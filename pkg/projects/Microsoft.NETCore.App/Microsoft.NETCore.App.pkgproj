@@ -24,8 +24,8 @@
         <PackageVersion>$([System.Text.RegularExpressions.Regex]::Match('%(Identity)', '(\d+\.\d+.\d+[^&quot;]*)'))</PackageVersion>
       </PackageMatch>
 
-      <Dependency Include="@(PackageMatch -> '%(PackageId)')" Condition="'%(PackageVersion)' != ''">
-        <Version>%(PackageVersion)</Version>
+      <Dependency Include="@(PackageMatch -> '%(PackageId)')" Condition="'%(PackageMatch.PackageVersion)' != ''">
+        <Version>%(PackageMatch.PackageVersion)</Version>
         <TargetFramework>.NETStandard1.0</TargetFramework>
       </Dependency>
 
