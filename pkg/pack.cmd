@@ -65,7 +65,7 @@ if exist "%__ProjectDir%\bin" (rmdir /s /q "%__ProjectDir%\bin")
 
 copy /y "%__DotNetHostBinDir%\corehost.exe" "%__DotNetHostBinDir%\dotnet.exe"
 
-"%__ProjectDir%\Tools\corerun" "%__ProjectDir%\Tools\MSBuild.exe" "%__ProjectDir%\projects\packages.builds" /p:Platform=%__BuildArch% /p:DotNetHostBinDir=%__DotNetHostBinDir% /p:TargetsWindows=true /p:HostVersion=%__HostVer% /p:HostResolverVersion=%__FxrVer% /p:HostPolicyVersion=%__PolicyVer% /p:BuildNumberMajor=%__BuildMajor% /p:BuildNumberMinor=%__BuildMinor% /p:PreReleaseLabel=%__VersionTag% /p:CLIBuildVersion=%__BuildMajor% /verbosity:minimal
+"%__ProjectDir%\Tools\corerun" "%__ProjectDir%\Tools\MSBuild.exe" "%__ProjectDir%\projects\packages.builds" /p:Platform=%__BuildArch% /p:DotNetHostBinDir=%__DotNetHostBinDir% /p:TargetsWindows=true /p:HostVersion=%__HostVer% /p:HostResolverVersion=%__FxrVer% /p:HostPolicyVersion=%__PolicyVer% /p:BuildNumberMajor=%__BuildMajor% /p:BuildNumberMinor=%__BuildMinor% /p:PreReleaseLabel=%__VersionTag% /verbosity:minimal
 
 if not ERRORLEVEL 0 goto :Error
 

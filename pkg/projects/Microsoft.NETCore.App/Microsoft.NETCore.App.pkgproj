@@ -40,10 +40,6 @@
         <Exclude>Compile</Exclude>
       </Dependency>
     </ItemGroup>
-
-    <PropertyGroup>
-    <VersionSuffix>-rc3-$(CLIBuildVersion)</VersionSuffix>
-    </PropertyGroup>
   </Target>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
