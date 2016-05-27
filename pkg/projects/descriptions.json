@@ -5,6 +5,11 @@
         "CommonTypes": [ ]
     },
     {
+        "Name": "NuGet3MinVersion",
+        "Description": "When using NuGet 3.x this package requires at least version {0}.",
+        "CommonTypes": [ ]
+    },
+    {
         "Name": "Microsoft.NETCore.DotNetHostPolicy",
         "Description": "Provides a CoreCLR hosting policy implementation -- configuration settings, assembly paths and assembly servicing",
         "CommonTypes": [ ]
@@ -20,8 +25,23 @@
         "CommonTypes": [ ]
     },
     {
+        "Name": "Microsoft.NETCore",
+        "Description": "Provides a set of packages that can be used when building portable libraries on .NETCore based platforms.",
+        "CommonTypes": [ ]
+    },
+    {
         "Name": "Microsoft.NETCore.App",
         "Description": "A set of .NET API's that are included in the default .NET Core application model.",
+        "CommonTypes": [ ]
+    },
+    {
+        "Name": "Microsoft.NETCore.Console",
+        "Description": "Provides a set of packages that can be used when building console applications on .NETCore.",
+        "CommonTypes": [ ]
+    },
+    {
+        "Name": "Microsoft.NETCore.UniversalWindowsPlatform",
+        "Description": "Provides a set of packages that can be used when building Universal Windows applications on .NETCore.",
         "CommonTypes": [ ]
     },
 ]

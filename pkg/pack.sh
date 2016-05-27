@@ -103,7 +103,7 @@ fi
 
 # acquire dependencies
 pushd "$__project_dir/deps"
-"$__project_dir/Tools/dotnetcli/bin/dotnet" restore --source "https://dotnet.myget.org/F/dotnet-core" --packages "$__project_dir/packages"
+"$__project_dir/Tools/dotnetcli/dotnet" restore --source "https://dotnet.myget.org/F/dotnet-core" --packages "$__project_dir/packages"
 popd
 
 # cleanup existing packages
@@ -121,7 +121,7 @@ else
     init_distro_name
 fi
 
-__common_parameters="/p:Platform=$__build_arch /p:DotNetHostBinDir=$__dotnet_host_bin_dir /p:$__targets_param /p:DistroName=$__distro_name /p:HostVersion=$__host_ver /p:HostResolverVersion=$__fxr_ver /p:HostPolicyVersion=$__policy_ver /p:BuildNumberMajor=$__build_major /p:BuildNumberMinor=$__build_minor /p:PreReleaseLabel=$__version_tag /p:CLIBuildVersion=$__build_major /verbosity:minimal"
+__common_parameters="/p:Platform=$__build_arch /p:DotNetHostBinDir=$__dotnet_host_bin_dir /p:$__targets_param /p:DistroName=$__distro_name /p:HostVersion=$__host_ver /p:HostResolverVersion=$__fxr_ver /p:HostPolicyVersion=$__policy_ver /p:BuildNumberMajor=$__build_major /p:BuildNumberMinor=$__build_minor /p:PreReleaseLabel=$__version_tag /verbosity:minimal"
 
 $__corerun $__msbuild $__project_dir/projects/packages.builds $__common_parameters || exit 1
 

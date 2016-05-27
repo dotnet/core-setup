@@ -7,12 +7,6 @@
     <PackagePlatform>AnyCPU</PackagePlatform>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.NETCore.DotNetHost\Microsoft.NETCore.DotNetHostPolicy.pkgproj">
-      <TargetFramework>.NETStandard1.0</TargetFramework>
-    </ProjectReference>
-  </ItemGroup>
-
   <Target Name="ReadDependenciesFromProjectJsonFile" BeforeTargets="GetPackageDependencies">
     <ReadLinesFromFile File="$(MSBuildThisFileDirectory)project.json">
       <Output TaskParameter="Lines" ItemName="ProjectJsonLines" />
@@ -24,20 +18,8 @@
         <PackageVersion>$([System.Text.RegularExpressions.Regex]::Match('%(Identity)', '(\d+\.\d+.\d+[^&quot;]*)'))</PackageVersion>
       </PackageMatch>
 
-      <Dependency Include="@(PackageMatch -> '%(PackageId)')" Condition="'%(PackageMatch.PackageVersion)' != ''">
-        <Version>%(PackageMatch.PackageVersion)</Version>
-        <TargetFramework>.NETStandard1.0</TargetFramework>
-      </Dependency>
-
-      <!-- List of dependencies to mark as exclude=compile -->
-      <Dependency Condition="'%(Dependency.Identity)' == 'Microsoft.CodeAnalysis.CSharp'">
-        <Exclude>Compile</Exclude>
-      </Dependency>
-      <Dependency Condition="'%(Dependency.Identity)' == 'Microsoft.CodeAnalysis.VisualBasic'">
-        <Exclude>Compile</Exclude>
-      </Dependency>
-      <Dependency Condition="'%(Dependency.Identity)' == 'System.Runtime.Loader'">
-        <Exclude>Compile</Exclude>
+      <Dependency Include="@(PackageMatch -> '%(PackageId)')" Condition="'%(PackageVersion)' != ''">
+        <Version>%(PackageVersion)</Version>
       </Dependency>
     </ItemGroup>
   </Target>

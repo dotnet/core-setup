@@ -22,6 +22,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <PreReleaseLabel>rc3</PreReleaseLabel>
     <PackageOutputPath>$(PackagesOutDir)</PackageOutputPath>
     <RuntimeIdGraphDefinitionFile>$(ProjectDir)packages\Microsoft.NETCore.Platforms\1.0.1-rc3-24126-01\runtime.json</RuntimeIdGraphDefinitionFile>
     <PackageLicenseFile>$(ProjectDir)projects/dotnet_library_license.txt</PackageLicenseFile>
