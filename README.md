@@ -16,7 +16,7 @@ of the .NET Core runtime and libraries.
 
 For other issues, please use the following repos:
 
-- For overall .NET Core SDK issues, file on dotnet/cli repo
-- For class library and framework functioning issues, file on dotnet/corefx repo
-- For runtime issues, file on dotnet/coreclr issues
+- For overall .NET Core SDK issues, file on [dotnet/cli](https://github.com/dotnet/cli) repo
+- For class library and framework functioning issues, file on [dotnet/corefx](https://github.com/dotnet/corefx) repo
+- For runtime issues, file on [dotnet/coreclr]((https://github.com/dotnet/coreclr) issues
 
