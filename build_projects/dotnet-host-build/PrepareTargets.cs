@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.Host.Build
             c.BuildContext["CommitHash"] = commitHash;
             c.BuildContext["SharedFrameworkNugetVersion"] = buildVersion.NetCoreAppVersion;
 
-            c.Info($"Building Version: {hostVersion.LatestHostVersion.WithoutSuffix} (NuGet Packages: {hostVersion.LatestHostVersion})");
+            c.Info($"Building Version: {hostVersion.LatestHostVersionNoSuffix} (NuGet Packages: {hostVersion.LatestHostVersion})");
             c.Info($"From Commit: {commitHash}");
 
             return c.Success();
@@ -158,8 +158,8 @@ namespace Microsoft.DotNet.Host.Build
             c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
 
             var sharedFrameworkVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion.ToString();
-
+            var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion;
+            
             AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", hostVersion);
             AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework", sharedFrameworkVersion);
             AddInstallerArtifactToContext(c, "dotnet", "CombinedFrameworkHost", sharedFrameworkVersion);
