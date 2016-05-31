@@ -2,7 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required (VERSION 2.6)
-project(hostfxr)
+project(hostpolicy)
 
 if(WIN32)
     add_compile_options($<$<CONFIG:RelWithDebInfo>:/MT>)
@@ -14,13 +14,6 @@ endif()
 
 include(../setup.cmake)
 
-# Include directories
-if(WIN32)
-    include_directories("${CLI_CMAKE_RESOURCE_DIR}/hostfxr")
-endif()
-include_directories(./)
-include_directories(../)
-include_directories(../../)
 include_directories(../../common)
 include_directories(../json/casablanca/include)
 
@@ -51,10 +44,6 @@ add_definitions(-D_NO_ASYNCRTIMP)
 add_definitions(-D_NO_PPLXIMP)
 add_definitions(-DCOREHOST_MAKE_DLL=1)
 
-set(RESOURCES)
-if(WIN32)
-    list(APPEND RESOURCES ../native.rc)
-endif()
-add_library(hostfxr SHARED ${SOURCES} ${RESOURCES})
+add_library(hostfxr SHARED ${SOURCES})
 
 

@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Host.Build
             AzurePublisherTool = new AzurePublisher();
             DebRepoPublisherTool = new DebRepoPublisher(Dirs.Packages);
             SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            SharedHostNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion.ToString();
+            SharedHostNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion;
             Channel = c.BuildContext.Get<string>("Channel");
             BranchName = c.BuildContext.Get<string>("BranchName");
 
