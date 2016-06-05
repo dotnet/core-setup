@@ -98,7 +98,7 @@ fi
 
 # acquire dependencies
 pushd "$__project_dir/deps"
-"$__project_dir/Tools/dotnetcli/dotnet" restore --source "https://dotnet.myget.org/F/dotnet-core" --packages "$__project_dir/packages"
+"$__project_dir/Tools/dotnetcli/dotnet" restore --source "https://dotnet.myget.org/F/dotnet-core-test" --packages "$__project_dir/packages"
 popd
 
 # cleanup existing packages
