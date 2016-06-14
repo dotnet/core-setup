@@ -73,6 +73,8 @@ namespace Microsoft.DotNet.Cli.Build
                 Path.Combine(_corehostLockedDirectory, HostArtifactNames.DotnetHostBaseName),
                 Path.Combine(sharedFrameworkPublishRoot, HostArtifactNames.DotnetHostBaseName), true);
 
+            // Add License
+            File.Copy(Path.Combine(Dirs.RepoRoot, "LICENSE"), Path.Combine(sharedFrameworkPublishRoot, "LICENSE"));
         }
 
         public void CopyHostFxrToVersionedDirectory(string rootDirectory, string hostFxrVersion)
@@ -84,6 +86,9 @@ namespace Microsoft.DotNet.Cli.Build
             File.Copy(
                 Path.Combine(_corehostLockedDirectory, HostArtifactNames.DotnetHostFxrBaseName),
                 Path.Combine(hostFxrVersionedDirectory, HostArtifactNames.DotnetHostFxrBaseName), true);
+
+            // Add License
+            File.Copy(Path.Combine(Dirs.RepoRoot, "LICENSE"), Path.Combine(hostFxrVersionedDirectory, "LICENSE"));
         }
 
         public void PublishSharedFramework(string outputRootDirectory, string commitHash, DotNetCli dotnetCli, string hostFxrVersion)
@@ -134,6 +139,10 @@ namespace Microsoft.DotNet.Cli.Build
             var version = _sharedFrameworkNugetVersion;
             var content = $@"{commitHash}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(sharedFrameworkNameAndVersionRoot, ".version"), content);
+
+            // Add License and Third Party Notices
+            File.Copy(Path.Combine(Dirs.ThirdPartyNoticesRoot, "sharedframework", "ThirdPartyNotices.txt"), Path.Combine(sharedFrameworkNameAndVersionRoot, "ThirdPartyNotices.txt"));
+            File.Copy(Path.Combine(Dirs.RepoRoot, "LICENSE"), Path.Combine(sharedFrameworkNameAndVersionRoot, "LICENSE"));
 
             return;
         }
