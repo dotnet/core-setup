@@ -349,6 +349,7 @@ namespace Microsoft.DotNet.Host.Build
         }
 
         [Target]
+        [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult PublishSharedFrameworkArchiveToAzure(BuildTargetContext c)
         {
             var version = SharedFrameworkNugetVersion;
