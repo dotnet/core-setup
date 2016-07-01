@@ -61,10 +61,14 @@ namespace Microsoft.DotNet.Cli.Build
         //
 
         // Full versions and package information.
-        public bool EnsureStableVersion => true;
-        public VerInfo LatestHostVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
-        public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
-        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
+        public bool EnsureStableVersion => false;
+        public string LatestHostPrerelease => "servicing";
+        public string LatestHostBuildMajor => CommitCountString;
+        public string LatestHostBuildMinor => "00";
+        public VerInfo LatestHostVersion => new VerInfo(1, 0, 1, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 1, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 1, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+  
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
         {
             { "Microsoft.NETCore.DotNetHost", LatestHostVersion },
@@ -81,7 +85,7 @@ namespace Microsoft.DotNet.Cli.Build
         //
         // Locked muxer for consumption in CLI.
         //
-        public bool IsLocked = false; // Set this variable to toggle muxer locking.
+        public bool IsLocked = true; // Set this variable to toggle muxer locking.
         public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostFxrVersion;
         public VerInfo LockedHostVersion    => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostVersion;
     }
