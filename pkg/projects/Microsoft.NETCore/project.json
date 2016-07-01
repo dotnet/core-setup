@@ -17,7 +17,7 @@
     "System.Globalization.Calendars": "4.0.1",
     "System.Globalization.Extensions": "4.0.1",
     "System.IO": "4.1.0",
-    "System.IO.Compression": "4.1.0",
+    "System.IO.Compression": "4.1.1",
     "System.IO.Compression.ZipFile": "4.0.1",
     "System.IO.FileSystem": "4.0.1",
     "System.IO.FileSystem.Primitives": "4.0.1",

@@ -10,5 +10,10 @@
     <Project Include="*\*.builds" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'false'" >
+    <Project Include="Microsoft.NETCore\Microsoft.NETCore.builds" />
+    <Project Include="Microsoft.NETCore.UniversalWindowsPlatform\Microsoft.NETCore.UniversalWindowsPlatform.builds" />
+  </ItemGroup>
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
