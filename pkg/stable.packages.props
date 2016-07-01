@@ -98,8 +98,13 @@
     <StablePackage Include="runtime.win7-x86.Microsoft.NETCore.DotNetHostPolicy">
       <Version>1.0.1</Version>
     </StablePackage>
-    <StablePackage Include="runtime.win7-x86.Microsoft.NETCore.DotNetHostResolver">
-      <Version>1.0.1</Version>
+
+    <!-- servicing -->
+    <StablePackage Include="Microsoft.NETCore">
+      <Version>5.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>5.2.1</Version>
     </StablePackage>
   </ItemGroup>
 </Project>

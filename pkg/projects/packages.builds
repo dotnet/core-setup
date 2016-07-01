@@ -2,8 +2,17 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
-  <ItemGroup>
+  <PropertyGroup>
+    <BuildAllPackages>false</BuildAllPackages>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'true'" >
     <Project Include="*\*.builds" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'false'" >
+    <Project Include="Microsoft.NETCore\Microsoft.NETCore.builds" />
+    <Project Include="Microsoft.NETCore.UniversalWindowsPlatform\Microsoft.NETCore.UniversalWindowsPlatform.builds" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />

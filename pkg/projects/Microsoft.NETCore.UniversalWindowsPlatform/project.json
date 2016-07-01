@@ -1,12 +1,12 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2",
+    "Microsoft.NETCore.Portable.Compatibility": "1.0.2",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.3",
     "Microsoft.Win32.Primitives": "4.0.1",
     "System.ComponentModel.EventBasedAsync": "4.0.11",
     "System.Data.Common": "4.1.0",
     "System.Diagnostics.Contracts": "4.0.1",
-    "System.Diagnostics.StackTrace": "4.0.1",
+    "System.Diagnostics.StackTrace": "4.0.2",
     "System.IO.IsolatedStorage": "4.0.1",
     "System.Net.Http.Rtc": "4.0.1",
     "System.Net.NameResolution": "4.0.0",
