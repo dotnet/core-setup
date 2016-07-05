@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Host.Build
 
             var stubPackageBuilder = new StubPackageBuilder(DotNetCli.Stage0, Dirs.Intermediate, Dirs.CorehostDummyPackages);
 
-            foreach (var hostPackage in hostVersion.LatestHostPackages)
+            foreach (var hostPackage in hostVersion.LockedHostPackages)
             {
                 foreach (var rid in HostPackageSupportedRids.Values.Distinct())
                 {

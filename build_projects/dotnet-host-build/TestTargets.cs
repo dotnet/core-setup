@@ -49,7 +49,9 @@ namespace Microsoft.DotNet.Host.Build
             var dotnet = DotNetCli.Stage0;
             CleanBinObj(c, Path.Combine(Dirs.RepoRoot, "test"));
 
-            dotnet.Restore()
+            dotnet.Restore(
+                    "--fallbacksource", Dirs.CorehostLocalPackages,
+                    "--fallbacksource", Dirs.CorehostDummyPackages)
                 .WorkingDirectory(Path.Combine(Dirs.RepoRoot, "test"))
                 .Execute()
                 .EnsureSuccessful();
