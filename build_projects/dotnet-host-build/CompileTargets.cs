@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Host.Build
 
             var stubPackageBuilder = new StubPackageBuilder(DotNetCli.Stage0, Dirs.Intermediate, Dirs.CorehostDummyPackages);
 
-            foreach (var hostPackage in hostVersion.LatestHostPackages)
+            foreach (var hostPackage in hostVersion.LockedHostPackages)
             {
                 foreach (var rid in HostPackageSupportedRids.Values.Distinct())
                 {
@@ -297,14 +297,14 @@ namespace Microsoft.DotNet.Host.Build
 
                 Console.WriteLine($"Copying package {fileName} to artifacts directory {Dirs.CorehostLocalPackages}.");
             }
-            //foreach (var item in hostVersion.LatestHostPackages)
-            //{
-            //    var fileFilter = $"runtime.{HostPackagePlatformRid}.{item.Key}.{item.Value.ToString()}.nupkg";
-            //    if (Directory.GetFiles(Dirs.CorehostLocalPackages, fileFilter).Length == 0)
-            //    {
-            //        throw new BuildFailureException($"Nupkg for {fileFilter} was not created.");
-            //    }
-            //}
+            foreach (var item in hostVersion.LatestHostPackages)
+            {
+                var fileFilter = $"runtime.{HostPackagePlatformRid}.{item.Key}.{item.Value.ToString()}.nupkg";
+                if (Directory.GetFiles(Dirs.CorehostLocalPackages, fileFilter).Length == 0)
+                {
+                    throw new BuildFailureException($"Nupkg for {fileFilter} was not created.");
+                }
+            }
             return c.Success();
         }
 

@@ -75,6 +75,14 @@ namespace Microsoft.DotNet.Cli.Build
             { "Microsoft.NETCore.DotNetHostResolver", LatestHostFxrVersion },
             { "Microsoft.NETCore.DotNetHostPolicy", LatestHostPolicyVersion }
         };
+
+        public Dictionary<string, VerInfo> LockedHostPackages => new Dictionary<string, VerInfo>()
+        {
+            { "Microsoft.NETCore.DotNetHost", LockedHostVersion },
+            { "Microsoft.NETCore.DotNetHostResolver", LockedHostFxrVersion },
+            { "Microsoft.NETCore.DotNetHostPolicy", LatestHostPolicyVersion } // Don't lock to a particular version, as every new build of NETCore.App should get its own hostpolicy.dll
+        };
+
         public Dictionary<string, VerInfo> LatestHostBinaries => new Dictionary<string, VerInfo>()
         {
             { "dotnet", LatestHostVersion },
