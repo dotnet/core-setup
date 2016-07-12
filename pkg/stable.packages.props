@@ -114,5 +114,8 @@
     <StablePackage Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>5.2.1</Version>
     </StablePackage>
+    <StablePackage Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>5.2.2</Version>
+    </StablePackage>
   </ItemGroup>
 </Project>
