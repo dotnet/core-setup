@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Host.Build
 
             var stubPackageBuilder = new StubPackageBuilder(DotNetCli.Stage0, Dirs.Intermediate, Dirs.CorehostDummyPackages);
 
-            foreach (var hostPackage in hostVersion.LatestHostPackages)
+            foreach (var hostPackage in hostVersion.LockedHostPackages)
             {
                 foreach (var rid in HostPackageSupportedRids.Values.Distinct())
                 {
@@ -267,9 +267,9 @@ namespace Microsoft.DotNet.Host.Build
             msbuildProps.AppendLine($"    <HostVersion>{hostVersion.LatestHostPolicyVersion.WithoutSuffix}</HostVersion>");
             msbuildProps.AppendLine($"    <HostResolverVersion>{hostVersion.LatestHostFxrVersion.WithoutSuffix}</HostResolverVersion>");
             msbuildProps.AppendLine($"    <HostPolicyVersion>{hostVersion.LatestHostVersion.WithoutSuffix}</HostPolicyVersion>");
-            msbuildProps.AppendLine($"    <BuildNumberMajor></BuildNumberMajor>");
-            msbuildProps.AppendLine($"    <BuildNumberMinor></BuildNumberMinor>");
-            msbuildProps.AppendLine($"    <PreReleaseLabel></PreReleaseLabel>");
+            msbuildProps.AppendLine($"    <BuildNumberMajor>{hostVersion.LatestHostBuildMajor}</BuildNumberMajor>");
+            msbuildProps.AppendLine($"    <BuildNumberMinor>{hostVersion.LatestHostBuildMinor}</BuildNumberMinor>");
+            msbuildProps.AppendLine($"    <PreReleaseLabel>servicing</PreReleaseLabel>");
             msbuildProps.AppendLine($"    <EnsureStableVersion>{hostVersion.EnsureStableVersion}</EnsureStableVersion>");
             msbuildProps.AppendLine("  </PropertyGroup>");
             msbuildProps.AppendLine("</Project>");
