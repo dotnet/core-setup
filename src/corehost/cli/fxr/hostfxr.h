@@ -34,7 +34,8 @@ static_assert(sizeof(hostfxr_interface_t) == 5 * sizeof(size_t), "Did you add st
 
 struct hostfxr_init_t
 {
-    // !! NOTE: All these values may be unitialized if an older "dotnet.exe" that hasn't seen the fields, invokes hostfxr.dll
+    // !! NOTE: All these values may be unitialized if an older "dotnet.exe"
+    //          that hasn't seen the fields, invokes hostfxr.dll
     pal::string_t exe_version;
     pal::string_t exe_commit;
     pal::string_t exe_type;

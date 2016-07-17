@@ -92,8 +92,10 @@ hostfxr_init_t g_init;
 
 /**
  *  This export was added to hostfxr.dll since 1.1.*, dotnet.exe from RTM 1.0.0 will not call this export.
+ *  IMPORTANT: As more fields are added to this interface, some older executables may not initialize them.
+ *             So use suitable defaults for additional fields.
  */
-SHARED_API int hostfxr_load(const hostfxr_interface_t* input)
+SHARED_API int hostfxr_load(hostfxr_interface_t* input)
 {
     trace::setup();
 
@@ -103,17 +105,28 @@ SHARED_API int hostfxr_load(const hostfxr_interface_t* input)
         trace::error(_X("The version of the data layout used to initialize %s is [0x%04x]; expected version [0x%04x]"), LIBFXR_NAME, input->version_hi, HOSTFXR_INTERFACE_LAYOUT_VERSION_HI);
         return StatusCode::LibHostInitFailure;
     }
-    // Check if the size is at least what we expect to contain.
-    if (input->version_lo < HOSTFXR_INTERFACE_LAYOUT_VERSION_LO)
-    {
-        trace::error(_X("The size of the data layout used to initialize %s is %d; expected at least %d"), LIBFXR_NAME, input->version_lo, HOSTFXR_INTERFACE_LAYOUT_VERSION_LO);
-        return StatusCode::LibHostInitFailure;
-    }
     trace::verbose(_X("Reading from exe interface version: [0x%04x:%d] to initialize fxr version: [0x%04x:%d]"), input->version_hi, input->version_lo, HOSTFXR_INTERFACE_LAYOUT_VERSION_HI, HOSTFXR_INTERFACE_LAYOUT_VERSION_LO);
 
-    g_init.exe_type = input->exe_type;
-    g_init.exe_commit = input->exe_commit;
-    g_init.exe_version = input->exe_version;
+    // NOTE: Some fields will be uninitialized if activated by an older muxer.
+    //       We must maintain compatibility with an older muxer.
+    if (input->version_lo < HOSTFXR_INTERFACE_LAYOUT_VERSION_LO)
+    {
+        trace::info(_X("Initializing %s with data size %d, expected is: %d, some fields will be uninitialized"), LIBFXR_NAME, input->version_lo, HOSTFXR_INTERFACE_LAYOUT_VERSION_LO);
+    }
+    
+    // Check if the fields exist in the struct passed in.
+    if (input->version_lo > offsetof(hostfxr_interface_t, exe_type))
+    {
+        g_init.exe_type = input->exe_type;
+    }
+    if (input->version_lo > offsetof(hostfxr_interface_t, exe_commit))
+    {
+        g_init.exe_commit = input->exe_commit;
+    }
+    if (input->version_lo > offsetof(hostfxr_interface_t, exe_version))
+    {
+        g_init.exe_version = input->exe_version;
+    }
 
     return 0;
 }
