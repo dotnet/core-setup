@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0-*",
+  "description": "Redirects args to NuGet.CommandLine.XPlat. Allows usage of a newer version of NuGet than the CLI stage 0 has.",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "NuGet.CommandLine.XPlat": "3.5.0-rc1-1639"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}

@@ -110,11 +110,19 @@ fi
 # Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
+# Restore the restore tool
+echo "Restoring Restore projects..."
+(
+    cd "$REPOROOT/restore_projects"
+    dotnet restore
+)
+NUGET_RUNNER="$REPOROOT/restore_projects/NuGet.CommandLine.XPlat.Runner"
+
 # Restore the build scripts
 echo "Restoring Build Script projects..."
 (
     cd "$DIR/.."
-    dotnet restore --infer-runtimes
+    dotnet run -p "$NUGET_RUNNER" restore --infer-runtimes --disable-parallel
 )
 
 # Build the builder
