@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+
     <!-- NETCore 1.0 core-setup -->
     <StablePackage Include="Microsoft.NETCore.App">
       <Version>1.0.0</Version>
@@ -12,8 +13,7 @@
       <Version>5.2.0</Version>
     </StablePackage>
 
-    <!--
-
+    <!-- Mark host packages stable -->
     <StablePackage Include="Microsoft.NETCore.DotNetHost">
       <Version>1.0.1</Version>
     </StablePackage>
@@ -105,8 +105,6 @@
       <Version>1.0.1</Version>
     </StablePackage>
 
-    -->
-
     <!-- servicing -->
     <StablePackage Include="Microsoft.NETCore">
       <Version>5.0.2</Version>
@@ -116,6 +114,11 @@
     </StablePackage>
     <StablePackage Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>5.2.2</Version>
+    </StablePackage>
+
+    <!-- NETCore 1.0.1 servicing core-setup -->
+    <StablePackage Include="Microsoft.NETCore.App">
+      <Version>1.0.1</Version>
     </StablePackage>
   </ItemGroup>
 </Project>

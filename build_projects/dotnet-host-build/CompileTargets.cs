@@ -297,6 +297,8 @@ namespace Microsoft.DotNet.Host.Build
 
                 Console.WriteLine($"Copying package {fileName} to artifacts directory {Dirs.CorehostLocalPackages}.");
             }
+            /*
+            Disable package list check to enable building only certain packages
             foreach (var item in hostVersion.LatestHostPackages)
             {
                 var fileFilter = $"runtime.{HostPackagePlatformRid}.{item.Key}.{item.Value.ToString()}.nupkg";
@@ -305,6 +307,7 @@ namespace Microsoft.DotNet.Host.Build
                     throw new BuildFailureException($"Nupkg for {fileFilter} was not created.");
                 }
             }
+            */
             return c.Success();
         }
 
