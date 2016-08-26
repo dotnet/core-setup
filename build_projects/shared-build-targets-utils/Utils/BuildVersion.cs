@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public string SimpleVersion => $"{Major}.{Minor}.{Patch}.{CommitCountString}";
         public string VersionSuffix => $"{ReleaseSuffix}-{CommitCountString}";
-        public string NetCoreAppVersion => $"{Major}.{Minor}.{Patch}-servicing-{CommitCountString}-00";
+        public string NetCoreAppVersion => $"{Major}.{Minor}.{Patch}";
         public string ProductionVersion => $"{Major}.{Minor}.{Patch}";
     }
 }
