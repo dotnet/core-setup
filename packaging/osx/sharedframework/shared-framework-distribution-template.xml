@@ -3,7 +3,7 @@
     <title>{SharedFxBrandName} (x64)</title>
     <license file="eula.rtf" mime-type="application/rtf" />
     <background file="dotnetbackground.png" mime-type="image/png"/>
-    <options customize="never" require-scripts="true" />
+    <options customize="never" require-scripts="false" />
     <volume-check>
         <allowed-os-version>
             <os-version min="10.10" />
@@ -26,19 +26,4 @@
     <pkg-ref id="{SharedFxComponentId}.pkg">{SharedFxComponentId}.pkg</pkg-ref>
     <pkg-ref id="{HostFxrComponentId}.pkg">{HostFxrComponentId}.pkg</pkg-ref>
     <pkg-ref id="{SharedHostComponentId}.pkg">{SharedHostComponentId}.pkg</pkg-ref>
-    <installation-check script="openSSLCheck()" />
-    <script><![CDATA[
-        function openSSLCheck()
-        {
-            var openSSLRoot = "/usr/local/opt/openssl/lib/";
-            if (!system.files.fileExistsAtPath(openSSLRoot + "libcrypto.1.0.0.dylib") || 
-                !system.files.fileExistsAtPath(openSSLRoot + "libssl.1.0.0.dylib")
-                ){
-                    my.result.type = "Fatal";
-                    my.result.message = "OpenSSL was not detected on this machine. Please install OpenSSL to continue. Refer to https://dot.net/core for instructions.";
-                    return false;
-                }
-            return true; 
-        } 
-    ]]></script>
 </installer-gui-script>
