@@ -7,9 +7,10 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class DependencyVersions
     {
-        public static readonly string CoreCLRVersion = "1.0.2";
-        public static readonly string JitVersion = "1.0.2";
-        public static readonly string CoreCLRVersion_Latest = "1.1.0-beta-24415-01";
-        public static readonly string JitVersion_Latest = "1.1.0-beta-24415-01";
+        // TODO: Can these versions be updated by automation?
+        public static readonly string CoreCLRVersion = "1.1.0-preview1-24508-06";
+        public static readonly string JitVersion = "1.1.0-preview1-24508-06";
+        public static readonly string CoreCLRVersion_Latest = "1.1.0-preview1-24508-06";
+        public static readonly string JitVersion_Latest = "1.1.0-preview1-24508-06";
     }
 }
