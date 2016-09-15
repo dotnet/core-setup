@@ -16,7 +16,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# Some things depend on HOME and it may not be set. We should fix those things, but until then, we just patch a value in
+# Some things depend on HOME and it may not be set. We should fix those things, but until then, we just patch a value in.
 if [ -z "$HOME" ]; then
     export HOME=$DIR/artifacts/home
 
