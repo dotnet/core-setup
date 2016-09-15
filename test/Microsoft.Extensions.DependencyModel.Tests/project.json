@@ -9,7 +9,7 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "System.Diagnostics.TraceSource": "4.0.0",
+    "System.Diagnostics.TraceSource": "4.3.0-preview1-24513-01",
     "Microsoft.Extensions.DependencyModel": {
       "target": "project"
     },
