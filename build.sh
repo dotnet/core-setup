@@ -52,7 +52,7 @@ dockerbuild()
     BUILD_COMMAND=/opt/code/build_projects/dotnet-host-build/build.sh $DIR/scripts/dockerrun.sh --non-interactive "$@"
 }
 
-# Check if we need to build in docker
+# Check if we need to build in docker.
 if [ ! -z "$BUILD_IN_DOCKER" ]; then
     dockerbuild "${args[@]}"
 else
