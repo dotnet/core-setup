@@ -2,12 +2,12 @@
   "version": "1.0.0-*",
   "description": "Build scripts for dotnet-cli",
   "dependencies": {
-    "NETStandard.Library": "1.6.1-preview1-24517-08",
-    "Microsoft.CSharp": "4.3.0-preview1-24517-08",
-    "System.Dynamic.Runtime": "4.3.0-preview1-24517-08",
-    "System.Reflection.Metadata": "1.4.1-preview1-24517-08",
-    "System.Runtime.Serialization.Primitives": "4.3.0-preview1-24517-08",
-    "System.Xml.XmlSerializer": "4.3.0-preview1-24517-08",
+    "NETStandard.Library": "1.6.1-preview1-24520-02",
+    "Microsoft.CSharp": "4.3.0-preview1-24520-02",
+    "System.Dynamic.Runtime": "4.3.0-preview1-24520-02",
+    "System.Reflection.Metadata": "1.4.1-preview1-24520-02",
+    "System.Runtime.Serialization.Primitives": "4.3.0-preview1-24520-02",
+    "System.Xml.XmlSerializer": "4.3.0-preview1-24520-02",
     "WindowsAzure.Storage": "6.2.2-preview",
     "Microsoft.DotNet.Cli.Build.Framework": {
       "target": "project"
