@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli.Build
     public class SharedFrameworkPublisher
     {
         public static string s_sharedFrameworkName = "Microsoft.NETCore.App";
-        
+
         private string _sharedFrameworkTemplateSourceRoot;
         private string _sharedFrameworkNugetVersion;
         private string _sharedFrameworkRid;
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Build
         private string _corehostPackageSource;
 
         public SharedFrameworkPublisher(
-            string repoRoot, 
+            string repoRoot,
             string corehostLockedDirectory,
             string corehostLatestDirectory,
             string corehostPackageSource,
@@ -51,8 +51,8 @@ namespace Microsoft.DotNet.Cli.Build
             _sharedFrameworkTarget = sharedFrameworkTarget;
 
             _sharedFrameworkSourceRoot = GenerateSharedFrameworkProject(
-                _sharedFrameworkNugetVersion, 
-                _sharedFrameworkTemplateSourceRoot, 
+                _sharedFrameworkNugetVersion,
+                _sharedFrameworkTemplateSourceRoot,
                 _sharedFrameworkRid,
                 _sharedFrameworkTarget);
         }
@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Clean up artifacts that dotnet-publish generates which we don't need
             PublishMutationUtilties.CleanPublishOutput(
-                sharedFrameworkNameAndVersionRoot, 
+                sharedFrameworkNameAndVersionRoot,
                 "framework",
                 deleteRuntimeConfigJson: true,
                 deleteDepsJson: false);
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Cli.Build
             GenerateRuntimeGraph(dotnetCli, destinationDeps);
 
             CopyHostArtifactsToSharedFramework(sharedFrameworkNameAndVersionRoot, hostFxrVersion);
-            
+
             _crossgenUtil.CrossgenDirectory(sharedFrameworkNameAndVersionRoot, sharedFrameworkNameAndVersionRoot);
 
             // Generate .version file for sharedfx
@@ -194,7 +194,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private string GenerateSharedFrameworkProject(
             string sharedFrameworkNugetVersion,
-            string sharedFrameworkTemplatePath, 
+            string sharedFrameworkTemplatePath,
             string rid,
             string targetFramework)
         {
