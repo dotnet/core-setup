@@ -10,6 +10,7 @@
     <Project Include="*\*.builds" />
   </ItemGroup>
 
+  <!-- Specify the packages to be rebuilt, for servicing, here -->
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false'" >
     <Project Include="Microsoft.NETCore.App\Microsoft.NETCore.App.builds" />
   </ItemGroup>
