@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Host.Build
                     targetRID = $"win7-{RuntimeEnvironment.RuntimeArchitecture}";
                 }
             }
-            string targetFramework = Environment.GetEnvironmentVariable("TARGETFRAMEWORK") ?? "netcoreapp1.0";
+            string targetFramework = Environment.GetEnvironmentVariable("TARGETFRAMEWORK") ?? "netcoreapp1.1";
 
             if (string.IsNullOrEmpty(configEnv))
             {
