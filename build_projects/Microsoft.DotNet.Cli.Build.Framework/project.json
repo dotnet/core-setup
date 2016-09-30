@@ -5,9 +5,9 @@
     "allowUnsafe": true
   },
   "dependencies": {
-    "NETStandard.Library": "1.6.1-preview1-24530-01",
-    "System.Diagnostics.Process": "4.3.0-preview1-24530-01",
-    "System.Reflection.TypeExtensions": "4.3.0-preview1-24530-01",
+    "NETStandard.Library": "1.6.1-preview1-24530-02",
+    "System.Diagnostics.Process": "4.3.0-preview1-24530-02",
+    "System.Reflection.TypeExtensions": "4.3.0-preview1-24530-02",
     "Microsoft.DotNet.InternalAbstractions": "1.0.0-rc2-002702"
   },
   "frameworks": {
