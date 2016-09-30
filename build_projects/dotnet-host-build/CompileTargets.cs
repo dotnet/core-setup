@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Host.Build
             { "win7-x86", "win7-x86" },
             { "osx.10.10-x64", "osx.10.10-x64" },
             { "osx.10.11-x64", "osx.10.10-x64" },
+            { "osx.10.12-x64", "osx.10.10-x64" },
             { "ubuntu.14.04-x64", "ubuntu.14.04-x64" },
             { "ubuntu.16.04-x64", "ubuntu.16.04-x64" },
             { "centos.7-x64", "rhel.7-x64" },
@@ -297,8 +298,8 @@ namespace Microsoft.DotNet.Host.Build
 
                 Console.WriteLine($"Copying package {fileName} to artifacts directory {Dirs.CorehostLocalPackages}.");
             }
-            /*
-            Disable package list check to enable building only certain packages
+            
+            // Comment out the loop below if we dont want to validate the built host packages
             foreach (var item in hostVersion.LatestHostPackages)
             {
                 var fileFilter = $"runtime.{HostPackagePlatformRid}.{item.Key}.{item.Value.ToString()}.nupkg";
@@ -307,7 +308,7 @@ namespace Microsoft.DotNet.Host.Build
                     throw new BuildFailureException($"Nupkg for {fileFilter} was not created.");
                 }
             }
-            */
+            
             return c.Success();
         }
 
