@@ -7,7 +7,9 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class DependencyVersions
     {
-        public static readonly string CoreCLRVersion = "1.0.5-servicing-24530-02";
-        public static readonly string JitVersion = "1.0.5-servicing-24530-02";
+        // TODO: Update these for consuming servicing version of CoreCLR packages
+        //       Also, update CoreCLR package referenced at /Users/gkhanna/Github/gkhanna79/core-setup/pkg/projects/Microsoft.NETCore.App/project.json
+        public static readonly string CoreCLRVersion = "1.0.4";
+        public static readonly string JitVersion = "1.0.4";
     }
 }
