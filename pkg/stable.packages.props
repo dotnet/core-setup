@@ -120,5 +120,10 @@
     <StablePackage Include="Microsoft.NETCore.App">
       <Version>1.0.1</Version>
     </StablePackage>
+
+    <!-- NETCore 1.0.2 servicing core-setup -->
+    <StablePackage Include="Microsoft.NETCore.App">
+      <Version>1.0.2</Version>
+    </StablePackage>
   </ItemGroup>
 </Project>
