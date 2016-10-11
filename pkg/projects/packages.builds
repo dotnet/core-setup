@@ -13,7 +13,6 @@
   <!-- Specify the packages to be rebuilt, for servicing, here -->
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false'" >
     <Project Include="Microsoft.NETCore.App\Microsoft.NETCore.App.builds" />
-    <Project Include="Microsoft.NETCore.DotNetHost\*.builds" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
