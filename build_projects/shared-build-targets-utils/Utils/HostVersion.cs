@@ -61,15 +61,13 @@ namespace Microsoft.DotNet.Cli.Build
         //
 
         // Full versions and package information.
-        //
-        // Set the variable below to true to generate stable versions of the host packages
         public bool EnsureStableVersion => false;
         public string LatestHostPrerelease => "servicing";
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
-        public VerInfo LatestHostVersion => new VerInfo(1, 0, 2, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
-        public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 2, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
-        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 2, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        public VerInfo LatestHostVersion => new VerInfo(1, 0, 1, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 1, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 1, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
   
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
         {
@@ -95,9 +93,7 @@ namespace Microsoft.DotNet.Cli.Build
         //
         // Locked muxer for consumption in CLI.
         //
-        // Set this variable to toggle muxer locking. We set it to true once a stable release has been shipped
-        // and we wish to have the subsequent servicing releases lock to it.
-        public bool IsLocked = false; 
+        public bool IsLocked = true; // Set this variable to toggle muxer locking.
         public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostFxrVersion;
         public VerInfo LockedHostVersion    => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostVersion;
     }
