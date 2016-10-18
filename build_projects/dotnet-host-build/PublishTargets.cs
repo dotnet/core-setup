@@ -123,6 +123,7 @@ namespace Microsoft.DotNet.Host.Build
                         "debian.x64.version",
                         "centos.x64.version",
                         "fedora.23.x64.version",
+                        "fedora.24.x64.version",
                         "opensuse.13.2.x64.version",
                         "opensuse.42.1.x64.version"
                     };
