@@ -23,7 +23,8 @@
   </PropertyGroup>
 
   <Import Project="version.props" Condition="Exists('version.props')" />
-
+  <Import Project="stable.packages.props" />
+  
   <PropertyGroup>
     <PackageOutputPath>$(PackagesOutDir)</PackageOutputPath>
     <SymbolPackageOutputPath>$(SymbolPackagesOutDir)</SymbolPackageOutputPath>
@@ -53,6 +54,9 @@
   <PropertyGroup>
     <PreReleaseSuffix></PreReleaseSuffix>
     <PreReleaseSuffix Condition="'$(EnsureStableVersion)'=='false'">-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</PreReleaseSuffix>
+    <BuildNumberMajor Condition="'$(EnsureStableVersion)' == 'true'"></BuildNumberMajor>
+    <BuildNumberMinor Condition="'$(EnsureStableVersion)' == 'true'"></BuildNumberMinor>
+    <PreReleaseLabel Condition="'$(EnsureStableVersion)' == 'true'"></PreReleaseLabel>
     <HostPolicyFullVersion>$(HostPolicyVersion)$(PreReleaseSuffix)</HostPolicyFullVersion>
     <HostResolverFullVersion>$(HostResolverVersion)$(PreReleaseSuffix)</HostResolverFullVersion>
     <HostFullVersion>$(HostVersion)$(PreReleaseSuffix)</HostFullVersion>

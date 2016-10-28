@@ -63,10 +63,16 @@ namespace Microsoft.DotNet.Cli.Build
         // Full versions and package information.
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
-        public bool EnsureStableVersion => false;
+        public bool EnsureStableVersion => true;
+        /*
         public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
         public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
         public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 0, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        */
+        public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
+        public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
+        
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
         {
             { "Microsoft.NETCore.DotNetHost", LatestHostVersion },
