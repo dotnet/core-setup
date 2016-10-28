@@ -142,7 +142,7 @@ pal::string_t get_directory(const pal::string_t& path)
         return ret + DIR_SEPARATOR;
     }
 
-    ssize_t pos = (ssize_t) path_sep;
+    int pos = (int) path_sep;
     while (pos >= 0 && ret[pos] == DIR_SEPARATOR)
     {
         pos--;
