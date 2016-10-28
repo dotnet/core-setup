@@ -326,7 +326,7 @@ namespace Microsoft.DotNet.Host.Build
             msbuildProps.AppendLine($"    <BuildNumberMajor>{hostVersion.LatestHostBuildMajor}</BuildNumberMajor>");
             msbuildProps.AppendLine($"    <BuildNumberMinor>{hostVersion.LatestHostBuildMinor}</BuildNumberMinor>");
             msbuildProps.AppendLine($"    <PreReleaseLabel>{hostVersion.ReleaseSuffix}</PreReleaseLabel>");
-            msbuildProps.AppendLine($"    <EnsureStableVersion>{hostVersion.EnsureStableVersion}</EnsureStableVersion>");
+            msbuildProps.AppendLine($"    <EnsureStableVersion>{hostVersion.EnsureStableVersion.ToString().ToLower()}</EnsureStableVersion>");
             msbuildProps.AppendLine("  </PropertyGroup>");
             msbuildProps.AppendLine("</Project>");
 
