@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Build
         public string LatestHostBuildMinor => "00";
         public VerInfo LatestHostVersion => new VerInfo(1, 0, 1, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
         public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 1, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
-        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 1, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 3, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
   
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
         {

@@ -29,7 +29,6 @@ set(SOURCES
     ../../common/trace.cpp
     ../../common/utils.cpp
     ../libhost.cpp
-    ../deps_format.cpp
     ../deps_entry.cpp
     ../runtime_config.cpp
     ../json/casablanca/src/json/json.cpp

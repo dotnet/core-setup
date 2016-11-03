@@ -13,7 +13,7 @@
   
   <ItemGroup>
     <Dependency Include="Microsoft.NETCore.DotNetHostResolver">
-      <Version>$(HostResolverFullVersion)</Version>
+      <Version>$(HostResolverVersion)</Version>
     </Dependency>
 
     <ArchitectureSpecificNativeFile Include="$(DotNetHostBinDir)/hostpolicy.dll"/>
