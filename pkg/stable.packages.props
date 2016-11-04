@@ -17,9 +17,11 @@
     <StablePackage Include="Microsoft.NETCore.DotNetHost">
       <Version>1.0.1</Version>
     </StablePackage>
+    <!--
     <StablePackage Include="Microsoft.NETCore.DotNetHostPolicy">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </StablePackage>
+    -->
     <StablePackage Include="Microsoft.NETCore.DotNetHostResolver">
       <Version>1.0.1</Version>
     </StablePackage>
