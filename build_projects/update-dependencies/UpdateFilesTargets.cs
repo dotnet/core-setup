@@ -87,7 +87,11 @@ namespace Microsoft.DotNet.Scripts
         {
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
 
-            IEnumerable<string> projectJsonFiles = Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories);
+            var projectJsonFiles = new List<string>
+            {
+                Path.Combine(Dirs.PkgProjects, "Microsoft.NETCore.App", "project.json"),
+                Path.Combine(Dirs.PkgDeps, "project.json")
+            };
 
             JObject projectRoot;
             foreach (string projectJsonFile in projectJsonFiles)
