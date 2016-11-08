@@ -87,24 +87,11 @@ namespace Microsoft.DotNet.Scripts
         {
             List<DependencyInfo> dependencyInfos = c.GetDependencyInfos();
 
-            string[] sourceDirsToUpdate =
+            var projectJsonFiles = new List<string>
             {
-                "build_projects",
-                "pkg",
-                // Don't upgrade RTM versions in InternalAbstractions and DependencyModel.
-                // See https://github.com/dotnet/core-setup/issues/275
-                //"src",
-                "test",
-                "tools"
+                Path.Combine(Dirs.PkgProjects, "Microsoft.NETCore.App", "project.json"),
+                Path.Combine(Dirs.PkgDeps, "project.json")
             };
-
-            IEnumerable<string> projectJsonFiles = sourceDirsToUpdate
-                .SelectMany(name =>
-                    Directory.GetFiles(
-                        Path.Combine(Dirs.RepoRoot, name),
-                        "project.json",
-                        SearchOption.AllDirectories))
-                .ToArray();
 
             JObject projectRoot;
             foreach (string projectJsonFile in projectJsonFiles)
