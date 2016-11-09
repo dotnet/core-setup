@@ -31,6 +31,8 @@ namespace Microsoft.DotNet.Host.Build
 
         private static string HostFxrNugetVersion { get; set; }
 
+        private static bool IncludeSymbolPackages { get; set; }
+
         [Target]
         public static BuildTargetResult InitPublish(BuildTargetContext c)
         {
@@ -42,6 +44,9 @@ namespace Microsoft.DotNet.Host.Build
             Channel = c.BuildContext.Get<string>("Channel");
             BranchName = c.BuildContext.Get<string>("BranchName");
             CommitHash = c.BuildContext.Get<string>("CommitHash");
+
+            // Do not publish symbol packages on a release branch.
+            IncludeSymbolPackages = !c.BuildContext.Get<string>("BranchName").StartsWith("release/");
 
             return c.Success();
         }
@@ -62,7 +67,7 @@ namespace Microsoft.DotNet.Host.Build
         {
             string nugetFeedUrl = EnvVars.EnsureVariable("CLI_NUGET_FEED_URL");
             string apiKey = EnvVars.EnsureVariable("CLI_NUGET_API_KEY");
-            NuGetUtil.PushPackages(Dirs.Packages, nugetFeedUrl, apiKey);
+            NuGetUtil.PushPackages(Dirs.Packages, nugetFeedUrl, apiKey, IncludeSymbolPackages);
 
             return c.Success();
         }
@@ -167,7 +172,7 @@ namespace Microsoft.DotNet.Host.Build
 
             string nugetFeedUrl = EnvVars.EnsureVariable("NUGET_FEED_URL");
             string apiKey = EnvVars.EnsureVariable("NUGET_API_KEY");
-            NuGetUtil.PushPackages(Dirs.PackagesNoRID, nugetFeedUrl, apiKey);
+            NuGetUtil.PushPackages(Dirs.PackagesNoRID, nugetFeedUrl, apiKey, IncludeSymbolPackages);
 
             string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
             VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
