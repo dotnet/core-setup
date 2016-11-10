@@ -17,11 +17,9 @@
     <StablePackage Include="Microsoft.NETCore.DotNetHost">
       <Version>1.0.1</Version>
     </StablePackage>
-    <!--
     <StablePackage Include="Microsoft.NETCore.DotNetHostPolicy">
-      <Version>1.0.3</Version>
+      <Version>1.0.1</Version>
     </StablePackage>
-    -->
     <StablePackage Include="Microsoft.NETCore.DotNetHostResolver">
       <Version>1.0.1</Version>
     </StablePackage>
@@ -127,5 +125,40 @@
     <StablePackage Include="Microsoft.NETCore.App">
       <Version>1.0.2</Version>
     </StablePackage>
-  </ItemGroup>
+
+    <!-- NETCore 1.0.3 servicing core-setup -->
+    <StablePackage Include="Microsoft.NETCore.App">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.debian.8-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.fedora.23-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.opensuse.13.2-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.osx.10.10-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.rhel.7-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.ubuntu.14.04-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.ubuntu.16.04-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win7-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win7-x86.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.0.3</Version>
+    </StablePackage>
+</ItemGroup>
 </Project>
