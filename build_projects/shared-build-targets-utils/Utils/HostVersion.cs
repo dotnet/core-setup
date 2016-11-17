@@ -63,16 +63,25 @@ namespace Microsoft.DotNet.Cli.Build
         // Full versions and package information.
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
-        public bool EnsureStableVersion => true;
-        /*
-        public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
-        public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
-        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 0, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
-        */
-        public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
-        public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
-        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
-        
+        public bool EnsureStableVersion => false;
+
+        // Comment below lines when stabilizing 1.1.1
+        public VerInfo LatestHostVersion => new VerInfo(1, 1, 1, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 1, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 1, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+
+        // Uncomment below lines when stabilizing 1.1.1
+/*
+        public VerInfo LatestHostVersion => new VerInfo(1, 1, 1, "", "", "", CommitCountString);
+        public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 1, "", "", "", CommitCountString);
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 1, "", "", "", CommitCountString);
+*/
+
+        // If you are producing host packages use this to validate them.
+        public Dictionary<string, VerInfo> LatestHostPackagesToValidate => new Dictionary<string, VerInfo>()
+        {
+            // Add packages here to validate that they are produced, similar to LatestHostPackages.
+        };
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
         {
             { "Microsoft.NETCore.DotNetHost", LatestHostVersion },
@@ -89,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Build
         //
         // Locked muxer for consumption in CLI.
         //
-        public bool IsLocked = false; // Set this variable to toggle muxer locking.
+        public bool IsLocked = true; // Set this variable to toggle muxer locking.
         public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 1, 0, "", "", "", CommitCountString) : LatestHostFxrVersion;
         public VerInfo LockedHostVersion    => IsLocked ? new VerInfo(1, 1, 0, "", "", "", CommitCountString) : LatestHostVersion;
     }
