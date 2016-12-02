@@ -354,7 +354,7 @@ namespace Microsoft.DotNet.Host.Build
 
                 Console.WriteLine($"Copying package {fileName} to artifacts directory {Dirs.CorehostLocalPackages}.");
             }
-            foreach (var item in hostVersion.LatestHostPackages)
+            foreach (var item in hostVersion.LatestHostPackagesToValidate)
             {
                 var fileFilter = $"runtime.{rid}.{item.Key}.{item.Value.ToString()}.nupkg";
                 if (Directory.GetFiles(Dirs.CorehostLocalPackages, fileFilter).Length == 0)
