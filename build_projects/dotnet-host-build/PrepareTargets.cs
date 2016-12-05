@@ -136,6 +136,7 @@ namespace Microsoft.DotNet.Host.Build
             c.BuildContext["BuildVersion"] = buildVersion;
             c.BuildContext["HostVersion"] = hostVersion;
             c.BuildContext["CommitHash"] = commitHash;
+            c.BuildContext["BranchName"] = branchInfo.Entries["BRANCH_NAME"];
             c.BuildContext["SharedFrameworkNugetVersion"] = buildVersion.NetCoreAppVersion;
 
             c.Info($"Building Version: {hostVersion.LatestHostVersion.WithoutSuffix} (NuGet Packages: {hostVersion.LatestHostVersion})");
