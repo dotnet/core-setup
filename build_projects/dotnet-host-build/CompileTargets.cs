@@ -289,37 +289,30 @@ namespace Microsoft.DotNet.Host.Build
                         throw new PlatformNotSupportedException("Target Architecture: " + platform + " is not currently supported.");
                 }
 
-                if (crossCompiler == null) {
-                    ExecIn(cmakeOut, Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost", "build.sh"),
-                            "--arch",
-                            arch,
-                            "--hostver",
-                            hostVersion.LatestHostVersion.ToString(),
-                            "--fxrver",
-                            hostVersion.LatestHostFxrVersion.ToString(),
-                            "--policyver",
-                            hostVersion.LatestHostPolicyVersion.ToString(),
-                            "--rid",
-                            rid,
-                            "--commithash",
-                            commitHash);
-                } else {
-                    ExecIn(cmakeOut, Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost", "build.sh"),
-                            "--arch",
-                            arch,
-                            "--hostver",
-                            hostVersion.LatestHostVersion.ToString(),
-                            "--fxrver",
-                            hostVersion.LatestHostFxrVersion.ToString(),
-                            "--policyver",
-                            hostVersion.LatestHostPolicyVersion.ToString(),
-                            "--rid",
-                            rid,
-                            "--commithash",
-                            commitHash,
-                            "--xcompiler",
-                            crossCompiler);
+                // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
+                // See the comment in "src/corehost/build.sh" for details. It doesn't work for some reason.
+                List<string> buildScriptArgList = new List<string>();
+                string buildScriptFile  = Path.Combine(corehostSrcDir, "build.sh");
+
+                buildScriptArgList.Add("--arch");
+                buildScriptArgList.Add(arch);
+                buildScriptArgList.Add("--hostver");
+                buildScriptArgList.Add(hostVersion.LatestHostVersion.ToString());
+                buildScriptArgList.Add("--fxrver");
+                buildScriptArgList.Add(hostVersion.LatestHostFxrVersion.ToString());
+                buildScriptArgList.Add("--policyver");
+                buildScriptArgList.Add(hostVersion.LatestHostPolicyVersion.ToString());
+                buildScriptArgList.Add("--rid");
+                buildScriptArgList.Add(rid);
+                buildScriptArgList.Add("--commithash");
+                buildScriptArgList.Add(commitHash);
+
+                if (crossCompiler != null) {
+                    buildScriptArgList.Add("--xcompiler");
+                    buildScriptArgList.Add(crossCompiler);
                 }
+
+                ExecIn(cmakeOut, buildScriptFile, buildScriptArgList);
 
                 // Copy the output out
                 File.Copy(Path.Combine(cmakeOut, "cli", "exe", "dotnet"), Path.Combine(Dirs.CorehostLatest, "dotnet"), overwrite: true);
