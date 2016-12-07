@@ -164,7 +164,6 @@ namespace Microsoft.DotNet.Host.Build
             var configuration = c.BuildContext.Get<string>("Configuration");
             string rid = c.BuildContext.Get<string>("TargetRID");
             string platform = c.BuildContext.Get<string>("Platform");
-            string crossCompiler = c.BuildContext.Get<string>("CrossCompiler");
 
             // Generate build files
             var cmakeOut = Path.Combine(Dirs.CorehostLatest, "cmake");
@@ -306,11 +305,6 @@ namespace Microsoft.DotNet.Host.Build
                 buildScriptArgList.Add(rid);
                 buildScriptArgList.Add("--commithash");
                 buildScriptArgList.Add(commitHash);
-
-                if (crossCompiler != null) {
-                    buildScriptArgList.Add("--xcompiler");
-                    buildScriptArgList.Add(crossCompiler);
-                }
 
                 ExecIn(cmakeOut, buildScriptFile, buildScriptArgList);
 

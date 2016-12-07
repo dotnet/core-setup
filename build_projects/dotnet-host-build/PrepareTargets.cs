@@ -44,7 +44,6 @@ namespace Microsoft.DotNet.Host.Build
             var configEnv = Environment.GetEnvironmentVariable("CONFIGURATION");
             string platformEnv = Environment.GetEnvironmentVariable("TARGETPLATFORM") ?? RuntimeEnvironment.RuntimeArchitecture.ToString();
             string targetRID = Environment.GetEnvironmentVariable("TARGETRID");
-            string crossCompiler = Environment.GetEnvironmentVariable("CROSSCOMPILER");
             if (targetRID == null)
             {
                 targetRID = RuntimeEnvironment.GetRuntimeIdentifier();
@@ -65,7 +64,6 @@ namespace Microsoft.DotNet.Host.Build
             c.BuildContext["Platform"] = platformEnv;
             c.BuildContext["TargetRID"] = targetRID;
             c.BuildContext["TargetFramework"] = targetFramework;
-            c.BuildContext["CrossCompiler"] = crossCompiler;
 
             c.Info($"Building {c.BuildContext["Configuration"]} to: {Dirs.Output}");
             c.Info("Build Environment:");
