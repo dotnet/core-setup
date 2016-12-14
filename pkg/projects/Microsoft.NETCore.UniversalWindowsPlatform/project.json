@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "Microsoft.NETCore.Portable.Compatibility": "1.0.2",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.5",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.6-servicing-24814-03",
     "Microsoft.NETCore.Targets": "1.0.2",
     "Microsoft.Win32.Primitives": "4.0.1",
     "System.ComponentModel.EventBasedAsync": "4.0.11",
