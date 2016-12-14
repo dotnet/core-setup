@@ -11,7 +11,7 @@
     "Microsoft.DotNet.ProjectModel": "1.0.0-rc2-002794",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-preview2-002794",
     "NETStandard.Library": "1.6.0",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.5"
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.6-servicing-24814-03"
   },
   "frameworks": {
     "netcoreapp1.0": {
