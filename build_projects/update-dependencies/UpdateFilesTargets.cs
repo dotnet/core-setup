@@ -91,6 +91,11 @@ namespace Microsoft.DotNet.Scripts
             {
                 Path.Combine(Dirs.PkgProjects, "Microsoft.NETCore.App", "project.json"),
                 Path.Combine(Dirs.PkgDeps, "project.json")
+
+                // Don't auto-upgrade RTM versions in InternalAbstractions and DependencyModel
+                // project.json files. If the code to create projectJsonFiles is changed back to a
+                // recursive file search, don't include "src".
+                // See https://github.com/dotnet/core-setup/issues/275
             };
 
             JObject projectRoot;
