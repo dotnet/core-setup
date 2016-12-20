@@ -11,7 +11,8 @@ param(
     [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetVersion,
     [Parameter(Mandatory=$true)][string]$SharedFrameworkUpgradeCode,
     [Parameter(Mandatory=$true)][string]$Architecture,
-    [Parameter(Mandatory=$true)][string]$WixObjRoot
+    [Parameter(Mandatory=$true)][string]$WixObjRoot,
+    [Parameter(Mandatory=$true)][string]$InstallerResourcesPath
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -60,7 +61,7 @@ function RunCandle
     .\candle.exe -nologo `
         -out "$WixObjRoot\" `
         -dSharedFrameworkSource="$SharedFrameworkPublishRoot" `
-        -dMicrosoftEula="$RepoRoot\packaging\osx\sharedframework\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$InstallerResourcesPath\osx\en.lproj\eula.rtf" `
         -dProductMoniker="$ProductMoniker" `
         -dFrameworkName="$SharedFrameworkNugetName" `
         -dFrameworkDisplayVersion="$SharedFrameworkNugetVersion" `

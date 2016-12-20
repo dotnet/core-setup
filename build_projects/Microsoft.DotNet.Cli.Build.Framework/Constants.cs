@@ -19,5 +19,11 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
         public static readonly string DynamicLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" :
                                                          RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? ".dylib" : ".so";
+
+        public static readonly string DefaultZipFileLicenseType = "mit";
+
+        public static readonly string DefaultInstallerLicenseType = "msft";
+
+        public static readonly string DefaultNuPkgLicenseType = "msft";
     }
 }

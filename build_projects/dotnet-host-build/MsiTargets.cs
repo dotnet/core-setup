@@ -119,6 +119,7 @@ namespace Microsoft.DotNet.Host.Build
             var inputDir = c.BuildContext.Get<string>("SharedHostPublishRoot");
             var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "sharedhost");
             var sharedHostBrandName = $"'{Monikers.SharedHostBrandName}'";
+            var installerResourcesPath = GetInstallerResourcesPath();
 
             if (Directory.Exists(wixObjRoot))
             {
@@ -126,11 +127,17 @@ namespace Microsoft.DotNet.Host.Build
             }
             Directory.CreateDirectory(wixObjRoot);
 
+            File.Copy(Path.Combine(installerResourcesPath, "LICENSE.txt"),
+                      Path.Combine(inputDir, "LICENSE.txt"));
+
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "host", "generatemsi.ps1"),
-                inputDir, SharedHostMsi, WixRoot, sharedHostBrandName, hostMsiVersion, hostNugetVersion, Arch, wixObjRoot)
+                inputDir, SharedHostMsi, WixRoot, sharedHostBrandName, hostMsiVersion, hostNugetVersion, Arch, wixObjRoot, installerResourcesPath)
                     .Execute()
                     .EnsureSuccessful();
+
+            File.Delete(Path.Combine(inputDir, "LICENSE.txt"));
+            
             return c.Success();
         }
 
@@ -144,6 +151,7 @@ namespace Microsoft.DotNet.Host.Build
             var inputDir = c.BuildContext.Get<string>("HostFxrPublishRoot");
             var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "hostfxr");
             var hostFxrBrandName = $"'{Monikers.HostFxrBrandName}'";
+            var installerResourcesPath = GetInstallerResourcesPath();
 
             if (Directory.Exists(wixObjRoot))
             {
@@ -153,7 +161,7 @@ namespace Microsoft.DotNet.Host.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "hostfxr", "generatemsi.ps1"),
-                inputDir, HostFxrMsi, WixRoot, hostFxrBrandName, hostFxrMsiVersion, hostFxrNugetVersion, Arch, wixObjRoot)
+                inputDir, HostFxrMsi, WixRoot, hostFxrBrandName, hostFxrMsiVersion, hostFxrNugetVersion, Arch, wixObjRoot, installerResourcesPath)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -170,6 +178,7 @@ namespace Microsoft.DotNet.Host.Build
             var upgradeCode = Utils.GenerateGuidFromName(SharedFrameworkMsi).ToString().ToUpper();
             var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "sharedframework");
             var sharedFxBrandName = $"'{Monikers.SharedFxBrandName}'";
+            var installerResourcesPath = GetInstallerResourcesPath();
 
             if (Directory.Exists(wixObjRoot))
             {
@@ -179,7 +188,7 @@ namespace Microsoft.DotNet.Host.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatemsi.ps1"),
-                inputDir, SharedFrameworkMsi, WixRoot, sharedFxBrandName, msiVerison, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, wixObjRoot)
+                inputDir, SharedFrameworkMsi, WixRoot, sharedFxBrandName, msiVerison, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, wixObjRoot, installerResourcesPath)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -193,10 +202,11 @@ namespace Microsoft.DotNet.Host.Build
             var sharedFrameworkNuGetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             var upgradeCode = Utils.GenerateGuidFromName(SharedFrameworkBundle).ToString().ToUpper();
             var sharedFxBrandName = $"'{Monikers.SharedFxBrandName}'";
+            var installerResourcesPath = GetInstallerResourcesPath();
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatebundle.ps1"),
-                SharedFrameworkMsi, SharedHostMsi, HostFxrMsi, SharedFrameworkBundle, WixRoot, sharedFxBrandName, MsiVersion, DisplayVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch)
+                SharedFrameworkMsi, SharedHostMsi, HostFxrMsi, SharedFrameworkBundle, WixRoot, sharedFxBrandName, MsiVersion, DisplayVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, installerResourcesPath)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
@@ -238,6 +248,13 @@ namespace Microsoft.DotNet.Host.Build
                     .EnsureSuccessful();
 
             File.Delete(engine);
+        }
+
+        private static string GetInstallerResourcesPath()
+        {
+            string licenseType = Environment.GetEnvironmentVariable("InstallerLicenseType") ?? Constants.DefaultInstallerLicenseType;
+
+            return Path.Combine(Dirs.RepoRoot, "resources", licenseType);
         }
     }
 }

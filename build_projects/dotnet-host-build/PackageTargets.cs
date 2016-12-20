@@ -73,10 +73,6 @@ namespace Microsoft.DotNet.Host.Build
                 Path.Combine(Dirs.RepoRoot, "resources", "ThirdPartyNotices.txt"),
                 Path.Combine(sharedHostRoot, "ThirdPartyNotices.txt"));
 
-            File.Copy(
-                Path.Combine(Dirs.RepoRoot, "resources", "LICENSE.txt"),
-                Path.Combine(sharedHostRoot, "LICENSE.txt"));
-
             c.BuildContext["SharedHostPublishRoot"] = sharedHostRoot;
             return c.Success();
         }
@@ -152,9 +148,15 @@ namespace Microsoft.DotNet.Host.Build
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult GenerateZip(BuildTargetContext c)
         {
+            string combinedPublishRoot = c.BuildContext.Get<string>("CombinedMuxerHostFxrFrameworkPublishRoot");
+
+            CopyLicenseToDirectory(combinedPublishRoot);
+
             CreateZipFromDirectory(
-                c.BuildContext.Get<string>("CombinedMuxerHostFxrFrameworkPublishRoot"), 
+                combinedPublishRoot, 
                 c.BuildContext.Get<string>("CombinedMuxerHostFxrFrameworkCompressedFile"));
+
+            File.Delete(Path.Combine(combinedPublishRoot, "LICENSE.txt"));
 
             CreateZipFromDirectory(
                 c.BuildContext.Get<string>("HostFxrPublishRoot"), 
@@ -166,9 +168,15 @@ namespace Microsoft.DotNet.Host.Build
         [BuildPlatforms(BuildPlatform.Unix)]
         public static BuildTargetResult GenerateTarBall(BuildTargetContext c)
         {
+            string combinedPublishRoot = c.BuildContext.Get<string>("CombinedMuxerHostFxrFrameworkPublishRoot");
+
+            CopyLicenseToDirectory(combinedPublishRoot);
+
             CreateTarBallFromDirectory(
-                c.BuildContext.Get<string>("CombinedMuxerHostFxrFrameworkPublishRoot"), 
+                combinedPublishRoot, 
                 c.BuildContext.Get<string>("CombinedMuxerHostFxrFrameworkCompressedFile"));
+
+            File.Delete(Path.Combine(combinedPublishRoot, "LICENSE.txt"));
 
             CreateTarBallFromDirectory(
                 c.BuildContext.Get<string>("HostFxrPublishRoot"), 
@@ -197,6 +205,15 @@ namespace Microsoft.DotNet.Host.Build
             Cmd("tar", "-czf", artifactPath, "-C", directory, ".")
                 .Execute()
                 .EnsureSuccessful();
+        }
+
+        private static void CopyLicenseToDirectory(string directory)
+        {
+            string licenseType = Environment.GetEnvironmentVariable("ZipFileLicenseType") ?? Constants.DefaultZipFileLicenseType;
+
+            File.Copy(
+                Path.Combine(Dirs.RepoRoot, "resources", licenseType, "LICENSE.txt"),
+                Path.Combine(directory, "LICENSE.txt"));
         }
 
         private static void FixPermissions(string directory)
