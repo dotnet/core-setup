@@ -153,15 +153,10 @@ bool pal::get_default_breadcrumb_store(string_t* recv)
 }
 
 static
-bool get_wow_mode_program_files(pal::string_t* recv)
+bool get_program_files_by_id(KNOWNFOLDERID kfid, pal::string_t* recv)
 {
     recv->clear();
     pal::char_t* prog_files;
-#if defined(_TARGET_AMD64_)
-    KNOWNFOLDERID kfid = FOLDERID_ProgramFilesX86;
-#else
-    KNOWNFOLDERID kfid = FOLDERID_ProgramFiles;
-#endif
     HRESULT hr = ::SHGetKnownFolderPath(kfid, 0,  NULL, &prog_files);
     if (hr != S_OK)
     {
@@ -170,6 +165,17 @@ bool get_wow_mode_program_files(pal::string_t* recv)
     }
     recv->assign(prog_files);
     return true;
+}
+
+static
+bool get_wow_mode_program_files(pal::string_t* recv)
+{
+#if defined(_TARGET_AMD64_)
+    KNOWNFOLDERID kfid = FOLDERID_ProgramFilesX86;
+#else
+    KNOWNFOLDERID kfid = FOLDERID_ProgramFiles;
+#endif
+    return get_program_files_by_id(kfid, recv);
 }
 
 bool pal::get_default_servicing_directory(string_t* recv)
@@ -331,7 +337,7 @@ void pal::readdir(const string_t& path, std::vector<pal::string_t>* list)
 
 bool pal::get_global_shared_package_dir(pal::string_t* dir)
 {
-    if (!get_wow_mode_program_files(dir))
+    if (!get_program_files_by_id(FOLDERID_ProgramFiles, dir))
     {
         return false;
     }
