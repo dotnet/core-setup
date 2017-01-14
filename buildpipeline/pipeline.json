@@ -1,0 +1,63 @@
+{
+  "Repository": "core-setup",
+  "Definitions": {
+    "Path": ".",
+    "Type": "VSTS",
+    "BaseUrl": "https://devdiv.visualstudio.com/DefaultCollection"
+  },
+  "Pipelines": [
+    {
+      "Name": "Trusted-All-Release",
+      "Parameters": {
+        "TreatWarningsAsErrors": "false"
+      },
+      "BuildParameters": {
+        "BuildConfiguration": "Release"
+      },
+      "Definitions": [
+        {
+          "Name": "Core-Setup-CentOS-x64-master"
+        },
+        {
+          "Name": "Core-Setup-Debian8-x64-master"
+        },
+        {
+          "Name": "Core-Setup-Fedora23-x64-master"
+        },
+        {
+          "Name": "Core-Setup-Fedora24-x64-master"
+        },
+        {
+          "Name": "Core-Setup-OpenSuse13.2-x64-master"
+        },
+        {
+          "Name": "Core-Setup-OpenSuse42.1-x64-master"
+        },
+        {
+          "Name": "Core-Setup-OSX-x64-master"
+        },
+        {
+          "Name": "Core-Setup-PortableLinux-x64-master"
+        },
+        {
+          "Name": "Core-Setup-RHEL7-x64-master"
+        },
+        {
+          "Name": "Core-Setup-Ubuntu14.04-x64-master"
+        },
+        {
+          "Name": "Core-Setup-Ubuntu16.04-x64-master"
+        },
+        {
+          "Name": "Core-Setup-Ubuntu16.10-x64-master"
+        },
+        {
+          "Name": "Core-Setup-Windows-arm32-master"
+        },
+        {
+          "Name": "Core-Setup-Windows-arm64-master"
+        }
+      ]
+    }
+  ]
+}
