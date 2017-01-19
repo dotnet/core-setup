@@ -13,7 +13,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration Release -Targets Init,Compile,Package,Publish -TargetArch arm -Framework netcoreapp1.1",
+        "arguments": "-Configuration Release -Targets Init,Compile,Package,Publish -TargetArch arm -Framework netcoreapp2.0",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
