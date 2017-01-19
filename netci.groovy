@@ -24,7 +24,7 @@ platformList.each { platform ->
     def jobName = getBuildJobName(configuration, os, architecture)
     def buildCommand = '';
 
-    // Calculate the build command
+    // Calculate build command
     if (os == 'Windows_NT') {
         buildCommand = ".\\build.cmd -Configuration ${configuration} -Architecture ${architecture} -Targets Default"
     }
