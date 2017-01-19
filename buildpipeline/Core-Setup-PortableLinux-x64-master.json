@@ -4,7 +4,27 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Run docker",
+      "displayName": "Docker cleanup",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
+        "versionSpec": "0.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "type": "InlineScript",
+        "scriptPath": "",
+        "args": "",
+        "script": "echo \"Running: docker ps -a -q --filter name=$(DockerContainerName) | xargs --no-run-if-empty docker rm -f\"\ndocker ps -a -q --filter name=$(DockerContainerName) | xargs --no-run-if-empty docker rm -f",
+        "cwd": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run build.sh in Docker container",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -13,7 +33,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run -t --rm --sig-proxy=true --name dotnetcore-setup-build-container-rhel -v $(Build.SourcesDirectory):/opt/code -w /opt/code -e CONNECTION_STRING -e PUBLISH_TO_AZURE_BLOB chcosta/dotnetcore:rhel7_prereqs /bin/bash -c \"git clean -X -d -f; ./build.sh $(BuildArguments)\"",
+        "arguments": "run -t --rm --sig-proxy=true --name $(DockerContainerName) -v $(Build.SourcesDirectory):/opt/code -w /opt/code -e CONNECTION_STRING -e PUBLISH_TO_AZURE_BLOB chcosta/dotnetcore:rhel7_prereqs /bin/bash -c \"git clean -X -d -f; ./build.sh $(BuildArguments)\"",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -71,6 +91,10 @@
       "value": "--skip-prereqs --configuration $(BuildConfiguration) --targets Default --portableLinux",
       "allowOverride": true
     },
+    "DockerContainerName": {
+      "value": "dotnetcore-setup-build-container-portablelinux",
+      "allowOverride": true
+    },
     "CONNECTION_STRING": {
       "value": "PassedViaPipeBuild"
     },
@@ -96,7 +120,7 @@
       "branches": [
         "+refs/heads/*"
       ],
-      "artifacts": [],
+      "artifacts": [ ],
       "artifactTypesToDelete": [
         "FilePath",
         "SymbolStore"
