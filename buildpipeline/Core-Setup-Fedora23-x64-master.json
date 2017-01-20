@@ -32,7 +32,7 @@
       },
       "inputs": {
         "CopyRoot": "",
-        "Contents": "**\\*.log",
+        "Contents": "**/*.log",
         "ArtifactName": "Build Logs",
         "ArtifactType": "Container",
         "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
