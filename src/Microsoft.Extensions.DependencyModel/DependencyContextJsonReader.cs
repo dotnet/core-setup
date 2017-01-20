@@ -727,4 +727,21 @@ namespace Microsoft.Extensions.DependencyModel
             public string HashPath;
         }
     }
+    
+#if NET451
+    static class JsonExtensions
+    {
+        public static bool? ReadAsBoolean(this JsonReader r)
+        {
+            string s = r.ReadAsString();
+            if (string.IsNullOrEmpty(s))
+            {
+                return null;
+            }
+
+            return bool.Parse(s);
+            
+        }
+    }
+#endif
 }
