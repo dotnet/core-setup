@@ -34,8 +34,8 @@ The layout within `netcoreapp*` folders is a NuGet cache layout.
 ```
     - %USERPROFILE% or $HOME/
         - .dotnet
-          - {arch=x86|x64}
-            - packages 
+          - packages 
+            - {arch=x86|x64}
                 = do =
 ```
 
@@ -45,22 +45,24 @@ The layout within `netcoreapp*` folders is a NuGet cache layout.
 
 To compose the layout of the shared package store, we will use a dotnet command called `dotnet cache`. We expect the *hosting providers* (ex: Antares) to use the command to prime their machines and framework authors who want to provide *pre-optimized package archives* create the compressed archive layouts.
 
-The layout is composed from a list of package names and versions specified as JSON: 
+The layout is composed from a list of package names and versions specified as xml: 
 
 **Roslyn Example**
 ```xml
+<Project Sdk="Microsoft.NET.Sdk">
  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis" Version="1.3.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="1.3.2" />
     <PackageReference Include=""Microsoft.CodeAnalysis.VisualBasic.Features" Version="1.3.2" />
   </ItemGroup>
+</Project>
 ```
 
 
 and issue a command like below:
 
 ```
-dotnet cache --entries packages.xml -f netcoreapp2.0 [--output C:\Foo] --rid win7-x64 --fx-version 2.0.0-preview2-00001 [--no-optimize]
+dotnet cache --entries packages.xml --framework netcoreapp2.0 [--output C:\Foo] --runtime win7-x64 --fx-version 2.0.0-preview2-00001 [--no-optimize]
 
 --framework          Specifies the TFM that the package store is applicable to
 --output       The output directory to create the package store in (default: %USERPROFILE%\.dotnet or ~/.dotnet)
@@ -124,7 +126,7 @@ The host will probe in the following order of precedence for `dotnet run` and ap
 
 ## dotnet publish
 
-Publish will be enhanced to support a filter profile file specified as JSON. This file explicitly lists all asset packages that need to be trimmed out of the publish output. The following are examples of how various application types can be published.
+Publish will be enhanced to support a filter profile file specified as xml. This file explicitly lists all asset packages that need to be trimmed out of the publish output. The following are examples of how various application types can be published.
 
 Publish a portable app:
 
