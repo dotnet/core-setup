@@ -3,7 +3,7 @@
     "Microsoft.CodeAnalysis.CSharp": "1.3.0",
     "Microsoft.CodeAnalysis.VisualBasic": "1.3.0",
     "Microsoft.CSharp": "4.3.0",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.1-servicing-24927-02",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.1-servicing-24928-01",
     "Microsoft.VisualBasic": "10.1.0",
     "NETStandard.Library": "1.6.1",
     "System.Buffers": "4.3.0",
