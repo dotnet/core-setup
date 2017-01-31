@@ -115,6 +115,9 @@
     <StablePackage Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>5.2.2</Version>
     </StablePackage>
+    <StablePackage Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>5.3.0</Version>
+    </StablePackage>
 
     <!-- NETCore 1.0.1 servicing core-setup -->
     <StablePackage Include="Microsoft.NETCore.App">
