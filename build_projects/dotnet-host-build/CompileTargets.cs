@@ -346,7 +346,9 @@ namespace Microsoft.DotNet.Host.Build
         [Target]
         public static BuildTargetResult BuildProjectsForNuGetPackages(BuildTargetContext c)
         {
-            if (CurrentPlatform.IsWindows)
+            string rid = c.BuildContext.Get<string>("TargetRID");
+
+            if (CurrentPlatform.IsWindows || rid == "ubuntu.14.04-arm" || rid == "ubuntu.16.04-arm" || rid == "tizen.4.0.0-armel" )
             {
                 var configuration = c.BuildContext.Get<string>("Configuration");
 
