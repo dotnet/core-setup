@@ -42,6 +42,13 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# ARM cross build dependency
+RUN apt-get update && \
+    apt-get -qqy install \
+        binutils-arm-linux-gnueabihf && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Use clang as c++ compiler
 RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.5 100
 RUN update-alternatives --set c++ /usr/bin/clang++-3.5
