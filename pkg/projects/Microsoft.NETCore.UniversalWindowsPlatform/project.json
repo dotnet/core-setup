@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "Microsoft.Net.Native.Compiler": "1.6.0",
     "Microsoft.NETCore.Portable.Compatibility": "1.0.2",
     "Microsoft.NETCore.Runtime.CoreCLR": "1.0.5",
     "Microsoft.NETCore.Targets": "1.0.2",
