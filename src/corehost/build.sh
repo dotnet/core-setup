@@ -184,6 +184,13 @@ else
     exit 1
 fi
 
+if [ -z $CONFIGURATION ]; then
+    export CONFIGURATION=Debug
+fi
+echo "CONFIGURATION=$CONFIGURATION"
+
+__cmake_defines="-DCMAKE_BUILD_TYPE=${CONFIGURATION} ${__cmake_defines}"
+
 echo "Building Corehost from $DIR to $(pwd)"
 set -x # turn on trace
 if [ $__CrossBuild == 1 ]; then
