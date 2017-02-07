@@ -160,5 +160,10 @@
     <StablePackage Include="runtime.win7-x86.Microsoft.NETCore.DotNetHostPolicy">
       <Version>1.0.3</Version>
     </StablePackage>
+
+    <!-- NETCore 1.0.4 servicing core-setup -->
+    <StablePackage Include="Microsoft.NETCore.App">
+      <Version>1.0.4</Version>
+    </StablePackage>
 </ItemGroup>
 </Project>

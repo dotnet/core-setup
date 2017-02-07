@@ -61,10 +61,16 @@ namespace Microsoft.DotNet.Cli.Build
         //
 
         // Full versions and package information.
-        public bool EnsureStableVersion => false;
+        public bool EnsureStableVersion => true;
         public string LatestHostPrerelease => "servicing";
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
+        
+        // These are the versions used by GenerateMSbuildPropsFile to generate version.props that is used for
+        // versioning of host nuget package projects.
+        //
+        // These versions should only be incremented in a servicing release if the package in question
+        // is being updated.
         public VerInfo LatestHostVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
         public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
         public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 3, "", "", "", CommitCountString);
@@ -96,6 +102,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         //
         // Locked muxer for consumption in CLI.
+        //
+        // These versions are used when generating platform installers.
         //
         public bool IsLocked = true; // Set this variable to toggle muxer locking.
         public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostFxrVersion;
