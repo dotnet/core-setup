@@ -1,5 +1,8 @@
 ### Repo-specific things ###
 
+# Tool Runtime Dir
+/[Tt]ools/
+
 # Test results
 *-testResults.xml
 
