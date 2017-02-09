@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" InitialTargets="CheckRoslyn" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition="Exists('..\dir.props')" Project="..\dir.props" />
+
+  <Import Project="dependencyversions.props" />
+
+  <!-- Branch Info -->
+  <PropertyGroup>
+    <MajorVersion>2</MajorVersion>
+    <MinorVersion>0</MinorVersion>
+    <PatchVersion>0</PatchVersion>
+    <StabilizePackageVersion>false</StabilizePackageVersion>
+    <LockHostVersion>false</LockHostVersion>
+    <ReleaseSuffix>beta</ReleaseSuffix>
+    <Channel>master</Channel>
+    <BranchName>master</BranchName>
+  </PropertyGroup>
+
+  <!-- Versioning -->
+  <PropertyGroup>
+    <CommitCountString>009999</CommitCountString>
+    <SimpleVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).$(CommitCountString)</SimpleVersion>
+    <VersionSuffix>$(ReleaseSuffix)-$(CommitCountString)</VersionSuffix>
+    <NuGetVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)</NuGetVersion>
+    <HostVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)-00</HostVersion>
+    <NetCoreAppVersion>$(HostVersion)</NetCoreAppVersion>
+    <ProductionVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</ProductionVersion>
+    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'true'">$(NetCoreAppVersion)</SharedFrameworkNugetVersion>
+    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'false'">$(ProductionVersion)</SharedFrameworkNugetVersion>
+  </PropertyGroup>
+
+  <!--
+    $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
+  -->
+  <PropertyGroup>
+    <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
+  </PropertyGroup>
+
+  <!-- Common repo directories -->
+  <PropertyGroup>
+    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <SourceDir>$(ProjectDir)src/</SourceDir>
+
+    <!-- Output directories -->
+    <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
+    <ObjDir Condition="'$(ObjDir)'==''">$(BinDir)obj/</ObjDir>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)</BaseIntermediateOutputPath>
+    <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
+    <PackagesOutDir Condition="'$(PackagesOutDir)'==''">$(BinDir)packages/</PackagesOutDir>
+
+    <!-- Input Directories -->
+    <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
+    <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
+    <BuildToolsTaskDir Condition="'$(MSBuildRuntimeType)' != 'core'">$(ToolsDir)net45/</BuildToolsTaskDir>
+    <PackagingTaskDir>$(ToolsDir)net45/</PackagingTaskDir>
+    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolsDir)dotnetcli/</DotnetCliPath>
+  </PropertyGroup>
+
+  <!-- Setting up Versioning -->
+  <PropertyGroup>
+    <VersionComparisonDate>2016-01-01</VersionComparisonDate>
+  </PropertyGroup>
+  <Import Project="$(ToolsDir)BuildVersion.targets" />
+
+  <!-- Import Build tools common props file where repo-independent properties are found -->
+  <Import Project="$(ToolsDir)Build.Common.props" />
+
+  <!-- list of nuget package sources passed to nuget.exe -->
+  <ItemGroup>
+    <NuGetSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools" />
+    <NuGetSourceList Include="https:%2F%2Fwww.nuget.org/api/v2" />
+  </ItemGroup>
+
+  <!-- Common nuget properties -->
+  <PropertyGroup>
+    <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$(ToolsDir)NuGet.CommandLine/NuGet.exe</NuGetToolPath>
+    <NuGetPackageSource>@(NuGetSourceList -> '-source %(Identity)', ' ')</NuGetPackageSource>
+    <NuGetConfigCommandLine>$(NuGetPackageSource)</NuGetConfigCommandLine>
+
+    <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
+    <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
+    <!-- NuGet.exe doesn't like trailing slashes in the output directory argument -->
+    <NugetRestoreCommand>$(NugetRestoreCommand) -OutputDirectory "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</NugetRestoreCommand>
+    <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
+    <NugetRestoreCommand>$(NugetRestoreCommand) -Verbosity detailed</NugetRestoreCommand>
+    <NugetRestoreCommand Condition="'$(OsEnvironment)'=='Unix'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
+  </PropertyGroup>
+
+  <!-- list of nuget package sources passed to dnu -->
+  <ItemGroup>
+    <!-- Need to escape double forward slash (%2F) or MSBuild will normalize to one slash on Unix. -->
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/cli-deps/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/nugetbuild/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fapi.nuget.org/v3/index.json" />
+  </ItemGroup>
+
+  <!-- list of directories to perform batch restore -->
+  <ItemGroup>
+    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\src" >
+      <AdditionalArgs>--disable-parallel</AdditionalArgs>
+    </DnuRestoreDirs>
+    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\pkg\deps" />
+    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\setuptools\dotnet-deb-tool" >
+      <AdditionalArgs>--disable-parallel</AdditionalArgs>
+    </DnuRestoreDirs>
+    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\setuptools\independent">
+      <AdditionalArgs>--disable-parallel --infer-runtimes</AdditionalArgs>
+    </DnuRestoreDirs>
+
+  </ItemGroup>
+
+  <PropertyGroup>
+    <DotnetToolCommand Condition="'$(DotnetToolCommand)'=='' and '$(OsEnvironment)'!='Unix'">$(DotnetCliPath)dotnet.exe</DotnetToolCommand>
+    <DotnetToolCommand Condition="'$(DotnetToolCommand)'=='' and '$(OsEnvironment)'=='Unix'">$(DotnetCliPath)dotnet</DotnetToolCommand>
+
+    <DnuRestoreSource>@(DnuSourceList -> '--source %(Identity)', ' ')</DnuRestoreSource>
+
+    <DnuRestoreCommand>"$(DotnetToolCommand)"</DnuRestoreCommand>
+    <DnuRestoreCommand>$(DnuRestoreCommand) restore</DnuRestoreCommand>
+    <DnuRestoreCommand>$(DnuRestoreCommand) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(LockDependencies)' == 'true'">$(DnuRestoreCommand) --lock</DnuRestoreCommand>
+  </PropertyGroup>
+
+  <!-- Create a collection of all project.json files for dependency updates. -->
+  <ItemGroup>
+    <ProjectJsonFiles Include="$(SourceDir)**/project.json" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(BuildAllProjects)'=='true'">
+    <!-- When we do a traversal build we get all packages up front, don't restore them again -->
+    <RestorePackages>false</RestorePackages>
+  </PropertyGroup>
+
+  <!-- 
+  Projects that have no OS-specific implementations just use Debug and Release for $(Configuration).
+  Projects that do have OS-specific implementations use OS_Debug and OS_Release, for all OS's we support even
+  if the code is the same between some OS's (so if you have some project that just calls POSIX APIs, we still have
+  OSX_[Debug|Release] and Linux_[Debug|Release] configurations.  We do this so that we place all the output under
+  a single binary folder and can have a similar experience between the command line and Visual Studio.
+  
+  Since now have multiple *Debug and *Release configurations, ConfigurationGroup is set to Debug for any of the
+  debug configurations, and to Release for any of the release configurations.
+  -->
+
+  <!-- Set default Configuration and Platform -->
+  <PropertyGroup>
+    <Platform Condition="'$(Platform)'==''">$(TargetArchitecture)</Platform>
+
+    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
+    <ConfigurationGroup Condition="$(Configuration.EndsWith('Debug'))">Debug</ConfigurationGroup>
+    <ConfigurationGroup Condition="$(Configuration.EndsWith('Release'))">Release</ConfigurationGroup>
+    <ConfigurationGroup Condition="'$(ConfigurationGroup)'==''">$(Configuration)</ConfigurationGroup>
+
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Windows'))">Windows_NT</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Linux'))">Linux</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('OSX'))">OSX</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('FreeBSD'))">FreeBSD</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('NetBSD'))">NetBSD</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'==''">AnyOS</OSGroup>
+  </PropertyGroup>
+
+  <!-- Set up Default symbol and optimization for Configuration -->
+  <PropertyGroup Condition="'$(ConfigurationGroup)' == 'Debug'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
+    <DefineConstants>$(DefineConstants),DEBUG,TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ConfigurationGroup)' == 'Release'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <DefineConstants>$(DefineConstants),TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Set up common target properties that we use to conditionally include sources -->
+  <PropertyGroup>
+    <TargetsWindows Condition="'$(OSGroup)' == 'Windows_NT'">true</TargetsWindows>
+    <TargetsLinux Condition="'$(OSGroup)' == 'Linux'">true</TargetsLinux>
+    <TargetsOSX Condition="'$(OSGroup)' == 'OSX'">true</TargetsOSX>
+    <TargetsFreeBSD Condition="'$(OSGroup)' == 'FreeBSD'">true</TargetsFreeBSD>
+    <TargetsNetBSD Condition="'$(OSGroup)' == 'NetBSD'">true</TargetsNetBSD>
+
+    <TargetsUnix Condition="'$(TargetsLinux)' == 'true' or '$(TargetsOSX)' == 'true' or '$(TargetsFreeBSD)' == 'true' or '$(TargetsNetBSD)' == 'true'">true</TargetsUnix>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ExeSuffix Condition="'$(TargetsWindows)'=='true'">.exe</ExeSuffix>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Framework Condition="'$(TargetArchitecture)' == 'arm64'">netcoreapp1.1</Framework>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetRid)' == '' and '$(OSGroup)' == 'Windows_NT'">
+    <TargetRid Condition="'$(TargetArchitecture)' == 'x86'">win7-x86</TargetRid>
+    <TargetRid Condition="'$(TargetArchitecture)' == 'x64'">win7-x64</TargetRid>
+    <TargetRid Condition="'$(TargetArchitecture)' == 'arm'">win8-arm</TargetRid>
+    <TargetRid Condition="'$(TargetArchitecture)' == 'arm64'">win10-arm64</TargetRid>
+  </PropertyGroup>
+
+  <!-- Use actual publishable (non-dummy) package name produced by the build system for this RID -->
+  <PropertyGroup Condition="'$(TargetRid)' != ''">
+    <PackageTargetRid>$(TargetRid)</PackageTargetRid>
+    <PackageTargetRid Condition="'$(TargetRid)' == 'osx.10.11-x64'">osx.10.10-x64</PackageTargetRid>
+    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.2-x64'">rhel.7-x64</PackageTargetRid>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedRid Include="win7-x64"/>
+    <SupportedRid Include="win7-x86"/>
+    <SupportedRid Include="win8-arm"/>
+    <SupportedRid Include="win10-arm64"/>
+    <SupportedRid Include="osx.10.10-x64"/>
+    <SupportedRid Include="osx.10.11-x64"/>
+    <SupportedRid Include="linux-x64"/>
+    <SupportedRid Include="ubuntu.14.04-x64"/>
+    <SupportedRid Include="ubuntu.16.04-x64"/>
+    <SupportedRid Include="ubuntu.14.04-arm"/>
+    <SupportedRid Include="ubuntu.16.04-arm"/>
+    <SupportedRid Include="ubuntu.16.10-x64"/>
+    <SupportedRid Include="centos.7-x64"/>
+    <SupportedRid Include="rhel.7-x64"/>
+    <SupportedRid Include="rhel.7.2-x64"/>
+    <SupportedRid Include="debian.8-x64"/>
+    <SupportedRid Include="fedora.23-x64"/>
+    <SupportedRid Include="fedora.24-x64"/>
+    <SupportedRid Include="opensuse.13.2-x64"/>
+    <SupportedRid Include="opensuse.42.1-x64"/>
+  </ItemGroup>
+
+  <!-- Set up the default output and intermediate paths -->
+  <PropertyGroup>
+    <OSPlatformConfig>$(TargetRid).$(ConfigurationGroup)</OSPlatformConfig>
+
+    <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
+    <BaseOutputRootPath>$(BaseOutputPath)$(OSPlatformConfig)\</BaseOutputRootPath>
+    <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)\$(MSBuildProjectName)\</OutputPath>
+
+    <IntermediateOutputRootPath Condition="'$(IntermediateOutputRootPath)' == ''">$(BaseIntermediateOutputPath)$(OSPlatformConfig)\</IntermediateOutputRootPath>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(IntermediateOutputRootPath)$(MSBuildProjectName)\</IntermediateOutputPath>
+
+    <TestPath Condition="'$(TestPath)'==''">$(TestWorkingDir)$(OSPlatformConfig)\$(MSBuildProjectName)\</TestPath>
+
+    <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DisableCrossgen>false</DisableCrossgen>
+  </PropertyGroup>
+
+</Project>
