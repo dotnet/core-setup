@@ -16,7 +16,7 @@
     <File Include="@(ArchitectureSpecificNativeFile)">
       <TargetPath>runtimes/$(PackageTargetRuntime)/native</TargetPath>
     </File>
-    <File Include="$(ProjectDir)/version.txt" />
+    <File Include="$(ProjectDir)pkg/version.txt" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
