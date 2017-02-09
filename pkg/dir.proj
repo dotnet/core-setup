@@ -7,8 +7,6 @@
   <Target Name="Build"
           DependsOnTargets="GenerateVersionTxt">
 
-    <MSBuild Projects="tasks/core-setup.tasks.builds"/>
-
     <PropertyGroup>
         <BuildParams Condition="'$(OSGroup)' == 'Windows_NT'">TargetsWindows=true</BuildParams>
         <BuildParams Condition="'$(OSGroup)' == 'OSX'">TargetsOSX=true;DistroRid=$(PackageTargetRid)</BuildParams>
@@ -18,10 +16,6 @@
     <MSBuild Projects="projects/packages.builds" Properties="$(BuildParams)"/>
 
     <ItemGroup>
-    <!-- { "Microsoft.NETCore.DotNetHost", LatestHostVersion },
-+        { "Microsoft.NETCore.DotNetAppHost", LatestAppHostVersion },
-         { "Microsoft.NETCore.DotNetHostResolver", LatestHostFxrVersion },
-         { "Microsoft.NETCore.DotNetHostPolicy", LatestHostPolicyVersion } -->
         <Nupkgs Include="$(PackageOutputPath)\**\*.nupkg" />
     </ItemGroup>
 
