@@ -217,7 +217,28 @@
            "TargetArchitecture": "default",
            "Framework": "default",
            "OSGroup": "default",
-           "MsBuildLogging":"default"
+           "MsBuildLogging":"default",
+           "Project":"build.proj"
+        }
+      }
+    },
+    "build-native":{
+      "alias":{
+        "verbose":{
+          "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
+          "settings":{
+            "MsBuildLogging": "/flp:v=diag;LogFile=msbuild-cmake.log"
+          }
+        }
+      },
+      "defaultValues":{
+        "toolName": "msbuild",
+        "settings": {
+          "Architecture": "default", 
+           "TargetArchitecture": "default",
+           "Framework": "default",
+           "OSGroup": "default",
+           "MsBuildLogging":"/flp:v=n;LogFile=msbuild-cmake.log"
         }
       }
     },
