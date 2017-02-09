@@ -33,6 +33,8 @@
     $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
   -->
   <PropertyGroup>
+    <!-- Temp change to make OS X build behave as a Linux build -->
+    <OsEnvironment Condition="'$(OsEnvironment)'=='' AND '$(OS)'=='OSX'">Unix</OsEnvironment>
     <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
   </PropertyGroup>
 
@@ -43,16 +45,20 @@
 
     <!-- Output directories -->
     <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
+    <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
     <ObjDir Condition="'$(ObjDir)'==''">$(BinDir)obj/</ObjDir>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)</BaseIntermediateOutputPath>
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
     <PackagesOutDir Condition="'$(PackagesOutDir)'==''">$(BinDir)packages/</PackagesOutDir>
+    <SymbolPackagesOutDir Condition="'$(SymbolPackagesOutDir)'==''">$(PackagesOutDir)</SymbolPackagesOutDir>
 
     <!-- Input Directories -->
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
+    <ToolRuntimePath Condition="'$(ToolRuntimePath)'==''">$(ProjectDir)Tools/</ToolRuntimePath>
+    <ToolsDir Condition="'$(UseToolRuntimeForToolsDir)'=='true'">$(ToolRuntimePath)</ToolsDir>
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
-    <BuildToolsTaskDir Condition="'$(MSBuildRuntimeType)' != 'core'">$(ToolsDir)net45/</BuildToolsTaskDir>
-    <PackagingTaskDir>$(ToolsDir)net45/</PackagingTaskDir>
+    <BuildToolsTaskDir Condition="'$(BuildToolsTargets45)' == 'true' OR '$(MSBuildRuntimeType)' != 'core'">$(ToolsDir)net45/</BuildToolsTaskDir>
+    <PackagingTaskDir Condition="'$(BuildToolsTaskDir)' != ''">$(BuildToolsTaskDir)</PackagingTaskDir>
     <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolsDir)dotnetcli/</DotnetCliPath>
   </PropertyGroup>
 
@@ -108,7 +114,6 @@
     <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\setuptools\independent">
       <AdditionalArgs>--disable-parallel --infer-runtimes</AdditionalArgs>
     </DnuRestoreDirs>
-
   </ItemGroup>
 
   <PropertyGroup>
@@ -133,27 +138,42 @@
     <RestorePackages>false</RestorePackages>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Platform Condition="'$(Platform)'==''">$(TargetArchitecture)</Platform>
+  </PropertyGroup>
   <!-- 
   Projects that have no OS-specific implementations just use Debug and Release for $(Configuration).
   Projects that do have OS-specific implementations use OS_Debug and OS_Release, for all OS's we support even
   if the code is the same between some OS's (so if you have some project that just calls POSIX APIs, we still have
   OSX_[Debug|Release] and Linux_[Debug|Release] configurations.  We do this so that we place all the output under
   a single binary folder and can have a similar experience between the command line and Visual Studio.
-  
-  Since now have multiple *Debug and *Release configurations, ConfigurationGroup is set to Debug for any of the
-  debug configurations, and to Release for any of the release configurations.
   -->
 
-  <!-- Set default Configuration and Platform -->
-  <PropertyGroup>
-    <Platform Condition="'$(Platform)'==''">$(TargetArchitecture)</Platform>
+  <!--
+  If Configuration is empty that means we are not being built in VS and so folks need to explicitly pass the different
+  values for $(ConfigurationGroup), $(TargetGroup), or $(OSGroup) or accept the defaults for them.
+  -->
+  <PropertyGroup Condition="'$(Configuration)'==''">
+    <ConfigurationGroup Condition="'$(ConfigurationGroup)'==''">Debug</ConfigurationGroup>
+    <Configuration>$(ConfigurationGroup)</Configuration>
+    <Configuration Condition="'$(TargetGroup)'!=''">$(TargetGroup)_$(Configuration)</Configuration>
+    <Configuration Condition="'$(OSGroup)'!='' and '$(OSGroup)'!='AnyOS'">$(OSGroup)_$(Configuration)</Configuration>
+  </PropertyGroup>
+  
+  <!--
+  If Configuration is set then someone explicitly passed it in or we building from VS. In either case
+  default $(ConfigurationGroup), $(TargetGroup), or $(OSGroup) from the Configuration if they aren't
+  already explicitly set.
+  -->
+  <PropertyGroup Condition="'$(Configuration)'!=''">
+    <ConfigurationGroup Condition="'$(ConfigurationGroup)'=='' and $(Configuration.EndsWith('Debug'))">Debug</ConfigurationGroup>
+    <ConfigurationGroup Condition="'$(ConfigurationGroup)'=='' and $(Configuration.EndsWith('Release'))">Release</ConfigurationGroup>
+    <ConfigurationGroup Condition="'$(ConfigurationGroup)'==''">Debug</ConfigurationGroup>
 
-    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
-    <ConfigurationGroup Condition="$(Configuration.EndsWith('Debug'))">Debug</ConfigurationGroup>
-    <ConfigurationGroup Condition="$(Configuration.EndsWith('Release'))">Release</ConfigurationGroup>
-    <ConfigurationGroup Condition="'$(ConfigurationGroup)'==''">$(Configuration)</ConfigurationGroup>
+    <BuildAllOSGroups Condition="'$(BuildAllOSGroups)' == ''">true</BuildAllOSGroups>
 
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Windows'))">Windows_NT</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Unix'))">Unix</OSGroup>
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Linux'))">Linux</OSGroup>
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('OSX'))">OSX</OSGroup>
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('FreeBSD'))">FreeBSD</OSGroup>
@@ -162,29 +182,29 @@
   </PropertyGroup>
 
   <!-- Set up Default symbol and optimization for Configuration -->
-  <PropertyGroup Condition="'$(ConfigurationGroup)' == 'Debug'">
-    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
-    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
-    <DefineConstants>$(DefineConstants),DEBUG,TRACE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(ConfigurationGroup)' == 'Release'">
-    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
-    <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
-    <DefineConstants>$(DefineConstants),TRACE</DefineConstants>
-  </PropertyGroup>
-
-  <!-- Set up common target properties that we use to conditionally include sources -->
-  <PropertyGroup>
-    <TargetsWindows Condition="'$(OSGroup)' == 'Windows_NT'">true</TargetsWindows>
-    <TargetsLinux Condition="'$(OSGroup)' == 'Linux'">true</TargetsLinux>
-    <TargetsOSX Condition="'$(OSGroup)' == 'OSX'">true</TargetsOSX>
-    <TargetsFreeBSD Condition="'$(OSGroup)' == 'FreeBSD'">true</TargetsFreeBSD>
-    <TargetsNetBSD Condition="'$(OSGroup)' == 'NetBSD'">true</TargetsNetBSD>
-
-    <TargetsUnix Condition="'$(TargetsLinux)' == 'true' or '$(TargetsOSX)' == 'true' or '$(TargetsFreeBSD)' == 'true' or '$(TargetsNetBSD)' == 'true'">true</TargetsUnix>
-  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(ConfigurationGroup)'=='Debug'">
+      <PropertyGroup>
+        <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+        <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
+        <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
+        <DefineConstants>$(DefineConstants),DEBUG,TRACE</DefineConstants>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(ConfigurationGroup)' == 'Release'">
+      <PropertyGroup>
+        <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+        <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+        <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+        <DefineConstants>$(DefineConstants),TRACE</DefineConstants>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ConfigurationErrorMsg>$(ConfigurationErrorMsg);Unknown ConfigurationGroup [$(ConfigurationGroup)] specificed in your project.</ConfigurationErrorMsg>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
 
   <PropertyGroup>
     <ExeSuffix Condition="'$(TargetsWindows)'=='true'">.exe</ExeSuffix>
@@ -245,9 +265,10 @@
   <!-- Set up the default output and intermediate paths -->
   <PropertyGroup>
     <OSPlatformConfig>$(TargetRid).$(ConfigurationGroup)</OSPlatformConfig>
+    <TargetOutputRelPath Condition="'$(TargetGroup)'!=''">$(TargetGroup)/</TargetOutputRelPath>
 
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
-    <BaseOutputRootPath>$(BaseOutputPath)$(OSPlatformConfig)\</BaseOutputRootPath>
+    <BaseOutputRootPath>$(BaseOutputPath)$(OSPlatformConfig)\</BaseOutputRootPath>   
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)\$(MSBuildProjectName)\</OutputPath>
 
     <IntermediateOutputRootPath Condition="'$(IntermediateOutputRootPath)' == ''">$(BaseIntermediateOutputPath)$(OSPlatformConfig)\</IntermediateOutputRootPath>

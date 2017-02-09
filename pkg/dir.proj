@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="dir.props" />
+  <Import Project="dir.targets" />
+  <Import Project="dir.traversal.targets" />
+
+  <Target Name="Build"
+          DependsOnTargets="GenerateVersionTxt">
+
+    <MSBuild Projects="tasks/core-setup.tasks.builds"/>
+
+    <PropertyGroup>
+        <BuildParams Condition="'$(OSGroup)' == 'Windows_NT'">TargetsWindows=true</BuildParams>
+        <BuildParams Condition="'$(OSGroup)' == 'OSX'">TargetsOSX=true;DistroRid=$(PackageTargetRid)</BuildParams>
+        <BuildParams Condition="'$(BuildParams)' == ''">TargetsLinux=true;DistroRid=$(PackageTargetRid)</BuildParams>
+    </PropertyGroup>
+
+    <MSBuild Projects="projects/packages.builds" Properties="$(BuildParams)"/>
+
+    <ItemGroup>
+    <!-- { "Microsoft.NETCore.DotNetHost", LatestHostVersion },
++        { "Microsoft.NETCore.DotNetAppHost", LatestAppHostVersion },
+         { "Microsoft.NETCore.DotNetHostResolver", LatestHostFxrVersion },
+         { "Microsoft.NETCore.DotNetHostPolicy", LatestHostPolicyVersion } -->
+        <Nupkgs Include="$(PackageOutputPath)\**\*.nupkg" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(Nupkgs)"
+          DestinationFolder="$(BaseOutputRootPath)corehost"/>
+  </Target>
+  
+  <Target Name="GenerateVersionTxt"
+          DependsOnTargets="GetLatestCommitHash">
+    <ItemGroup>
+      <Lines Include="$(LatestCommit)" />
+      <Lines Include="$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)-00" />
+    </ItemGroup>
+
+    <WriteLinesToFile
+      File="version.txt"
+      Lines="@(Lines)"
+      Overwrite="true" />
+  </Target>
+
+</Project>

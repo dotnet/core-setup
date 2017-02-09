@@ -3,6 +3,10 @@
 # Tool Runtime Dir
 /[Tt]ools/
 
+#pkg
+pkg/version.txt
+pkg/version.props
+
 # Test results
 *-testResults.xml
 
