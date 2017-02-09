@@ -2,6 +2,11 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
 
+    <!-- NETCore 1.1.1 core-setup -->
+    <StablePackage Include="Microsoft.NETCore.App">
+      <Version>1.1.1</Version>
+    </StablePackage>
+
     <!-- NETCore 1.1.0 core-setup -->
     <StablePackage Include="Microsoft.NETCore.App">
       <Version>1.1.0</Version>

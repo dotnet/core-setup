@@ -67,10 +67,10 @@
       <Version>4.0.1</Version>
     </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="Microsoft.NETCore.DotNetHostPolicy">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="Microsoft.NETCore.Runtime.CoreCLR">
-      <Version>1.0.4</Version>
+      <Version>1.0.6</Version>
     </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="Microsoft.VisualBasic">
       <Version>10.0.1</Version>
@@ -180,6 +180,12 @@
     </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="Libuv">
       <Version>1.9.1</Version>
+    </NETCoreApp10Dependency>
+    <NETCoreApp10Dependency Include="Microsoft.NETCore.Platforms">
+      <Version>1.0.2</Version>
+    </NETCoreApp10Dependency>
+    <NETCoreApp10Dependency Include="System.Net.Http">
+      <Version>4.1.1</Version>
     </NETCoreApp10Dependency>
 
     <Dependency Include="@(NETCoreApp10Dependency)">
