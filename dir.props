@@ -205,7 +205,12 @@
   <PropertyGroup Condition="'$(TargetRid)' != ''">
     <PackageTargetRid>$(TargetRid)</PackageTargetRid>
     <PackageTargetRid Condition="'$(TargetRid)' == 'osx.10.11-x64'">osx.10.10-x64</PackageTargetRid>
+    <PackageTargetRid Condition="'$(TargetRid)' == 'osx.10.12-x64'">osx.10.10-x64</PackageTargetRid>    
+    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.0-x64'">rhel.7-x64</PackageTargetRid>
+    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.1-x64'">rhel.7-x64</PackageTargetRid>
     <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.2-x64'">rhel.7-x64</PackageTargetRid>
+    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.3-x64'">rhel.7-x64</PackageTargetRid>
+    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.2-x64'">rhel.7-x64</PackageTargetRid>    
   </PropertyGroup>
 
   <ItemGroup>
@@ -215,6 +220,7 @@
     <SupportedRid Include="win10-arm64"/>
     <SupportedRid Include="osx.10.10-x64"/>
     <SupportedRid Include="osx.10.11-x64"/>
+    <SupportedRid Include="osx.10.12-x64"/>
     <SupportedRid Include="linux-x64"/>
     <SupportedRid Include="ubuntu.14.04-x64"/>
     <SupportedRid Include="ubuntu.16.04-x64"/>
@@ -223,12 +229,17 @@
     <SupportedRid Include="ubuntu.16.10-x64"/>
     <SupportedRid Include="centos.7-x64"/>
     <SupportedRid Include="rhel.7-x64"/>
+    <SupportedRid Include="rhel.7.0-x64"/>        
+    <SupportedRid Include="rhel.7.1-x64"/>    
     <SupportedRid Include="rhel.7.2-x64"/>
+    <SupportedRid Include="rhel.7.3-x64"/>
     <SupportedRid Include="debian.8-x64"/>
+    <SupportedRid Include="debian.8-armel"/>    
     <SupportedRid Include="fedora.23-x64"/>
     <SupportedRid Include="fedora.24-x64"/>
     <SupportedRid Include="opensuse.13.2-x64"/>
     <SupportedRid Include="opensuse.42.1-x64"/>
+    <SupportedRid Include="tizen.4.0.0-armel"/>    
   </ItemGroup>
 
   <!-- Set up the default output and intermediate paths -->

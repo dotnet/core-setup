@@ -27,7 +27,7 @@
     "TargetArchitecture":{
       "description": "Build for the specified architecture (x64, x86 (supported only on Windows), arm, or arm64, default: x64)",
       "valueType": "property",
-      "values": ["x64", "x86", "arm", "arm64"],
+      "values": ["x64", "x86", "arm", "arm64", "armel"],
       "defaultValue": "x64"
     },
     "Framework":{
