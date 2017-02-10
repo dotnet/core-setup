@@ -242,6 +242,26 @@
         }
       }
     },
+    "build-custom":{
+      "alias":{
+        "verbose":{
+          "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
+          "settings":{
+            "MsBuildLogging": "/flp:v=diag;LogFile=msbuild.log"
+          }
+        }
+      },
+      "defaultValues":{
+        "toolName": "msbuild",
+        "settings": {
+          "Architecture": "default", 
+           "TargetArchitecture": "default",
+           "Framework": "default",
+           "OSGroup": "default",
+           "MsBuildLogging":"/flp:v=n;LogFile=msbuild.log"
+        }
+      }
+    },
     "clean":{
       "alias":{
         "b":{
