@@ -17,6 +17,7 @@
     <Compile Include="BuildTask.cs" />
     <Compile Include="GenerateFileVersionProps.cs" />
     <Compile Include="FileUtilities.cs" />
+    <Compile Include="GetBuildableFrameworks.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net45'">
     <Compile Include="FileUtilities.netstandard.cs" />

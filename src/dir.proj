@@ -16,8 +16,7 @@
 
   <Target Name="Build" DependsOnTargets="$(BuildTargets)" />
           
-  <Target Name="BuildProjectsForNuGetPackages"
-          Condition="'$(OSGroup)' == 'Windows_NT'">
+  <Target Name="BuildProjectsForNuGetPackages">
     
     <PropertyGroup>
       <pOutDir>$(IntermediateOutputRootPath)forPackaging</pOutDir>
