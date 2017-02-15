@@ -92,7 +92,7 @@
       "value": "azure-apt-cat.cloudapp.net"
     },
     "NUGET_FEED_URL": {
-      "value": "https://dotnet.myget.org/F/dotnet-core"
+      "value": "https://dotnet.myget.org/F/dotnet-cli-private"
     },
     "NUGET_API_KEY": {
       "value": "PassedViaPipeBuild"
@@ -101,7 +101,7 @@
       "value": "PassedViaPipeBuild"
     },
     "CLI_NUGET_FEED_URL": {
-      "value": "https://www.myget.org/F/core-setup-testing"
+      "value": "https://dotnet.myget.org/F/dotnet-cli-private"
     },
     "CLI_NUGET_API_KEY": {
       "value": "PassedViaPipeBuild"

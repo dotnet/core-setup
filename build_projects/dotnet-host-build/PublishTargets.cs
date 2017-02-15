@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Host.Build
 
                     // Delete old version files
                     AzurePublisherTool.ListBlobs($"{targetContainer}")
-                        .Select(s => s.Replace("/dotnet/", ""))
+                        .Select(s => s.Replace("/mlorbe/", ""))
                         .Where(s => versionFileRegex.IsMatch(s))
                         .ToList()
                         .ForEach(f => AzurePublisherTool.TryDeleteBlob(f));
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.Host.Build
         {
             foreach (string blob in AzurePublisherTool.ListBlobs(sourceFolder))
             {
-                string source = blob.Replace("/dotnet/", "");
+                string source = blob.Replace("/mlorbe/", "");
                 string targetName = Path.GetFileName(blob)
                                         .Replace(SharedFrameworkNugetVersion, "latest")
                                         .Replace(SharedHostNugetVersion, "latest");
@@ -176,8 +176,8 @@ namespace Microsoft.DotNet.Host.Build
             NuGetUtil.PushPackages(Dirs.PackagesNoRID, nugetFeedUrl, apiKey, IncludeSymbolPackages);
 
             string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
-            VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
-            repoUpdater.UpdatePublishedVersions(Dirs.PackagesNoRID, $"build-info/dotnet/core-setup/{Channel}/Latest").Wait();
+            //VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
+            //repoUpdater.UpdatePublishedVersions(Dirs.PackagesNoRID, $"build-info/dotnet/core-setup/{Channel}/Latest").Wait();
         }
 
         private static bool CheckIfAllBuildsHavePublished()
@@ -235,7 +235,7 @@ namespace Microsoft.DotNet.Host.Build
             nameof(PublishTargets.PublishInstallerFilesToAzure),
             nameof(PublishTargets.PublishArchivesToAzure),
             nameof(PublishTargets.PublishDotnetDebToolPackage),
-            nameof(PublishTargets.PublishDebFilesToDebianRepo),
+            //nameof(PublishTargets.PublishDebFilesToDebianRepo),
             nameof(PublishTargets.PublishCoreHostPackages),
             nameof(PublishTargets.PublishManagedPackages),
             nameof(PublishTargets.PublishSharedFrameworkVersionBadge))]
