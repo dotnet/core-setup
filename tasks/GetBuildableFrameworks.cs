@@ -8,41 +8,54 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using Microsoft.Build.Construction;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Build.Tasks
 {
-    public class GetBuildableFrameworks : BuildTask
+    /// <summary>
+    /// This target opens the json files and extracts the frameworks that are buildable
+    /// according to the current OSGroup.
+    /// In short it removes net45 and similar from *nix systems.
+    /// The output is an ItemGroup that can be batch called when executing 'dotnet build'
+    /// </summary>
+    public class GetBuildArgsByFrameworks : BuildTask
     {
         [Required]
-        public string ProjectJsonPath { get; set; }
+        public ITaskItem[] ProjectJsonPaths { get; set; }
         [Required]
         public string OSGroup { get; set; }
         [Output]
-        public string Frameworks { get; set; }
+        public ITaskItem[] BuildArgs { get; set; }
         public override bool Execute()
         {
-            List<string> frameworks = new List<string>();
-
-            using (TextReader projectFileReader = File.OpenText(ProjectJsonPath))
+            List<string> args = new List<string>();
+            foreach (var projectJsonPath in ProjectJsonPaths)
             {
-                var projectJsonReader = new JsonTextReader(projectFileReader);
-                var serializer = new JsonSerializer();
-                var project = serializer.Deserialize<JObject>(projectJsonReader);
-
-                var frameworksSection = project.Value<JObject>("frameworks");
-                foreach (var framework in frameworksSection.Properties())
+                using (TextReader projectFileReader = File.OpenText(projectJsonPath.ItemSpec))
                 {
-                    if (OSGroup == "Windows_NT"
-                        || framework.Name.StartsWith("netstandard")
-                        || framework.Name.StartsWith("netcoreapp"))
+
+                    var projectJsonReader = new JsonTextReader(projectFileReader);
+                    var serializer = new JsonSerializer();
+                    var project = serializer.Deserialize<JObject>(projectJsonReader);
+                    var dir = Path.GetDirectoryName(projectJsonPath.ItemSpec);
+                    var frameworksSection = project.Value<JObject>("frameworks");
+                    foreach (var framework in frameworksSection.Properties())
                     {
-                        frameworks.Add(framework.Name);
+                        if (OSGroup == "Windows_NT"
+                            || framework.Name.StartsWith("netstandard")
+                            || framework.Name.StartsWith("netcoreapp"))
+                        {
+                            args.Add($"--framework {framework.Name} {dir}");
+                        }
                     }
                 }
             }
 
-            Frameworks = string.Join(";",frameworks);
+            BuildArgs = new ITaskItem[args.Count];
+            for (int i = 0; i < BuildArgs.Length; i++)
+            {
+                BuildArgs[i] = new TaskItem(args[i]);
+            }
 
             return true;
         }

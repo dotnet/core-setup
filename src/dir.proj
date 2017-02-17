@@ -15,7 +15,9 @@
   </PropertyGroup>
 
   <Target Name="Build" DependsOnTargets="$(BuildTargets)" />
-          
+
+  <UsingTask TaskName="GetBuildArgsByFrameworks" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll"/>
+
   <Target Name="BuildProjectsForNuGetPackages">
     
     <PropertyGroup>
@@ -29,11 +31,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageProjects Include="Microsoft.DotNet.PlatformAbstractions" />
-      <PackageProjects Include="Microsoft.Extensions.DependencyModel" />
+      <PackageProjects Include="Microsoft.DotNet.PlatformAbstractions/project.json" />
+      <PackageProjects Include="Microsoft.Extensions.DependencyModel/project.json" />
     </ItemGroup>
 
-    <Exec Command="$(DotnetToolCommand) build $(Args) %(PackageProjects.FullPath)" />
+    <GetBuildArgsByFrameworks
+      OSGroup="$(OSGroup)"
+      ProjectJsonPaths="@(PackageProjects)">
+      <Output ItemName="buildCmdArgs" TaskParameter="BuildArgs" />
+    </GetBuildArgsByFrameworks>
+
+    <Exec Command="$(DotnetToolCommand) build $(Args) %(buildCmdArgs.Identity)" />
   </Target>
 
   <Target Name="PublishSharedFrameworkAndSharedHost"
