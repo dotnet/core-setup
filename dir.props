@@ -210,7 +210,7 @@
   </Choose>
 
   <PropertyGroup>
-    <ExeSuffix Condition="'$(TargetsWindows)'=='true'">.exe</ExeSuffix>
+    <ExeSuffix Condition="'$(OSGroup)'=='Windows_NT'">.exe</ExeSuffix>
   </PropertyGroup>
 
   <PropertyGroup>
