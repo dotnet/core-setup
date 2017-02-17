@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <WindowsScriptRoot>$(ProjectDir)packaging\windows\</WindowsScriptRoot>
+    <WixVersion>3.10.2</WixVersion>
+    <GetWixScript>$(WindowsScriptRoot)GetWix.ps1</GetWixScript>
+    <WixToolsDir>$(IntermediateOutputRootPath)WixTools.$(WixVersion)</WixToolsDir>
+    <WixObjRoot>$(IntermediateOutputRootPath)wix/</WixObjRoot>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <MsiArch>$(TargetArchitecture)</MsiArch>
+    <MsiArch Condition="'$(TargetArchitecture)' == 'arm'">x86</MsiArch>
+    <MsiArch Condition="'$(TargetArchitecture)' == 'arm64'">x64</MsiArch>    
+  </PropertyGroup>
+
+  <!-- 
+    MSI versioning
+    Encode the CLI version to fit into the MSI versioning scheme - https://msdn.microsoft.com/en-us/library/windows/desktop/aa370859(v=vs.85).aspx
+    MSI versions are 3 part
+                            major.minor.build
+    Size(bits) of each part     8     8    16
+    So we have 32 bits to encode the CLI version
+    Starting with most significant bit this how the CLI version is going to be encoded as MSI Version
+    CLI major  -> 6 bits
+    CLI minor  -> 6 bits
+    CLI patch  -> 6 bits
+    CLI commitcount -> 14 bits
+  -->
+  <PropertyGroup>
+    <!-- major = MajorVersion << 26 = MajorVersion*2^26 -->
+    <MsiMajor>$([MSBuild]::Multiply('$(MajorVersion)','67108864'))</MsiMajor>
+    <!-- minor = MinorVersion << 20 = MajorVersion*2^20 -->
+    <MsiMinor>$([MSBuild]::Multiply('$(MinorVersion)','1048576'))</MsiMinor>
+    <!-- patch = PatchVersion << 14 = MajorVersion*2^14 -->
+    <MsiPatch>$([MSBuild]::Multiply('$(PatchVersion)','16384'))</MsiPatch>
+    
+    <!-- MsiVersion = Major | Minor | Patch | CommitCount -->
+    <MsiVersion>$([MSBuild]::BitwiseOr('$(MsiMajor)','$(MsiMinor)'))</MsiVersion>
+    <MsiVersion>$([MSBuild]::BitwiseOr('$(MsiVersion)','$(MsiPatch)'))</MsiVersion>
+    <MsiVersion>$([MSBuild]::BitwiseOr('$(MsiVersion)','$(CommitCountString)'))</MsiVersion> 
+
+    <!-- major = (msiVersionNumber >> 24) & 0xFF = (msiVersionNumber / 2^24) & 0xFF -->
+    <MsiMajor>$([System.Convert]::ToInt32($([MSBuild]::Divide('$(MsiVersion)','16777216'))))</MsiMajor>
+    <MsiMajor>$([MSBuild]::BitwiseAnd('$(MsiMajor)','255'))</MsiMajor>
+  
+    <!-- minor = (msiVersionNumber >> 16) & 0xFF = (msiVersionNumber / 2^16) & 0xFF  -->
+    <MsiMinor>$([System.Convert]::ToInt32($([MSBuild]::Divide('$(MsiMinor)','65536'))))</MsiMinor>
+    <MsiMinor>$([MSBuild]::BitwiseAnd('$(MsiMinor)','255'))</MsiMinor>
+
+    <!-- patch = msiVersionNumber & 0xFFFF -->
+    <MsiPatch>$([MSBuild]::BitwiseAnd('$(MsiVersion)','65535'))</MsiPatch> 
+
+    <MsiVersionString>$(MsiMajor).$(MsiMinor).$(MsiPatch)</MsiVersionString>
+  </PropertyGroup>
+</Project>
