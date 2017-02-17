@@ -239,7 +239,8 @@
     </PropertyGroup>  
 
     <Exec Command="$(DotnetToolCommand) restore --verbosity verbose $(RestoreArgs)"
-          WorkingDirectory="$(JsonDir)" />
+          WorkingDirectory="$(JsonDir)"
+          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir)" />
 
     <PropertyGroup>
       <PublishArgs>--output $(CoreHostLockedDir) --no-build -r $(PackageTargetRid)</PublishArgs>
@@ -248,7 +249,8 @@
     <RemoveDir Directories="$(CoreHostLockedDir)" />
 
     <Exec Command="$(DotnetToolCommand) publish $(PublishArgs)"
-          WorkingDirectory="$(JsonDir)" />
+          WorkingDirectory="$(JsonDir)"
+          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir)" />
   </Target>
 
   <Target Name="GenerateSharedFrameworkProject">
