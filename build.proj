@@ -16,6 +16,7 @@
     <Project Include="src/corehost/build.proj" />
     <Project Include="pkg/dir.proj" />
     <Project Include="src/dir.proj" />
+    <Project Include="test/dir.proj" Condition="'$(SkipTests)' != 'true'"/>
   </ItemGroup>
 
   <Import Project="dir.targets" />
