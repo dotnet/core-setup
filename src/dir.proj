@@ -187,9 +187,9 @@
       <runtimeGraphGeneratorName>RuntimeGraphGenerator</runtimeGraphGeneratorName>
       <runtimeGraphGeneratorProject>$(ProjectDir)setuptools/independent/$(runtimeGraphGeneratorName)</runtimeGraphGeneratorProject>
       <runtimeGraphGeneratorOutput>$(IntermediateOutputRootPath)setuptools/independent/$(runtimeGraphGeneratorName)</runtimeGraphGeneratorOutput>
-      <runtimeGraphGeneratorRuntime Condition="'$(TargetsWindows)'=='true'">win</runtimeGraphGeneratorRuntime>
-      <runtimeGraphGeneratorRuntime Condition="'$(TargetsOSX)'=='true'">osx</runtimeGraphGeneratorRuntime>
-      <runtimeGraphGeneratorRuntime Condition="'$(TargetsLinux)'=='true'">linux</runtimeGraphGeneratorRuntime>      
+      <runtimeGraphGeneratorRuntime Condition="'$(OSGroup)'=='Windows_NT'">win</runtimeGraphGeneratorRuntime>
+      <runtimeGraphGeneratorRuntime Condition="'$(OSGroup)'=='OSX'">osx</runtimeGraphGeneratorRuntime>
+      <runtimeGraphGeneratorRuntime Condition="'$(runtimeGraphGeneratorRuntime)'==''">linux</runtimeGraphGeneratorRuntime>      
     </PropertyGroup>
 
     <Error Text="Could not determine rid graph generation runtime for platform $(OSGroup)"
