@@ -44,6 +44,8 @@
     <Exec Command="$(DotnetToolCommand) build $(Args) %(buildCmdArgs.Identity)" />
   </Target>
 
+  <UsingTask TaskName="ChangeEntryPointLibraryName" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll"/>
+
   <Target Name="PublishSharedFrameworkAndSharedHost"
           DependsOnTargets="RestoreLockedCoreHost;GenerateSharedFrameworkProject">
     
@@ -61,8 +63,7 @@
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir)" />
 
     <!-- Clean deps.json -->
-    <Exec Command="$(DotnetToolCommand) framework.dll"
-          WorkingDirectory="$(SharedFrameworkNameAndVersionRoot)" />
+    <ChangeEntryPointLibraryName DepsFile="$(SharedFrameworkNameAndVersionRoot)/framework.deps.json" />
 
     <!-- Clean up artifacts that dotnet-publish generates which we don't need -->
     <ItemGroup>

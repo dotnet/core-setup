@@ -18,6 +18,7 @@
     <Compile Include="GenerateFileVersionProps.cs" />
     <Compile Include="FileUtilities.cs" />
     <Compile Include="GetBuildableFrameworks.cs" />
+    <Compile Include="ChangeEntryPointLibraryName.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net45'">
     <Compile Include="FileUtilities.netstandard.cs" />
