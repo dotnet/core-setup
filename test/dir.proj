@@ -56,7 +56,7 @@
 
     <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml %(TestProjects.Filename)-testResults.xml -notrait categorty=failing"
           WorkingDirectory="%(TestProjects.Identity)"
-          EnvironmentVariables="TEST_ARTIFACTS=$(TestsOutputDir);TEST_TARGETRID=$(PackageTargetRid)"
+          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir);TEST_ARTIFACTS=$(TestsOutputDir);TEST_TARGETRID=$(PackageTargetRid)"
           Condition="'%(TestProjects.Filename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'" />
   </Target>
 </Project>
