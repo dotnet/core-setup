@@ -49,15 +49,15 @@
     <!-- Fix file permits -->
     <!-- Reset everything to user readable/writeable and group and world readable. -->
     <Exec Condition="'$(OSGroup)' != 'Windows_NT'"
-          Command="find %(OutDirs.Identity) -type f -name * -exec chmod 644 {} ;" />   
+          Command='find %(OutDirs.Identity) -type f -name "*" -exec chmod 644 {} \;' />   
     <!-- Generally, dylibs and sos have 'x' --> 
     <Exec Condition="'$(OSGroup)' != 'Windows_NT'"
-          Command="find %(OutDirs.Identity) -type f -name *.dylib -exec chmod 755 {} ;" />
+          Command='find %(OutDirs.Identity) -type f -name "*.dylib" -exec chmod 755 {} \;' />
     <Exec Condition="'$(OSGroup)' != 'Windows_NT'"
-          Command="find %(OutDirs.Identity) -type f -name *.so -exec chmod 755 {} ;" />  
+          Command='find %(OutDirs.Identity) -type f -name "*.so" -exec chmod 755 {} \;' />  
     <!-- Executables (those without dots) are executable -->
     <Exec Condition="'$(OSGroup)' != 'Windows_NT'"
-          Command="find %(OutDirs.Identity) -type f ! -name *.* -exec chmod 755 {} ;" />   
+          Command='find %(OutDirs.Identity) -type f ! -name "*.*" -exec chmod 755 {} \;' />   
     
     
     <!-- Copy al to combined directory -->

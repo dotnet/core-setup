@@ -105,7 +105,7 @@
   </Target>
 
   <Target Name="CrossGenDirectory"
-          Condition="'$(DisableCrossgen)'!='true'">
+          Condition="'$(OSGroup)' == 'Windows_NT' and '$(DisableCrossgen)'!='true'">
 
     <PropertyGroup>
       <CrossgenRid>$(PackageTargetRid)</CrossgenRid>
