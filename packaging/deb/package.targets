@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Import Project='package.props' />
+
+  <Target Name="InitializeDotnetDebTool">
+
+    <RemoveDir Condition="Exists('$(consumingProjectDirectory)')"
+               Directories="$(consumingProjectDirectory)" />
+    
+    <MakeDir Directories="$(consumingProjectDirectory)" />
+
+    <ItemGroup>
+      <debJson Include='{' />
+      <debJson Include='  "version": "1.0.0-*",' />
+      <debJson Include='  "name": "$(toolConsumerProjectName)",' />
+      <debJson Include='  "frameworks": { "netcoreapp1.0": { } },' />
+      <debJson Include='  "tools": {{ "$(dotnetDebToolPackageId)": "$(dotnetDebToolVersion)" }},' />
+      <debJson Include='}' />
+    </ItemGroup>
+
+    <WriteLinesToFile
+      File="$(consumingProjectDirectory)\project.json"
+      Lines="@(debJson)"
+      Overwrite="true" />
+
+    <Exec Command="$(DotnetToolCommand) restore -f $(dotnetDebToolPackageSource) --disable-parallel"
+          WorkingDirectory="$(consumingProjectDirectory)" />
+  
+  </Target>
+
+  <Target Name="GenerateDebs" 
+          DependsOnTargets="InitializeDotnetDebTool"
+          Condition="$(TargetArchitecture) == 'x64' and ($(OSGroup) == 'Debian' or $(OSGroup) == 'Ubuntu')">
+
+  </Target>
+
+
+
+</Project>

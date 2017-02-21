@@ -127,6 +127,7 @@
      GenerateMsis;
      GenerateBundles;
      GeneratePkgs;
+     GenerateDebs;
    </InstallerDependsOn>
   </PropertyGroup>
   <Target Name="GenerateInstallers" DependsOnTargets="$(InstallerDependsOn)" />
