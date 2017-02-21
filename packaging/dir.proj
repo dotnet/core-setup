@@ -76,8 +76,17 @@
   </Target>
 
   <Target Name="GenerateVersionBadge">
-    <!-- TODO -->
-    <!-- update ver_number with $(SharedFrameworkNugetVersion) on resources/images/version_badge.svg -->
+
+    <PropertyGroup>
+      <templateSvg>$(ProjectDir)resources/images/version_badge.svg</templateSvg>
+      <outputSvg>$(BaseOutputRootPath)/sharedfx_$(TargetRid)_$(ConfigurationGroup)_version_badge.svg</outputSvg>
+    </PropertyGroup>
+
+    <WriteLinesToFile
+      File="$(outputSvg)"
+      Lines="$([System.IO.File]::ReadAllText('$(templateSvg)').Replace('ver_number', '$(HostVersion)'))"
+      Overwrite="true"
+                      />
   </Target>
   
   <Target Name="GenerateCompressedFiles" DependsOnTargets="InitPackage;GenerateZip;GenerateTarBall" />
