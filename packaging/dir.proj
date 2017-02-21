@@ -122,6 +122,8 @@
   
   <Import Project="windows\package.targets" />
   <Import Project="osx\package.targets" />
+  <Import Project="deb\package.targets">
+  
   <PropertyGroup>
    <InstallerDependsOn>
      GenerateMsis;
