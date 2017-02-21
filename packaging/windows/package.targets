@@ -3,6 +3,7 @@
 <Import Project='package.props' />
     
     <UsingTask TaskName="GenerateMsiVersion" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll" />
+    <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll" />
 
     <Target Name="GenerateMsis"
           Condition="'$(OSGroup)' == 'Windows_NT'">
@@ -39,10 +40,13 @@
         <Output TaskParameter="MsiVersion" PropertyName="MsiVersionString" />
       </GenerateMsiVersion>
 
+      <GenerateGuidFromName Name="$(PackagesOutputDir)$(SharedFrameworkInstallerFile)">
+        <Output TaskParameter="GeneratedGui" PropertyName="SharedFxUpgradeCode" />
+      </GenerateGuidFromName>
+
       <PropertyGroup>
         <ArchParams>"$(MsiArch)" "$(TargetArchitecture)"</ArchParams>
         <CommonParams>$(MsiVersionString) $(HostVersion) $(ArchParams)</CommonParams>
-        <SharedFxUpgradeCode>$([System.Guid]::NewGuid())</SharedFxUpgradeCode>
         <SharedFxParams>$(SharedFrameworkNugetVersion) $(SharedFrameworkName) $(HostVersion) $(SharedFxUpgradeCode) $(ArchParams)</SharedFxParams>
       </PropertyGroup>
 
@@ -60,10 +64,17 @@
         <HostFxrMsi>$(PackagesOutputDir)$(HostFxrInstallerFile)</HostFxrMsi>
         <SharedBundle>$(PackagesOutputDir)$(CombinedInstallerFile)</SharedBundle>
         <SharedBrandName>'Microsoft .NET Core $(ProductionVersion) - Runtime'</SharedBrandName>
-        <SharedBundleCode>$([System.Guid]::NewGuid())</SharedBundleCode>
         <ArchParams>"$(MsiArch)" "$(TargetArchitecture)"</ArchParams>
+     </PropertyGroup>
+
+     <GenerateGuidFromName Name="$(SharedBundle)">
+       <Output TaskParameter="GeneratedGui" PropertyName="SharedBundleCode" />
+     </GenerateGuidFromName>
+
+     <PropertyGroup>
         <BundleParameters>$(ShareFXMsi) $(HostMsi) $(HostFxrMsi) $(SharedBundle) $(WixToolsDir) $(SharedBrandName) $(MsiVersionString) $(SimpleVersion) $(SharedFrameworkName) $(HostVersion) $(SharedBundleCode) $(ArchParams)</BundleParameters>
      </PropertyGroup>
+
      <Exec Command="powershell -NoProfile -NoLogo $(SharedFxBundleScript) $(BundleParameters)" />
   </Target>
 </Project>

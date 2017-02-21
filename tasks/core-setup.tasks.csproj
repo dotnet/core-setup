@@ -17,9 +17,10 @@
     <Compile Include="BuildTask.cs" />
     <Compile Include="GenerateFileVersionProps.cs" />
     <Compile Include="FileUtilities.cs" />
+    <Compile Include="GenerateGuidFromName.cs" />
+    <Compile Include="GenerateMsiVersion.cs" />
     <Compile Include="GetBuildableFrameworks.cs" />
     <Compile Include="ChangeEntryPointLibraryName.cs" />
-    <Compile Include="GenerateMsiVersion.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net45'">
     <Compile Include="FileUtilities.netstandard.cs" />
