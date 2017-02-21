@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Build.Tasks
                     targetLibrary.Replace(new JProperty(NewName + '/' + version, targetLibrary.Value));
                 }
             }
-            if (string.IsNullOrEmpty(version))
+            if (!string.IsNullOrEmpty(version))
             {
                 var library = deps["libraries"].Children<JProperty>().First();
                 if (string.IsNullOrEmpty(NewName))
