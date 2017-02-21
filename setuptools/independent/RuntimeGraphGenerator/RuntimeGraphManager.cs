@@ -24,8 +24,8 @@ namespace Microsoft.DotNet.ProjectModel
                     if (runtimeJson != null)
                     {
                         // Convert the package-name to lower-case in the path to lookup runtime.json
-                        string lowercasedPackageName = description.Identity.Name.ToLower();
-                        string pathToPackage = export.Library.Path.Replace(description.Identity.Name, lowercasedPackageName);
+                        // string lowercasedPackageName = description.Identity.Name.ToLower();
+                        string pathToPackage = export.Library.Path;
 
                         var runtimeJsonFullName = Path.Combine(pathToPackage, runtimeJson);
                         graph = RuntimeGraph.Merge(graph, JsonRuntimeFormat.ReadRuntimeGraph(runtimeJsonFullName));
