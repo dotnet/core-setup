@@ -9,7 +9,8 @@
   </Target>
 
   <Target Name="GeneratePkgs"
-          Condition="'$(OSGroup)' == 'OSX'">
+          Condition="'$(OSGroup)' == 'OSX'"
+          DependsOnTargets="InitPkg">
     <ItemGroup>
         <OSXPackages Include="sharedframework">
             <Id>$(SharedFxComponentId)</Id>
@@ -36,7 +37,7 @@
 
     <PropertyGroup>
         <InstallLocation>/usr/local/share/dotnet</InstallLocation>
-        <CommonArgs>--version $(HostVersion) --instal-location $(InstallLocation)</CommonArgs>
+        <CommonArgs>--version $(HostVersion) --install-location $(InstallLocation)</CommonArgs>
     </PropertyGroup>
 
     <Exec Command="pkgbuild --root %(OSXPackages.Root) --identifier %(OSXPackages.Id)  $(CommonArgs) --scripts %(OSXPackages.Script) %(OSXPackages.OutFile)" />
@@ -57,7 +58,7 @@
       Lines="$([System.IO.File]::ReadAllText('$(SharedFxScriptRoot)$(TemplateFile)').Replace('{SharedFxComponentId}', '$(SharedFxComponentId)').Replace('{SharedHostComponentId}', '$(SharedHostComponentId)').Replace('{HostFxrComponentId}', '$(HostFxrComponentId)').Replace('{SharedFrameworkNugetName}','$(SharedFrameworkName)').Replace('{SharedFrameworkNugetVersion}', '$(HostVersion)').Replace('{SharedFxBrandName}', '$(SharedFrameworkBrandName)').Replace('{SharedHostBrandName}', '$(SharedHostBrandName)').Replace('{HostFxrBrandName}', '$(HostFxrBrandName)'))"
       Overwrite="true"/>
 
-    <Exec Command="productbuild --version $(HostVersion) --identifier $(SharedPackageId) --package-path $(PackagesIntermediateDir) --resources $(ResourcePath) --distribution $(DistributionFile)" />
+    <Exec Command="productbuild --version $(HostVersion) --identifier $(SharedPackageId) --package-path $(PackagesIntermediateDir) --resources $(ResourcePath) --distribution $(DistributionFile) $(OutFilePath)" />
   </Target>
 
 </Project>
