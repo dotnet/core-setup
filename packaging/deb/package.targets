@@ -9,12 +9,15 @@
     
     <MakeDir Directories="$(consumingProjectDirectory)" />
 
+    <MakeDir Condition="!Exists('$(PackagesIntermediateDir)')"
+             Directories="$(PackagesIntermediateDir)" />
+
     <ItemGroup>
       <debJson Include='{' />
       <debJson Include='  "version": "1.0.0-*",' />
       <debJson Include='  "name": "$(toolConsumerProjectName)",' />
       <debJson Include='  "frameworks": { "netcoreapp1.0": { } },' />
-      <debJson Include='  "tools": {{ "$(dotnetDebToolPackageId)": "$(dotnetDebToolVersion)" }},' />
+      <debJson Include='  "tools": { "$(dotnetDebToolPackageId)": "$(dotnetDebToolVersion)" },' />
       <debJson Include='}' />
     </ItemGroup>
 
@@ -29,8 +32,63 @@
   </Target>
 
   <Target Name="GenerateDebs" 
-          DependsOnTargets="InitializeDotnetDebTool"
-          Condition="$(TargetArchitecture) == 'x64' and ($(OSGroup) == 'Debian' or $(OSGroup) == 'Ubuntu')">
+          DependsOnTargets="InitializeDotnetDebTool;GenerateSharedHostDeb"
+          Condition="$(TargetArchitecture) == 'x64' ">
+          <!-- TODO readd condition -->
+        <!-- and ($(OS) == 'Debian' or $(OS) == 'Ubuntu')-->
+    
+
+  </Target>
+
+  <Target Name="GenerateSharedHostDeb">
+
+    <PropertyGroup>
+      <DebPackageName>dotnet-host</DebPackageName>
+      <DebPackageVersion>$(HostVersion)</DebPackageVersion>
+      <ConfigJsonName>dotnet-sharedhost-debian_config.json</ConfigJsonName>
+      <ConfigJsonFile>$(debPackaginfConfigPath)$(ConfigJsonName)</ConfigJsonFile>
+      <InputRoot>$(SharedHostPublishRoot)</InputRoot>
+      <DebFile>$(SharedHostInstallerFile)</DebFile>
+      <ManPagesDir>$(ProjectDir)Documentation/manpages</ManPagesDir>
+      <debIntermediatesDir>$(PackagesIntermediateDir)$(DebPackageName)/$(DebPackageVersion)</debIntermediatesDir>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <debLayoutDirectory>$(debIntermediatesDir)/debianLayoutDirectory/</debLayoutDirectory>
+      <debLayoutAbsolute>$(debLayoutDirectory)$</debLayoutAbsolute>
+      <debLayoutPackageRoot>$(debLayoutDirectory)package_root</debLayoutPackageRoot>
+      <debLayoutSamples>$(debLayoutDirectory)samples</debLayoutSamples>
+      <debLayoutDocs>$(debLayoutDirectory)docs</debLayoutDocs>
+    </PropertyGroup>
+
+    <RemoveDir Condition="Exists('$(debIntermediatesDir)')" Directories="$(debIntermediatesDir)" />
+    <MakeDir Directories="$(debIntermediatesDir)" />
+
+    <!-- Create empty debian layout -->
+    <RemoveDir Condition="Exists('$(debLayoutDirectory)')" Directories="$(debLayoutDirectory)" />
+    <MakeDir Directories="$(debLayoutDirectory)" />
+    <MakeDir Directories="$(debLayoutAbsolute)" />
+    <MakeDir Directories="$(debLayoutPackageRoot)" />
+    <MakeDir Directories="$(debLayoutSamples)" />
+    <MakeDir Directories="$(debLayoutDocs)" />
+    
+    <!-- Copy files to debian layout -->
+    <ItemGroup>
+        <SHFiles Include="$(InputRoot)/**/*" />
+        <SHManpages Include="$(ManPagesDir)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(SHFiles)" DestinationFolder="$(debLayoutPackageRoot)"/>
+    <Copy SourceFiles="@(SHManpages)" DestinationFolder="$(debLayoutDocs)"/>
+
+    <!-- Replace config json variables -->
+    <WriteLinesToFile
+      File="$(debLayoutDirectory)$(ConfigJsonName)"
+      Lines="$([System.IO.File]::ReadAllText('$(ConfigJsonFile)').Replace('%25SHARED_HOST_BRAND_NAME%25', '$(SharedHostBrandName)'))"
+      Overwrite="true"
+                      />
+
+    <!-- TODO call deb tool -->
 
   </Target>
 

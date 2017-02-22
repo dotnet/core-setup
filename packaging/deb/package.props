@@ -8,6 +8,7 @@
     <toolConsumerProjectName>dotnet-deb-tool-consumer</toolConsumerProjectName>
     <debianConfigJsonFileName>debian_config.json</debianConfigJsonFileName>
     <consumingProjectDirectory>$(IntermediateOutputRootPath)$(toolConsumerProjectName)</consumingProjectDirectory>
+    <debPackaginfConfigPath>$(ProjectDir)packaging/deb/</debPackaginfConfigPath>
   </PropertyGroup>
 
 </Project>
