@@ -15,6 +15,10 @@
     <Channel>master</Channel>
     <BranchName>master</BranchName>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
+  </PropertyGroup>
 
   <!-- Versioning -->
   <PropertyGroup>

@@ -5,7 +5,6 @@
   <PropertyGroup>
     <CoreHostOutputDir>$(BaseOutputRootPath)corehost\</CoreHostOutputDir>
     <CoreHostLockedDir>$(CoreHostOutputDir)locked\</CoreHostLockedDir>
-    <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
     <SharedFrameworkSourceRoot>$(IntermediateOutputRootPath)sharedFramework\framework</SharedFrameworkSourceRoot>
     <SharedFrameworkPublishDir>$(IntermediateOutputRootPath)sharedFrameworkPublish\</SharedFrameworkPublishDir>
     <SharedFrameworkNameAndVersionRoot>$(SharedFrameworkPublishDir)shared\$(SharedFrameworkName)\$(HostVersion)</SharedFrameworkNameAndVersionRoot>

@@ -11,4 +11,10 @@
     <debPackaginfConfigPath>$(ProjectDir)packaging/deb/</debPackaginfConfigPath>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <SharedHostDebPkgName>dotnet-host</SharedHostDebPkgName>
+    <HostFxrDebPkgName>dotnet-hostfxr-$(HostVersion)</HostFxrDebPkgName>
+    <SharedFxDebPkgName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFrameworkNugetVersion)</SharedFxDebPkgName>
+  </PropertyGroup>
+
 </Project>
