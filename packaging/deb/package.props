@@ -3,7 +3,7 @@
   
   <PropertyGroup>
     <dotnetDebToolPackageId>dotnet-deb-tool</dotnetDebToolPackageId>
-    <dotnetDebToolVersion>"1.0.1-*"</dotnetDebToolVersion>
+    <dotnetDebToolVersion>1.0.1-*</dotnetDebToolVersion>
     <dotnetDebToolPackageSource>$(PackagesOutputDir)</dotnetDebToolPackageSource>
     <toolConsumerProjectName>dotnet-deb-tool-consumer</toolConsumerProjectName>
     <debianConfigJsonFileName>debian_config.json</debianConfigJsonFileName>

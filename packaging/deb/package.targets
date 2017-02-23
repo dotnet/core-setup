@@ -17,7 +17,7 @@
       <debJson Include='  "version": "1.0.0-*",' />
       <debJson Include='  "name": "$(toolConsumerProjectName)",' />
       <debJson Include='  "frameworks": { "netcoreapp1.0": { } },' />
-      <debJson Include='  "tools": { "$(dotnetDebToolPackageId)": "$(dotnetDebToolVersion)" },' />
+      <debJson Include='  "tools": { "$(dotnetDebToolPackageId)": "$(dotnetDebToolVersion)" }' />
       <debJson Include='}' />
     </ItemGroup>
 
