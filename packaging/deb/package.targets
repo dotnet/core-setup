@@ -33,7 +33,7 @@
 
   <Target Name="GenerateDebs" 
           DependsOnTargets="InitializeDotnetDebTool;GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb"
-          Condition="$(TargetArchitecture) == 'x64' and ($(OS) == 'Debian' or $(OS) == 'Ubuntu')" />
+          Condition="'$(BuildDebPkg)'=='true' and '$(TargetArchitecture)' == 'x64'" />
 
   <Target Name="GenerateSharedHostDeb">
     <PropertyGroup>
