@@ -16,42 +16,44 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# Some things depend on HOME and it may not be set. We should fix those things, but until then, we just patch a value in
-if [ -z "$HOME" ]; then
-    export HOME=$DIR/artifacts/home
+# Use uname to determine what the OS is.
+OSName=$(uname -s)
+case $OSName in
+    Linux)
+        __BuildOS=Linux
+        __HostOS=Linux
+        ;;
 
-    [ ! -d "$HOME" ] || rm -Rf $HOME
-    mkdir -p $HOME
-fi
+    Darwin)
+        __BuildOS=OSX
+        __HostOS=OSX
+        ;;
 
-while [[ $# > 0 ]]; do
-    lowerI="$(echo $1 | awk '{print tolower($0)}')"
-    case $lowerI in
-        --docker)
-            export BUILD_IN_DOCKER=1
-            export DOCKER_IMAGENAME=$2
-            shift
-            ;;
-        *)
-            args+=( $1 )
-            ;;
-    esac
-    shift
-done
+    FreeBSD)
+        __BuildOS=FreeBSD
+        __HostOS=FreeBSD
+        ;;
 
-# $args array may have empty elements in it.
-# The easiest way to remove them is to cast to string and back to array.
-temp="${args[@]}"
-args=($temp)
+    OpenBSD)
+        __BuildOS=OpenBSD
+        __HostOS=OpenBSD
+        ;;
 
-dockerbuild()
-{
-    BUILD_COMMAND=/opt/code/build_projects/dotnet-host-build/build.sh $DIR/scripts/dockerrun.sh --non-interactive "$@"
-}
+    NetBSD)
+        __BuildOS=NetBSD
+        __HostOS=NetBSD
+        ;;
 
-# Check if we need to build in docker
-if [ ! -z "$BUILD_IN_DOCKER" ]; then
-    dockerbuild "${args[@]}"
-else
-    $DIR/build_projects/dotnet-host-build/build.sh "${args[@]}"
-fi
+    SunOS)
+        __BuildOS=SunOS
+        __HostOS=SunOS
+        ;;
+
+    *)
+        echo "Unsupported OS $OSName detected, configuring as if for Linux"
+        __BuildOS=Linux
+        __HostOS=Linux
+        ;;
+esac
+
+$DIR/run.sh build -OSGroup=$__HostOS $@

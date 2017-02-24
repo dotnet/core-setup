@@ -125,6 +125,12 @@
       "valueType": "passThrough",
       "values": [],
       "defaultValue": ""
+    },
+    "SkipTests": {
+      "description": "Skip running tests",
+      "valueType": "property",
+      "values": ["true", "false"],
+      "defaultValue":false
     }
   },
   "commands": {
@@ -167,18 +173,6 @@
             "GenerateVersionHeader": "default"
           }
         },
-        "corehost":{
-          "description": "Builds native assests (corehost, hostfxr and hostpolicy)",
-          "settings": {
-            "Project": "src/corehost/build.proj"
-          }
-        },
-        "packages":{
-          "description": "Builds the NuGet packages.",
-          "settings":{
-            "Project": "src/packages.builds"
-          }
-        },
         "debug":{
           "description": "Sets ConfigurationGroup=Debug or the value passed by the user.",
           "settings":{
@@ -207,6 +201,12 @@
           "description": "Sets OSGroup=AnyOS or the value passed by the user.",
           "settings":{
             "OSGroup": "default"
+          }
+        },
+        "skipTests":{
+          "description": "Skips running tests",
+          "settings":{
+            "SkipTests": "true"
           }
         }
       },
