@@ -10,16 +10,22 @@
       
       <Exec Command="powershell -NoProfile -NoLogo $(GetWixScript) -WixVersion $(WixVersion) -OutputDir $(WixToolsDir)" />
 
+      <GenerateGuidFromName Name="$(PackagesOutputDir)$(SharedFrameworkInstallerFile)">
+        <Output TaskParameter="GeneratedGui" PropertyName="HostFxrUpgradeCode" />
+      </GenerateGuidFromName>
+
       <ItemGroup>
         <WixOutputs Include="$(WixObjRoot)host">
             <InputDir>$(SharedHostPublishRoot)</InputDir>
             <BrandName>$(SharedHostBrandName)</BrandName>
             <InstallerName>$(PackagesOutputDir)$(SharedHostInstallerFile)</InstallerName>
+            <UpgradeCode></UpgradeCode>
         </WixOutputs>
         <WixOutputs Include="$(WixObjRoot)hostfxr">
             <InputDir>$(HostFxrPublishRoot)</InputDir>
             <BrandName>$(HostFxrBrandName)</BrandName>
             <InstallerName>$(PackagesOutputDir)$(HostFxrInstallerFile)</InstallerName>
+            <UpgradeCode>$(HostFxrUpgradeCode)</UpgradeCode>
         </WixOutputs>
         <!-- shared framework has extra arguments so it needs to be in a separate group -->
         <WixOutputs2 Include="$(WixObjRoot)sharedframework">
@@ -50,7 +56,7 @@
         <SharedFxParams>$(SharedFrameworkNugetVersion) $(SharedFrameworkName) $(HostVersion) $(SharedFxUpgradeCode) $(ArchParams)</SharedFxParams>
       </PropertyGroup>
 
-      <Exec Command="powershell -NoProfile -NoLogo $(WindowsScriptRoot)%(WixOutputs.Filename)\generatemsi.ps1 %(WixOutputs.InputDir) %(WixOutputs.InstallerName) $(WixToolsDir) %(WixOutputs.BrandName) $(CommonParams) %(WixOutputs.Identity)" />
+      <Exec Command="powershell -NoProfile -NoLogo $(WindowsScriptRoot)%(WixOutputs.Filename)\generatemsi.ps1 %(WixOutputs.InputDir) %(WixOutputs.InstallerName) $(WixToolsDir) %(WixOutputs.BrandName) $(CommonParams) %(WixOutputs.Identity) %(WixOutputs.UpgradeCode)" />
       <!-- shared framework -->
       <Exec Command="powershell -NoProfile -NoLogo $(WindowsScriptRoot)%(WixOutputs2.Filename)\generatemsi.ps1 %(WixOutputs2.InputDir) %(WixOutputs2.InstallerName) $(WixToolsDir) %(WixOutputs2.BrandName) $(SharedFxParams) %(WixOutputs2.Identity)" />
   </Target>
