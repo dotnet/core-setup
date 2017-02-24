@@ -411,7 +411,7 @@
       "value": "400"
     },
     "RID": {
-      "value": "win81-x86"
+      "value": "win10-x86"
     },
     "MsbuildSigningArguments": {
       "value": "/p:RID=$(RID) /p:CertificateId=$(CertificateId) /v:detailed"
@@ -469,11 +469,11 @@
   "quality": "definition",
   "queue": {
     "pool": {
-      "id": 39,
-      "name": "DotNet-Build"
+      "id": 83,
+      "name": "DotNetCore-Test"
     },
-    "id": 36,
-    "name": "DotNet-Build"
+    "id": 159,
+    "name": "DotNetCore-Test"
   },
   "path": "\\",
   "type": "build",
