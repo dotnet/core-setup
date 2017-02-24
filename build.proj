@@ -17,6 +17,7 @@
     <Project Include="pkg/dir.proj" />
     <Project Include="src/dir.proj" />
     <Project Include="test/dir.proj" Condition="'$(SkipTests)' != 'true'"/>
+    <Project Include="packaging/dir.proj"/>
   </ItemGroup>
 
   <Import Project="dir.targets" />
