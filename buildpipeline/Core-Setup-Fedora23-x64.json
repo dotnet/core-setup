@@ -97,7 +97,7 @@
       "allowOverride": true
     },
     "NUGET_FEED_URL": {
-      "value": "https://dotnet.myget.org/F/dotnet-cli-private"
+      "value": "https://dotnet.myget.org/F/dotnet-core"
     },
     "NUGET_API_KEY": {
       "value": "PassedViaPipeBuild"
@@ -143,7 +143,7 @@
     "type": "GitHub",
     "name": "dotnet/core-setup",
     "url": "https://github.com/dotnet/core-setup.git",
-    "defaultBranch": "naamunds/build_defs_1.1.0",
+    "defaultBranch": "release/build_defs_1.1.0",
     "clean": "true",
     "checkoutSubmodules": false
   },
