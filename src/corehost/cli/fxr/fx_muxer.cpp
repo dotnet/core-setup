@@ -766,7 +766,7 @@ int fx_muxer_t::parse_args_and_execute(
 {
     *is_an_app = true;
 
-    std::vector<pal::string_t> known_opts = { _X("--additionalprobingpath") };
+    std::vector<pal::string_t> known_opts = { _X("--additionalprobingpath"), _X("--custom-deps") };
     if (exec_mode || mode == host_mode_t::split_fx || mode == host_mode_t::standalone)
     {
         known_opts.push_back(_X("--depsfile"));
@@ -856,11 +856,13 @@ int fx_muxer_t::read_config_and_execute(
     pal::string_t opts_roll_fwd_on_no_candidate_fx = _X("--roll-forward-on-no-candidate-fx");
     pal::string_t opts_deps_file = _X("--depsfile");
     pal::string_t opts_probe_path = _X("--additionalprobingpath");
+    pal::string_t opts_custom_deps = _X("--custom-deps");
     pal::string_t opts_runtime_config = _X("--runtimeconfig");
 
     pal::string_t fx_version = get_last_known_arg(opts, opts_fx_version, _X(""));
     pal::string_t roll_fwd_on_no_candidate_fx = get_last_known_arg(opts, opts_roll_fwd_on_no_candidate_fx, _X(""));
     pal::string_t deps_file = get_last_known_arg(opts, opts_deps_file, _X(""));
+    pal::string_t custom_deps = get_last_known_arg(opts, opts_custom_deps, _X(""));
     pal::string_t runtime_config = get_last_known_arg(opts, opts_runtime_config, _X(""));
     std::vector<pal::string_t> spec_probe_paths = opts.count(opts_probe_path) ? opts.find(opts_probe_path)->second : std::vector<pal::string_t>();
 
@@ -918,6 +920,13 @@ int fx_muxer_t::read_config_and_execute(
         roll_fwd_on_no_candidate_fx_val = pal::xtoi(roll_fwd_on_no_candidate_fx.c_str());
     }
 
+    pal::string_t custom_deps_serialized = custom_deps;
+    if (custom_deps_serialized.empty())
+    {
+        // custom_deps_serialized stays empty if DOTNET_CUSTOM_DEPS env var is not defined
+        pal::getenv(_X("DOTNET_CUSTOM_DEPS"), &custom_deps_serialized);
+    }
+
     bool is_portable = config.get_portable();
     pal::string_t fx_dir = is_portable ? resolve_fx_dir(mode, own_dir, config, fx_version, roll_fwd_on_no_candidate_fx_val) : _X("");
 
@@ -930,7 +939,7 @@ int fx_muxer_t::read_config_and_execute(
         return CoreHostLibMissingFailure;
     }
 
-    corehost_init_t init(deps_file, probe_realpaths, fx_dir, mode, config);
+    corehost_init_t init(deps_file, custom_deps_serialized, probe_realpaths, fx_dir, mode, config);
     return execute_app(impl_dir, &init, new_argc, new_argv);
 }
 
