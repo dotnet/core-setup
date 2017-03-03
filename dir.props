@@ -108,7 +108,7 @@
 
   <!-- list of directories to perform batch restore -->
   <ItemGroup>
-    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\tasks" >
+    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\build\tasks" >
       <AdditionalArgs>--disable-parallel</AdditionalArgs>
     </DnuRestoreDirs>
     <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\src" >
