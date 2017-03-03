@@ -8,6 +8,8 @@
              Directories="$(PackagesIntermediateDir)" />
   </Target>
 
+  <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll"/>
+
   <Target Name="GeneratePkgs"
           Condition="'$(OSGroup)' == 'OSX'"
           DependsOnTargets="InitPkg">
@@ -53,11 +55,23 @@
         <DistributionFile>$(PackagesIntermediateDir)$(TemplateFile)</DistributionFile>
     </PropertyGroup>
 
-    <WriteLinesToFile
-      File="$(DistributionFile)"
-      Lines="$([System.IO.File]::ReadAllText('$(SharedFxScriptRoot)$(TemplateFile)').Replace('{SharedFxComponentId}', '$(SharedFxComponentId)').Replace('{SharedHostComponentId}', '$(SharedHostComponentId)').Replace('{HostFxrComponentId}', '$(HostFxrComponentId)').Replace('{SharedFrameworkNugetName}','$(SharedFrameworkName)').Replace('{SharedFrameworkNugetVersion}', '$(HostVersion)').Replace('{SharedFxBrandName}', '$(SharedFrameworkBrandName)').Replace('{SharedHostBrandName}', '$(SharedHostBrandName)').Replace('{HostFxrBrandName}', '$(HostFxrBrandName)'))"
-      Overwrite="true"/>
+    <ItemGroup>
+      <ConfigPattern Include="{SharedFxComponentId}" /> <ConfigReplace Include="$(SharedFxComponentId)" />
+      <ConfigPattern Include="{SharedHostComponentId}" /> <ConfigReplace Include="$(SharedHostComponentId)" />
+      <ConfigPattern Include="{HostFxrComponentId}" /> <ConfigReplace Include="$(HostFxrComponentId)" />
+      <ConfigPattern Include="{SharedFrameworkNugetName}" /> <ConfigReplace Include="$(SharedFrameworkName)'" />
+      <ConfigPattern Include="{SharedFrameworkNugetVersion}" /> <ConfigReplace Include="$(HostVersion)" />
+      <ConfigPattern Include="{SharedFxBrandName}" /> <ConfigReplace Include="$(SharedFrameworkBrandName)" />
+      <ConfigPattern Include="{SharedHostBrandName}" /> <ConfigReplace Include="$(SharedHostBrandName)" />
+      <ConfigPattern Include="{HostFxrBrandName}" /> <ConfigReplace Include="$(HostFxrBrandName)" />      
+    </ItemGroup>
 
+    <ReplaceFileContents
+        InputFile="$(SharedFxScriptRoot)$(TemplateFile)"
+        DestinationFile="$(DistributionFile)"
+        ReplacementPatterns="@(ConfigPattern)"
+        ReplacementStrings="@(ConfigReplace)" />
+    
     <Exec Command="productbuild --version $(HostVersion) --identifier $(SharedPackageId) --package-path $(PackagesIntermediateDir) --resources $(ResourcePath) --distribution $(DistributionFile) $(OutFilePath)" />
   </Target>
 

@@ -143,6 +143,8 @@
 
   </Target>
 
+  <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll"/>
+
   <Target Name="GenerateSharedFrameworkDeb">
     <PropertyGroup>
       <DebPackageName>$(SharedFxDebPkgName)</DebPackageName>
@@ -183,11 +185,22 @@
     <Copy SourceFiles="@(SHManpages)" DestinationFolder="$(debLayoutDocs)"/>
 
     <!-- Replace config json variables -->
-    <WriteLinesToFile
-      File="$(debLayoutDirectory)$(ConfigJsonName)"
-      Lines="$([System.IO.File]::ReadAllText('$(ConfigJsonFile)').Replace('%25SHARED_HOST_DEBIAN_VERSION%25', '$(HostVersion)').Replace('%25HOSTFXR_DEBIAN_PACKAGE_NAME%25', '$(HostFxrDebPkgName)').Replace('%25HOSTFXR_DEBIAN_VERSION%25', '$(HostVersion)').Replace('%25SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%25', '$(SharedFxDebPkgName)').Replace('%25SHARED_FRAMEWORK_NUGET_NAME%25', '$(SharedFrameworkName)').Replace('%25SHARED_FRAMEWORK_NUGET_VERSION%25', '$(SharedFrameworkNugetVersion)').Replace('%25SHARED_FRAMEWORK_BRAND_NAME%25', '$(SharedFrameworkBrandName)'))"
-      Overwrite="true" />
+    <ItemGroup>
+      <ConfigPattern Include="%25SHARED_HOST_DEBIAN_VERSION%25" /> <ConfigReplace Include="$(HostVersion)" />
+      <ConfigPattern Include="%25HOSTFXR_DEBIAN_PACKAGE_NAME%25" /> <ConfigReplace Include="$(HostFxrDebPkgName)" />
+      <ConfigPattern Include="%25HOSTFXR_DEBIAN_VERSION%25" /> <ConfigReplace Include="$(HostVersion)" />
+      <ConfigPattern Include="%25SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%25" /> <ConfigReplace Include="$(SharedFxDebPkgName)'" />
+      <ConfigPattern Include="%25SHARED_FRAMEWORK_NUGET_NAME%25" /> <ConfigReplace Include="$(SharedFrameworkName)" />
+      <ConfigPattern Include="%25SHARED_FRAMEWORK_NUGET_VERSION%25" /> <ConfigReplace Include="$(SharedFrameworkNugetVersion)" />
+      <ConfigPattern Include="%25SHARED_FRAMEWORK_BRAND_NAME%25" /> <ConfigReplace Include="$(SharedFrameworkBrandName)" />
+    </ItemGroup>
 
+    <ReplaceFileContents
+      InputFile="$(SharedFxScriptRoot)$(TemplateFile)"
+      DestinationFile="$(DistributionFile)"
+      ReplacementPatterns="@(ConfigPattern)"
+      ReplacementStrings="@(ConfigReplace)" />
+    
     <Exec Command="$(DotnetToolCommand) deb-tool -i $(debLayoutDirectory) -o $(debIntermediatesDir) -n $(DebPackageName) -v $(DebPackageVersion)"
           WorkingDirectory="$(consumingProjectDirectory)" />
 

@@ -249,6 +249,8 @@
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir)" />
   </Target>
 
+  <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll"/>
+
   <Target Name="GenerateSharedFrameworkProject">
 
     <MakeDir Condition="!Exists('$(IntermediateOutputRootPath)sharedFramework')" 
@@ -260,28 +262,11 @@
 
     <Copy SourceFiles="@(SharedFrameworkFiles)" DestinationFolder="$(SharedFrameworkSourceRoot)"/>
 
-    <ItemGroup>
-      <JsonLines Include='{' />
-      <JsonLines Include='  "version": "1.0.0-*",' />
-      <JsonLines Include='  "compilationOptions": {' />
-      <JsonLines Include='    "emitEntryPoint": true' />
-      <JsonLines Include='  },' />
-      <JsonLines Include='  "dependencies": {' />
-      <JsonLines Include='    "Microsoft.NETCore.App": "$(HostVersion)"' />
-      <JsonLines Include='  },' />
-      <JsonLines Include='  "runtimes": {' />
-      <JsonLines Include='    "$(TargetRid)": {}' />
-      <JsonLines Include='  },' />
-      <JsonLines Include='  "frameworks": {' />
-      <JsonLines Include='    "$(Framework)": {}' />
-      <JsonLines Include='    }' />
-      <JsonLines Include='  }' />
-    </ItemGroup>
-
-    <WriteLinesToFile
-      File="$(SharedFrameworkSourceRoot)\project.json"
-      Lines="@(JsonLines)"
-      Overwrite="true" />
+    <ReplaceFileContents
+      InputFile="sharedFramework\project.json.template"
+      DestinationFile="$(SharedFrameworkSourceRoot)\project.json"
+      ReplacementPatterns="%24(NetCoreAppVersion);%24(RID);%24(TargetFramework)"
+      ReplacementStrings="$(HostVersion);$(TargetRid);$(Framework)" />
 
   </Target>
   
