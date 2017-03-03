@@ -21,6 +21,7 @@
     <Compile Include="GenerateMsiVersion.cs" />
     <Compile Include="GetBuildableFrameworks.cs" />
     <Compile Include="ChangeEntryPointLibraryName.cs" />
+    <Compile Include="ReplaceFileContents.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net45'">
     <Compile Include="FileUtilities.netstandard.cs" />
