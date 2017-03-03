@@ -37,7 +37,7 @@
     </PropertyGroup>
   </Target>
 
-  <!-- Override Target rom buildtools -->
+  <!-- Override Target from buildtools -->
   <Target Name="GenerateVersionHeader"
       Inputs="$(MSBuildProjectFile)"
       Outputs="$(NativeVersionHeaderFile)"

@@ -61,7 +61,7 @@
           Command='find %(OutDirs.Identity) -type f ! -name "*.*" -exec chmod 755 {} \;' />   
     
     
-    <!-- Copy al to combined directory -->
+    <!-- Copy all to combined directory -->
     <ItemGroup>
       <CombinedFiles Include="$(SharedHostPublishRoot)\**\*" />
       <CombinedFiles Include="$(HostFxrPublishRoot)/**\*" />

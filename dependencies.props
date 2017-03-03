@@ -4,4 +4,9 @@
        <CoreCLRVersion>2.0.0-beta-25102-03</CoreCLRVersion>
        <JitVersion>2.0.0-beta-25102-03</JitVersion>
   </PropertyGroup>
+
+  <!-- Create a collection of all project.json files for dependency updates. -->
+  <ItemGroup>
+    <ProjectJsonFiles Include="$(SourceDir)**/project.json" />
+  </ItemGroup>
 </Project>

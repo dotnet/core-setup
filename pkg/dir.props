@@ -18,6 +18,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <VersionTxtFile>$(VersionTxtFile)</VersionTxtFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <PackageOutputPath>$(PackagesOutDir)</PackageOutputPath>
     <SymbolPackageOutputPath>$(SymbolPackagesOutDir)</SymbolPackageOutputPath>
     <RuntimeIdGraphDefinitionFile>$(ProjectDir)packages\Microsoft.NETCore.Platforms\2.0.0-beta-25022-02\runtime.json</RuntimeIdGraphDefinitionFile>

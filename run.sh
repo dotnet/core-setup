@@ -4,6 +4,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+set -e
+
 # Use in the the functions: eval $invocation
 invocation='echo "Calling: ${FUNCNAME[0]}"'
 

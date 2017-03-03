@@ -31,7 +31,7 @@
     </ItemGroup>
 
     <WriteLinesToFile
-      File="version.txt"
+      File="$(VersionTxtFile)"
       Lines="@(Lines)"
       Overwrite="true" />
   </Target>

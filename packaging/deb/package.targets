@@ -188,7 +188,7 @@
       Lines="$([System.IO.File]::ReadAllText('$(ConfigJsonFile)').Replace('%25SHARED_HOST_DEBIAN_VERSION%25', '$(HostVersion)').Replace('%25HOSTFXR_DEBIAN_PACKAGE_NAME%25', '$(HostFxrDebPkgName)').Replace('%25HOSTFXR_DEBIAN_VERSION%25', '$(HostVersion)').Replace('%25SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%25', '$(SharedFxDebPkgName)').Replace('%25SHARED_FRAMEWORK_NUGET_NAME%25', '$(SharedFrameworkName)').Replace('%25SHARED_FRAMEWORK_NUGET_VERSION%25', '$(SharedFrameworkNugetVersion)').Replace('%25SHARED_FRAMEWORK_BRAND_NAME%25', '$(SharedFrameworkBrandName)'))"
       Overwrite="true" />
 
-    <Exec Command="deb-tool -i $(debLayoutDirectory) -o $(debIntermediatesDir) -n $(DebPackageName) -v $(DebPackageVersion)"
+    <Exec Command="$(DotnetToolCommand) deb-tool -i $(debLayoutDirectory) -o $(debIntermediatesDir) -n $(DebPackageName) -v $(DebPackageVersion)"
           WorkingDirectory="$(consumingProjectDirectory)" />
 
   </Target>

@@ -5,7 +5,7 @@
   <Import Project="..\..\dir.traversal.targets" />
 
   <!-- Target that builds dotnet, hostfxr and hostpolicy -->
-  <Target Name="Build" DependsOnTargets="BuildCoreHostUnix;BuildeCoreHostWindows" /> 
+  <Target Name="Build" DependsOnTargets="BuildCoreHostUnix;BuildCoreHostWindows" /> 
 
 
   <Target Name="BuildCoreHostUnix"
@@ -29,7 +29,7 @@
           DestinationFolder="$(CoreHostOutputDir)"/>
   </Target>
 
-  <Target Name="BuildeCoreHostWindows"
+  <Target Name="BuildCoreHostWindows"
           Condition="'$(OSGroup)' == 'Windows_NT'"
           DependsOnTargets="GetLatestCommitHash">
 
@@ -53,9 +53,9 @@
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\dotnet\$(ConfigurationGroup)\dotnet.pdb" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\apphost\$(ConfigurationGroup)\apphost.exe" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\apphost\$(ConfigurationGroup)\apphost.pdb" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dll\$(ConfigurationGroup)\hostpolicy.dll" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dll\$(ConfigurationGroup)\$(HostPolicyBaseName)" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dll\$(ConfigurationGroup)\hostpolicy.pdb" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\fxr\$(ConfigurationGroup)\hostfxr.dll" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\fxr\$(ConfigurationGroup)\$(DotnetHostFxrBaseName)" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\fxr\$(ConfigurationGroup)\hostfxr.pdb" />      
     </ItemGroup>
     

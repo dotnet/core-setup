@@ -153,8 +153,7 @@
 
     <PropertyGroup>
       <PlatformAssembliesPaths>$(CoreLibsDir);$(SharedFrameworkNameAndVersionRoot)</PlatformAssembliesPaths>
-      <CrossgenArgs>-platform_assemblies_paths $(PlatformAssembliesPaths)</CrossgenArgs>
-      <CrossgenArgs>$(CrossgenArgs) -JITPath $(JitPath)</CrossgenArgs>
+      <CrossgenArgs>-platform_assemblies_paths $(PlatformAssembliesPaths) -JITPath $(JitPath)</CrossgenArgs>
     </PropertyGroup>
 
     <!-- Form the dynamic path that would not collide if another instance of this is running. -->
@@ -191,9 +190,6 @@
       <runtimeGraphGeneratorRuntime Condition="'$(OSGroup)'=='OSX'">osx</runtimeGraphGeneratorRuntime>
       <runtimeGraphGeneratorRuntime Condition="'$(runtimeGraphGeneratorRuntime)'==''">linux</runtimeGraphGeneratorRuntime>      
     </PropertyGroup>
-
-    <Error Text="Could not determine rid graph generation runtime for platform $(OSGroup)"
-          Condition="$(runtimeGraphGeneratorRuntime) == ''" />
 
     <Exec Command="$(DotnetToolCommand) publish --output $(runtimeGraphGeneratorOutput) $(runtimeGraphGeneratorProject) "
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir)" />
