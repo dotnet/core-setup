@@ -258,12 +258,13 @@
 
     <ItemGroup>
       <SharedFrameworkFiles Include="sharedFramework\**\*.cs" />
+      <SharedFrameworkTemplate Include="sharedFramework\framework\project.json.template" />
     </ItemGroup>
 
     <Copy SourceFiles="@(SharedFrameworkFiles)" DestinationFolder="$(SharedFrameworkSourceRoot)"/>
 
     <ReplaceFileContents
-      InputFile="sharedFramework\project.json.template"
+      InputFile="@(SharedFrameworkTemplate)"
       DestinationFile="$(SharedFrameworkSourceRoot)\project.json"
       ReplacementPatterns="%24(NetCoreAppVersion);%24(RID);%24(TargetFramework)"
       ReplacementStrings="$(HostVersion);$(TargetRid);$(Framework)" />

@@ -22,7 +22,7 @@
       InputFile="project.json.template"
       DestinationFile="$(ProjectJson)"
       ReplacementPatterns="{RID};{TFM}"
-      ReplacementStrings="$(NuGetRuntimeIdentifier);$(NuGetTargetMoniker)" />
+      ReplacementStrings="$(TargetRid);$(NuGetTargetMoniker)" />
 
     <ItemGroup>
       <FileWrites Include="$(ProjectJson)" />

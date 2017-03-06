@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <VersionTxtFile>$(VersionTxtFile)</VersionTxtFile>
+    <VersionTxtFile>$(IntermediateOutputRootPath)version.txt</VersionTxtFile>
   </PropertyGroup>
 
   <PropertyGroup>
