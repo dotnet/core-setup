@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="dir.props" />
+
+  <PropertyGroup>
+    <BuildTestTargets>
+        RestoreTestAssets;
+        RestoreTests;
+        BuildTests;
+        RunTests;
+    </BuildTestTargets>
+  </PropertyGroup>
+
+  <Target Name="BuildAndTest" DependsOnTargets="$(BuildTestTargets)" />
+  
+  <Target Name="RestoreTestAssets">
+   <ItemGroup>
+      <DirsToClean Include="$(TestAssetsDir)\**\bin" />
+      <DirsToClean Include="$(TestAssetsDir)\**\obj" />
+   </ItemGroup>
+
+    <RemoveDir Directories="$(DirsToClean)" />
+
+    <PropertyGroup>
+      <RestoreArgs>--fallbacksource $(CoreHostOutputDir) --disable-parallel --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
+    </PropertyGroup>
+
+    <Exec Command="$(DotnetToolCommand) restore $(RestoreArgs)"
+          WorkingDirectory="$(TestAssetsDir)" />
+  </Target>
+
+  <Target Name="RestoreTests">
+  <PropertyGroup>
+      <RestoreArgs>--disable-parallel --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
+    </PropertyGroup>
+
+    <Exec Command="$(DotnetToolCommand) restore $(RestoreArgs)"
+          WorkingDirectory="$(TestDir)" />
+  </Target>
+
+  <Target Name="BuildTests">
+    <PropertyGroup>
+      <BuildArgs>--configuration $(ConfigurationGroup)</BuildArgs>
+    </PropertyGroup>
+
+    <Message Text="Building Tests" Importance="High" />
+    <Exec Command="$(DotnetToolCommand) build $(BuildArgs)"
+          WorkingDirectory="%(TestProjects.Identity)" />
+  </Target>
+
+  <Target Name="RunTests">
+    <PropertyGroup>
+      <TestArgs>--configuration $(ConfigurationGroup)</TestArgs>
+      <IsCrossArch Condition="'$(TargetArchitecture)' == 'arm' or '$(TargetArchitecture)' == 'arm64' or '$(TargetArchitecture)' == 'armel'">true</IsCrossArch>
+    </PropertyGroup>
+
+    <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml %(TestProjects.Filename)-testResults.xml -notrait categorty=failing"
+          WorkingDirectory="%(TestProjects.Identity)"
+          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir);TEST_ARTIFACTS=$(TestsOutputDir);TEST_TARGETRID=$(PackageTargetRid)"
+          Condition="'%(TestProjects.Filename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'" />
+  </Target>
+</Project>
