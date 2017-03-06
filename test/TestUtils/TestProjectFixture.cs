@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 ?? Environment.GetEnvironmentVariable(s_testArtifactDirectoryEnvironmentVariable)
                 ?? Path.Combine(AppContext.BaseDirectory, s_testArtifactDirectoryEnvironmentVariable);
 
-            _sdkDotnet = new DotNetCli(dotnetInstallPath ?? DotNetCli.GetStage0Path(repoDirectoriesProvider.RepoRoot));
+            _sdkDotnet = new DotNetCli(dotnetInstallPath ?? repoDirectoriesProvider.DotnetSDK);
             _currentRid = currentRid ?? repoDirectoriesProvider.TargetRID;
 
             _builtDotnet = new DotNetCli(repoDirectoriesProvider.BuiltDotnet);
