@@ -18,11 +18,11 @@
     <!-- Update project.json template -->
     <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(ProjectJson)'))" />
 
-    <ReplaceFileContents
-      InputFile="project.json.template"
-      DestinationFile="$(ProjectJson)"
-      ReplacementPatterns="{RID};{TFM}"
-      ReplacementStrings="$(TargetRid);$(NuGetTargetMoniker)" />
+    <WriteLinesToFile
+      File="$(ProjectJson)"
+      Lines="$([System.IO.File]::ReadAllText('project.json.template').Replace('{RID}', $(NuGetRuntimeIdentifier)).Replace('{TFM}', $(NuGetTargetMoniker)))"
+      Overwrite="true"
+                      />
 
     <ItemGroup>
       <FileWrites Include="$(ProjectJson)" />
