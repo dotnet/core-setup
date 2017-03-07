@@ -50,7 +50,7 @@
           DependsOnTargets="RestoreLockedCoreHost;GenerateSharedFrameworkProject">
     
     <PropertyGroup>
-      <RestoreArgs>--fallbacksource $(CoreHostOutputDir) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
+      <RestoreArgs>--fallbacksource $(PackagesOutDir) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
     </PropertyGroup>  
 
     <Exec Command="$(DotnetToolCommand) restore --verbosity verbose --disable-parallel --infer-runtimes $(RestoreArgs)"
@@ -231,7 +231,7 @@
       Overwrite="true" />
     
     <PropertyGroup>
-      <RestoreArgs>--source https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json --fallbacksource $(CoreHostOutputDir) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
+      <RestoreArgs>--source https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json --fallbacksource $(PackagesOutDir) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
     </PropertyGroup>  
 
     <Exec Command="$(DotnetToolCommand) restore --verbosity verbose $(RestoreArgs)"
