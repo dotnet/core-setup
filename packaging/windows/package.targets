@@ -10,7 +10,11 @@
       
       <Exec Command="powershell -NoProfile -NoLogo $(GetWixScript) -WixVersion $(WixVersion) -OutputDir $(WixToolsDir)" />
 
-      <GenerateGuidFromName Name="$(PackagesOutputDir)$(SharedFrameworkInstallerFile)">
+      <GenerateGuidFromName Name="$(PackagesOutputDir)$(SharedHostInstallerFile)">
+        <Output TaskParameter="GeneratedGui" PropertyName="SharedHostUpgradeCode" />
+      </GenerateGuidFromName>
+
+      <GenerateGuidFromName Name="$(PackagesOutputDir)$(HostFxrInstallerFile)">
         <Output TaskParameter="GeneratedGui" PropertyName="HostFxrUpgradeCode" />
       </GenerateGuidFromName>
 
@@ -19,7 +23,7 @@
             <InputDir>$(SharedHostPublishRoot)</InputDir>
             <BrandName>$(SharedHostBrandName)</BrandName>
             <InstallerName>$(PackagesOutputDir)$(SharedHostInstallerFile)</InstallerName>
-            <UpgradeCode></UpgradeCode>
+            <UpgradeCode>$(SharedHostUpgradeCode)</UpgradeCode>
         </WixOutputs>
         <WixOutputs Include="$(WixObjRoot)hostfxr">
             <InputDir>$(HostFxrPublishRoot)</InputDir>
