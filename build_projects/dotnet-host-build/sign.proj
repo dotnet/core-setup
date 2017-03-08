@@ -29,6 +29,7 @@
 
   <Target Name="GetSignCoreHostFiles">
     <ItemGroup>
+      <!--Note that dotnet.exe is not intentionally being signed.-->
       <FilesToSign Include="$(OutDir)corehost/**/hostfxr.dll">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
