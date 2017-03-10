@@ -87,8 +87,23 @@ fi
 #  VSO
 [ ! -z "$BUILD_BUILDID" ] && DOTNET_BUILD_CONTAINER_NAME="${BUILD_BUILDID}-${BUILD_BUILDNUMBER}"
 
+# Reads Docker file and get the name of the image.
+get_image_name()
+{
+    grep -i ""
+    echo $imageName
+}
+
 # Build the docker container (will be fast if it is already built)
 echo "Building Docker Container using Dockerfile: $DOCKERFILE"
+
+image=$(get_image_name)
+
+if [ ! -z "$image" ]; then
+    echo "Pulling Docker image $image"
+    "$DIR/init-docker.sh" $image
+fi
+
 docker build --build-arg USER_ID=$(id -u) -t $DOTNET_BUILD_CONTAINER_TAG $DOCKERFILE
 
 # Run the build in the container
