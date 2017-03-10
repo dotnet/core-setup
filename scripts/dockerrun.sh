@@ -87,11 +87,10 @@ fi
 #  VSO
 [ ! -z "$BUILD_BUILDID" ] && DOTNET_BUILD_CONTAINER_NAME="${BUILD_BUILDID}-${BUILD_BUILDNUMBER}"
 
-# Reads Docker file and get the name of the image.
+# Searches the Docker file, and returns the name of the image.
 get_image_name()
 {
-    grep -i ""
-    echo $imageName
+    grep -i "^FROM " "$DOCKERFILE" | awk '{ print $2 }'
 }
 
 # Build the docker container (will be fast if it is already built)
