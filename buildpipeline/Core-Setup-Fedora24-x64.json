@@ -68,8 +68,8 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "pkg/Tools/scripts/docker/cleanup-docker.sh",
-        "arguments": "",
+        "filename": "perl",
+        "arguments": "pkg/Tools/scripts/docker/cleanup-docker.sh",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
