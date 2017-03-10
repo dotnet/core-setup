@@ -93,6 +93,28 @@ get_image_name()
     grep -i "^FROM " "$DOCKERFILE" | awk '{ print $2 }'
 }
 
+# Executes a command and retries if it fails.
+# NOTE: This function is the exact copy from init-docker.sh.
+# Reason for not invoking init.docker.sh directly is since that script 
+# also performs cleanup, which we do not want in this case.
+execute() {
+    local count=0
+    until "$@"; do
+        local exit=$?
+        count=$(( $count + 1 ))
+        if [ $count -lt $retries ]; then
+            local wait=$(( waitFactor ** (( count - 1 )) ))
+            echo "Retry $count/$retries exited $exit, retrying in $wait seconds..."
+            sleep $wait
+        else    
+            say_err "Retry $count/$retries exited $exit, no more retries left."
+            return $exit
+        fi
+    done
+
+    return 0
+}
+
 # Build the docker container (will be fast if it is already built)
 echo "Building Docker Container using Dockerfile: $DOCKERFILE"
 
@@ -100,7 +122,8 @@ image=$(get_image_name)
 
 if [ ! -z "$image" ]; then
     echo "Pulling Docker image $image"
-    "$DIR/init-docker.sh" $image
+    
+    execute docker pull $image
 fi
 
 docker build --build-arg USER_ID=$(id -u) -t $DOTNET_BUILD_CONTAINER_TAG $DOCKERFILE
