@@ -99,6 +99,7 @@ get_image_name()
 # also performs cleanup, which we do not want in this case.
 execute() {
     local count=0
+    local retries=5
     until "$@"; do
         local exit=$?
         count=$(( $count + 1 ))
