@@ -87,12 +87,6 @@ fi
 #  VSO
 [ ! -z "$BUILD_BUILDID" ] && DOTNET_BUILD_CONTAINER_NAME="${BUILD_BUILDID}-${BUILD_BUILDNUMBER}"
 
-# Searches the Docker file, and returns the name of the image.
-get_image_name()
-{
-    grep -i "^FROM " "$DOCKERFILE" | awk '{ print $2 }'
-}
-
 # Executes a command and retries if it fails.
 # NOTE: This function is the exact copy from init-docker.sh.
 # Reason for not invoking init.docker.sh directly is since that script 
@@ -119,11 +113,11 @@ execute() {
 # Build the docker container (will be fast if it is already built)
 echo "Building Docker Container using Dockerfile: $DOCKERFILE"
 
-image=$(get_image_name)
+# Get the name of Docker image.
+image=$(grep -i "^FROM " "$DOCKERFILE" | awk '{ print $2 }')
 
 if [ ! -z "$image" ]; then
     echo "Pulling Docker image $image"
-    
     execute docker pull $image
 fi
 

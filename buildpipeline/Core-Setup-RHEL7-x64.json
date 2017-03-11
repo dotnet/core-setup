@@ -31,7 +31,7 @@
       },
       "inputs": {
         "scriptPath": "scripts/init-docker.sh",
-        "args": "microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2",
+        "args": "$(PB_DockerImageName)",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
