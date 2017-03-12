@@ -7,7 +7,7 @@ usage()
     echo.
     echo "Usage: $0 [BuildArch] [ApiLevel]"
     echo.
-    echo "BuildArch is the target architecture of Android. Currently only arm64 is supported."
+    echo "BuildArch is the target architecture of Android."
     echo "ApiLevel is the target Android API level. API levels usually match to Android releases. See https://source.android.com/source/build-numbers.html"
     echo.
     echo "By default, the toolchain and sysroot will be generated in cross/android-rootfs/toolchain/[BuildArch]. You can change this behavior"
