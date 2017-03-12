@@ -141,7 +141,8 @@ cp -R $__Android_Cross_Dir/tmp/$__AndroidArch/data/data/com.termux/files/usr/* $
 
 # Prepare libunwind
 
-# If libunwind was built for CoreCLR and sysroot where libunwind installed still exists, copy files from there
+# If libunwind was built for CoreCLR and sysroot where libunwind installed still exists, copy files from there.
+#TODO: Fix conditionals so that libunwind not builtif files exist
 if [[ -n "$__libunwind_cfxdir" ]]; then
     cp -r $__libunwind_cfxdir/lib/libunwind* $__ToolchainDir/sysroot/usr/lib/
     cp -r $__libunwind_cfxdir/include/libunwind* $__ToolchainDir/sysroot/usr/include/
