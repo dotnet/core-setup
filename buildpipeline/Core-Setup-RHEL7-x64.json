@@ -227,7 +227,7 @@
     "type": "GitHub",
     "name": "dotnet/core-setup",
     "url": "https://github.com/dotnet/core-setup.git",
-    "defaultBranch": "BuildConfigurations",
+    "defaultBranch": "release/build_defs_1.1.0",
     "clean": "true",
     "checkoutSubmodules": false
   },
