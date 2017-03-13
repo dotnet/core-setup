@@ -30,10 +30,6 @@
         "definitionType": "task"
       },
       "inputs": {
-        // init-docker.sh was manually copied from dotnet/buildtools, as opposed to restoring buildtools package.
-        // Copying the script was a safer approach since:
-        //  1. Version of buildtools used in this branch does not have init-docker.sh
-        //  2. This is a service branch. Upgrading to a newer version of buildtools has a greater chance for regressions.
         "scriptPath": "scripts/init-docker.sh",
         "args": "$(DockerImageName)",
         "disableAutoCwd": "false",

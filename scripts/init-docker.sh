@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Version of the script copied was - 
+#   https://github.com/dotnet/buildtools/blob/b5cc6e6ab5f71f6c0be7b730058b426e92528479/src/Microsoft.DotNet.Build.Tasks/PackageFiles/scripts/docker/init-docker.sh
+
 # Stop script on NZEC
 set -e
 # Stop script if unbound variable found (use ${var:-} if intentional)

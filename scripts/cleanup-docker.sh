@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+# Version of the script copied was - 
+#   https://github.com/dotnet/buildtools/blob/b5cc6e6ab5f71f6c0be7b730058b426e92528479/src/Microsoft.DotNet.Build.Tasks/PackageFiles/scripts/docker/cleanup-docker.sh
+
 #
 # ./cleanup-docker.sh 
 #
