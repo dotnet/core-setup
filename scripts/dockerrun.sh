@@ -117,9 +117,8 @@ echo "Building Docker Container using Dockerfile: $DOCKERFILE"
 # Get the name of Docker image.
 image=$(grep -i "^FROM " "$DOCKERFILE" | awk '{ print $2 }')
 
-# Core-Setup uses a predefined image for RHEL.  For all other Linux platforms, 
-# a Dockerfile specifies the Docker image to be built as part of the build.
-# Image name stated in the Dockerfile is pulled on behalf of the build.
+# Explicitly pull the base image with retry logic. 
+# This eliminates intermittent failures during docker build caused by failing to retrieve the base image.
 if [ ! -z "$image" ]; then
     echo "Pulling Docker image $image"
     execute docker pull $image
