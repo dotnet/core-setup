@@ -30,8 +30,12 @@
         "definitionType": "task"
       },
       "inputs": {
+        // init-docker.sh was manually copied from dotnet/buildtools, as opposed to restoring buildtools package.
+        // Copying the script was a safer approach since:
+        //  1. Version of buildtools used in this branch does not have init-docker.sh
+        //  2. This is a service branch. Upgrading to a newer version of buildtools has a greater chance for regressions.
         "scriptPath": "scripts/init-docker.sh",
-        "args": "$(PB_DockerImageName)",
+        "args": "$(DockerImageName)",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
@@ -68,7 +72,7 @@
       },
       "inputs": {
         "scriptPath": "scripts/dockerrun-as-current-user.sh",
-        "args": "-t --rm --sig-proxy=true --name $(DockerContainerName) -v $(Build.SourcesDirectory):/opt/code -w /opt/code -e CONNECTION_STRING -e PUBLISH_TO_AZURE_BLOB -e NUGET_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD $(PB_DockerImageName) /bin/bash -c \"HOME=/opt/code; git clean -X -d -f; ./build.sh $(BuildArguments)\"",
+        "args": "-t --rm --sig-proxy=true --name $(DockerContainerName) -v $(Build.SourcesDirectory):/opt/code -w /opt/code -e CONNECTION_STRING -e PUBLISH_TO_AZURE_BLOB -e NUGET_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD $(DockerImageName) /bin/bash -c \"HOME=/opt/code; git clean -X -d -f; ./build.sh $(BuildArguments)\"",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
@@ -184,7 +188,7 @@
     "GITHUB_PASSWORD": {
       "value": "PassedViaPipeBuild"
     },
-    "PB_DockerImageName": {
+    "DockerImageName": {
       "value": "microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2"
     }
   },
