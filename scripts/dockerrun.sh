@@ -94,6 +94,7 @@ fi
 execute() {
     local count=0
     local retries=5
+    local waitFactor=6
     until "$@"; do
         local exit=$?
         count=$(( $count + 1 ))
