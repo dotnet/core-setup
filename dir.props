@@ -108,18 +108,14 @@
 
   <!-- list of directories to perform batch restore -->
   <ItemGroup>
-    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\build\tasks" >
-      <AdditionalArgs>--disable-parallel</AdditionalArgs>
+    <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)pkg\projects\**\project.json" />
+    <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)src\test\**\project.json" />
+    <_ProjectJsonFiles Include="$(MSBuildThisFileDirectory)**\project.json" Exclude="@(_DnuExcludeProjectJsonFiles)" />
+    <DnuRestoreDirs Include="@(_ProjectJsonFiles->'%(RootDir)%(Directory)')" >
+      <AdditionalArgs>%(AdditionalArgs) --disable-parallel</AdditionalArgs>
     </DnuRestoreDirs>
-    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\src" >
-      <AdditionalArgs>--disable-parallel</AdditionalArgs>
-    </DnuRestoreDirs>
-    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\pkg\deps" />
-    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\setuptools\dotnet-deb-tool" >
-      <AdditionalArgs>--disable-parallel</AdditionalArgs>
-    </DnuRestoreDirs>
-    <DnuRestoreDirs Include="$(MSBuildProjectDirectory)\setuptools\independent">
-      <AdditionalArgs>--disable-parallel --infer-runtimes</AdditionalArgs>
+    <DnuRestoreDirs Include="$(MSBuildThisFileDirectory)\tools-local\setuptools\independent\">
+      <AdditionalArgs>%(AdditionalArgs) --disable-parallel --infer-runtimes</AdditionalArgs>
     </DnuRestoreDirs>
   </ItemGroup>
 

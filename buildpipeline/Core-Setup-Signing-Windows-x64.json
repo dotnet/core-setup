@@ -31,7 +31,7 @@
       },
       "inputs": {
         "scriptType": "filePath",
-        "scriptName": "build_projects/dotnet-host-build/build.ps1",
+        "scriptName": "src/build/dotnet-host-build/build.ps1",
         "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,CompileCoreHost",
         "inlineScript": "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\"",
         "workingFolder": "",
@@ -69,7 +69,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "build_projects\\dotnet-host-build\\sign.proj",
+        "solution": "src\\build\\dotnet-host-build\\sign.proj",
         "platform": "",
         "configuration": "$(BuildConfiguration)",
         "msbuildArguments": "/t:SignCoreHost $(MsbuildSigningArguments)",
@@ -97,7 +97,7 @@
       },
       "inputs": {
         "scriptType": "filePath",
-        "scriptName": "build_projects/dotnet-host-build/build.ps1",
+        "scriptName": "src/build/dotnet-host-build/build.ps1",
         "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,PackagePkgProjects,BuildProjectsForNuGetPackages",
         "inlineScript": "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\"",
         "workingFolder": "",
@@ -135,7 +135,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "build_projects\\dotnet-host-build\\sign.proj",
+        "solution": "src\\build\\dotnet-host-build\\sign.proj",
         "platform": "",
         "configuration": "$(BuildConfiguration)",
         "msbuildArguments": "/t:SignSharedFrameworkCrossgenedAssemblies $(MsbuildSigningArguments)",
@@ -162,7 +162,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "build_projects\\dotnet-host-build\\sign.proj",
+        "solution": "src\\build\\dotnet-host-build\\sign.proj",
         "platform": "",
         "configuration": "$(BuildConfiguration)",
         "msbuildArguments": "/t:SignAssemblies $(MsbuildSigningArguments)",
@@ -208,7 +208,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "build_projects\\dotnet-host-build\\sign.proj",
+        "solution": "src\\build\\dotnet-host-build\\sign.proj",
         "platform": "",
         "configuration": "$(BuildConfiguration)",
         "msbuildArguments": "/t:SignMsiAndCab $(MsbuildSigningArguments)",
@@ -273,7 +273,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "build_projects\\dotnet-host-build\\sign.proj",
+        "solution": "src\\build\\dotnet-host-build\\sign.proj",
         "platform": "",
         "configuration": "$(BuildConfiguration)",
         "msbuildArguments": "/t:SignEngine $(MsbuildSigningArguments)",
@@ -319,7 +319,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "build_projects\\dotnet-host-build\\sign.proj",
+        "solution": "src\\build\\dotnet-host-build\\sign.proj",
         "platform": "",
         "configuration": "$(BuildConfiguration)",
         "msbuildArguments": "/t:SignBundle $(MsbuildSigningArguments)",

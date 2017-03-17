@@ -15,9 +15,9 @@
   <ItemGroup>
     <Project Include="src/corehost/build.proj" />
     <Project Include="pkg/dir.proj" />
-    <Project Include="src/dir.proj" />
-    <Project Include="test/dir.proj" Condition="'$(SkipTests)' != 'true'"/>
-    <Project Include="packaging/dir.proj"/>
+    <Project Include="src/src/dir.proj" />
+    <Project Include="src/test/dir.proj" Condition="'$(SkipTests)' != 'true'"/>
+    <Project Include="src/compressionpackaging/dir.proj"/>
   </ItemGroup>
 
   <Import Project="dir.targets" />
@@ -37,7 +37,7 @@
   </PropertyGroup>
 
   <Target Name="BuildCustomTasks">
-      <MSBuild Projects="build/tasks/core-setup.tasks.builds"/>
+      <MSBuild Projects="src/tasks/core-setup.tasks.builds"/>
   </Target>
 
   <Target Name="BatchRestorePackages" Condition="'$(RestoreDuringBuild)'=='true'">
