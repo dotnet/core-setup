@@ -37,7 +37,7 @@ while [[ $# > 0 ]]; do
             echo "Usage: $0 [-d|--dockerfile <Dockerfile>] [-i|--image <ImageName>] <Command>"
             echo ""
             echo "Options:"
-            echo "  <Dockerfile>    The path to the Dockerfile to use to create the build container"
+            echo "  <Dockerfile>    The path to the folder that contains a Dockerfile to use to create the build container"
             echo "  <ImageName>     The name of an existing Dockerfile folder under scripts/docker to use as the Dockerfile"
             echo "  <Command>  The command to run once inside the container (/opt/code is mapped to the repo root; defaults to nothing, which runs the default shell)"
             exit 0
@@ -59,7 +59,7 @@ if [ -z "$DOCKERFILE" ]; then
             if [ -e /etc/os-release ]; then
                source /etc/os-release
 
-               if [ -d "scritps/docker/$ID.$VERSION_ID" ]; then
+               if [ -d "scripts/docker/$ID.$VERSION_ID" ]; then
                    echo "Using '$ID.$VERSION_ID' image"
                    export DOCKERFILE="scripts/docker/$ID.$VERSION_ID"
                else
@@ -115,7 +115,7 @@ execute() {
 echo "Building Docker Container using Dockerfile: $DOCKERFILE"
 
 # Get the name of Docker image.
-image=$(grep -i "^FROM " "$DOCKERFILE" | awk '{ print $2 }')
+image=$(grep -i "^FROM " "$DOCKERFILE/Dockerfile" | awk '{ print $2 }')
 
 # Explicitly pull the base image with retry logic. 
 # This eliminates intermittent failures during docker build caused by failing to retrieve the base image.
