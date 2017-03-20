@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 usage()
 {
     echo "Creates a toolchain and sysroot used for cross-compiling for Android."
@@ -13,7 +12,7 @@ usage()
     echo "By default, the toolchain and sysroot will be generated in cross/android-rootfs/toolchain/[BuildArch]. You can change this behavior"
     echo "by setting the TOOLCHAIN_DIR environment variable"
     echo.
-    echo "By default, the NDK will be downloaded into the cross/android-rootfs/android-ndk-r13b directory. If you already have an NDK installation,"
+    echo "By default, the NDK will be downloaded into the cross/android-rootfs/android-ndk-r[versionname] directory. If you already have an NDK installation,"
     echo "you can set the NDK_DIR environment variable to have this script use that installation of the NDK."
     exit 1
 }
@@ -60,7 +59,7 @@ __CrossDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Set up directories based on root of repo
 __Android_Cross_Dir="$__CrossDir/android-rootfs"
-__NDK_Dir="$__Android_Cross_Dir/android-ndk-r13b"
+__NDK_Dir="$__Android_Cross_Dir/android-ndk-$__NDK_Version"
 __libunwind_Dir="$__Android_Cross_Dir/libunwind"
 __ToolchainDir="$__Android_Cross_Dir/toolchain/$__BuildArch"
 __libunwind_cfxdir=__libunwind_clrdir=`sudo find / -wholename "*/coreclr/cross/android-rootfs/toolchain/arm64/sysroot/usr"`
