@@ -369,6 +369,18 @@ bool deps_resolver_t::resolve_tpa_list(
         }
     }
 
+    for (const auto& custom_deps : m_custom_deps)
+    {
+        auto custom_deps_entries = custom_deps->get_entries(deps_entry_t::asset_types::runtime);
+        for (auto entry : custom_deps_entries)
+        {
+            if (!process_entry(m_app_dir, custom_deps.get(), entry))
+            {
+                return false;
+            }
+        }
+    }
+
     // Probe FX deps entries after app assemblies are added.
     const auto& fx_entries = m_portable ? m_fx_deps->get_entries(deps_entry_t::asset_types::runtime) : empty;
     for (const auto& entry : fx_entries)
@@ -400,6 +412,66 @@ void deps_resolver_t::init_known_entry_path(const deps_entry_t& entry, const pal
     {
         m_clrjit_path = path;
         return;
+    }
+}
+
+void deps_resolver_t::resolve_custom_deps(const hostpolicy_init_t& init)
+{
+    pal::string_t custom_deps_serialized = init.custom_deps_serialized;
+    pal::string_t fx_name = init.fx_name;
+    pal::string_t fx_ver = init.fx_ver;
+
+    if (custom_deps_serialized.empty())
+    {
+        return;
+    }
+
+    pal::string_t custom_deps_path;
+    pal::stringstream_t ss(custom_deps_serialized);
+    while (std::getline(ss, custom_deps_path, PATH_SEPARATOR))
+    {
+        // If it's a single deps file, insert it in 'm_custom_deps_files'
+        if (ends_with(custom_deps_path, _X(".deps.json"), false))
+        {
+            if (pal::file_exists(custom_deps_path))
+            {
+                m_custom_deps_files.push_back(custom_deps_path);
+            }
+        }
+        // If it's not a single deps file, we'll assume it's a directory
+        else
+        {
+            // We'll search deps files in 'base_dir'/shared/fx_name/fx_ver
+            append_path(&custom_deps_path, _X("shared"));
+            append_path(&custom_deps_path, fx_name.c_str());
+            append_path(&custom_deps_path, fx_ver.c_str());
+
+            // The resulting list will be empty if 'custom_deps_path' is not a valid directory path
+            std::vector<pal::string_t> list;
+            pal::readdir(custom_deps_path, _X("*.deps.json"), &list);
+            for (pal::string_t json_file : list)
+            {
+                pal::string_t json_full_path = custom_deps_path;
+                append_path(&json_full_path, json_file.c_str());
+                m_custom_deps_files.push_back(json_full_path);
+            }
+        }
+    }
+    if (m_portable)
+    {
+        for (pal::string_t json_file : m_custom_deps_files)
+        {
+            m_custom_deps.push_back(std::unique_ptr<deps_json_t>(
+                new deps_json_t(true, json_file, m_fx_deps->get_rid_fallback_graph())));
+        }
+    }
+    else
+    {
+        for (pal::string_t json_file : m_custom_deps_files)
+        {
+            m_custom_deps.push_back(std::unique_ptr<deps_json_t>(
+                new deps_json_t(false, json_file)));
+        }
     }
 }
 
@@ -508,6 +580,18 @@ bool deps_resolver_t::resolve_probe_dirs(
         (void) library_exists_in_dir(m_app_dir, LIBCORECLR_NAME, &m_coreclr_path);
 
         (void) library_exists_in_dir(m_app_dir, LIBCLRJIT_NAME, &m_clrjit_path);
+    }
+
+    for (const auto& custom_deps : m_custom_deps)
+    {
+        auto custom_deps_entries = custom_deps->get_entries(deps_entry_t::asset_types::runtime);
+        for (auto entry : custom_deps_entries)
+        {
+            if (!add_package_cache_entry(entry, m_app_dir))
+            {
+                return false;
+            }
+        }
     }
     
     for (const auto& entry : fx_entries)
