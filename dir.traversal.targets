@@ -77,18 +77,18 @@
 
   <PropertyGroup>
     <TraversalBuildDependsOn>
-      BuildAllProjects;
       $(TraversalBuildDependsOn);
+      BuildAllProjects;
     </TraversalBuildDependsOn>
 
     <TraversalCleanDependsOn>
-      CleanAllProjects;
       $(TraversalCleanDependsOn);
+      CleanAllProjects;
     </TraversalCleanDependsOn>
 
     <TraversalRestorePackagesDependsOn>
-      RestoreAllProjectPackages;
       $(TraversalRestorePackagesDependsOn)
+      RestoreAllProjectPackages;
     </TraversalRestorePackagesDependsOn>
   </PropertyGroup>
 

@@ -11,26 +11,14 @@
     <PatchVersion>0</PatchVersion>
     <StabilizePackageVersion>false</StabilizePackageVersion>
     <LockHostVersion>false</LockHostVersion>
-    <ReleaseSuffix>beta</ReleaseSuffix>
+    <PreReleaseLabel>beta</PreReleaseLabel>
+    <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
     <Channel>master</Channel>
     <BranchName>master</BranchName>
   </PropertyGroup>
   
   <PropertyGroup>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
-  </PropertyGroup>
-
-  <!-- Versioning -->
-  <PropertyGroup>
-    <CommitCountString>009999</CommitCountString>
-    <SimpleVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).$(CommitCountString)</SimpleVersion>
-    <VersionSuffix>$(ReleaseSuffix)-$(CommitCountString)</VersionSuffix>
-    <NuGetVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)</NuGetVersion>
-    <HostVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)-00</HostVersion>
-    <NetCoreAppVersion>$(HostVersion)</NetCoreAppVersion>
-    <ProductionVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</ProductionVersion>
-    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'true'">$(NetCoreAppVersion)</SharedFrameworkNugetVersion>
-    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'false'">$(ProductionVersion)</SharedFrameworkNugetVersion>
   </PropertyGroup>
 
   <!--
@@ -67,10 +55,31 @@
   </PropertyGroup>
 
   <!-- Setting up Versioning -->
-  <PropertyGroup>
-    <VersionComparisonDate>2016-01-01</VersionComparisonDate>
-  </PropertyGroup>
   <Import Project="$(ToolsDir)BuildVersion.targets" />
+
+  <!-- Versioning --> 
+  <PropertyGroup>
+    <VersionSuffix Condition="'$(PreReleaseLabel)' != ''">$(PreReleaseLabel)-</VersionSuffix>
+    <VersionSuffix>$(VersionSuffix)$(BuildNumberMajor)-$(BuildNumberMinor)</VersionSuffix>
+
+    <ProductVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</ProductVersion>
+    <ProductionVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</ProductionVersion>
+
+    <NuGetVersion>$(ProductVersion)</NuGetVersion>
+    <HostVersion>$(ProductVersion)</HostVersion>
+    <AppHostVersion>$(ProductVersion)</AppHostVersion>
+    <NetCoreAppVersion>$(ProductVersion)</NetCoreAppVersion>
+    <HostResolverVersion>$(ProductionVersion)</HostResolverVersion>
+    <HostPolicyVersion>$(ProductionVersion)</HostPolicyVersion>
+    
+    <HostFullVersion>$(HostVersion)-$(VersionSuffix)</HostFullVersion>
+    <HostResolverFullVersion>$(HostResolverVersion)-$(VersionSuffix)</HostResolverFullVersion>
+    <AppHostFullVersion>$(AppHostVersion)-$(VersionSuffix)</AppHostFullVersion>
+    <HostPolicyFullVersion>$(HostPolicyVersion)-$(VersionSuffix)</HostPolicyFullVersion>
+
+    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'true'">$(NetCoreAppVersion)</SharedFrameworkNugetVersion>
+    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'false'">$(ProductionVersion)</SharedFrameworkNugetVersion>
+  </PropertyGroup>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
   <Import Project="$(ToolsDir)Build.Common.props" />
@@ -108,7 +117,7 @@
 
   <!-- list of directories to perform batch restore -->
   <ItemGroup>
-    <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)pkg\projects\**\project.json" />
+    <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)src\pkg\projects\**\project.json" />
     <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)src\test\**\project.json" />
     <_ProjectJsonFiles Include="$(MSBuildThisFileDirectory)**\project.json" Exclude="@(_DnuExcludeProjectJsonFiles)" />
     <DnuRestoreDirs Include="@(_ProjectJsonFiles->'%(RootDir)%(Directory)')" >
@@ -275,6 +284,9 @@
     <TestPath Condition="'$(TestPath)'==''">$(TestWorkingDir)$(OSPlatformConfig)\$(MSBuildProjectName)\</TestPath>
 
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
+
+    <SharedFrameworkPublishDir>$(IntermediateOutputRootPath)sharedFrameworkPublish\</SharedFrameworkPublishDir>
+    <SharedFrameworkNameAndVersionRoot>$(SharedFrameworkPublishDir)shared\$(SharedFrameworkName)\$(HostVersion)</SharedFrameworkNameAndVersionRoot>
   </PropertyGroup>
 
   <PropertyGroup>

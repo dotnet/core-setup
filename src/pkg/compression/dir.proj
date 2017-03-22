@@ -145,7 +145,7 @@
       <BuildBasePathArg>--build-base-path $(IntermediateOutputRootPath)forPackaging</BuildBasePathArg>
       <OutputArg>--output $(PackagesOutputDir)</OutputArg>
       <ConfigArg>--configuration $(Configuration)</ConfigArg>
-      <VersionSuffixArg>--version-suffix $(CommitCountString)</VersionSuffixArg>
+      <VersionSuffixArg>--version-suffix $(VersionSuffix)</VersionSuffixArg>
     </PropertyGroup>
 
     <Exec Command="$(DotnetToolCommand) pack %(PackageProjects.Identity) --no-build --serviceable $(BuildBasePathArg) $(OutputArg) $(ConfigArg) $(VersionSuffixArg)" />

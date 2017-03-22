@@ -14,22 +14,28 @@ param(
     [Parameter(Mandatory=$true)][string]$SharedHostUpgradeCode
 )
 
-. "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
-$RepoRoot = Convert-Path "$PSScriptRoot\..\..\..\.."
+$RepoRoot = Convert-Path "$PSScriptRoot\..\..\..\..\.."
+$CommonScript = "$RepoRoot\tools-local\scripts\common\_common.ps1"
+if(-Not (Test-Path "$CommonScript"))
+{
+    Exit -1
+} 
+. "$CommonScript"
 
+$CompressionRoot = Join-Path $RepoRoot "src\pkg\compression"
 function RunCandle
 {
     $result = $true
     pushd "$WixRoot"
 
     Write-Host Running candle..
-    $AuthWsxRoot =  Join-Path $RepoRoot "src\compressionpackaging\windows\host"
+    $AuthWsxRoot =  Join-Path $CompressionRoot "windows\host"
 
     .\candle.exe -nologo `
         -out "$WixObjRoot\" `
         -ext WixDependencyExtension.dll `
         -dHostSrc="$SharedHostPublishRoot" `
-        -dMicrosoftEula="$RepoRoot\src\compressionpackaging\osx\sharedhost\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$CompressionRoot\osx\sharedhost\resources\en.lproj\eula.rtf" `
         -dProductMoniker="$ProductMoniker" `
         -dBuildVersion="$SharedHostMSIVersion" `
         -dNugetVersion="$SharedHostNugetVersion" `

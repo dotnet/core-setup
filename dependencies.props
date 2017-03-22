@@ -7,6 +7,8 @@
 
   <!-- Create a collection of all project.json files for dependency updates. -->
   <ItemGroup>
-    <ProjectJsonFiles Include="$(SourceDir)**/project.json" />
+    <_ProjectJsonExcludes Include="$(SourceDir)test\**\project.json" />
+    <_ProjectJsonExcludes Include="$(SourceDir)pkg\**\project.json" />
+    <ProjectJsonFiles Include="$(SourceDir)**\project.json" Exclude="@(_ProjectJsonExcludes)" />
   </ItemGroup>
 </Project>

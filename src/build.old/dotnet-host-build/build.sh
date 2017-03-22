@@ -15,7 +15,7 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 OLDPATH="$PATH"
 
-REPOROOT="$DIR/../.."
+REPOROOT="$DIR/../../.."
 source "$REPOROOT/scripts/common/_prettyprint.sh"
 
 __BuildDriverOnly=0

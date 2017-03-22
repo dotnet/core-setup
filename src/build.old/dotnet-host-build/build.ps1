@@ -38,7 +38,7 @@ if (!$TargetArch)
 }
 $env:TARGETPLATFORM = $TargetArch;
 $env:TARGETFRAMEWORK = $Framework;
-$RepoRoot = "$PSScriptRoot\..\.."
+$RepoRoot = "$PSScriptRoot\..\..\.."
 $env:NUGET_PACKAGES = "$RepoRoot\.nuget\packages"
 
 if($TargetArch -eq "arm64")

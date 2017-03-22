@@ -37,6 +37,26 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="GetCommitCount">
+    <Exec Command="git rev-list --count HEAD" 
+          StandardOutputImportance="Low" 
+          IgnoreExitCode="true" 
+          IgnoreStandardErrorWarningFormat="true" 
+          ConsoleToMSBuild="true"
+          Condition="'$(CommitCount)' == ''">
+     <Output TaskParameter="ConsoleOutput" PropertyName="CommitCount" />
+     <Output TaskParameter="ExitCode" PropertyName="CommitCountExitCode" />
+    </Exec>
+    <Error Condition="'$(CommitCount)' == ''" Text="Unable to determine the 'commit count'.  'Commit count' is used for generating an msi version.  If you are building outside of a git repo, you must pass the '/p:CommitCount=[value]' property" />
+  </Target>
+
+  <Target Name="GetBundleDisplayVersion"
+          DependsOnTargets="GetCommitCount">
+    <PropertyGroup>
+      <BundleDisplayVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).$(CommitCount)</BundleDisplayVersion>
+    </PropertyGroup>
+  </Target>
+  
   <!-- Override Target from buildtools -->
   <Target Name="GenerateVersionHeader"
       Inputs="$(MSBuildProjectFile)"

@@ -2,19 +2,10 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" InitialTargets="ValidateArgs" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
 
-  <!-- Version info -->
   <PropertyGroup>
     <Platform>$(TargetArchitecture)</Platform>
     <DotNetHostBinDir>$(BaseOutputRootPath)corehost</DotNetHostBinDir>
-    <HostVersion>$(ProductionVersion)</HostVersion>
-    <AppHostVersion>$(ProductionVersion)</AppHostVersion>
-    <HostResolverVersion>$(ProductionVersion)</HostResolverVersion>
-    <HostPolicyVersion>$(ProductionVersion)</HostPolicyVersion>
-    <BuildNumberMajor>$(CommitCountString)</BuildNumberMajor>
-    <BuildNumberMinor>00</BuildNumberMinor>
-    <PreReleaseLabel>$(ReleaseSuffix)</PreReleaseLabel>
     <EnsureStableVersion>$(StabilizePackageVersion)</EnsureStableVersion>
-    <NetCoreAppVersion>$(ProductionVersion)</NetCoreAppVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -24,10 +15,11 @@
   <PropertyGroup>
     <PackageOutputPath>$(PackagesOutDir)</PackageOutputPath>
     <SymbolPackageOutputPath>$(SymbolPackagesOutDir)</SymbolPackageOutputPath>
+    <!-- TODO: this hardcoding seems wrong -->
     <RuntimeIdGraphDefinitionFile>$(ProjectDir)packages\Microsoft.NETCore.Platforms\2.0.0-beta-25104-02\runtime.json</RuntimeIdGraphDefinitionFile>
-    <PackageLicenseFile>$(ProjectDir)pkg/projects/dotnet_library_license.txt</PackageLicenseFile>
-    <PackageThirdPartyNoticesFile>$(ProjectDir)pkg/projects/ThirdPartyNotices.txt</PackageThirdPartyNoticesFile>
-    <PackageDescriptionFile>$(ProjectDir)pkg/projects/descriptions.json</PackageDescriptionFile>
+    <PackageLicenseFile>$(ProjectDir)src/pkg/projects/dotnet_library_license.txt</PackageLicenseFile>
+    <PackageThirdPartyNoticesFile>$(ProjectDir)src/pkg/projects/ThirdPartyNotices.txt</PackageThirdPartyNoticesFile>
+    <PackageDescriptionFile>$(ProjectDir)src/pkg/projects/descriptions.json</PackageDescriptionFile>
     <!-- This link should be updated for each release milestone, currently this points to 1.0.0 -->
     <ReleaseNotes>https://go.microsoft.com/fwlink/?LinkID=799417</ReleaseNotes>
     <ProjectUrl>https://dot.net</ProjectUrl>
@@ -46,15 +38,6 @@
       <SkipPackageFileCheck>true</SkipPackageFileCheck>
     </File>
   </ItemGroup>
-
-  <PropertyGroup>
-    <PreReleaseSuffix></PreReleaseSuffix>
-    <PreReleaseSuffix Condition="'$(EnsureStableVersion)'=='false'">-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</PreReleaseSuffix>
-    <HostPolicyFullVersion>$(HostPolicyVersion)$(PreReleaseSuffix)</HostPolicyFullVersion>
-    <HostResolverFullVersion>$(HostResolverVersion)$(PreReleaseSuffix)</HostResolverFullVersion>
-    <AppHostFullVersion>$(AppHostVersion)$(PreReleaseSuffix)</AppHostFullVersion>
-    <HostFullVersion>$(HostVersion)$(PreReleaseSuffix)</HostFullVersion>
-  </PropertyGroup>
 
   <PropertyGroup>
     <NuGetConfigFile Condition="'$(NuGetConfigFile)' == ''">$(ProjectDir)NuGet.Config</NuGetConfigFile>

@@ -13,7 +13,7 @@
         <BuildParams Condition="'$(BuildParams)' == ''">TargetsLinux=true;DistroRid=$(PackageTargetRid)</BuildParams>
     </PropertyGroup>
 
-    <MSBuild Projects="projects/packages.builds" Properties="$(BuildParams)"/>
+    <MSBuild Projects="$(MSBuildThisFileDirectory)projects/packages.builds" Properties="$(BuildParams)"/>
 
     <ItemGroup>
         <Nupkgs Include="$(PackageOutputPath)\**\*.nupkg" />

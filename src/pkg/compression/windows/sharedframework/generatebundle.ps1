@@ -17,8 +17,15 @@ param(
     [Parameter(Mandatory=$true)][string]$Architecture
 )
 
-. "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
-$RepoRoot = Convert-Path "$PSScriptRoot\..\..\..\.."
+$RepoRoot = Convert-Path "$PSScriptRoot\..\..\..\..\.."
+$CommonScript = "$RepoRoot\tools-local\scripts\common\_common.ps1"
+if(-Not (Test-Path "$CommonScript"))
+{
+    Exit -1
+} 
+. "$CommonScript"
+
+$CompressionRoot = Join-Path $RepoRoot "src\pkg\compression"
 
 function RunCandleForBundle
 {
@@ -26,11 +33,11 @@ function RunCandleForBundle
     pushd "$WixRoot"
 
     Write-Host Running candle for bundle..
-    $AuthWsxRoot =  Join-Path $RepoRoot "src\compressionpackaging\windows\sharedframework"
+    $AuthWsxRoot =  Join-Path $CompressionRoot "windows\sharedframework"
     $SharedFrameworkComponentVersion = $SharedFrameworkNugetVersion.Replace('-', '_');
 
     .\candle.exe -nologo `
-        -dMicrosoftEula="$RepoRoot\src\compressionpackaging\osx\sharedframework\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$CompressionRoot\osx\sharedframework\resources\en.lproj\eula.rtf" `
         -dProductMoniker="$ProductMoniker" `
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `
@@ -64,7 +71,7 @@ function RunLightForBundle
     pushd "$WixRoot"
 
     Write-Host Running light for bundle..
-    $AuthWsxRoot =  Join-Path $RepoRoot "src\compressionpackaging\windows\sharedframework"
+    $AuthWsxRoot =  Join-Path $CompressionRoot "windows\sharedframework"
 
     .\light.exe -nologo `
         -cultures:en-us `

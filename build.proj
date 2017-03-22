@@ -12,20 +12,6 @@
     <RestoreDuringBuild Condition="'$(RestoreDuringBuild)'==''">true</RestoreDuringBuild>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Project Include="src/corehost/build.proj" />
-    <Project Include="pkg/dir.proj" />
-    <Project Include="src/src/dir.proj" />
-    <Project Include="src/test/dir.proj" Condition="'$(SkipTests)' != 'true'"/>
-    <Project Include="src/compressionpackaging/dir.proj"/>
-  </ItemGroup>
-
-  <Import Project="dir.targets" />
-
-  <Import Project="dir.traversal.targets" />
-  
-  <Import Project="$(ToolsDir)clean.targets" />
-
   <PropertyGroup>
     <TraversalBuildDependsOn>
       BatchRestorePackages;
@@ -35,6 +21,11 @@
       $(TraversalBuildDependsOn);
     </TraversalBuildDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Project Include="src/dir.proj" />
+    <Project Include="src/pkg/compression/dir.proj"/>
+  </ItemGroup>
 
   <Target Name="BuildCustomTasks">
       <MSBuild Projects="src/tasks/core-setup.tasks.builds"/>
@@ -51,16 +42,6 @@
     <Exec Condition="'@(_allPackagesConfigs)' != ''" Command="$(NugetRestoreCommand) &quot;%(_allPackagesConfigs.FullPath)&quot;" StandardOutputImportance="Low" />
   </Target>
 
-  <!-- Tasks from buildtools for easy project.json dependency updates -->
-  <UsingTask TaskName="UpdatePackageDependencyVersion" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll" />
-
-  <Target Name="UpdatePackageDependencyVersion">
-    <UpdatePackageDependencyVersion ProjectJsons="@(ProjectJsonFiles)"
-                                    PackageId="$(PackageId)"
-                                    OldVersion="$(OldVersion)"
-                                    NewVersion="$(NewVersion)" />
-  </Target>
-  
   <!-- Task from buildtools that uses lockfiles to validate that packages restored are exactly what were specified. -->
   <UsingTask TaskName="ValidateExactRestore" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll" />
 
@@ -68,6 +49,10 @@
           Condition="'$(AllowInexactRestore)'!='true'">
     <ValidateExactRestore ProjectLockJsons="@(ProjectJsonFiles->'%(RootDir)%(Directory)%(Filename).lock.json')" />
   </Target>
+
+  <Import Project="dir.targets" />
+  <Import Project="dir.traversal.targets" />
+  <Import Project="$(ToolsDir)clean.targets" />
 
   <!-- Override RestorePackages from dir.traversal.targets and do a batch restore -->
   <Target Name="RestorePackages" DependsOnTargets="BatchRestorePackages" />

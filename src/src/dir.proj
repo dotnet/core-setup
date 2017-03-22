@@ -53,10 +53,10 @@
       <RestoreArgs>--fallbacksource $(PackagesOutDir) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
     </PropertyGroup>  
 
+    <RemoveDir Directories="$(SharedFrameworkNameAndVersionRoot)" />
+
     <Exec Command="$(DotnetToolCommand) restore --verbosity verbose --disable-parallel --infer-runtimes $(RestoreArgs)"
           WorkingDirectory="$(SharedFrameworkSourceRoot)" />
-
-    <RemoveDir Directories="$(SharedFrameworkNameAndVersionRoot)" />
 
     <!-- We publish to a sub folder of the PublishRoot so tools like heat and zip can generate folder structures easier. -->
     <Exec Command="$(DotnetToolCommand) publish --output $(SharedFrameworkNameAndVersionRoot) -r $(TargetRid) $(SharedFrameworkSourceRoot)"
@@ -95,7 +95,7 @@
     <!-- Generate .version file -->
     <ItemGroup>
       <VersionLines Include="$(LatestCommit)" />
-      <VersionLines Include="$(HostVersion)" />
+      <VersionLines Include="$(HostFullVersion)" />
     </ItemGroup>
 
     <WriteLinesToFile
@@ -208,7 +208,7 @@
     <ItemGroup>
       <ProjJsonLines Include='{' />
       <ProjJsonLines Include='  "dependencies": {' />
-      <ProjJsonLines Include='    "Microsoft.NETCore.DotNetHostResolver"  :  "$(HostVersion)"' />
+      <ProjJsonLines Include='    "Microsoft.NETCore.DotNetHostResolver"  :  "$(HostFullVersion)"' />
       <ProjJsonLines Include='  },' />
       <ProjJsonLines Include='  "frameworks": {' />
       <ProjJsonLines Include='    "$(Framework)": {}' />
@@ -267,7 +267,7 @@
       InputFile="@(SharedFrameworkTemplate)"
       DestinationFile="$(SharedFrameworkSourceRoot)\project.json"
       ReplacementPatterns="%24(NetCoreAppVersion);%24(RID);%24(TargetFramework)"
-      ReplacementStrings="$(HostVersion);$(TargetRid);$(Framework)" />
+      ReplacementStrings="$(HostFullVersion);$(TargetRid);$(Framework)" />
 
   </Target>
   

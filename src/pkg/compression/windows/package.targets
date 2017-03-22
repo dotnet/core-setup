@@ -6,6 +6,7 @@
     <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll" />
 
     <Target Name="GenerateMsis"
+          DependsOnTargets="GetCommitCount"
           Condition="'$(OSGroup)' == 'Windows_NT'">
       
       <Exec Command="powershell -NoProfile -NoLogo $(GetWixScript) -WixVersion $(WixVersion) -OutputDir $(WixToolsDir)" />
@@ -46,7 +47,7 @@
         Major="$(MajorVersion)"
         Minor="$(MinorVersion)"
         Patch="$(PatchVersion)"
-        BuildNumber="$(CommitCountString)">
+        BuildNumber="$(CommitCount)">
         <Output TaskParameter="MsiVersion" PropertyName="MsiVersionString" />
       </GenerateMsiVersion>
 
@@ -66,6 +67,7 @@
   </Target>
 
   <Target Name="GenerateBundles"
+          DependsOnTargets="GetBundleDisplayVersion"
           Condition="'$(OSGroup)' == 'Windows_NT'">
      <PropertyGroup>
         <SharedFxBundleScript>$(WindowsScriptRoot)sharedframework\generatebundle.ps1</SharedFxBundleScript>
@@ -82,7 +84,7 @@
      </GenerateGuidFromName>
 
      <PropertyGroup>
-        <BundleParameters>$(ShareFXMsi) $(HostMsi) $(HostFxrMsi) $(SharedBundle) $(WixToolsDir) $(SharedBrandName) $(MsiVersionString) $(SimpleVersion) $(SharedFrameworkName) $(HostVersion) $(SharedBundleCode) $(ArchParams)</BundleParameters>
+        <BundleParameters>$(ShareFXMsi) $(HostMsi) $(HostFxrMsi) $(SharedBundle) $(WixToolsDir) $(SharedBrandName) $(MsiVersionString) $(BundleDisplayVersion) $(SharedFrameworkName) $(HostVersion) $(SharedBundleCode) $(ArchParams)</BundleParameters>
      </PropertyGroup>
 
      <Exec Command="powershell -NoProfile -NoLogo $(SharedFxBundleScript) $(BundleParameters)" />
