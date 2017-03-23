@@ -263,10 +263,8 @@ namespace Microsoft.DotNet.Cli.Build
             string templateFile = Path.Combine(sharedFrameworkProjectPath, "project.json.template");
             JObject sharedFrameworkProject = JsonUtils.ReadProject(templateFile);
 
-            string netCoreAppDependencyName = GetNetCoreAppDependencyName(rid);
+            AddSharedFrameworkDependencies(sharedFrameworkProject, sharedFrameworkNugetVersion, rid);
 
-            ((JObject)sharedFrameworkProject["dependencies"]).RemoveAll();
-            sharedFrameworkProject["dependencies"][netCoreAppDependencyName] = sharedFrameworkNugetVersion;
             ((JObject)sharedFrameworkProject["runtimes"]).RemoveAll();
             sharedFrameworkProject["runtimes"][rid] = new JObject();
             ((JObject)sharedFrameworkProject["frameworks"]).RemoveAll();
@@ -280,14 +278,19 @@ namespace Microsoft.DotNet.Cli.Build
             return sharedFrameworkProjectPath;
         }
 
-        private static string GetNetCoreAppDependencyName(string rid)
+        private static void AddSharedFrameworkDependencies(
+            JObject sharedFrameworkProject,
+            string sharedFrameworkNugetVersion,
+            string rid)
         {
+            ((JObject)sharedFrameworkProject["dependencies"]).RemoveAll();
+
             if (NeedsToUseRuntimeSpecificDependency(rid))
             {
-                return $"runtime.{rid}.Microsoft.NETCore.App";
+                sharedFrameworkProject["dependencies"][$"runtime.{rid}.Microsoft.NETCore.App"] = sharedFrameworkNugetVersion;
             }
 
-            return "Microsoft.NETCore.App";
+            sharedFrameworkProject["dependencies"]["Microsoft.NETCore.App"] = sharedFrameworkNugetVersion;
         }
 
         private static bool NeedsToUseRuntimeSpecificDependency(string rid)
