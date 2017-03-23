@@ -6,6 +6,9 @@
     <StablePackage Include="Microsoft.NETCore.App">
       <Version>1.1.1</Version>
     </StablePackage>
+    <StablePackage Include="Microsoft.NETCore">
+      <Version>5.0.2</Version>
+    </StablePackage>
 
     <!-- NETCore 1.1.0 core-setup -->
     <StablePackage Include="Microsoft.NETCore.App">
