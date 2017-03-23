@@ -97,7 +97,8 @@
             "PB_DockerOS": "ubuntu.16.04",
             "REPO_ID": "575f40f3797ef7280505232f",
             "REPO_USER": "dotnet",
-            "REPO_PASS": "PassedViaPipeBuild"
+            "REPO_PASS": "PassedViaPipeBuild",
+            "REPO_SERVER": "azure-apt-cat.cloudapp.net"
           },
           "ReportingParameters": {
             "OperatingSystem": "Ubuntu 16.04",
@@ -111,7 +112,8 @@
             "PB_DockerOS": "ubuntu.16.10",
             "REPO_ID": "575f40f3797ef7280505232f",
             "REPO_USER": "dotnet",
-            "REPO_PASS": "PassedViaPipeBuild"
+            "REPO_PASS": "PassedViaPipeBuild",
+            "REPO_SERVER": "azure-apt-cat.cloudapp.net"
           },
           "ReportingParameters": {
             "OperatingSystem": "Ubuntu 16.10",
