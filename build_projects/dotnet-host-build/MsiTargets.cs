@@ -144,6 +144,7 @@ namespace Microsoft.DotNet.Host.Build
             var inputDir = c.BuildContext.Get<string>("HostFxrPublishRoot");
             var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "hostfxr");
             var hostFxrBrandName = $"'{Monikers.HostFxrBrandName}'";
+            var upgradeCode = Utils.GenerateGuidFromName(HostFxrMsi).ToString().ToUpper(); 
 
             if (Directory.Exists(wixObjRoot))
             {
@@ -153,7 +154,7 @@ namespace Microsoft.DotNet.Host.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "hostfxr", "generatemsi.ps1"),
-                inputDir, HostFxrMsi, WixRoot, hostFxrBrandName, hostFxrMsiVersion, hostFxrNugetVersion, Arch, wixObjRoot)
+                inputDir, HostFxrMsi, WixRoot, hostFxrBrandName, hostFxrMsiVersion, hostFxrNugetVersion, Arch, wixObjRoot, upgradeCode)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();
