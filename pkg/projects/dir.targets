@@ -89,4 +89,20 @@
               ItemName="Dependency" />
     </MSBuild>
   </Target>
+
+  <!-- Remove the linux distro specific dependencies so the portable linux RID is used by default. -->
+  <Target Name="RemoveLinuxDistroDependencies"
+          Condition="'@(RuntimeDependency)' != ''"
+          AfterTargets="DetermineRuntimeDependencies"
+          Outputs="%(LinuxDistroRIDNonDependency.Identity)">
+    <PropertyGroup>
+      <CurrentLinuxDistroRID>%(LinuxDistroRIDNonDependency.Identity)</CurrentLinuxDistroRID>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_RuntimeDependencyToRemove Include="@(RuntimeDependency)"
+                                  Condition="'%(RuntimeDependency.TargetRuntime)' == '$(CurrentLinuxDistroRID)'" />
+      <RuntimeDependency Remove="@(_RuntimeDependencyToRemove)" />
+    </ItemGroup>
+  </Target>
 </Project>

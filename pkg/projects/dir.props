@@ -108,6 +108,20 @@
     </BuildRID>
   </ItemGroup>
 
+  <!-- RIDs to remove from the runtime dependencies, so the lineup packages don't have distro specific dependencies.
+       Instead, the linux-x64 runtime will be used on all linux distros by default. 
+       NOTE: There isn't a linux-arm build yet, so we can't remove any arm RIDs. -->
+  <ItemGroup>
+    <LinuxDistroRIDNonDependency Include="debian.8-x64" />
+    <LinuxDistroRIDNonDependency Include="fedora.23-x64" />
+    <LinuxDistroRIDNonDependency Include="fedora.24-x64" />
+    <LinuxDistroRIDNonDependency Include="opensuse.42.1-x64" />
+    <LinuxDistroRIDNonDependency Include="rhel.7-x64" />
+    <LinuxDistroRIDNonDependency Include="ubuntu.14.04-x64" />
+    <LinuxDistroRIDNonDependency Include="ubuntu.16.04-x64" />
+    <LinuxDistroRIDNonDependency Include="ubuntu.16.10-x64" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(HasRuntimePackages)' != 'false'">
     <_project Include="@(BuildRID)">
       <Platform Condition="'%(Platform)' == ''">x64</Platform>
