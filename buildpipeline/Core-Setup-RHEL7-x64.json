@@ -211,7 +211,7 @@
       "value": "true"
     },
     "DockerHost_Sandbox": {
-      "value": "$(build.artifactstagingdirectory)/HostSandbox"
+      "value": "$(Build.StagingDirectory)/HostSandbox"
     },
     "DockerHost_ToolsDirectory": {
       "value": "$(DockerHost_Sandbox)/Tools"
