@@ -181,7 +181,7 @@
         "SymbolStore"
       ],
       "daysToKeep": 2,
-      "minimumToKeep": 1,
+      "minimumToKeep": 10,
       "deleteBuildRecord": true,
       "deleteTestResults": true
     }
