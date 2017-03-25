@@ -36,7 +36,7 @@
     },
     {
         "Name": "Microsoft.NETCore.UniversalWindowsPlatform",
-        "Description": "Provides a set of packages that can be used when building Universal Windows applications on .NETCore.",
+        "Description": "Provides a set of packages that can be used when building Universal Windows applications on .NETCore.\nWhen using Visual Studio this package requires Visual Studio 2017 or later.",
         "CommonTypes": [ ]
     },
 ]
