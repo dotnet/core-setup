@@ -128,32 +128,32 @@
       "allowOverride": true
     },
     "CONNECTION_STRING": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "PUBLISH_TO_AZURE_BLOB": {
-      "value": "true",
+      "value": "false",
       "allowOverride": true
     },
     "NUGET_FEED_URL": {
-      "value": "https://dotnet.myget.org/F/dotnet-core"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "NUGET_API_KEY": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "GITHUB_PASSWORD": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "REPO_ID": {
-      "value": "579f8fb0fedca9aeeb399132"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "REPO_USER": {
-      "value": "dotnet"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "REPO_PASS": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "REPO_SERVER": {
-      "value": "azure-apt-cat.cloudapp.net"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     }
   },
   "demands": [

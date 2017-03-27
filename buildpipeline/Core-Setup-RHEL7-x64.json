@@ -68,7 +68,7 @@
       },
       "inputs": {
         "scriptPath": "scripts/dockerrun-as-current-user.sh",
-        "args": "-t --rm --sig-proxy=true --name $(DockerContainerName) -v $(Build.SourcesDirectory):/opt/code -w /opt/code -e CONNECTION_STRING -e PUBLISH_TO_AZURE_BLOB -e NUGET_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD $(DockerImageName) /bin/bash -c \"HOME=/opt/code; git clean -X -d -f; ./build.sh $(BuildArguments)\"",
+        "args": "-t --rm --sig-proxy=true --name $(DockerContainerName) -v $(Build.SourcesDirectory):/opt/code -w /opt/code $(BuildEnvironmentVariables) $(DockerImageName) /bin/bash -c \"HOME=/opt/code; git clean -X -d -f; ./build.sh $(BuildArguments)\"",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
@@ -164,25 +164,29 @@
       "value": "--skip-prereqs --configuration $(BuildConfiguration) --targets Default",
       "allowOverride": true
     },
+    "BuildEnvironmentVariables": {
+      "value": "-e CHANNEL -e CONNECTION_STRING -e REPO_ID -e REPO_USER -e REPO_PASS -e REPO_SERVER -e DOTNET_BUILD_SKIP_CROSSGEN -e PUBLISH_TO_AZURE_BLOB -e DOCKER_HUB_REPO -e DOCKER_HUB_TRIGGER_TOKEN -e NUGET_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD -e CLI_NUGET_FEED_URL -e CLI_NUGET_API_KEY",
+      "allowOverride": true
+    },
     "DockerContainerName": {
       "value": "dotnetcore-setup-build-container-rhel",
       "allowOverride": true
     },
     "CONNECTION_STRING": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "PUBLISH_TO_AZURE_BLOB": {
-      "value": "true",
+      "value": "false",
       "allowOverride": true
     },
     "NUGET_FEED_URL": {
-      "value": "https://dotnet.myget.org/F/dotnet-core"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "NUGET_API_KEY": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "GITHUB_PASSWORD": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "DockerImageName": {
       "value": "microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2"
