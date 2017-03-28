@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Host.Build
             }
             Directory.CreateDirectory(wixObjRoot);
 
-            Cmd("powershell", "-NoProfile", "-NoLogo",
+            Cmd("powershell", "-ExecutionPolicy", "Unrestricted", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "host", "generatemsi.ps1"),
                 inputDir, SharedHostMsi, WixRoot, sharedHostBrandName, hostMsiVersion, hostNugetVersion, Arch, wixObjRoot)
                     .Execute()
@@ -177,7 +177,7 @@ namespace Microsoft.DotNet.Host.Build
             }
             Directory.CreateDirectory(wixObjRoot);
 
-            Cmd("powershell", "-NoProfile", "-NoLogo",
+            Cmd("powershell", "-ExecutionPolicy", "Unrestricted", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatemsi.ps1"),
                 inputDir, SharedFrameworkMsi, WixRoot, sharedFxBrandName, msiVerison, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch, wixObjRoot)
                     .Execute()
@@ -194,7 +194,7 @@ namespace Microsoft.DotNet.Host.Build
             var upgradeCode = Utils.GenerateGuidFromName(SharedFrameworkBundle).ToString().ToUpper();
             var sharedFxBrandName = $"'{Monikers.SharedFxBrandName}'";
 
-            Cmd("powershell", "-NoProfile", "-NoLogo",
+            Cmd("powershell", "-ExecutionPolicy", "Unrestricted", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "sharedframework", "generatebundle.ps1"),
                 SharedFrameworkMsi, SharedHostMsi, HostFxrMsi, SharedFrameworkBundle, WixRoot, sharedFxBrandName, MsiVersion, DisplayVersion, sharedFrameworkNuGetName, sharedFrameworkNuGetVersion, upgradeCode, Arch)
                     .Execute()
