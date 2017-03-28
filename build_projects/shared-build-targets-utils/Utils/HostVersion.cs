@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Cli.Build
         // These should only be incremented in a servicing release if we are updating one (or more) of the host packages.
 
         public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
-        public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
+        public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 2, "", "", "", CommitCountString);
         public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
 
 
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Cli.Build
         // These are used for generating platform installers.
         //
         public bool IsLocked = true; // Set this variable to toggle muxer locking.
-        public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 1, 0, "", "", "", CommitCountString) : LatestHostFxrVersion;
+        public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 1, 2, "", "", "", CommitCountString) : LatestHostFxrVersion;
         public VerInfo LockedHostVersion    => IsLocked ? new VerInfo(1, 1, 0, "", "", "", CommitCountString) : LatestHostVersion;
     }
 }
