@@ -121,7 +121,6 @@ platformList.each { platform ->
                 // build the world, but don't run the tests
                 batchFile("build.cmd -Configuration ${configurationGroup} -Targets Init,Compile,Package,Publish -Architecure x64 -TargetArch arm64 -ToolsetDir C:\\ats2 -Framework netcoreapp1.1")
             }
-            label("arm64")
 
             // Kick off the test run
             publishers {
@@ -133,6 +132,9 @@ platformList.each { platform ->
                 }
             }
         }
+		
+		// Set to use the arm64 build machines
+		Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-arm64')
 
         // Set up standard options.
         Utilities.standardJobSetup(newJob, project, /* isPR */ false, "*/${branch}")
