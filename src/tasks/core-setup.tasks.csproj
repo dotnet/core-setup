@@ -14,23 +14,18 @@
   <PropertyGroup Condition="'$(Configuration)' == 'netstandard1.5_Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'net45_Debug'" />
   <ItemGroup>
-    <Compile Include="BuildTask.cs" />
-    <Compile Include="GenerateFileVersionProps.cs" />
-    <Compile Include="FileUtilities.cs" />
-    <Compile Include="GenerateGuidFromName.cs" />
-    <Compile Include="GenerateMsiVersion.cs" />
-    <Compile Include="GetBuildableFrameworks.cs" />
-    <Compile Include="ChangeEntryPointLibraryName.cs" />
-    <Compile Include="ReplaceFileContents.cs" />
+    <Compile Include="*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net45'">
-    <Compile Include="FileUtilities.netstandard.cs" />
+    <Compile Include="netstandard/FileUtilities.netstandard.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net45'">
-    <Compile Include="FileUtilities.net45.cs" />
+    <Compile Include="net45/FileUtilities.net45.cs" />
     <TargetingPackReference Include="System" />
     <TargetingPackReference Include="System.Core" />
+    <TargetingPackReference Include="System.Net.Http" />
     <TargetingPackReference Include="System.Runtime" />
+    <TargetingPackReference Include="System.Xml" />
     <TargetingPackReference Include="Microsoft.Build" />
     <TargetingPackReference Include="Microsoft.Build.Framework" />
     <TargetingPackReference Include="Microsoft.Build.Utilities.v4.0" />

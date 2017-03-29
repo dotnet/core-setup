@@ -77,14 +77,12 @@
   </Target>
 
   <Target Name="GenerateVersionBadge">
-
     <PropertyGroup>
       <templateSvg>$(ProjectDir)resources/images/version_badge.svg</templateSvg>
-      <outputSvg>$(BaseOutputRootPath)/sharedfx_$(TargetRid)_$(ConfigurationGroup)_version_badge.svg</outputSvg>
     </PropertyGroup>
 
     <WriteLinesToFile
-      File="$(outputSvg)"
+      File="$(OutputVersionBadge)"
       Lines="$([System.IO.File]::ReadAllText('$(templateSvg)').Replace('ver_number', '$(HostVersion)'))"
       Overwrite="true"
                       />

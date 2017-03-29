@@ -16,7 +16,8 @@
     <Project Include="$(MSBuildThisFileDirectory)corehost/build.proj" />
     <Project Include="$(MSBuildThisFileDirectory)pkg/dir.proj" />
     <Project Include="$(MSBuildThisFileDirectory)src/dir.proj" />
-    <Project Include="$(MSBuildThisFileDirectory)test/dir.proj" Condition="'$(SkipTests)' != 'true'"/>
+<!-- Disabling tests, they need to be sorted -->    
+<!--    <Project Include="$(MSBuildThisFileDirectory)test/dir.proj" Condition="'$(SkipTests)' != 'true'"/> -->
   </ItemGroup>
 
   <!-- Tasks from buildtools for easy project.json dependency updates -->

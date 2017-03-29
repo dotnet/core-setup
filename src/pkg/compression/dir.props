@@ -18,19 +18,12 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <CompressedFileExtension Condition="'$(OSGroup)' == 'Windows_NT'">.zip</CompressedFileExtension>
-    <CompressedFileExtension Condition="'$(OSGroup)' != 'Windows_NT'">.tar.gz</CompressedFileExtension>
     <CombinedCompressedFile>dotnet-$(ProductMoniker)$(CompressedFileExtension)</CombinedCompressedFile>
     <HostFxrCompressedFile>dotnet-hostfxr-$(ProductMoniker)$(CompressedFileExtension)</HostFxrCompressedFile>
     <SharedFrameworkCompressedFile>dotnet-sharedframework-$(ProductMoniker)$(CompressedFileExtension)</SharedFrameworkCompressedFile>
   </PropertyGroup>
 
   <PropertyGroup>
-    <InstallerExtension Condition="'$(OSGroup)' == 'Windows_NT'">.msi</InstallerExtension>
-    <InstallerExtension Condition="'$(OSGroup)' == 'OSX'">.pkg</InstallerExtension>
-    <InstallerExtension Condition="'$(OSGroup)' != 'Windows_NT' and '$(OSGroup)' != 'OSX'">.deb</InstallerExtension>
-    <CombinedInstallerExtension Condition="'$(OSGroup)' == 'Windows_NT'">.exe</CombinedInstallerExtension>
-    <CombinedInstallerExtension Condition="'$(OSGroup)' != 'Windows_NT'">$(InstallerExtension)</CombinedInstallerExtension>    
     <CombinedInstallerFile>dotnet-$(ProductMoniker)$(CombinedInstallerExtension)</CombinedInstallerFile>
     <SharedHostInstallerFile>dotnet-host-$(ProductMoniker)$(InstallerExtension)</SharedHostInstallerFile>
     <HostFxrInstallerFile>dotnet-hostfxr-$(ProductMoniker)$(InstallerExtension)</HostFxrInstallerFile>

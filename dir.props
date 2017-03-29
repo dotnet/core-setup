@@ -59,16 +59,17 @@
 
   <!-- Versioning --> 
   <PropertyGroup>
+    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
     <VersionSuffix Condition="'$(PreReleaseLabel)' != ''">$(PreReleaseLabel)-</VersionSuffix>
     <VersionSuffix>$(VersionSuffix)$(BuildNumberMajor)-$(BuildNumberMinor)</VersionSuffix>
 
-    <ProductVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</ProductVersion>
+    <ProductVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)</ProductVersion>
     <ProductionVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</ProductionVersion>
 
-    <NuGetVersion>$(ProductVersion)</NuGetVersion>
-    <HostVersion>$(ProductVersion)</HostVersion>
-    <AppHostVersion>$(ProductVersion)</AppHostVersion>
-    <NetCoreAppVersion>$(ProductVersion)</NetCoreAppVersion>
+    <NuGetVersion>$(ProductionVersion)</NuGetVersion>
+    <HostVersion>$(ProductionVersion)</HostVersion>
+    <AppHostVersion>$(ProductionVersion)</AppHostVersion>
+    <NetCoreAppVersion>$(ProductionVersion)</NetCoreAppVersion>
     <HostResolverVersion>$(ProductionVersion)</HostResolverVersion>
     <HostPolicyVersion>$(ProductionVersion)</HostPolicyVersion>
     
@@ -77,8 +78,19 @@
     <AppHostFullVersion>$(AppHostVersion)-$(VersionSuffix)</AppHostFullVersion>
     <HostPolicyFullVersion>$(HostPolicyVersion)-$(VersionSuffix)</HostPolicyFullVersion>
 
-    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'true'">$(NetCoreAppVersion)</SharedFrameworkNugetVersion>
-    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'false'">$(ProductionVersion)</SharedFrameworkNugetVersion>
+    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'true'">$(ProductionVersion)</SharedFrameworkNugetVersion>
+    <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'false'">$(ProductVersion)</SharedFrameworkNugetVersion>
+
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CompressedFileExtension Condition="'$(OSGroup)' == 'Windows_NT'">.zip</CompressedFileExtension>
+    <CompressedFileExtension Condition="'$(OSGroup)' != 'Windows_NT'">.tar.gz</CompressedFileExtension>
+    <InstallerExtension Condition="'$(OSGroup)' == 'Windows_NT'">.msi</InstallerExtension>
+    <InstallerExtension Condition="'$(OSGroup)' == 'OSX'">.pkg</InstallerExtension>
+    <InstallerExtension Condition="'$(OSGroup)' != 'Windows_NT' and '$(OSGroup)' != 'OSX'">.deb</InstallerExtension>
+    <CombinedInstallerExtension Condition="'$(OSGroup)' == 'Windows_NT'">.exe</CombinedInstallerExtension>
+    <CombinedInstallerExtension Condition="'$(OSGroup)' != 'Windows_NT'">$(InstallerExtension)</CombinedInstallerExtension>    
   </PropertyGroup>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
@@ -146,6 +158,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <TargetArchitecture  Condition="'$(TargetArchitecture)' == ''">x64</TargetArchitecture>
     <Platform Condition="'$(Platform)'==''">$(TargetArchitecture)</Platform>
   </PropertyGroup>
   <!-- 
@@ -241,32 +254,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SupportedRid Include="win7-x64"/>
-    <SupportedRid Include="win7-x86"/>
-    <SupportedRid Include="win8-arm"/>
-    <SupportedRid Include="win10-arm64"/>
-    <SupportedRid Include="osx.10.10-x64"/>
-    <SupportedRid Include="osx.10.11-x64"/>
-    <SupportedRid Include="osx.10.12-x64"/>
-    <SupportedRid Include="linux-x64"/>
-    <SupportedRid Include="ubuntu.14.04-x64"/>
-    <SupportedRid Include="ubuntu.16.04-x64"/>
-    <SupportedRid Include="ubuntu.14.04-arm"/>
-    <SupportedRid Include="ubuntu.16.04-arm"/>
-    <SupportedRid Include="ubuntu.16.10-x64"/>
-    <SupportedRid Include="centos.7-x64"/>
-    <SupportedRid Include="rhel.7-x64"/>
-    <SupportedRid Include="rhel.7.0-x64"/>        
-    <SupportedRid Include="rhel.7.1-x64"/>    
-    <SupportedRid Include="rhel.7.2-x64"/>
-    <SupportedRid Include="rhel.7.3-x64"/>
-    <SupportedRid Include="debian.8-x64"/>
-    <SupportedRid Include="debian.8-armel"/>    
-    <SupportedRid Include="fedora.23-x64"/>
-    <SupportedRid Include="fedora.24-x64"/>
-    <SupportedRid Include="opensuse.13.2-x64"/>
-    <SupportedRid Include="opensuse.42.1-x64"/>
-    <SupportedRid Include="tizen.4.0.0-armel"/>    
+    <PublishRid Include="win7-x64"/>
+    <!-->
+    <PublishRid Include="win7-x86"/>
+    <PublishRid Include="win8-arm"/>
+    <PublishRid Include="win10-arm64"/>
+    <PublishRid Include="osx.10.12-x64"/>
+    <PublishRid Include="linux-x64"/>
+    <PublishRid Include="ubuntu.14.04-x64"/>
+    <PublishRid Include="ubuntu.16.04-x64"/>
+    <PublishRid Include="ubuntu.14.04-arm"/>
+    <PublishRid Include="ubuntu.16.04-arm"/>
+    <PublishRid Include="ubuntu.16.10-x64"/>
+    <PublishRid Include="rhel.7-x64"/>
+    <PublishRid Include="debian.8-x64"/>
+    <PublishRid Include="fedora.23-x64"/>
+    <PublishRid Include="fedora.24-x64"/>
+    <PublishRid Include="opensuse.42.1-x64"/>
+    -->
   </ItemGroup>
 
   <!-- Set up the default output and intermediate paths -->
@@ -291,6 +296,7 @@
 
   <PropertyGroup>
     <DisableCrossgen>false</DisableCrossgen>
+    <OutputVersionBadge>$(BaseOutputRootPath)sharedfx_$(TargetRid)_$(ConfigurationGroup)_version_badge.svg</OutputVersionBadge>
   </PropertyGroup>
 
   <!-- Disable some standard properties for building our projects -->
@@ -307,4 +313,45 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <TargetsWindows>false</TargetsWindows>
+    <TargetsOSX>false</TargetsOSX>
+    <TargetsLinux>false</TargetsLinux>
+    <TargetsUnix>false</TargetsUnix>
+    <TargetsUbuntu>false</TargetsUbuntu>
+    <TargetsDebian>false</TargetsDebian>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="$(TargetRid.StartsWith('win'))">
+      <PropertyGroup>
+        <TargetsWindows>true</TargetsWindows>
+      </PropertyGroup>
+    </When>
+    <When Condition="$(TargetRid.StartsWith('osx'))">
+      <PropertyGroup>
+        <TargetsOSX>true</TargetsOSX>
+        <TargetsUnix>true</TargetsUnix>
+      </PropertyGroup>
+    </When>
+    <When Condition="$(TargetRid.StartsWith('debian'))">
+      <PropertyGroup>
+        <TargetsDebian>true</TargetsDebian>
+        <TargetsLinux>true</TargetsLinux>
+        <TargetsUnix>true</TargetsUnix>
+      </PropertyGroup>
+    </When>
+    <When Condition="$(TargetRid.StartsWith('ubuntu'))">
+      <PropertyGroup>
+        <TargetsUbuntu>true</TargetsUbuntu>
+        <TargetsLinux>true</TargetsLinux>
+        <TargetsUnix>true</TargetsUnix>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <TargetsLinux>true</TargetsLinux>
+        <TargetsUnix>true</TargetsUnix>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
 </Project>
