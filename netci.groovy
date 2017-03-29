@@ -133,8 +133,8 @@ platformList.each { platform ->
             }
         }
 		
-		// Set to use the arm64 build machines
-		Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-arm64')
+        // Set to use the arm64 build machines
+        Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-arm64')
 
         // Set up standard options.
         Utilities.standardJobSetup(newJob, project, /* isPR */ false, "*/${branch}")
