@@ -145,20 +145,20 @@
       "value": "--skip-prereqs --configuration $(BuildConfiguration)  --docker fedora.23 --targets Default"
     },
     "CONNECTION_STRING": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "PUBLISH_TO_AZURE_BLOB": {
-      "value": "true",
+      "value": "false",
       "allowOverride": true
     },
     "NUGET_FEED_URL": {
-      "value": "https://dotnet.myget.org/F/dotnet-core"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "NUGET_API_KEY": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
     "GITHUB_PASSWORD": {
-      "value": "PassedViaPipeBuild"
+      "value": "ENV_VAR_EMPTY_WORKAROUND"
     }
   },
   "demands": [

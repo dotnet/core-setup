@@ -63,6 +63,7 @@ namespace Microsoft.DotNet.Host.Build
 
         [Target]
         [BuildPlatforms(BuildPlatform.Ubuntu, "14.04")]
+        [Environment("CLI_NUGET_FEED_URL")]
         public static BuildTargetResult PublishDotnetDebToolPackage(BuildTargetContext c)
         {
             string nugetFeedUrl = EnvVars.EnsureVariable("CLI_NUGET_FEED_URL");
@@ -133,7 +134,8 @@ namespace Microsoft.DotNet.Host.Build
                         "opensuse.13.2.x64.version"
                     };
                     
-                    PublishCoreHostPackagesToFeed();
+                    c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackagesToFeed));
+                    c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
 
                     string sfxVersion = Utils.GetSharedFrameworkVersionFileContent(c);
                     foreach (string version in versionFiles)
@@ -163,20 +165,39 @@ namespace Microsoft.DotNet.Host.Build
             }
         }
 
-        private static void PublishCoreHostPackagesToFeed()
+        [Target]
+        public static BuildTargetResult DownloadCoreHostPackagesToBuildDirectory(BuildTargetContext c)
         {
             var hostBlob = $"{Channel}/Binaries/{SharedFrameworkNugetVersion}";
 
             Directory.CreateDirectory(Dirs.PackagesNoRID);
             AzurePublisherTool.DownloadFilesWithExtension(hostBlob, ".nupkg", Dirs.PackagesNoRID);
 
+            return c.Success();
+        }
+
+        [Target(nameof(PublishTargets.DownloadCoreHostPackagesToBuildDirectory))]
+        [Environment("NUGET_FEED_URL")]
+        public static BuildTargetResult PublishCoreHostPackagesToFeed(BuildTargetContext c)
+        {
             string nugetFeedUrl = EnvVars.EnsureVariable("NUGET_FEED_URL");
             string apiKey = EnvVars.EnsureVariable("NUGET_API_KEY");
+
             NuGetUtil.PushPackages(Dirs.PackagesNoRID, nugetFeedUrl, apiKey, IncludeSymbolPackages);
 
+            return c.Success();
+        }
+
+        [Target(nameof(PublishTargets.DownloadCoreHostPackagesToBuildDirectory))]
+        [Environment("GITHUB_PASSWORD")]
+        public static BuildTargetResult PublishCoreHostPackageVersionsToVersionsRepo(BuildTargetContext c)
+        {
             string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
             VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
+
             repoUpdater.UpdatePublishedVersions(Dirs.PackagesNoRID, $"build-info/dotnet/core-setup/{BranchName}/Latest").Wait();
+
+            return c.Success();
         }
 
         private static bool CheckIfAllBuildsHavePublished()
@@ -254,6 +275,10 @@ namespace Microsoft.DotNet.Host.Build
             nameof(PublishHostFxrDebToDebianRepo),
             nameof(PublishSharedHostDebToDebianRepo))]
         [BuildPlatforms(BuildPlatform.Ubuntu)]
+        [Environment("REPO_SERVER")]
+        [Environment("REPO_ID")]
+        [Environment("REPO_USER")]
+        [Environment("REPO_PASS")]
         public static BuildTargetResult PublishDebFilesToDebianRepo(BuildTargetContext c)
         {
             return c.Success();

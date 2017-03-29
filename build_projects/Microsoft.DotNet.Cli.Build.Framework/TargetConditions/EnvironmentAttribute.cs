@@ -6,6 +6,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
     public class EnvironmentAttribute : TargetConditionAttribute
     {
+        private const string EnvVarEmptyWorkaround = "ENV_VAR_EMPTY_WORKAROUND";
         private string _envVar;
         private string[] _expectedVals;
 
@@ -34,7 +35,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
             else
             {
-                return !string.IsNullOrEmpty(actualVal);
+                return actualVal != EnvVarEmptyWorkaround && !string.IsNullOrEmpty(actualVal);
             }
         }
     }
