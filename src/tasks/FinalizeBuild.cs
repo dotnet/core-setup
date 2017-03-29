@@ -26,7 +26,6 @@ namespace Microsoft.DotNet.Build.Tasks
         public string FinalizeContainer { get; set; }
         public string MaxWait { get; set; }
         public string Delay { get; set; }
-
         public string AccountName { get; set; }
         public string AccountKey { get; set; }
         public string ConnectionString { get; set; }
@@ -35,7 +34,18 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required]
         public string Channel { get; set; }
         [Required]
+        public string Version { get; set; }
+        [Required]
+        public ITaskItem [] PublishRids { get; set; }
         public string CommitHash { get; set; }
+        [Required]
+        public string NuGetFeedUrl { get; set; }
+        [Required]
+        public string NuGetApiKey { get; set; }
+        [Required]
+        public string GitHubPassword { get; set; }
+        [Required]
+        public string DownloadPackagesToFolder { get; set; }
 
         private const int s_MaxWaitDefault = 120; // seconds
         private const int s_DelayDefault = 500; // milliseconds
@@ -77,7 +87,6 @@ namespace Microsoft.DotNet.Build.Tasks
                 return false;
             }
 
-
             Console.WriteLine("Attach debugger now <press ENTER to continue>");
             Console.ReadLine();
             _leaseUrl = GetBlobLeaseRequestUrl(AccountName, ContainerName, SemaphoreBlob);
@@ -88,33 +97,125 @@ namespace Microsoft.DotNet.Build.Tasks
             {
                 FinalizeContainer = $"{FinalizeContainer}/";
             }
-            string targetVersionFile = $"{FinalizeContainer}{CommitHash}";
+            string targetVersionFile = $"{FinalizeContainer}{Version}";
 
             CreateBlobIfNotExists(SemaphoreBlob);
 
             string leaseId = AcquireLeaseOnBlob(SemaphoreBlob);
 
-            if(IsLatestSpecifiedVersion(targetVersionFile))
+            // Prevent race conditions by dropping a version hint of what version this is. If we see this file
+            // and it is the same as our version then we know that a race happened where two+ builds finished 
+            // at the same time and someone already took care of publishing and we have no work to do.
+            if (IsLatestSpecifiedVersion(targetVersionFile))
             {
                 ReleaseLeaseOnBlob(SemaphoreBlob, leaseId);
                 return true;
             }
             else
             {
-                Regex versionFileRegex = new Regex(@"(?<CommitHash>[\w\d]}40})");
+                Regex versionFileRegex = new Regex(@"(?<version>\d\.\d\.\d\.)(-(?<prerelease>.*)?)?");
 
+                // Delete old version files
                 GetBlobList(FinalizeContainer)
                     .Select(s => s.Replace("/dotnet/", ""))
                     .Where(w => versionFileRegex.IsMatch(w))
                     .ToList()
                     .ForEach(f => TryDeleteBlob(f));
 
+
+                // Drop the version file signaling such for any race-condition builds (see above comment).
                 CreateBlobIfNotExists(targetVersionFile);
+
+                try
+                {
+                    CopyBlobs($"{Channel}/Binaries/{Version}", FinalizeContainer);
+
+                    CopyBlobs($"{Channel}/Installers/{Version}", $"{Channel}/Installers/Latest/");
+
+                    // Generate the Sharedfx Version text files
+                    // TODO: Update readme to match new names for dnvm version files
+                    List<string> versionFiles = PublishRids.Select(p => $"{p.ItemSpec}.version").ToList();
+
+                    PublishCoreHostPackagesToFeed();
+
+                    string sfxVersion = GetSharedFrameworkVersionFileContent();
+                    foreach(string version in versionFiles)
+                    {
+                        PublishStringToBlob($"{Channel}/dnvm/latest.sharedfx.{version}", sfxVersion);
+                    }
+                }
+                finally
+                {
+                    ReleaseLeaseOnBlob(SemaphoreBlob, leaseId);
+                }
 
             }
             return !Log.HasLoggedErrors;
         }
 
+        public void PublishStringToBlob(string blob, string content)
+        {
+            string blobUrl = GetBlobRootRequestUrl(AccountName, ContainerName, blob);
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    Tuple<string, string> headerBlobType = new Tuple<string, string>("x-ms-blob-type", "BlockBlob");
+                    List<Tuple<string, string>> additionalHeaders = new List<Tuple<string, string>>() { headerBlobType };
+                    var request = AzureHelper.RequestMessage("PUT", blobUrl, AccountName, AccountKey, additionalHeaders, content);
+                    
+                    AzureHelper.RequestWithRetry(Log, client, request).GetAwaiter().GetResult();
+                }
+                catch (Exception e)
+                {
+                    Log.LogErrorFromException(e, true);
+                }
+            }
+        }
+        private string GetSharedFrameworkVersionFileContent()
+        {
+            string returnString = string.Empty;
+            if(!string.IsNullOrWhiteSpace(CommitHash))
+            {
+                returnString += $"{CommitHash}{Environment.NewLine}";
+            }
+            returnString += $"{Version}{Environment.NewLine}";
+            return returnString;
+        }
+        private void PublishCoreHostPackagesToFeed()
+        {
+            string hostblob = $"{Channel}/Binaries/{Version}";
+            Directory.CreateDirectory(DownloadPackagesToFolder);
+            DownloadFilesWithExtension(hostblob, ".nupkg", DownloadPackagesToFolder);
+
+            // TODO: use dotnet to push packages when we sync forward to use a newere version of the CLI which has dotnet-nuget-push
+
+            // TODO: update versions repo
+        }
+
+        public void DownloadFilesWithExtension(string blobFolder, string fileExtension, string localDownloadPath)
+        {
+            var blobFiles = GetBlobList(blobFolder).Where(b => Path.GetExtension(b) == fileExtension);
+
+            foreach(var blobFile in blobFiles)
+            {
+                string localBlobFile = Path.Combine(localDownloadPath, Path.GetFileName(blobFile));
+                Log.LogMessage($"Downloading {blobFile} to {localBlobFile}");
+
+                DownloadBlobFromAzure downloadFromAzure = new DownloadBlobFromAzure();
+                downloadFromAzure.AccountName = AccountName;
+                downloadFromAzure.AccountKey = AccountKey;
+                downloadFromAzure.ConnectionString = ConnectionString;
+                downloadFromAzure.ContainerName = ContainerName;
+                downloadFromAzure.BlobName = blobFile;
+                downloadFromAzure.DownloadDirectory = localDownloadPath;
+                downloadFromAzure.BuildEngine = this.BuildEngine;
+                downloadFromAzure.HostObject = this.HostObject;
+
+                downloadFromAzure.Execute();
+            }
+
+        }
         public string [] GetBlobList(string path)
         {
             GetAzureBlobList azureBlobList = new GetAzureBlobList();
@@ -130,17 +231,49 @@ namespace Microsoft.DotNet.Build.Tasks
             return azureBlobList.BlobNames;
         }
 
-        public void CopyBlobs(string sourceFolder, string destinationFolder)
+        public bool CopyBlobs(string sourceFolder, string destinationFolder)
         {
-            foreach(string blob in GetBlobList(sourceFolder))
+            bool returnStatus = true;
+            List<Task<bool>> copyTasks = new List<Task<bool>>();
+            foreach (string blob in GetBlobList(sourceFolder))
             {
-                string source = blob.Replace("/dotnet/", "");
-                string directoryName = Path.GetDirectoryName(blob);
+                string source = GetBlobRootRequestUrl(AccountName, ContainerName, blob.Replace($"/{ContainerName}/", ""));
                 string targetName = Path.GetFileName(blob)
-                    .Replace(directoryName, "chcosta_latest");
-                string target = $"{destinationFolder}{targetName}";
-                /* Actually copy the blob */
+                    .Replace(Version, "Latest");
+                string target = GetBlobRootRequestUrl(AccountName, ContainerName, $"{destinationFolder}{targetName}");
+                copyTasks.Add(CopyBlobAsync(source, target));
             }
+            Task.WaitAll(copyTasks.ToArray());
+            copyTasks.ForEach(c => returnStatus &= c.Result);
+            return returnStatus;
+        }
+
+        public async Task<bool> CopyBlobAsync(string sourceUrl, string destinationUrl)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    Tuple<string, string> leaseAction = new Tuple<string, string>("x-ms-lease-action", "acquire");
+                    Tuple<string, string> leaseDuration = new Tuple<string, string>("x-ms-lease-duration", "60" /* seconds */);
+                    Tuple<string, string> headerSource = new Tuple<string, string>("x-ms-copy-source", sourceUrl);
+                    List<Tuple<string, string>> additionalHeaders = new List<Tuple<string, string>>() { leaseAction, leaseDuration, headerSource };
+                    var request = AzureHelper.RequestMessage("PUT", destinationUrl, AccountName, AccountKey, additionalHeaders);
+                    using (HttpResponseMessage response = await AzureHelper.RequestWithRetry(Log, client, request))
+                    {
+                        if(response.IsSuccessStatusCode)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.LogErrorFromException(e, true);
+                }
+            }
+            return false;
+
         }
         public bool TryDeleteBlob(string path)
         {
@@ -170,26 +303,9 @@ namespace Microsoft.DotNet.Build.Tasks
             var blobList = GetBlobList(path);
             if(blobList.Count() == 0)
             {
-                string semaphoreFile = Path.GetFileName(path);
-                using (StreamWriter writer = File.CreateText(semaphoreFile))
-                {
-                    writer.WriteLine(DateTime.Now.ToString());
-                }
-                Dictionary<string, string> metadata = new Dictionary<string, string>();
-                metadata.Add("RelativeBlobPath", $"{path}");
-                Microsoft.Build.Utilities.TaskItem item = new Microsoft.Build.Utilities.TaskItem(semaphoreFile, metadata);
-                UploadToAzure uploadToAzure = new UploadToAzure();
-                uploadToAzure.AccountName = AccountName;
-                uploadToAzure.AccountKey = AccountKey;
-                uploadToAzure.BuildEngine = BuildEngine;
-                uploadToAzure.ConnectionString = ConnectionString;
-                uploadToAzure.ContainerName = ContainerName;
-                uploadToAzure.Items = new ITaskItem[] { item };
-                uploadToAzure.Execute();
+                PublishStringToBlob(path, DateTime.Now.ToString());
             }
-
         }
-
         public bool IsLatestSpecifiedVersion(string versionFile)
         {
 

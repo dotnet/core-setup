@@ -408,7 +408,7 @@ namespace Microsoft.DotNet.Build.Tasks
             }
         }
 
-        public static Func<HttpRequestMessage> RequestMessage(string method, string url, string accountName, string accountKey, List<Tuple<string, string>> additionalHeaders = null)
+        public static Func<HttpRequestMessage> RequestMessage(string method, string url, string accountName, string accountKey, List<Tuple<string, string>> additionalHeaders = null, string body = null)
         {
             Func<HttpRequestMessage> requestFunc = () =>
             {
@@ -432,12 +432,29 @@ namespace Microsoft.DotNet.Build.Tasks
                         request.Headers.Add(additionalHeader.Item1, additionalHeader.Item2);
                     }
                 }
-                request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
-                    accountName,
-                    accountKey,
-                    method,
-                    dateTime,
-                    request));
+                if (body != null)
+                {
+                    request.Content = new StringContent(body);
+                    request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
+                        accountName,
+                        accountKey,
+                        method,
+                        dateTime,
+                        request,
+                        "",
+                        "",
+                        request.Content.Headers.ContentLength.ToString(),
+                        request.Content.Headers.ContentType.ToString()));
+                }
+                else
+                {
+                    request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
+                        accountName,
+                        accountKey,
+                        method,
+                        dateTime,
+                        request));
+                }
                 return request;
             };
             return requestFunc;
