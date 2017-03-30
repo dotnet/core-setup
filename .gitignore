@@ -3,6 +3,9 @@
 # Tool Runtime Dir
 /[Tt]ools/
 
+# RootFS used for cross-compilation
+cross/rootfs
+
 # Test results
 *-testResults.xml
 

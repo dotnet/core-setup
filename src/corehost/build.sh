@@ -44,7 +44,7 @@ usage()
     echo "Usage: $0 --arch <Architecture> --hostver <Dotnet exe version> --apphostver <app host exe version> --fxrver <HostFxr library version> --policyver <HostPolicy library version> --commithash <Git commit hash> [--xcompiler <Cross C++ Compiler>]"
     echo ""
     echo "Options:"
-    echo "  --arch <Architecture>             Target Architecture (x64, x86, arm, armel)"
+    echo "  --arch <Architecture>             Target Architecture (x64, x86, arm, arm64, armel)"
     echo "  --hostver <Dotnet host version>   Version of the dotnet executable"
     echo "  --apphostver <app host version>   Version of the apphost executable"
     echo "  --fxrver <HostFxr version>        Version of the hostfxr library"
@@ -136,6 +136,9 @@ case $__build_arch in
     arm|armel)
         __arch_define=-DCLI_CMAKE_PLATFORM_ARCH_ARM=1
         ;;
+    arm64)
+        __arch_define=-DCLI_CMAKE_PLATFORM_ARCH_ARM64=1
+        ;;
     *)
         echo "Unknown architecture $__build_arch"; usage; exit 1
         ;;
@@ -145,13 +148,13 @@ __cmake_defines="${__cmake_defines} ${__arch_define}"
 # __rid_plat is the base RID that corehost is shipped for, effectively, the name of the folder in "runtimes/{__rid_plat}/native/" inside the nupkgs.
 __rid_plat=
 if [ "$(uname -s)" == "Darwin" ]; then
-    __rid_plat=osx.10.10
+    __rid_plat=osx.10.12
 else
     init_rid_plat
 fi
 
 if [ -z $__rid_plat ]; then
-    echo "Unknown base rid (eg.: osx.10.10, ubuntu.14.04) being targeted"
+    echo "Unknown base rid (eg.: osx.10.12, ubuntu.14.04) being targeted"
     exit -1
 fi
 
@@ -165,15 +168,15 @@ __base_rid=$__rid_plat-$__build_arch_lowcase
 export __CrossToolChainTargetRID=$__base_rid
 
 # Set up the environment to be used for building with clang.
-if which "clang-3.5" > /dev/null 2>&1; then
-    export CC="$(which clang-3.5)"
-    export CXX="$(which clang++-3.5)"
-elif which "clang-3.6" > /dev/null 2>&1; then
-    export CC="$(which clang-3.6)"
-    export CXX="$(which clang++-3.6)"
-elif which clang > /dev/null 2>&1; then
-    export CC="$(which clang)"
-    export CXX="$(which clang++)"
+if command -v "clang-3.5" > /dev/null 2>&1; then
+    export CC="$(command -v clang-3.5)"
+    export CXX="$(command -v clang++-3.5)"
+elif command -v "clang-3.6" > /dev/null 2>&1; then
+    export CC="$(command -v clang-3.6)"
+    export CXX="$(command -v clang++-3.6)"
+elif command -v clang > /dev/null 2>&1; then
+    export CC="$(command -v clang)"
+    export CXX="$(command -v clang++)"
 else
     echo "Unable to find Clang Compiler"
     echo "Install clang-3.5 or clang3.6"
@@ -184,9 +187,9 @@ echo "Building Corehost from $DIR to $(pwd)"
 set -x # turn on trace
 if [ $__CrossBuild == 1 ]; then
     # clang-3.6 is default compiler for cross compilation
-    if which "clang-3.6" > /dev/null 2>&1; then
-        export CC="$(which clang-3.6)"
-        export CXX="$(which clang++-3.6)"
+    if command -v "clang-3.6" > /dev/null 2>&1; then
+        export CC="$(command -v clang-3.6)"
+        export CXX="$(command -v clang++-3.6)"
     else
         echo "Unable to find Clang 3.6 Compiler"
         echo "Install clang-3.6 for cross compilation"

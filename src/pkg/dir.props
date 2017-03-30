@@ -1,89 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" InitialTargets="ValidateArgs" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
-
   <PropertyGroup>
-    <Platform>$(TargetArchitecture)</Platform>
-    <DotNetHostBinDir>$(BaseOutputRootPath)corehost</DotNetHostBinDir>
     <EnsureStableVersion>$(StabilizePackageVersion)</EnsureStableVersion>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <VersionTxtFile>$(IntermediateOutputRootPath)version.txt</VersionTxtFile>
-  </PropertyGroup>
 
-  <PropertyGroup>
-    <PackageOutputPath>$(PackagesOutDir)</PackageOutputPath>
-    <SymbolPackageOutputPath>$(SymbolPackagesOutDir)</SymbolPackageOutputPath>
-    <!-- TODO: this hardcoding seems wrong -->
-    <RuntimeIdGraphDefinitionFile>$(ProjectDir)packages\Microsoft.NETCore.Platforms\2.0.0-beta-25104-02\runtime.json</RuntimeIdGraphDefinitionFile>
     <PackageLicenseFile>$(ProjectDir)src/pkg/projects/dotnet_library_license.txt</PackageLicenseFile>
     <PackageThirdPartyNoticesFile>$(ProjectDir)src/pkg/projects/ThirdPartyNotices.txt</PackageThirdPartyNoticesFile>
     <PackageDescriptionFile>$(ProjectDir)src/pkg/projects/descriptions.json</PackageDescriptionFile>
-    <!-- This link should be updated for each release milestone, currently this points to 1.0.0 -->
-    <ReleaseNotes>https://go.microsoft.com/fwlink/?LinkID=799417</ReleaseNotes>
-    <ProjectUrl>https://dot.net</ProjectUrl>
-    <PackagePlatform Condition="'$(PackagePlatform)' == ''">$(Platform)</PackagePlatform>
-    <PackagePlatform Condition="'$(PackagePlatform)' == 'amd64'">x64</PackagePlatform>
+
+    <PackageIndexFile>$(MSBuildThisFileDirectory)packageIndex.json</PackageIndexFile> 
+    <!-- core-setup doesn't currently use the index so don't force it to be in sync --> 
+    <SkipIndexCheck>true</SkipIndexCheck>     
+
+    <Serviceable>true</Serviceable>
+    <PackageIndex Include="$(PackageIndexFile)" />     
+    <PreReleaseSuffix></PreReleaseSuffix>
+    <PreReleaseSuffix Condition="'$(EnsureStableVersion)'=='false'">-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</PreReleaseSuffix>
+    <HostPolicyFullVersion>$(HostPolicyVersion)$(PreReleaseSuffix)</HostPolicyFullVersion>
+    <HostResolverFullVersion>$(HostResolverVersion)$(PreReleaseSuffix)</HostResolverFullVersion>
+    <AppHostFullVersion>$(AppHostVersion)$(PreReleaseSuffix)</AppHostFullVersion>
+    <HostFullVersion>$(HostVersion)$(PreReleaseSuffix)</HostFullVersion>
   </PropertyGroup>
-
-  <!-- Add required legal files to packages -->
-  <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.pkgproj'">
-    <File Condition="Exists('$(PackageLicenseFile)')"
-          Include="$(PackageLicenseFile)" >
-      <SkipPackageFileCheck>true</SkipPackageFileCheck>
-    </File>
-    <File Condition="Exists('$(PackageThirdPartyNoticesFile)')"
-          Include="$(PackageThirdPartyNoticesFile)" >
-      <SkipPackageFileCheck>true</SkipPackageFileCheck>
-    </File>
-  </ItemGroup>
-
-  <PropertyGroup>
-    <NuGetConfigFile Condition="'$(NuGetConfigFile)' == ''">$(ProjectDir)NuGet.Config</NuGetConfigFile>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <DotNetTool Condition="'$(DotNetTool)' == '' and '$(OsEnvironment)'!='Unix'">$(DotnetCliPath)dotnet.exe</DotNetTool>
-    <DotNetTool Condition="'$(DotNetTool)' == '' and '$(OsEnvironment)'=='Unix'">$(DotnetCliPath)dotnet</DotNetTool>
-    <OverrideToolHost Condition="'$(MSBuildRuntimeType)' == 'Core'">$(DotNetTool)</OverrideToolHost>
-    <DotNetRestoreCommand>"$(DotNetTool)" restore</DotNetRestoreCommand>
-    <DotNetRestoreCommand>$(DotNetRestoreCommand) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</DotNetRestoreCommand>
-    <DotNetRestoreCommand>$(DotNetRestoreCommand) --configfile "$(NuGetConfigFile)"</DotNetRestoreCommand>
-    <DnuRestoreCommand>$(DotNetRestoreCommand)</DnuRestoreCommand>
-  </PropertyGroup>
-
-  <Target Name="ValidateArgs" Condition="'$(CLIBuildVersion)'==''">
-    <Error Condition="'$(EnsureStableVersion)'==''" Text="EnsureStableVersion is undefined" />
-    <Error Condition="'$(HostPolicyVersion)'==''" Text="HostPolicyVersion is undefined" />
-    <Error Condition="'$(HostResolverVersion)'==''" Text="HostResolverVersion is undefined" />
-    <Error Condition="'$(HostVersion)'==''" Text="HostVersion is undefined" />
-  </Target>
-
-  <Target Name="ValidatePreReleaseStrings" Condition="'$(EnsureStableVersion)'=='false'">
-    <Error Condition="'$(PreReleaseLabel)'==''" Text="PreReleaseLabel is undefined" />
-    <Error Condition="'$(BuildNumberMajor)'==''" Text="BuildNumberMajor is undefined" />
-    <Error Condition="'$(BuildNumberMinor)'==''" Text="BuildNumberMinor is undefined" />
-  </Target>
-
-  <PropertyGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netcore50aot'))">netcore50aot</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netstandard13aot'))">netstandard13aot</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netstandard15aot'))">netstandard15aot</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netcore50'))">netcore50</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netcoreapp1.0'))">netcoreapp1.0</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netcoreapp1.1'))">netcoreapp1.1</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('dnxcore50'))">dnxcore50</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net463'))">net463</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net462'))">net462</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net461'))">net461</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net46'))">net46</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net45'))">net45</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net451'))">net451</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('win8'))">win8</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('wpa81'))">wpa81</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('uap101aot'))">uap101aot</TargetGroup>
-    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('uap101'))">uap101</TargetGroup>
-  </PropertyGroup>
-
 </Project>

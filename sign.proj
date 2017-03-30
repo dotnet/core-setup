@@ -33,6 +33,9 @@
       <FilesToSign Include="$(OutDir)corehost/**/hostpolicy.dll">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
+      <FilesToSign Include="$(OutDir)corehost/**/dotnet.exe">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
     </ItemGroup>
   </Target>
 
@@ -43,6 +46,18 @@
   <Target Name="GetSignSharedFrameworkCrossgenedAssembliesFiles">
     <ItemGroup>
       <FilesToSign Include="$(IntermediateOutputPath)sharedFrameworkPublish/shared/**/Microsoft.*.dll">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="$(IntermediateOutputPath)sharedFrameworkPublish/shared/**/mscorlib.dll">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="$(IntermediateOutputPath)sharedFrameworkPublish/shared/**/netstandard.dll">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="$(IntermediateOutputPath)sharedFrameworkPublish/shared/**/SOS.NETCore.dll">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="$(IntermediateOutputPath)sharedFrameworkPublish/shared/**/System.dll">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
       <FilesToSign Include="$(IntermediateOutputPath)sharedFrameworkPublish/shared/**/System.*.dll">
