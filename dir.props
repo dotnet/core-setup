@@ -49,7 +49,7 @@
     <ToolRuntimePath Condition="'$(ToolRuntimePath)'==''">$(ProjectDir)Tools/</ToolRuntimePath>
     <ToolsDir Condition="'$(UseToolRuntimeForToolsDir)'=='true'">$(ToolRuntimePath)</ToolsDir>
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
-    <BuildToolsTaskDir Condition="'$(BuildToolsTargets45)' == 'true' OR '$(MSBuildRuntimeType)' != 'core'">$(ToolsDir)net45/</BuildToolsTaskDir>
+    <BuildToolsTaskDir Condition="'$(BuildToolsTargets45)' == 'true' OR '$(MSBuildRuntimeType)' != 'core'">$(ToolsDir)net46/</BuildToolsTaskDir>
     <PackagingTaskDir Condition="'$(BuildToolsTaskDir)' != ''">$(BuildToolsTaskDir)</PackagingTaskDir>
     <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolsDir)dotnetcli/</DotnetCliPath>
   </PropertyGroup>
@@ -125,12 +125,15 @@
     <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools/api/v3/index.json" />
     <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/nugetbuild/api/v3/index.json" />
     <DnuSourceList Include="https:%2F%2Fapi.nuget.org/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-corefxlab/api/v3/index.json" />
   </ItemGroup>
 
   <!-- list of directories to perform batch restore -->
   <ItemGroup>
     <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)src\pkg\projects\**\project.json" />
     <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)src\test\**\project.json" />
+    <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)bin\**\project.json" />
+    
     <_ProjectJsonFiles Include="$(MSBuildThisFileDirectory)**\project.json" Exclude="@(_DnuExcludeProjectJsonFiles)" />
     <DnuRestoreDirs Include="@(_ProjectJsonFiles->'%(RootDir)%(Directory)')" >
       <AdditionalArgs>%(AdditionalArgs) --disable-parallel</AdditionalArgs>
@@ -138,6 +141,7 @@
     <DnuRestoreDirs Include="$(MSBuildThisFileDirectory)\tools-local\setuptools\independent\">
       <AdditionalArgs>%(AdditionalArgs) --disable-parallel --infer-runtimes</AdditionalArgs>
     </DnuRestoreDirs>
+    <DnuRestoreDirs Include="$(MSBuildThisFileDirectory)src/pkg/deps" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -354,4 +358,8 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
+
+  <!-- Use Roslyn Compilers to build --> 
+  <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'!='true' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false'" /> 
+  <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'=='true' and Exists('$(RoslynPropsFile)')" /> 
 </Project>

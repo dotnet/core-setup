@@ -4,8 +4,7 @@
   <Import Project="dir.targets" />
   <Import Project="dir.traversal.targets" />
 
-  <Target Name="Build"
-          DependsOnTargets="GenerateVersionTxt">
+  <Target Name="Build">
 
     <PropertyGroup>
         <BuildParams Condition="'$(OSGroup)' == 'Windows_NT'">TargetsWindows=true</BuildParams>
@@ -13,7 +12,7 @@
         <BuildParams Condition="'$(BuildParams)' == ''">TargetsLinux=true;DistroRid=$(PackageTargetRid)</BuildParams>
     </PropertyGroup>
 
-    <MSBuild Projects="$(MSBuildThisFileDirectory)projects/packages.builds" Properties="$(BuildParams)"/>
+    <MSBuild Projects="packages.builds" Properties="$(BuildParams)"/>
 
     <ItemGroup>
         <Nupkgs Include="$(PackageOutputPath)\**\*.nupkg" />
@@ -23,17 +22,4 @@
           DestinationFolder="$(BaseOutputRootPath)corehost"/>
   </Target>
   
-  <Target Name="GenerateVersionTxt"
-          DependsOnTargets="GetLatestCommitHash">
-    <ItemGroup>
-      <Lines Include="$(LatestCommit)" />
-      <Lines Include="$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)-00" />
-    </ItemGroup>
-
-    <WriteLinesToFile
-      File="$(VersionTxtFile)"
-      Lines="@(Lines)"
-      Overwrite="true" />
-  </Target>
-
 </Project>

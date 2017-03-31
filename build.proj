@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <Target Name="BuildCustomTasks">
-      <MSBuild Projects="src/tasks/core-setup.tasks.builds"/>
+      <MSBuild Projects="tools-local/tasks/core-setup.tasks.builds"/>
   </Target>
 
   <Target Name="BatchRestorePackages" Condition="'$(RestoreDuringBuild)'=='true'">
