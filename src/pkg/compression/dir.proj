@@ -135,8 +135,8 @@
 
   <Target Name="GenerateNugetPackages" DependsOnTargets="InitPackage">
     <ItemGroup>
-      <PackageProjects Include="$(ProjectDir)src\src\Microsoft.DotNet.PlatformAbstractions\project.json" />
-      <PackageProjects Include="$(ProjectDir)src\src\Microsoft.Extensions.DependencyModel\project.json" />
+      <PackageProjects Include="$(ProjectDir)src\managed\Microsoft.DotNet.PlatformAbstractions\project.json" />
+      <PackageProjects Include="$(ProjectDir)src\managed\Microsoft.Extensions.DependencyModel\project.json" />
     </ItemGroup>
 
     <PropertyGroup>

@@ -16,7 +16,6 @@
   "frameworks": {
     "netcoreapp1.0": {
       "imports": [
-        "netstandard1.5",
         "dnxcore50",
         "portable-net45+wp80+win8+wpa81+dnxcore50"
       ]

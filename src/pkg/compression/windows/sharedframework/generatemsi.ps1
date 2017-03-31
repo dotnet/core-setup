@@ -14,7 +14,7 @@ param(
     [Parameter(Mandatory=$true)][string]$TargetArchitecture,
     [Parameter(Mandatory=$true)][string]$WixObjRoot
 )
-Write-Host "chcosta $DotnetMSIVersion"
+
 $RepoRoot = Convert-Path "$PSScriptRoot\..\..\..\..\.."
 $CommonScript = "$RepoRoot\tools-local\scripts\common\_common.ps1"
 if(-Not (Test-Path "$CommonScript"))

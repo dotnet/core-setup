@@ -58,7 +58,7 @@
       <PropertyGroup>
         <ArchParams>"$(MsiArch)" "$(TargetArchitecture)"</ArchParams>
         <CommonParams>$(MsiVersionString) $(HostVersion) $(ArchParams)</CommonParams>
-        <SharedFxParams>$(SharedFrameworkNugetVersion) $(SharedFrameworkName) $(HostVersion) $(SharedFxUpgradeCode) $(ArchParams)</SharedFxParams>
+        <SharedFxParams>$(MsiVersionString) $(SharedFrameworkName) $(HostVersion) $(SharedFxUpgradeCode) $(ArchParams)</SharedFxParams>
       </PropertyGroup>
 
       <Exec Command="powershell -NoProfile -NoLogo $(WindowsScriptRoot)%(WixOutputs.Filename)\generatemsi.ps1 %(WixOutputs.InputDir) %(WixOutputs.InstallerName) $(WixToolsDir) %(WixOutputs.BrandName) $(CommonParams) %(WixOutputs.Identity) %(WixOutputs.UpgradeCode)" />

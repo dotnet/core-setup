@@ -95,7 +95,7 @@
     <!-- Generate .version file -->
     <ItemGroup>
       <VersionLines Include="$(LatestCommit)" />
-      <VersionLines Include="$(HostFullVersion)" />
+      <VersionLines Include="$(HostFullVersion)" />      
     </ItemGroup>
 
     <WriteLinesToFile
@@ -109,13 +109,13 @@
 
     <PropertyGroup>
       <CrossgenRid>$(PackageTargetRid)</CrossgenRid>
-      <RuntimePackageId>runtime.$(CrossgenRid).microsoft.netcore.runtime.coreclr</RuntimePackageId>
+      <RuntimePackageId>transport.runtime.$(CrossgenRid).Microsoft.NetCore.Runtime.CoreCLR</RuntimePackageId>
       <CrossgenPathRoot>$(PackagesDir)$(RuntimePackageId)/$(CoreCLRVersion)/tools</CrossgenPathRoot>
       <CrossgenPath Condition="'$(CrossgenRid)'=='win8-arm'">$(CrossgenPathRoot)/x86_arm/crossgen.exe</CrossgenPath>
       <CrossgenPath Condition="'$(CrossgenRid)'=='win10-arm64'">$(CrossgenPathRoot)/x64_arm64/crossgen.exe</CrossgenPath>
       <CrossgenPath Condition="'$(CrossgenPath)'==''">$(CrossgenPathRoot)/crossgen$(ExeSuffix)</CrossgenPath>
       <CoreLibsDir>$(PackagesDir)$(RuntimePackageId)/$(CoreCLRVersion)/runtimes/$(CrossgenRid)/lib/netstandard1.0</CoreLibsDir>
-      <JitPackageId>runtime.$(CrossgenRid).microsoft.netcore.jit</JitPackageId>
+      <JitPackageId>transport.runtime.$(CrossgenRid).Microsoft.NETCore.Jit</JitPackageId>
       <JitPathRoot>$(PackagesDir)$(JitPackageId)/$(JitVersion)/runtimes</JitPathRoot>
       <JitPath Condition="'$(CrossgenRid)'=='win8-arm'">$(JitPathRoot)/x86_arm/native/$(LibPrefix)clrjit$(LibSuffix)</JitPath>
       <JitPath Condition="'$(CrossgenRid)'=='win10-arm64'">$(JitPathRoot)/x64_arm64/native/$(LibPrefix)clrjit$(LibSuffix)</JitPath>
@@ -126,29 +126,29 @@
     <Error Condition="!Exists('$(CrossgenPath)')" Text="Can't find $(CrossgenPath)'" />
 
     <ItemGroup>
-      <ExcludedLibraries Include="mscorlib.dll" />
-      <ExcludedLibraries Include="mscorlib.ni.dll" />
-      <ExcludedLibraries Include="System.Private.CoreLib.dll" />
-      <ExcludedLibraries Include="System.Private.CoreLib.ni.dll" />
-      <ExcludedLibraries Include="clrcompression.dll" />
-      <ExcludedLibraries Include="clretwrc.dll" />
-      <ExcludedLibraries Include="clrjit.dll" />
-      <ExcludedLibraries Include="coreclr.dll" />
-      <ExcludedLibraries Include="dbgshim.dll" />
-      <ExcludedLibraries Include="hostfxr.dll" />
-      <ExcludedLibraries Include="hostpolicy.dll" />
-      <ExcludedLibraries Include="libuv.dll" />
-      <ExcludedLibraries Include="mscordaccore.dll" />
-      <ExcludedLibraries Include="mscordbi.dll" />
-      <ExcludedLibraries Include="mscorrc.debug.dll" />
-      <ExcludedLibraries Include="mscorrc.dll" />
-      <ExcludedLibraries Include="sos.dll" />
-      <ExcludedLibraries Include="libuv.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscorlib.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscorlib.ni.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\System.Private.CoreLib.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\System.Private.CoreLib.ni.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\clrcompression.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\clretwrc.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\clrjit.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\coreclr.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\dbgshim.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\hostfxr.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\hostpolicy.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\libuv.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscordaccore*.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscordbi.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscorrc.debug.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscorrc.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\sos*.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\libuv.dll" />
 
       <ExcludedNative Include="$(SharedFrameworkNameAndVersionRoot)\Microsoft.DiaSymReader*" />
 
       <PlatformAssemblies Include="$(SharedFrameworkNameAndVersionRoot)\*.dll"
-                          Exclude="@(ExcludedLibraries->'$(SharedFrameworkNameAndVersionRoot)\%(Identity)');@(ExcludedNative)" />
+                          Exclude="@(ExcludedLibraries);@(ExcludedNative)" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -183,7 +183,7 @@
 
   <Target Name="GenerateRuntimeGraph">
     <PropertyGroup>
-      <runtimeGraphGeneratorName>RuntimeGraphGenerator</runtimeGraphGeneratorName>
+      <runtimeGraphGeneratorName>DepsProcessor</runtimeGraphGeneratorName>
       <runtimeGraphGeneratorProject>$(ProjectDir)tools-local/setuptools/independent/$(runtimeGraphGeneratorName)</runtimeGraphGeneratorProject>
       <runtimeGraphGeneratorOutput>$(IntermediateOutputRootPath)setuptools/independent/$(runtimeGraphGeneratorName)</runtimeGraphGeneratorOutput>
       <runtimeGraphGeneratorRuntime Condition="'$(OSGroup)'=='Windows_NT'">win</runtimeGraphGeneratorRuntime>
@@ -208,7 +208,8 @@
     <ItemGroup>
       <ProjJsonLines Include='{' />
       <ProjJsonLines Include='  "dependencies": {' />
-      <ProjJsonLines Include='    "Microsoft.NETCore.DotNetHostResolver"  :  "$(HostFullVersion)"' />
+      <ProjJsonLines Include='    "Microsoft.NETCore.DotNetHostResolver"  :  "$(HostFullVersion)",' />
+      <ProjJsonLines Include='    "Microsoft.NETCore.DotNetHost"  :  "$(HostFullVersion)"' />
       <ProjJsonLines Include='  },' />
       <ProjJsonLines Include='  "frameworks": {' />
       <ProjJsonLines Include='    "$(Framework)": {}' />
