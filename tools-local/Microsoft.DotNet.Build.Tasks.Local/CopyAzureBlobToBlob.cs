@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Build.Tasks
                                        IBuildEngine buildengine,
                                        ITaskHost taskHost)
         {
-            CopyAzureBlobToBlob downloadBlobFromAzure = new CopyAzureBlobToBlob()
+            CopyAzureBlobToBlob copyAzureBlobToBlob = new CopyAzureBlobToBlob()
             {
                 AccountName = accountName,
                 AccountKey = accountKey,
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Build.Tasks
                 BuildEngine = buildengine,
                 HostObject = taskHost
             };
-            return downloadBlobFromAzure.Execute();
+            return copyAzureBlobToBlob.Execute();
         }
         public static Task<bool> ExecuteAsync(string accountName,
                                               string accountKey,
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Build.Tasks
                                               IBuildEngine buildengine,
                                               ITaskHost taskHost)
         {
-            CopyAzureBlobToBlob downloadBlobFromAzure = new CopyAzureBlobToBlob()
+            CopyAzureBlobToBlob copyAzureBlobToBlob = new CopyAzureBlobToBlob()
             {
                 AccountName = accountName,
                 AccountKey = accountKey,
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Build.Tasks
                 BuildEngine = buildengine,
                 HostObject = taskHost
             };
-            return downloadBlobFromAzure.ExecuteAsync();
+            return copyAzureBlobToBlob.ExecuteAsync();
         }
     }
 }

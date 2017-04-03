@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Build.Tasks
         private string _blobName;
         private TimeSpan _maxWait;
         private TimeSpan _delay;
-        private const int s_MaxWaitDefault = 120; // seconds
+        private const int s_MaxWaitDefault = 60; // seconds
         private const int s_DelayDefault = 500; // milliseconds
         private CancellationTokenSource _cancellationTokenSource;
         private Task _leaseRenewalTask;

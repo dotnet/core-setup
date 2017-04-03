@@ -43,11 +43,12 @@ namespace Microsoft.DotNet.Build.Tasks
         public string GitHubPassword { get; set; }
         [Required]
         public string DownloadPackagesToFolder { get; set; }
+        public bool ForcePublish { get; set; }
+
+        private Regex _versionRegex = new Regex(@"(?<version>\d+\.\d+\.\d+)(-(?<prerelease>[^-]+-)?(?<major>\d+)-(?<minor>\d+))?");
 
         public override bool Execute()
         {
-            Console.WriteLine("attach");
-            Console.ReadLine();
             ParseConnectionString();
 
             if (Log.HasLoggedErrors)
@@ -64,34 +65,37 @@ namespace Microsoft.DotNet.Build.Tasks
             CreateBlobIfNotExists(SemaphoreBlob);
 
             AzureBlobLease blobLease = new AzureBlobLease(AccountName, AccountKey, ConnectionString, ContainerName, SemaphoreBlob, Log);
+            Log.LogMessage($"Acquiring lease on semaphore blob '{SemaphoreBlob}'");
             blobLease.Acquire();
 
             // Prevent race conditions by dropping a version hint of what version this is. If we see this file
             // and it is the same as our version then we know that a race happened where two+ builds finished 
             // at the same time and someone already took care of publishing and we have no work to do.
-            if (IsLatestSpecifiedVersion(targetVersionFile))
+            if (IsLatestSpecifiedVersion(targetVersionFile) && !ForcePublish)
             {
+                Log.LogMessage(MessageImportance.Low, $"version hint file for publishing finalization is {targetVersionFile}");
+                Log.LogMessage(MessageImportance.High, $"Version '{Version}' is already published, skipping finalization.");
+                Log.LogMessage($"Releasing lease on semaphore blob '{SemaphoreBlob}'");
                 blobLease.Release();
                 return true;
             }
             else
             {
-                Regex versionFileRegex = new Regex(@"(?<version>\d\.\d\.\d\.)(-(?<prerelease>.*)?)?");
 
                 // Delete old version files
                 GetBlobList(FinalizeContainer)
                     .Select(s => s.Replace("/dotnet/", ""))
-                    .Where(w => versionFileRegex.IsMatch(w))
+                    .Where(w => _versionRegex.Replace(Path.GetFileName(w), "") == "")
                     .ToList()
                     .ForEach(f => TryDeleteBlob(f));
 
-
+                
                 // Drop the version file signaling such for any race-condition builds (see above comment).
                 CreateBlobIfNotExists(targetVersionFile);
 
                 try
                 {
-                    CopyBlobs($"{Channel}/Binaries/{Version}", FinalizeContainer);
+                    CopyBlobs($"{Channel}/Binaries/{Version}", $"{Channel}/Binaries/Latest/");
 
                     CopyBlobs($"{Channel}/Installers/{Version}", $"{Channel}/Installers/Latest/");
 
@@ -156,11 +160,14 @@ namespace Microsoft.DotNet.Build.Tasks
         {
             bool returnStatus = true;
             List<Task<bool>> copyTasks = new List<Task<bool>>();
-            foreach (string blob in GetBlobList(sourceFolder))
+            string[] blobs = GetBlobList(sourceFolder);
+            foreach (string blob in blobs)
             {
-                string targetName = Path.GetFileName(blob)
-                    .Replace(Version, "Latest");
-                copyTasks.Add(CopyBlobAsync(blob.Replace($"/{ContainerName}/", ""), $"{destinationFolder}{targetName}"));
+                string targetName = _versionRegex.Replace(Path.GetFileName(blob), "Latest");
+                string sourceBlob = blob.Replace($"/{ContainerName}/", "");
+                string destinationBlob = $"{destinationFolder}{targetName}";
+                Log.LogMessage($"Copying blob '{sourceBlob}' to '{destinationBlob}'");
+                copyTasks.Add(CopyBlobAsync(sourceBlob, destinationBlob));
             }
             Task.WaitAll(copyTasks.ToArray());
             copyTasks.ForEach(c => returnStatus &= c.Result);

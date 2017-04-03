@@ -250,7 +250,6 @@
 
   <ItemGroup>
     <PublishRid Include="win7-x64"/>
-    <PublishRid Include="win7-x86"/>
 <!--
     TODO: Align this with OfficialBuildRid    
     <PublishRid Include="win7-x86"/>

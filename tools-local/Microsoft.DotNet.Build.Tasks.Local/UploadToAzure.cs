@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Build.Tasks
             }
 
             Log.LogMessage(
-                MessageImportance.High, 
+                MessageImportance.Normal, 
                 "Begin uploading blobs to Azure account {0} in container {1}.", 
                 AccountName, 
                 ContainerName);
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Build.Tasks
                     await ThreadingTask.WhenAll(Items.Select(item => UploadAsync(ct, item, blobsPresent, clientThrottle)));
                 }
 
-                Log.LogMessage(MessageImportance.High, "Upload to Azure is complete, a total of {0} items were uploaded.", Items.Length);
+                Log.LogMessage(MessageImportance.Normal, "Upload to Azure is complete, a total of {0} items were uploaded.", Items.Length);
             }
             catch (Exception e)
             {
