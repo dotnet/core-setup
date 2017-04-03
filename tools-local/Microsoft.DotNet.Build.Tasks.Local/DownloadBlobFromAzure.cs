@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -7,34 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Xml;
 
 namespace Microsoft.DotNet.Build.Tasks
 {
-    public sealed class DownloadBlobFromAzure : BuildTask
+    public partial class DownloadBlobFromAzure : Utility.AzureConnectionStringBuildTask
     {
-
-        /// <summary>
-        /// Azure Storage account connection string.  Supersedes Account Key / Name.  
-        /// Will cause errors if both are set.
-        /// </summary>
-        public string ConnectionString { get; set; }
-
-        /// <summary>
-        /// The Azure account key used when creating the connection string.
-        /// When we fully deprecate these, can just make them get; only.
-        /// </summary>
-        public string AccountKey { get; set; }
-
-        /// <summary>
-        /// The Azure account name used when creating the connection string.
-        /// When we fully deprecate these, can just make them get; only.
-        /// </summary>
-        public string AccountName { get; set; }
-
         /// <summary>
         /// The name of the container to access.  The specified name must be in the correct format, see the
         /// following page for more info.  https://msdn.microsoft.com/en-us/library/azure/dd135715.aspx
@@ -58,36 +37,7 @@ namespace Microsoft.DotNet.Build.Tasks
 
         public async Task<bool> ExecuteAsync()
         {
-            if (!string.IsNullOrEmpty(ConnectionString))
-            {
-                if (!(string.IsNullOrEmpty(AccountKey) && string.IsNullOrEmpty(AccountName)))
-                {
-                    Log.LogError("If the ConnectionString property is set, you must not provide AccountKey / AccountName.  These values will be deprecated in the future.");
-                }
-                else
-                {
-                    Tuple<string, string> parsedValues = AzureHelper.ParseConnectionString(ConnectionString);
-                    if (parsedValues == null)
-                    {
-                        Log.LogError("Error parsing connection string.  Please review its value.");
-                    }
-                    else
-                    {
-                        AccountName = parsedValues.Item1;
-                        AccountKey = parsedValues.Item2;
-                    }
-                }
-            }
-            else if (string.IsNullOrEmpty(AccountKey) || string.IsNullOrEmpty(AccountName))
-            {
-                Log.LogError("Error, must provide either ConnectionString or AccountName with AccountKey");
-            }
-
-            if (Log.HasLoggedErrors)
-            {
-                return false;
-            }
-            // If the connection string AND AccountKey & AccountName are provided, error out.
+            ParseConnectionString();
             if (Log.HasLoggedErrors)
             {
                 return false;
@@ -109,9 +59,9 @@ namespace Microsoft.DotNet.Build.Tasks
                     {
                         DateTime dateTime = DateTime.UtcNow;
                         var request = new HttpRequestMessage(HttpMethod.Get, urlListBlobs);
-                        request.Headers.Add(AzureHelper.DateHeaderString, dateTime.ToString("R", CultureInfo.InvariantCulture));
-                        request.Headers.Add(AzureHelper.VersionHeaderString, AzureHelper.StorageApiVersion);
-                        request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
+                        request.Headers.Add(Utility.AzureHelper.DateHeaderString, dateTime.ToString("R", CultureInfo.InvariantCulture));
+                        request.Headers.Add(Utility.AzureHelper.VersionHeaderString, Utility.AzureHelper.StorageApiVersion);
+                        request.Headers.Add(Utility.AzureHelper.AuthorizationHeaderString, Utility.AzureHelper.AuthorizationHeader(
                                 AccountName,
                                 AccountKey,
                                 "GET",
@@ -123,7 +73,7 @@ namespace Microsoft.DotNet.Build.Tasks
                     // track the number of blobs that fail to download
                     string blob = Path.GetFileName(BlobName);
                     string filename = Path.Combine(DownloadDirectory, blob);
-                    using (HttpResponseMessage response = await AzureHelper.RequestWithRetry(Log, client, createRequest))
+                    using (HttpResponseMessage response = await Utility.AzureHelper.RequestWithRetry(Log, client, createRequest))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -154,6 +104,50 @@ namespace Microsoft.DotNet.Build.Tasks
                 }
                 return !Log.HasLoggedErrors;
             }
+        }
+
+        public static bool Execute(string accountName,
+                                       string accountKey,
+                                       string connectionString,
+                                       string containerName,
+                                       string blobName,
+                                       string downloadDirectory,
+                                       IBuildEngine buildengine,
+                                       ITaskHost taskHost)
+        {
+            DownloadBlobFromAzure downloadBlobFromAzure = new DownloadBlobFromAzure()
+            {
+                AccountName = accountName,
+                AccountKey = accountKey,
+                ContainerName = containerName,
+                BlobName = blobName,
+                DownloadDirectory = downloadDirectory,
+                BuildEngine = buildengine,
+                HostObject = taskHost
+            };
+            return downloadBlobFromAzure.Execute();
+        }
+
+        public static Task<bool> ExecuteAsync(string accountName,
+                                       string accountKey,
+                                       string connectionString,
+                                       string containerName,
+                                       string blobName,
+                                       string downloadDirectory,
+                                       IBuildEngine buildengine,
+                                       ITaskHost taskHost)
+        {
+            DownloadBlobFromAzure downloadBlobFromAzure = new DownloadBlobFromAzure()
+            {
+                AccountName = accountName,
+                AccountKey = accountKey,
+                ContainerName = containerName,
+                BlobName = blobName,
+                DownloadDirectory = downloadDirectory,
+                BuildEngine = buildengine,
+                HostObject = taskHost
+            };
+            return downloadBlobFromAzure.ExecuteAsync();
         }
     }
 }

@@ -3,7 +3,6 @@
   <Import Project="..\dir.props" />
 
   <PropertyGroup>
-    <CoreHostOutputDir>$(BaseOutputRootPath)corehost\</CoreHostOutputDir>
     <CoreHostLockedDir>$(CoreHostOutputDir)locked\</CoreHostLockedDir>
     <SharedFrameworkSourceRoot>$(IntermediateOutputRootPath)sharedFramework\framework</SharedFrameworkSourceRoot>
   </PropertyGroup>

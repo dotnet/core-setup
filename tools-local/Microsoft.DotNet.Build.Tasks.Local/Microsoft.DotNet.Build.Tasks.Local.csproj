@@ -6,7 +6,7 @@
     <NuGetTargetMoniker>.NETStandard,Version=v1.5</NuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == 'net45'">.NETFramework,Version=v4.5</NuGetTargetMoniker>
     <CLSCompliant>false</CLSCompliant>
-    <ProjectGuid>{360F25FA-3CD9-4338-B961-A4F3122B88B2}</ProjectGuid>
+    <ProjectGuid>{B507BED2-0A28-456A-99C6-AD7AA148E35F}</ProjectGuid>
     <OutputPath Condition="'$(TargetGroup)' != 'net45'">$(ToolRuntimePath)</OutputPath>
     <IntermediateOutputPath Condition="'$(TargetGroup)' == 'net45'">$(IntermediateOutputPath)\net45</IntermediateOutputPath>
     <OutputPath Condition="'$(TargetGroup)' == 'net45'">$(ToolRuntimePath)\net46</OutputPath>
@@ -20,11 +20,7 @@
   <ItemGroup>
     <Compile Include="*.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net45'">
-    <Compile Include="netstandard/FileUtilities.netstandard.cs" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net45'">
-    <Compile Include="net45/FileUtilities.net45.cs" />
     <TargetingPackReference Include="System" />
     <TargetingPackReference Include="System.Core" />
     <TargetingPackReference Include="System.Net.Http" />
@@ -36,12 +32,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.DotNet.Build.Tasks.Local\Microsoft.DotNet.Build.Tasks.Local.csproj">
-      <Project>{b507bed2-0a28-456a-99c6-ad7aa148e35f}</Project>
-      <Name>Microsoft.DotNet.Build.Tasks.Local</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

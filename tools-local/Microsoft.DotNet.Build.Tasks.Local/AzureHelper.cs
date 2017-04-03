@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -17,7 +17,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.Build.Tasks
+namespace Microsoft.DotNet.Build.Tasks.Utility
 {
     // This is grabbed directly from buildtools and we should not duplicate this when we move ListAzureBlobs back to buildtools
     public static class AzureHelper
@@ -175,8 +175,7 @@ namespace Microsoft.DotNet.Build.Tasks
         public static List<string> GetHeaderValues(HttpRequestHeaders headers, string headerName)
         {
             List<string> list = new List<string>();
-            IEnumerable<string> values;
-            headers.TryGetValues(headerName, out values);
+            headers.TryGetValues(headerName, out IEnumerable<string> values);
             if (values != null)
             {
                 list.Add((values.FirstOrDefault() ?? string.Empty).TrimStart(null));
@@ -348,8 +347,7 @@ namespace Microsoft.DotNet.Build.Tasks
                     value = match.Groups[4].Value;
                 }
 
-                HashSet<string> setOfValues;
-                if (values.TryGetValue(key, out setOfValues))
+                if (values.TryGetValue(key, out HashSet<string> setOfValues))
                 {
                     setOfValues.Add(value);
                 }
@@ -370,15 +368,13 @@ namespace Microsoft.DotNet.Build.Tasks
 
             foreach (string queryKeys in queryKeyValues.Keys)
             {
-                HashSet<string> setOfValues;
-                queryKeyValues.TryGetValue(queryKeys, out setOfValues);
+                queryKeyValues.TryGetValue(queryKeys, out HashSet<string> setOfValues);
                 List<string> list = new List<string>();
                 list.AddRange(setOfValues);
                 list.Sort();
                 string commaSeparatedValues = string.Join(",", list);
                 string key = queryKeys.ToLowerInvariant();
-                HashSet<string> setOfValues2;
-                if (dictionary.TryGetValue(key, out setOfValues2))
+                if (dictionary.TryGetValue(key, out HashSet<string> setOfValues2))
                 {
                     setOfValues2.Add(commaSeparatedValues);
                 }
@@ -460,5 +456,9 @@ namespace Microsoft.DotNet.Build.Tasks
             return requestFunc;
         }
 
+        public static string GetBlobRestUrl(string accountName, string containerName, string blob)
+        {
+            return $"https://{accountName}.blob.core.windows.net/{containerName}/{blob}";
+        }
     }
 }

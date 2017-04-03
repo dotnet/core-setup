@@ -18,7 +18,7 @@ using ThreadingTask = System.Threading.Tasks.Task;
 namespace Microsoft.DotNet.Build.Tasks
 {
 
-    public partial class UploadToAzure : BuildTask
+    public partial class UploadToAzure : Utility.AzureConnectionStringBuildTask
     {
         private static readonly CancellationTokenSource TokenSource = new CancellationTokenSource();
         private static readonly CancellationToken CancellationToken = TokenSource.Token;
@@ -30,9 +30,6 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required]
         public string ContainerName { get; set; }
 
-        public string AccountName { get; set; }
-        public string AccountKey { get; set; }
-        public string ConnectionString { get; set; }
         /// <summary>
         /// An item group of files to upload.  Each item must have metadata RelativeBlobPath
         /// that specifies the path relative to ContainerName where the item will be uploaded.
@@ -62,37 +59,7 @@ namespace Microsoft.DotNet.Build.Tasks
 
         public async Task<bool> ExecuteAsync(CancellationToken ct)
         {
-            if (!string.IsNullOrEmpty(ConnectionString))
-            {
-                if (!(string.IsNullOrEmpty(AccountKey) && string.IsNullOrEmpty(AccountName)))
-                {
-                    Log.LogError("If the ConnectionString property is set, you must not provide AccountKey / AccountName.  These values will be deprecated in the future.");
-                }
-                else
-                {
-                    Tuple<string, string> parsedValues = AzureHelper.ParseConnectionString(ConnectionString);
-                    if (parsedValues == null)
-                    {
-                        Log.LogError("Error parsing connection string.  Please review its value.");
-                    }
-                    else
-                    {
-                        AccountName = parsedValues.Item1;
-                        AccountKey = parsedValues.Item2;
-                    }
-                }
-            }
-            else if (string.IsNullOrEmpty(AccountKey) || string.IsNullOrEmpty(AccountName))
-            {
-                Log.LogError("Error, must provide either ConnectionString or AccountName with AccountKey");
-            }
-
-            if (Log.HasLoggedErrors)
-            {
-                return false;
-            }
-
-            // If the connection string AND AccountKey & AccountName are provided, error out.
+            ParseConnectionString();
             if (Log.HasLoggedErrors)
             {
                 return false;
@@ -126,9 +93,9 @@ namespace Microsoft.DotNet.Build.Tasks
                     {
                         DateTime dt = DateTime.UtcNow;
                         var req = new HttpRequestMessage(HttpMethod.Get, checkListUrl);
-                        req.Headers.Add(AzureHelper.DateHeaderString, dt.ToString("R", CultureInfo.InvariantCulture));
-                        req.Headers.Add(AzureHelper.VersionHeaderString, AzureHelper.StorageApiVersion);
-                        req.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
+                        req.Headers.Add(Utility.AzureHelper.DateHeaderString, dt.ToString("R", CultureInfo.InvariantCulture));
+                        req.Headers.Add(Utility.AzureHelper.VersionHeaderString, Utility.AzureHelper.StorageApiVersion);
+                        req.Headers.Add(Utility.AzureHelper.AuthorizationHeaderString, Utility.AzureHelper.AuthorizationHeader(
                             AccountName,
                             AccountKey,
                             "GET",
@@ -138,7 +105,7 @@ namespace Microsoft.DotNet.Build.Tasks
                     };
 
                     Log.LogMessage(MessageImportance.Low, "Sending request to check whether Container blobs exist");
-                    using (HttpResponseMessage response = await AzureHelper.RequestWithRetry(Log, client, createRequest))
+                    using (HttpResponseMessage response = await Utility.AzureHelper.RequestWithRetry(Log, client, createRequest))
                     {
                         var doc = new XmlDocument();
                         doc.LoadXml(await response.Content.ReadAsStringAsync());
@@ -191,7 +158,7 @@ namespace Microsoft.DotNet.Build.Tasks
             try
             {
                 Log.LogMessage("Uploading {0} to {1}.", item.ItemSpec, ContainerName);
-                UploadClient uploadClient = new UploadClient(Log);
+                Utility.UploadClient uploadClient = new Utility.UploadClient(Log);
                 await
                     uploadClient.UploadBlockBlobAsync(
                         ct,

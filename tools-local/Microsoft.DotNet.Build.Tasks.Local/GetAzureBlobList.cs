@@ -1,41 +1,19 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System;
 using Microsoft.Build.Framework;
-using System.IO;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using Microsoft.Build.Construction;
 using System.Net.Http;
 using System.Xml;
-using System.Globalization;
 using System.Threading.Tasks;
 using System.Linq;
 
 namespace Microsoft.DotNet.Build.Tasks
 {
-    public partial class GetAzureBlobList : BuildTask
+    public partial class GetAzureBlobList : Utility.AzureConnectionStringBuildTask
     {
-        /// <summary>
-        /// Azure Storage account connection string.  Supersedes Account Key / Name.  
-        /// Will cause errors if both are set.
-        /// </summary>
-        public string ConnectionString { get; set; }
-
-        /// <summary>
-        /// The Azure account key used when creating the connection string.
-        /// When we fully deprecate these, can just make them get; only.
-        /// </summary>
-        public string AccountKey { get; set; }
-
-        /// <summary>
-        /// The Azure account name used when creating the connection string.
-        /// When we fully deprecate these, can just make them get; only.
-        /// </summary>
-        public string AccountName { get; set; }
-
 
         /// <summary>
         /// The name of the container to access.  The specified name must be in the correct format, see the
@@ -54,33 +32,31 @@ namespace Microsoft.DotNet.Build.Tasks
             return ExecuteAsync().GetAwaiter().GetResult();
         }
 
+        public static string [] Execute(string accountName,
+                                   string accountKey,
+                                   string connectionString,
+                                   string containerName,
+                                   string filterBlobNames,
+                                   IBuildEngine buildengine,
+                                   ITaskHost taskHost)
+        {
+            GetAzureBlobList getAzureBlobList = new GetAzureBlobList()
+            {
+                AccountName = accountName,
+                AccountKey = accountKey,
+                ContainerName = containerName,
+                FilterBlobNames = filterBlobNames,
+                BuildEngine = buildengine,
+                HostObject = taskHost
+            };
+            getAzureBlobList.Execute();
+            return getAzureBlobList.BlobNames;
+        }
+
         // This code is duplicated in BuildTools task DownloadFromAzure, and that code should be refactored to permit blob listing.
         public async Task<bool> ExecuteAsync()
         {
-            if (!string.IsNullOrEmpty(ConnectionString))
-            {
-                if (!(string.IsNullOrEmpty(AccountKey) && string.IsNullOrEmpty(AccountName)))
-                {
-                    Log.LogError("If the ConnectionString property is set, you must not provide AccountKey / AccountName.  These values will be deprecated in the future.");
-                }
-                else
-                {
-                    Tuple<string, string> parsedValues = AzureHelper.ParseConnectionString(ConnectionString);
-                    if (parsedValues == null)
-                    {
-                        Log.LogError("Error parsing connection string.  Please review its value.");
-                    }
-                    else
-                    {
-                        AccountName = parsedValues.Item1;
-                        AccountKey = parsedValues.Item2;
-                    }
-                }
-            }
-            else if (string.IsNullOrEmpty(AccountKey) || string.IsNullOrEmpty(AccountName))
-            {
-                Log.LogError("Error, must provide either ConnectionString or AccountName with AccountKey");
-            }
+            ParseConnectionString();
 
             if (Log.HasLoggedErrors)
             {
@@ -96,11 +72,11 @@ namespace Microsoft.DotNet.Build.Tasks
             {
                 try
                 {
-                    var createRequest = AzureHelper.RequestMessage("GET", urlListBlobs, AccountName, AccountKey);
+                    var createRequest = Utility.AzureHelper.RequestMessage("GET", urlListBlobs, AccountName, AccountKey);
 
                     XmlDocument responseFile;
                     string nextMarker = string.Empty;
-                    using (HttpResponseMessage response = await AzureHelper.RequestWithRetry(Log, client, createRequest))
+                    using (HttpResponseMessage response = await Utility.AzureHelper.RequestWithRetry(Log, client, createRequest))
                     {
                         responseFile = new XmlDocument();
                         responseFile.LoadXml(await response.Content.ReadAsStringAsync());
@@ -115,7 +91,7 @@ namespace Microsoft.DotNet.Build.Tasks
                     while (!string.IsNullOrEmpty(nextMarker))
                     {
                         urlListBlobs = string.Format($"https://{AccountName}.blob.core.windows.net/{ContainerName}?restype=container&comp=list&marker={nextMarker}");
-                        using (HttpResponseMessage response = AzureHelper.RequestWithRetry(Log, client, createRequest).GetAwaiter().GetResult())
+                        using (HttpResponseMessage response = Utility.AzureHelper.RequestWithRetry(Log, client, createRequest).GetAwaiter().GetResult())
                         {
                             responseFile = new XmlDocument();
                             responseFile.LoadXml(response.Content.ReadAsStringAsync().GetAwaiter().GetResult());

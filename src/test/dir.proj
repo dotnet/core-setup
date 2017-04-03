@@ -30,12 +30,15 @@
   </Target>
 
   <Target Name="RestoreTests">
-  <PropertyGroup>
-      <RestoreArgs>--disable-parallel --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
+    <ItemGroup>
+      <RestoreTest Include="$(TestDir)/**/project.json" />
+    </ItemGroup>
+    <PropertyGroup>
+      <RestoreArgs>--disable-parallel --fallbacksource $(CoreHostOutputDir) --source $(PackagesBasePath)/packages --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
     </PropertyGroup>
 
     <Exec Command="$(DotnetToolCommand) restore $(RestoreArgs)"
-          WorkingDirectory="$(TestDir)" />
+          WorkingDirectory="%(RestoreTest.RootDir)%(RestoreTest.Directory)" />
   </Target>
 
   <Target Name="BuildTests">

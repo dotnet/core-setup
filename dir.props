@@ -41,8 +41,6 @@
     <ObjDir Condition="'$(ObjDir)'==''">$(BinDir)obj/</ObjDir>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)</BaseIntermediateOutputPath>
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
-    <PackagesOutDir Condition="'$(PackagesOutDir)'==''">$(BinDir)packages/</PackagesOutDir>
-    <SymbolPackagesOutDir Condition="'$(SymbolPackagesOutDir)'==''">$(PackagesOutDir)</SymbolPackagesOutDir>
 
     <!-- Input Directories -->
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
@@ -80,17 +78,6 @@
 
     <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'true'">$(ProductionVersion)</SharedFrameworkNugetVersion>
     <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'false'">$(ProductVersion)</SharedFrameworkNugetVersion>
-
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <CompressedFileExtension Condition="'$(OSGroup)' == 'Windows_NT'">.zip</CompressedFileExtension>
-    <CompressedFileExtension Condition="'$(OSGroup)' != 'Windows_NT'">.tar.gz</CompressedFileExtension>
-    <InstallerExtension Condition="'$(OSGroup)' == 'Windows_NT'">.msi</InstallerExtension>
-    <InstallerExtension Condition="'$(OSGroup)' == 'OSX'">.pkg</InstallerExtension>
-    <InstallerExtension Condition="'$(OSGroup)' != 'Windows_NT' and '$(OSGroup)' != 'OSX'">.deb</InstallerExtension>
-    <CombinedInstallerExtension Condition="'$(OSGroup)' == 'Windows_NT'">.exe</CombinedInstallerExtension>
-    <CombinedInstallerExtension Condition="'$(OSGroup)' != 'Windows_NT'">$(InstallerExtension)</CombinedInstallerExtension>    
   </PropertyGroup>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
@@ -177,6 +164,10 @@
   If Configuration is empty that means we are not being built in VS and so folks need to explicitly pass the different
   values for $(ConfigurationGroup), $(TargetGroup), or $(OSGroup) or accept the defaults for them.
   -->
+  <PropertyGroup>
+    <OSGroup Condition="'$(OSGroup)' == ''">$(OsEnvironment)</OSGroup>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(Configuration)'==''">
     <ConfigurationGroup Condition="'$(ConfigurationGroup)'==''">Debug</ConfigurationGroup>
     <Configuration>$(ConfigurationGroup)</Configuration>
@@ -259,7 +250,9 @@
 
   <ItemGroup>
     <PublishRid Include="win7-x64"/>
-    <!-->
+    <PublishRid Include="win7-x86"/>
+<!--
+    TODO: Align this with OfficialBuildRid    
     <PublishRid Include="win7-x86"/>
     <PublishRid Include="win8-arm"/>
     <PublishRid Include="win10-arm64"/>
@@ -275,7 +268,7 @@
     <PublishRid Include="fedora.23-x64"/>
     <PublishRid Include="fedora.24-x64"/>
     <PublishRid Include="opensuse.42.1-x64"/>
-    -->
+-->    
   </ItemGroup>
 
   <!-- Set up the default output and intermediate paths -->
@@ -292,7 +285,11 @@
 
     <TestPath Condition="'$(TestPath)'==''">$(TestWorkingDir)$(OSPlatformConfig)\$(MSBuildProjectName)\</TestPath>
 
-    <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
+    <CoreHostOutputDir>$(BaseOutputRootPath)corehost\</CoreHostOutputDir>
+
+    <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)/</PackagesBasePath>
+    <PackagesOutDir Condition="'$(PackagesOutDir)'==''">$(PackagesBasePath)packages/</PackagesOutDir>
+    <SymbolPackagesOutDir Condition="'$(SymbolPackagesOutDir)'==''">$(PackagesOutDir)</SymbolPackagesOutDir>
 
     <SharedFrameworkPublishDir>$(IntermediateOutputRootPath)sharedFrameworkPublish\</SharedFrameworkPublishDir>
     <SharedFrameworkNameAndVersionRoot>$(SharedFrameworkPublishDir)shared\$(SharedFrameworkName)\$(HostVersion)</SharedFrameworkNameAndVersionRoot>
@@ -301,6 +298,16 @@
   <PropertyGroup>
     <DisableCrossgen>false</DisableCrossgen>
     <OutputVersionBadge>$(BaseOutputRootPath)sharedfx_$(TargetRid)_$(ConfigurationGroup)_version_badge.svg</OutputVersionBadge>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CompressedFileExtension Condition="'$(OSGroup)' == 'Windows_NT'">.zip</CompressedFileExtension>
+    <CompressedFileExtension Condition="'$(OSGroup)' != 'Windows_NT'">.tar.gz</CompressedFileExtension>
+    <InstallerExtension Condition="'$(OSGroup)' == 'Windows_NT'">.msi</InstallerExtension>
+    <InstallerExtension Condition="'$(OSGroup)' == 'OSX'">.pkg</InstallerExtension>
+    <InstallerExtension Condition="'$(OSGroup)' != 'Windows_NT' and '$(OSGroup)' != 'OSX'">.deb</InstallerExtension>
+    <CombinedInstallerExtension Condition="'$(OSGroup)' == 'Windows_NT'">.exe</CombinedInstallerExtension>
+    <CombinedInstallerExtension Condition="'$(OSGroup)' != 'Windows_NT'">$(InstallerExtension)</CombinedInstallerExtension>    
   </PropertyGroup>
 
   <!-- Disable some standard properties for building our projects -->
