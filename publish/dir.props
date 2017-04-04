@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\dir.props" />
+
+  <PropertyGroup>
+    <AzureAccountName>sourcebuild</AzureAccountName> <!-- ToDo: Pass from official build -->
+    <AzureAccessToken>B5u7LE0PwxPArWTNKCHEnZZn948BxLJHFF7RHIZ9lktpQ7gdicPtA37PmzxrkQOkH82jU8FCJdSQL63vPQknAg==</AzureAccessToken> <!-- ToDo: Pass from official build -->
+    <ContainerName>dotnetcli</ContainerName>
+
+    <DebRepoUser>dotnet</DebRepoUser> <!-- ToDo: Pass from official build -->
+    <DebRepoPass>JtLmjhewMDJES7eMiv4O</DebRepoPass> <!-- ToDo: Pass from official build -->
+    <DebRepoId>579f8fb0fedca9aeeb399132</DebRepoId> <!-- ToDo: Pass from official build -->
+    <DebRepoServer>azure-apt-cat.cloudapp.net</DebRepoServer> <!-- ToDo: Pass from official build -->
+  </PropertyGroup>
+  <ItemGroup>
+    <DebInstallerFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion).deb" />
+    <InstallerFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion)$(InstallerExtension)" />
+    <InstallerFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion)$(CombinedInstallerExtension)" />
+    <CompressedFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion)$(CompressedFileExtension)" />
+    <CompressedFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion).nupkg" />
+  </ItemGroup>
+</Project>
