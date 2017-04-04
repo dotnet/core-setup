@@ -364,9 +364,6 @@ namespace Microsoft.DotNet.Host.Build
             var dotnetCli = DotNetCli.Stage0;
             var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion");
             var sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-
-            // For Windows (MSI) we want to pick the MSI version of LockedHostFxrVersion till the time we do not ship an updated hostfxr (to 1.0.1) (#1574)
-            //var hostFxrVersion = hostVersion.LockedHostFxrVersion.ToString();
             var hostFxrVersion = (CurrentPlatform.Current == BuildPlatform.Windows) ? hostVersion.LockedHostFxrMSIVersion.ToString() : hostVersion.LockedHostFxrVersion.ToString();
             var commitHash = c.BuildContext.Get<string>("CommitHash");
 
