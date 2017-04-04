@@ -6,8 +6,8 @@ param(
     [Parameter(Mandatory=$true)][string]$HostFxrMSIOutput,
     [Parameter(Mandatory=$true)][string]$WixRoot,
     [Parameter(Mandatory=$true)][string]$ProductMoniker,
+    [Parameter(Mandatory=$true)][string]$HostFxrInternalMSIVersion,
     [Parameter(Mandatory=$true)][string]$HostFxrMSIVersion,
-    [Parameter(Mandatory=$true)][string]$HostFxrNugetVersion,
     [Parameter(Mandatory=$true)][string]$Architecture,
     [Parameter(Mandatory=$true)][string]$WixObjRoot,
     [Parameter(Mandatory=$true)][string]$HostFxrUpgradeCode 
@@ -54,15 +54,15 @@ function RunCandle
     Write-Host Running candle..
     $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows\hostfxr"
 
-    $ComponentVersion = $HostFxrNugetVersion.Replace('-', '_');
+    $ComponentVersion = $HostFxrMSIVersion.Replace('-', '_');
 
     .\candle.exe -nologo `
         -out "$WixObjRoot\" `
         -dHostFxrSrc="$HostFxrPublishRoot" `
         -dMicrosoftEula="$RepoRoot\packaging\osx\hostfxr\resources\en.lproj\eula.rtf" `
         -dProductMoniker="$ProductMoniker" `
-        -dBuildVersion="$HostFxrMSIVersion" `
-        -dNugetVersion="$HostFxrNugetVersion" `
+        -dBuildVersion="$HostFxrInternalMSIVersion" `
+        -dNugetVersion="$HostFxrMSIVersion" `
         -dComponentVersion="$ComponentVersion" `
         -dUpgradeCode="$HostFxrUpgradeCode" `
         -arch $Architecture `

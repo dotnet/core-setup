@@ -169,8 +169,16 @@ namespace Microsoft.DotNet.Host.Build
 
             var sharedFrameworkVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion.ToString();
-            var hostFxrVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrVersion.ToString();
-
+            var hostFxrVersion = "";
+            if (CurrentPlatform.Current == BuildPlatform.Windows)
+            {
+                hostFxrVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrMSIVersion.ToString();
+            }
+            else
+            {
+                hostFxrVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrVersion.ToString();
+            }
+            
             AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", hostVersion);
             AddInstallerArtifactToContext(c, "dotnet-hostfxr", "HostFxr", hostFxrVersion);
             AddInstallerArtifactToContext(c, "dotnet-sharedframework", "SharedFramework", sharedFrameworkVersion);

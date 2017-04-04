@@ -40,7 +40,14 @@ namespace Microsoft.DotNet.Host.Build
             DebRepoPublisherTool = new DebRepoPublisher(Dirs.Packages);
             SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             SharedHostNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion.ToString();
-            HostFxrNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrVersion.ToString();
+            if (CurrentPlatform.Current == BuildPlatform.Windows)
+            {
+                HostFxrNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrMSIVersion.ToString();
+            }
+            else
+            {
+                HostFxrNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrVersion.ToString();
+            }
             Channel = c.BuildContext.Get<string>("Channel");
             BranchName = c.BuildContext.Get<string>("BranchName");
             CommitHash = c.BuildContext.Get<string>("CommitHash");

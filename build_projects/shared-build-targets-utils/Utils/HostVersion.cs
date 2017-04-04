@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Build
         // These versions should only be incremented in a servicing release if the package in question
         // is being updated.
         public VerInfo LatestHostVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
-        public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 5, "", "", "", CommitCountString);
+        public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
         public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 3, "", "", "", CommitCountString);
   
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
@@ -107,6 +107,8 @@ namespace Microsoft.DotNet.Cli.Build
         //
         public bool IsLocked = true; // Set this variable to toggle muxer locking.
         public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostFxrVersion;
+        //We add a different LockedHostFxrVersion for the MSI as the package needs to deviate for issue #1574. This we can reconcile and remove when we have a binary change for the hostfxr.dll
+        public VerInfo LockedHostFxrMSIVersion => new VerInfo(1, 0, 5, "", "", "", CommitCountString);
         public VerInfo LockedHostVersion    => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostVersion;
     }
 }
