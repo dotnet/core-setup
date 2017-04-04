@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
             _projectJson = Path.Combine(_projectDirectory, "project.json");
             _projectLockJson = Path.Combine(_projectDirectory, "project.lock.json");
 
-            _outputDirectory = outputDirectory ?? Path.Combine(_projectDirectory, "bin");
+            _outputDirectory = outputDirectory ?? Path.Combine(_projectDirectory, "Bin");
             if (Directory.Exists(_outputDirectory))
             {
                 LoadOutputFiles();

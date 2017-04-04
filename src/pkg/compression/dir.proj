@@ -72,8 +72,8 @@
           DestinationFolder="$(CombinedPublishRoot)/%(CombinedFiles.RecursiveDir)" />
 
     <!-- create output dir -->
-    <MakeDir Condition="!Exists('$(PackagesOutputDir)')"
-             Directories="$(PackagesOutputDir)" />
+    <MakeDir Condition="!Exists('$(PackagesOutDir)')"
+             Directories="$(PackagesOutDir)" />
   </Target>
 
   <Target Name="GenerateVersionBadge">
@@ -96,17 +96,17 @@
 
     <ZipFileCreateFromDirectory
         SourceDirectory="$(CombinedPublishRoot)"
-        DestinationArchive="$(PackagesOutputDir)$(CombinedCompressedFile)"
+        DestinationArchive="$(PackagesOutDir)$(CombinedCompressedFile)"
         OverwriteDestination="true" />
 
     <ZipFileCreateFromDirectory
         SourceDirectory="$(HostFxrPublishRoot)"
-        DestinationArchive="$(PackagesOutputDir)$(HostFxrCompressedFile)"
+        DestinationArchive="$(PackagesOutDir)$(HostFxrCompressedFile)"
         OverwriteDestination="true" />
 
     <ZipFileCreateFromDirectory
         SourceDirectory="$(SharedFrameworkPublishRoot)"
-        DestinationArchive="$(PackagesOutputDir)$(SharedFrameworkCompressedFile)"
+        DestinationArchive="$(PackagesOutDir)$(SharedFrameworkCompressedFile)"
         OverwriteDestination="true" />
 
   </Target>
@@ -114,9 +114,9 @@
   <Target Name="GenerateTarBall"
           Condition="'$(OSGroup)'!='Windows_NT'">
 
-    <Exec Command="tar -czf $(PackagesOutputDir)$(CombinedCompressedFile) -C $(CombinedPublishRoot) ." />
-    <Exec Command="tar -czf $(PackagesOutputDir)$(HostFxrCompressedFile) -C $(HostFxrPublishRoot) ." />
-    <Exec Command="tar -czf $(PackagesOutputDir)$(SharedFrameworkCompressedFile) -C $(SharedFrameworkPublishRoot) ." />
+    <Exec Command="tar -czf $(PackagesOutDir)$(CombinedCompressedFile) -C $(CombinedPublishRoot) ." />
+    <Exec Command="tar -czf $(PackagesOutDir)$(HostFxrCompressedFile) -C $(HostFxrPublishRoot) ." />
+    <Exec Command="tar -czf $(PackagesOutDir)$(SharedFrameworkCompressedFile) -C $(SharedFrameworkPublishRoot) ." />
   </Target>
   
   <Import Project="windows\package.targets" />
@@ -141,7 +141,7 @@
 
     <PropertyGroup>
       <BuildBasePathArg>--build-base-path $(IntermediateOutputRootPath)forPackaging</BuildBasePathArg>
-      <OutputArg>--output $(PackagesOutputDir)</OutputArg>
+      <OutputArg>--output $(PackagesOutDir)</OutputArg>
       <ConfigArg>--configuration $(Configuration)</ConfigArg>
       <VersionSuffixArg>--version-suffix $(VersionSuffix)</VersionSuffixArg>
     </PropertyGroup>

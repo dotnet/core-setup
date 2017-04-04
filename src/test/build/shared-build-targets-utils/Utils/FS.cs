@@ -109,6 +109,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach(var candidate in Directory.EnumerateDirectories(dir))
             {
                 if (string.Equals(Path.GetFileName(candidate), "bin") ||
+                    string.Equals(Path.GetFileName(candidate), "Bin") ||
                     string.Equals(Path.GetFileName(candidate), "obj"))
                 {
                     Utils.DeleteDirectory(candidate);

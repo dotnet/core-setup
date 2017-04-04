@@ -36,14 +36,14 @@
     <SourceDir>$(ProjectDir)src/</SourceDir>
 
     <!-- Output directories -->
-    <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
+    <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)Bin/</BinDir>
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
     <ObjDir Condition="'$(ObjDir)'==''">$(BinDir)obj/</ObjDir>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)</BaseIntermediateOutputPath>
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
 
     <!-- Input Directories -->
-    <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
+    <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)Packages/</PackagesDir>
     <ToolRuntimePath Condition="'$(ToolRuntimePath)'==''">$(ProjectDir)Tools/</ToolRuntimePath>
     <ToolsDir Condition="'$(UseToolRuntimeForToolsDir)'=='true'">$(ToolRuntimePath)</ToolsDir>
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
@@ -120,7 +120,7 @@
   <ItemGroup>
     <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)src\pkg\projects\**\project.json" />
     <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)src\test\**\project.json" />
-    <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)bin\**\project.json" />
+    <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)Bin\**\project.json" />
     
     <_ProjectJsonFiles Include="$(MSBuildThisFileDirectory)**\project.json" Exclude="@(_DnuExcludeProjectJsonFiles)" />
     <DnuRestoreDirs Include="@(_ProjectJsonFiles->'%(RootDir)%(Directory)')" >
@@ -286,7 +286,7 @@
     <CoreHostOutputDir>$(BaseOutputRootPath)corehost\</CoreHostOutputDir>
 
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)/</PackagesBasePath>
-    <PackagesOutDir Condition="'$(PackagesOutDir)'==''">$(PackagesBasePath)packages/</PackagesOutDir>
+    <PackagesOutDir Condition="'$(PackagesOutDir)'==''">$(PackagesBasePath)Packages/</PackagesOutDir>
     <SymbolPackagesOutDir Condition="'$(SymbolPackagesOutDir)'==''">$(PackagesOutDir)</SymbolPackagesOutDir>
 
     <SharedFrameworkPublishDir>$(IntermediateOutputRootPath)sharedFrameworkPublish\</SharedFrameworkPublishDir>

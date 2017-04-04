@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
         {
             _repoRoot = repoRoot ?? Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
 
-            string baseArtifactsFolder = artifacts ?? Path.Combine(_repoRoot, "bin");
+            string baseArtifactsFolder = artifacts ?? Path.Combine(_repoRoot, "Bin");
             _dotnetSDK = dotnetSdk ?? Path.Combine(_repoRoot, "Tools", "dotnetcli");
             _targetRID = Environment.GetEnvironmentVariable("TEST_TARGETRID");
             _artifacts = Path.Combine(baseArtifactsFolder, _targetRID+".Debug");

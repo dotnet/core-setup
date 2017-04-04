@@ -3,14 +3,14 @@
 <Import Project='package.props' />
 
   <Target Name="InitializeDotnetDebTool">
-    <Exec Command="$(DotnetToolCommand) pack $(dotnetDebToolSource)/project.json --output $(PackagesOutputDir)intermediate/ --version-suffix $(VersionSuffix)"/>
+    <Exec Command="$(DotnetToolCommand) pack $(dotnetDebToolSource)/project.json --output $(PackagesOutDir)intermediate/ --version-suffix $(VersionSuffix)"/>
 
     <ItemGroup>
-      <pkFiles Include="$(PackagesOutputDir)intermediate/dotnet-deb-tool.*.nupkg" 
-               Exclude="$(PackagesOutputDir)intermediate/*.symbols.nupkg" />
+      <pkFiles Include="$(PackagesOutDir)intermediate/dotnet-deb-tool.*.nupkg" 
+               Exclude="$(PackagesOutDir)intermediate/*.symbols.nupkg" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(pkFiles)" DestinationFolder="$(PackagesOutputDir)" />
+    <Copy SourceFiles="@(pkFiles)" DestinationFolder="$(PackagesOutDir)" />
 
     <RemoveDir Condition="Exists('$(consumingProjectDirectory)')"
                Directories="$(consumingProjectDirectory)" />

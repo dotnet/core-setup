@@ -5,8 +5,7 @@
   <PropertyGroup>
     <CompressionRoot>$(ProjectDir)src/pkg/compression/</CompressionRoot>
     
-    <PackagesOutputDir>$(BaseOutputRootPath)packages/</PackagesOutputDir>
-    <PackagesIntermediateDir>$(IntermediateOutputRootPath)packages/</PackagesIntermediateDir>
+    <PackagesIntermediateDir>$(IntermediateOutputRootPath)Packages/</PackagesIntermediateDir>
     <SharedHostPublishRoot>$(IntermediateOutputRootPath)sharedHost/</SharedHostPublishRoot>
     <HostFxrPublishRoot>$(IntermediateOutputRootPath)hostFxr/</HostFxrPublishRoot>
     <SharedFrameworkPublishRoot>$(IntermediateOutputRootPath)sharedFx/</SharedFrameworkPublishRoot>
