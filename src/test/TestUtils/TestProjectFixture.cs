@@ -1,4 +1,4 @@
-﻿using Microsoft.DotNet.Cli.Build;
+using Microsoft.DotNet.Cli.Build;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -190,11 +190,6 @@ namespace Microsoft.DotNet.CoreSetup.Test
             if ( ! Directory.Exists(repoDirectoriesProvider.CorehostPackages))
             {
                 throw new Exception($"Unable to find host packages directory, please ensure the build has been run: {repoDirectoriesProvider.CorehostPackages}");
-            }
-
-            if (!Directory.Exists(repoDirectoriesProvider.CorehostDummyPackages))
-            {
-                throw new Exception($"Unable to find host dummy packages directory, please ensure the build has been run: {repoDirectoriesProvider.CorehostDummyPackages}");
             }
         }
 

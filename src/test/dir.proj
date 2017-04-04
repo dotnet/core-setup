@@ -51,7 +51,8 @@
           WorkingDirectory="%(TestProjects.Identity)" />
   </Target>
 
-  <Target Name="RunTests">
+  <Target Name="RunTests"
+          DependsOnTargets="PrepareTestFolders">
     <PropertyGroup>
       <TestArgs>--configuration $(ConfigurationGroup)</TestArgs>
       <IsCrossArch Condition="'$(TargetArchitecture)' == 'arm' or '$(TargetArchitecture)' == 'arm64' or '$(TargetArchitecture)' == 'armel'">true</IsCrossArch>
@@ -60,6 +61,16 @@
     <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml %(TestProjects.Filename)-testResults.xml -notrait categorty=failing"
           WorkingDirectory="%(TestProjects.Identity)"
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir);TEST_ARTIFACTS=$(TestsOutputDir);TEST_TARGETRID=$(PackageTargetRid)"
-          Condition="'%(TestProjects.Filename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'" />
+          Condition="'%(TestProjects.Filename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'"
+          IgnoreStandardErrorWarningFormat="true" />
+  </Target>
+
+  <Target Name="PrepareTestFolders">
+    <ItemGroup>
+      <SharedFrameworkPublishFiles Include="$(IntermediateOutputRootPath)sharedFrameworkPublish/**" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(SharedFrameworkPublishFiles)"
+          DestinationFiles="@(SharedFrameworkPublishFiles->'$(TestsOutputDir)sharedFrameworkPublish/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>

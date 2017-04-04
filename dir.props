@@ -64,20 +64,21 @@
     <ProductVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)</ProductVersion>
     <ProductionVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</ProductionVersion>
 
-    <NuGetVersion>$(ProductionVersion)</NuGetVersion>
-    <HostVersion>$(ProductionVersion)</HostVersion>
-    <AppHostVersion>$(ProductionVersion)</AppHostVersion>
-    <NetCoreAppVersion>$(ProductionVersion)</NetCoreAppVersion>
-    <HostResolverVersion>$(ProductionVersion)</HostResolverVersion>
-    <HostPolicyVersion>$(ProductionVersion)</HostPolicyVersion>
-    
-    <HostFullVersion>$(HostVersion)-$(VersionSuffix)</HostFullVersion>
-    <HostResolverFullVersion>$(HostResolverVersion)-$(VersionSuffix)</HostResolverFullVersion>
-    <AppHostFullVersion>$(AppHostVersion)-$(VersionSuffix)</AppHostFullVersion>
-    <HostPolicyFullVersion>$(HostPolicyVersion)-$(VersionSuffix)</HostPolicyFullVersion>
-
     <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'true'">$(ProductionVersion)</SharedFrameworkNugetVersion>
     <SharedFrameworkNugetVersion Condition="'$(StabilizePackageVersion)' == 'false'">$(ProductVersion)</SharedFrameworkNugetVersion>
+
+    <NuGetVersion>$(SharedFrameworkNugetVersion)</NuGetVersion>
+    <HostVersion>$(SharedFrameworkNugetVersion)</HostVersion>
+    <AppHostVersion>$(SharedFrameworkNugetVersion)</AppHostVersion>
+    <NetCoreAppVersion>$(SharedFrameworkNugetVersion)</NetCoreAppVersion>
+    <HostResolverVersion>$(SharedFrameworkNugetVersion)</HostResolverVersion>
+    <HostPolicyVersion>$(SharedFrameworkNugetVersion)</HostPolicyVersion>
+    
+    <HostFullVersion>$(ProductVersion)</HostFullVersion>
+    <HostResolverFullVersion>$(ProductVersion)</HostResolverFullVersion>
+    <AppHostFullVersion>$(ProductVersion)</AppHostFullVersion>
+    <HostPolicyFullVersion>$(ProductVersion)</HostPolicyFullVersion>
+
   </PropertyGroup>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
@@ -226,6 +227,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <Framework>netcoreapp2.0</Framework>
     <Framework Condition="'$(TargetArchitecture)' == 'arm64'">netcoreapp1.1</Framework>
   </PropertyGroup>
   
@@ -250,8 +252,6 @@
 
   <ItemGroup>
     <PublishRid Include="win7-x64"/>
-<!--
-    TODO: Align this with OfficialBuildRid    
     <PublishRid Include="win7-x86"/>
     <PublishRid Include="win8-arm"/>
     <PublishRid Include="win10-arm64"/>
@@ -267,7 +267,6 @@
     <PublishRid Include="fedora.23-x64"/>
     <PublishRid Include="fedora.24-x64"/>
     <PublishRid Include="opensuse.42.1-x64"/>
--->    
   </ItemGroup>
 
   <!-- Set up the default output and intermediate paths -->

@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <Version>$(NetCoreAppVersion)</Version>
-    <NETCoreAppFramework>netcoreapp$([System.Version]::Parse('$(NetCoreAppVersion)').ToString(2))</NETCoreAppFramework>
+    <NETCoreAppFramework>netcoreapp$([System.Version]::Parse('$(ProductionVersion)').ToString(2))</NETCoreAppFramework>
     <OmitDependencies>true</OmitDependencies>
     <SkipValidatePackage>true</SkipValidatePackage>
     <ShouldCreateLayout>false</ShouldCreateLayout>
