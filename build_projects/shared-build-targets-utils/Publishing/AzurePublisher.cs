@@ -51,6 +51,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         public void PublishFile(string blob, string file)
         {
+            Console.WriteLine($"Publishing file '{file}' to '{blob}'");
+
             CloudBlockBlob blockBlob = _blobContainer.GetBlockBlobReference(blob);
             blockBlob.UploadFromFileAsync(file, FileMode.Open).Wait();
 
@@ -68,6 +70,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         public void CopyBlob(string sourceBlob, string targetBlob)
         {
+            Console.WriteLine($"Copying blob '{sourceBlob}' to '{targetBlob}'");
+
             CloudBlockBlob source = _blobContainer.GetBlockBlobReference(sourceBlob);
             CloudBlockBlob target = _blobContainer.GetBlockBlobReference(targetBlob);
 
