@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -13,11 +13,20 @@ namespace Microsoft.DotNet.Build.Tasks
     //                           major.minor.build
     // Size(bits) of each part     8     8    16
     // So we have 32 bits to encode the CLI version
-    // Starting with most significant bit this how the CLI version is going to be encoded as MSI Version
-    // CLI major  -> 6 bits
-    // CLI minor  -> 6 bits
-    // CLI patch  -> 6 bits
-    // CLI commitcount -> 14 bits
+
+    // For a CLI version based on commit count:
+    //   Starting with most significant bit this how the CLI version is going to be encoded as MSI Version
+    //   CLI major  -> 6 bits
+    //   CLI minor  -> 6 bits
+    //   CLI patch  -> 6 bits
+    //   CLI commitcount -> 14 bits
+    //
+    // For a CLI version based on BuildTools versioning
+    //   CLI major  -> 5 bits
+    //   CLI minor  -> 5 bits
+    //   CLI patch  -> 4 bits
+    //   BuildNumber major -> 14 bits
+    //   BuildNumber minor -> 4 bits
     public class GenerateMsiVersion : BuildTask
     {
         [Required]
@@ -26,12 +35,40 @@ namespace Microsoft.DotNet.Build.Tasks
         public string Minor { get; set; }
         [Required]
         public string Patch { get; set; }
-        [Required]
         public string BuildNumber { get; set; }
+        public string BuildNumberMajor { get; set; }
+        public string BuildNumberMinor { get; set; }
         [Output]
         public string MsiVersion { get; set; }
 
         public override bool Execute()
+        {
+            if(BuildNumber == null && BuildNumberMajor == null)
+            {
+                Log.LogError("Either BuildNumber or BuildNumberMajor and BuildNumberMinor are required parameters.");
+                return false;
+            }
+            if(BuildNumber != null && BuildNumberMajor != null)
+            {
+                Log.LogError("You must specify either BuildNumber or BuildNumberMajor and BuildNumberMinor, you cannot specify both parameters.");
+                return false;
+            }
+            if (BuildNumberMajor != null && BuildNumberMinor == null)
+            {
+                Log.LogError("If you specify a BuildNumberMajor, you must also specify the BuildNumberMinor.");
+                return false;
+            }
+            if(BuildNumber != null)
+            {
+                ParseBuildNumber();
+            }
+            else
+            {
+                ParseBuildNumberMajorMinor();
+            }
+            return true;
+        }
+        private void ParseBuildNumber()
         {
             var major = int.Parse(Major) << 26;
             var minor = int.Parse(Minor) << 20;
@@ -43,8 +80,24 @@ namespace Microsoft.DotNet.Build.Tasks
             var msiBuild = msiVersionNumber & 0xFFFF;
 
             MsiVersion = $"{msiMajor}.{msiMinor}.{msiBuild}";
-
-            return true;
         }
+        private void ParseBuildNumberMajorMinor()
+        {
+            var major = int.Parse(Major) << 27;
+            var minor = int.Parse(Minor) << 22;
+            var patch = int.Parse(Patch) << 18;
+
+            var buildNumberMajor = int.Parse(BuildNumberMajor) & 0x3FFF << 4;
+            var buildNumberMinor = int.Parse(BuildNumberMinor) & 0xF;
+
+            var msiVersionNumber = major | minor | patch | buildNumberMajor | buildNumberMinor;
+
+            var msiMajor = (msiVersionNumber >> 24) & 0xFF;
+            var msiMinor = (msiVersionNumber >> 16) & 0xFF;
+            var msiBuild = msiVersionNumber & 0xFFFF;
+
+            MsiVersion = $"{msiMajor}.{msiMinor}.{msiBuild}";
+        }
+
     }
 }

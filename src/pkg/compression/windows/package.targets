@@ -6,8 +6,7 @@
     <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll" />
 
     <Target Name="GenerateMsis"
-          DependsOnTargets="GetCommitCount"
-          Condition="'$(OSGroup)' == 'Windows_NT'">
+            Condition="'$(OSGroup)' == 'Windows_NT'">
       
       <Exec Command="powershell -NoProfile -NoLogo $(GetWixScript) -WixVersion $(WixVersion) -OutputDir $(WixToolsDir)" />
 
@@ -47,7 +46,8 @@
         Major="$(MajorVersion)"
         Minor="$(MinorVersion)"
         Patch="$(PatchVersion)"
-        BuildNumber="$(CommitCount)">
+        BuildNumberMajor="$(BuildNumberMajor)"
+        BuildNumberMinor="$(BuildNumberMajor)">
         <Output TaskParameter="MsiVersion" PropertyName="MsiVersionString" />
       </GenerateMsiVersion>
 

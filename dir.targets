@@ -50,10 +50,9 @@
     <Error Condition="'$(CommitCount)' == ''" Text="Unable to determine the 'commit count'.  'Commit count' is used for generating an msi version.  If you are building outside of a git repo, you must pass the '/p:CommitCount=[value]' property" />
   </Target>
 
-  <Target Name="GetBundleDisplayVersion"
-          DependsOnTargets="GetCommitCount">
+  <Target Name="GetBundleDisplayVersion">
     <PropertyGroup>
-      <BundleDisplayVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).$(CommitCount)</BundleDisplayVersion>
+      <BundleDisplayVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).$(BuildNumberMajor)</BundleDisplayVersion>
     </PropertyGroup>
   </Target>
   

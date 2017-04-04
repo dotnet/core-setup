@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <TestProjects Include="$(TestDir)/HostActivationTests" />
-    <TestProjects Include="$(TestDir)/Microsoft.Extensions.DependencyModel.Tests" />      
+    <!-- <TestProjects Include="$(TestDir)/Microsoft.Extensions.DependencyModel.Tests" /> -->      
   </ItemGroup>
 
 </Project>

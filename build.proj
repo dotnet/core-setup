@@ -25,6 +25,10 @@
   <ItemGroup>
     <Project Include="src/dir.proj" />
     <Project Include="src/pkg/compression/dir.proj"/>
+    <!-- TODO: 
+    - Enable Microsoft.Extension.DependencyModel.Tests
+    - catch failures, currently runs tests and then reports success -->
+    <Project Include="$(MSBuildThisFileDirectory)src/test/dir.proj" Condition="'$(SkipTests)' != 'true'"/>
   </ItemGroup>
 
   <Target Name="BuildCustomTasks">

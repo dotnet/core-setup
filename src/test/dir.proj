@@ -35,7 +35,7 @@
     </ItemGroup>
     <PropertyGroup>
       <!-- Todo: clean up these sources-->
-      <RestoreArgs>--disable-parallel --fallbacksource $(CoreHostOutputDir) --source $(PackagesBasePath)/packages --source https:%2F%2Fwww.nuget.org/api/v2 --source https:%2F%2Fwww.myget.org/F/aspnet-contrib/api/v2 --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
+      <RestoreArgs>--disable-parallel --fallbacksource $(CoreHostOutputDir) --source $(PackagesBasePath)Packages --source https:%2F%2Fwww.nuget.org/api/v2 --source https:%2F%2Fwww.myget.org/F/aspnet-contrib/api/v2 --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
     </PropertyGroup>
 
     <Exec Command="$(DotnetToolCommand) restore $(RestoreArgs)"
