@@ -1,6 +1,6 @@
+using Microsoft.DotNet.Cli.Build.Framework;
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Build.Framework;
 
 namespace Microsoft.DotNet.Cli.Build
 {
