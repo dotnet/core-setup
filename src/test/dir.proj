@@ -70,13 +70,19 @@
         <ExitCode>$(_ErrorCode)</ExitCode>
       </TestResults>
     </ItemGroup>
-
     <Message Importance="High" Condition="'$(_ErrorCode)' != '0'" Text="Test run failed with exit code '$(_ErrorCode)'" />
   </Target>
 
   <Target Name="RunTests"
           DependsOnTargets="PrepareTestFolders;RunTest">
-    <Error Condition="'%(TestResults.ErrorCode)' != '0'" Text="%(TestResults.Identity) test runs failed with non-zero exit code %(TestResults.ErrorCode)" />
+    <ItemGroup>
+      <FailedTests Include="%(TestResults.Identity)" Condition="'%(TestResults.ExitCode)' != '0'">
+        <ExitCode>%(TestResults.ExitCode)</ExitCode>
+      </FailedTests>
+    </ItemGroup>
+    <Message Importance="High" Condition="'@(FailedTests)' != ''" Text="Failed test summary" />
+    <Message Importance="High" Condition="'@(FailedTests)' != ''" Text="  %(FailedTests.Identity) failed with exit code %(FailedTests.ExitCode)" />      
+    <Error Condition="'@(FailedTests)' != ''" Text="One or more test runs failed." />
   </Target>
 
   <Target Name="PrepareTestFolders">
