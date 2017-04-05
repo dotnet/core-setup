@@ -139,8 +139,10 @@ namespace Microsoft.DotNet.Host.Build
         public static BuildTargetResult GenerateDotnetHostFxrMsi(BuildTargetContext c)
         {
             var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion");
-            var hostFxrMsiVersion = hostVersion.LockedHostFxrVersion.GenerateMsiVersion();            
-            var hostFxrNugetVersion = hostVersion.LockedHostFxrVersion.ToString();
+
+            //We provide a different locked hostFxr version for Windows (MSIs) instead of LockedHostFxrVersion for issue #1574. This we can update when we have the next binary change for the hostfxr.dll (from 1.0.1)
+            var hostFxrInternalMsiVersion = hostVersion.LockedHostFxrMSIVersion.GenerateMsiVersion();
+            var hostFxrMSIVersion = hostVersion.LockedHostFxrMSIVersion.ToString();
             var inputDir = c.BuildContext.Get<string>("HostFxrPublishRoot");
             var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "hostfxr");
             var hostFxrBrandName = $"'{Monikers.HostFxrBrandName}'";
@@ -154,7 +156,7 @@ namespace Microsoft.DotNet.Host.Build
 
             Cmd("powershell", "-NoProfile", "-NoLogo",
                 Path.Combine(Dirs.RepoRoot, "packaging", "windows", "hostfxr", "generatemsi.ps1"),
-                inputDir, HostFxrMsi, WixRoot, hostFxrBrandName, hostFxrMsiVersion, hostFxrNugetVersion, Arch, wixObjRoot, upgradeCode)
+                inputDir, HostFxrMsi, WixRoot, hostFxrBrandName, hostFxrInternalMsiVersion, hostFxrMSIVersion, Arch, wixObjRoot, upgradeCode)
                     .Execute()
                     .EnsureSuccessful();
             return c.Success();

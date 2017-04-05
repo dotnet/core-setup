@@ -421,7 +421,8 @@ namespace Microsoft.DotNet.Host.Build
             string sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             string sharedFrameworkRid = c.BuildContext.Get<string>("TargetRID");
             string sharedFrameworkTarget = c.BuildContext.Get<string>("TargetFramework");
-            var hostFxrVersion = hostVersion.LockedHostFxrVersion.ToString();
+            //We provide a different locked hostFxr version for Windows (MSIs) instead of LockedHostFxrVersion for issue #1575. This we can update when we have the next binary change for the hostfxr.dll (from 1.0.1)
+            var hostFxrVersion = (CurrentPlatform.Current == BuildPlatform.Windows) ? hostVersion.LockedHostFxrMSIVersion.ToString() : hostVersion.LockedHostFxrVersion.ToString();
             var commitHash = c.BuildContext.Get<string>("CommitHash");
 
             var sharedFrameworkPublisher = new SharedFrameworkPublisher(
