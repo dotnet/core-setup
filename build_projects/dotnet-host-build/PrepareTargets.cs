@@ -169,8 +169,7 @@ namespace Microsoft.DotNet.Host.Build
 
             var sharedFrameworkVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion.ToString();
-            //We provide a different locked hostFxr version for Windows (MSIs) instead of LockedHostFxrVersion for issue #1574. This we can update when we have the next binary change for the hostfxr.dll (from 1.0.1)
-            var hostFxrVersion = (CurrentPlatform.Current == BuildPlatform.Windows) ? c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrMSIVersion.ToString() : c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrVersion.ToString();
+            var hostFxrVersion = c.BuildContext.Get<HostVersion>("HostVersion").GetLockedPlatformInstallerVersion().ToString();
 
             AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", hostVersion);
             AddInstallerArtifactToContext(c, "dotnet-hostfxr", "HostFxr", hostFxrVersion);

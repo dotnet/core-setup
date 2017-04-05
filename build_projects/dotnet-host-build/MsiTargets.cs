@@ -139,9 +139,8 @@ namespace Microsoft.DotNet.Host.Build
         public static BuildTargetResult GenerateDotnetHostFxrMsi(BuildTargetContext c)
         {
             var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion");
-            //We provide a different locked hostFxr version for Windows (MSIs) instead of LockedHostFxrVersion for issue #1574. This we can update when we have the next binary change for the hostfxr.dll (from 1.0.1)
-            var hostFxrInternalMsiVersion = hostVersion.LockedHostFxrMSIVersion.GenerateMsiVersion();
-            var hostFxrMSIVersion = hostVersion.LockedHostFxrMSIVersion.ToString();
+            var hostFxrInternalMsiVersion = hostVersion.GetLockedPlatformInstallerVersion().GenerateMsiVersion();
+            var hostFxrMSIVersion = hostVersion.GetLockedPlatformInstallerVersion().ToString();
             var inputDir = c.BuildContext.Get<string>("HostFxrPublishRoot");
             var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "hostfxr");
             var hostFxrBrandName = $"'{Monikers.HostFxrBrandName}'";
