@@ -1,6 +1,6 @@
+using Microsoft.DotNet.Cli.Build.Framework;
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Build.Framework;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -100,6 +100,7 @@ namespace Microsoft.DotNet.Cli.Build
             { "hostfxr", LatestHostFxrVersion },
             { "hostpolicy", LatestHostPolicyVersion }
         };
+
         //
         // Locked muxer for consumption in CLI.
         //
