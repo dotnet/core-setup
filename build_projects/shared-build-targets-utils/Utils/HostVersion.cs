@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.DotNet.Cli.Build.Framework;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -106,9 +107,21 @@ namespace Microsoft.DotNet.Cli.Build
         //
         public bool IsLocked = true; // Set this variable to toggle muxer locking.
         public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 1, 0, "", "", "", CommitCountString) : LatestHostFxrVersion;
-        //We add a different LockedHostFxrVersion for the MSI as the package needs to deviate for issue #1575. This we can update or remove when we have a binary change for the hostfxr.dll (from 1.0.1)
-        public bool fExplicitHostFXRMSIVersion = true; // Set this variable to override LatestHostFxrVersion for MSI packages only. This can be set to false when we fall back to using just LockedHostFxrVersion for all.
-        public VerInfo LockedHostFxrMSIVersion => fExplicitHostFXRMSIVersion ? new VerInfo(1, 1, 2, "", "", "", CommitCountString) : LockedHostFxrVersion;
         public VerInfo LockedHostVersion    => IsLocked ? new VerInfo(1, 1, 0, "", "", "", CommitCountString) : LatestHostVersion;
+        public bool fExplicitHostFXRMSIVersion = true; //This should be set to false when we no longer need to override the MSI version to be different from the HostFXR nuget package version".
+
+        // This method returns the locked hostfxr version based on the flag fExplicitHostFXRMSIVersion and the current platform. 
+        // For MSI (Windows) generation we specify a newer version for handling issue #1574 and for non-Windows platform we return the LockedHostFxrVersion.
+        public VerInfo GetLockedPlatformInstallerVersion()
+        {
+            VerInfo version = LockedHostFxrVersion;
+
+            if (fExplicitHostFXRMSIVersion && CurrentPlatform.Current == BuildPlatform.Windows)
+            {
+                version = new VerInfo(1, 1, 2, "", "", "", CommitCountString);
+            }
+
+            return version;
+        }
     }
 }
