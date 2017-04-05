@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "Microsoft.Net.Native.Compiler": "1.6.0",
+    "Microsoft.Private.CoreFx.UAP": "4.4.0-preview1-25205-01",
+    "transport.Microsoft.NETCore.Runtime.CoreCLR": "2.0.0-preview1-25205-03",
+    "Microsoft.DiaSymReader.Native": "1.4.0",
+    "Microsoft.NETCore.Platforms": "2.0.0-preview1-25205-01",
+    "NETStandard.Library": "2.0.0-preview1-25204-01"
+  },
+  "frameworks": {
+    "uap10.1": {}
+  },
+  "runtimes": {
+    "{RID}": {}
+  }
+}

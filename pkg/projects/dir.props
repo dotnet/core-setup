@@ -54,7 +54,7 @@
     <AdditionalSymbolPackageExcludes Condition="'$(LibraryFileExtension)' != ''" Include="%2A%2A\%2A.a;%2A%2A\%2A$(LibraryFileExtension)" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(PackageRID)' == ''">
+  <PropertyGroup Condition="'$(PackageRID)' == '' And '$(OverridePackageRIDs)' != 'true'">
     <PackageRID>$(DistroRid)</PackageRID>
     <PackageRID Condition="'$(OSEnvironment)' == 'OSX'">osx.10.12-$(Platform)</PackageRID>
     <PackageRID Condition="'$(OSEnvironment)' == 'Windows_NT'">win7-$(Platform)</PackageRID>
@@ -62,7 +62,7 @@
     <PackageRID Condition="'$(OSEnvironment)' == 'Windows_NT' AND '$(Platform)' =='arm64'">win10-$(Platform)</PackageRID>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(OverridePackageRIDs)' != 'true'">
     <OfficialBuildRID Include="alpine.3.4.3-x64" />
     <OfficialBuildRid Include="debian.8-armel">
       <Platform>armel</Platform>
@@ -88,6 +88,38 @@
     <OfficialBuildRid Include="tizen.4.0.0-armel">
       <Platform>armel</Platform>
     </OfficialBuildRid>
+
+    <!-- Ensure we have a RID-specific package for the current build, even if it isn't in our official set -->
+    <BuildRID Include="@(OfficialBuildRID)" Exclude="$(PackageRID)"/>
+    <BuildRID Include="$(PackageRID)">
+      <Platform>$(Platform)</Platform>
+    </BuildRID>
+  </ItemGroup>
+
+  <!-- ================== Section for Universal Windows Platform package ================== -->
+  <PropertyGroup Condition="'$(PackageRID)' == '' And '$(OverridePackageRIDs)' == 'true'">
+    <PackageRID>win10-$(Platform)</PackageRID>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(OverridePackageRIDs)' == 'true'">
+    <OfficialBuildRID Include="win10-x86">
+      <Platform>x86</Platform>
+    </OfficialBuildRID>
+    <OfficialBuildRID Include="win10-x64" />
+    <OfficialBuildRID Include="win10-arm">
+      <Platform>arm</Platform>
+    </OfficialBuildRID>
+    <OfficialBuildRID Include="win10-x86-aot">
+      <BuidOnRID>win10-x86</BuidOnRID>
+      <Platform>x86</Platform>
+    </OfficialBuildRID>
+    <OfficialBuildRID Include="win10-x64-aot">
+      <BuidOnRID>win10-x64</BuidOnRID>
+    </OfficialBuildRID>
+    <OfficialBuildRID Include="win10-arm-aot">
+      <BuidOnRID>win10-arm</BuidOnRID>
+      <Platform>arm</Platform>
+    </OfficialBuildRID>
 
     <!-- Ensure we have a RID-specific package for the current build, even if it isn't in our official set -->
     <BuildRID Include="@(OfficialBuildRID)" Exclude="$(PackageRID)"/>
