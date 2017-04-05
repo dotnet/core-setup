@@ -55,7 +55,7 @@
       <IsCrossArch Condition="'$(TargetArchitecture)' == 'arm' or '$(TargetArchitecture)' == 'arm64' or '$(TargetArchitecture)' == 'armel'">true</IsCrossArch>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml $(TestProjectFilename)-testResults.xml -notrait categorty=failing"
+    <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml $(TestProjectFilename)-testResults.xml -notrait category=failing"
           WorkingDirectory="$(TestProject)"
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir);TEST_ARTIFACTS=$(TestsOutputDir);TEST_TARGETRID=$(PackageTargetRid)"
           Condition="'$(TestProjectFilename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'"
