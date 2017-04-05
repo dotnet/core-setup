@@ -100,7 +100,6 @@ namespace Microsoft.DotNet.Cli.Build
             { "hostfxr", LatestHostFxrVersion },
             { "hostpolicy", LatestHostPolicyVersion }
         };
-        
         //
         // Locked muxer for consumption in CLI.
         //
