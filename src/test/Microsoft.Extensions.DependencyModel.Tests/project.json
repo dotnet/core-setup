@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   "description": "Microsoft.DotNet.Tools.Tests.Utilities Class Library",
   "buildOptions": {
-    "keyFile": "../../tools-local/setuptools/Key.snk"
+    "keyFile": "../../../tools-local/setuptools/Key.snk"
   },
   "dependencies": {
     "Microsoft.NETCore.App": {
@@ -10,8 +10,12 @@
       "version": "1.0.0"
     },
     "System.Diagnostics.TraceSource": "4.0.0",
-    "Microsoft.Extensions.DependencyModel": "2.0.0-beta-25203-0",
-    "Microsoft.DotNet.PlatformAbstractions": "2.0.0-beta-25203-0",
+    "Microsoft.Extensions.DependencyModel": {
+      "target": "project"
+    },
+    "Microsoft.DotNet.PlatformAbstractions": {
+      "target": "project"
+    },
     "Microsoft.DotNet.InternalAbstractions": "1.0.0",
     "FluentAssertions": "4.0.0",
     "moq.netcore": "4.4.0-beta8",

@@ -4,7 +4,6 @@
 
   <PropertyGroup>
     <BuildTestTargets>
-        RestoreTestAssets;
         RestoreTests;
         BuildTests;
         RunTests;
@@ -13,29 +12,21 @@
 
   <Target Name="BuildAndTest" DependsOnTargets="$(BuildTestTargets)" />
   
-  <Target Name="RestoreTestAssets">
+  <Target Name="RestoreTests">
+    <ItemGroup>
+      <RestoreTest Include="$(TestDir)/**/project.json')" />
+    </ItemGroup>
    <ItemGroup>
-      <DirsToClean Include="$(TestAssetsDir)\**\bin" />
-      <DirsToClean Include="$(TestAssetsDir)\**\obj" />
+      <DirsToClean Include="$(TestDir)\**\bin" />
+      <DirsToClean Include="$(TestDir)\**\obj" />
    </ItemGroup>
 
     <RemoveDir Directories="$(DirsToClean)" />
 
     <PropertyGroup>
-      <RestoreArgs>--fallbacksource $(CoreHostOutputDir) --disable-parallel --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
-    </PropertyGroup>
-
-    <Exec Command="$(DotnetToolCommand) restore $(RestoreArgs)"
-          WorkingDirectory="$(TestAssetsDir)" />
-  </Target>
-
-  <Target Name="RestoreTests">
-    <ItemGroup>
-      <RestoreTest Include="$(TestDir)/**/project.json" />
-    </ItemGroup>
-    <PropertyGroup>
+      <RestoreSourceArg>@(RestoreTestSource->'--fallbacksource %(Identity)', ' ')</RestoreSourceArg>
       <!-- Todo: clean up these sources-->
-      <RestoreArgs>--disable-parallel --fallbacksource $(CoreHostOutputDir) --source $(PackagesBasePath)Packages --source https:%2F%2Fwww.nuget.org/api/v2 --source https:%2F%2Fwww.myget.org/F/aspnet-contrib/api/v2 --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</RestoreArgs>
+      <RestoreArgs>--disable-parallel --no-cache --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(RestoreSourceArg.Replace('\', '/'))</RestoreArgs>
     </PropertyGroup>
 
     <Exec Command="$(DotnetToolCommand) restore $(RestoreArgs)"
@@ -52,18 +43,40 @@
           WorkingDirectory="%(TestProjects.Identity)" />
   </Target>
 
-  <Target Name="RunTests"
-          DependsOnTargets="PrepareTestFolders">
+  <Target Name="RunTest"
+          Inputs="%(TestProjects.Identity)"
+          Outputs="fake">
+    <PropertyGroup>
+      <TestProject>%(TestProjects.Identity)</TestProject>
+      <TestProjectFilename>%(TestProjects.Filename)</TestProjectFilename>
+    </PropertyGroup>
     <PropertyGroup>
       <TestArgs>--configuration $(ConfigurationGroup)</TestArgs>
       <IsCrossArch Condition="'$(TargetArchitecture)' == 'arm' or '$(TargetArchitecture)' == 'arm64' or '$(TargetArchitecture)' == 'armel'">true</IsCrossArch>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml %(TestProjects.Filename)-testResults.xml -notrait categorty=failing"
-          WorkingDirectory="%(TestProjects.Identity)"
+    <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml $(TestProjectFilename)-testResults.xml -notrait categorty=failing"
+          WorkingDirectory="$(TestProject)"
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir);TEST_ARTIFACTS=$(TestsOutputDir);TEST_TARGETRID=$(PackageTargetRid)"
-          Condition="'%(TestProjects.Filename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'"
-          IgnoreStandardErrorWarningFormat="true" />
+          Condition="'$(TestProjectFilename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'"
+          ContinueOnError="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="true">
+        <Output TaskParameter="ExitCode" PropertyName="_ErrorCode" />
+    </Exec>
+
+    <ItemGroup>
+      <TestResults Include="$(TestProject)">
+        <ExitCode>$(_ErrorCode)</ExitCode>
+      </TestResults>
+    </ItemGroup>
+
+    <Message Importance="High" Condition="'$(_ErrorCode)' != '0'" Text="Test run failed with exit code '$(_ErrorCode)'" />
+  </Target>
+
+  <Target Name="RunTests"
+          DependsOnTargets="PrepareTestFolders;RunTest">
+    <Error Condition="'%(TestResults.ErrorCode)' != '0'" Text="%(TestResults.Identity) test runs failed with non-zero exit code %(TestResults.ErrorCode)" />
   </Target>
 
   <Target Name="PrepareTestFolders">
