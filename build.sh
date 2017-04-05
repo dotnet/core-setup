@@ -16,6 +16,14 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+# Some things depend on HOME and it may not be set. We should fix those things, but until then, we just patch a value in
+if [ -z "$HOME" ] || [ ! -d "$HOME" ]; then
+    export HOME=$DIR/Bin/home
+
+    [ ! -d "$HOME" ] || rm -Rf $HOME
+    mkdir -p $HOME
+fi
+
 # Use uname to determine what the OS is.
 OSName=$(uname -s)
 case $OSName in
