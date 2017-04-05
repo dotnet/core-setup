@@ -108,7 +108,8 @@ namespace Microsoft.DotNet.Cli.Build
         public bool IsLocked = true; // Set this variable to toggle muxer locking.
         public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostFxrVersion;
         //We add a different LockedHostFxrVersion for the MSI as the package needs to deviate for issue #1574. This we can update or remove when we have a binary change for the hostfxr.dll (from 1.0.1)
-        public VerInfo LockedHostFxrMSIVersion => new VerInfo(1, 0, 5, "", "", "", CommitCountString);
+        public bool fExplicitHostFXRMSIVersion = true; // Set this variable to override LatestHostFxrVersion for MSI packages only. This can be set to false when we fall back to using just LockedHostFxrVersion for all.
+        public VerInfo LockedHostFxrMSIVersion => fExplicitHostFXRMSIVersion ? new VerInfo(1, 0, 5, "", "", "", CommitCountString) : LockedHostFxrVersion;
         public VerInfo LockedHostVersion    => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostVersion;
     }
 }
