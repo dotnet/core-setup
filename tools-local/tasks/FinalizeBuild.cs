@@ -35,14 +35,6 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required]
         public ITaskItem [] PublishRids { get; set; }
         public string CommitHash { get; set; }
-        [Required]
-        public string NuGetFeedUrl { get; set; }
-        [Required]
-        public string NuGetApiKey { get; set; }
-        [Required]
-        public string GitHubPassword { get; set; }
-        [Required]
-        public string DownloadPackagesToFolder { get; set; }
         public bool ForcePublish { get; set; }
 
         private Regex _versionRegex = new Regex(@"(?<version>\d+\.\d+\.\d+)(-(?<prerelease>[^-]+-)?(?<major>\d+)-(?<minor>\d+))?");
@@ -100,10 +92,7 @@ namespace Microsoft.DotNet.Build.Tasks
                     CopyBlobs($"{Channel}/Installers/{Version}", $"{Channel}/Installers/Latest/");
 
                     // Generate the Sharedfx Version text files
-                    // TODO: Update readme to match new names for dnvm version files
                     List<string> versionFiles = PublishRids.Select(p => $"{p.ItemSpec}.version").ToList();
-
-                    PublishCoreHostPackagesToFeed();
 
                     string sfxVersion = GetSharedFrameworkVersionFileContent();
                     foreach(string version in versionFiles)
@@ -128,32 +117,6 @@ namespace Microsoft.DotNet.Build.Tasks
             }
             returnString += $"{Version}{Environment.NewLine}";
             return returnString;
-        }
-
-        private void PublishCoreHostPackagesToFeed()
-        {
-            string hostblob = $"{Channel}/Binaries/{Version}";
-            Directory.CreateDirectory(DownloadPackagesToFolder);
-            DownloadFilesWithExtension(hostblob, ".nupkg", DownloadPackagesToFolder);
-
-            // TODO: use dotnet to push packages when we sync forward to use a newere version of the CLI which has dotnet-nuget-push
-
-            // TODO: update versions repo
-        }
-
-        public void DownloadFilesWithExtension(string blobFolder, string fileExtension, string localDownloadPath)
-        {
-            var blobFiles = GetBlobList(blobFolder).Where(b => Path.GetExtension(b) == fileExtension);
-
-            List<Task<bool>> downloadTasks = new List<Task<bool>>();
-            foreach(var blobFile in blobFiles)
-            {
-                string localBlobFile = Path.Combine(localDownloadPath, Path.GetFileName(blobFile));
-                Log.LogMessage($"Downloading {blobFile} to {localBlobFile}");
-
-                downloadTasks.Add(DownloadBlobAsync(ContainerName, blobFile, localDownloadPath));
-            }
-            Task.WaitAll(downloadTasks.ToArray());
         }
 
         public bool CopyBlobs(string sourceFolder, string destinationFolder)
@@ -215,18 +178,6 @@ namespace Microsoft.DotNet.Build.Tasks
                                                destinationBlobName,
                                                BuildEngine,
                                                HostObject);
-        }
-
-        public Task<bool> DownloadBlobAsync(string container, string blob, string downloadDirectory)
-        {
-            return DownloadBlobFromAzure.ExecuteAsync(AccountName,
-                                                      AccountKey,
-                                                      ConnectionString,
-                                                      container,
-                                                      blob,
-                                                      downloadDirectory,
-                                                      BuildEngine,
-                                                      HostObject);
         }
 
         public string[] GetBlobList(string path)

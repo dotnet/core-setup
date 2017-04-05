@@ -43,8 +43,8 @@ namespace Microsoft.DotNet.Build.Tasks
                 return false;
             }
 
-            Log.LogMessage(MessageImportance.Normal, "Downloading contents of container {0} from storage account '{1}' to directory {2}.",
-                ContainerName, AccountName, DownloadDirectory);
+            Log.LogMessage(MessageImportance.Normal, "Downloading blob {0} from container {1} at storage account '{2}' to directory {3}.",
+                BlobName, ContainerName, AccountName, DownloadDirectory);
 
             List<string> blobsNames = new List<string>();
             string urlListBlobs = $"https://{AccountName}.blob.core.windows.net/{ContainerName}/{BlobName}";
