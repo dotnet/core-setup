@@ -126,29 +126,16 @@
     <Error Condition="!Exists('$(CrossgenPath)')" Text="Can't find $(CrossgenPath)'" />
 
     <ItemGroup>
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscorlib.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscorlib.ni.dll" />
+      <IncludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\Microsoft*.dll" />
+      <IncludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\netstandard.dll" />
+      <IncludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\System*.dll" />
+
       <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\System.Private.CoreLib.dll" />
       <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\System.Private.CoreLib.ni.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\clrcompression.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\clretwrc.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\clrjit.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\coreclr.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\dbgshim.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\hostfxr.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\hostpolicy.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\libuv.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscordaccore*.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscordbi.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscorrc.debug.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\mscorrc.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\sos*.dll" />
-      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\libuv.dll" />
+      <ExcludedLibraries Include="$(SharedFrameworkNameAndVersionRoot)\Microsoft.DiaSymReader*" />
 
-      <ExcludedNative Include="$(SharedFrameworkNameAndVersionRoot)\Microsoft.DiaSymReader*" />
-
-      <PlatformAssemblies Include="$(SharedFrameworkNameAndVersionRoot)\*.dll"
-                          Exclude="@(ExcludedLibraries);@(ExcludedNative)" />
+      <PlatformAssemblies Include="@(IncludedLibraries)"
+                          Exclude="@(ExcludedLibraries)" />
     </ItemGroup>
 
     <PropertyGroup>

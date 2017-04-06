@@ -43,17 +43,6 @@
         {
           "Name": "Core-Setup-Linux",
           "Parameters": {
-            "PB_DockerOS": "fedora.23"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Fedora 23",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-Linux",
-          "Parameters": {
             "PB_DockerOS": "fedora.24"
           },
           "ReportingParameters": {
@@ -80,7 +69,8 @@
             "REPO_ID": "562fbfe0b2d7d0e0a43780c4",
             "REPO_USER": "dotnet",
             "REPO_SERVER": "azure-apt-cat.cloudapp.net",
-            "CLI_NUGET_FEED_URL": "https://dotnet.myget.org/F/cli-deps",
+            "CLI_NUGET_FEED_URL": "https://dotnet.myget.org/F/cli-deps/api/v2/package",
+            "CLI_NUGET_SYMBOLS_FEED_URL": "https://dotnet.myget.org/F/cli-deps/symbols/api/v2/package"
           },
           "ReportingParameters": {
             "OperatingSystem": "Ubuntu 14.04",

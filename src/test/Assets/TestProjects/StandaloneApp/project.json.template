@@ -5,7 +5,7 @@
   "frameworks": {
     "netcoreapp2.0": {
       "dependencies": {
-        "Microsoft.NETCore.App": "2.0.0-beta-*",
+        "Microsoft.NETCore.App": "2.0.0-*",
         "Newtonsoft.Json": "9.0.1-beta1",
         
         "Microsoft.CodeAnalysis.Analyzers": {
@@ -482,46 +482,6 @@
           "exclude": "all"
         },
         "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
-          "version": "4.3.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.Microsoft.NETCore.DotNetHost": {
-          "version": "1.1.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.Microsoft.NETCore.DotNetHostPolicy": {
-          "version": "1.1.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.Microsoft.NETCore.DotNetHostResolver": {
-          "version": "1.1.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.Microsoft.NETCore.Jit": {
-          "version": "1.1.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.Microsoft.NETCore.Runtime.CoreCLR": {
-          "version": "1.1.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.runtime.native.System": {
-          "version": "4.3.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.runtime.native.System.IO.Compression": {
-          "version": "4.3.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.runtime.native.System.Net.Http": {
-          "version": "4.3.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.runtime.native.System.Net.Security": {
-          "version": "4.3.0",
-          "exclude": "all"
-        },
-        "runtime.fedora.23-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
           "version": "4.3.0",
           "exclude": "all"
         },

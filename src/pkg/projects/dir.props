@@ -59,6 +59,9 @@
           Include="$(PackageThirdPartyNoticesFile)" >
       <SkipPackageFileCheck>true</SkipPackageFileCheck>
     </File>
+
+    <AdditionalLibPackageExcludes Condition="'$(SymbolFileExtension)' != ''" Include="%2A%2A\%2A$(SymbolFileExtension)" />
+    <AdditionalSymbolPackageExcludes Condition="'$(LibraryFileExtension)' != ''" Include="%2A%2A\%2A.a;%2A%2A\%2A$(LibraryFileExtension)" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(PackageRID)' == ''">
