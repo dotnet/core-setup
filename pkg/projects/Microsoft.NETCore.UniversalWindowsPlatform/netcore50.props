@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <NetCore50Dependency Include="Microsoft.NETCore">
+      <Version>5.0.2</Version>
+    </NetCore50Dependency>
     <NetCore50Dependency Include="Microsoft.Net.Native.Compiler">
       <Version>1.6.0</Version>
     </NetCore50Dependency>
