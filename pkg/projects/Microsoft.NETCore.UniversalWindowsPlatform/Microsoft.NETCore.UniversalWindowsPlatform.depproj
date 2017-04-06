@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="dir.props" />
   <PropertyGroup>
     <!-- we intentionally don't want to produce output -->
     <OutputPath>unused</OutputPath>
@@ -33,10 +33,9 @@
         <!-- ResolveNugetPackageAssets doesn't preserve the asset type (native), 
              calculate it by looking for native in the path -->
         <IsNative Condition="$([System.String]::new('%(Identity)').ToLowerInvariant().Replace('\', '/').Contains('/native/'))">true</IsNative>
+        <!-- We previously shipped a clrcompression on the lib folder, so we need to flag it as native in here -->
+        <IsNative Condition="'%(FileName)%(Extension)' == 'clrcompression.dll'">true</IsNative>
       </_FilesToPackage>
-      <!-- Exclude System.IO.Compression files as they get pulled into the closure by WCF -->
-      <_FilesToExclude Include="@(_FilesToPackage)" Condition="$([System.String]::new('%(_FilesToPackage.NuGetPackageId)').Contains('System.IO.Compression'))" />
-      <_FilesToPackage Remove="@(_FilesToExclude)" />
       <_FilesToPackage>
         <TargetPath Condition="'%(_FilesToPackage.IsNative)' != 'true'">runtimes/$(NuGetRuntimeIdentifier)/lib/$(PackageTargetFramework)</TargetPath>
         <TargetPath Condition="'%(_FilesToPackage.IsNative)' == 'true'">runtimes/$(NuGetRuntimeIdentifier)/native</TargetPath>
