@@ -110,11 +110,11 @@ namespace Microsoft.DotNet.Host.Build
                     // Copy the shared framework + host Archives
                     CopyBlobs($"{Channel}/Binaries/{SharedFrameworkNugetVersion}/", targetContainer);
 
-                    // Copy the shared framework installers
-                    CopyBlobs($"{Channel}/Installers/{SharedFrameworkNugetVersion}/", $"{Channel}/Installers/Latest/");
-
                     // Copy the shared host installers
                     CopyBlobs($"{Channel}/Installers/{SharedHostNugetVersion}/", $"{Channel}/Installers/Latest/");
+
+                    // Copy the shared framework installers
+                    CopyBlobs($"{Channel}/Installers/{SharedFrameworkNugetVersion}/", $"{Channel}/Installers/Latest/");
 
                     // Generate the Sharedfx Version text files
                     List<string> versionFiles = new List<string>() 
