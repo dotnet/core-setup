@@ -139,8 +139,8 @@ namespace Microsoft.DotNet.Host.Build
         public static BuildTargetResult GenerateDotnetHostFxrMsi(BuildTargetContext c)
         {
             var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion");
-            var hostFxrInternalMsiVersion = hostVersion.GetLockedPlatformInstallerVersion().GenerateMsiVersion();
-            var hostFxrMSIVersion = hostVersion.GetLockedPlatformInstallerVersion().ToString();
+            var hostFxrInternalMsiVersion = hostVersion.GetLockedHostFXRPlatformInstallerVersion().GenerateMsiVersion();
+            var hostFxrMSIVersion = hostVersion.GetLockedHostFXRPlatformInstallerVersion().ToString();
             var inputDir = c.BuildContext.Get<string>("HostFxrPublishRoot");
             var wixObjRoot = Path.Combine(Dirs.Output, "obj", "wix", "hostfxr");
             var hostFxrBrandName = $"'{Monikers.HostFxrBrandName}'";
