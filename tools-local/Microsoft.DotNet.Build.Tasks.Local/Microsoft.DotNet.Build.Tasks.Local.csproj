@@ -10,10 +10,6 @@
     <OutputPath Condition="'$(TargetGroup)' != 'net45'">$(ToolRuntimePath)</OutputPath>
     <IntermediateOutputPath Condition="'$(TargetGroup)' == 'net45'">$(IntermediateOutputPath)\net45</IntermediateOutputPath>
     <OutputPath Condition="'$(TargetGroup)' == 'net45'">$(ToolRuntimePath)\net46</OutputPath>
-    <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two properties to any folder that exists to skip 
-         the GenerateReferenceAssemblyPaths task (not target) and to prevent it from outputting a warning (MSB3644). -->
-    <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)/Documentation</_TargetFrameworkDirectories>
-    <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)/Documentation</_FullFrameworkReferenceAssemblyPaths>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'netstandard1.5_Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'net45_Debug'" />

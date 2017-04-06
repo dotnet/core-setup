@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <BuildTestTargets>
+        InitBaseDotnetCli;
         RestoreTests;
         BuildTests;
         RunTests;
@@ -12,6 +13,16 @@
 
   <Target Name="BuildAndTest" DependsOnTargets="$(BuildTestTargets)" />
   
+  <!-- We need a version of the Cli that we can plug the host / shared framework into for testing. -->
+  <Target Name="InitBaseDotnetCli">
+    <PropertyGroup>
+      <TestToolsLocalPath Condition="'$(ToolsLocalPath)' == ''">$(TestsOutputDir)Tools</TestToolsLocalPath>
+      <BootstrapCommand Condition="'$(OSGroup)' == 'Windows_NT'">powershell -NoProfile -ExecutionPolicy unrestricted -Command "$(MSBuildThisFileDirectory)bootstrap/bootstrap.ps1" -ToolsLocalPath $(TestToolsLocalPath)</BootstrapCommand>
+      <BootstrapCommand Condition="'$(OSGroup)' != 'Windows_NT'">$(MSBuildThisFileDirectory)bootstrap/bootstrap.sh --toolsLocalPath $(TestToolsLocalPath)</BootstrapCommand>
+    </PropertyGroup>
+    <Exec Command="$(BootstrapCommand)" />
+  </Target>
+
   <Target Name="RestoreTests">
     <ItemGroup>
       <RestoreTest Include="$(TestDir)/**/project.json')" />
@@ -25,7 +36,6 @@
 
     <PropertyGroup>
       <RestoreSourceArg>@(RestoreTestSource->'--fallbacksource %(Identity)', ' ')</RestoreSourceArg>
-      <!-- Todo: clean up these sources-->
       <RestoreArgs>--disable-parallel --no-cache --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(RestoreSourceArg.Replace('\', '/'))</RestoreArgs>
     </PropertyGroup>
 
@@ -53,9 +63,10 @@
     <PropertyGroup>
       <TestArgs>--configuration $(ConfigurationGroup)</TestArgs>
       <IsCrossArch Condition="'$(TargetArchitecture)' == 'arm' or '$(TargetArchitecture)' == 'arm64' or '$(TargetArchitecture)' == 'armel'">true</IsCrossArch>
+      <TestResultsXml>$(TestsOutputDir)$(TestProjectFilename)-testResults.xml</TestResultsXml>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml $(TestProjectFilename)-testResults.xml -notrait category=failing"
+    <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml $(TestResultsXml) -notrait category=failing"
           WorkingDirectory="$(TestProject)"
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir);TEST_ARTIFACTS=$(TestsOutputDir);TEST_TARGETRID=$(PackageTargetRid)"
           Condition="'$(TestProjectFilename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'"
@@ -67,21 +78,21 @@
 
     <ItemGroup>
       <TestResults Include="$(TestProject)">
+        <ResultsXml>$(TestResultsXml)</ResultsXml>
         <ExitCode>$(_ErrorCode)</ExitCode>
       </TestResults>
     </ItemGroup>
-    <Message Importance="High" Condition="'$(_ErrorCode)' != '0'" Text="Test run failed with exit code '$(_ErrorCode)'" />
+    <Message Importance="High" Condition="'$(_ErrorCode)' != '0'" Text="Test run failed with exit code '$(_ErrorCode)', see $(TestResultsXml)" />
   </Target>
 
   <Target Name="RunTests"
           DependsOnTargets="PrepareTestFolders;RunTest">
     <ItemGroup>
-      <FailedTests Include="%(TestResults.Identity)" Condition="'%(TestResults.ExitCode)' != '0'">
-        <ExitCode>%(TestResults.ExitCode)</ExitCode>
+      <FailedTests Include="@(TestResults)" Condition="'%(TestResults.ExitCode)' != '0'">
       </FailedTests>
     </ItemGroup>
     <Message Importance="High" Condition="'@(FailedTests)' != ''" Text="Failed test summary" />
-    <Message Importance="High" Condition="'@(FailedTests)' != ''" Text="  %(FailedTests.Identity) failed with exit code %(FailedTests.ExitCode)" />      
+    <Message Importance="High" Condition="'@(FailedTests)' != ''" Text="  %(FailedTests.Identity) failed with exit code %(FailedTests.ExitCode), see %(FailedTests.ResultsXml)" />      
     <Error Condition="'@(FailedTests)' != ''" Text="One or more test runs failed." />
   </Target>
 
