@@ -68,9 +68,11 @@ namespace Microsoft.DotNet.Host.Build
 
             Directory.CreateDirectory(sharedHostRoot);
 
-            foreach (var file in Directory.GetFiles(Dirs.SharedFrameworkPublish, "*", SearchOption.TopDirectoryOnly))
+            string sharedFrameworkPublishPath = GetSharedFrameworkPublishPath();
+
+            foreach (var file in Directory.GetFiles(sharedFrameworkPublishPath, "*", SearchOption.TopDirectoryOnly))
             {
-                var destFile = file.Replace(Dirs.SharedFrameworkPublish, sharedHostRoot);
+                var destFile = file.Replace(sharedFrameworkPublishPath, sharedHostRoot);
                 File.Copy(file, destFile, true);
                 c.Warn(destFile);
             }
@@ -99,7 +101,7 @@ namespace Microsoft.DotNet.Host.Build
 
             Directory.CreateDirectory(hostFxrRoot);
 
-            string srcHostDir = Path.Combine(Dirs.SharedFrameworkPublish, "host");
+            string srcHostDir = Path.Combine(GetSharedFrameworkPublishPath(), "host");
             string destHostDir = Path.Combine(hostFxrRoot, "host");
 
             FS.CopyRecursive(srcHostDir, destHostDir);
@@ -119,7 +121,8 @@ namespace Microsoft.DotNet.Host.Build
             }
 
             Directory.CreateDirectory(sharedFxRoot);
-            Utils.CopyDirectoryRecursively(Path.Combine(Dirs.SharedFrameworkPublish, "shared"), sharedFxRoot, true);
+
+            Utils.CopyDirectoryRecursively(Path.Combine(GetSharedFrameworkPublishPath(), "shared"), sharedFxRoot, true);
             FixPermissions(sharedFxRoot);
 
             c.BuildContext["SharedFrameworkPublishRoot"] = sharedFxRoot;
@@ -265,6 +268,26 @@ namespace Microsoft.DotNet.Host.Build
                 // Now make things that should be executable, executable.
                 FS.FixModeFlags(directory);
             }
+        }
+
+        private static string GetSharedFrameworkPublishPath()
+        {
+            string sharedFrameworkPublishPath = string.Empty;
+            
+            string preBuiltPortableBinaryPath=Environment.GetEnvironmentVariable("PORTABLE_BINARY_LOCATION")?.Trim();
+
+            // set to default path if PORTABLE_BINARY_LOCATION environment variable doesn't exist
+            if(preBuiltPortableBinaryPath == null)
+            {
+                sharedFrameworkPublishPath = Dirs.SharedFrameworkPublish;
+            }
+            else 
+            {
+                Console.WriteLine($"Installers will package binaries from path set by PORTABLE_BINARY_LOCATION environment variable :{preBuiltPortableBinaryPath}");
+                sharedFrameworkPublishPath = preBuiltPortableBinaryPath;
+            }
+            
+            return sharedFrameworkPublishPath;
         }
     }
 }
