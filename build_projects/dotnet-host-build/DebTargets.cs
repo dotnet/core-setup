@@ -52,6 +52,11 @@ namespace Microsoft.DotNet.Host.Build
                 Dirs.Intermediate,
                 dotnetDebToolPackageSource: Dirs.Packages);
 
+            var licenseType = Environment.GetEnvironmentVariable("InstallerLicenseType") ?? Constants.DefaultInstallerLicenseType;
+
+            File.Copy(Path.Combine(Dirs.RepoRoot, "resources", licenseType, "LICENSE.txt"),
+                      Path.Combine(inputRoot, "LICENSE.txt"));
+
             debCreator.CreateDeb(
                 debianConfigFile, 
                 packageName, 
@@ -60,6 +65,8 @@ namespace Microsoft.DotNet.Host.Build
                 debianConfigVariables, 
                 debFile, 
                 manPagesDir);
+
+            File.Delete(Path.Combine(inputRoot, "LICENSE.txt"));
 
             return c.Success();
         }

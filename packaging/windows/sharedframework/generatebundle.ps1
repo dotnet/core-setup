@@ -13,7 +13,8 @@ param(
     [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetName,
     [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetVersion,
     [Parameter(Mandatory=$true)][string]$SharedFrameworkUpgradeCode,
-    [Parameter(Mandatory=$true)][string]$Architecture
+    [Parameter(Mandatory=$true)][string]$Architecture,
+    [Parameter(Mandatory=$true)][string]$InstallerResourcesPath
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -29,7 +30,8 @@ function RunCandleForBundle
     $SharedFrameworkComponentVersion = $SharedFrameworkNugetVersion.Replace('-', '_');
 
     .\candle.exe -nologo `
-        -dMicrosoftEula="$RepoRoot\packaging\osx\sharedframework\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$InstallerResourcesPath\osx\en.lproj\eula.rtf" `
+        -dResourcesPath="$InstallerResourcesPath" `
         -dProductMoniker="$ProductMoniker" `
         -dBuildVersion="$DotnetMSIVersion" `
         -dDisplayVersion="$DotnetCLIVersion" `

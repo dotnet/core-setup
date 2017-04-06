@@ -9,7 +9,8 @@ param(
     [Parameter(Mandatory=$true)][string]$SharedHostMSIVersion,
     [Parameter(Mandatory=$true)][string]$SharedHostNugetVersion,
     [Parameter(Mandatory=$true)][string]$Architecture,
-    [Parameter(Mandatory=$true)][string]$WixObjRoot
+    [Parameter(Mandatory=$true)][string]$WixObjRoot,
+    [Parameter(Mandatory=$true)][string]$InstallerResourcesPath
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -27,7 +28,7 @@ function RunCandle
         -out "$WixObjRoot\" `
         -ext WixDependencyExtension.dll `
         -dHostSrc="$SharedHostPublishRoot" `
-        -dMicrosoftEula="$RepoRoot\packaging\osx\sharedhost\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$InstallerResourcesPath\osx\en.lproj\eula.rtf" `
         -dProductMoniker="$ProductMoniker" `
         -dBuildVersion="$SharedHostMSIVersion" `
         -dNugetVersion="$SharedHostNugetVersion" `

@@ -54,7 +54,9 @@ namespace Microsoft.DotNet.Host.Build
         [BuildPlatforms(BuildPlatform.OSX)]
         public static BuildTargetResult GenerateSharedFrameworkProductArchive(BuildTargetContext c)
         {
-            string resourcePath = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "sharedframework", "resources");
+            string licenseType = Environment.GetEnvironmentVariable("InstallerLicenseType") ?? Constants.DefaultInstallerLicenseType;
+
+            string resourcePath = Path.Combine(Dirs.RepoRoot, "resources", licenseType, "osx");
             string outFilePath = Path.Combine(PkgsIntermediateDir, c.BuildContext.Get<string>("CombinedMuxerHostFxrFrameworkInstallerFile"));
 
             string inputDistTemplatePath = Path.Combine(
@@ -120,9 +122,15 @@ namespace Microsoft.DotNet.Host.Build
             string outFilePath = Path.Combine(PkgsIntermediateDir, SharedHostComponentId + ".pkg");
             string installLocation = "/usr/local/share/dotnet";
             string scriptsLocation = Path.Combine(Dirs.RepoRoot, "packaging", "osx", "sharedhost", "scripts");
+            string inputRoot = c.BuildContext.Get<string>("SharedHostPublishRoot");
+
+            string licenseType = Environment.GetEnvironmentVariable("InstallerLicenseType") ?? Constants.DefaultInstallerLicenseType;
+
+            File.Copy(Path.Combine(Dirs.RepoRoot, "resources", licenseType, "LICENSE.txt"),
+                      Path.Combine(inputRoot, "LICENSE.txt"));
 
             Cmd("pkgbuild",
-                "--root", c.BuildContext.Get<string>("SharedHostPublishRoot"),
+                "--root", inputRoot,
                 "--identifier", SharedHostComponentId,
                 "--version", version,
                 "--install-location", installLocation,
@@ -130,6 +138,8 @@ namespace Microsoft.DotNet.Host.Build
                 outFilePath)
                 .Execute()
                 .EnsureSuccessful();
+
+            File.Delete(Path.Combine(inputRoot, "LICENSE.txt"));
 
             File.Copy(outFilePath, c.BuildContext.Get<string>("SharedHostInstallerFile"), true);
 

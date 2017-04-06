@@ -9,7 +9,8 @@ param(
     [Parameter(Mandatory=$true)][string]$HostFxrMSIVersion,
     [Parameter(Mandatory=$true)][string]$HostFxrNugetVersion,
     [Parameter(Mandatory=$true)][string]$Architecture,
-    [Parameter(Mandatory=$true)][string]$WixObjRoot
+    [Parameter(Mandatory=$true)][string]$WixObjRoot,
+    [Parameter(Mandatory=$true)][string]$InstallerResourcesPath
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -58,7 +59,7 @@ function RunCandle
     .\candle.exe -nologo `
         -out "$WixObjRoot\" `
         -dHostFxrSrc="$HostFxrPublishRoot" `
-        -dMicrosoftEula="$RepoRoot\packaging\osx\hostfxr\resources\en.lproj\eula.rtf" `
+        -dMicrosoftEula="$InstallerResourcesPath\osx\en.lproj\eula.rtf" `
         -dProductMoniker="$ProductMoniker" `
         -dBuildVersion="$HostFxrMSIVersion" `
         -dNugetVersion="$HostFxrNugetVersion" `

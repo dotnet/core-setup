@@ -13,7 +13,7 @@
 
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.Foundation">
       <bal:WixStandardBootstrapperApplication
-        LicenseFile="..\..\osx\sharedframework\resources\en.lproj\eula.rtf"
+        LicenseFile="$(var.MicrosoftEula)"
         ShowFilesInUse="yes"
         ShowVersion="yes"
         />
@@ -76,7 +76,7 @@
     <PayloadGroup Id="DotnetCoreBAPayloads">
       <Payload Name="thm.xml" Compressed="yes" SourceFile="bundle.thm" />
       <Payload Name="thm.wxl" Compressed="yes" SourceFile="bundle.wxl" />
-      <Payload Name="bg.png" Compressed="yes" SourceFile="..\..\osx\sharedframework\resources\dotnetbackground.png" />
+      <Payload Name="bg.png" Compressed="yes" SourceFile="$(var.ResourcesPath)\osx\dotnetbackground.png" />
 
       <Payload Name='eula.rtf' Compressed='yes' SourceFile='!(wix.WixStdbaLicenseRtf)' />
     </PayloadGroup>

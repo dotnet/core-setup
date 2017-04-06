@@ -1,6 +1,7 @@
 ﻿<Project ToolsVersion="12.0" DefaultTargets="Build" InitialTargets="ValidateArgs" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <RepoDir>$(ProjectDir)/../</RepoDir>
 
     <!-- Output directories -->
     <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
@@ -26,11 +27,15 @@
   <Import Project="stable.packages.props" />
 
   <PropertyGroup>
+    <NuPkgLicenseType Condition="'$(NuPkgLicenseType)' == ''">msft</NuPkgLicenseType>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <PackageOutputPath>$(PackagesOutDir)</PackageOutputPath>
     <SymbolPackageOutputPath>$(SymbolPackagesOutDir)</SymbolPackageOutputPath>
     <RuntimeIdGraphDefinitionFile>$(ProjectDir)packages\Microsoft.NETCore.Platforms\1.0.2\runtime.json</RuntimeIdGraphDefinitionFile>
-    <PackageLicenseFile>$(ProjectDir)projects/dotnet_library_license.txt</PackageLicenseFile>
-    <PackageThirdPartyNoticesFile>$(ProjectDir)projects/ThirdPartyNotices.txt</PackageThirdPartyNoticesFile>
+    <PackageLicenseFile>$(RepoDir)resources/$(NuPkgLicenseType)/LICENSE.txt</PackageLicenseFile>
+    <PackageThirdPartyNoticesFile>$(RepoDir)resources/ThirdPartyNotices.txt</PackageThirdPartyNoticesFile>
     <PackageDescriptionFile>$(ProjectDir)projects/descriptions.json</PackageDescriptionFile>
     <!-- This link should be updated for each release milestone, currently this points to 1.0.0 -->
     <ReleaseNotes>https://go.microsoft.com/fwlink/?LinkID=799417</ReleaseNotes>
