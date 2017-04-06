@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Cli.Build
         // is being updated.
         public VerInfo LatestHostVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
         public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
-        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 3, "", "", "", CommitCountString);
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 5, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
   
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
         {
