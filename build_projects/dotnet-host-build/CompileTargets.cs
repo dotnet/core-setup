@@ -421,7 +421,7 @@ namespace Microsoft.DotNet.Host.Build
             string sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             string sharedFrameworkRid = c.BuildContext.Get<string>("TargetRID");
             string sharedFrameworkTarget = c.BuildContext.Get<string>("TargetFramework");
-            var hostFxrVersion = hostVersion.GetLockedPlatformInstallerVersion().ToString();
+            var hostFxrVersion = hostVersion.GetLockedHostFXRPlatformInstallerVersion().ToString();
             var commitHash = c.BuildContext.Get<string>("CommitHash");
 
             var sharedFrameworkPublisher = new SharedFrameworkPublisher(
