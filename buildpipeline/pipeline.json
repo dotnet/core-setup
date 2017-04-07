@@ -149,6 +149,9 @@
         },
         {
           "Name": "Core-Setup-Signing-Windows-x64",
+          "Parameters": {
+            "SIGNED_PACKAGES": "true"
+          },
           "ReportingParameters": {
             "OperatingSystem": "Windows",
             "Type": "build/product/",
@@ -158,8 +161,7 @@
         {
           "Name": "Core-Setup-Signing-Windows-x64",
           "Parameters": {
-            "PB_PortableBuild": "-portable",
-            "SIGNED_PACKAGES": "false"
+            "PB_PortableBuild": "-portable"
           },
           "ReportingParameters": {
             "OperatingSystem": "Windows",
