@@ -40,7 +40,6 @@
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
     <ObjDir Condition="'$(ObjDir)'==''">$(BinDir)obj/</ObjDir>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)</BaseIntermediateOutputPath>
-    <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
 
     <!-- Input Directories -->
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)Packages/</PackagesDir>
@@ -231,6 +230,9 @@
     <Framework Condition="'$(TargetArchitecture)' == 'arm64'">netcoreapp1.1</Framework>
   </PropertyGroup>
   
+  <PropertyGroup>
+    <TestTargetRid Condition="'$(TestTargetRid)' == ''">win10-x64</TestTargetRid>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetRid)' == '' and '$(OSGroup)' == 'Windows_NT'">
     <TargetRid Condition="'$(TargetArchitecture)' == 'x86'">win7-x86</TargetRid>
     <TargetRid Condition="'$(TargetArchitecture)' == 'x64'">win7-x64</TargetRid>
@@ -272,16 +274,16 @@
   <!-- Set up the default output and intermediate paths -->
   <PropertyGroup>
     <OSPlatformConfig>$(TargetRid).$(ConfigurationGroup)</OSPlatformConfig>
+    <TestOSPlatformConfig>$(TestTargetRid).$(ConfigurationGroup)</TestOSPlatformConfig>
     <TargetOutputRelPath Condition="'$(TargetGroup)'!=''">$(TargetGroup)/</TargetOutputRelPath>
 
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
     <BaseOutputRootPath>$(BaseOutputPath)$(OSPlatformConfig)\</BaseOutputRootPath>   
+    <TestBaseOutputRootPath>$(BaseOutputPath)tests\$(TestOSPlatformConfig)\</TestBaseOutputRootPath>
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)\$(MSBuildProjectName)\</OutputPath>
 
     <IntermediateOutputRootPath Condition="'$(IntermediateOutputRootPath)' == ''">$(BaseIntermediateOutputPath)$(OSPlatformConfig)\</IntermediateOutputRootPath>
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(IntermediateOutputRootPath)$(MSBuildProjectName)\</IntermediateOutputPath>
-
-    <TestPath Condition="'$(TestPath)'==''">$(TestWorkingDir)$(OSPlatformConfig)\$(MSBuildProjectName)\</TestPath>
 
     <CoreHostOutputDir>$(BaseOutputRootPath)corehost\</CoreHostOutputDir>
 

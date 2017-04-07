@@ -16,10 +16,13 @@
   <!-- We need a version of the Cli that we can plug the host / shared framework into for testing. -->
   <Target Name="InitBaseDotnetCli">
     <PropertyGroup>
-      <TestToolsLocalPath Condition="'$(ToolsLocalPath)' == ''">$(TestsOutputDir)Tools</TestToolsLocalPath>
-      <BootstrapCommand Condition="'$(OSGroup)' == 'Windows_NT'">powershell -NoProfile -ExecutionPolicy unrestricted -Command "$(MSBuildThisFileDirectory)bootstrap/bootstrap.ps1" -ToolsLocalPath $(TestToolsLocalPath)</BootstrapCommand>
+      <TestToolsLocalPath Condition="'$(TestToolsLocalPath)' == ''">$(TestsOutputDir)Tools</TestToolsLocalPath>
+      <BootstrapCommand Condition="'$(OSGroup)' == 'Windows_NT'">powershell -NoProfile -ExecutionPolicy unrestricted -Command "$(MSBuildThisFileDirectory)bootstrap/bootstrap.ps1" -ToolsLocalPath $(TestToolsLocalPath) -Architecture $(TargetArchitecture)</BootstrapCommand>
       <BootstrapCommand Condition="'$(OSGroup)' != 'Windows_NT'">$(MSBuildThisFileDirectory)bootstrap/bootstrap.sh --toolsLocalPath $(TestToolsLocalPath)</BootstrapCommand>
+      <DotnetTestToolCommand Condition="'$(DotnetTestToolCommand)'=='' and '$(OsEnvironment)'!='Unix'">$(TestToolsLocalPath)/dotnetcli/dotnet.exe</DotnetTestToolCommand>
+      <DotnetTestToolCommand Condition="'$(DotnetTestToolCommand)'=='' and '$(OsEnvironment)'=='Unix'">$(TestToolsLocalPath)/dotnetcli/dotnet</DotnetTestToolCommand>
     </PropertyGroup>
+
     <Exec Command="$(BootstrapCommand)" />
   </Target>
 
@@ -39,7 +42,7 @@
       <RestoreArgs>--disable-parallel --no-cache --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(RestoreSourceArg.Replace('\', '/'))</RestoreArgs>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetToolCommand) restore $(RestoreArgs)"
+    <Exec Command="$(DotnetTestToolCommand) restore $(RestoreArgs)"
           WorkingDirectory="%(RestoreTest.RootDir)%(RestoreTest.Directory)" />
   </Target>
 
@@ -49,7 +52,7 @@
     </PropertyGroup>
 
     <Message Text="Building Tests" Importance="High" />
-    <Exec Command="$(DotnetToolCommand) build $(BuildArgs)"
+    <Exec Command="$(DotnetTestToolCommand) build $(BuildArgs)"
           WorkingDirectory="%(TestProjects.Identity)" />
   </Target>
 
@@ -59,6 +62,11 @@
     <PropertyGroup>
       <TestProject>%(TestProjects.Identity)</TestProject>
       <TestProjectFilename>%(TestProjects.Filename)</TestProjectFilename>
+      <DirectorySeparatorChar>$([System.IO.Path]::DirectorySeparatorChar)</DirectorySeparatorChar>
+      <!-- The tests use the TEST_ARTIFACTS env variable to determine the artifacts folder and then later compare that path to its expected path.
+           So, the TEST_ARTIFACTS variable has to have system specific path separators or the string compoarison will fail. -->   
+      <SystemPathTestsOutputDir>$([System.String]::Copy('$(TestsOutputDir)').Replace('/', '$(DirectorySeparatorChar)'))</SystemPathTestsOutputDir>   
+      <SystemPathTestsOutputDir>$([System.String]::Copy('$(SystemPathTestsOutputDir)').Replace('\', '$(DirectorySeparatorChar)'))</SystemPathTestsOutputDir>   
     </PropertyGroup>
     <PropertyGroup>
       <TestArgs>--configuration $(ConfigurationGroup)</TestArgs>
@@ -66,9 +74,9 @@
       <TestResultsXml>$(TestsOutputDir)$(TestProjectFilename)-testResults.xml</TestResultsXml>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetToolCommand) test $(TestArgs) -xml $(TestResultsXml) -notrait category=failing"
+    <Exec Command="$(DotnetTestToolCommand) test $(TestArgs) -xml $(TestResultsXml) -notrait category=failing"
           WorkingDirectory="$(TestProject)"
-          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir);TEST_ARTIFACTS=$(TestsOutputDir);TEST_TARGETRID=$(PackageTargetRid)"
+          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir);TEST_ARTIFACTS=$(SystemPathTestsOutputDir);TEST_TARGETRID=$(TestTargetRid);BUILDRID=$(TargetRid)"
           Condition="'$(TestProjectFilename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'"
           ContinueOnError="true"
           IgnoreStandardErrorWarningFormat="true"
@@ -104,4 +112,5 @@
     <Copy SourceFiles="@(SharedFrameworkPublishFiles)"
           DestinationFiles="@(SharedFrameworkPublishFiles->'$(TestsOutputDir)sharedFrameworkPublish/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
+
 </Project>

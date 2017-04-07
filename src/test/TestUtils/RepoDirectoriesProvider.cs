@@ -19,7 +19,9 @@ namespace Microsoft.DotNet.CoreSetup.Test
         private string _dotnetSDK;
 
         private string _targetRID;
+        private string _buildRID;
 
+        public string BuildRID => _buildRID;
         public string TargetRID => _targetRID;
         public string RepoRoot => _repoRoot;
         public string Artifacts => _artifacts;
@@ -42,24 +44,24 @@ namespace Microsoft.DotNet.CoreSetup.Test
             string baseArtifactsFolder = artifacts ?? Path.Combine(_repoRoot, "Bin");
             
             _targetRID = Environment.GetEnvironmentVariable("TEST_TARGETRID");
+            _buildRID = Environment.GetEnvironmentVariable("BUILDRID");
 
-            // ToDo, this is a poor way to 
-            _dotnetSDK = dotnetSdk ?? Path.Combine(baseArtifactsFolder, _targetRID+".Debug", "tests", "Tools", "dotnetcli");
+            _dotnetSDK = dotnetSdk ?? Path.Combine(baseArtifactsFolder, "tests", _targetRID+".Debug", "Tools", "dotnetcli");
             if(!Directory.Exists(_dotnetSDK))
-                _dotnetSDK = dotnetSdk ?? Path.Combine(baseArtifactsFolder, _targetRID+".Release", "tests", "Tools", "dotnetcli");
+                _dotnetSDK = dotnetSdk ?? Path.Combine(baseArtifactsFolder, "tests", _targetRID+".Release", "Tools", "dotnetcli");
 
-            _artifacts = Path.Combine(baseArtifactsFolder, _targetRID+".Debug");
+            _artifacts = Path.Combine(baseArtifactsFolder, _buildRID+".Debug");
             if(!Directory.Exists(_artifacts))
-                _artifacts = Path.Combine(baseArtifactsFolder, _targetRID+".Release");
+                _artifacts = Path.Combine(baseArtifactsFolder, _buildRID+".Release");
             _hostArtifacts = artifacts ?? Path.Combine(_artifacts, "corehost");
 
-            _nugetPackages = nugetPackages ?? Path.Combine(_repoRoot, "packages");
+            _nugetPackages = nugetPackages ?? Path.Combine(_repoRoot, "Packages");
 
             _corehostPackages = corehostPackages ?? Path.Combine(_artifacts, "corehost");
 
-            _builtDotnet = builtDotnet ?? Path.Combine(baseArtifactsFolder, "obj", _targetRID+".Debug", "sharedFrameworkPublish");
+            _builtDotnet = builtDotnet ?? Path.Combine(baseArtifactsFolder, "obj", _buildRID+".Debug", "sharedFrameworkPublish");
             if(!Directory.Exists(_builtDotnet))
-                _builtDotnet = builtDotnet ?? Path.Combine(baseArtifactsFolder, "obj", _targetRID+".Release", "sharedFrameworkPublish");
+                _builtDotnet = builtDotnet ?? Path.Combine(baseArtifactsFolder, "obj", _buildRID+".Release", "sharedFrameworkPublish");
         }
     }
 }

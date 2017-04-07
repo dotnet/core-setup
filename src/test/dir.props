@@ -5,7 +5,7 @@
   <PropertyGroup>
     <TestDir>$(ProjectDir)/src/test</TestDir>
     <TestAssetsDir>$(TestDir)/Assets</TestAssetsDir>
-    <TestsOutputDir>$(BaseOutputRootPath)tests\</TestsOutputDir>
+    <TestsOutputDir>$(TestBaseOutputRootPath)</TestsOutputDir>
   </PropertyGroup>
 
   <ItemGroup>
