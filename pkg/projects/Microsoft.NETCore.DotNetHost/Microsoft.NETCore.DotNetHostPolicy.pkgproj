@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <Dependency Include="Microsoft.NETCore.DotNetHostResolver">
-      <Version>$(HostResolverFullVersion)</Version>
+      <Version>$(HostResolverVersion)</Version>
     </Dependency>
     <ProjectReference Include="win\Microsoft.NETCore.DotNetHostPolicy.pkgproj">
       <Platform>amd64</Platform>
