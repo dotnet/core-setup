@@ -47,9 +47,12 @@
    <ItemGroup>
       <DirsToClean Include="$(TestDir)\**\bin" />
       <DirsToClean Include="$(TestDir)\**\obj" />
+      <!-- The tests make use of these temporary folders and will begin failing on successive reruns if they are not cleaned up -->
+      <DirsToClean Condition="'$(OSGroup)' == 'Windows_NT'" Include="$(USERPROFILE)\.dotnet" />
+      <DirsToClean Condition="'$(OSGroup)' != 'Windows_NT'" Include="$(HOME)/.dotnet" />  
    </ItemGroup>
 
-    <RemoveDir Directories="$(DirsToClean)" />
+    <RemoveDir Directories="@(DirsToClean)" />
 
     <PropertyGroup>
       <RestoreSourceArg>@(RestoreTestSource->'--fallbacksource %(Identity)', ' ')</RestoreSourceArg>
