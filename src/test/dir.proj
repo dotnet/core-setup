@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="dir.props" />
+  <UsingTask TaskName="GetHostInformation" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.Local.dll" />
 
   <PropertyGroup>
     <BuildTestTargets>
+        DetermineTestOutputDirectory;
         InitBaseDotnetCli;
         RestoreTests;
         BuildTests;
@@ -13,8 +15,20 @@
 
   <Target Name="BuildAndTest" DependsOnTargets="$(BuildTestTargets)" />
   
+  <Target Name="DetermineTestOutputDirectory">
+    <GetHostInformation>
+      <Output TaskParameter="Rid" PropertyName="_HostRid" />
+    </GetHostInformation>
+    <PropertyGroup>
+      <TestTargetRid Condition="'$(TestTargetRid)' == ''">$(_HostRid)</TestTargetRid>
+      <TestOSPlatformConfig>$(TestTargetRid).$(ConfigurationGroup)</TestOSPlatformConfig>
+      <TestsOutputDir Condition="'$(TestsOutputDir)' == ''">$(BaseOutputPath)tests/$(TestOSPlatformConfig)/</TestsOutputDir>
+    </PropertyGroup>
+  </Target>
+
   <!-- We need a version of the Cli that we can plug the host / shared framework into for testing. -->
-  <Target Name="InitBaseDotnetCli">
+  <Target Name="InitBaseDotnetCli"
+          DependsOnTargets="DetermineTestOutputDirectory">
     <PropertyGroup>
       <TestToolsLocalPath Condition="'$(TestToolsLocalPath)' == ''">$(TestsOutputDir)Tools</TestToolsLocalPath>
       <BootstrapCommand Condition="'$(OSGroup)' == 'Windows_NT'">powershell -NoProfile -ExecutionPolicy unrestricted -Command "$(MSBuildThisFileDirectory)bootstrap/bootstrap.ps1" -ToolsLocalPath $(TestToolsLocalPath) -Architecture $(TargetArchitecture)</BootstrapCommand>
@@ -46,7 +60,8 @@
           WorkingDirectory="%(RestoreTest.RootDir)%(RestoreTest.Directory)" />
   </Target>
 
-  <Target Name="BuildTests">
+  <Target Name="BuildTests"
+          DependsOnTargets="DetermineTestOutputDirectory">
     <PropertyGroup>
       <BuildArgs>--configuration $(ConfigurationGroup)</BuildArgs>
     </PropertyGroup>
@@ -57,6 +72,7 @@
   </Target>
 
   <Target Name="RunTest"
+          DependsOnTargets="DetermineTestOutputDirectory"
           Inputs="%(TestProjects.Identity)"
           Outputs="fake">
     <PropertyGroup>

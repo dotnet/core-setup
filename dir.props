@@ -77,7 +77,6 @@
     <HostResolverFullVersion>$(ProductVersion)</HostResolverFullVersion>
     <AppHostFullVersion>$(ProductVersion)</AppHostFullVersion>
     <HostPolicyFullVersion>$(ProductVersion)</HostPolicyFullVersion>
-
   </PropertyGroup>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
@@ -122,7 +121,7 @@
     <_DnuExcludeProjectJsonFiles Include="$(MSBuildThisFileDirectory)Bin\**\project.json" />
     
     <_ProjectJsonFiles Include="$(MSBuildThisFileDirectory)**\project.json" Exclude="@(_DnuExcludeProjectJsonFiles)" />
-    <DnuRestoreDirs Include="@(_ProjectJsonFiles->'%(RootDir)%(Directory)')" >
+    <DnuRestoreDirs Include="@(_ProjectJsonFiles->'%(RootDir)%(Directory)')">
       <AdditionalArgs>%(AdditionalArgs) --disable-parallel</AdditionalArgs>
     </DnuRestoreDirs>
     <DnuRestoreDirs Include="$(MSBuildThisFileDirectory)\tools-local\setuptools\independent\">
@@ -162,7 +161,7 @@
 
   <!--
   If Configuration is empty that means we are not being built in VS and so folks need to explicitly pass the different
-  values for $(ConfigurationGroup), $(TargetGroup), or $(OSGroup) or accept the defaults for them.
+  values for $(ConfigurationGroup) or $(OSGroup) or accept the defaults for them.
   -->
   <PropertyGroup>
     <OSGroup Condition="'$(OSGroup)' == ''">$(OsEnvironment)</OSGroup>
@@ -171,21 +170,18 @@
   <PropertyGroup Condition="'$(Configuration)'==''">
     <ConfigurationGroup Condition="'$(ConfigurationGroup)'==''">Debug</ConfigurationGroup>
     <Configuration>$(ConfigurationGroup)</Configuration>
-    <Configuration Condition="'$(TargetGroup)'!=''">$(TargetGroup)_$(Configuration)</Configuration>
-    <Configuration Condition="'$(OSGroup)'!='' and '$(OSGroup)'!='AnyOS'">$(OSGroup)_$(Configuration)</Configuration>
+    <Configuration>$(OSGroup)_$(Configuration)</Configuration>
   </PropertyGroup>
   
   <!--
   If Configuration is set then someone explicitly passed it in or we building from VS. In either case
-  default $(ConfigurationGroup), $(TargetGroup), or $(OSGroup) from the Configuration if they aren't
+  default $(ConfigurationGroup) or $(OSGroup) from the Configuration if they aren't
   already explicitly set.
   -->
   <PropertyGroup Condition="'$(Configuration)'!=''">
     <ConfigurationGroup Condition="'$(ConfigurationGroup)'=='' and $(Configuration.EndsWith('Debug'))">Debug</ConfigurationGroup>
     <ConfigurationGroup Condition="'$(ConfigurationGroup)'=='' and $(Configuration.EndsWith('Release'))">Release</ConfigurationGroup>
     <ConfigurationGroup Condition="'$(ConfigurationGroup)'==''">Debug</ConfigurationGroup>
-
-    <BuildAllOSGroups Condition="'$(BuildAllOSGroups)' == ''">true</BuildAllOSGroups>
 
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Windows'))">Windows_NT</OSGroup>
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Unix'))">Unix</OSGroup>
@@ -240,46 +236,12 @@
     <TargetRid Condition="'$(TargetArchitecture)' == 'arm64'">win10-arm64</TargetRid>
   </PropertyGroup>
 
-  <!-- Use actual publishable (non-dummy) package name produced by the build system for this RID -->
-  <PropertyGroup Condition="'$(TargetRid)' != ''">
-    <PackageTargetRid>$(TargetRid)</PackageTargetRid>
-    <PackageTargetRid Condition="'$(TargetRid)' == 'osx.10.11-x64'">osx.10.10-x64</PackageTargetRid>
-    <PackageTargetRid Condition="'$(TargetRid)' == 'osx.10.12-x64'">osx.10.10-x64</PackageTargetRid>    
-    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.0-x64'">rhel.7-x64</PackageTargetRid>
-    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.1-x64'">rhel.7-x64</PackageTargetRid>
-    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.2-x64'">rhel.7-x64</PackageTargetRid>
-    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.3-x64'">rhel.7-x64</PackageTargetRid>
-    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.2-x64'">rhel.7-x64</PackageTargetRid>    
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PublishRid Include="win7-x64"/>
-    <PublishRid Include="win7-x86"/>
-    <PublishRid Include="win8-arm"/>
-    <PublishRid Include="win10-arm64"/>
-    <PublishRid Include="osx.10.12-x64"/>
-    <PublishRid Include="linux-x64"/>
-    <PublishRid Include="ubuntu.14.04-x64"/>
-    <PublishRid Include="ubuntu.16.04-x64"/>
-    <PublishRid Include="ubuntu.14.04-arm"/>
-    <PublishRid Include="ubuntu.16.04-arm"/>
-    <PublishRid Include="ubuntu.16.10-x64"/>
-    <PublishRid Include="rhel.7-x64"/>
-    <PublishRid Include="debian.8-x64"/>
-    <PublishRid Include="fedora.23-x64"/>
-    <PublishRid Include="fedora.24-x64"/>
-    <PublishRid Include="opensuse.42.1-x64"/>
-  </ItemGroup>
-
   <!-- Set up the default output and intermediate paths -->
   <PropertyGroup>
     <OSPlatformConfig>$(TargetRid).$(ConfigurationGroup)</OSPlatformConfig>
-    <TestOSPlatformConfig>$(TestTargetRid).$(ConfigurationGroup)</TestOSPlatformConfig>
-    <TargetOutputRelPath Condition="'$(TargetGroup)'!=''">$(TargetGroup)/</TargetOutputRelPath>
 
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
     <BaseOutputRootPath>$(BaseOutputPath)$(OSPlatformConfig)\</BaseOutputRootPath>   
-    <TestBaseOutputRootPath>$(BaseOutputPath)tests\$(TestOSPlatformConfig)\</TestBaseOutputRootPath>
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)\$(MSBuildProjectName)\</OutputPath>
 
     <IntermediateOutputRootPath Condition="'$(IntermediateOutputRootPath)' == ''">$(BaseIntermediateOutputPath)$(OSPlatformConfig)\</IntermediateOutputRootPath>

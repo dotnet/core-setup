@@ -5,7 +5,6 @@
   <PropertyGroup>
     <TestDir>$(ProjectDir)/src/test</TestDir>
     <TestAssetsDir>$(TestDir)/Assets</TestAssetsDir>
-    <TestsOutputDir>$(TestBaseOutputRootPath)</TestsOutputDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,10 +14,6 @@
   <ItemGroup>
     <RestoreTestSource Include="$(CoreHostOutputDir)" />
     <RestoreTestSource Include="$(PackagesBasePath)Packages" />
-    <RestoreTestSource Include="https:%2F%2Fwww.nuget.org/api/v2" />
-    <RestoreTestSource Include="https:%2F%2Fwww.myget.org/F/aspnet-contrib/api/v2" />
-    <RestoreTestSource Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
-    <RestoreTestSource Include="https:%2F%2Fdotnet.myget.org/F/cli-deps/api/v3/index.json" />      
-    <RestoreTestSource Include="https:%2F%2Fdotnet.myget.org/F/dotnet-corefxlab/api/v3/index.json" />
+    <RestoreTestSource Include="@(DnuSourceList)" />
   </ItemGroup>
 </Project>
