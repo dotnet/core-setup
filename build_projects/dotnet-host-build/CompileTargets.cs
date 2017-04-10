@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Host.Build
                 // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
                 // See the comment in "src/corehost/build.sh" for details. It doesn't work for some reason.
                 string cmakeBaseRid, visualStudio, archMacro, arch;
-                string ridMacro = $"-DCLI_CMAKE_RUNTIME_ID:STRING={rid}";
+                string ridMacro = $"-DCLI_CMAKE_RUNTIME_ID:STRING=win10-{platform.ToLower()}";
                 string cmakeHostVer = $"-DCLI_CMAKE_HOST_VER:STRING={hostVersion.LatestHostVersion.ToString()}";
                 string cmakeHostPolicyVer = $"-DCLI_CMAKE_HOST_POLICY_VER:STRING={hostVersion.LatestHostPolicyVersion.ToString()}";
                 string cmakeHostFxrVer = $"-DCLI_CMAKE_HOST_FXR_VER:STRING={hostVersion.LatestHostFxrVersion.ToString()}";
