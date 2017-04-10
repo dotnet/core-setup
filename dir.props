@@ -226,14 +226,19 @@
     <Framework Condition="'$(TargetArchitecture)' == 'arm64'">netcoreapp1.1</Framework>
   </PropertyGroup>
   
-  <PropertyGroup>
-    <TestTargetRid Condition="'$(TestTargetRid)' == ''">win10-x64</TestTargetRid>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetRid)' == '' and '$(OSGroup)' == 'Windows_NT'">
     <TargetRid Condition="'$(TargetArchitecture)' == 'x86'">win7-x86</TargetRid>
     <TargetRid Condition="'$(TargetArchitecture)' == 'x64'">win7-x64</TargetRid>
     <TargetRid Condition="'$(TargetArchitecture)' == 'arm'">win8-arm</TargetRid>
     <TargetRid Condition="'$(TargetArchitecture)' == 'arm64'">win10-arm64</TargetRid>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetRid)' == '' and '$(DistroRid)' != ''">
+    <TargetRid>$(DistroRid)</TargetRid>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestTargetRid Condition="'$(TestTargetRid)' == '' and '$(OSGroup)' == 'Windows_NT'">win10-x64</TestTargetRid>
+    <TestTargetRid Condition="'$(TestTargetRid)' == ''">$(TargetRid)</TestTargetRid>
   </PropertyGroup>
 
   <!-- Set up the default output and intermediate paths -->
@@ -343,6 +348,6 @@
 
 
   <!-- Use Roslyn Compilers to build --> 
-  <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'!='true' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false'" /> 
-  <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'=='true' and Exists('$(RoslynPropsFile)')" /> 
+  <Import Project="$(RoslynPropsFile)" Condition="'$(OsEnvironment)'!='Windows_NT' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false'" /> 
+  <Import Project="$(RoslynPropsFile)" Condition="'$(OsEnvironment)'=='Windows_NT' and Exists('$(RoslynPropsFile)')" /> 
 </Project>

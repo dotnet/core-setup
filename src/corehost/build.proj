@@ -12,7 +12,7 @@
           Condition="'$(OSGroup)' != 'Windows_NT'"
           DependsOnTargets="GetLatestCommitHash">
     <PropertyGroup>
-      <BuildArgs>--Arch $(TargetArchitecture) --rid $(TargetRid) --apphostver $(HostVersion) --hostver $(HostVersion) --fxrver $(HostVersion) --policyver $(HostVersion) --commithash $(LatestCommit)</BuildArgs>     
+      <BuildArgs>--arch $(TargetArchitecture) --apphostver $(HostVersion) --hostver $(HostVersion) --fxrver $(HostVersion) --policyver $(HostVersion) --commithash $(LatestCommit)</BuildArgs>     
     </PropertyGroup>
     
     <Message Text="$(MSBuildProjectDirectory)\build.sh $(BuildArgs)" Importance="High"/>

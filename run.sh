@@ -66,5 +66,7 @@ fi
 
 __dotnet=$__toolsLocalPath/dotnetcli/dotnet
 
+cp -fR $__scriptpath/tools-override/* $__toolsLocalPath 
+
 $__dotnet $__toolsLocalPath/run.exe $*
 exit $?
