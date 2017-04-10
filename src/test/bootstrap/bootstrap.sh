@@ -72,7 +72,7 @@ download() {
 }
 
 verbose=false
-repoRoot=`pwd`
+repoRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 toolsLocalPath="<auto>"
 cliLocalPath="<auto>"
 symlinkPath="<auto>"

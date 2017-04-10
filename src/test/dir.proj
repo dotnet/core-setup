@@ -37,7 +37,8 @@
       <DotnetTestToolCommand Condition="'$(DotnetTestToolCommand)'=='' and '$(OsEnvironment)'=='Unix'">$(TestToolsLocalPath)/dotnetcli/dotnet</DotnetTestToolCommand>
     </PropertyGroup>
 
-    <Exec Command="$(BootstrapCommand)" />
+    <Exec Command="$(BootstrapCommand)" 
+          WorkingDirectory="$(MSBuildThisFileDirectory)bootstrap/" />
   </Target>
 
   <Target Name="RestoreTests">
@@ -56,7 +57,7 @@
 
     <PropertyGroup>
       <RestoreSourceArg>@(RestoreTestSource->'--fallbacksource %(Identity)', ' ')</RestoreSourceArg>
-      <RestoreArgs>--disable-parallel --no-cache --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(RestoreSourceArg.Replace('\', '/'))</RestoreArgs>
+      <RestoreArgs>--disable-parallel --no-cache --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(RestoreSourceArg)</RestoreArgs>
     </PropertyGroup>
 
     <Exec Command="$(DotnetTestToolCommand) restore $(RestoreArgs)"
