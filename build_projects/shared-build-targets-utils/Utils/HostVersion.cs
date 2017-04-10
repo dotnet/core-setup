@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
         public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
-        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 2, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
 
 
         // If you are producing host packages use this to validate them.
