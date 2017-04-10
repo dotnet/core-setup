@@ -113,10 +113,21 @@
 
   <Target Name="GenerateTarBall"
           Condition="'$(OSGroup)'!='Windows_NT'">
-
-    <Exec Command="tar -czf $(PackagesOutDir)$(CombinedCompressedFile) -C $(CombinedPublishRoot) ." />
-    <Exec Command="tar -czf $(PackagesOutDir)$(HostFxrCompressedFile) -C $(HostFxrPublishRoot) ." />
-    <Exec Command="tar -czf $(PackagesOutDir)$(SharedFrameworkCompressedFile) -C $(SharedFrameworkPublishRoot) ." />
+    <ItemGroup>
+      <CombinedCompressedFileSet Include="$(CombinedPublishRoot)/**" />
+      <HostFxrCompressedFileSet Include="$(HostFxrPublishRoot)/**" />
+      <SharedFrameworkCompressedFileSet Include="$(SharedFrameworkPublishRoot)/**" />
+    </ItemGroup>
+    <PropertyGroup>
+      <CombinedCompressedFiles>@(CombinedCompressedFileSet->'%(Identity)', ' ')</CombinedCompressedFiles>
+      <HostFxrCompressedFiles>@(HostFxrCompressedFileSet->'%(Identity)', ' ')</HostFxrCompressedFiles>
+      <SharedFrameworkCompressedFiles>@(SharedFrameworkCompressedFileSet->'%(Identity)', ' ')</SharedFrameworkCompressedFiles>
+    </PropertyGroup>
+    <!-- We can't use the '-C' option of tar to just compressed the full contents of a directory because we end up getting a 
+         "file changed as we read it error" from tar.  Instead, pass the full file list to tar. -->
+    <Exec Command="tar -czf $(PackagesOutDir)$(CombinedCompressedFile) $(CombinedCompressedFiles)" />
+    <Exec Command="tar -czf $(PackagesOutDir)$(HostFxrCompressedFile) $(HostFxrCompressedFiles)" />
+    <Exec Command="tar -czf $(PackagesOutDir)$(SharedFrameworkCompressedFile) $(SharedFrameworkCompressedFiles)" />
   </Target>
   
   <Import Project="windows\package.targets" />
