@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Build
         // Full versions and package information.
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
-        public bool EnsureStableVersion => false;
+        public bool EnsureStableVersion => true;
 
         // Comment below lines when stabilizing 1.1.X and we are going to update one (or more) of the host packages.
         //
@@ -79,13 +79,14 @@ namespace Microsoft.DotNet.Cli.Build
 
         public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
         public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
-        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 2, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 1, 2, "", "", "", CommitCountString);
 
 
         // If you are producing host packages use this to validate them.
         public Dictionary<string, VerInfo> LatestHostPackagesToValidate => new Dictionary<string, VerInfo>()
         {
             // Add packages here to validate that they are produced, similar to LatestHostPackages.
+            { "Microsoft.NETCore.DotNetHostPolicy", LatestHostPolicyVersion }
         };
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
         {
