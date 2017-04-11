@@ -98,7 +98,7 @@
     {
       "enabled": true,
       "continueOnError": true,
-      "alwaysRun": true,
+      "alwaysRun": false,
       "displayName": "Cleanup Docker",
       "timeoutInMinutes": 0,
       "task": {
@@ -116,7 +116,7 @@
     {
       "enabled": true,
       "continueOnError": true,
-      "alwaysRun": true,
+      "alwaysRun": false,
       "displayName": "Copy Publish Artifact: Build Logs",
       "timeoutInMinutes": 0,
       "task": {
@@ -135,7 +135,7 @@
     {
       "enabled": true,
       "continueOnError": true,
-      "alwaysRun": true,
+      "alwaysRun": false,
       "displayName": "Cleanup VSTS Agent",
       "timeoutInMinutes": 0,
       "task": {
@@ -261,46 +261,44 @@
   "buildNumberFormat": "$(date:yyyMMdd)$(rev:.r)-$(PB_DockerOS)",
   "jobAuthorizationScope": "projectCollection",
   "jobTimeoutInMinutes": 90,
+  "jobCancelTimeoutInMinutes": 5,
   "badgeEnabled": true,
   "repository": {
     "properties": {
-      "connectedServiceId": "f4c31735-42d2-4c3a-bc47-7ac06fd0dccc",
-      "apiUrl": "https://api.github.com/repos/dotnet/core-setup",
-      "branchesUrl": "https://api.github.com/repos/dotnet/core-setup/branches",
-      "cloneUrl": "https://github.com/dotnet/core-setup.git",
-      "refsUrl": "https://api.github.com/repos/dotnet/core-setup/git/refs",
+      "labelSources": "0",
+      "reportBuildStatus": "true",
+      "fetchDepth": "0",
       "gitLfsSupport": "false",
       "skipSyncSource": "false",
-      "fetchDepth": "0",
       "cleanOptions": "0"
     },
-    "id": "https://github.com/dotnet/core-setup.git",
-    "type": "GitHub",
-    "name": "dotnet/core-setup",
-    "url": "https://github.com/dotnet/core-setup.git",
-    "defaultBranch": "master",
-    "clean": "true",
+    "id": "c19ea379-feb7-4ca5-8f7f-5f2b5095ea62",
+    "type": "TfsGit",
+    "name": "DotNet-Core-Setup-Trusted",
+    "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Setup-Trusted",
+    "defaultBranch": "refs/heads/buildtools",
+    "clean": "undefined",
     "checkoutSubmodules": false
   },
   "quality": "definition",
   "queue": {
+    "id": 36,
+    "name": "DotNet-Build",
     "pool": {
       "id": 39,
       "name": "DotNet-Build"
-    },
-    "id": 36,
-    "name": "DotNet-Build"
+    }
   },
+  "id": 5075,
+  "name": "Core-Setup-Linux-BT",
   "path": "\\",
   "type": "build",
-  "id": 5075,
-  "name": "Core-Setup-Linux",
   "project": {
     "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "name": "DevDiv",
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418097620
+    "revision": 418097642
   }
 }

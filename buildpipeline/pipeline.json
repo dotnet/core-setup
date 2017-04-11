@@ -16,7 +16,7 @@
       },
       "Definitions": [
         {
-          "Name": "Core-Setup-Linux",
+          "Name": "Core-Setup-Linux-BT",
           "Parameters": {
             "PB_DockerOS": "centos.7"
           },
@@ -27,7 +27,7 @@
           }
         },
         {
-          "Name": "Core-Setup-Linux",
+          "Name": "Core-Setup-Linux-BT",
           "Parameters": {
             "PB_DockerOS": "debian.8",
             "REPO_ID": "579f8fb0fedca9aeeb399132",
@@ -41,7 +41,7 @@
           }
         },
         {
-          "Name": "Core-Setup-Linux",
+          "Name": "Core-Setup-Linux-BT",
           "Parameters": {
             "PB_DockerOS": "fedora.24"
           },
@@ -52,7 +52,7 @@
           }
         },
         {
-          "Name": "Core-Setup-Linux",
+          "Name": "Core-Setup-Linux-BT",
           "Parameters": {
             "PB_DockerOS": "opensuse.42.1"
           },
@@ -63,7 +63,7 @@
           }
         },
         {
-          "Name": "Core-Setup-Linux",
+          "Name": "Core-Setup-Linux-BT",
           "Parameters": {
             "PB_DockerOS": "ubuntu.14.04",
             "REPO_ID": "562fbfe0b2d7d0e0a43780c4",
@@ -79,7 +79,7 @@
           }
         },
         {
-          "Name": "Core-Setup-Linux",
+          "Name": "Core-Setup-Linux-BT",
           "Parameters": {
             "PB_DockerOS": "ubuntu.16.04",
             "REPO_ID": "575f40f3797ef7280505232f",
@@ -93,7 +93,7 @@
           }
         },
         {
-          "Name": "Core-Setup-Linux",
+          "Name": "Core-Setup-Linux-BT",
           "Parameters": {
             "PB_DockerOS": "ubuntu.16.10",
             "REPO_ID": "575f40f3797ef7280505232f",
@@ -104,88 +104,6 @@
             "OperatingSystem": "Ubuntu 16.10",
             "Type": "build/product/",
             "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-OSX-x64",
-          "ReportingParameters": {
-            "OperatingSystem": "OSX",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-PortableLinux-x64",
-          "ReportingParameters": {
-            "SubType": "PortableLinux",
-            "OperatingSystem": "RedHat 7",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-RHEL7-x64",
-          "ReportingParameters": {
-            "SubType": "Native",
-            "OperatingSystem": "RedHat 7",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-Signing-Windows-x64",
-          "ReportingParameters": {
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-Signing-Windows-x86",
-          "ReportingParameters": {
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "x86"
-          }
-        },
-        {
-          "Name": "Core-Setup-CrossBuild",
-          "Parameters": {
-            "PB_DockerTag": "ubuntu1404_cross_prereqs_v2",
-            "PB_Architecture": "arm",
-            "TargetRid": "ubuntu.14.04-arm"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Ubuntu 14.04",
-            "Type": "build/product/"
-          }
-        },
-        {
-          "Name": "Core-Setup-CrossBuild",
-          "Parameters": {
-            "PB_DockerTag": "ubuntu1604_cross_prereqs_v2",
-            "PB_Architecture": "arm",
-            "TargetRid": "ubuntu.16.04-arm"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Ubuntu 16.04",
-            "Type": "build/product/"
-          }
-        },
-        {
-          "Name": "Core-Setup-Windows-arm32",
-          "ReportingParameters": {
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm"
-          }
-        },
-        {
-          "Name": "Core-Setup-Windows-arm64",
-          "ReportingParameters": {
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "arm64"
           }
         }
       ]
