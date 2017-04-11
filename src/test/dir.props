@@ -12,8 +12,8 @@
     <TestProjects Include="$(TestDir)/Microsoft.Extensions.DependencyModel.Tests" />
   </ItemGroup>
   <ItemGroup>
-    <RestoreTestSource Include="$(CoreHostOutputDir)" />
-    <RestoreTestSource Include="$(PackagesBasePath)Packages" />
+    <RestoreTestFallbackSource Include="$(CoreHostOutputDir.TrimEnd('/\'.ToCharArray()))" />
+    <RestoreTestFallbackSource Include="$(PackagesBasePath)packages" />
     <RestoreTestSource Include="@(DnuSourceList)" />
   </ItemGroup>
 </Project>

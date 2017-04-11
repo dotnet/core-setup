@@ -1,7 +1,7 @@
 # set the base tools directory
 $toolsLocalPath = Join-Path $PSScriptRoot "Tools"
 $bootStrapperPath = Join-Path $toolsLocalPath "bootstrap.ps1"
-$restorePackagesPath = Join-Path $PSScriptRoot "Packages"
+$restorePackagesPath = Join-Path $PSScriptRoot "packages"
 $dummyGlobalJsonPath = Join-Path $restorePackagesPath "global.json"
 
 # if the boot-strapper script doesn't exist then download it

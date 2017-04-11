@@ -151,7 +151,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-      <BuildBasePathArg>--build-base-path $(IntermediateOutputRootPath)forPackaging</BuildBasePathArg>
+      <BuildBasePathArg>--build-base-path $(IntermediateOutputForPackaging)</BuildBasePathArg>
       <OutputArg>--output $(PackagesOutDir)</OutputArg>
       <ConfigArg>--configuration $(Configuration)</ConfigArg>
       <VersionSuffixArg>--version-suffix $(VersionSuffix)</VersionSuffixArg>

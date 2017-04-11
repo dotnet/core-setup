@@ -84,10 +84,10 @@
 
   <Target Name="GetSignMsiAndCabFiles">
     <ItemGroup>
-      <FilesToSign Include="$(OutDir)Packages/**/*.msi">
+      <FilesToSign Include="$(OutDir)packages/**/*.msi">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
-      <FilesToSign Include="$(OutDir)Packages/**/*.cab">
+      <FilesToSign Include="$(OutDir)packages/**/*.cab">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
@@ -99,7 +99,7 @@
 
   <Target Name="GetSignEngineFiles">
     <ItemGroup>
-      <FilesToSign Include="$(OutDir)Packages/**/*engine.exe">
+      <FilesToSign Include="$(OutDir)packages/**/*engine.exe">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
@@ -111,7 +111,7 @@
 
   <Target Name="GetSignBundleFiles">
     <ItemGroup>
-      <FilesToSign Include="$(OutDir)Packages/**/*.exe">
+      <FilesToSign Include="$(OutDir)packages/**/*.exe">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>

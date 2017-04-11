@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="dir.props" />
-  <UsingTask TaskName="GetHostInformation" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.Local.dll" />
+  <UsingTask TaskName="GetHostInformation" AssemblyFile="$(LocalBuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.Local.dll" />
 
   <PropertyGroup>
     <BuildTestTargets>
@@ -43,36 +43,42 @@
 
   <Target Name="RestoreTests">
     <ItemGroup>
-      <RestoreTest Include="$(TestDir)/**/project.json')" />
+      <RestoreTest Include="$(TestDir)/**/project.json" />
     </ItemGroup>
-   <ItemGroup>
+
+    <ItemGroup>
       <DirsToClean Include="$(TestDir)\**\bin" />
       <DirsToClean Include="$(TestDir)\**\obj" />
       <!-- The tests make use of these temporary folders and will begin failing on successive reruns if they are not cleaned up -->
       <DirsToClean Condition="'$(OSGroup)' == 'Windows_NT'" Include="$(USERPROFILE)\.dotnet" />
       <DirsToClean Condition="'$(OSGroup)' != 'Windows_NT'" Include="$(HOME)/.dotnet" />  
-   </ItemGroup>
+    </ItemGroup>
 
     <RemoveDir Directories="@(DirsToClean)" />
 
     <PropertyGroup>
-      <RestoreSourceArg>@(RestoreTestSource->'--fallbacksource %(Identity)', ' ')</RestoreSourceArg>
-      <RestoreArgs>--disable-parallel --no-cache --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(RestoreSourceArg)</RestoreArgs>
+      <RestoreSourceArg>@(RestoreTestSource->'--source %(Identity)', ' ')</RestoreSourceArg>
+      <RestoreSourceArg>$(RestoreSourceArg) @(RestoreTestFallbackSource->'--fallbacksource %(Identity)', ' ')</RestoreSourceArg>
+      <RestoreArgs>--disable-parallel --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(RestoreSourceArg)</RestoreArgs>
     </PropertyGroup>
 
     <Exec Command="$(DotnetTestToolCommand) restore $(RestoreArgs)"
-          WorkingDirectory="%(RestoreTest.RootDir)%(RestoreTest.Directory)" />
+          WorkingDirectory="%(RestoreTest.RootDir)%(RestoreTest.Directory)" 
+          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir.TrimEnd('/\'.ToCharArray()))" />
   </Target>
 
   <Target Name="BuildTests"
           DependsOnTargets="DetermineTestOutputDirectory">
+
     <PropertyGroup>
-      <BuildArgs>--configuration $(ConfigurationGroup)</BuildArgs>
+      <BuildArgs>--build-base-path $(IntermediateOutputForPackaging) --configuration $(ConfigurationGroup)</BuildArgs>
     </PropertyGroup>
 
     <Message Text="Building Tests" Importance="High" />
-    <Exec Command="$(DotnetTestToolCommand) build $(BuildArgs)"
-          WorkingDirectory="%(TestProjects.Identity)" />
+    <Message Importance="High" Text="TestProjects: @(TestProjects)" />
+    <Exec Command="$(DotnetTestToolCommand) build $(BuildArgs) %(TestProjects.Identity)" 
+          WorkingDirectory="%(TestProjects.Identity)"
+          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir.TrimEnd('/\'.ToCharArray()))" />
   </Target>
 
   <Target Name="RunTest"

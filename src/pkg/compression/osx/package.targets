@@ -2,13 +2,13 @@
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 <Import Project='package.props' />
     
+  <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
+
   <Target Name="InitPkg"
           Condition="'$(OSGroup)' == 'OSX'">
     <MakeDir Condition="!Exists('$(PackagesIntermediateDir)')"
              Directories="$(PackagesIntermediateDir)" />
   </Target>
-
-  <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll"/>
 
   <Target Name="GeneratePkgs"
           Condition="'$(OSGroup)' == 'OSX'"

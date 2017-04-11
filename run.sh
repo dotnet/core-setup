@@ -34,7 +34,7 @@ download() {
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __toolsLocalPath=$__scriptpath/Tools
 __bootstrapScript=$__toolsLocalPath/bootstrap.sh
-__packagesPath=$__scriptpath/Packages
+__packagesPath=$__scriptpath/packages
 
 if [ ! -f $__bootstrapScript ]; then
     if [ ! -d $__toolsLocalPath ]; then

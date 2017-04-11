@@ -3,6 +3,10 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
+  <UsingTask TaskName="ChangeEntryPointLibraryName" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
+  <UsingTask TaskName="GetBuildArgsByFrameworks" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
+  <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
+
   <PropertyGroup>
     <BuildTargets>
       BuildProjectsForNuGetPackages;
@@ -16,18 +20,12 @@
 
   <Target Name="Build" DependsOnTargets="$(BuildTargets)" />
 
-  <UsingTask TaskName="GetBuildArgsByFrameworks" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll"/>
-
   <Target Name="BuildProjectsForNuGetPackages">
-    
-    <PropertyGroup>
-      <pOutDir>$(IntermediateOutputRootPath)forPackaging</pOutDir>
-    </PropertyGroup>
     
     <MakeDir  Condition="!Exists('$(pOutDir)')" Directories="$(pOutDir)" /> 
 
     <PropertyGroup>
-      <Args>--build-base-path $(pOutDir) --configuration $(Configuration)</Args>
+      <Args>--build-base-path $(IntermediateOutputForPackaging) --configuration $(ConfigurationGroup)</Args>
     </PropertyGroup>
 
     <ItemGroup>
@@ -43,8 +41,6 @@
 
     <Exec Command="$(DotnetToolCommand) build $(Args) %(buildCmdArgs.Identity)" />
   </Target>
-
-  <UsingTask TaskName="ChangeEntryPointLibraryName" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll"/>
 
   <Target Name="PublishSharedFrameworkAndSharedHost"
           DependsOnTargets="RestoreLockedCoreHost;GenerateSharedFrameworkProject">
@@ -236,8 +232,6 @@
           WorkingDirectory="$(JsonDir)"
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir)" />
   </Target>
-
-  <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(BuildToolsTaskDir)core-setup.tasks.dll"/>
 
   <Target Name="GenerateSharedFrameworkProject">
 

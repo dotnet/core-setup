@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 _artifacts = Path.Combine(baseArtifactsFolder, _buildRID+".Release");
             _hostArtifacts = artifacts ?? Path.Combine(_artifacts, "corehost");
 
-            _nugetPackages = nugetPackages ?? Path.Combine(_repoRoot, "Packages");
+            _nugetPackages = nugetPackages ?? Path.Combine(_repoRoot, "packages");
 
             _corehostPackages = corehostPackages ?? Path.Combine(_artifacts, "corehost");
 

@@ -7,9 +7,9 @@
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == 'net45'">.NETFramework,Version=v4.5</NuGetTargetMoniker>
     <CLSCompliant>false</CLSCompliant>
     <ProjectGuid>{B507BED2-0A28-456A-99C6-AD7AA148E35F}</ProjectGuid>
-    <OutputPath Condition="'$(TargetGroup)' != 'net45'">$(ToolRuntimePath)</OutputPath>
+    <OutputPath Condition="'$(TargetGroup)' != 'net45'">$(LocalToolRuntimePath)</OutputPath>
     <IntermediateOutputPath Condition="'$(TargetGroup)' == 'net45'">$(IntermediateOutputPath)\net45</IntermediateOutputPath>
-    <OutputPath Condition="'$(TargetGroup)' == 'net45'">$(ToolRuntimePath)\net46</OutputPath>
+    <OutputPath Condition="'$(TargetGroup)' == 'net45'">$(LocalToolRuntimePath)\net46</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'netstandard1.5_Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'net45_Debug'" />
