@@ -30,7 +30,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "$(Build.StagingDirectory)/init.sh",
+        "filename": "$(Build.SourcesDirectory)/init.sh",
         "arguments": "",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -67,7 +67,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run -d -w $(PB_GitDirectory) -v $(Build.StagingDirectory):$(PB_GitDirectory) --name $(PB_DockerContainerName) $(PB_DockerImageName) sleep 7200",
+        "arguments": "run -d -w $(PB_GitDirectory) -v $(Build.SourcesDirectory):$(PB_GitDirectory) --name $(PB_DockerContainerName) $(PB_DockerImageName) sleep 7200",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -225,7 +225,7 @@
       "value": "true"
     },
     "DockerHost_ToolsDirectory": {
-      "value": "$(Build.StagingDirectory)/Tools"
+      "value": "$(Build.SourcesDirectory)/Tools"
     },
     "NUGET_SYMBOLS_FEED_URL": {
       "value": "https://dotnet.myget.org/F/dotnet-core/api/v2/package"
