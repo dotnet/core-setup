@@ -11,7 +11,7 @@ invocation='echo "Calling: ${FUNCNAME[0]}"'
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __toolsLocalPath=$__scriptpath/Tools
 
-$__scriptpath/init.sh
+$__scriptpath/init-tools.sh
 
 __dotnet=$__toolsLocalPath/dotnetcli/dotnet
 
