@@ -244,6 +244,9 @@
     },
     "OfficialBuildId": {
       "value": "$(Build.BuildNumber)"
+    },
+    "PB_GitDirectory": {
+      "value": "/root/coresetup"
     }
   },
   "demands": [
