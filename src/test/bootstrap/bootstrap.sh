@@ -197,7 +197,7 @@ if [ $forcedCliLocalPath = "<none>" ]; then
     # temporary hack for custom dotnet-install script which allows curl or wget use
     # download "https://raw.githubusercontent.com/dotnet/cli/$dotNetInstallBranch/scripts/obtain/dotnet-install.sh" "$dotnetInstallPath"
     if [ ! -d $toolsLocalPath ]; then
-        mkdir $toolsLocalPath
+        mkdir -p $toolsLocalPath
     fi
     cp -fv $repoRoot/dotnet-install.sh $dotnetInstallPath
     chmod u+x "$dotnetInstallPath"
