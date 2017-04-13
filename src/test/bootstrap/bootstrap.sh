@@ -61,12 +61,14 @@ download() {
     local failed=false
     which curl > /den/null 2> /dev/null
     if [ $? -ne 0 ]; then
+        echo "using wget for download"
         if [ -z "$out_path" ]; then
             wget -q --tries 10 $remote_path || failed=true
         else
             wget -q --tries 10 -O $out_path $remote_path || failed=true
         fi
     else 
+        echo "using curl for download"
         if [ -z "$out_path" ]; then
             curl --retry 10 -sSL --create-dirs $remote_path || failed=true
         else
