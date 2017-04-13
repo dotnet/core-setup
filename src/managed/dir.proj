@@ -240,8 +240,8 @@
              Directories="$(IntermediateOutputRootPath)sharedFramework;$(SharedFrameworkSourceRoot)" />
 
     <ItemGroup>
-      <SharedFrameworkFiles Include="sharedFramework\**\*.cs" />
-      <SharedFrameworkTemplate Include="sharedFramework\framework\project.json.template" />
+      <SharedFrameworkFiles Include="$(MSBuildThisFileDirectory)sharedFramework\**\*.cs" />
+      <SharedFrameworkTemplate Include="$(MSBuildThisFileDirectory)sharedFramework\framework\project.json.template" />
     </ItemGroup>
 
     <Copy SourceFiles="@(SharedFrameworkFiles)" DestinationFolder="$(SharedFrameworkSourceRoot)"/>
