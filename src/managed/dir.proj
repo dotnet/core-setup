@@ -240,22 +240,16 @@
              Directories="$(IntermediateOutputRootPath)sharedFramework;$(SharedFrameworkSourceRoot)" />
 
     <ItemGroup>
-      <SharedFrameworkFiles Include="$(MSBuildThisFileDirectory)sharedFramework\**\*.cs" />
-      <SharedFrameworkTemplate Include="$(MSBuildThisFileDirectory)sharedFramework\framework\project.json.template" />
+      <SharedFrameworkFiles Include="$(MSBuildThisFileDirectory)sharedframework\**\*.cs" />
     </ItemGroup>
+    <PropertyGroup>
+      <SharedFrameworkTemplate>$(MSBuildThisFileDirectory)sharedframework\framework\project.json.template</SharedFrameworkTemplate>
+    </PropertyGroup>
 
     <Copy SourceFiles="@(SharedFrameworkFiles)" DestinationFolder="$(SharedFrameworkSourceRoot)"/>
 
-<PropertyGroup>
-  <_SharedFrameworkTemplate>$(MSBuildThisFileDirectory)sharedFramework\framework\project.json.template</_SharedFrameworkTemplate>
-</PropertyGroup>
-<Message Importance="High" Text="SharedFrameworkTemplate: '@(SharedFrameworkTemplate)'" />
-<Message Importance="High" Condition="!Exists('@(SharedFrameworkTemplate)')" Text="Missing itemgroup sharedframeworktemplate" />
-<Message Importance="High" Text="_SharedFrameworkTemplate: '$(_SharedFrameworkTemplate)'" />
-<Message Importance="High" Condition="!Exists('$(_SharedFrameworkTemplate)')" Text="Missing propertygroup sharedframeworktemplate" />
-
     <ReplaceFileContents
-      InputFile="@(SharedFrameworkTemplate)"
+      InputFile="$(SharedFrameworkTemplate)"
       DestinationFile="$(SharedFrameworkSourceRoot)\project.json"
       ReplacementPatterns="%24(NetCoreAppVersion);%24(RID);%24(TargetFramework)"
       ReplacementStrings="$(HostFullVersion);$(TargetRid);$(Framework)" />
