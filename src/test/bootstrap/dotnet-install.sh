@@ -141,11 +141,17 @@ machine_has() {
 }
 
 check_min_reqs() {
-    if ! machine_has "curl"; then
-        say_err "curl is required to download dotnet. Install curl to proceed."
-        return 1
+    local hasMinimum=false
+    if machine_has "curl"; then
+        hasMinimum=true;
     fi
-    
+    if machine_has "wget"; then
+        hasMinimum=true;
+    fi
+    if [ "$hasMinimum" = "false" ]; then
+        say_err "curl (recommended) or wget are required to download dotnet. Install missing prereq to proceed."
+        return 1
+    fi        
     return 0
 }
 
