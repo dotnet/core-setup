@@ -196,7 +196,7 @@ if [ $forcedCliLocalPath = "<none>" ]; then
     # download CLI boot-strapper script
     # temporary hack for custom dotnet-install script which allows curl or wget use
     # download "https://raw.githubusercontent.com/dotnet/cli/$dotNetInstallBranch/scripts/obtain/dotnet-install.sh" "$dotnetInstallPath"
-    if [ ! -d $toosLocalPath ]; then
+    if [ ! -d $toolsLocalPath ]; then
         mkdir $toolsLocalPath
     fi
     cp -fv $repoRoot/dotnet-install.sh $dotnetInstallPath
