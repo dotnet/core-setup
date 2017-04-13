@@ -250,9 +250,9 @@
   <_SharedFrameworkTemplate>$(MSBuildThisFileDirectory)sharedFramework\framework\project.json.template</_SharedFrameworkTemplate>
 </PropertyGroup>
 <Message Importance="High" Text="SharedFrameworkTemplate: '@(SharedFrameworkTemplate)'" />
-<Message Importance="High" Condition="!Exists('@(SharedFrameworkTemplate)'" Text="Missing itemgroup sharedframeworktemplate" />
+<Message Importance="High" Condition="!Exists('@(SharedFrameworkTemplate)')" Text="Missing itemgroup sharedframeworktemplate" />
 <Message Importance="High" Text="_SharedFrameworkTemplate: '$(_SharedFrameworkTemplate)'" />
-<Message Importance="High" Condition="!Exists('$(_SharedFrameworkTemplate)'" Text="Missing propertygroup sharedframeworktemplate" />
+<Message Importance="High" Condition="!Exists('$(_SharedFrameworkTemplate)')" Text="Missing propertygroup sharedframeworktemplate" />
 
     <ReplaceFileContents
       InputFile="@(SharedFrameworkTemplate)"

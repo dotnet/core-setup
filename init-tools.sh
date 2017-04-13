@@ -121,14 +121,11 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
             echo "Installing '${__DOTNET_LOCATION}' to '$__DOTNET_PATH/dotnet.tar'" >> $__init_tools_log
             which curl > /dev/null 2> /dev/null
             if [ $? -ne 0 ]; then
-                echo "wget -O $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}"
-                wget -O $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
+                wget -q -O $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
             else
-                echo "curl --retry 10 -sSL --create-dirs -o $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}"
                 curl --retry 10 -sSL --create-dirs -o $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
             fi
             cd $__DOTNET_PATH
-            echo "tar -xf $__DOTNET_PATH/dotnet.tar"
             tar -xf $__DOTNET_PATH/dotnet.tar
 
             cd $__scriptpath
