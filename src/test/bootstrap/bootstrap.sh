@@ -59,7 +59,7 @@ download() {
     local out_path=${2:-}
 
     local failed=false
-    which curl > /den/null 2> /dev/null
+    which curl > /dev/null 2> /dev/null
     if [ $? -ne 0 ]; then
         echo "using wget for download"
         if [ -z "$out_path" ]; then
