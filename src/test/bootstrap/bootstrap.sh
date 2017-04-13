@@ -187,7 +187,7 @@ if [ -d $toolsLocalPath ]; then
     # if the bootstrap.sh script was downloaded to the tools directory don't delete it
     find $toolsLocalPath -type f -not -name bootstrap.sh -exec rm -f {} \;
 else
-    mkdir $toolsLocalPath
+    mkdir -p $toolsLocalPath
 fi
 
 if [ $forcedCliLocalPath = "<none>" ]; then
