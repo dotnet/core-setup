@@ -8,4 +8,5 @@ set -e
 
 command="$1"
 shift
+echo "docker $command -u=$(id -u):$(id -g) $@" 
 docker "$command" -u="$(id -u):$(id -g)" "$@"
