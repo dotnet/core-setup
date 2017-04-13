@@ -2,22 +2,6 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
 
-  <PropertyGroup>
-    <AzureAccountName>sourcebuild</AzureAccountName> <!-- ToDo: Pass from official build -->
-    <AzureAccessToken>B5u7LE0PwxPArWTNKCHEnZZn948BxLJHFF7RHIZ9lktpQ7gdicPtA37PmzxrkQOkH82jU8FCJdSQL63vPQknAg==</AzureAccessToken> <!-- ToDo: Pass from official build -->
-    <ContainerName>dotnetcli</ContainerName>
-
-    <DebRepoUser>dotnet</DebRepoUser> <!-- ToDo: Pass from official build -->
-    <DebRepoPass>JtLmjhewMDJES7eMiv4O</DebRepoPass> <!-- ToDo: Pass from official build -->
-    <DebRepoId>579f8fb0fedca9aeeb399132</DebRepoId> <!-- ToDo: Pass from official build -->
-    <DebRepoServer>azure-apt-cat.cloudapp.net</DebRepoServer> <!-- ToDo: Pass from official build -->
-
-    <NuGetFeedUrl>https://dotnet.myget.org/F/dotnet-core-dev-eng/api/v2/package</NuGetFeedUrl>
-    <NuGetSymbolsFeedUrl>https://dotnet.myget.org/F/dotnet-core-dev-eng/symbols/api/v2/package</NuGetSymbolsFeedUrl>
-    <NuGetApiKey>f0e13e71-a729-4014-9ee0-6ac2ab017be3</NuGetApiKey>
-    <NuGetPushTimeoutSeconds Condition="'$(NuGetPushTimeoutSeconds)' == ''">3600</NuGetPushTimeoutSeconds>
-  </PropertyGroup>
-
   <ItemGroup>
     <DebInstallerFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion).deb" />
     <InstallerFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion)$(InstallerExtension)" />
