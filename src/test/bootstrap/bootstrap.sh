@@ -188,7 +188,9 @@ if [ $forcedCliLocalPath = "<none>" ]; then
     check_min_reqs
 
     # download CLI boot-strapper script
-    download "https://raw.githubusercontent.com/dotnet/cli/$dotNetInstallBranch/scripts/obtain/dotnet-install.sh" "$dotnetInstallPath"
+    # temporary hack for custom dotnet-install script which allows curl or wget use
+    # download "https://raw.githubusercontent.com/dotnet/cli/$dotNetInstallBranch/scripts/obtain/dotnet-install.sh" "$dotnetInstallPath"
+    cp $repoRoot/dotnet-install.sh $dotnetInstallPath
     chmod u+x "$dotnetInstallPath"
 
     # load the version of the CLI
