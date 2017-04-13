@@ -521,36 +521,53 @@ extract_dotnet_package() {
     fi
 }
 
+downloadcurl() {
+    eval $invocation
+    local remote_path=$1
+    local out_path=${2:-}
+
+    local failed=false
+    if [ -z "$out_path" ]; then
+        curl --retry 10 -sSL --create-dirs $remote_path || failed=true
+    else
+        curl --retry 10 -sSL --create-dirs -o $out_path $remote_path || failed=true
+    fi
+}
+
+downloadwget() {
+    eval $invocation
+    local remote_path=$1
+    local out_path=${2:-}
+
+    local failed=false
+    if [ -z "$out_path" ]; then
+        wget -q --tries 10 $remote_path || failed=true
+    else
+        wget -v --tries 10 -O $out_path $remote_path || failed=true
+    fi
+}
+
 # args:
 # remote_path - $1
 # [out_path] - $2 - stdout if not provided
 download() {
     eval $invocation
-    
+
     local remote_path=$1
     local out_path=${2:-}
 
     local failed=false
-    which curl > /dev/null 2> /dev/null
-    if [ $? -ne 0 ]; then
-        if [ -z "$out_path" ]; then
-            wget -q --tries 10 $remote_path || failed=true
-        else
-            wget -q --tries 10 -O $out_path $remote_path || failed=true
-        fi
-    else 
-        if [ -z "$out_path" ]; then
-            curl --retry 10 -sSL --create-dirs $remote_path || failed=true
-        else
-            curl --retry 10 -sSL --create-dirs -o $out_path $remote_path || failed=true
-        fi
+    if machine_has "curl"; then
+        downloadcurl $remote_path $out_path || failed=true
+    elif machine_has "wget"; then
+        downloadwget $remote_path $out_path || failed=true
     fi
-    
     if [ "$failed" = true ]; then
         say_err "Download failed"
         return 1
     fi
 }
+
 
 calculate_vars() {
     eval $invocation
