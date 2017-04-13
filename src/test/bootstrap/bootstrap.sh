@@ -59,10 +59,19 @@ download() {
     local out_path=${2:-}
 
     local failed=false
-    if [ -z "$out_path" ]; then
-        curl --retry 10 -sSL --create-dirs $remote_path || failed=true
-    else
-        curl --retry 10 -sSL --create-dirs -o $out_path $remote_path || failed=true
+    which curl > /den/null 2> /dev/null
+    if [ $? -ne 0 ]; then
+        if [ -z "$out_path" ]; then
+            wget -q --tries 10 $remote_path || failed=true
+        else
+            wget -q --tries 10 -O $out_path $remote_path || failed=true
+        fi
+    else 
+        if [ -z "$out_path" ]; then
+            curl --retry 10 -sSL --create-dirs $remote_path || failed=true
+        else
+            curl --retry 10 -sSL --create-dirs -o $out_path $remote_path || failed=true
+        fi
     fi
     
     if [ "$failed" = true ]; then
