@@ -213,7 +213,7 @@ if [ $forcedCliLocalPath = "<none>" ]; then
     # now execute the script
     say_verbose "installing CLI: $dotnetInstallPath --version \"$dotNetCliVersion\" --install-dir $cliLocalPath --architecture \"$architecture\""
     $dotnetInstallPath --version "$dotNetCliVersion" --install-dir $cliLocalPath --architecture "$architecture"
-    if [ $? != 0 ]; then
+    if [ "$?" != "0" ]; then
         say_err "The .NET CLI installation failed with exit code $?"
         exit $?
     fi
