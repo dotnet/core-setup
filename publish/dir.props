@@ -2,6 +2,10 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
 
+  <PropertyGroup>
+    <NuGetPushTimeoutSeconds Condition="'$(NuGetPushTimeoutSeconds)' == ''">3600</NuGetPushTimeoutSeconds>
+  </PropertyGroup>
+    
   <ItemGroup>
     <DebInstallerFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion).deb" />
     <InstallerFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion)$(InstallerExtension)" />
