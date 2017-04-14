@@ -2,6 +2,42 @@
   "build": [
     {
       "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Cleanup build",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "sudo",
+        "arguments": "rm -dfr $(PB_SourcesDirectory)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run git",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "git",
+        "arguments": "clone $(PB_VsoRepoUrl) $(PB_SourcesDirectory)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "git checkout",
@@ -14,7 +50,7 @@
       "inputs": {
         "filename": "git",
         "arguments": "checkout $(SourceVersion)",
-        "workingFolder": "",
+        "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
     },
@@ -22,7 +58,27 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Initialize tools",
+      "displayName": "Create host machine tools sandbox",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "SourceFolder": "$(PB_SourcesDirectory)",
+        "Contents": "init-tools.sh\nBuildToolsVersion.txt\nDotnetCLIVersion.txt",
+        "TargetFolder": "$(PB_DockerHost_Sandbox)",
+        "CleanTargetFolder": "false",
+        "OverWrite": "false",
+        "flattenFolders": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Initialize tools in sandbox for host machine",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -30,9 +86,9 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "$(Build.SourcesDirectory)/init.sh",
+        "filename": "$(PB_DockerHost_Sandbox)/init-tools.sh",
         "arguments": "",
-        "workingFolder": "",
+        "workingFolder": "$(PB_DockerHost_Sandbox)",
         "failOnStandardError": "false"
       }
     },
@@ -48,9 +104,9 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "$(DockerHost_ToolsDirectory)/scripts/docker/init-docker.sh",
+        "filename": "$(PB_DockerHost_ToolsDirectory)/scripts/docker/init-docker.sh",
         "arguments": "$(PB_DockerImageName)",
-        "workingFolder": "",
+        "workingFolder": "$(PB_DockerHost_Sandbox)",
         "failOnStandardError": "false"
       }
     },
@@ -58,7 +114,7 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Start detached docker container",
+      "displayName": "Build",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -67,8 +123,8 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run -d -w $(PB_GitDirectory) -v $(Build.SourcesDirectory):$(PB_GitDirectory) --name $(PB_DockerContainerName) $(PB_DockerImageName) sleep 7200",
-        "workingFolder": "",
+        "arguments": "run --rm $(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments)",
+        "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
     },
@@ -76,7 +132,7 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Run build.sh",
+      "displayName": "Publish",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -85,8 +141,8 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "exec $(PB_DockerContainerName) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments)",
-        "workingFolder": "",
+        "arguments": "run --rm $(DockerCommonRunArgs) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:NuGetFeedUrl=$(NUGET_FEED_URL) /p:NuGetSymbolsFeedUrl=$(NUGET_SYMBOLS_FEED_URL) /p:NuGetApiKey=$(NUGET_API_KEY) /p:AzureAccountName=$(PB_AzureAccountName) /p:AzureAccessToken=$(PB_AzureAccessToken) /p:DistroRid=$(PB_DistroRid) /p:TargetArchitecture=$(PB_TargetArchiitecture) /p:ConfigurationGroup=$(BuildConfiguration)",
+        "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
     },
@@ -103,7 +159,7 @@
       },
       "inputs": {
         "filename": "perl",
-        "arguments": "$(DockerHost_ToolsDirectory)/scripts/docker/cleanup-docker.sh",
+        "arguments": "$(PB_DockerHost_ToolsDirectory)/scripts/docker/cleanup-docker.sh",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -139,8 +195,8 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "$(DockerHost_ToolsDirectory)/msbuild.sh",
-        "arguments": "cleanupagent.proj /p:AgentDirectory=$(Agent.HomeDirectory) /p:DoClean=$(PB_CleanAgent)",
+        "filename": "$(PB_DockerHost_ToolsDirectory)/msbuild.sh",
+        "arguments": "$(PB_DockerHost_ToolsDirectory)/scripts/vstsagent/cleanupagent.proj /p:AgentDirectory=$(Agent.HomeDirectory) /p:DoClean=$(PB_CleanAgent)",
         "workingFolder": "$(DockerHost_ToolsDirectory)/scripts/vstsagent/",
         "failOnStandardError": "false"
       }
@@ -206,10 +262,11 @@
       "allowOverride": true
     },
     "NUGET_FEED_URL": {
-      "value": "https://dotnet.myget.org/F/dotnet-core/api/v2/package"
+      "value": "https://dotnet.myget.org/F/dotnet-core-dev-eng/api/v2/package"
     },
     "NUGET_API_KEY": {
-      "value": "PassedViaPipeBuild"
+      "value": null,
+      "isSecret": true
     },
     "GITHUB_PASSWORD": {
       "value": "PassedViaPipeBuild"
@@ -224,11 +281,11 @@
     "PB_CleanAgent": {
       "value": "true"
     },
-    "DockerHost_ToolsDirectory": {
-      "value": "$(Build.SourcesDirectory)/Tools"
+    "PB_DockerHost_ToolsDirectory": {
+      "value": "$(PB_DockerHost_Sandbox)/Tools"
     },
     "NUGET_SYMBOLS_FEED_URL": {
-      "value": "https://dotnet.myget.org/F/dotnet-core/api/v2/package"
+      "value": "https://dotnet.myget.org/F/dotnet-core-dev-eng/symbols/api/v2/package"
     },
     "PB_DockerImageName": {
       "value": "$(PB_DockerRepository):$(PB_DockerTag)"
@@ -240,13 +297,51 @@
       "value": "coresetup-$(Build.BuildId)"
     },
     "PB_DockerTag": {
-      "value": "debian82_prereqs_2"
+      "value": "ubuntu1404_prereqs_v3"
     },
     "OfficialBuildId": {
       "value": "$(Build.BuildNumber)"
     },
     "PB_GitDirectory": {
       "value": "/root/coresetup"
+    },
+    "SourceVersion": {
+      "value": "HEAD"
+    },
+    "DockerCommonRunArgs": {
+      "value": "--name $(PB_DockerContainerName) -v \"$(PB_SourcesDirectory):$(PB_GitDirectory)\" -w=\"$(PB_GitDirectory)\" $(PB_DockerImageName)"
+    },
+    "PB_VsoRepoUrl": {
+      "value": "--branch $(PB_Branch) https://$(PB_VsoAccountName):$(PB_VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Setup-Trusted"
+    },
+    "PB_VsoAccountName": {
+      "value": "dn-bot"
+    },
+    "PB_VsoPassword": {
+      "value": null,
+      "isSecret": true
+    },
+    "PB_SourcesDirectory": {
+      "value": "$(Build.SourcesDirectory)/core-setup"
+    },
+    "PB_Branch": {
+      "value": "buildtools"
+    },
+    "PB_DockerHost_Sandbox": {
+      "value": "$(Build.StagingDirectory)/HostSandbox"
+    },
+    "PB_AzureAccountName": {
+      "value": "sourcebuild"
+    },
+    "PB_AzureAccessToken": {
+      "value": null,
+      "isSecret": true
+    },
+    "PB_DistroRid": {
+      "value": "ubuntu.14.04-x64"
+    },
+    "PB_TargetArchitecture": {
+      "value": "x64"
     }
   },
   "demands": [
@@ -279,8 +374,8 @@
       "reportBuildStatus": "true",
       "fetchDepth": "0",
       "gitLfsSupport": "false",
-      "skipSyncSource": "false",
-      "cleanOptions": "0"
+      "skipSyncSource": "true",
+      "cleanOptions": "3"
     },
     "id": "c19ea379-feb7-4ca5-8f7f-5f2b5095ea62",
     "type": "TfsGit",
@@ -290,6 +385,7 @@
     "clean": "false",
     "checkoutSubmodules": false
   },
+  "processParameters": {},
   "quality": "definition",
   "queue": {
     "id": 36,
@@ -299,8 +395,9 @@
       "name": "DotNet-Build"
     }
   },
-  "id": 5075,
-  "name": "Core-Setup-Linux-BT",
+  "id": 6057,
+  "name": "DotNet-Core-Setup-BT-6043_Core-Setup-Linux-BT",
+  "url": "https://devdiv.visualstudio.com/DefaultCollection/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/6057",
   "path": "\\",
   "type": "build",
   "project": {
