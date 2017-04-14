@@ -2,6 +2,42 @@
   "build": [
     {
       "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Cleanup previous build",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "rd",
+        "arguments": "/s/q $(PB_SourcesDirectory)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Clone repo",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "git",
+        "arguments": "clone $(PB_VsoRepoUrl) $(PB_SourcesDirectory)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "git checkout",
@@ -14,7 +50,7 @@
       "inputs": {
         "filename": "git",
         "arguments": "checkout $(SourceVersion)",
-        "workingFolder": "",
+        "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
     },
@@ -38,6 +74,43 @@
     },
     {
       "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run init-tools.cmd",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory)\\init-tools.cmd",
+        "arguments": "",
+        "modifyEnvironment": "false",
+        "workingFolder": "$(PB_SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Compile Corehost",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory)\\Tools\\msbuild.cmd",
+        "arguments": "$(PB_SourcesDirectory)\\src\\corehost\\build.proj /p:ConfigurationGroup=$(BuildConfiguration) /p:DistroRid=$(PB_DistroRid)",
+        "workingFolder": "$(PB_SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": false,
       "continueOnError": true,
       "alwaysRun": false,
       "displayName": "Compile CoreHost",
@@ -60,23 +133,22 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Run init-tools.cmd",
+      "displayName": "Sign host assemblies",
       "timeoutInMinutes": 0,
       "task": {
-        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "pkg\\init-tools.cmd",
-        "arguments": "",
-        "modifyEnvironment": "false",
-        "workingFolder": "",
+        "filename": "$(PB_SourcesDirectory)\\Tools\\msbuild.cmd",
+        "arguments": "$(PB_SourcesDirectory)sign.proj /p:DistroRid=$(PB_DistroRid) /p:ConfigurationGroup=$(BuildConfiguration) /t:SignCoreHost $(MsbuildSigningArguments)",
+        "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
     },
     {
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Sign HostFxr HostPolicy",
@@ -87,7 +159,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "src\\build\\dotnet-host-build\\sign.proj",
+        "solution": "$(PB_SourcesDirectory)\\sign.proj",
         "platform": "",
         "configuration": "$(BuildConfiguration)",
         "msbuildArguments": "/t:SignCoreHost $(MsbuildSigningArguments)",
@@ -104,6 +176,24 @@
     },
     {
       "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Build nuget packages",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory)\\Tools\\msbuild.cmd",
+        "arguments": "$(PB_SourcesDirectory)\\src\\pkg\\dir.proj /p:ConfigurationGroup=$(BuildConfiguration) /p:DistroRid=$(PB_DistroRid)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": false,
       "continueOnError": true,
       "alwaysRun": false,
       "displayName": "PackagePkgProjects",
@@ -126,6 +216,24 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Build managed / publish sharedframework",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory)\\Tools\\msbuild.cmd",
+        "arguments": "$(PB_SourcesDirectory)\\src\\managed\\dir.proj /p:ConfigurationGroup=$(BuildConfiguration) /p:DistroRid=$(PB_DistroRid)",
+        "workingFolder": "$(PB_SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": false,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "PublishSharedFramework",
       "timeoutInMinutes": 0,
       "task": {
@@ -143,6 +251,24 @@
     },
     {
       "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Sign shared framework crossgen'd assemblies",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory)\\Tools\\msbuild.cmd",
+        "arguments": "$(PB_SourcesDirectory)\\sign.proj /t:SignSharedFrameworkCrossgenedAssemblies /p:ConfigurationGroup=$(BuildConfiguration) /p:DistroRid=$(PB_DistroRid) $(MsbuildSigningArguments)",
+        "workingFolder": "$(PB_SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Sign Shared Framework Crossgened Assemblies",
@@ -172,6 +298,24 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Sign managed assemblies",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory)\\Tools\\msbuild.cmd",
+        "arguments": "/t:SignAssemblies p:ConfigurationGroup=$(BuildConfiguration) /p:DistroRid=$(PB_DistroRid) $(MsbuildSigningArguments)",
+        "workingFolder": "$(PB_SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": false,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "Sign Assemblies: *.dll",
       "timeoutInMinutes": 0,
       "task": {
@@ -199,6 +343,42 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Package",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory)\\Tools\\msbuild.cmd",
+        "arguments": "$(PB_SourcesDirectory)\\src\\pkg\\compression\\dir.proj /p:ConfigurationGroup=$(BuildConfiguration) /p:DistroRid=$(PB_DistroRid)",
+        "workingFolder": "$(PB_SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Build and run tests",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory)\\tools\\msbuild.cmd",
+        "arguments": "$(PB_SourcesDirectory)\\src\\test\\dir.proj /p:ConfigurationGroup=$(BuildConfiguration) /p:DistroRid=$(PB_DistroRid)",
+        "workingFolder": "$(PB_SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": false,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "Test and Package",
       "timeoutInMinutes": 0,
       "task": {
@@ -216,6 +396,24 @@
     },
     {
       "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Sign msi and cab",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory)\\tools\\msbuild.cmd",
+        "arguments": "$(PB_SourcesDirectory)\\sign.proj /t:SignMsiAndCab /p:ConfigurationGroup=$(BuildConfiguration) /p:DistroRid=$(PB_DistroRid) $(MsbuildSigningArguments)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Sign MSI and cab",
@@ -242,7 +440,7 @@
       }
     },
     {
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Generate Bundle",
@@ -261,7 +459,7 @@
       }
     },
     {
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Extract Engine from bundle",
@@ -280,7 +478,7 @@
       }
     },
     {
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Sign Engine",
@@ -307,7 +505,7 @@
       }
     },
     {
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Reattach Engine to Bundle",
@@ -326,7 +524,7 @@
       }
     },
     {
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Sign Bundle",
@@ -356,6 +554,24 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Publish",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(PB_SourcesDirectory\\Tools\\msbuild.cmd",
+        "arguments": "$(PB_SourcesDirectory)\\publish\\publish.proj /p:$(PB_ConfigurationGroup)=$(BuildConfiguration) /p:$(DistroRid)=$(PB_DistroRid) /p:NuGetFeedUrl=$(NUGET_FEED_URL) /p:NuGetSymbolsFeedUrl=$(NUGET_SYMBOLS_FEED_URL) /p:NuGetApiKey=$(NUGET_API_KEY) /p:AzureAccountName=$(PB_AzureAccountName) /p:AzureAccessToken=$(PB_AzureAccessToken)",
+        "workingFolder": "$(PB_SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "Perform Cleanup Tasks",
       "timeoutInMinutes": 0,
       "task": {
@@ -366,7 +582,7 @@
       "inputs": {}
     },
     {
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Publish Build Artifacts",
@@ -468,7 +684,7 @@
       "value": "win81-x64"
     },
     "MsbuildSigningArguments": {
-      "value": "/p:RID=$(RID) /p:CertificateId=$(CertificateId) /v:detailed"
+      "value": "/p:CertificateId=$(CertificateId) /v:detailed"
     },
     "TeamName": {
       "value": "DotNetCore"
@@ -478,6 +694,19 @@
     },
     "NUGET_SYMBOLS_FEED_URL": {
       "value": "https://dotnet.myget.org/F/dotnet-core/symbols/api/v2/package"
+    },
+    "PB_SourcesDirectory": {
+      "value": "$(Build.SourcesDirectory)/core-setup"
+    },
+    "PB_VsoRepoUrl": {
+      "value": "--branch $(PB_Branch) https://$(PB_VsoAccountName):$(PB_VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Setup-Trusted"
+    },
+    "PB_AzureAccountName": {
+      "value": "sourcebuild"
+    },
+    "PB_AzureAccessToken": {
+      "value": null,
+      "isSecret": true
     }
   },
   "demands": [
@@ -502,46 +731,44 @@
   "buildNumberFormat": "$(Date:yyyMMdd)$(Rev:.r)",
   "jobAuthorizationScope": "projectCollection",
   "jobTimeoutInMinutes": 120,
+  "jobCancelTimeoutInMinutes": 5,
   "badgeEnabled": true,
   "repository": {
     "properties": {
-      "connectedServiceId": "f4c31735-42d2-4c3a-bc47-7ac06fd0dccc",
-      "apiUrl": "https://api.github.com/repos/dotnet/core-setup",
-      "branchesUrl": "https://api.github.com/repos/dotnet/core-setup/branches",
-      "cloneUrl": "https://github.com/dotnet/core-setup.git",
-      "refsUrl": "https://api.github.com/repos/dotnet/core-setup/git/refs",
-      "gitLfsSupport": "false",
-      "skipSyncSource": "false",
+      "labelSources": "0",
+      "reportBuildStatus": "true",
       "fetchDepth": "0",
-      "cleanOptions": "0"
+      "gitLfsSupport": "false",
+      "skipSyncSource": "true",
+      "cleanOptions": "3"
     },
-    "id": "https://github.com/dotnet/core-setup.git",
-    "type": "GitHub",
-    "name": "dotnet/core-setup",
-    "url": "https://github.com/dotnet/core-setup.git",
-    "defaultBranch": "master",
-    "clean": "true",
+    "id": "c19ea379-feb7-4ca5-8f7f-5f2b5095ea62",
+    "type": "TfsGit",
+    "name": "DotNet-Core-Setup-Trusted",
+    "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Setup-Trusted",
+    "defaultBranch": "refs/heads/master",
+    "clean": "false",
     "checkoutSubmodules": false
   },
   "quality": "definition",
   "queue": {
+    "id": 36,
+    "name": "DotNet-Build",
     "pool": {
       "id": 39,
       "name": "DotNet-Build"
-    },
-    "id": 36,
-    "name": "DotNet-Build"
+    }
   },
+  "id": 5154,
+  "name": "Core-Setup-Signing-Windows-x64-BT",
   "path": "\\",
   "type": "build",
-  "id": 5154,
-  "name": "Core-Setup-Signing-Windows-x64",
   "project": {
     "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "name": "DevDiv",
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418097620
+    "revision": 418097642
   }
 }
