@@ -170,8 +170,10 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
         fi
     fi
 
-    tools-override/crossgen.sh $__scriptpath/Tools
-
+    if [ -e $__scriptpath/tools-override/crossgen.sh ]; then 
+        $__scriptpath/tools-override/crossgen.sh $__scriptpath/Tools
+    fi
+    
     touch $__INIT_TOOLS_DONE_MARKER
 
     echo "Done initializing tools."
