@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Host.Build
 
             Directory.CreateDirectory(sharedHostRoot);
 
-            string sharedFrameworkPublishPath = GetSharedFrameworkPublishPath();
+            string sharedFrameworkPublishPath = GetSharedFrameworkPublishPath(c);
 
             foreach (var file in Directory.GetFiles(sharedFrameworkPublishPath, "*", SearchOption.TopDirectoryOnly))
             {
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Host.Build
 
             Directory.CreateDirectory(hostFxrRoot);
 
-            string srcHostDir = Path.Combine(GetSharedFrameworkPublishPath(), "host");
+            string srcHostDir = Path.Combine(GetSharedFrameworkPublishPath(c), "host");
             string destHostDir = Path.Combine(hostFxrRoot, "host");
 
             FS.CopyRecursive(srcHostDir, destHostDir);
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Host.Build
 
             Directory.CreateDirectory(sharedFxRoot);
 
-            Utils.CopyDirectoryRecursively(Path.Combine(GetSharedFrameworkPublishPath(), "shared"), sharedFxRoot, true);
+            Utils.CopyDirectoryRecursively(Path.Combine(GetSharedFrameworkPublishPath(c), "shared"), sharedFxRoot, true);
             FixPermissions(sharedFxRoot);
 
             c.BuildContext["SharedFrameworkPublishRoot"] = sharedFxRoot;
@@ -270,21 +270,21 @@ namespace Microsoft.DotNet.Host.Build
             }
         }
 
-        private static string GetSharedFrameworkPublishPath()
+        private static string GetSharedFrameworkPublishPath(BuildTargetContext c)
         {
             string sharedFrameworkPublishPath = string.Empty;
             
-            string preBuiltPortableBinaryPath=Environment.GetEnvironmentVariable("PORTABLE_BINARY_LOCATION")?.Trim();
+            string preBuiltPortableStagingPath=c.BuildContext.Get<string>("PortableBuildStagingLocation");
 
-            // set to default path if PORTABLE_BINARY_LOCATION environment variable doesn't exist
-            if(preBuiltPortableBinaryPath == null)
+            // If we are not generating distro specific installers for portable build, then we won't have access to staging location and thus, will use default binary location where SharedFX was published
+            if(preBuiltPortableStagingPath == null)
             {
                 sharedFrameworkPublishPath = Dirs.SharedFrameworkPublish;
             }
             else 
             {
-                Console.WriteLine($"Installers will package binaries from path set by PORTABLE_BINARY_LOCATION environment variable :{preBuiltPortableBinaryPath}");
-                sharedFrameworkPublishPath = preBuiltPortableBinaryPath;
+                Console.WriteLine($"Installers will package binaries from path set by PORTABLE_BUILD_STAGING_LOCATION environment variable :{preBuiltPortableStagingPath}");
+                sharedFrameworkPublishPath = preBuiltPortableStagingPath;
             }
             
             return sharedFrameworkPublishPath;

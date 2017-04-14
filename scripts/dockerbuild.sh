@@ -16,15 +16,10 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 cd "$DIR/.."
 
-INTERACTIVE="-i"
-
 while [[ $# > 0 ]]; do
     key=$1
 
     case $key in
-        --non-interactive)
-            INTERACTIVE=
-            ;;
         -t|--tag)
             DOCKER_TAG=$2
             shift
@@ -48,12 +43,6 @@ while [[ $# > 0 ]]; do
 
     shift
 done
-
-# Make container names CI-specific if we're running in CI
-#  Jenkins
-[ ! -z "$BUILD_TAG" ] && DOTNET_BUILD_CONTAINER_NAME="${BUILD_TAG}-${DOCKER_TAG}"
-#  VSO
-[ ! -z "$BUILD_BUILDID" ] && DOTNET_BUILD_CONTAINER_NAME="${BUILD_BUILDID}-${BUILD_BUILDNUMBER}-${DOCKER_TAG}"
 
 # Executes a command and retries if it fails.
 # NOTE: This function is the exact copy from init-docker.sh.
@@ -93,9 +82,3 @@ if [ ! -z "$image" ]; then
 fi
 
 docker build --build-arg USER_ID=$(id -u) -t $DOCKER_TAG $DOCKERFILE
-
-set +e
-docker rm -f $DOTNET_BUILD_CONTAINER_NAME
-
-# This won't be hit if a failure happened above, but forces ignoring the rm failure, which we don't care about
-exit 0

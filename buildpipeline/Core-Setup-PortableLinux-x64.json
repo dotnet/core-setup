@@ -128,7 +128,7 @@
       },
       "inputs": {
         "scriptPath": "scripts/dockerbuild.sh",
-        "args": "--non-interactive -d $(Build.SourcesDirectory)/scripts/docker/ubuntu.14.04 -t ubuntu.14.04-coresetup",
+        "args": "-d $(Build.SourcesDirectory)/scripts/docker/ubuntu.14.04 -t ubuntu.14.04-coresetup",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
@@ -166,7 +166,7 @@
       },
       "inputs": {
         "scriptPath": "scripts/dockerbuild.sh",
-        "args": "--non-interactive -d $(Build.SourcesDirectory)/scripts/docker/ubuntu.16.04 -t ubuntu.16.04-coresetup",
+        "args": "-d $(Build.SourcesDirectory)/scripts/docker/ubuntu.16.04 -t ubuntu.16.04-coresetup",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
@@ -204,7 +204,7 @@
       },
       "inputs": {
         "scriptPath": "scripts/dockerbuild.sh",
-        "args": "--non-interactive -d $(Build.SourcesDirectory)/scripts/docker/ubuntu.16.10 -t ubuntu.16.10-coresetup",
+        "args": "-d $(Build.SourcesDirectory)/scripts/docker/ubuntu.16.10 -t ubuntu.16.10-coresetup",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
@@ -242,7 +242,7 @@
       },
       "inputs": {
         "scriptPath": "scripts/dockerbuild.sh",
-        "args": "--non-interactive -d $(Build.SourcesDirectory)/scripts/docker/debian.8 -t debian.8-coresetup",
+        "args": "-d $(Build.SourcesDirectory)/scripts/docker/debian.8 -t debian.8-coresetup",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
@@ -252,7 +252,7 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Run build Debian Installer in Debian.8 docker container",
+      "displayName": "Build Debian Installer in Debian.8 docker container",
       "timeoutInMinutes": 0,
       "task": {
         "id": "6c731c3c-3c68-459a-a5c9-bde6e6595b5b",
@@ -270,7 +270,7 @@
     {
       "enabled": true,
       "continueOnError": true,
-      "alwaysRun": false,
+      "alwaysRun": true,
       "displayName": "Cleanup Docker",
       "timeoutInMinutes": 0,
       "task": {
@@ -427,7 +427,7 @@
       "value": "azure-apt-cat.cloudapp.net"
     },
     "DockerBuildEnvironmentVariables": {
-      "value": "-e PORTABLE_BINARY_LOCATION=/opt/sharedFrameworkPublish -e CONNECTION_STRING -e PUBLISH_TO_AZURE_BLOB -e REPO_ID -e REPO_USER -e REPO_PASS -e REPO_SERVER -e NUGET_FEED_URL -e NUGET_API_KEY -e NUGET_SYMBOLS_FEED_URL -e GITHUB_PASSWORD"
+      "value": "-e PORTABLE_BUILD_STAGING_LOCATION=/opt/sharedFrameworkPublish -e CONNECTION_STRING -e PUBLISH_TO_AZURE_BLOB -e REPO_ID -e REPO_USER -e REPO_PASS -e REPO_SERVER -e NUGET_FEED_URL -e NUGET_API_KEY -e NUGET_SYMBOLS_FEED_URL -e GITHUB_PASSWORD"
     },
     "InstallerOnlyBuildArguments": {
       "value": "Init,Prepare,InitPackage,GenerateVersionBadge,GenerateInstaller,TestInstaller,PublishInstallers"
