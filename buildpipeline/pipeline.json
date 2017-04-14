@@ -15,21 +15,11 @@
         "BuildConfiguration": "Release"
       },
       "Definitions": [
+
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
-            "PB_DockerOS": "centos.7"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "CentOS 7.1",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-Linux-BT",
-          "Parameters": {
-            "PB_DockerOS": "debian.8",
+            "PB_DockerTag": "debian82_prereqs_2",
             "REPO_ID": "579f8fb0fedca9aeeb399132",
             "REPO_USER": "dotnet",
             "REPO_SERVER": "azure-apt-cat.cloudapp.net"
@@ -43,7 +33,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
-            "PB_DockerOS": "fedora.24"
+            "PB_DockerTag": "fedora24_prereqs_v4"
           },
           "ReportingParameters": {
             "OperatingSystem": "Fedora 24",
@@ -54,7 +44,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
-            "PB_DockerOS": "opensuse.42.1"
+            "PB_DockerTag": "opensuse421_prereqs_v3"
           },
           "ReportingParameters": {
             "OperatingSystem": "OpenSuse 42.1",
@@ -65,7 +55,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
-            "PB_DockerOS": "ubuntu.14.04",
+            "PB_DockerTag": "ubuntu1404_prereqs_v3",
             "REPO_ID": "562fbfe0b2d7d0e0a43780c4",
             "REPO_USER": "dotnet",
             "REPO_SERVER": "azure-apt-cat.cloudapp.net",
@@ -81,7 +71,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
-            "PB_DockerOS": "ubuntu.16.04",
+            "PB_DockerTag": "ubuntu1604_prereqs",
             "REPO_ID": "575f40f3797ef7280505232f",
             "REPO_USER": "dotnet",
             "REPO_SERVER": "azure-apt-cat.cloudapp.net"
@@ -95,7 +85,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
-            "PB_DockerOS": "ubuntu.16.10",
+            "PB_DockerTag": "ubuntu1610_prereqs_v2",
             "REPO_ID": "575f40f3797ef7280505232f",
             "REPO_USER": "dotnet",
             "REPO_SERVER": "azure-apt-cat.cloudapp.net"
