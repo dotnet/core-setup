@@ -19,6 +19,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
+            "PB_DistroRid": "debian.8-x64",
             "PB_DockerTag": "debian82_prereqs_2",
             "REPO_ID": "579f8fb0fedca9aeeb399132",
             "REPO_USER": "dotnet",
@@ -33,6 +34,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
+            "PB_DistroRid": "fedora.24-x64",
             "PB_DockerTag": "fedora24_prereqs_v4"
           },
           "ReportingParameters": {
@@ -44,6 +46,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
+            "PB_DistroRid": "opensuse.42.1-x64",
             "PB_DockerTag": "opensuse421_prereqs_v3"
           },
           "ReportingParameters": {
@@ -55,6 +58,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
+            "PB_DistroRid": "ubuntu.14.04-x64",
             "PB_DockerTag": "ubuntu1404_prereqs_v3",
             "REPO_ID": "562fbfe0b2d7d0e0a43780c4",
             "REPO_USER": "dotnet",
@@ -71,6 +75,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
+            "PB_DistroRid": "ubuntu.16.04-x64",
             "PB_DockerTag": "ubuntu1604_prereqs",
             "REPO_ID": "575f40f3797ef7280505232f",
             "REPO_USER": "dotnet",
@@ -85,6 +90,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
+            "PB_DistroRid": "ubuntu.16.10-x64",
             "PB_DockerTag": "ubuntu1610_prereqs_v2",
             "REPO_ID": "575f40f3797ef7280505232f",
             "REPO_USER": "dotnet",
