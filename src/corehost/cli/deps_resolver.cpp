@@ -252,17 +252,21 @@ void deps_resolver_t::setup_probe_config(
 
 void deps_resolver_t::setup_additional_probes(const std::vector<pal::string_t>& probe_paths)
 {
-    m_additional_probes.assign(probe_paths.begin(), probe_paths.end());
+    m_additional_probes.clear();
 
-    for (auto iter = m_additional_probes.begin(); iter != m_additional_probes.end(); )
+    for (const auto& path : probe_paths)
     {
-        if (pal::directory_exists(*iter))
+        pal::string_t path_ni = path;
+        append_path(&path_ni, get_arch());
+
+        bool ni_exists = pal::directory_exists(path_ni);
+        if (ni_exists)
         {
-            ++iter;
+            m_additional_probes.push_back(path_ni);
         }
-        else
+        if (ni_exists || pal::directory_exists(path))
         {
-            iter = m_additional_probes.erase(iter);
+            m_additional_probes.push_back(path);
         }
     }
 }
