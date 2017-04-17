@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
@@ -83,21 +85,81 @@ namespace Microsoft.DotNet.Host.Build
             {
                 string targetContainer = $"{Channel}/Binaries/Latest/";
                 string targetVersionFile = $"{targetContainer}{CommitHash}";
+                string flagFinalizationInProgress = $"{targetContainer}/Finalizing";
                 string semaphoreBlob = $"{Channel}/Binaries/sharedFxPublishSemaphore";
+                
                 AzurePublisherTool.CreateBlobIfNotExists(semaphoreBlob);
 
-                string leaseId = AzurePublisherTool.AcquireLeaseOnBlob(semaphoreBlob);
+                // Check if another build is executing and publishing binaries to "Latest".
+                TimeSpan maxWait = TimeSpan.FromSeconds(1800);
+                string leaseId = null;
 
-                // Prevent race conditions by dropping a version hint of what version this is. If we see this file
-                // and it is the same as our version then we know that a race happened where two+ builds finished 
-                // at the same time and someone already took care of publishing and we have no work to do.
-                if (AzurePublisherTool.IsLatestSpecifiedVersion(targetVersionFile))
+                while(true)
                 {
-                    AzurePublisherTool.ReleaseLeaseOnBlob(semaphoreBlob, leaseId);
-                    return c.Success();
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+
+                    // Wait for 30 mins to get access to finalization flag - if it does not come through, then we will
+                    // fail the build.
+                    bool fIsAnotherFinalizationInProgress = false;
+                    while (stopWatch.ElapsedMilliseconds < maxWait.TotalMilliseconds)
+                    {
+                        fIsAnotherFinalizationInProgress = AzurePublisherTool.DoesBlobReferenceExist(flagFinalizationInProgress);
+                        if (fIsAnotherFinalizationInProgress)
+                        {
+                            // Sleep for a second
+                            Thread.Sleep(TimeSpan.FromSeconds(1));
+                        }
+                        else
+                        {
+                            // No more finalization in progress
+                            break;
+                        }
+                    }
+
+                    if (fIsAnotherFinalizationInProgress)
+                    {
+                        // We timed out waiting for finalization - throw an exception
+                        throw new InvalidOperationException("Timed out while waiting for finalization flag to be cleared from another build!");
+                    }
+
+                    // Prevent race conditions by dropping a version hint of what version this is. If we see this file
+                    // and it is the same as our version then we know that a race happened where two+ builds finished 
+                    // at the same time and someone already took care of publishing and we have no work to do.
+                    if (AzurePublisherTool.DoesBlobReferenceExist(targetVersionFile))
+                    {
+                        return c.Success();
+                    }
+
+                    try
+                    {
+                        // Acquire the lease on the blob - if another build raced us to this point and acquired it,
+                        // a timeout exception will be thrown and we will restart the loop.
+                        leaseId = AzurePublisherTool.AcquireLeaseOnBlob(semaphoreBlob);
+
+                        // Yay - we acquired the lease, so break out of the loop
+                        break;
+                    }
+                    catch(TimeoutException)
+                    {
+                        Console.WriteLine("Another build beat us for build finalization - looping to wait for its completion.");
+                    }
                 }
-                else
+
+                bool fCreatedFinalizationFlag = false;
+
+                try
                 {
+                    // First thing we do is to drop the flag that finalization is in progress so that other builds
+                    // can wait against this.
+                    AzurePublisherTool.WriteBlobReference(flagFinalizationInProgress);
+                    fCreatedFinalizationFlag = true;
+                    if (!AzurePublisherTool.DoesBlobReferenceExist(flagFinalizationInProgress))
+                    {
+                        // If we don't see the finalization flag we wrote, then something is critically wrong
+                        throw new InvalidOperationException($"Unable to locate the finalization flag that we just set: {flagFinalizationInProgress}");
+                    }
+                    
                     Regex versionFileRegex = new Regex(@"(?<CommitHash>[\w\d]{40})");
 
                     // Delete old version files
@@ -108,11 +170,8 @@ namespace Microsoft.DotNet.Host.Build
                         .ForEach(f => AzurePublisherTool.TryDeleteBlob(f));
 
                     // Drop the version file signaling such for any race-condition builds (see above comment).
-                    AzurePublisherTool.DropLatestSpecifiedVersion(targetVersionFile);
-                }
-
-                try
-                {
+                    AzurePublisherTool.WriteBlobReference(targetVersionFile);
+                
                     // Copy the shared framework + host Archives
                     CopyBlobs($"{Channel}/Binaries/{SharedFrameworkNugetVersion}/", targetContainer);
 
@@ -161,6 +220,12 @@ namespace Microsoft.DotNet.Host.Build
                 finally
                 {
                     AzurePublisherTool.ReleaseLeaseOnBlob(semaphoreBlob, leaseId);
+
+                    if (fCreatedFinalizationFlag && (!AzurePublisherTool.DeleteBlobReference(flagFinalizationInProgress)))
+                    {
+                        // If we don't see the finalization flag we wrote, then something is critically wrong
+                        throw new InvalidOperationException($"Unable to delete the finalization flag that we set: {flagFinalizationInProgress}");
+                    }
                 }
             }
 

@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             ResetLeaseRenewalTaskState();
 
-            throw new Exception($"Unable to acquire lease on {blob}");
+            throw new TimeoutException($"Unable to acquire lease on {blob}");
         }
 
         private void ResetLeaseRenewalTaskState()
@@ -219,14 +219,21 @@ namespace Microsoft.DotNet.Cli.Build
             cloudBlob.ReleaseLeaseAsync(ac).Wait();
         }
 
-        public bool IsLatestSpecifiedVersion(string version)
+        public bool DoesBlobReferenceExist(string version)
         {
             System.Threading.Tasks.Task<bool> task = _blobContainer.GetBlockBlobReference(version).ExistsAsync();
             task.Wait();
             return task.Result;
         }
 
-        public void DropLatestSpecifiedVersion(string version)
+        public bool DeleteBlobReference(string version)
+        {
+            System.Threading.Tasks.Task<bool> task = _blobContainer.GetBlockBlobReference(version).DeleteIfExistsAsync();
+            task.Wait();
+            return task.Result;
+        }
+
+        public void WriteBlobReference(string version)
         {
             CloudBlockBlob blob = _blobContainer.GetBlockBlobReference(version);
             using (MemoryStream ms = new MemoryStream())
