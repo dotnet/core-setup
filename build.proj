@@ -28,6 +28,9 @@
     <Project Include="$(MSBuildThisFileDirectory)src/test/dir.proj" Condition="'$(SkipTests)' != 'true'"/>
   </ItemGroup>
 
+  <Target Name="BuildTraversalBuildDependencies"
+          DependsOnTargets="$(TraversalBuildDependsOn)" />
+
   <Target Name="BuildCustomTasks">
       <MSBuild Projects="tools-local/Microsoft.DotNet.Build.Tasks.Local/Microsoft.DotNet.Build.Tasks.Local.builds" />
       <MSBuild Projects="tools-local/tasks/core-setup.tasks.builds" />
