@@ -81,6 +81,8 @@ if %UPDATE_CLI_ERRORLEVEL% GTR 1 (
   exit /b %UPDATE_CLI_ERRORLEVEL%
 )
 
+if exist %~dp0tools-override xcopy /Y/e/s %~dp0tools-override\* %TOOLRUNTIME_DIR%
+ 
 :: Create sempahore file
 echo Done initializing tools.
 echo Init-Tools.cmd completed for BuildTools Version: %BUILDTOOLS_VERSION% > "%BUILD_TOOLS_SEMAPHORE%"
