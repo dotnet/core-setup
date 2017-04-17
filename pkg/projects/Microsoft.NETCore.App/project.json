@@ -22,7 +22,7 @@
     "System.Linq.Queryable": "4.0.1",
     "System.Net.NameResolution": "4.0.0",
     "System.Net.Requests": "4.0.11",
-    "System.Net.Security": "4.0.0",
+    "System.Net.Security": "4.0.1-servicing-25214-01",
     "System.Net.WebHeaderCollection": "4.0.1",
     "System.Numerics.Vectors": "4.1.1",
     "System.Reflection.DispatchProxy": "4.0.1",
@@ -41,7 +41,8 @@
     "System.Threading.ThreadPool": "4.0.10",
     "Libuv": "1.9.1",
     "Microsoft.NETCore.Platforms": "1.0.2",
-    "System.Net.Http": "4.1.1"
+    "System.Net.Http": "4.1.2-servicing-25214-01",
+    "runtime.native.System.Security.Cryptography": "4.0.1-servicing-25214-01"
   },
   "frameworks": {
     "netstandard1.5": {}
