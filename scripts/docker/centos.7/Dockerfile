@@ -23,7 +23,8 @@ RUN yum -q -y install unzip libunwind gettext libcurl-devel openssl-devel zlib l
 
 # Install Build Prereqs
 # CMake 3.3.2 from GhettoForge; LLVM 3.6.2 built from source ourselves;
-RUN yum install -y http://mirror.symnds.com/distributions/gf/el/7/plus/x86_64/cmake-3.3.2-1.gf.el7.x86_64.rpm \
+RUN yum install -y \
+        https://matell.blob.core.windows.net/rpms/cmake-3.3.2-1.gf.el7.x86_64.rpm \
         https://matell.blob.core.windows.net/rpms/clang-3.6.2-1.el7.centos.x86_64.rpm \
         https://matell.blob.core.windows.net/rpms/clang-libs-3.6.2-1.el7.centos.x86_64.rpm \
         https://matell.blob.core.windows.net/rpms/lldb-3.6.2-1.el7.centos.x86_64.rpm \
