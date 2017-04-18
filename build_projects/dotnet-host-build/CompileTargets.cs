@@ -57,6 +57,7 @@ namespace Microsoft.DotNet.Host.Build
 
         [Target(nameof(PrepareTargets.Init),
             nameof(CompileCoreHost),
+            nameof(CompileUwpHosts),
             nameof(PackagePkgProjects),
             nameof(BuildProjectsForNuGetPackages),
             nameof(PublishSharedFrameworkAndSharedHost))]
@@ -238,11 +239,7 @@ namespace Microsoft.DotNet.Host.Build
 
                 ExecIn(cmakeOut, "cmake", cmakeArgList);
 
-                var pf32 = RuntimeInformation.OSArchitecture == Architecture.X64 ?
-                    Environment.GetEnvironmentVariable("ProgramFiles(x86)") :
-                    Environment.GetEnvironmentVariable("ProgramFiles");
-
-                string msbuildPath = Path.Combine(pf32, "MSBuild", "14.0", "Bin", "MSBuild.exe");
+                string msbuildPath = GetMSBuildPath();
                 string cmakeOutPath = Path.Combine(cmakeOut, "ALL_BUILD.vcxproj");
                 string configParameter = $"/p:Configuration={configuration}";
                 if (arch == "arm64")
@@ -322,6 +319,109 @@ namespace Microsoft.DotNet.Host.Build
             return c.Success();
         }
 
+        private static string GetMSBuildPath()
+        {
+            string programfilesx86 = RuntimeInformation.OSArchitecture == Architecture.X64 ?
+                                    Environment.GetEnvironmentVariable("ProgramFiles(x86)") :
+                                    Environment.GetEnvironmentVariable("ProgramFiles");
+
+            string msbuildPath = Path.Combine(programfilesx86, "MSBuild", "14.0", "Bin", "MSBuild.exe");
+            return msbuildPath;
+        }    
+
+        
+        [Target]
+        [BuildPlatforms(BuildPlatform.Windows)]
+        public static BuildTargetResult CompileUwpHosts(BuildTargetContext c)
+        {
+            string configuration = c.BuildContext.Get<string>("Configuration");
+            string platform = c.BuildContext.Get<string>("Platform");
+
+            // cmake generated build file location artifacts\<config>\uwp\cmake
+            string cmakeOut = Path.Combine(Dirs.Uwp, "cmake");
+            Rmdir(cmakeOut);
+            Mkdirp(cmakeOut);
+
+            // cmake generated build file location artifacts\<config>\uwp
+            string cmakeInstallPrefixDir = Dirs.Uwp;
+
+            string uwpSrcDir = Path.Combine(c.BuildContext.BuildDirectory, "src", "uwp");
+
+            string resourceDir = GenerateVersionResource(c);
+
+            if (configuration.Equals("Release"))
+            {
+                // Cmake calls it "RelWithDebInfo" in the generated MSBuild
+                configuration = "RelWithDebInfo";
+            }
+
+            List<string> cmakeArgList = new List<string>();
+
+            string visualStudio, archMacro, arch;
+            string cmakeResourceDir = $"-DCLI_CMAKE_RESOURCE_DIR:STRING={resourceDir}";
+            string cmakeInstallPrefix = $"-DCMAKE_INSTALL_PREFIX:STRING={cmakeInstallPrefixDir}";
+            string cmakeExtraArgs = "-DCMAKE_SYSTEM_VERSION=10.0";
+
+            switch (platform.ToLower())
+            {
+                case "x86":
+                    visualStudio = "Visual Studio 14 2015";
+                    archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_I386=1";
+                    arch = "x86";
+                    break;
+                case "arm":
+                    visualStudio = "Visual Studio 14 2015 ARM";
+                    archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_ARM=1";
+                    arch = "arm";
+                    break;
+                case "arm64":
+                    visualStudio = "Visual Studio 14 2015 Win64";
+                    archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_ARM64=1";
+                    arch = "arm64";
+                    if (Environment.GetEnvironmentVariable("__ToolsetDir") == null)
+                    {
+                        throw new Exception("Toolset Dir must be set when the Platform is ARM64");
+                    }
+                    break;
+                case "x64":
+                    visualStudio = "Visual Studio 14 2015 Win64";
+                    archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_AMD64=1";
+                    cmakeExtraArgs = "-DCMAKE_SYSTEM_VERSION=10.0";
+                    arch = "x64";
+                    break;
+                default:
+                    throw new PlatformNotSupportedException("Target Architecture: " + platform + " is not currently supported.");
+            }
+
+            cmakeArgList.Add(cmakeInstallPrefix);
+            cmakeArgList.Add(uwpSrcDir);
+            cmakeArgList.Add(archMacro);
+            cmakeArgList.Add(cmakeResourceDir);
+            cmakeArgList.Add("-G");
+            cmakeArgList.Add(visualStudio);
+
+            if (!String.IsNullOrEmpty(cmakeExtraArgs))
+            {
+                cmakeArgList.Add(cmakeExtraArgs);
+            }
+
+            ExecIn(cmakeOut, "cmake", cmakeArgList);
+            
+            string msbuildPath = GetMSBuildPath();
+            string cmakeOutPath = Path.Combine(cmakeOut, "INSTALL.vcxproj");
+            string configParameter = $"/p:Configuration={configuration}";
+            if (arch == "arm64")
+            {
+                Exec(msbuildPath, cmakeOutPath, configParameter, "/p:useEnv=true");
+            }
+            else
+            {
+                Exec(msbuildPath, cmakeOutPath, configParameter);
+            }
+
+            return c.Success();
+        }
+
         [Target]
         public static BuildTargetResult BuildProjectsForNuGetPackages(BuildTargetContext c)
         {
@@ -368,6 +468,7 @@ namespace Microsoft.DotNet.Host.Build
             msbuildProps.AppendLine("  <PropertyGroup>");
             msbuildProps.AppendLine($"    <Platform>{platform}</Platform>");
             msbuildProps.AppendLine($"    <DotNetHostBinDir>{Dirs.CorehostLatest}</DotNetHostBinDir>");
+            msbuildProps.AppendLine($"    <UwpHostBinDir>{Dirs.Uwp}</UwpHostBinDir>");
             msbuildProps.AppendLine($"    <HostVersion>{hostVersion.LatestHostVersion.WithoutSuffix}</HostVersion>");
             msbuildProps.AppendLine($"    <AppHostVersion>{hostVersion.LatestAppHostVersion.WithoutSuffix}</AppHostVersion>");
             msbuildProps.AppendLine($"    <HostResolverVersion>{hostVersion.LatestHostFxrVersion.WithoutSuffix}</HostResolverVersion>");
@@ -377,6 +478,7 @@ namespace Microsoft.DotNet.Host.Build
             msbuildProps.AppendLine($"    <PreReleaseLabel>{hostVersion.ReleaseSuffix}</PreReleaseLabel>");
             msbuildProps.AppendLine($"    <EnsureStableVersion>{hostVersion.EnsureStableVersion}</EnsureStableVersion>");
             msbuildProps.AppendLine($"    <NetCoreAppVersion>{buildVersion.ProductionVersion}</NetCoreAppVersion>");
+            msbuildProps.AppendLine($"    <SimpleVersion>{buildVersion.Major}.{buildVersion.Minor}.{buildVersion.Patch}.{buildVersion.CommitCount}</SimpleVersion>");
             msbuildProps.AppendLine("  </PropertyGroup>");
             msbuildProps.AppendLine("</Project>");
 

@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.Build
         public static readonly string OSXReferenceAssembliesPath = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/xbuild-frameworks";
         public static readonly string UsrLocalReferenceAssembliesPath = "/usr/local/lib/mono/xbuild-frameworks";
         public static readonly string UsrReferenceAssembliesPath = "/usr/lib/mono/xbuild-frameworks";
-
+        public static readonly string Uwp = Path.Combine(Output, "uwp");
 
         public static string NuGetPackages = Environment.GetEnvironmentVariable("NUGET_PACKAGES") ?? GetNuGetPackagesDir();
         public static string PkgNuGetPackages = Path.Combine(Dirs.RepoRoot, "pkg", "packages");
