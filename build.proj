@@ -13,11 +13,14 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TraversalBuildDependsOn>
+    <TraversalBuildDependencies>
       BatchRestorePackages;
       ValidateExactRestore;
       CreateOrUpdateCurrentVersionFile;
       BuildCustomTasks;
+    </TraversalBuildDependencies>
+    <TraversalBuildDependsOn>
+      $(TraversalBuildDependencies);
       $(TraversalBuildDependsOn);
     </TraversalBuildDependsOn>
   </PropertyGroup>
@@ -29,7 +32,7 @@
   </ItemGroup>
 
   <Target Name="BuildTraversalBuildDependencies"
-          DependsOnTargets="$(TraversalBuildDependsOn)" />
+          DependsOnTargets="$(TraversalBuildDependencies)" />
 
   <Target Name="BuildCustomTasks">
       <MSBuild Projects="tools-local/Microsoft.DotNet.Build.Tasks.Local/Microsoft.DotNet.Build.Tasks.Local.builds" />
