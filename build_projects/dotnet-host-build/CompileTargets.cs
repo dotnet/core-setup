@@ -366,6 +366,7 @@ namespace Microsoft.DotNet.Host.Build
                 case "x86":
                     visualStudio = "Visual Studio 14 2015";
                     archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_I386=1";
+                    cmakeExtraArgs = "-DCMAKE_SYSTEM_VERSION=10.0";
                     arch = "x86";
                     break;
                 case "arm":
@@ -377,6 +378,7 @@ namespace Microsoft.DotNet.Host.Build
                 case "arm64":
                     visualStudio = "Visual Studio 14 2015 Win64";
                     archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_ARM64=1";
+                    cmakeExtraArgs = "-DCMAKE_SYSTEM_VERSION=10.0";
                     arch = "arm64";
                     if (Environment.GetEnvironmentVariable("__ToolsetDir") == null)
                     {
@@ -386,6 +388,7 @@ namespace Microsoft.DotNet.Host.Build
                 case "x64":
                     visualStudio = "Visual Studio 14 2015 Win64";
                     archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_AMD64=1";
+                    cmakeExtraArgs = "-DCMAKE_SYSTEM_VERSION=10.0";
                     arch = "x64";
                     break;
                 default:
