@@ -38,6 +38,14 @@
   <Target Name="BuildCustomTasks">
       <MSBuild Projects="tools-local/Microsoft.DotNet.Build.Tasks.Local/Microsoft.DotNet.Build.Tasks.Local.builds" />
       <MSBuild Projects="tools-local/tasks/core-setup.tasks.builds" />
+
+      <ItemGroup>
+        <CustomTaskDependencies Include="$(BuildToolsTaskDir)Newtonsoft.Json.dll" />
+      </ItemGroup>        
+      <Copy SourceFiles="@(CustomTaskDependencies)"
+            DestinationFolder="$(LocalBuildToolsTaskDir)"
+            OverwriteReadOnlyFiles="true"
+            SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="BatchRestorePackages" Condition="'$(RestoreDuringBuild)'=='true'">
