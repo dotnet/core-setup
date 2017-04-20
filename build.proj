@@ -41,6 +41,7 @@
 
       <ItemGroup>
         <CustomTaskDependencies Include="$(BuildToolsTaskDir)Newtonsoft.Json.dll" />
+        <CustomTaskDependencies Include="$(BuildToolsTaskDir)Microsoft.DotNet.PlatformAbstractions.dll" />
       </ItemGroup>        
       <Copy SourceFiles="@(CustomTaskDependencies)"
             DestinationFolder="$(LocalBuildToolsTaskDir)"
