@@ -62,11 +62,11 @@ namespace Microsoft.DotNet.Cli.Build
         //
 
         // Full versions and package information.
-        public bool EnsureStableVersion => false;
+        public bool EnsureStableVersion => true;
         public string LatestHostPrerelease => "servicing";
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
-        
+
         // These are the versions used by GenerateMSbuildPropsFile to generate version.props that is used for
         // versioning of host nuget package projects.
         //
@@ -74,8 +74,8 @@ namespace Microsoft.DotNet.Cli.Build
         // is being updated.
         public VerInfo LatestHostVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
         public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
-        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 5, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString);
-  
+        public VerInfo LatestHostPolicyVersion => new VerInfo(1, 0, 5, "", "", "", CommitCountString);
+
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
         {
             { "Microsoft.NETCore.DotNetHost", LatestHostVersion },
@@ -85,6 +85,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public Dictionary<string, VerInfo> LatestHostPackagesToValidate => new Dictionary<string, VerInfo>()
         {
+            { "Microsoft.NETCore.DotNetHostPolicy", LatestHostPolicyVersion }
         };
 
         public Dictionary<string, VerInfo> LockedHostPackages => new Dictionary<string, VerInfo>()
@@ -111,7 +112,7 @@ namespace Microsoft.DotNet.Cli.Build
         public VerInfo LockedHostVersion    => IsLocked ? new VerInfo(1, 0, 1, "", "", "", CommitCountString) : LatestHostVersion;
         public bool fExplicitHostFXRMSIVersion = true; //This should be set to false when we no longer need to override the MSI version to be different from the HostFXR nuget package version".
 
-        // This method returns the locked hostfxr version based on the flag fExplicitHostFXRMSIVersion and the current platform. 
+        // This method returns the locked hostfxr version based on the flag fExplicitHostFXRMSIVersion and the current platform.
         // For MSI (Windows) generation we specify a newer version for handling issue #1574 and for non-Windows platform we return the LockedHostFxrVersion.
         public VerInfo GetLockedHostFXRPlatformInstallerVersion()
         {
