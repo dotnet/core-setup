@@ -17,6 +17,7 @@
       BatchRestorePackages;
       ValidateExactRestore;
       CreateOrUpdateCurrentVersionFile;
+      CreateVersionInfoFile;
       BuildCustomTasks;
     </TraversalBuildDependencies>
     <TraversalBuildDependsOn>
