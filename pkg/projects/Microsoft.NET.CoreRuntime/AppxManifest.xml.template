@@ -11,9 +11,9 @@
   PhonePublisherId="6B151E87-785E-4C4A-AA41-823B05AA9A66" />
 <Properties>
   <Framework>true</Framework>
-  <DisplayName>Microsoft .Net Core Runtime Package 2.0</DisplayName>
+  <DisplayName>[AppxDisplayName]</DisplayName>
   <PublisherDisplayName>Microsoft Corporation</PublisherDisplayName>
-  <Description>Microsoft .Net Core Runtime Package for Universal Applications</Description>
+  <Description>Microsoft .Net Core Runtime Package for Universal Windows Applications</Description>
   <Logo>logo.png</Logo>
 </Properties>
 <Resources>

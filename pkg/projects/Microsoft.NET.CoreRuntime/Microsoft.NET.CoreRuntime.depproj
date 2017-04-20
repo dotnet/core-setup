@@ -9,6 +9,7 @@
     <AppxManifest>$(IntermediateOutputPath)AppxManifest.xml</AppxManifest>
     <AppxName>Microsoft.NET.CoreRuntime</AppxName>
     <AppxIdentityName>Microsoft.NET.CoreRuntime.$(SimpleVersion.Split('.')[0]).$(SimpleVersion.Split('.')[1])</AppxIdentityName>
+    <AppxDisplayName>Microsoft .Net Core Runtime Package $(SimpleVersion.Split('.')[0]).$(SimpleVersion.Split('.')[1])</AppxDisplayName>
     <AppxOutputPath>$(IntermediateOutputPath)$(AppxIdentityName)</AppxOutputPath>
     <AppxOutputPackageName>$(IntermediateOutputPath)$(AppxIdentityName).appx</AppxOutputPackageName>
     <OutputPath>$(IntermediateOutputPath)$(AppxIdentityName)</OutputPath>
@@ -38,19 +39,19 @@
           Inputs="$(AppxManifestTemplate)"
           Outputs="$(AppxManifest)">
     <WriteLinesToFile File="$(AppxManifest)"
-                      Lines="$([System.IO.File]::ReadAllText($(AppxManifestTemplate)).Replace('[AppxBuildArch]', $(Platform)).Replace('[AppxVersion]',$(SimpleVersion)).Replace('[AppxIdentityName]',$(AppxIdentityName)))"
+                      Lines="$([System.IO.File]::ReadAllText($(AppxManifestTemplate)).Replace('[AppxBuildArch]', $(Platform)).Replace('[AppxVersion]',$(SimpleVersion)).Replace('[AppxIdentityName]',$(AppxIdentityName)).Replace('[AppxDisplayName]',$(AppxDisplayName)))"
                       Overwrite="true" />
     <ItemGroup>
       <FileWrites Include="$(AppxManifest)" />
     </ItemGroup>
   </Target>
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
-
   <Target Name="MakeAppx"
           AfterTargets="Build">
     <Delete Files="$(AppxOutputPackageName)" />
     <Exec Command='CALL "$(VS140COMNTOOLS)vsdevcmd.bat" &amp; makeappx pack /d "$(AppxOutputPath)" /p "$(AppxOutputPackageName)" /o' />
   </Target>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
 </Project>

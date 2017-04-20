@@ -239,11 +239,7 @@ namespace Microsoft.DotNet.Host.Build
 
                 ExecIn(cmakeOut, "cmake", cmakeArgList);
 
-                var pf32 = RuntimeInformation.OSArchitecture == Architecture.X64 ?
-                    Environment.GetEnvironmentVariable("ProgramFiles(x86)") :
-                    Environment.GetEnvironmentVariable("ProgramFiles");
-
-                string msbuildPath = Path.Combine(pf32, "MSBuild", "14.0", "Bin", "MSBuild.exe");
+                string msbuildPath = GetMSBuildPath();
                 string cmakeOutPath = Path.Combine(cmakeOut, "ALL_BUILD.vcxproj");
                 string configParameter = $"/p:Configuration={configuration}";
                 if (arch == "arm64")
@@ -323,30 +319,35 @@ namespace Microsoft.DotNet.Host.Build
             return c.Success();
         }
 
+        private static string GetMSBuildPath()
+        {
+            string programfilesx86 = RuntimeInformation.OSArchitecture == Architecture.X64 ?
+                                    Environment.GetEnvironmentVariable("ProgramFiles(x86)") :
+                                    Environment.GetEnvironmentVariable("ProgramFiles");
+
+            string msbuildPath = Path.Combine(programfilesx86, "MSBuild", "14.0", "Bin", "MSBuild.exe");
+            return msbuildPath;
+        }    
+
         
         [Target]
         [BuildPlatforms(BuildPlatform.Windows)]
         public static BuildTargetResult CompileUwpHosts(BuildTargetContext c)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return c.Failed();
-
-            var configuration = c.BuildContext.Get<string>("Configuration");
+            string configuration = c.BuildContext.Get<string>("Configuration");
             string platform = c.BuildContext.Get<string>("Platform");
 
             // cmake generated build file location artifacts\<config>\uwp\cmake
-            var cmakeOut = Path.Combine(Dirs.Uwp, "cmake");
+            string cmakeOut = Path.Combine(Dirs.Uwp, "cmake");
             Rmdir(cmakeOut);
             Mkdirp(cmakeOut);
 
             // cmake generated build file location artifacts\<config>\uwp
-            var cmakeInstallPrefixDir = Dirs.Uwp;
+            string cmakeInstallPrefixDir = Dirs.Uwp;
 
-            // Run the build
             string uwpSrcDir = Path.Combine(c.BuildContext.BuildDirectory, "src", "uwp");
 
-            // Create .rc files
-            var resourceDir = GenerateVersionResource(c);
+            string resourceDir = GenerateVersionResource(c);
 
             if (configuration.Equals("Release"))
             {
@@ -359,26 +360,23 @@ namespace Microsoft.DotNet.Host.Build
             string visualStudio, archMacro, arch;
             string cmakeResourceDir = $"-DCLI_CMAKE_RESOURCE_DIR:STRING={resourceDir}";
             string cmakeInstallPrefix = $"-DCMAKE_INSTALL_PREFIX:STRING={cmakeInstallPrefixDir}";
-            string cmakeExtraArgs = null;
+            string cmakeExtraArgs = "-DCMAKE_SYSTEM_VERSION=10.0";
 
             switch (platform.ToLower())
             {
                 case "x86":
                     visualStudio = "Visual Studio 14 2015";
                     archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_I386=1";
-                    cmakeExtraArgs = "-DCMAKE_SYSTEM_VERSION=10.0";
                     arch = "x86";
                     break;
                 case "arm":
                     visualStudio = "Visual Studio 14 2015 ARM";
                     archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_ARM=1";
-                    cmakeExtraArgs = "-DCMAKE_SYSTEM_VERSION=10.0";
                     arch = "arm";
                     break;
                 case "arm64":
                     visualStudio = "Visual Studio 14 2015 Win64";
                     archMacro = "-DCLI_CMAKE_PLATFORM_ARCH_ARM64=1";
-                    cmakeExtraArgs = "-DCMAKE_SYSTEM_VERSION=10.0";
                     arch = "arm64";
                     if (Environment.GetEnvironmentVariable("__ToolsetDir") == null)
                     {
@@ -408,18 +406,18 @@ namespace Microsoft.DotNet.Host.Build
             }
 
             ExecIn(cmakeOut, "cmake", cmakeArgList);
-
-            var pf32 = RuntimeInformation.OSArchitecture == Architecture.X64 ?
-                Environment.GetEnvironmentVariable("ProgramFiles(x86)") :
-                Environment.GetEnvironmentVariable("ProgramFiles");
-
-            string msbuildPath = Path.Combine(pf32, "MSBuild", "14.0", "Bin", "MSBuild.exe");
+            
+            string msbuildPath = GetMSBuildPath();
             string cmakeOutPath = Path.Combine(cmakeOut, "INSTALL.vcxproj");
             string configParameter = $"/p:Configuration={configuration}";
             if (arch == "arm64")
+            {
                 Exec(msbuildPath, cmakeOutPath, configParameter, "/p:useEnv=true");
+            }
             else
+            {
                 Exec(msbuildPath, cmakeOutPath, configParameter);
+            }
 
             return c.Success();
         }
