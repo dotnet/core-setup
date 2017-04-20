@@ -29,8 +29,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageProjects Include="Microsoft.DotNet.PlatformAbstractions/project.json" />
-      <PackageProjects Include="Microsoft.Extensions.DependencyModel/project.json" />
+      <PackageProjects Include="$(MSBuildThisFileDirectory)Microsoft.DotNet.PlatformAbstractions/project.json" />
+      <PackageProjects Include="$(MSBuildThisFileDirectory)Microsoft.Extensions.DependencyModel/project.json" />
     </ItemGroup>
 
     <GetBuildArgsByFrameworks
