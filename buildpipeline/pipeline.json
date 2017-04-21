@@ -102,16 +102,29 @@
           }
         },
         {
-          "Name": "Core-Setup-Signing-Windows-x64-BT",
+          "Name": "Core-Setup-Signing-Windows-BT",
           "Parameters": {
-            "PB_DistroRid": "win7-x64"
+            "PB_DistroRid": "win7-x64",
+            "PB_TargetArchitecture": "x64"
           },
           "ReportingParameters": {
             "OperatingSystem": "Windows",
             "Type": "build/product/",
             "Platform": "x64"
           }
-        }        
+        },
+        {
+          "Name": "Core-Setup-Signing-Windows-BT",
+          "Parameters": {
+            "PB_DistroRid": "win7-x86",
+            "PB_TargetArchitecture": "x86"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x86"
+          }
+        }
       ]
     }
   ]
