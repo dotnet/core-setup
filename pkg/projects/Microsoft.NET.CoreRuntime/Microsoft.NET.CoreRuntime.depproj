@@ -10,9 +10,9 @@
     <AppxName>Microsoft.NET.CoreRuntime</AppxName>
     <AppxIdentityName>Microsoft.NET.CoreRuntime.$(SimpleVersion.Split('.')[0]).$(SimpleVersion.Split('.')[1])</AppxIdentityName>
     <AppxDisplayName>Microsoft .Net Core Runtime Package $(SimpleVersion.Split('.')[0]).$(SimpleVersion.Split('.')[1])</AppxDisplayName>
-    <!-- path to contents of appx that will be zipped ->
+    <!-- path to contents of appx that will be zipped -->
     <AppxOutputPath>$(IntermediateOutputPath)$(AppxIdentityName)</AppxOutputPath>
-    <!-- path of generated .appx package ->
+    <!-- path of generated .appx package -->
     <AppxOutputPackageName>$(PackageOutputPath)$(AppxIdentityName).appx</AppxOutputPackageName>
     <OutputPath>$(IntermediateOutputPath)$(AppxIdentityName)</OutputPath>
   </PropertyGroup>
