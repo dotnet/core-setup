@@ -56,7 +56,7 @@
           WorkingDirectory="$(SharedFrameworkSourceRoot)" />
 
     <!-- We publish to a sub folder of the PublishRoot so tools like heat and zip can generate folder structures easier. -->
-    <Exec Command="$(DotnetToolCommand) publish --output $(SharedFrameworkNameAndVersionRoot) -r $(TargetRid) $(SharedFrameworkSourceRoot)"
+    <Exec Command="$(DotnetToolCommand) publish --output $(SharedFrameworkNameAndVersionRoot) -r $(PackageTargetRid) $(SharedFrameworkSourceRoot)"
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir)" />
 
     <!-- Clean deps.json -->
