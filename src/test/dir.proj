@@ -46,17 +46,18 @@
       <RestoreTest Include="$(TestDir)/**/project.json" />
     </ItemGroup>
 
+    <PropertyGroup>
+      <TempFolderRoot Condition="'$(OSGroup)' == 'Windows_NT'">$(USERPROFILE)\.dotnet\</TempFolderRoot>
+      <TempFolderRoot Condition="'$(OSGroup)' != 'Windows_NT'">$(HOME)/.dotnet/</TempFolderRoot>
+    </PropertyGroup>
     <ItemGroup>
       <DirsToClean Include="$(TestDir)\**\bin" />
       <DirsToClean Include="$(TestDir)\**\obj" />
-      <!-- The tests make use of these temporary folders and will begin failing on successive reruns if they are not cleaned up -->
-      <TempFolder Condition="'$(OSGroup)' == 'Windows_NT'" Include="$(USERPROFILE)\.dotnet\$(TargetArchitecture)" />
-      <TempFolder Condition="'$(OSGroup)' != 'Windows_NT'" Include="$(HOME)/.dotnet/$(TargetArchitecture)" />
-      <DirsToClean Include="@(TempFolder)" />  
+      <DirsToClean Include="$(TempFolderRoot)$(TargetArchitecture)" />  
     </ItemGroup>
 
     <RemoveDir Directories="@(DirsToClean)" />
-    <MakeDir Directories="@(TempFolder)" />
+    <MakeDir Directories="$(TempFolderRoot)NuGetFallbackFolder" />
 
     <PropertyGroup>
       <RestoreSourceArg>@(RestoreTestSource->'--source %(Identity)', ' ')</RestoreSourceArg>
