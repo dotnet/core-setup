@@ -139,17 +139,6 @@
         {
           "Name": "Core-Setup-Signing-Windows-x64",
           "Parameters": {
-            "SIGNED_PACKAGES": "true"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Windows",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-Signing-Windows-x64",
-          "Parameters": {
             "PB_PortableBuild": "-portable",
             "RID": "win-x64"
           },
@@ -259,6 +248,31 @@
             "Platform": "arm64"
           }
         }
+      ]
+    },
+    {
+      "Name": "Trusted-Publish-Release",
+      "Parameters": {
+        "TreatWarningsAsErrors": "false"
+      },
+      "BuildParameters": {
+        "BuildConfiguration": "Release"
+      },
+      "Definitions": [
+        {
+          "Name": "Core-Setup-Signing-Windows-x64",
+          "Parameters": {
+            "SIGNED_PACKAGES": "true"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        }
+      ],
+      "DependsOn": [
+        "Trusted-All-Release"
       ]
     }
   ]
