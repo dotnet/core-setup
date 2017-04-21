@@ -241,7 +241,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TestTargetRid Condition="'$(TestTargetRid)' == '' and '$(OSGroup)' == 'Windows_NT'">win10-x64</TestTargetRid>
+    <TestTargetRid Condition="'$(TestTargetRid)' == '' and '$(OSGroup)' == 'Windows_NT'">win10-$(TargetArchitecture)</TestTargetRid>
     <TestTargetRid Condition="'$(TestTargetRid)' == ''">$(TargetRid)</TestTargetRid>
   </PropertyGroup>
 
