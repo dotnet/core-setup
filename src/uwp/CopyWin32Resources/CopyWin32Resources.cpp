@@ -279,7 +279,7 @@ BOOL EnumLangsFunc(
 
     pEnumResourceCallbackParam pCallbackParam = (pEnumResourceCallbackParam) lParam;
 
-    hRes = FindResourceEx(hModule, MAKEINTRESOURCE(lpType), MAKEINTRESOURCE(lpName), wLang);
+    hRes = FindResourceEx(hModule, lpType, lpName, wLang);
     HGLOBAL hResLoad = LoadResource(hModule, hRes);
     if (hResLoad == NULL)
     {
@@ -298,8 +298,8 @@ BOOL EnumLangsFunc(
 
 
     result = UpdateResource(pCallbackParam->handle, // update resource handle
-        MAKEINTRESOURCE(lpType),
-        MAKEINTRESOURCE(lpName),
+        lpType,
+        lpName,
         wLang,
         lpResLock, // ptr to resource info
         (pCallbackParam->action == eRemove) ? 0 : SizeofResource(hModule, hRes) // size of resource info

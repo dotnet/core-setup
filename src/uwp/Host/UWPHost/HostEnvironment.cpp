@@ -12,6 +12,11 @@
 #include "windows.h"
 #include "HostEnvironment.h"
 
+// This should ideally come from WINDOWS SDK header but is missing in earlier versions
+#ifndef PACKAGE_FILTER_IS_IN_RELATED_SET 
+#define PACKAGE_FILTER_IS_IN_RELATED_SET 0x40000
+#endif
+
 
 HRESULT HostEnvironment::TryLoadCoreCLR() {
 
@@ -105,7 +110,7 @@ HRESULT HostEnvironment::Initialize()
     IfFailWin32Ret(rc);
 
     length = 0;
-    rc = GetPackageInfo(packageInfoReference, PACKAGE_FILTER_DIRECT, &length, NULL, &m_dependentPackagesCount);
+    rc = GetPackageInfo(packageInfoReference, PACKAGE_FILTER_DIRECT|PACKAGE_FILTER_IS_IN_RELATED_SET, &length, NULL, &m_dependentPackagesCount);
     IfFalseWin32Goto(rc == ERROR_INSUFFICIENT_BUFFER, rc, ErrExit2);
 
     BYTE* buffer = (BYTE *) malloc(length);
@@ -115,7 +120,7 @@ HRESULT HostEnvironment::Initialize()
     IfFalseGo(m_dependentPackagesRootPaths != NULL, E_FAIL);
     memset(m_dependentPackagesRootPaths, 0, m_dependentPackagesCount * sizeof(wchar_t*));
 
-    rc = GetPackageInfo(packageInfoReference, PACKAGE_FILTER_DIRECT, &length, buffer, &m_dependentPackagesCount);
+    rc = GetPackageInfo(packageInfoReference, PACKAGE_FILTER_DIRECT|PACKAGE_FILTER_IS_IN_RELATED_SET, &length, buffer, &m_dependentPackagesCount);
     IfFailWin32Go(rc);
 
     const PACKAGE_INFO *packageInfo = (PACKAGE_INFO *) buffer;
