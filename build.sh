@@ -18,8 +18,6 @@ initHostDistroRid()
             source /etc/os-release
             __HostDistroRid="$ID.$VERSION_ID-$__HostArch"
         fi
-    else
-      __HostDistroRid="osx.10.12-x64"
     fi
 }
 
