@@ -102,6 +102,14 @@
           }
         },
         {
+          "Name": "Core-Setup-OSX-BT",
+          "ReportingParameters": {
+            "OperatingSystem": "OSX",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        },
+        {
           "Name": "Core-Setup-Signing-Windows-BT",
           "Parameters": {
             "PB_DistroRid": "win7-x64",

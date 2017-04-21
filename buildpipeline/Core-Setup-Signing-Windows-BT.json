@@ -774,7 +774,7 @@
       "deleteTestResults": true
     }
   ],
-  "buildNumberFormat": "$(Date:yyyMMdd)$(Rev:.r)",
+  "buildNumberFormat": "$(Date:yyyyMMdd)$(Rev:-rr)",
   "jobAuthorizationScope": "projectCollection",
   "jobTimeoutInMinutes": 120,
   "jobCancelTimeoutInMinutes": 5,
