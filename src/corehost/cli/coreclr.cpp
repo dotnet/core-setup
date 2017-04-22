@@ -84,7 +84,7 @@ pal::hresult_t coreclr::initialize(
         domain_id);
 }
 
-pal::hresult_t coreclr::shutdown(host_handle_t host_handle, domain_id_t domain_id, latchedExitCode)
+pal::hresult_t coreclr::shutdown(host_handle_t host_handle, domain_id_t domain_id, int* latchedExitCode)
 {
     assert(g_coreclr != nullptr && coreclr_shutdown != nullptr);
 
