@@ -404,7 +404,7 @@ namespace Microsoft.DotNet.Host.Build
         [Target]
         public static BuildTargetResult PublishHostFxrArchiveToAzure(BuildTargetContext c)
         {
-            var version = SharedFrameworkNugetVersion;
+            var version = HostFxrNugetVersion;
             var archiveFile = c.BuildContext.Get<string>("HostFxrCompressedFile");
 
             AzurePublisherTool.PublishArchive(archiveFile, Channel, version);
