@@ -8,17 +8,21 @@
   "dependencies": {
     "Microsoft.DotNet.PlatformAbstractions": {
       "target": "project"
-    },
-    "Newtonsoft.Json": "9.0.1"
+    }
   },
   "frameworks": {
-    "net451": {},
+    "net451": {
+      "dependencies": {
+        "Newtonsoft.Json": "6.0.4"        
+      }
+    },
     "netstandard1.3": {
       "imports": "portable-net45+wp80+win8+wpa81+dnxcore50",
       "dependencies": {
         "System.Diagnostics.Debug": "4.0.11",
         "System.Dynamic.Runtime": "4.0.11",
-        "System.Linq": "4.1.0"
+        "System.Linq": "4.1.0",
+        "Newtonsoft.Json": "9.0.1"
       }
     },
     "netstandard1.6": {
@@ -26,7 +30,8 @@
       "dependencies": {
         "System.Diagnostics.Debug": "4.0.11",
         "System.Dynamic.Runtime": "4.0.11",
-        "System.Linq": "4.1.0"
+        "System.Linq": "4.1.0",
+        "Newtonsoft.Json": "9.0.1"
       }
     }
   },
