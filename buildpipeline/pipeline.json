@@ -136,7 +136,7 @@
         {
           "Name": "Core-Setup-Windows-BT",
           "Parameters": {
-            "PB_PortableBuild": "-portable",
+            "PB_AdditionalBuildArguments": "-portable",
             "PB_TargetArchitecture": "arm"
           },
           "ReportingParameters": {
@@ -149,7 +149,7 @@
         {
           "Name": "Core-Setup-Windows-BT",
           "Parameters": {
-            "PB_PortableBuild": "-portable",
+            "PB_AdditionalBuildArguments": "-portable",
             "PB_TargetArchitecture": "arm64"
           },
           "ReportingParameters": {

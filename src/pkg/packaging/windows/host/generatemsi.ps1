@@ -22,7 +22,7 @@ if(-Not (Test-Path "$CommonScript"))
 } 
 . "$CommonScript"
 
-$CompressionRoot = Join-Path $RepoRoot "src\pkg\compression"
+$CompressionRoot = Join-Path $RepoRoot "src\pkg\packaging"
 function RunCandle
 {
     $result = $true

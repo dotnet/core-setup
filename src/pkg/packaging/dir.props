@@ -3,7 +3,7 @@
   <Import Project="..\dir.props" />
 
   <PropertyGroup>
-    <CompressionRoot>$(ProjectDir)src/pkg/compression/</CompressionRoot>
+    <CompressionRoot>$(ProjectDir)src/pkg/packaging/</CompressionRoot>
     
     <PackagesIntermediateDir>$(IntermediateOutputRootPath)packages/</PackagesIntermediateDir>
     <SharedHostPublishRoot>$(IntermediateOutputRootPath)sharedHost/</SharedHostPublishRoot>

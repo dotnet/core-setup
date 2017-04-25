@@ -239,9 +239,15 @@
   <PropertyGroup Condition="'$(TargetRid)' == '' and '$(DistroRid)' != ''">
     <TargetRid>$(DistroRid)</TargetRid>
   </PropertyGroup>
+  <!-- Portable -->
+  <PropertyGroup Condition="'$(PortableBuild)' == 'true'">
+    <TargetRid Condition="'$(OSGroup)' == 'Windows_NT'">win-$(TargetArchitecture)</TargetRid>
+    <TargetRid Condition="'$(OSGroup)' == 'OSX'">osx-$(TargetArchitecture)</TargetRid>
+    <TargetRid Condition="'$(OSGroup)' == 'Linux'">linux-$(TargetArchitecture)</TargetRid>
+  </PropertyGroup>
 
   <PropertyGroup>
-    <TestTargetRid Condition="'$(TestTargetRid)' == '' and '$(OSGroup)' == 'Windows_NT'">win10-$(TargetArchitecture)</TestTargetRid>
+    <TestTargetRid Condition="'$(TestTargetRid)' == '' and '$(PortableBuild)' != 'true' and '$(OSGroup)' == 'Windows_NT'">win10-$(TargetArchitecture)</TestTargetRid>
     <TestTargetRid Condition="'$(TestTargetRid)' == ''">$(TargetRid)</TestTargetRid>
   </PropertyGroup>
 
@@ -269,7 +275,8 @@
 
   <PropertyGroup>
     <DisableCrossgen>false</DisableCrossgen>
-    <OutputVersionBadge>$(BaseOutputRootPath)sharedfx_$(TargetRid)_$(ConfigurationGroup)_version_badge.svg</OutputVersionBadge>
+    <PortableLabel Condition="'$(PortableBuild)' == 'true'">_portable</PortableLabel>
+    <OutputVersionBadge>$(BaseOutputRootPath)sharedfx_$(TargetRid)$(PortableLabel)_$(ConfigurationGroup)_version_badge.svg</OutputVersionBadge>
   </PropertyGroup>
 
   <PropertyGroup>

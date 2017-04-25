@@ -362,7 +362,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "$(PB_SourcesDirectory)\\src\\pkg\\compression\\dir.proj",
+        "solution": "$(PB_SourcesDirectory)\\src\\pkg\\packaging\\dir.proj",
         "platform": "$(PB_TargetArchitecture)",
         "configuration": "$(BuildConfiguration)",
         "msbuildArguments": "$(PB_CommonMSBuildArgs) /flp:v=diag",

@@ -24,7 +24,12 @@
       "values": ["x64", "x86"],
       "defaultValue": "x64"
     },
-
+    "PortableBuild": {
+      "description": "Indicates if this is a portable build.",
+      "valueType": "property",
+      "values": [ "True", "False"],
+      "defaultValue": "False"
+    },
     "DistroRid": {
       "description": "Specifies the distro rid for Unix OS.",
       "valueType": "property",
@@ -204,6 +209,12 @@
             "OSGroup": "default"
           }
         },
+        "portable":{
+          "description": "Make the build-native script generate binaries that are portable for the platform.",
+          "settings": {
+            "PortableBuild":"true"
+          }
+        },        
         "skipTests":{
           "description": "Skips running tests",
           "settings":{
@@ -230,7 +241,13 @@
           "settings":{
             "MsBuildLogging": "/flp:v=diag;LogFile=msbuild-cmake.log"
           }
-        }
+        },
+        "portable":{
+          "description": "Make the build-native script generate binaries that are portable for the platform.",
+          "settings": {
+            "PortableBuild":"true"
+          }
+        }        
       },
       "defaultValues":{
         "toolName": "msbuild",

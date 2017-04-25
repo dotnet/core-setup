@@ -64,12 +64,18 @@
     <AdditionalSymbolPackageExcludes Condition="'$(LibraryFileExtension)' != ''" Include="%2A%2A\%2A.a;%2A%2A\%2A$(LibraryFileExtension)" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(PackageRID)' == ''">
+  <PropertyGroup Condition="'$(PortableBuild)' != 'true' and '$(PackageRID)' == ''">
     <PackageRID>$(DistroRid)</PackageRID>
     <PackageRID Condition="'$(OSEnvironment)' == 'OSX'">osx.10.12-$(Platform)</PackageRID>
     <PackageRID Condition="'$(OSEnvironment)' == 'Windows_NT'">win7-$(Platform)</PackageRID>
     <PackageRID Condition="'$(OSEnvironment)' == 'Windows_NT' AND '$(Platform)' =='arm'">win8-$(Platform)</PackageRID>
     <PackageRID Condition="'$(OSEnvironment)' == 'Windows_NT' AND '$(Platform)' =='arm64'">win10-$(Platform)</PackageRID>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(PortableBuild)' == 'true'">
+    <PackageRID>win-$(Platform)</PackageRID> 
+    <PackageRID Condition="'$(OSGroup)' == 'OSX'">osx-$(Platform)</PackageRID> 
+    <PackageRID Condition="'$(OSGroup)' == 'Linux'">linux-$(Platform)</PackageRID>   
   </PropertyGroup>
 
   <ItemGroup>

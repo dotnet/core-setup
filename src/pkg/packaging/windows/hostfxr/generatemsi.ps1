@@ -2,32 +2,31 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 param(
-    [Parameter(Mandatory=$true)][string]$SharedFrameworkPublishRoot,
-    [Parameter(Mandatory=$true)][string]$SharedFrameworkMSIOutput,
+    [Parameter(Mandatory=$true)][string]$HostFxrPublishRoot,
+    [Parameter(Mandatory=$true)][string]$HostFxrMSIOutput,
     [Parameter(Mandatory=$true)][string]$WixRoot,
     [Parameter(Mandatory=$true)][string]$ProductMoniker,
-    [Parameter(Mandatory=$true)][string]$DotnetMSIVersion,
-    [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetName,
-    [Parameter(Mandatory=$true)][string]$SharedFrameworkNugetVersion,
-    [Parameter(Mandatory=$true)][string]$SharedFrameworkUpgradeCode,
+    [Parameter(Mandatory=$true)][string]$HostFxrMSIVersion,
+    [Parameter(Mandatory=$true)][string]$HostFxrNugetVersion,
     [Parameter(Mandatory=$true)][string]$Architecture,
     [Parameter(Mandatory=$true)][string]$TargetArchitecture,
-    [Parameter(Mandatory=$true)][string]$WixObjRoot
+    [Parameter(Mandatory=$true)][string]$WixObjRoot,
+    [Parameter(Mandatory=$true)][string]$HostFxrUpgradeCode
 )
 
 $RepoRoot = Convert-Path "$PSScriptRoot\..\..\..\..\.."
 $CommonScript = "$RepoRoot\tools-local\scripts\common\_common.ps1"
+
 if(-Not (Test-Path "$CommonScript"))
 {
     Exit -1
 } 
 . "$CommonScript"
 
-$CompressionRoot = Join-Path $RepoRoot "src\pkg\compression"
+$CompressionRoot = Join-Path $RepoRoot "src\pkg\packaging"
 
 $InstallFileswsx = "$WixObjRoot\install-files.wxs"
 $InstallFilesWixobj = "$WixObjRoot\install-files.wixobj"
-
 
 function RunHeat
 {
@@ -36,11 +35,11 @@ function RunHeat
 
     Write-Host Running heat..
 
-    .\heat.exe dir `"$SharedFrameworkPublishRoot`" `
+    .\heat.exe dir `"$HostFxrPublishRoot`" `
     -nologo `
     -template fragment `
     -sreg -gg `
-    -var var.SharedFrameworkSource `
+    -var var.HostFxrSrc `
     -cg InstallFiles `
     -srd `
     -dr DOTNETHOME `
@@ -62,23 +61,23 @@ function RunCandle
     pushd "$WixRoot"
 
     Write-Host Running candle..
-    $AuthWsxRoot = Join-Path $CompressionRoot "windows\sharedframework"
-    $SharedFrameworkComponentVersion = $SharedFrameworkNugetVersion.Replace('-', '_');
+    $AuthWsxRoot =  Join-Path $CompressionRoot "windows\hostfxr"
+
+    $ComponentVersion = $HostFxrNugetVersion.Replace('-', '_');
 
     .\candle.exe -nologo `
         -out "$WixObjRoot\" `
-        -dSharedFrameworkSource="$SharedFrameworkPublishRoot" `
-        -dMicrosoftEula="$CompressionRoot\osx\sharedframework\resources\en.lproj\eula.rtf" `
+        -dHostFxrSrc="$HostFxrPublishRoot" `
+        -dMicrosoftEula="$CompressionRoot\osx\hostfxr\resources\en.lproj\eula.rtf" `
         -dProductMoniker="$ProductMoniker" `
-        -dFrameworkName="$SharedFrameworkNugetName" `
-        -dFrameworkDisplayVersion="$SharedFrameworkNugetVersion" `
-        -dFrameworkComponentVersion="$SharedFrameworkComponentVersion" `
-        -dFrameworkUpgradeCode="$SharedFrameworkUpgradeCode" `
+        -dBuildVersion="$HostFxrMSIVersion" `
+        -dNugetVersion="$HostFxrNugetVersion" `
+        -dComponentVersion="$ComponentVersion" `
         -dTargetArchitecture="$TargetArchitecture" `
-        -dBuildVersion="$DotnetMSIVersion" `
+        -dUpgradeCode="$HostFxrUpgradeCode" `
         -arch $Architecture `
         -ext WixDependencyExtension.dll `
-        "$AuthWsxRoot\sharedframework.wxs" `
+        "$AuthWsxRoot\hostfxr.wxs" `
         "$AuthWsxRoot\provider.wxs" `
         "$AuthWsxRoot\registrykeys.wxs" `
         $InstallFileswsx | Out-Host
@@ -99,15 +98,17 @@ function RunLight
     pushd "$WixRoot"
 
     Write-Host Running light..
-    $CabCache = Join-Path $WixRoot "cabcache"
 
-    .\light.exe -nologo -ext WixUIExtension -ext WixDependencyExtension -ext WixUtilExtension `
+    .\light.exe -nologo `
+        -ext WixUIExtension.dll `
+        -ext WixDependencyExtension.dll `
+        -ext WixUtilExtension.dll `
         -cultures:en-us `
-        "$WixObjRoot\sharedframework.wixobj" `
+        "$WixObjRoot\hostfxr.wixobj" `
         "$WixObjRoot\provider.wixobj" `
         "$WixObjRoot\registrykeys.wixobj" `
         "$InstallFilesWixobj" `
-        -out $SharedFrameworkMSIOutput | Out-Host
+        -out $HostFxrMSIOutput | Out-Host
 
     if($LastExitCode -ne 0)
     {
@@ -119,7 +120,7 @@ function RunLight
     return $result
 }
 
-if(!(Test-Path $SharedFrameworkPublishRoot))
+if(!(Test-Path $HostFxrPublishRoot))
 {
     throw "$SharedHostPublishRoot not found"
 }
@@ -129,7 +130,7 @@ if(!(Test-Path $WixObjRoot))
     throw "$WixObjRoot not found"
 }
 
-Write-Host "Creating dotnet shared framework MSI at $SharedFrameworkMSIOutput"
+Write-Host "Creating shared Host FX Resolver MSI at $HostFxrMSIOutput"
 
 if([string]::IsNullOrEmpty($WixRoot))
 {
@@ -151,12 +152,12 @@ if(-Not (RunLight))
     Exit -1
 }
 
-if(!(Test-Path $SharedFrameworkMSIOutput))
+if(!(Test-Path $HostFxrMSIOutput))
 {
-    throw "Unable to create the dotnet shared framework msi."
+    throw "Unable to create the shared host msi."
     Exit -1
 }
 
-Write-Host -ForegroundColor Green "Successfully created shared framework MSI - $SharedFrameworkMSIOutput"
+Write-Host -ForegroundColor Green "Successfully created shared host MSI - $HostFxrMSIOutput"
 
 exit $LastExitCode
