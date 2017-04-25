@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli.Build
             _corehostPackageSource = corehostPackageSource;
 
             string crossgenRID = null;
-            
+
             // If we are dealing with cross-targeting compilation, then specify the 
             // correct RID for crossgen to use when compiling SharedFramework.
             // TODO-ARM-Crossgen: Add ubuntu.14.04-arm and ubuntu.16.04-arm
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Cli.Build
                 s_sharedFrameworkName,
                 sharedFrameworkNugetVersion);
         }
-        
+
         public static string GetNetCoreAppRuntimeLibSymbolsPath(string symbolsRoot, string sharedFrameworkRid, string sharedFrameworkTarget)
         {
             return Path.Combine(symbolsRoot, s_sharedFrameworkName, "runtimes", sharedFrameworkRid, "lib", sharedFrameworkTarget);
@@ -177,7 +177,7 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 pdbFiles.AddRange(Directory.GetFiles(libPdbPath));
             }
-            if(Directory.Exists(nativePdbPath))
+            if (Directory.Exists(nativePdbPath))
             {
                 pdbFiles.AddRange(Directory.GetFiles(nativePdbPath));
             }
@@ -263,7 +263,8 @@ namespace Microsoft.DotNet.Cli.Build
             string templateFile = Path.Combine(sharedFrameworkProjectPath, "project.json.template");
             JObject sharedFrameworkProject = JsonUtils.ReadProject(templateFile);
 
-            sharedFrameworkProject["dependencies"]["Microsoft.NETCore.App"] = sharedFrameworkNugetVersion;
+            AddSharedFrameworkDependencies(sharedFrameworkProject, sharedFrameworkNugetVersion, rid);
+
             ((JObject)sharedFrameworkProject["runtimes"]).RemoveAll();
             sharedFrameworkProject["runtimes"][rid] = new JObject();
             ((JObject)sharedFrameworkProject["frameworks"]).RemoveAll();
@@ -275,6 +276,32 @@ namespace Microsoft.DotNet.Cli.Build
             Rm(templateFile);
 
             return sharedFrameworkProjectPath;
+        }
+
+        private static void AddSharedFrameworkDependencies(
+            JObject sharedFrameworkProject,
+            string sharedFrameworkNugetVersion,
+            string rid)
+        {
+            ((JObject)sharedFrameworkProject["dependencies"]).RemoveAll();
+
+            if (NeedsToUseRuntimeSpecificDependency(rid))
+            {
+                sharedFrameworkProject["dependencies"][$"runtime.{rid}.Microsoft.NETCore.App"] = sharedFrameworkNugetVersion;
+            }
+
+            sharedFrameworkProject["dependencies"]["Microsoft.NETCore.App"] = sharedFrameworkNugetVersion;
+        }
+
+        private static bool NeedsToUseRuntimeSpecificDependency(string rid)
+        {
+            // specific linux distro dependencies are not in the Microsoft.NETCore.App lineup package,
+            // so these packages need to use a runtime-specific dependency.
+            return !rid.StartsWith("win", StringComparison.OrdinalIgnoreCase) &&
+                   !rid.StartsWith("osx", StringComparison.OrdinalIgnoreCase) &&
+                   !rid.StartsWith("alpine", StringComparison.OrdinalIgnoreCase) &&
+                   !rid.StartsWith("linux-", StringComparison.OrdinalIgnoreCase) &&
+                   rid.EndsWith("-x64");
         }
     }
 }

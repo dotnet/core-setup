@@ -89,4 +89,44 @@
               ItemName="Dependency" />
     </MSBuild>
   </Target>
+
+  <!-- Remove the specific linux distro dependencies so the portable linux RID is used by default. -->
+  <Target Name="RemoveLinuxDistroDependencies"
+          Condition="'$(PackageTargetRuntime)' == '' And '@(RuntimeDependency)' != ''"
+          DependsOnTargets="CalculateValidLineupDependencies"
+          AfterTargets="DetermineRuntimeDependencies">
+
+    <ItemGroup>
+      <_RuntimeDependencyToRemove Include="@(RuntimeDependency)"
+                                  Condition="!$(ValidLineupDependencies.Contains(';%(RuntimeDependency.TargetRuntime);'))" />
+      <RuntimeDependency Remove="@(_RuntimeDependencyToRemove)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- For runtime packages on specific linux distros, add the RuntimeDependency between the current RID and the Base package.
+       This way, consumers can use the distro-specific package and get the correct assets. -->
+  <Target Name="AddLinuxDistroDependency"
+          Condition="'$(PackageTargetRuntime)' != ''"
+          DependsOnTargets="CalculatePackageVersion;CalculateValidLineupDependencies"
+          AfterTargets="DetermineRuntimeDependencies">
+
+    <PropertyGroup>
+      <ShouldAddRuntimeDependency>!$(ValidLineupDependencies.Contains(';$(PackageTargetRuntime);'))</ShouldAddRuntimeDependency>
+      <IncludeRuntimeJson Condition="'$(ShouldAddRuntimeDependency)' == 'true'">true</IncludeRuntimeJson>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(ShouldAddRuntimeDependency)' == 'true'">
+      <RuntimeDependency Include="$(Id)"
+                         TargetRuntime="$(PackageTargetRuntime)"
+                         TargetPackage="$(BaseId)"
+                         Version="$(PackageVersion)" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="CalculateValidLineupDependencies">
+    <PropertyGroup>
+      <ValidLineupDependencies>;@(ValidLineupDependency);</ValidLineupDependencies>
+    </PropertyGroup>
+  </Target>
 </Project>

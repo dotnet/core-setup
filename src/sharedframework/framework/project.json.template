@@ -4,7 +4,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.NETCore.App": "$(NetCoreAppVersion)"
+    "$(MicrosoftNETCoreAppName)": "$(NetCoreAppVersion)"
   },
   "runtimes": {
     "$(RID)": {}

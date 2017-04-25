@@ -5,7 +5,7 @@
     <PackagePlatform>AnyCPU</PackagePlatform>
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">obj/$(Configuration)/</IntermediateOutputPath>
     <IntermediateOutputPath Condition="'$(NuGetRuntimeIdentifier)' != ''">$(IntermediateOutputPath)$(NuGetRuntimeIdentifier)/</IntermediateOutputPath>
-    
+
     <ProjectJsonTemplate>$(MSBuildThisProjectDirectory)project.json.template</ProjectJsonTemplate>
     <ProjectJson Condition="Exists('$(ProjectJsonTemplate)')">$(IntermediateOutputPath)project.json</ProjectJson>
     <ProjectLockJson Condition="Exists('$(ProjectJsonTemplate)')">$(IntermediateOutputPath)project.lock.json</ProjectLockJson>
@@ -68,6 +68,26 @@
     </BuildRID>
   </ItemGroup>
 
+  <!-- RIDs to keep in the runtime dependencies, so the lineup packages don't have linux distro specific dependencies.
+       Instead, the linux-x64 runtime will be used on all linux distros by default. 
+       NOTE: There isn't a linux-arm build yet, so we can't remove any arm RIDs. -->
+  <ItemGroup>
+    <ValidLineupDependency Include="alpine.3.4.3-x64" />
+    <ValidLineupDependency Include="debian.8-armel" />
+    <ValidLineupDependency Include="linux-x64" />
+    <ValidLineupDependency Include="osx.10.10-x64" />
+    <ValidLineupDependency Include="win7-x86" />
+    <ValidLineupDependency Include="win7-x64" />
+    <ValidLineupDependency Include="win8-arm" />
+    <ValidLineupDependency Include="win10-x86" />
+    <ValidLineupDependency Include="win10-x64" />
+    <ValidLineupDependency Include="win10-arm" />
+    <ValidLineupDependency Include="win10-arm64" />
+    <ValidLineupDependency Include="ubuntu.14.04-arm" />
+    <ValidLineupDependency Include="ubuntu.16.04-arm" />
+    <ValidLineupDependency Include="tizen.4.0.0-armel" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(HasRuntimePackages)' != 'false'">
     <_project Include="@(BuildRID)">
       <Platform Condition="'%(Platform)' == ''">x64</Platform>
@@ -80,5 +100,5 @@
 
   <ItemGroup Condition="'$(PackageTargetRuntime)' == '' and '$(HasRuntimePackages)' != 'false'">
     <ProjectReference Include="@(Project)" />
-  </ItemGroup>  
+  </ItemGroup>
 </Project>
