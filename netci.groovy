@@ -28,7 +28,7 @@ platformList.each { platform ->
 
     // Calculate build command
     if (os == 'Windows_NT') {
-        buildCommand = ".\\build.cmd -ConfigurationGroup ${configuration} -TargetArchitecture ${architecture}"
+        buildCommand = ".\\build.cmd -ConfigurationGroup=${configuration} -TargetArchitecture=${architecture}"
     }
 /*
     else if ((os.startsWith("Ubuntu") || os.startsWith("Tizen")) &&
