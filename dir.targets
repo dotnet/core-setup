@@ -11,7 +11,7 @@
   <Target Name="RebuildAndTest" DependsOnTargets="Rebuild;Test" />
   <Target Name="Test" />
 
-  <Import Project="$(ToolsDir)/Build.Common.targets" Condition="'$(UseLiveBuildTools)' != 'true'" />
+  <Import Project="$(ToolsDir)/Build.Common.targets" Condition="Exists('$(ToolsDir)Build.Common.targets') and '$(UseLiveBuildTools)' != 'true'" />
 
   <Target Name="GetLatestCommitHash">
     <!-- Get the latest commit hash -->
