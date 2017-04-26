@@ -13,7 +13,7 @@
           DependsOnTargets="GetLatestCommitHash">
     <PropertyGroup>
       <BuildArgs>--arch $(TargetArchitecture) --apphostver $(HostVersion) --hostver $(HostVersion) --fxrver $(HostVersion) --policyver $(HostVersion) --commithash $(LatestCommit)</BuildArgs>
-      <BuildArgs Condition="'$(PortableBuild)' == 'true'">$(BuildArgs) --portableLinux</BuildArgs>     
+      <BuildArgs Condition="'$(PortableBuild)' == 'true'">$(BuildArgs) -portable</BuildArgs>     
     </PropertyGroup>
     
     <Message Text="$(MSBuildProjectDirectory)\build.sh $(BuildArgs)" Importance="High"/>

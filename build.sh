@@ -224,6 +224,10 @@ initTargetDistroRid
 
 __RunArgs="-TargetArchitecture=$__BuildArch -ConfigurationGroup=$__BuildType -OSGroup=$__HostOS -DistroRid=$__DistroRid"
 
+if [ $__PortableBuild == 1 ]; then
+  __RunArgs="$__RunArgs -PortableBuild=True"
+fi
+
 # Configure environment if we are doing a verbose build
 if [ $__VerboseBuild == 1 ]; then
     export VERBOSE=1
