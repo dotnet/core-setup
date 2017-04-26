@@ -54,8 +54,14 @@ namespace Microsoft.DotNet.Cli.Build
 
         public void PublishFile(string blob, string file)
         {
+            Console.WriteLine($"Publishing file '{file}' to '{blob}'");
+
             CloudBlockBlob blockBlob = _blobContainer.GetBlockBlobReference(blob);
-            blockBlob.UploadFromFileAsync(file).Wait();
+            blockBlob.UploadFromFileAsync(
+                file, 
+                AccessCondition.GenerateIfNotExistsCondition(),
+                options: null,
+                operationContext: null).Wait();
 
             SetBlobPropertiesBasedOnFileType(blockBlob);
         }
@@ -71,6 +77,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         public void CopyBlob(string sourceBlob, string targetBlob)
         {
+            Console.WriteLine($"Copying blob '{sourceBlob}' to '{targetBlob}'");
+
             CloudBlockBlob source = _blobContainer.GetBlockBlobReference(sourceBlob);
             CloudBlockBlob target = _blobContainer.GetBlockBlobReference(targetBlob);
 
@@ -113,7 +121,7 @@ namespace Microsoft.DotNet.Cli.Build
             TimeSpan? maxWaitDefault=null, 
             TimeSpan? delayDefault=null)
         {
-            TimeSpan maxWait = maxWaitDefault ?? TimeSpan.FromSeconds(120);
+            TimeSpan maxWait = maxWaitDefault ?? TimeSpan.FromSeconds(1800);
             TimeSpan delay = delayDefault ?? TimeSpan.FromMilliseconds(500);
 
             Stopwatch stopWatch = new Stopwatch();

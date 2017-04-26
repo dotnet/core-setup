@@ -268,3 +268,11 @@ Session.vim
 # Private test configuration and binaries.
 config.ps1
 **/IISApplications
+
+# VS generated files
+launchSettings.json
+
+# Generated project.json files (the project.json.template file is the authoritative copy)
+setuptools/independent/DepsProcessor/project.json
+build_projects/dotnet-host-build/project.json
+build_projects/update-dependencies/project.json

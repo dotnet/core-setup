@@ -33,30 +33,6 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
-            "PB_DistroRid": "fedora.24-x64",
-            "PB_DockerTag": "fedora24_prereqs_v4"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "Fedora 24",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-Linux-BT",
-          "Parameters": {
-            "PB_DistroRid": "opensuse.42.1-x64",
-            "PB_DockerTag": "opensuse421_prereqs_v3"
-          },
-          "ReportingParameters": {
-            "OperatingSystem": "OpenSuse 42.1",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-Linux-BT",
-          "Parameters": {
             "PB_DistroRid": "ubuntu.14.04-x64",
             "PB_DockerTag": "ubuntu1404_prereqs_v3",
             "REPO_ID": "562fbfe0b2d7d0e0a43780c4",
@@ -103,7 +79,11 @@
         },
         {
           "Name": "Core-Setup-OSX-BT",
+          "Parameters": {
+            "PB_PortableBuild": "-portable"
+          },
           "ReportingParameters": {
+            "SubType": "PortableBuild",
             "OperatingSystem": "OSX",
             "Type": "build/product/",
             "Platform": "x64"
@@ -113,10 +93,12 @@
           "Name": "Core-Setup-Signing-Windows-BT",
           "Parameters": {
             "PB_DistroRid": "win7-x64",
-            "PB_TargetArchitecture": "x64"
+            "PB_TargetArchitecture": "x64",
+            "PB_PortableBuild": "-portable"
           },
           "ReportingParameters": {
             "OperatingSystem": "Windows",
+            "SubType": "PortableBuild",
             "Type": "build/product/",
             "Platform": "x64"
           }
@@ -125,10 +107,12 @@
           "Name": "Core-Setup-Signing-Windows-BT",
           "Parameters": {
             "PB_DistroRid": "win7-x86",
-            "PB_TargetArchitecture": "x86"
+            "PB_TargetArchitecture": "x86",
+            "PB_PortableBuild": "-portable"
           },
           "ReportingParameters": {
             "OperatingSystem": "Windows",
+            "SubType": "PortableBuild",
             "Type": "build/product/",
             "Platform": "x86"
           }
@@ -150,7 +134,8 @@
           "Name": "Core-Setup-Windows-BT",
           "Parameters": {
             "PB_AdditionalBuildArguments": "-portable",
-            "PB_TargetArchitecture": "arm64"
+            "PB_TargetArchitecture": "arm64",
+            "PB_PortableBuild": "-portable"
           },
           "ReportingParameters": {
             "OperatingSystem": "Windows",

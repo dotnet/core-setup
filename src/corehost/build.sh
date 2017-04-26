@@ -35,7 +35,11 @@ init_rid_plat()
     fi
 
     if [ $__linkPortable == 1 ]; then
-        export __rid_plat="linux"
+        if [ "$(uname -s)" == "Darwin" ]; then
+        export __rid_plat="osx"
+        else
+            export __rid_plat="linux"
+        fi
     fi
 }
 
@@ -49,8 +53,8 @@ usage()
     echo "  --apphostver <app host version>   Version of the apphost executable"
     echo "  --fxrver <HostFxr version>        Version of the hostfxr library"
     echo "  --policyver <HostPolicy version>  Version of the hostpolicy library"
-    echo "  --commithash <Git commit hash>   Current commit hash of the repo at build time"
-    echo "  --portableLinux                      Optional argument to build native libraries portable over GLIBC based Linux distros."
+    echo "  --commithash <Git commit hash>    Current commit hash of the repo at build time"
+    echo "  -portable                         Optional argument to build portable platform packages."
     echo "  --cross                           Optional argument to signify cross compilation,"
     echo "                                    and use ROOTFS_DIR environment variable to find rootfs."
 
@@ -74,7 +78,7 @@ __policy_ver=
 __fxr_ver=
 __CrossBuild=0
 __commit_hash=
-__linkPortable=0
+__portableBuildArgs=
 __configuration=Debug
 
 while [ "$1" != "" ]; do
@@ -112,8 +116,8 @@ while [ "$1" != "" ]; do
             shift
             __commit_hash=$1
             ;;
-        --portablelinux)
-            __linkPortable=1
+        -portable)
+            __portableBuildArgs="-DCLI_CMAKE_PORTABLE_BUILD=1"
             ;;
         --cross)
             __CrossBuild=1
@@ -124,7 +128,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-__cmake_defines="-DCMAKE_BUILD_TYPE=${__configuration}"
+__cmake_defines="-DCMAKE_BUILD_TYPE=${__configuration} ${__portableBuildArgs}"
 
 case $__build_arch in
     amd64|x64)
@@ -174,25 +178,28 @@ if command -v "clang-3.5" > /dev/null 2>&1; then
 elif command -v "clang-3.6" > /dev/null 2>&1; then
     export CC="$(command -v clang-3.6)"
     export CXX="$(command -v clang++-3.6)"
+elif command -v "clang-3.9" > /dev/null 2>&1; then
+    export CC="$(command -v clang-3.9)"
+    export CXX="$(command -v clang++-3.9)"
 elif command -v clang > /dev/null 2>&1; then
     export CC="$(command -v clang)"
     export CXX="$(command -v clang++)"
 else
     echo "Unable to find Clang Compiler"
-    echo "Install clang-3.5 or clang3.6"
+    echo "Install clang-3.5 or clang3.6 or clang3.9"
     exit 1
 fi
 
 echo "Building Corehost from $DIR to $(pwd)"
 set -x # turn on trace
 if [ $__CrossBuild == 1 ]; then
-    # clang-3.6 is default compiler for cross compilation
-    if command -v "clang-3.6" > /dev/null 2>&1; then
-        export CC="$(command -v clang-3.6)"
-        export CXX="$(command -v clang++-3.6)"
+    # clang-3.9 is default compiler for cross compilation
+    if command -v "clang-3.9" > /dev/null 2>&1; then
+        export CC="$(command -v clang-3.9)"
+        export CXX="$(command -v clang++-3.9)"
     else
-        echo "Unable to find Clang 3.6 Compiler"
-        echo "Install clang-3.6 for cross compilation"
+        echo "Unable to find Clang 3.9 Compiler"
+        echo "Install clang-3.9 for cross compilation"
         exit 1
     fi
     cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash -DCMAKE_TOOLCHAIN_FILE=$DIR/../../cross/$__build_arch_lowcase/toolchain.cmake

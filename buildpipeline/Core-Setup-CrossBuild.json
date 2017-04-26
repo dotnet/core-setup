@@ -125,7 +125,7 @@
       },
       "inputs": {
         "scriptPath": "$(PB_RepoName)/scripts/docker-as-current-user.sh",
-        "args": "run --name $(PB_DockerContainerName) --rm --privileged -v $(System.DefaultWorkingDirectory)/$(PB_RepoName):$(PB_GitDirectory) -w $(PB_GitDirectory) -e HOME -e ROOTFS_DIR -e PUBLISH_TO_AZURE_BLOB -e CONNECTION_STRING -e CLI_NUGET_FEED_URL -e CLI_NUGET_SYMBOLS_FEED_URL -e CLI_NUGET_API_KEY -e NUGET_FEED_URL -e NUGET_SYMBOLS_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD $(PB_DockerImageName) ./build.sh $(CommonArguments) $(BuildArguments) $(portableLinux) --env-vars \"DISABLE_CROSSGEN=1,TARGETPLATFORM=$(PB_Architecture),TARGETRID=$(TargetRid),CROSS=1\"",
+        "args": "run --name $(PB_DockerContainerName) --rm --privileged -v $(System.DefaultWorkingDirectory)/$(PB_RepoName):$(PB_GitDirectory) -w $(PB_GitDirectory) -e HOME -e ROOTFS_DIR -e PUBLISH_TO_AZURE_BLOB -e CONNECTION_STRING -e CLI_NUGET_FEED_URL -e CLI_NUGET_SYMBOLS_FEED_URL -e CLI_NUGET_API_KEY -e NUGET_FEED_URL -e NUGET_SYMBOLS_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD $(PB_DockerImageName) ./build.sh $(CommonArguments) $(BuildArguments) $(PB_PortableBuild) --env-vars \"DISABLE_CROSSGEN=1,TARGETPLATFORM=$(PB_Architecture),TARGETRID=$(TargetRid),CROSS=1\"",
         "disableAutoCwd": "false",
         "cwd": "",
         "failOnStandardError": "false"
@@ -147,6 +147,25 @@
         "arguments": "$(DockerHost_ToolsDirectory)/scripts/docker/cleanup-docker.sh",
         "workingFolder": "",
         "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Copy Publish Artifact: Build Logs",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "1d341bb0-2106-458c-8422-d00bcea6512a",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "CopyRoot": "",
+        "Contents": "**/*.log",
+        "ArtifactName": "Build Logs",
+        "ArtifactType": "Container",
+        "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
       }
     },
     {
@@ -278,7 +297,7 @@
     "PB_Architecture": {
       "value": "arm"
     },
-    "portableLinux": {
+    "PB_PortableBuild": {
       "value": "",
       "allowOverride": true
     },

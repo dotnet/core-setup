@@ -572,27 +572,15 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path)
 
     pal::readdir(sdk_path, &versions);
     fx_ver_t max_ver(-1, -1, -1);
-    fx_ver_t max_pre(-1, -1, -1);
     for (const auto& version : versions)
     {
         trace::verbose(_X("Considering version... [%s]"), version.c_str());
 
         fx_ver_t ver(-1, -1, -1);
-        if (fx_ver_t::parse(version, &ver, true))
+        if (fx_ver_t::parse(version, &ver, false))  // false -- implies both production and prerelease.
         {
             max_ver = std::max(ver, max_ver);
         }
-        if (fx_ver_t::parse(version, &ver, false))
-        {
-            max_pre = std::max(ver, max_pre);
-        }
-    }
-
-    // No production, use the max pre-release.
-    if (max_ver == fx_ver_t(-1, -1, -1))
-    {
-        trace::verbose(_X("No production version found, so using latest prerelease"));
-        max_ver = max_pre;
     }
 
     pal::string_t max_ver_str = max_ver.as_str();
@@ -612,8 +600,20 @@ bool fx_muxer_t::resolve_sdk_dotnet_path(const pal::string_t& own_dir, pal::stri
 {
     trace::verbose(_X("--- Resolving dotnet from working dir"));
     pal::string_t cwd;
+    if (!pal::getcwd(&cwd))
+    {
+        trace::verbose(_X("Failed to obtain current working dir"));
+        assert(cwd.empty());
+    }
+
+    return resolve_sdk_dotnet_path(own_dir, cwd, cli_sdk);
+}
+
+bool fx_muxer_t::resolve_sdk_dotnet_path(const pal::string_t& own_dir, const pal::string_t& cwd, pal::string_t* cli_sdk)
+{
     pal::string_t global;
-    if (pal::getcwd(&cwd))
+
+    if (!cwd.empty())
     {
         for (pal::string_t parent_dir, cur_dir = cwd; true; cur_dir = parent_dir)
         {
@@ -635,10 +635,6 @@ bool fx_muxer_t::resolve_sdk_dotnet_path(const pal::string_t& own_dir, pal::stri
             }
         }
     }
-    else
-    {
-        trace::verbose(_X("Failed to obtain current working dir"));
-    }
 
     std::vector<pal::string_t> hive_dir;
     pal::string_t local_dir;
@@ -647,7 +643,7 @@ bool fx_muxer_t::resolve_sdk_dotnet_path(const pal::string_t& own_dir, pal::stri
 
     if (multilevel_lookup)
     {
-        if (pal::getcwd(&cwd))
+        if (!cwd.empty())
         {
             hive_dir.push_back(cwd);
         }
@@ -656,7 +652,12 @@ bool fx_muxer_t::resolve_sdk_dotnet_path(const pal::string_t& own_dir, pal::stri
             hive_dir.push_back(local_dir);
         }
     }
-    hive_dir.push_back(own_dir);
+
+    if (!own_dir.empty())
+    {
+        hive_dir.push_back(own_dir);
+    }
+
     if (multilevel_lookup && pal::get_global_dotnet_dir(&global_dir))
     {
         hive_dir.push_back(global_dir);
@@ -854,9 +855,9 @@ int fx_muxer_t::parse_args_and_execute(
 
     if (cur_i != 1)
     {
-        vec_argv.resize(argc - cur_i + 1, 0); // +1 for dotnet
-        memcpy(vec_argv.data() + 1, argv + cur_i, (argc - cur_i) * sizeof(pal::char_t*));
-        vec_argv[0] = argv[0];
+        vec_argv.reserve(argc - cur_i + 1); // +1 for dotnet
+        vec_argv.push_back(argv[0]);
+        vec_argv.insert(vec_argv.end(), argv + cur_i, argv + argc);
         new_argv = vec_argv.data();
         new_argc = vec_argv.size();
     }
@@ -1065,10 +1066,11 @@ int fx_muxer_t::execute(const int argc, const pal::char_t* argv[])
 
     // Transform dotnet [command] [args] -> dotnet dotnet.dll [command] [args]
 
-    std::vector<const pal::char_t*> new_argv(argc + 1);
-    memcpy(&new_argv.data()[2], argv + 1, (argc - 1) * sizeof(pal::char_t*));
-    new_argv[0] = argv[0];
-    new_argv[1] = sdk_dotnet.c_str();
+    std::vector<const pal::char_t*> new_argv;
+    new_argv.reserve(argc + 1);
+    new_argv.push_back(argv[0]);
+    new_argv.push_back(sdk_dotnet.c_str());
+    new_argv.insert(new_argv.end(), argv + 1, argv + argc);
 
     trace::verbose(_X("Using dotnet SDK dll=[%s]"), sdk_dotnet.c_str());
     result = parse_args_and_execute(own_dir, own_dll, 1, new_argv.size(), new_argv.data(), false, host_mode_t::muxer, &is_an_app);

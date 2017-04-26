@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Build
             bool deleteAppHost=false)
         {
             File.Delete(Path.Combine(path, $"{name}{Constants.ExeSuffix}"));
-            File.Delete(Path.Combine(path, $"{name}.dll"));
+            File.Delete(Path.Combine(path, $"{Constants.DynamicLibPrefix}{name}{Constants.DynamicLibSuffix}"));
             File.Delete(Path.Combine(path, $"{name}.pdb"));
 
             if (deleteRuntimeConfigJson)

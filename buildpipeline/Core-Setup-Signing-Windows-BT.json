@@ -157,26 +157,6 @@
       }
     },
     {
-      "enabled": false,
-      "continueOnError": true,
-      "alwaysRun": false,
-      "displayName": "Compile CoreHost",
-      "timeoutInMinutes": 0,
-      "task": {
-        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "scriptType": "filePath",
-        "scriptName": "src/build/dotnet-host-build/build.ps1",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,CompileCoreHost",
-        "inlineScript": "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\"",
-        "workingFolder": "",
-        "failOnStandardError": "true"
-      }
-    },
-    {
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
@@ -231,26 +211,6 @@
       }
     },
     {
-      "enabled": false,
-      "continueOnError": true,
-      "alwaysRun": false,
-      "displayName": "PackagePkgProjects",
-      "timeoutInMinutes": 0,
-      "task": {
-        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "scriptType": "filePath",
-        "scriptName": "src/build/dotnet-host-build/build.ps1",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,PackagePkgProjects,BuildProjectsForNuGetPackages",
-        "inlineScript": "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\"",
-        "workingFolder": "",
-        "failOnStandardError": "true"
-      }
-    },
-    {
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
@@ -290,7 +250,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,PublishSharedFrameworkAndSharedHost",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,PublishSharedFrameworkAndSharedHost $(PB_PortableBuild)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -417,7 +377,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,Test,InitPackage,GenerateVersionBadge,GenerateZip,GenerateMsis,GenerateNugetPackages",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,Test,InitPackage,GenerateVersionBadge,GenerateZip,GenerateMsis,GenerateNugetPackages $(PB_PortableBuild)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -463,7 +423,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,GenerateBundles",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,GenerateBundles $(PB_PortableBuild)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -482,37 +442,10 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,ExtractEngineFromBundle",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,ExtractEngineFromBundle $(PB_PortableBuild)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
-      }
-    },
-    {
-      "enabled": false,
-      "continueOnError": false,
-      "alwaysRun": false,
-      "displayName": "Sign Engine",
-      "timeoutInMinutes": 0,
-      "task": {
-        "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "solution": "src\\build\\dotnet-host-build\\sign.proj",
-        "platform": "",
-        "configuration": "$(BuildConfiguration)",
-        "msbuildArguments": "/t:SignEngine $(MsbuildSigningArguments)",
-        "clean": "false",
-        "maximumCpuCount": "false",
-        "restoreNugetPackages": "false",
-        "logProjectEvents": "false",
-        "createLogFile": "false",
-        "msbuildLocationMethod": "version",
-        "msbuildVersion": "15.0",
-        "msbuildArchitecture": "x64",
-        "msbuildLocation": ""
       }
     },
     {
@@ -528,7 +461,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,ReattachEngineToBundle",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,ReattachEngineToBundle $(PB_PortableBuild)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -546,7 +479,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "src\\build\\dotnet-host-build\\sign.proj",
+        "solution": "build_projects\\signing\\sign.proj",
         "platform": "",
         "configuration": "$(BuildConfiguration)",
         "msbuildArguments": "/t:SignBundle $(MsbuildSigningArguments)",
@@ -614,10 +547,29 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,Publish",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,Publish $(PB_PortableBuild)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Copy Publish Artifact: Build Logs",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "1d341bb0-2106-458c-8422-d00bcea6512a",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "CopyRoot": "",
+        "Contents": "**\\*.log",
+        "ArtifactName": "Build Logs",
+        "ArtifactType": "Container",
+        "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
       }
     }
   ],
@@ -694,14 +646,21 @@
     "GITHUB_PASSWORD": {
       "value": "PassedViaPipeBuild"
     },
-    "SIGNED_PACKAGES": {
+    "BUILD_FULL_PLATFORM_MANIFEST": {
+      "value": "true"
+    },
+    "PUBLISH_RID_AGNOSTIC_PACKAGES": {
       "value": "true"
     },
     "CertificateId": {
       "value": "400"
     },
     "PB_DistroRid": {
-      "value": "win7-x64"
+      "value": "win-x64"
+    },
+    "RID": {
+      "value": "win-x64",
+      "allowOverride": true
     },
     "MsbuildSigningArguments": {
       "value": "/p:CertificateId=$(CertificateId) /v:detailed"
@@ -711,6 +670,10 @@
     },
     "system.debug": {
       "value": "false"
+    },
+    "PB_PortableBuild": {
+      "value": "",
+      "allowOverride": true
     },
     "NUGET_SYMBOLS_FEED_URL": {
       "value": "https://dotnet.myget.org/F/dotnet-core/symbols/api/v2/package"

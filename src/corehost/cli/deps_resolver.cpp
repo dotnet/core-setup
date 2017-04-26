@@ -133,35 +133,47 @@ void deps_resolver_t::get_dir_assemblies(
     }
 }
 
-void deps_resolver_t::setup_shared_package_probes(
+void deps_resolver_t::setup_shared_store_probes(
     const hostpolicy_init_t& init,
     const arguments_t& args)
 {
-    for (const auto& shared : args.env_shared_packages)
+    for (const auto& shared : args.env_shared_store)
     {
         if (pal::directory_exists(shared))
         {
-            // Shared Packages probe: DOTNET_SHARED_PACKAGES
+            // Shared Store probe: DOTNET_SHARED_STORE
             m_probes.push_back(probe_config_t::lookup(shared));
         }
     }
 
-    if (pal::directory_exists(args.local_shared_packages))
+    if (pal::directory_exists(args.local_shared_store))
     {
-        // Shared Packages probe: $HOME/.dotnet/packages or %USERPROFILE%\.dotnet\packages
-        m_probes.push_back(probe_config_t::lookup(args.local_shared_packages));
+        // Shared Store probe: $HOME/.dotnet/store or %USERPROFILE%\.dotnet\store
+        m_probes.push_back(probe_config_t::lookup(args.local_shared_store));
     }
 
-    if (pal::directory_exists(args.dotnet_shared_packages))
+    if (pal::directory_exists(args.dotnet_shared_store))
     {
-        m_probes.push_back(probe_config_t::lookup(args.dotnet_shared_packages));
+        m_probes.push_back(probe_config_t::lookup(args.dotnet_shared_store));
     }
 
-    if (args.global_shared_packages != args.dotnet_shared_packages && pal::directory_exists(args.global_shared_packages))
+    if (args.global_shared_store != args.dotnet_shared_store && pal::directory_exists(args.global_shared_store))
     {
-        // Shared Packages probe: /usr/share/dotnet/packages or C:\Program Files (x86)\dotnet\packages
-        m_probes.push_back(probe_config_t::lookup(args.global_shared_packages));
+        // Shared Store probe: /usr/share/dotnet/store or C:\Program Files (x86)\dotnet\store
+        m_probes.push_back(probe_config_t::lookup(args.global_shared_store));
     }
+}
+
+pal::string_t deps_resolver_t::get_probe_directories()
+{
+    pal::string_t directories;
+    for (const auto& pc : m_probes)
+    {
+        directories.append(pc.probe_dir);
+        directories.push_back(PATH_SEPARATOR);
+    }
+
+    return directories;
 }
 
 void deps_resolver_t::setup_probe_config(
@@ -194,7 +206,7 @@ void deps_resolver_t::setup_probe_config(
     // The probe directory will be available at probe time.
     m_probes.push_back(probe_config_t::published_deps_dir());
 
-    setup_shared_package_probes(init, args);
+    setup_shared_store_probes(init, args);
 
     for (const auto& probe : m_additional_probes)
     {
@@ -296,6 +308,21 @@ bool deps_resolver_t::probe_deps_entry(const deps_entry_t& entry, const pal::str
     return false;
 }
 
+bool report_missing_assembly_in_manifest(const deps_entry_t& entry)
+{
+    if (!entry.runtime_store_manifest_list.empty())
+    {
+        trace::error(_X("Error: assembly specified in the dependencies manifest was not found probably due to missing runtime store associated with %s -- package: '%s', version: '%s', path: '%s'"), 
+                entry.runtime_store_manifest_list.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
+    }
+    else
+    {
+        trace::error(_X("Error: assembly specified in the dependencies manifest was not found -- package: '%s', version: '%s', path: '%s'"), 
+                entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
+    }
+
+    return false;
+}
 /**
  *  Resovle the TPA assembly locations
  */
@@ -334,9 +361,7 @@ bool deps_resolver_t::resolve_tpa_list(
         }
         else
         {
-            trace::error(_X("Error: assembly specified in the dependencies manifest was not found -- package: '%s', version: '%s', path: '%s'"), 
-                entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
-            return false;
+            return report_missing_assembly_in_manifest(entry);
         }
     };
 
@@ -563,9 +588,8 @@ bool deps_resolver_t::resolve_probe_dirs(
                     entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
                 return true;
             }
-            trace::error(_X("Error: assembly specified in the dependencies manifest was not found -- package: '%s', version: '%s', path: '%s'"), 
-                entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
-            return false;
+
+            return report_missing_assembly_in_manifest(entry);
         }
 
         if (m_api_set_paths.empty() && pal::need_api_sets() &&
