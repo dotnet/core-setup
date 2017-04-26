@@ -78,11 +78,30 @@ namespace Microsoft.DotNet.Host.Build
             var buildNumberMajor = hostVer.VerRsrcBuildMajor;
             var buildNumberMinor = hostVer.VerRsrcBuildMinor;
             var buildDetails = $"{semVer}, {commitHash} built by: {System.Environment.MachineName}, UTC: {DateTime.UtcNow.ToString()}";
+            string predefines = string.Empty;
+
+            if ( assemblyName.Equals("apphost", StringComparison.OrdinalIgnoreCase))
+            {
+                predefines = @"
+#define VER_COMPANYNAME_STR         "" ""
+#define VER_LEGALCOPYRIGHT_STR      "" "";
+#define VER_PRODUCTNAME_STR         "" "";
+";
+            }
+
             var rcContent = $@"
 #include <Windows.h>
 
+{predefines}
+
 #ifndef VER_COMPANYNAME_STR
 #define VER_COMPANYNAME_STR         ""Microsoft Corporation""
+#endif
+#ifndef VER_LEGALCOPYRIGHT_STR
+#define VER_LEGALCOPYRIGHT_STR      ""\xa9 Microsoft Corporation.  All rights reserved."";
+#endif
+#ifndef VER_PRODUCTNAME_STR
+#define VER_PRODUCTNAME_STR         ""Microsoft\xae .NET Core Framework"";
 #endif
 #ifndef VER_FILEDESCRIPTION_STR
 #define VER_FILEDESCRIPTION_STR     ""{assemblyName}""
@@ -93,9 +112,6 @@ namespace Microsoft.DotNet.Host.Build
 #ifndef VER_ORIGINALFILENAME_STR
 #define VER_ORIGINALFILENAME_STR    VER_FILEDESCRIPTION_STR
 #endif
-#ifndef VER_PRODUCTNAME_STR
-#define VER_PRODUCTNAME_STR         ""Microsoft\xae .NET Core Framework"";
-#endif
 #undef VER_PRODUCTVERSION
 #define VER_PRODUCTVERSION          {majorVersion},{minorVersion},{patchVersion},{buildNumberMajor}
 #undef VER_PRODUCTVERSION_STR
@@ -104,9 +120,6 @@ namespace Microsoft.DotNet.Host.Build
 #define VER_FILEVERSION             {majorVersion},{minorVersion},{patchVersion},{buildNumberMajor}
 #undef VER_FILEVERSION_STR
 #define VER_FILEVERSION_STR         ""{majorVersion},{minorVersion},{buildNumberMajor},{buildNumberMinor},{buildDetails}"";
-#ifndef VER_LEGALCOPYRIGHT_STR
-#define VER_LEGALCOPYRIGHT_STR      ""\xa9 Microsoft Corporation.  All rights reserved."";
-#endif
 #ifndef VER_DEBUG
 #ifdef DEBUG
 #define VER_DEBUG                   VS_FF_DEBUG
