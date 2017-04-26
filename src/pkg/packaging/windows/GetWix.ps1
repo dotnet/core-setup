@@ -13,7 +13,7 @@ if (!(Test-Path "$OutputDir"))
 
 if(!(Test-Path "$outFile"))
 {
-    Write-Output "Downloading WixTools.."
+    Write-Output "Downloading WixTools to $outFile.."
     Write-Output $uri
     Invoke-WebRequest -Uri $uri -OutFile $outFile
 }

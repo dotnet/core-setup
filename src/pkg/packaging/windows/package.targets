@@ -15,8 +15,14 @@
       </PropertyGroup>
 
       <Exec Command="powershell -NoProfile -NoLogo $(GetWixScript) -WixVersion $(WixVersion) -OutputDir $(WixToolsDir)" />
+      
+      <ItemGroup>
+        <_filelist Include="$(WixToolsDir)\**" />
+      </ItemGroup>
 
-      <Message Importance="High" Text="Extracting Wix tools..." />
+      <Message Importance="High" Text="Contents of $(WixToolsDir): @(_filelist)" />
+   
+      <Message Importance="High" Text="Extracting Wix tools from $(WixToolsDir)\$(WixFilename)..." />
       <ZipFileExtractToDirectory Condition="!Exists('$(WixToolsDir)\candle.exe')"
                                  SourceArchive="$(WixToolsDir)\$(WixFilename)"
                                  DestinationDirectory="$(WixToolsDir)"
