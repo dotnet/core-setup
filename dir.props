@@ -11,7 +11,7 @@
     <PatchVersion>0</PatchVersion>
     <StabilizePackageVersion>false</StabilizePackageVersion>
     <LockHostVersion>false</LockHostVersion>
-    <PreReleaseLabel>preview1</PreReleaseLabel>
+    <PreReleaseLabel>preview2</PreReleaseLabel>
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
     <Channel>master</Channel>
     <BranchName>master</BranchName>
