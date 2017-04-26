@@ -4,7 +4,7 @@
 )
 
 $uri = "https://dotnetcli.blob.core.windows.net/build/wix/" + $wixFilename
-$outFile = $OutputDir + "/" + $wixFilename
+$outFile = $OutputDir + "\\" + $wixFilename
 
 if (!(Test-Path "$OutputDir"))
 {
