@@ -4,11 +4,23 @@
     
     <UsingTask TaskName="GenerateMsiVersion" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll" />
     <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll" />
+    <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
     <Target Name="GenerateMsis"
             Condition="'$(OSGroup)' == 'Windows_NT'">
       
-      <Exec Command="powershell -ExecutionPolicy Unrestricted -NoProfile -NoLogo $(GetWixScript) -WixVersion $(WixVersion) -OutputDir $(WixToolsDir)" />
+      <PropertyGroup>
+        <WixVersion Condition="'$(WixVersion)' == ''">3.10.2</WixVersion>
+        <WixFilename>wix.$(WixVersion).zip</WixFilename>
+      </PropertyGroup>
+
+      <Exec Command="powershell -NoProfile -NoLogo $(GetWixScript) -WixVersion $(WixVersion) -OutputDir $(WixToolsDir)" />
+
+      <Message Importance="High" Text="Extracting Wix tools..." />
+      <ZipFileExtractToDirectory Condition="!Exists('$(WixToolsDir)\candle.exe')"
+                                 SourceArchive="$(WixToolsDir)\$(WixFilename)"
+                                 DestinationDirectory="$(WixToolsDir)"
+                                 OverwriteDestination="true" />
 
       <GenerateGuidFromName Name="$(PackagesOutDir)$(SharedHostInstallerFile)">
         <Output TaskParameter="GeneratedGui" PropertyName="SharedHostUpgradeCode" />
@@ -61,9 +73,9 @@
         <SharedFxParams>$(MsiVersionString) $(SharedFrameworkName) $(HostVersion) $(SharedFxUpgradeCode) $(ArchParams)</SharedFxParams>
       </PropertyGroup>
 
-      <Exec Command="powershell -ExecutionPolicy Unrestricted -NoProfile -NoLogo $(WindowsScriptRoot)%(WixOutputs.Filename)\generatemsi.ps1 %(WixOutputs.InputDir) %(WixOutputs.InstallerName) $(WixToolsDir) %(WixOutputs.BrandName) $(CommonParams) %(WixOutputs.Identity) %(WixOutputs.UpgradeCode)" />
+      <Exec Command="powershell -NoProfile -NoLogo $(WindowsScriptRoot)%(WixOutputs.Filename)\generatemsi.ps1 %(WixOutputs.InputDir) %(WixOutputs.InstallerName) $(WixToolsDir) %(WixOutputs.BrandName) $(CommonParams) %(WixOutputs.Identity) %(WixOutputs.UpgradeCode)" />
       <!-- shared framework -->
-      <Exec Command="powershell -ExecutionPolicy Unrestricted -NoProfile -NoLogo $(WindowsScriptRoot)%(WixOutputs2.Filename)\generatemsi.ps1 %(WixOutputs2.InputDir) %(WixOutputs2.InstallerName) $(WixToolsDir) %(WixOutputs2.BrandName) $(SharedFxParams) %(WixOutputs2.Identity)" />
+      <Exec Command="powershell -NoProfile -NoLogo $(WindowsScriptRoot)%(WixOutputs2.Filename)\generatemsi.ps1 %(WixOutputs2.InputDir) %(WixOutputs2.InstallerName) $(WixToolsDir) %(WixOutputs2.BrandName) $(SharedFxParams) %(WixOutputs2.Identity)" />
   </Target>
 
   <Target Name="GenerateBundles"
@@ -87,6 +99,6 @@
         <BundleParameters>$(ShareFXMsi) $(HostMsi) $(HostFxrMsi) $(SharedBundle) $(WixToolsDir) $(SharedBrandName) $(MsiVersionString) $(BundleDisplayVersion) $(SharedFrameworkName) $(HostVersion) $(SharedBundleCode) $(ArchParams)</BundleParameters>
      </PropertyGroup>
 
-     <Exec Command="powershell -ExecutionPolicy Unrestricted -NoProfile -NoLogo $(SharedFxBundleScript) $(BundleParameters)" />
+     <Exec Command="powershell -NoProfile -NoLogo $(SharedFxBundleScript) $(BundleParameters)" />
   </Target>
 </Project>
