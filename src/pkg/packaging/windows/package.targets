@@ -26,7 +26,7 @@
       <ZipFileExtractToDirectory Condition="!Exists('$(WixToolsDir)\candle.exe')"
                                  SourceArchive="$(WixToolsDir)\$(WixFilename)"
                                  DestinationDirectory="$(WixToolsDir)"
-                                 OverwriteDestination="true" />
+                                 OverwriteDestination="false" />
 
       <GenerateGuidFromName Name="$(PackagesOutDir)$(SharedHostInstallerFile)">
         <Output TaskParameter="GeneratedGui" PropertyName="SharedHostUpgradeCode" />
