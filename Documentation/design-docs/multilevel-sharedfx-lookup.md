@@ -10,14 +10,14 @@ The executable is in charge of finding and loading the hostfxr.dll file. The hos
 
 .NET Core uses the Semantic Versioning system to manage its version number. It’s important to understand how this system works because since it’s being proposed to search files from different locations, it’s necessary to establish the software behavior based on compatibility limitations.
 
-The version number must take the form X.Y.Z where X is the major version, Y is the minor version, and Z is the patch version. Bug fixes and modifications that do not affect the API itself must increment the patch version. Changes that affect the API but have backwards compatibility must increment the minor version and reset the patch version to zero. Finally changes that are backwards incompatible must increment the major version and reset both patch and minor versions to zero.
+The version number must take the form X.Y.Z where X is the major version, Y is the minor version, and Z is the patch version. Bug fixes and modifications that do not affect the API itself must increment the patch version. Changes that affect the API but have backwards compatibility must increment the minor version and reset the patch version to zero. Finally, changes that are backwards incompatible must increment the major version and reset both patch and minor versions to zero.
 
 It’s also possible to append a dash followed by a string after the version number to specify a pre-release. The string must be composed of only alphanumeric characters plus dash. Precedence is determined by lexicographic ASCII sort order.
 
-Versions that are not pre-releases are called productions.
+Versions that are not pre-releases are called productions and take precendence over pre-release versions with the same numbers.
 
 	For instance, a valid Semantic Versioning number sort would be:
-	1.0.0 -> 1.0.1 -> 1.0.1-alpha -> 1.1.0 -> 1.1.1 -> 2.0.0.
+	1.0.0 -> 1.0.1 -> 1.1.0-alpha -> 1.1.0-rc1 -> 1.1.0 -> 1.1.1 -> 2.0.0.
 
 ## Executable
 
