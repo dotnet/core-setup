@@ -10,19 +10,19 @@ namespace Microsoft.DotNet.Cli.Build
     public class Monikers
     {
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
-        public const string CLISdkBrandName = "Microsoft .NET Core 1.0.0 - SDK Preview 2";
         public const string RuntimeName = "Microsoft .NET Core";
 
         private static string GetBrandName(BuildTargetContext c, string suffix)
         {
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
-            var releaseBrandingSuffix = c.BuildContext.Get<string>("ReleaseBrandingSuffix")?.Trim();
+            string releaseBrandingSuffix = c.BuildContext.Get<string>("ReleaseBrandingSuffix")?.Trim();
+            string runtimeBaseBranding = $"{RuntimeName} {buildVersion.Major}.{buildVersion.Minor}.{buildVersion.Patch}";
 
             string brandName = string.IsNullOrEmpty(releaseBrandingSuffix) ?
                                //RTM branding
-                               $"{RuntimeName} {buildVersion.Major}.{buildVersion.Minor}.{buildVersion.Patch} {suffix}"
+                               $"{runtimeBaseBranding} {suffix}"
                                //Pre-Release branding
-                               : $"{RuntimeName} {buildVersion.Major}.{buildVersion.Minor}.{buildVersion.Patch} {releaseBrandingSuffix} {suffix}";
+                               : $"{runtimeBaseBranding} {releaseBrandingSuffix} {suffix}";
             return brandName;
         }
 
