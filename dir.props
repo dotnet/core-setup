@@ -238,7 +238,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetRid)' == '' and '$(OSGroup)' == 'OSX'">
     <TargetRid>osx.10.12-x64</TargetRid>
-  </TargetRid>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetRid)' == '' and '$(DistroRid)' != ''">
     <TargetRid>$(DistroRid)</TargetRid>
   </PropertyGroup>
