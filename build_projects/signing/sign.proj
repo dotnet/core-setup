@@ -119,4 +119,33 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="SignUwpFiles" DependsOnTargets="GetSignUwpFiles">
+    <CallTarget Targets="SignFiles" />
+  </Target>
+
+  <Target Name="GetSignUwpFiles">
+    <ItemGroup>
+      <FilesToSign Include="$(OutDir)uwp/UWPHost.dll">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="$(OutDir)uwp/UWPShim.exe">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="$(OutDir)uwp/CopyWin32Resources.exe">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SignUwpAppxPackage" DependsOnTargets="GetSignUwpAppxPackage">
+    <CallTarget Targets="SignFiles" />
+  </Target>
+
+  <Target Name="GetSignUwpAppxPackage">
+    <ItemGroup>
+      <FilesToSign Include="$(RepoRoot)pgk/bin/packages/Microsoft.NET.CoreRuntime.2.0.appx">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
 </Project>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="dir.props" />
+  <PropertyGroup>
+    <HasRuntimePackages>false</HasRuntimePackages>
+    <NuGetTargetMoniker>UAP,Version=v10.1</NuGetTargetMoniker>
+    <NuGetRuntimeIdentifier Condition="$(NuGetRuntimeIdentifier) == ''">win10-$(Platform)</NuGetRuntimeIdentifier>
+    <AppxManifestTemplate>$(MSBuildProjectDirectory)\AppxManifest.xml.template</AppxManifestTemplate>
+    <AppxManifest>$(IntermediateOutputPath)AppxManifest.xml</AppxManifest>
+    <AppxName>Microsoft.NET.CoreRuntime</AppxName>
+    <AppxIdentityName>Microsoft.NET.CoreRuntime.$(SimpleVersion.Split('.')[0]).$(SimpleVersion.Split('.')[1])</AppxIdentityName>
+    <AppxDisplayName>Microsoft .Net Core Runtime Package $(SimpleVersion.Split('.')[0]).$(SimpleVersion.Split('.')[1])</AppxDisplayName>
+    <!-- path to contents of appx that will be zipped -->
+    <AppxOutputPath>$(IntermediateOutputPath)$(AppxIdentityName)</AppxOutputPath>
+    <!-- path of generated .appx package -->
+    <AppxOutputPackageName>$(PackageOutputPath)$(AppxIdentityName).appx</AppxOutputPackageName>
+    <OutputPath>$(IntermediateOutputPath)$(AppxIdentityName)</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AppxFileList Include="clretwrc.dll;coreclr.dll;mscordaccore.dll;mscordbi.dll;mscorrc.debug.dll"/>
+    <AppxFileList Include="mscorrc.dll;System.Private.CoreLib.ni.dll;clrjit.dll" />
+  </ItemGroup>
+
+  <!-- Add more files to be copied -->
+  <Target Name="IncludeAllFiles"
+          AfterTargets="ResolveNuGetPackages">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'@(AppxFileList->'%(FileName)%(Extension)')' != '%(FileName)%(Extension)'" />
+      <ReferenceCopyLocalPaths Include="logo.png" />
+      <ReferenceCopyLocalPaths Include="$(UwpHostBinDir)\uwphost.dll" />
+      <ReferenceCopyLocalPaths Include="$(AppxManifest)" />
+    </ItemGroup>
+ </Target>
+
+  <Target Name="GenerateAppxManifestFromTemplate"
+          BeforeTargets="IncludeAllFiles"
+          Inputs="$(AppxManifestTemplate)"
+          Outputs="$(AppxManifest)">
+    <WriteLinesToFile File="$(AppxManifest)"
+                      Lines="$([System.IO.File]::ReadAllText($(AppxManifestTemplate)).Replace('[AppxBuildArch]', $(Platform)).Replace('[AppxVersion]',$(SimpleVersion)).Replace('[AppxIdentityName]',$(AppxIdentityName)).Replace('[AppxDisplayName]',$(AppxDisplayName)))"
+                      Overwrite="true" />
+    <ItemGroup>
+      <FileWrites Include="$(AppxManifest)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="MakeAppx"
+          AfterTargets="Build">
+    <MakeDir Directories="$(PackageOutputPath)"/>  
+    <Delete Files="$(AppxOutputPackageName)" />
+    <Exec Command='CALL "$(VS140COMNTOOLS)vsdevcmd.bat" &amp; makeappx pack /d "$(AppxOutputPath)" /p "$(AppxOutputPackageName)" /o' />
+  </Target>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+
+</Project>

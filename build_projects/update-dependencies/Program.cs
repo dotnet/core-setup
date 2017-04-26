@@ -173,6 +173,7 @@ namespace Microsoft.DotNet.Scripts
             {
                 Path.Combine(Dirs.PkgProjects, "Microsoft.NETCore.App", "project.json.template"),
                 Path.Combine(Dirs.PkgProjects, "Microsoft.NETCore.UniversalWindowsPlatform", "project.json.template"),
+                Path.Combine(Dirs.PkgProjects, "Microsoft.NET.CoreRuntime", "project.json.template"),
                 Path.Combine(Dirs.PkgDeps, "project.json")
             };
 
