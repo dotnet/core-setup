@@ -11,13 +11,21 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
         public const string CLISdkBrandName = "Microsoft .NET Core 1.0.0 - SDK Preview 2";
+        public const string RuntimeName = "Microsoft .NET Core";
 
         private static string GetBrandName(BuildTargetContext c, string suffix)
         {
             var buildVersion = c.BuildContext.Get<BuildVersion>("BuildVersion");
-            return String.Format("Microsoft .NET Core {0}.{1}.{2} - {3}", buildVersion.Major, 
-            buildVersion.Minor, buildVersion.Patch, suffix);
+            var releaseBrandingSuffix = c.BuildContext.Get<string>("ReleaseBrandingSuffix")?.Trim();
+
+            string brandName = string.IsNullOrEmpty(releaseBrandingSuffix) ?
+                               //RTM branding
+                               $"{RuntimeName} {buildVersion.Major}.{buildVersion.Minor}.{buildVersion.Patch} {suffix}"
+                               //Pre-Release branding
+                               : $"{RuntimeName} {buildVersion.Major}.{buildVersion.Minor}.{buildVersion.Patch} {releaseBrandingSuffix} {suffix}";
+            return brandName;
         }
+
         public static string GetSharedFxBrandName(BuildTargetContext c)
         {
             return GetBrandName(c, "Runtime");
