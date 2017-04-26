@@ -236,6 +236,9 @@
     <TargetRid Condition="'$(TargetArchitecture)' == 'arm'">win8-arm</TargetRid>
     <TargetRid Condition="'$(TargetArchitecture)' == 'arm64'">win10-arm64</TargetRid>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetRid)' == '' and '$(OSGroup)' == 'OSX'">
+    <TargetRid>osx.10.12-x64</TargetRid>
+  </TargetRid>
   <PropertyGroup Condition="'$(TargetRid)' == '' and '$(DistroRid)' != ''">
     <TargetRid>$(DistroRid)</TargetRid>
   </PropertyGroup>
