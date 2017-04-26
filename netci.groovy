@@ -28,7 +28,7 @@ platformList.each { platform ->
 
     // Calculate build command
     if (os == 'Windows_NT') {
-        buildCommand = ".\\build.cmd -ConfigurationGroup ${configuration} -TargetArchitecture ${architecture} -Targets Default"
+        buildCommand = ".\\build.cmd -ConfigurationGroup ${configuration} -TargetArchitecture ${architecture}"
     }
 /*
     else if ((os.startsWith("Ubuntu") || os.startsWith("Tizen")) &&
@@ -48,7 +48,7 @@ platformList.each { platform ->
     }
 */    
     else if (os == 'Ubuntu') {
-        buildCommand = "./build.sh --configuration ${configuration} --docker ubuntu.14.04 --targets Default"
+        buildCommand = "./build.sh --configuration ${configuration} --docker ubuntu.14.04"
     }
     else {
         // Jenkins non-Ubuntu CI machines don't have docker
