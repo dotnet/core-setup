@@ -101,7 +101,7 @@ platformList.each { platform ->
 
     Utilities.addArchival(newJob, settings)
 
-    newJob.with { disable(false) }
+    newJob.with { disabled(false) }
 }
 
 // **************************
