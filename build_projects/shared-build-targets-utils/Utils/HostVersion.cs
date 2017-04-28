@@ -39,6 +39,8 @@ namespace Microsoft.DotNet.Cli.Build
 
             public string WithoutSuffix => $"{Major}.{Minor}.{Patch}";
 
+            public string WithoutBuildNumber => $"{Major}.{Minor}.{Patch}-{Release}";
+
             // The version numbers to be included in the embedded version resource (.rc) files.
             public string VerRsrcBuildMajor => !string.IsNullOrEmpty(BuildMajor) ? BuildMajor : CommitCountString;
             public string VerRsrcBuildMinor => !string.IsNullOrEmpty(BuildMinor) ? BuildMinor : "00";

@@ -263,8 +263,8 @@ namespace Microsoft.DotNet.Host.Build
             c.BuildContext["VersionBadge"] = Path.Combine(Dirs.Output, versionBadgeName);
 
             var sharedFrameworkVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion.ToString();
-            var hostFxrVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrVersion.ToString();
+            var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion.WithoutBuildNumber;
+            var hostFxrVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrVersion.WithoutBuildNumber;
 
             AddInstallerArtifactToContext(c, "dotnet-host", "SharedHost", hostVersion);
             AddInstallerArtifactToContext(c, "dotnet-hostfxr", "HostFxr", hostFxrVersion);
