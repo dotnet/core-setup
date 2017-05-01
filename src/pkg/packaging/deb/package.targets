@@ -4,12 +4,19 @@
 
   <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
 
+  <PropertyGroup>
+    <IsDebianBasedDistro Condition="$(PackageTargetRid.StartsWith('ubuntu')) or
+                                    $(PackageTargetRid.StartsWith('debian'))">true</IsDebianBasedDistro>
+    <BuildDebPackage Condition="'$(IsDebianBasedDistro)' == true and '$(TargetArchitecture)' == 'x64'">true</BuildDebPackage>
+    <DebianConfigJsonName>debian_config.json</DebianConfigJsonName>
+  </PropertyGroup>
+
   <Target Name="InitializeDotnetDebTool">
     <Exec Command="$(DotnetSdkToolCommand) restore $(dotnetDebToolSource)"/>
     <Exec Command="$(DotnetSdkToolCommand) pack $(dotnetDebToolSource) --output $(PackagesOutDir)intermediate/ --version-suffix $(VersionSuffix)"/>
 
     <ItemGroup>
-      <pkFiles Include="$(PackagesOutDir)intermediate/dotnet-deb-tool.*.nupkg" 
+      <pkFiles Include="$(PackagesOutDir)intermediate/dotnet-deb-tool.*.nupkg"
                Exclude="$(PackagesOutDir)intermediate/*.symbols.nupkg" />
     </ItemGroup>
 
@@ -29,12 +36,12 @@
 
     <Exec Command="$(DotnetSdkToolCommand) restore -s $(dotnetDebToolPackageSource)"
           WorkingDirectory="$(consumingProjectDirectory)" />
-  
+
   </Target>
 
-  <Target Name="GenerateDebs" 
+  <Target Name="GenerateDebs"
           DependsOnTargets="InitializeDotnetDebTool;GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb"
-          Condition="'$(BuildDebPkg)'=='true' and '$(TargetArchitecture)' == 'x64'" />
+          Condition="'$(BuildDebPackage)'=='true'" />
 
   <Target Name="GenerateSharedHostDeb">
     <PropertyGroup>
@@ -66,24 +73,43 @@
     <MakeDir Directories="$(debLayoutPackageRoot)" />
     <MakeDir Directories="$(debLayoutSamples)" />
     <MakeDir Directories="$(debLayoutDocs)" />
-    
+
     <!-- Copy files to debian layout -->
     <ItemGroup>
-        <SHFiles Include="$(InputRoot)/**/*" />
-        <SHManpages Include="$(ManPagesDir)/**/*" />
+      <SHFiles Include="$(InputRoot)/**/*" />
+      <SHManpages Include="$(ManPagesDir)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(SHFiles)" DestinationFolder="$(debLayoutPackageRoot)"/>
     <Copy SourceFiles="@(SHManpages)" DestinationFolder="$(debLayoutDocs)"/>
 
     <!-- Replace config json variables -->
-    <WriteLinesToFile
-      File="$(debLayoutDirectory)$(ConfigJsonName)"
-      Lines="$([System.IO.File]::ReadAllText('$(ConfigJsonFile)').Replace('%25SHARED_HOST_BRAND_NAME%25', '$(SharedHostBrandName)'))"
-      Overwrite="true" />
+    <ItemGroup>
+      <SharedHostTokenValue Include="%SHARED_HOST_BRAND_NAME%">
+        <ReplacementString>$(SharedHostBrandName)</ReplacementString>
+      </SharedHostTokenValue>
+    </ItemGroup>
+
+    <ReplaceFileContents InputFile="$(ConfigJsonFile)"
+                         DestinationFile="$(debLayoutDirectory)$(DebianConfigJsonName)"
+                         ReplacementItems="@(SharedHostTokenValue)" />
 
     <Exec Command="$(DotnetSdkToolCommand) deb-tool -i $(debLayoutDirectory) -o $(debIntermediatesDir) -n $(DebPackageName) -v $(DebPackageVersion)"
           WorkingDirectory="$(consumingProjectDirectory)" />
+
+    <!-- Copy package to output -->
+    <ItemGroup>
+      <GeneratedDebFiles Remove="@(GeneratedDebFiles)" />
+      <GeneratedDebFiles Include="$(debIntermediatesDir)/*.deb" />
+    </ItemGroup>
+
+    <Error Text="@(GeneratedDebFiles->Count()) .deb files generated." Condition="'@(GeneratedDebFiles->Count())' != 1" />
+
+    <Copy SourceFiles="@(GeneratedDebFiles)"
+          DestinationFiles="$(DebFile)"
+          OverwriteReadOnlyFiles="True"
+          SkipUnchangedFiles="False"
+          UseHardlinksIfPossible="False" />
 
   </Target>
 
@@ -116,24 +142,51 @@
     <MakeDir Directories="$(debLayoutPackageRoot)" />
     <MakeDir Directories="$(debLayoutSamples)" />
     <MakeDir Directories="$(debLayoutDocs)" />
-    
+
     <!-- Copy files to debian layout -->
     <ItemGroup>
-        <HFFiles Include="$(InputRoot)/**/*" />
+      <HFFiles Include="$(InputRoot)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(HFFiles)" DestinationFolder="$(debLayoutPackageRoot)"/>
 
     <!-- Replace config json variables -->
-    <WriteLinesToFile
-      File="$(debLayoutDirectory)$(ConfigJsonName)"
-      Lines="$([System.IO.File]::ReadAllText('$(ConfigJsonFile)').Replace('%25HOSTFXR_BRAND_NAME%25', '$(HostFxrBrandName)').Replace('%25SHARED_HOST_DEBIAN_VERSION%25', '$(HostVersion)').Replace('%25HOSTFXR_NUGET_VERSION%25', '$(HostVersion)').Replace('%25HOSTFXR_DEBIAN_PACKAGE_NAME%25', '$(DebPackageName)')
-      )"
-      Overwrite="true" />
+    <ItemGroup>
+      <HostFxrTokenValue Include="%HOSTFXR_BRAND_NAME%">
+        <ReplacementString>$(HostFxrBrandName)</ReplacementString>
+      </HostFxrTokenValue>
+      <HostFxrTokenValue Include="%SHARED_HOST_DEBIAN_VERSION%">
+        <ReplacementString>$(HostVersion)</ReplacementString>
+      </HostFxrTokenValue>
+      <HostFxrTokenValue Include="%HOSTFXR_NUGET_VERSION%">
+        <ReplacementString>$(HostVersion)</ReplacementString>
+      </HostFxrTokenValue>
+      <HostFxrTokenValue Include="%HOSTFXR_DEBIAN_PACKAGE_NAME%">
+        <ReplacementString>$(DebPackageName)</ReplacementString>
+      </HostFxrTokenValue>
+    </ItemGroup>
+
+    <ReplaceFileContents InputFile="$(ConfigJsonFile)"
+                         DestinationFile="$(debLayoutDirectory)$(DebianConfigJsonName)"
+                         ReplacementItems="@(HostFxrTokenValue)" />
 
     <Exec Command="$(DotnetSdkToolCommand) deb-tool -i $(debLayoutDirectory) -o $(debIntermediatesDir) -n $(DebPackageName) -v $(DebPackageVersion)"
           WorkingDirectory="$(consumingProjectDirectory)" />
 
+    <!-- Copy package to output -->
+    <ItemGroup>
+      <GeneratedDebFiles Remove="@(GeneratedDebFiles)" />
+      <GeneratedDebFiles Include="$(debIntermediatesDir)/*.deb" />
+    </ItemGroup>
+
+    <Error Text="@(GeneratedDebFiles->Count()) .deb files generated." Condition="'@(GeneratedDebFiles->Count())' != 1" />
+
+    <Copy SourceFiles="@(GeneratedDebFiles)"
+          DestinationFiles="$(DebFile)"
+          OverwriteReadOnlyFiles="True"
+          SkipUnchangedFiles="False"
+          UseHardlinksIfPossible="False" />
+    
   </Target>
 
   <Target Name="GenerateSharedFrameworkDeb">
@@ -141,7 +194,7 @@
       <DebPackageName>$(SharedFxDebPkgName)</DebPackageName>
       <DebPackageVersion>$(HostVersion)</DebPackageVersion>
       <InputRoot>$(SharedHostPublishRoot)</InputRoot>
-      <DebFile>$(SharedHostInstallerFile)</DebFile>
+      <DebFile>$(SharedFrameworkInstallerFile)</DebFile>
       <ConfigJsonName>dotnet-sharedframework-debian_config.json</ConfigJsonName>
       <ConfigJsonFile>$(debPackaginfConfigPath)$(ConfigJsonName)</ConfigJsonFile>
       <debIntermediatesDir>$(PackagesIntermediateDir)$(DebPackageName)/$(DebPackageVersion)</debIntermediatesDir>
@@ -165,11 +218,11 @@
     <MakeDir Directories="$(debLayoutPackageRoot)" />
     <MakeDir Directories="$(debLayoutSamples)" />
     <MakeDir Directories="$(debLayoutDocs)" />
-    
+
     <!-- Copy files to debian layout -->
     <ItemGroup>
-        <SHFiles Include="$(InputRoot)/**/*" />
-        <SHManpages Include="$(ManPagesDir)/**/*" />
+      <SHFiles Include="$(InputRoot)/**/*" />
+      <SHManpages Include="$(ManPagesDir)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(SHFiles)" DestinationFolder="$(debLayoutPackageRoot)"/>
@@ -177,26 +230,49 @@
 
     <!-- Replace config json variables -->
     <ItemGroup>
-      <ConfigPattern Include="%25SHARED_HOST_DEBIAN_VERSION%25" /> <ConfigReplace Include="$(HostVersion)" />
-      <ConfigPattern Include="%25HOSTFXR_DEBIAN_PACKAGE_NAME%25" /> <ConfigReplace Include="$(HostFxrDebPkgName)" />
-      <ConfigPattern Include="%25HOSTFXR_DEBIAN_VERSION%25" /> <ConfigReplace Include="$(HostVersion)" />
-      <ConfigPattern Include="%25SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%25" /> <ConfigReplace Include="$(SharedFxDebPkgName)'" />
-      <ConfigPattern Include="%25SHARED_FRAMEWORK_NUGET_NAME%25" /> <ConfigReplace Include="$(SharedFrameworkName)" />
-      <ConfigPattern Include="%25SHARED_FRAMEWORK_NUGET_VERSION%25" /> <ConfigReplace Include="$(SharedFrameworkNugetVersion)" />
-      <ConfigPattern Include="%25SHARED_FRAMEWORK_BRAND_NAME%25" /> <ConfigReplace Include="$(SharedFrameworkBrandName)" />
+      <SharedFrameworkTokenValue Include="%SHARED_HOST_DEBIAN_VERSION%">
+        <ReplacementString>$(HostVersion)</ReplacementString>
+      </SharedFrameworkTokenValue>
+      <SharedFrameworkTokenValue Include="%HOSTFXR_DEBIAN_PACKAGE_NAME%">
+        <ReplacementString>$(HostFxrDebPkgName)</ReplacementString>
+      </SharedFrameworkTokenValue>
+      <SharedFrameworkTokenValue Include="%HOSTFXR_DEBIAN_VERSION%">
+        <ReplacementString>$(HostVersion)</ReplacementString>
+      </SharedFrameworkTokenValue>
+      <SharedFrameworkTokenValue Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
+        <ReplacementString>$(SharedFxDebPkgName)</ReplacementString>
+      </SharedFrameworkTokenValue>
+      <SharedFrameworkTokenValue Include="%SHARED_FRAMEWORK_NUGET_NAME%">
+        <ReplacementString>$(SharedFrameworkName)</ReplacementString>
+      </SharedFrameworkTokenValue>
+      <SharedFrameworkTokenValue Include="%SHARED_FRAMEWORK_NUGET_VERSION%">
+        <ReplacementString>$(SharedFrameworkNugetVersion)</ReplacementString>
+      </SharedFrameworkTokenValue>
+      <SharedFrameworkTokenValue Include="%SHARED_FRAMEWORK_BRAND_NAME%">
+        <ReplacementString>$(SharedFrameworkBrandName)</ReplacementString>
+      </SharedFrameworkTokenValue>
     </ItemGroup>
 
-    <ReplaceFileContents
-      InputFile="$(SharedFxScriptRoot)$(TemplateFile)"
-      DestinationFile="$(DistributionFile)"
-      ReplacementPatterns="@(ConfigPattern)"
-      ReplacementStrings="@(ConfigReplace)" />
-    
+    <ReplaceFileContents InputFile="$(ConfigJsonFile)"
+                         DestinationFile="$(debLayoutDirectory)$(DebianConfigJsonName)"
+                         ReplacementItems="@(SharedFrameworkTokenValue)" />
+
     <Exec Command="$(DotnetSdkToolCommand) deb-tool -i $(debLayoutDirectory) -o $(debIntermediatesDir) -n $(DebPackageName) -v $(DebPackageVersion)"
           WorkingDirectory="$(consumingProjectDirectory)" />
 
+    <!-- Copy package to output -->
+    <ItemGroup>
+      <GeneratedDebFiles Remove="@(GeneratedDebFiles)" />
+      <GeneratedDebFiles Include="$(debIntermediatesDir)/*.deb" />
+    </ItemGroup>
+
+    <Error Text="@(GeneratedDebFiles->Count()) .deb files generated." Condition="'@(GeneratedDebFiles->Count())' != 1" />
+
+    <Copy SourceFiles="@(GeneratedDebFiles)"
+          DestinationFiles="$(DebFile)"
+          OverwriteReadOnlyFiles="True"
+          SkipUnchangedFiles="False"
+          UseHardlinksIfPossible="False" />
+
   </Target>
-
-
-
 </Project>
