@@ -14,22 +14,21 @@
 
   <PropertyGroup>
     <ProductMoniker>$(PackageTargetRid)-$(HostFullVersion)</ProductMoniker>
-    <PortableMoniker Condition="'$(PortableBuild)' == 'true'">-portable</PortableMoniker>
   </PropertyGroup>
 
   <PropertyGroup>
-    <CombinedCompressedFile>dotnet-$(ProductMoniker)$(PortableMoniker)$(CompressedFileExtension)</CombinedCompressedFile>
-    <HostFxrCompressedFile>dotnet-hostfxr-$(ProductMoniker)$(PortableMoniker)$(CompressedFileExtension)</HostFxrCompressedFile>
-    <SharedFrameworkCompressedFile>dotnet-sharedframework-$(ProductMoniker)$(PortableMoniker)$(CompressedFileExtension)</SharedFrameworkCompressedFile>
-    <SharedFrameworkSymbolsCompressedFile>dotnet-sharedframework-symbols-$(ProductMoniker)$(PortableMoniker)$(CompressedFileExtension)</SharedFrameworkSymbolsCompressedFile>
+    <CombinedCompressedFile>dotnet-$(ProductMoniker)$(CompressedFileExtension)</CombinedCompressedFile>
+    <HostFxrCompressedFile>dotnet-hostfxr-$(ProductMoniker)$(CompressedFileExtension)</HostFxrCompressedFile>
+    <SharedFrameworkCompressedFile>dotnet-sharedframework-$(ProductMoniker)$(CompressedFileExtension)</SharedFrameworkCompressedFile>
+    <SharedFrameworkSymbolsCompressedFile>dotnet-sharedframework-symbols-$(ProductMoniker)$(CompressedFileExtension)</SharedFrameworkSymbolsCompressedFile>
   </PropertyGroup>
 
   <PropertyGroup>
-    <CombinedInstallerFile>dotnet-$(ProductMoniker)$(PortableMoniker)$(CombinedInstallerExtension)</CombinedInstallerFile>
-    <SharedHostInstallerFile>dotnet-host-$(ProductMoniker)$(PortableMoniker)$(InstallerExtension)</SharedHostInstallerFile>
-    <HostFxrInstallerFile>dotnet-hostfxr-$(ProductMoniker)$(PortableMoniker)$(InstallerExtension)</HostFxrInstallerFile>
-    <SharedFrameworkInstallerFile>dotnet-sharedframework-$(ProductMoniker)$(PortableMoniker)$(InstallerExtension)</SharedFrameworkInstallerFile>
-    <SharedFrameworkEngine>dotnet-sharedframework-$(ProductMoniker)$(PortableMoniker)-engine.exe</SharedFrameworkEngine>
+    <CombinedInstallerFile>dotnet-$(ProductMoniker)$(CombinedInstallerExtension)</CombinedInstallerFile>
+    <SharedHostInstallerFile>dotnet-host-$(ProductMoniker)$(InstallerExtension)</SharedHostInstallerFile>
+    <HostFxrInstallerFile>dotnet-hostfxr-$(ProductMoniker)$(InstallerExtension)</HostFxrInstallerFile>
+    <SharedFrameworkInstallerFile>dotnet-sharedframework-$(ProductMoniker)$(InstallerExtension)</SharedFrameworkInstallerFile>
+    <SharedFrameworkEngine>dotnet-sharedframework-$(ProductMoniker)-engine.exe</SharedFrameworkEngine>
   </PropertyGroup>
 
   <PropertyGroup>
