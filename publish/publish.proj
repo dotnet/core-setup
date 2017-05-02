@@ -111,7 +111,6 @@
     </PropertyGroup>
 
       <!-- ToDo: look at moving this to an msbuild task so that we can include retry logic, parallelize it, and hide the api key -->
-      <!-- ToDo: may not be able to take a dependency on NuGet -->
     <Exec Command="$(NuGetPushCommand) %(_DownloadedStandardPackages.Identity)" />
 
     <Message Condition="'@(_DownloadedSymbolsPackages)' != ''" Text="Pushing CoreHost symbols packages to $(NuGetSymbolsFeedUrl)" />
