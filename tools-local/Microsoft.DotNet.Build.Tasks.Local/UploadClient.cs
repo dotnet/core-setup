@@ -47,8 +47,6 @@ namespace Microsoft.DotNet.Build.Tasks.Utility
             string filePath,
             string destinationBlob)
         {
-            System.Console.WriteLine($"attach for {filePath}");
-            System.Console.ReadLine();
             string resourceUrl = string.Format("https://{0}.blob.core.windows.net/{1}", AccountName, ContainerName);
 
             string fileName = destinationBlob;
