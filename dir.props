@@ -64,7 +64,7 @@
     <!-- Dev builds get a minor version, by default, of '0'.  Our tests restore packages with
          a -* version, and include myget sources, so any package published the same day to myget
          will conflict with the local build and override the local built package.  Prevent this
-         by setting the non-official build minor version to 99 -->
+         by setting the non-official build minor version to 9 -->
     <BuildNumberMinor Condition="'$(BuildNumberMinor)' == '0'">9</BuildNumberMinor>
 
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
