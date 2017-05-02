@@ -390,7 +390,7 @@ namespace Microsoft.DotNet.Host.Build
         public static BuildTargetResult PackagePkgProjects(BuildTargetContext c)
         {
             var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion");
-            var hostNugetversion = hostVersion.LatestHostVersion.ToString();
+            var hostNugetversion = hostVersion.LatestHostVersion.WithoutBuildNumber;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{hostNugetversion}{Environment.NewLine}";
             var pkgDir = Path.Combine(c.BuildContext.BuildDirectory, "pkg");
             string rid = HostPackageSupportedRids[c.BuildContext.Get<string>("TargetRID")];
@@ -428,7 +428,7 @@ namespace Microsoft.DotNet.Host.Build
 
             foreach (var item in hostVersion.LatestHostPackagesToValidate)
             {
-                var fileFilter = $"runtime.{rid}.{item.Key}.{item.Value.ToString()}.nupkg";
+                var fileFilter = $"runtime.{rid}.{item.Key}.{item.Value.WithoutBuildNumber}.nupkg";
                 if (Directory.GetFiles(Dirs.CorehostLocalPackages, fileFilter).Length == 0)
                 {
                     throw new BuildFailureException($"Nupkg for {fileFilter} was not created.");
