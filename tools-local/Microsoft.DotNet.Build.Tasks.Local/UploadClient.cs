@@ -139,13 +139,15 @@ namespace Microsoft.DotNet.Build.Tasks.Utility
                     var req = new HttpRequestMessage(HttpMethod.Put, blockListUploadUrl);
                     req.Headers.Add(AzureHelper.DateHeaderString, dt1.ToString("R", CultureInfo.InvariantCulture));
                     req.Headers.Add(AzureHelper.VersionHeaderString, AzureHelper.StorageApiVersion);
-                    if(!string.IsNullOrEmpty(DetermineContentTypeBasedOnFileExtension(filePath)))
+                    string contentType = DetermineContentTypeBasedOnFileExtension(filePath);
+                    if (!string.IsNullOrEmpty(contentType))
                     {
-                        req.Headers.Add(AzureHelper.ContentTypeString, DetermineContentTypeBasedOnFileExtension(filePath));
+                        req.Headers.Add(AzureHelper.ContentTypeString, contentType);
                     }
-                    if (!string.IsNullOrEmpty(DetermineCacheControlBasedOnFileExtension(filePath)))
+                    string cacheControl = DetermineCacheControlBasedOnFileExtension(filePath);
+                    if (!string.IsNullOrEmpty(cacheControl))
                     {
-                        req.Headers.Add(AzureHelper.CacheControlString, DetermineCacheControlBasedOnFileExtension(filePath));
+                        req.Headers.Add(AzureHelper.CacheControlString, cacheControl);
                     }
 
                     var body = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?><BlockList>");
