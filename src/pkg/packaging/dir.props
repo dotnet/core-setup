@@ -3,13 +3,13 @@
   <Import Project="..\dir.props" />
 
   <PropertyGroup>
-    <CompressionRoot>$(ProjectDir)src/pkg/packaging/</CompressionRoot>
+    <PackagingRoot>$(ProjectDir)src/pkg/packaging/</PackagingRoot>
     
     <PackagesIntermediateDir>$(IntermediateOutputRootPath)packages/</PackagesIntermediateDir>
     <SharedHostPublishRoot>$(IntermediateOutputRootPath)sharedHost/</SharedHostPublishRoot>
     <HostFxrPublishRoot>$(IntermediateOutputRootPath)hostFxr/</HostFxrPublishRoot>
     <SharedFrameworkPublishRoot>$(IntermediateOutputRootPath)sharedFx/</SharedFrameworkPublishRoot>
-    <CombinedPublishRoot>$(IntermediateOutputRootPath)combined-framework-host/</CombinedPublishRoot>   
+    <CombinedPublishRoot>$(IntermediateOutputRootPath)combined-framework-host/</CombinedPublishRoot>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -25,6 +25,7 @@
 
   <PropertyGroup>
     <CombinedInstallerFile>dotnet-$(ProductMoniker)$(CombinedInstallerExtension)</CombinedInstallerFile>
+    <CombinedInstallerEngine>dotnet-$(ProductMoniker)-engine.exe</CombinedInstallerEngine>
     <SharedHostInstallerFile>dotnet-host-$(ProductMoniker)$(InstallerExtension)</SharedHostInstallerFile>
     <HostFxrInstallerFile>dotnet-hostfxr-$(ProductMoniker)$(InstallerExtension)</HostFxrInstallerFile>
     <SharedFrameworkInstallerFile>dotnet-sharedframework-$(ProductMoniker)$(InstallerExtension)</SharedFrameworkInstallerFile>
