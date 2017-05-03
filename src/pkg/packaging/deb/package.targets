@@ -40,8 +40,13 @@
   </Target>
 
   <Target Name="GenerateDebs"
-          DependsOnTargets="InitializeDotnetDebTool;GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb"
+          DependsOnTargets="TestDebuild;
+                            BuildDebs;"
           Condition="'$(BuildDebPackage)'=='true'" />
+          
+  <Target Name="BuildDebs"
+          DependsOnTargets="InitializeDotnetDebTool;GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb"
+          Condition="'$(BuildDebPackage)'=='true' and '$(DebuildPresent)' == 'true'" />
 
   <Target Name="GenerateSharedHostDeb">
     <PropertyGroup>
@@ -274,5 +279,24 @@
           SkipUnchangedFiles="False"
           UseHardlinksIfPossible="False" />
 
+  </Target>
+
+  <Target Name="TestDebuild">
+
+    <!-- run Debuild -->
+    <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
+    </Exec>
+
+    <!-- Check if it returned 0 -->
+    <PropertyGroup>
+      <DebuildPresent>false</DebuildPresent>
+      <DebuildPresent Condition=" '$(DebuildExitCode)' == '0' ">true</DebuildPresent>
+    </PropertyGroup>
+
+    <!-- Workaround for Jenkins machines that don't have the necessary packages https://github.com/dotnet/core-setup/issues/2260 -->
+    <Message Condition=" '$(DebuildPresent)'  != 'true' "
+             Text="Debuild Not found, Debian packages will not be built."
+             Importance="High" />
   </Target>
 </Project>
