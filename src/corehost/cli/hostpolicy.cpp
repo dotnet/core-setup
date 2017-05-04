@@ -49,6 +49,22 @@ int run(const arguments_t& args)
         return StatusCode::CoreClrResolveFailure;
     }
 
+    // Get path in which CoreCLR is present.
+    pal::string_t clr_dir = get_directory(clr_path);
+
+    // System.Private.CoreLib.dll is expected to be next to CoreCLR.dll - add its path to the TPA list.
+    pal::string_t corelib_path = clr_dir;
+    append_path(&corelib_path, CORELIB_NAME);
+
+    // Append CoreLib path
+    if (probe_paths.tpa.back() != PATH_SEPARATOR)
+    {
+        probe_paths.tpa.push_back(PATH_SEPARATOR);
+    }
+
+    probe_paths.tpa.append(corelib_path);
+    probe_paths.tpa.push_back(PATH_SEPARATOR);
+
     pal::string_t clrjit_path = probe_paths.clrjit;
     if (clrjit_path.empty())
     {
@@ -80,11 +96,7 @@ int run(const arguments_t& args)
     // Note: these variables' lifetime should be longer than coreclr_initialize.
     std::vector<char> tpa_paths_cstr, app_base_cstr, native_dirs_cstr, resources_dirs_cstr, fx_deps, deps, clrjit_path_cstr, probe_directories;
     pal::pal_clrstring(probe_paths.tpa, &tpa_paths_cstr);
-
-    //removing trailing directory seperator for app compat reasons
-    pal::string_t trimmed_app_dir = trim_end(args.app_dir, DIR_SEPARATOR);
-    pal::pal_clrstring(trimmed_app_dir, &app_base_cstr);
-
+    pal::pal_clrstring(args.app_dir, &app_base_cstr);
     pal::pal_clrstring(probe_paths.native, &native_dirs_cstr);
     pal::pal_clrstring(probe_paths.resources, &resources_dirs_cstr);
 
@@ -147,7 +159,6 @@ int run(const arguments_t& args)
     assert(property_keys.size() == property_values.size());
 
     // Bind CoreCLR
-    pal::string_t clr_dir = get_directory(clr_path);
     trace::verbose(_X("CoreCLR path = '%s', CoreCLR dir = '%s'"), clr_path.c_str(), clr_dir.c_str());
     if (!coreclr::bind(clr_dir))
     {
