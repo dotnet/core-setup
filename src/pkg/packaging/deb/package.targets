@@ -5,8 +5,8 @@
   <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
 
   <PropertyGroup>
-    <IsDebianBasedDistro Condition="$(PackageTargetRid.StartsWith('ubuntu')) or
-                                    $(PackageTargetRid.StartsWith('debian'))">true</IsDebianBasedDistro>
+    <IsDebianBasedDistro Condition="$(PackageTargetMoniker.StartsWith('ubuntu')) or
+                                    $(PackageTargetMoniker.StartsWith('debian'))">true</IsDebianBasedDistro>
     <BuildDebPackage Condition="'$(IsDebianBasedDistro)' == true and '$(TargetArchitecture)' == 'x64'">true</BuildDebPackage>
     <DebianConfigJsonName>debian_config.json</DebianConfigJsonName>
   </PropertyGroup>

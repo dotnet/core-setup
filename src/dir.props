@@ -26,7 +26,11 @@
     <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.1-x64'">rhel.7-x64</PackageTargetRid>
     <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.2-x64'">rhel.7-x64</PackageTargetRid>
     <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.3-x64'">rhel.7-x64</PackageTargetRid>
-    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.2-x64'">rhel.7-x64</PackageTargetRid>    
+    <PackageTargetRid Condition="'$(TargetRid)' == 'rhel.7.2-x64'">rhel.7-x64</PackageTargetRid>
+
+    <PackageTargetMoniker>$(PackageTargetRid)</PackageTargetMoniker>
+    <PackageTargetMoniker Condition="'$(TargetRid)' == 'ubuntu.14.04-x64'">ubuntu-x64</PackageTargetMoniker>
+    <PackageTargetMoniker Condition="'$(TargetRid)' == 'debian.8-x64'">debian-x64</PackageTargetMoniker>
   </PropertyGroup>
     
 </Project>
