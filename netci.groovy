@@ -10,10 +10,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-// Move these to the platform list when they are re-enabled
-// [ 'Ubuntu:arm:Release', 'Ubuntu16.04:arm:Release', 'Windows_NT:arm:Debug', ]
-
-def platformList = ['Debian8.2:x64:Debug', 'PortableLinux:x64:Release', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Release', 'Ubuntu16.10:x64:Release', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'Fedora24:x64:Debug', 'OpenSUSE42.1:x64:Debug']
+def platformList = ['Debian8.2:x64:Debug', 'PortableLinux:x64:Release', 'Ubuntu:x64:Release', 'Ubuntu16.04:x64:Release', 'Ubuntu16.10:x64:Release', 'Ubuntu:arm:Release', 'Ubuntu16.04:arm:Release', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'Windows_NT:arm:Debug', 'Fedora24:x64:Debug', 'OpenSUSE42.1:x64:Debug']
 
 def static getBuildJobName(def configuration, def os, def architecture) {
     return configuration.toLowerCase() + '_' + os.toLowerCase() + '_' + architecture.toLowerCase()
@@ -28,30 +25,35 @@ platformList.each { platform ->
     def buildCommand = '';
     def osForGHTrigger = os
     def version = "latest-or-auto"
+    def dockerRepository = "microsoft/dotnet-buildtools-prereqs"
+    def dockerContainer = ''
+    def dockerWorkingDirectory = "/src/core-setup"
+    def dockerCommand = ''
+    def portableArgs = ''
 
     // Calculate build command
     if (os == 'Windows_NT') {
         buildCommand = ".\\build.cmd -ConfigurationGroup=${configuration} -TargetArchitecture=${architecture}"
-    }
-/*
-    else if ((os.startsWith("Ubuntu") || os.startsWith("Tizen")) &&
-             (architecture == 'arm' || architecture == 'armel')) {
-        def linuxcodename = '';
-        if (os == 'Ubuntu') {
-            version = "arm-cross-latest"
-            linuxcodename = 'trusty'
+        if ((architecture == 'arm' || architecture == 'arm64')) {
+            buildCommand += " -PortableBuild=true -Skiptests=true"
         }
-        else if (os == 'Ubuntu16.04') {
-            version = "latest-or-auto-docker"
-            linuxcodename = 'xenial'
-        }
-
-        // Call the arm32_ci_script.sh script to perform the cross build by using docker
-        buildCommand = "./scripts/arm32_ci_script.sh --buildConfig=${configuration} --${architecture} --linuxCodeName=${linuxcodename} --verbose"
     }
-*/    
-    else if (os == 'Ubuntu') {
-        buildCommand = "./build.sh --configuration ${configuration} --docker ubuntu.14.04"
+    else if (os.startsWith("Ubuntu")) {
+        if ((architecture == 'arm' || architecture == 'armel')) {
+            if (os == 'Ubuntu') {
+                dockerContainer = "ubuntu-14.04-cross-0cd4667-20172211042239"
+            }
+            else if (os == 'Ubuntu16.04') {
+                dockerContainer = "ubuntu-16.04-cross-ef0ac75-20175511035548"
+            }
+            portableArgs = " -portable cross skiptests disablecrossgen"
+        }
+        else {
+            dockerContainer = "ubuntu-14.04-debpkg-e5cf912-20175003025046"
+            buildCommand = "./build.sh --configuration ${configuration} --docker ubuntu.14.04"
+        }
+        dockerCommand = "docker run --name ${dockerContainer} --rm -v \${WORKSPACE}:${dockerWorkingDirectory} -w=${dockerWorkingDirectory} ${dockerRepository}:${dockerContainer}"
+        buildCommand = "${dockerCommand} ./build.sh ${configuration} ${architecture}${portableArgs}"
     }
     else {
         // Jenkins non-Ubuntu CI machines don't have docker
@@ -83,7 +85,7 @@ platformList.each { platform ->
     Utilities.setMachineAffinity(newJob, os, version)
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
 
-    if (!(os == 'Windows_NT' && architecture == 'arm')) {
+    if (!(architecture == 'arm')) {
         Utilities.addMSTestResults(newJob, '**/*-testResults.trx')
     }
 
