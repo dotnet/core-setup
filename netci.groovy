@@ -38,34 +38,30 @@ platformList.each { platform ->
             buildCommand += " -PortableBuild=true -Skiptests=true"
         }
     }
-    else if (os.startsWith("Ubuntu")) {
-        if ((architecture == 'arm' || architecture == 'armel')) {
-            if (os == 'Ubuntu') {
-                dockerContainer = "ubuntu-14.04-cross-0cd4667-20172211042239"
-            }
-            else if (os == 'Ubuntu16.04') {
-                dockerContainer = "ubuntu-16.04-cross-ef0ac75-20175511035548"
-            }
-            portableArgs = " -portable cross skiptests disablecrossgen"
+    else if ((os.startsWith("Ubuntu") && 
+             (architecture == 'arm' || architecture == 'armel')) {
+        if (os == 'Ubuntu') {
+            dockerContainer = "ubuntu-14.04-cross-0cd4667-20172211042239"
         }
-        else {
-            dockerContainer = "ubuntu-14.04-debpkg-e5cf912-20175003025046"
-            buildCommand = "./build.sh --configuration ${configuration} --docker ubuntu.14.04"
+        else if (os == 'Ubuntu16.04') {
+            dockerContainer = "ubuntu-16.04-cross-ef0ac75-20175511035548"
         }
+        portableArgs = " -portable cross skiptests disablecrossgen"
+        dockerCommand = "docker run --name ${dockerContainer} --rm -v \${WORKSPACE}:${dockerWorkingDirectory} -w=${dockerWorkingDirectory} ${dockerRepository}:${dockerContainer}"
+        buildCommand = "${dockerCommand} ./build.sh ${configuration} ${architecture}${portableArgs}"
+    }
+    else if (os == "Ubuntu") {
+        dockerContainer = "ubuntu-14.04-debpkg-e5cf912-20175003025046"
         dockerCommand = "docker run --name ${dockerContainer} --rm -v \${WORKSPACE}:${dockerWorkingDirectory} -w=${dockerWorkingDirectory} ${dockerRepository}:${dockerContainer}"
         buildCommand = "${dockerCommand} ./build.sh ${configuration} ${architecture}${portableArgs}"
     }
     else {
         // Jenkins non-Ubuntu CI machines don't have docker
-        buildCommand = "./build.sh ${configuration}"
+        buildCommand = "./build.sh ${configuration} -portable"
 
-        if (os == 'PortableLinux') {
-
-            // Trigger a portable Linux build that runs on RHEL7.2
-            buildCommand += " -portable"
-            osForGHTrigger = "PortableLinux"
-            os = "RHEL7.2"
-        }
+        // Trigger a portable Linux build that runs on RHEL7.2
+        osForGHTrigger = "PortableLinux"
+        os = "RHEL7.2"
     }
 
     def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
