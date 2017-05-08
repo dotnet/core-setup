@@ -272,6 +272,7 @@
 
   </Target>
 
+<<<<<<< 4d2d0b29c0661aeb5c316a5927eb55370f6708e7
   <Target Name="TestFPMTool">
 
     <!-- run FPM  -->
@@ -291,4 +292,6 @@
              Importance="High" />
   </Target>
 
+=======
+>>>>>>> Changes for RPM packaging
 </Project>
