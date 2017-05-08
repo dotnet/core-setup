@@ -38,7 +38,7 @@ platformList.each { platform ->
             buildCommand += " -PortableBuild=true -Skiptests=true"
         }
     }
-    else if ((os.startsWith("Ubuntu") && 
+    else if ((os.startsWith("Ubuntu")) && 
              (architecture == 'arm' || architecture == 'armel')) {
         if (os == 'Ubuntu') {
             dockerContainer = "ubuntu-14.04-cross-0cd4667-20172211042239"
