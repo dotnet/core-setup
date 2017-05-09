@@ -35,7 +35,7 @@ platformList.each { platform ->
     if (os == 'Windows_NT') {
         buildCommand = ".\\build.cmd -ConfigurationGroup=${configuration} -TargetArchitecture=${architecture}"
         if ((architecture == 'arm' || architecture == 'arm64')) {
-            buildCommand += " -PortableBuild=true -Skiptests=true"
+            buildCommand += " -PortableBuild=true -SkipTests=true"
         }
     }
     else if ((os.startsWith("Ubuntu")) && 
