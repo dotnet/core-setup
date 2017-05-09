@@ -15,9 +15,12 @@
   </PropertyGroup>
   
   <PropertyGroup>
+    <CoreFxExpectedPrerelease>preview2-25310-01</CoreFxExpectedPrerelease>
     <PlatformPackageVersion>2.0.0-preview2-25311-04</PlatformPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.0-preview2-25309-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreRuntimeJitPackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</MicrosoftNETCoreRuntimeJitPackageVersion>
+    <NETStandardVersion>2.0.0-preview2-25310-01</NETStandardVersion>
+    <DiaSymReaderNativeVersion>1.4.1</DiaSymReaderNativeVersion>
   </PropertyGroup>
   
   <!-- Package dependency verification/auto-upgrade configuration. -->
@@ -47,17 +50,18 @@
     
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>PlatformPackageVersion</ElementName>
-      <PackageId>Microsoft.NETCore.Platforms</PackageId>
+      <ElementName>CoreFxExpectedPrerelease</ElementName>
+      <BuildInfoName>CoreFx</BuildInfoName>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>MicrosoftNETCoreRuntimeCoreCLRPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
     </XmlUpdateStep>
-
-    <!-- project.json files to update -->
-    <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)**\project.json.template" />
-    <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)src\pkg\deps\project.json" />
+    <XmlUpdateStep Include="Standard">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>NETStandardVersion</ElementName>
+      <PackageId>NETStandard.Library</PackageId>
+    </XmlUpdateStep>
   </ItemGroup>
 </Project>

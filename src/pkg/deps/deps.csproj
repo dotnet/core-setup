@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dependencies.props))\dependencies.props" />
+
+  <PropertyGroup>
+    <TargetFramework>dnxcore50</TargetFramework>
+    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="$(PlatformPackageVersion)" />
+  </ItemGroup>
+
+</Project>
