@@ -377,6 +377,7 @@ namespace Microsoft.DotNet.Host.Build
             msbuildProps.AppendLine($"    <PreReleaseLabel>{hostVersion.ReleaseSuffix}</PreReleaseLabel>");
             msbuildProps.AppendLine($"    <EnsureStableVersion>{hostVersion.EnsureStableVersion}</EnsureStableVersion>");
             msbuildProps.AppendLine($"    <NetCoreAppVersion>{buildVersion.ProductionVersion}</NetCoreAppVersion>");
+            msbuildProps.AppendLine($"    <IncludeBuildNumberInPackageVersion>false</IncludeBuildNumberInPackageVersion>");
             msbuildProps.AppendLine("  </PropertyGroup>");
             msbuildProps.AppendLine("</Project>");
 
@@ -389,7 +390,7 @@ namespace Microsoft.DotNet.Host.Build
         public static BuildTargetResult PackagePkgProjects(BuildTargetContext c)
         {
             var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion");
-            var hostNugetversion = hostVersion.LatestHostVersion.ToString();
+            var hostNugetversion = hostVersion.LatestHostVersion.WithoutBuildNumber;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{hostNugetversion}{Environment.NewLine}";
             var pkgDir = Path.Combine(c.BuildContext.BuildDirectory, "pkg");
             string rid = HostPackageSupportedRids[c.BuildContext.Get<string>("TargetRID")];
@@ -427,7 +428,7 @@ namespace Microsoft.DotNet.Host.Build
 
             foreach (var item in hostVersion.LatestHostPackagesToValidate)
             {
-                var fileFilter = $"runtime.{rid}.{item.Key}.{item.Value.ToString()}.nupkg";
+                var fileFilter = $"runtime.{rid}.{item.Key}.{item.Value.WithoutBuildNumber}.nupkg";
                 if (Directory.GetFiles(Dirs.CorehostLocalPackages, fileFilter).Length == 0)
                 {
                     throw new BuildFailureException($"Nupkg for {fileFilter} was not created.");
@@ -441,8 +442,8 @@ namespace Microsoft.DotNet.Host.Build
         public static BuildTargetResult RestoreLockedCoreHost(BuildTargetContext c)
         {
             var hostVersion = c.BuildContext.Get<HostVersion>("HostVersion");
-            var lockedHostFxrVersion = hostVersion.LockedHostFxrVersion.ToString();
-            var lockedHostVersion = hostVersion.LockedHostVersion.ToString();
+            var lockedHostFxrVersion = hostVersion.LockedHostFxrVersion.WithoutBuildNumber;
+            var lockedHostVersion = hostVersion.LockedHostVersion.WithoutBuildNumber;
             string currentRid = HostPackageSupportedRids[c.BuildContext.Get<string>("TargetRID")];
             string framework = c.BuildContext.Get<string>("TargetFramework");
 
@@ -494,7 +495,7 @@ namespace Microsoft.DotNet.Host.Build
             string sharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
             string sharedFrameworkRid = c.BuildContext.Get<string>("TargetRID");
             string sharedFrameworkTarget = c.BuildContext.Get<string>("TargetFramework");
-            var hostFxrVersion = hostVersion.LockedHostFxrVersion.ToString();
+            var hostFxrVersion = hostVersion.LockedHostFxrVersion.WithoutBuildNumber;
             var commitHash = c.BuildContext.Get<string>("CommitHash");
 
             var sharedFrameworkPublisher = new SharedFrameworkPublisher(

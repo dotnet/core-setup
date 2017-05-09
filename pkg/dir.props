@@ -74,7 +74,7 @@
 
   <PropertyGroup>
     <PreReleaseSuffix></PreReleaseSuffix>
-    <PreReleaseSuffix Condition="'$(EnsureStableVersion)'=='false'">-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</PreReleaseSuffix>
+    <PreReleaseSuffix Condition="'$(EnsureStableVersion)'=='false'">-$(PreReleaseLabel)</PreReleaseSuffix>
     <HostPolicyFullVersion>$(HostPolicyVersion)$(PreReleaseSuffix)</HostPolicyFullVersion>
     <HostResolverFullVersion>$(HostResolverVersion)$(PreReleaseSuffix)</HostResolverFullVersion>
     <AppHostFullVersion>$(AppHostVersion)$(PreReleaseSuffix)</AppHostFullVersion>
