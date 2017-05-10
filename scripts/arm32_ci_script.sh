@@ -284,12 +284,6 @@ do
     esac
 done
 
-if [[ $__linuxCodeName == "tizen" ]]; then
-    # This case does not support CI build yet.
-    # Will be enabled ASAP.
-    exit 0
-fi
-
 #Check if there are any uncommited changes in the source directory as git adds and removes patches
 if [[ $(git status -s) != "" ]]; then
    echo 'ERROR: There are some uncommited changes. To avoid losing these changes commit them and try again.'

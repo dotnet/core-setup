@@ -10,7 +10,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def platformList = ['Debian8.2:x64:Debug', 'PortableLinux:x64:Release', 'Ubuntu:arm:Release', 'Ubuntu:x64:Release', 'Ubuntu16.04:arm:Release', 'Ubuntu16.04:x64:Release', 'Ubuntu16.10:x64:Release', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'Windows_NT:arm:Debug', 'Fedora24:x64:Debug', 'OpenSUSE42.1:x64:Debug']
+def platformList = ['Debian8.2:x64:Debug', 'PortableLinux:x64:Release', 'Ubuntu:arm:Release', 'Ubuntu:x64:Release', 'Ubuntu16.04:arm:Release', 'Ubuntu16.04:x64:Release', 'Ubuntu16.10:x64:Release', 'OSX10.12:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'Windows_NT:arm:Debug', 'Fedora24:x64:Debug', 'OpenSUSE42.1:x64:Debug', 'Tizen:armel:Release']
 
 def static getBuildJobName(def configuration, def os, def architecture) {
     return configuration.toLowerCase() + '_' + os.toLowerCase() + '_' + architecture.toLowerCase()
@@ -49,6 +49,10 @@ platformList.each { platform ->
         else if (os == 'Ubuntu16.04') {
             version = "latest-or-auto-docker"
             linuxcodename = 'xenial'
+        }
+        else if (os == 'Tizen') {
+            version = "arm-cross-latest"
+            linuxcodename = 'tizen'
         }
 
         // Call the arm32_ci_script.sh script to perform the cross build by using docker
