@@ -61,10 +61,6 @@
       <AdditionalProperties Condition="'$(PackageTargetRuntime)' != ''">NuGetRuntimeIdentifier=$(PackageTargetRuntime)</AdditionalProperties>
     </ProjectReference>
   </ItemGroup>
-
-  <ItemGroup>
-    <File Include="$(ObjDir)\Microsoft.NETCore.App.versions.txt" />
-  </ItemGroup>
   
   <Target Name="GenerateFileVersionProps" BeforeTargets="GenerateNuSpec" Condition="'$(PackageTargetRuntime)' == ''">
     <MSBuild Projects="@(ProjectReference)"
