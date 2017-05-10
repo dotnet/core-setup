@@ -89,10 +89,10 @@
       <_SkipCoreClrHash Condition="'$(_SystemPrivateCoreLibPath)' == ''">true</_SkipCoreClrHash>
     </PropertyGroup>
 
-    <GetVersionFromAssembly PathToAssembly="$(_SystemRuntimePath)">
+    <GetVersionFromAssembly PathToAssembly="$(_SystemRuntimePath)" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="AssemblyHash" PropertyName="CoreFxHash" />
     </GetVersionFromAssembly>
-    <GetVersionFromAssembly PathToAssembly="$(_SystemPrivateCoreLibPath)" Condition="'$(_SkipCoreClrHash)' != 'true'" >
+    <GetVersionFromAssembly PathToAssembly="$(_SystemPrivateCoreLibPath)" ContinueOnError="WarnAndContinue" Condition="'$(_SkipCoreClrHash)' != 'true'" >
       <Output TaskParameter="AssemblyHash" PropertyName="CoreClrHash" />
     </GetVersionFromAssembly>
 
@@ -100,10 +100,10 @@
     <Message Importance="Low" Text="The hash of coreclr is $(CoreClrHash) taken from $(_SystemPrivateCoreLibPath)" />
 
     <ItemGroup>
-      <_VersionsFileLines Include="CoreSetup $(LatestCommit)" />
-      <_VersionsFileLines Include="CoreFx $(CoreFxHash)" />
+      <_VersionsFileLines Include="core-setup $(LatestCommit)" />
+      <_VersionsFileLines Include="corefx $(CoreFxHash)" />
       <_VersionsFileLines Include="dotnet/versions/corefx $(CoreFxCurrentRef)" />
-      <_VersionsFileLines Include="CoreClr $(CoreClrHash)" Condition="'$(_SkipCoreClrHash)' != 'true'" />
+      <_VersionsFileLines Include="coreclr $(CoreClrHash)" Condition="'$(_SkipCoreClrHash)' != 'true'" />
       <_VersionsFileLines Include="dotnet/versions/coreclr $(CoreClrCurrentRef)" Condition="'$(_SkipCoreClrHash)' != 'true'" />
     </ItemGroup>
 
