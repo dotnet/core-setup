@@ -61,6 +61,10 @@
       <AdditionalProperties Condition="'$(PackageTargetRuntime)' != ''">NuGetRuntimeIdentifier=$(PackageTargetRuntime)</AdditionalProperties>
     </ProjectReference>
   </ItemGroup>
+
+  <ItemGroup>
+    <File Include="$(ObjDir)\Microsoft.NETCore.App.versions.txt" />
+  </ItemGroup>
   
   <Target Name="GenerateFileVersionProps" BeforeTargets="GenerateNuSpec" Condition="'$(PackageTargetRuntime)' == ''">
     <MSBuild Projects="@(ProjectReference)"
@@ -78,42 +82,6 @@
                               PlatformManifestFile="$(PlatformManifestFile)"
                               PropsFile="$(PropsFile)"
                               PreferredPackages="$(Id);@(RuntimeDependency)" />
-  </Target>
-
-  <UsingTask TaskName="GetVersionFromAssembly" AssemblyFile="$(LocalBuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.Local.dll"/>
-
-  <Target Name="GenerateHashVersionsFile" BeforeTargets="GetPackageFiles">
-    <PropertyGroup>
-      <_SystemRuntimePath Condition="$([System.String]::new('%(File.Identity)').ToLowerInvariant().Contains('system.runtime.dll'))">%(File.Identity)</_SystemRuntimePath>
-      <_SystemPrivateCoreLibPath Condition="$([System.String]::new('%(File.Identity)').ToLowerInvariant().Contains('system.private.corelib.dll'))">%(File.Identity)</_SystemPrivateCoreLibPath>
-      <_SkipCoreClrHash Condition="'$(_SystemPrivateCoreLibPath)' == ''">true</_SkipCoreClrHash>
-    </PropertyGroup>
-
-    <GetVersionFromAssembly PathToAssembly="$(_SystemRuntimePath)" ContinueOnError="WarnAndContinue">
-      <Output TaskParameter="AssemblyHash" PropertyName="CoreFxHash" />
-    </GetVersionFromAssembly>
-    <GetVersionFromAssembly PathToAssembly="$(_SystemPrivateCoreLibPath)" ContinueOnError="WarnAndContinue" Condition="'$(_SkipCoreClrHash)' != 'true'" >
-      <Output TaskParameter="AssemblyHash" PropertyName="CoreClrHash" />
-    </GetVersionFromAssembly>
-
-    <Message Importance="Low" Text="The hash of corefx is $(CoreFxHash) taken from $(_SystemRuntimePath)" />
-    <Message Importance="Low" Text="The hash of coreclr is $(CoreClrHash) taken from $(_SystemPrivateCoreLibPath)" />
-
-    <ItemGroup>
-      <_VersionsFileLines Include="core-setup $(LatestCommit)" />
-      <_VersionsFileLines Include="corefx $(CoreFxHash)" />
-      <_VersionsFileLines Include="dotnet/versions/corefx $(CoreFxCurrentRef)" />
-      <_VersionsFileLines Include="coreclr $(CoreClrHash)" Condition="'$(_SkipCoreClrHash)' != 'true'" />
-      <_VersionsFileLines Include="dotnet/versions/coreclr $(CoreClrCurrentRef)" Condition="'$(_SkipCoreClrHash)' != 'true'" />
-    </ItemGroup>
-
-    <WriteLinesToFile Lines="@(_VersionsFileLines)"
-                      File="$(ObjDir)\Microsoft.NETCore.App.versions.txt"
-                      Overwrite="true"/>
-
-    <ItemGroup>
-      <File Include="$(ObjDir)\Microsoft.NETCore.App.versions.txt" />
-    </ItemGroup>
   </Target>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
