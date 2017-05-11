@@ -45,7 +45,7 @@ platformList.each { platform ->
             dockerContainer = "ubuntu-16.04-cross-ef0ac75-20175511035548"
         }
         dockerCommand = "docker run --name ${dockerContainer} --rm -v \${WORKSPACE}:${dockerWorkingDirectory} -w=${dockerWorkingDirectory} ${dockerRepository}:${dockerContainer}"
-        buildCommand = "${dockerCommand} ./build.sh -ConfigurationGroup=${configuration} -TargetArchitecture=${architecture} -PortableBuild=true -DistroRid=linux-${architecture} -SkipTests=true -DisableCrossgen=true"
+        buildCommand = "${dockerCommand} ./build.sh -ConfigurationGroup=${configuration} -TargetArchitecture=${architecture} -PortableBuild=true -DistroRid=linux-${architecture} -SkipTests=true -DisableCrossgen=true -CrossBuild=true"
     }
     else if (os == "Ubuntu") {
         dockerContainer = "ubuntu-14.04-debpkg-e5cf912-20175003025046"
