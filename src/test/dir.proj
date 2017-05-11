@@ -46,13 +46,13 @@
     <PropertyGroup>
       <RestoreSourceArg>@(RestoreTestSource->'--source %(Identity)', ' ')</RestoreSourceArg>
       <RestoreSourceArg>$(RestoreSourceArg) @(RestoreTestFallbackSource->'--source %(Identity)', ' ')</RestoreSourceArg>
-      <RestoreArgs>--disable-parallel --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(RestoreSourceArg)</RestoreArgs>
+      <RestoreArgs>--disable-parallel --packages "$(PackagesDir.TrimEnd('/').TrimEnd('\'))" $(RestoreSourceArg)</RestoreArgs>
       <RestoreArgs>$(RestoreArgs) /p:MNAVersion=$(ProductVersion) /p:TestTargetRid=$(TestTargetRid)</RestoreArgs>
       <RestorePrefix Condition="'$(OsEnvironment)' != 'Windows_NT'">DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1</RestorePrefix>
     </PropertyGroup>
 
     <Exec Command="$(RestorePrefix) $(DotnetSdkToolCommand) restore $(RestoreArgs) %(RestoreTest.Identity)"
-          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir.TrimEnd('/\'.ToCharArray()))" />
+          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir.TrimEnd('/').TrimEnd('\'))" />
   </Target>
 
   <Target Name="BuildTests"
@@ -66,7 +66,7 @@
     <Message Importance="High" Text="TestProjects: @(TestProjects)" />
     <Exec Command="$(DotnetSdkToolCommand) build $(BuildArgs) %(TestProjects.Identity)"
           WorkingDirectory="$([System.IO.Path]::GetDirectoryName(%(TestProjects.Identity)))"
-          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir.TrimEnd('/\'.ToCharArray()))" />
+          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir.TrimEnd('/').TrimEnd('\'))" />
   </Target>
 
   <Target Name="RunTest"

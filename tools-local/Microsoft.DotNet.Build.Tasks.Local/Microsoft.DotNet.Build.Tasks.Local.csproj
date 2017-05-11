@@ -10,12 +10,12 @@
     <CLSCompliant>false</CLSCompliant>
     <ProjectGuid>{B507BED2-0A28-456A-99C6-AD7AA148E35F}</ProjectGuid>
     <OutputPath Condition="'$(TargetGroup)' != 'net45'">$(LocalToolRuntimePath)</OutputPath>
-    <IntermediateOutputPath Condition="'$(TargetGroup)' == 'net45'">$(IntermediateOutputPath)\net45</IntermediateOutputPath>
     <OutputPath Condition="'$(TargetGroup)' == 'net45'">$(LocalToolRuntimePath)\net46</OutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)tools-local/$(MSBuildProjectName)/$(TargetGroup)</IntermediateOutputPath>
     <PackageTargetFallback>dnxcore50;portable-net45+win8+wpa81</PackageTargetFallback>
     <ContainsPackageReferences>true</ContainsPackageReferences>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <RestoreOutputPath>$(IntermediateOutputPath)$(TargetGroup)</RestoreOutputPath>
+    <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
     <SkipSigning>true</SkipSigning>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>

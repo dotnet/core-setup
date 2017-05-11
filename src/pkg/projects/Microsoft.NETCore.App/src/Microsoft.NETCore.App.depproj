@@ -66,7 +66,7 @@
     <PropertyGroup Condition="'@(_runtimeCLR)' != ''">
       <_runtimePackageId>%(_runtimeCLR.NuGetPackageId)</_runtimePackageId>
       <_runtimePackageVersion>%(_runtimeCLR.NuGetPackageVersion)</_runtimePackageVersion>
-      <_runtimePackagePath>$(PackagesDir)/$(_runtimePackageId)/$(_runtimePackageVersion)</_runtimePackagePath>
+      <_runtimePackagePath>$(PackagesDir)/$(_runtimePackageId.ToLowerInvariant())/$(_runtimePackageVersion)</_runtimePackagePath>
       
       <_crossGenPath>$(_runtimePackagePath)/tools$(_crossDir)/crossgen$(ApplicationFileExtension)</_crossGenPath>
       <_runtimeDirectory>%(_runtimeCLR.RootDir)%(_runtimeCLR.Directory)</_runtimeDirectory>
@@ -79,7 +79,7 @@
     <PropertyGroup Condition="'@(_runtimeJIT)' != ''">
       <_jitPackageId>%(_runtimeJIT.NuGetPackageId)</_jitPackageId>
       <_jitPackageVersion>%(_runtimeJIT.NuGetPackageVersion)</_jitPackageVersion>
-      <_jitPackagePath>$(PackagesDir)/$(_jitPackageId)/$(_jitPackageVersion)</_jitPackagePath>
+      <_jitPackagePath>$(PackagesDir)/$(_jitPackageId.ToLowerInvariant())/$(_jitPackageVersion)</_jitPackagePath>
       <_jitPath>%(_runtimeJIT.FullPath)</_jitPath>
       <_jitPath Condition="'$(_crossDir)' != ''">$(_jitPackagePath)/runtimes$(_crossDir)/native/$(LibraryFilePrefix)clrjit$(LibraryFileExtension)</_jitPath>
     </PropertyGroup>
@@ -101,7 +101,7 @@
     <PropertyGroup>
       <CoreFxVersionFile 
         Condition="$([System.String]::new('%(Reference.Identity)').ToLowerInvariant().Contains('system.runtime.dll'))">
-          $(PackagesDir)%(Reference.NuGetPackageId)/%(Reference.NuGetPackageVersion)/version.txt
+          $(PackagesDir)$([System.String]::new('%(Reference.NuGetPackageId)').ToLowerInvariant())/%(Reference.NuGetPackageVersion)/version.txt
       </CoreFxVersionFile>
       <CoreClrVersionFile Condition="'$(NuGetRuntimeIdentifier)' != ''">
           $(_runtimePackagePath)/version.txt
@@ -201,6 +201,7 @@
     <PropertyGroup>
       <_crossGenIntermediatePath>$(IntermediateOutputPath)/crossgen</_crossGenIntermediatePath>
     </PropertyGroup>
+    <Exec Command="chmod u+x $(_crossGenPath)" />
     <ItemGroup>
       <_filesToCrossGen Include="@(FilesToPackage)" 
                         Condition="'%(FilesToPackage.IsNative)' != 'true' AND '%(FileName)' != 'System.Private.CoreLib' AND '%(FileName)' != 'mscorlib' AND '%(Extension)' == '.dll'">
