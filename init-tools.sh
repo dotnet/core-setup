@@ -15,6 +15,9 @@ __INIT_TOOLS_RESTORE_PROJECT=$__scriptpath/init-tools.msbuild
 __INIT_TOOLS_DONE_MARKER_DIR=$__TOOLRUNTIME_DIR/$__BUILD_TOOLS_PACKAGE_VERSION
 __INIT_TOOLS_DONE_MARKER=$__INIT_TOOLS_DONE_MARKER_DIR/done
 
+# We do not want to run the first-time experience.
+export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
 if [ -z "$__DOTNET_PKG" ]; then
     if [ "$(uname -m | grep "i[3456]86")" = "i686" ]; then
         echo "Warning: build not supported on 32 bit Unix"

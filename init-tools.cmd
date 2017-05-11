@@ -12,6 +12,9 @@ set BUILD_TOOLS_PATH=%PACKAGES_DIR%Microsoft.DotNet.BuildTools\%BUILDTOOLS_VERSI
 set INIT_TOOLS_RESTORE_PROJECT=%~dp0init-tools.msbuild
 set BUILD_TOOLS_SEMAPHORE=%TOOLRUNTIME_DIR%\%BUILDTOOLS_VERSION%\init-tools.completed
 
+:: We do not want to run the first-time experience.
+set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
 :: if force option is specified then clean the tool runtime and build tools package directory to force it to get recreated
 if [%1]==[force] (
   if exist "%TOOLRUNTIME_DIR%" rmdir /S /Q "%TOOLRUNTIME_DIR%"
