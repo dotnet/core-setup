@@ -35,7 +35,7 @@ init_rid_plat()
     fi
 
     if [ "$(uname -s)" == "Darwin" ]; then
-        __rid_plat=osx.10.12
+        export __rid_plat=osx.10.12
     fi
 
     if [ $__linkPortable == 1 ]; then
