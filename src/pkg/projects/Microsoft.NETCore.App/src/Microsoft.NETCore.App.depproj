@@ -201,7 +201,9 @@
     <PropertyGroup>
       <_crossGenIntermediatePath>$(IntermediateOutputPath)/crossgen</_crossGenIntermediatePath>
     </PropertyGroup>
-    <Exec Command="chmod u+x $(_crossGenPath)" />
+    <!-- Ensure crossgen is executable.  See https://github.com/NuGet/Home/issues/4424 -->
+    <Exec Command="chmod u+x $(_crossGenPath)"
+          Condition="'$(OSGroup)' != 'Windows_NT'" />
     <ItemGroup>
       <_filesToCrossGen Include="@(FilesToPackage)" 
                         Condition="'%(FilesToPackage.IsNative)' != 'true' AND '%(FileName)' != 'System.Private.CoreLib' AND '%(FileName)' != 'mscorlib' AND '%(Extension)' == '.dll'">
