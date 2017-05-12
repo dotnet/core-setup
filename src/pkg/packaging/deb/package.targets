@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <Target Name="InitializeDotnetDebTool">
-    <Exec Command="$(DnuRestoreCommand) $(dotnetDebToolSource)"/>
+    <Exec Command="$(DotnetRestoreCommand) $(dotnetDebToolSource)"/>
     <Exec Command="$(DotnetToolCommand) pack $(dotnetDebToolSource) --output $(PackagesOutDir)intermediate/ --version-suffix $(VersionSuffix)"/>
 
     <ItemGroup>
@@ -34,7 +34,7 @@
     <Copy SourceFiles="$(MSBuildThisFileDirectory)/$(toolConsumerProjectName)"
           DestinationFiles="$(consumingProjectDirectory)/$(toolConsumerProjectName)" />
 
-    <Exec Command="$(DnuRestoreCommand) -s $(dotnetDebToolPackageSource)"
+    <Exec Command="$(DotnetRestoreCommand) -s $(dotnetDebToolPackageSource)"
           WorkingDirectory="$(consumingProjectDirectory)" />
 
   </Target>

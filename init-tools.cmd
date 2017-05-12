@@ -32,7 +32,7 @@ if exist "%TOOLRUNTIME_DIR%" rmdir /S /Q "%TOOLRUNTIME_DIR%"
 echo Running %0 > "%INIT_TOOLS_LOG%"
 
 set /p DOTNET_VERSION=< "%~dp0DotnetCLIVersion.txt"
-if exist "%DOTNET_CMD%" goto :afterdotnetrestore
+if exist "%DOTNET_CMD%" goto :afterdotnetinstall
 
 echo Installing dotnet cli...
 if NOT exist "%DOTNET_PATH%" mkdir "%DOTNET_PATH%"
@@ -46,7 +46,7 @@ if NOT exist "%DOTNET_LOCAL_PATH%" (
   exit /b 1
 )
 
-:afterdotnetrestore
+:afterdotnetinstall
 
 if exist "%BUILD_TOOLS_PATH%" goto :afterbuildtoolsrestore
 echo Restoring BuildTools version %BUILDTOOLS_VERSION%...
