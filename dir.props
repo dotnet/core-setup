@@ -137,7 +137,7 @@
     </SdkRestoreProjects>
   </ItemGroup>
   <PropertyGroup>
-    <DotnetRestorePrefix Condition="'$(OsEnvironment)' != 'Windows_NT'">DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 </DotnetRestorePrefix>
+    <DotnetRestorePrefix Condition="'$(RunningOnUnix)' == 'true'">DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 </DotnetRestorePrefix>
     <DotnetRestoreCommand>$(DotnetRestorePrefix)$(DotnetRestoreCommand)</DotnetRestoreCommand>
   </PropertyGroup>
 
