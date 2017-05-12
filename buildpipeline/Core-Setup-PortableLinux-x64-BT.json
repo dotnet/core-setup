@@ -274,7 +274,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(PackageTargetsForInstallers) /p:DistroRid=$(DistroRid_Ubuntu1404) $(CommonMSBuildArguments) /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) /p:DistroRid=$(DistroRid_Ubuntu1404) $(CommonMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -293,7 +293,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj $(PublishTargetsForInstallers) /p:DistroRid=$(DistroRid_Ubuntu1404) $(CommonMSBuildArguments) $(CommonMSBuildPublishArgs)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:DistroRid=$(DistroRid_Ubuntu1404) $(CommonMSBuildArguments) $(CommonMSBuildPublishArgs)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -369,7 +369,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1604) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(PackageTargetsForInstallers) /p:DistroRid=$(DistroRid_Ubuntu1604) $(CommonMSBuildArguments) /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1604) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) /p:DistroRid=$(DistroRid_Ubuntu1604) $(CommonMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -388,7 +388,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1604) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj $(PublishTargetsForInstallers) /p:DistroRid=$(DistroRid_Ubuntu1604) $(CommonMSBuildArguments) $(CommonMSBuildPublishArgs)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1604) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:DistroRid=$(DistroRid_Ubuntu1604) $(CommonMSBuildArguments) $(CommonMSBuildPublishArgs)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -464,7 +464,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1610) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(PackageTargetsForInstallers) /p:DistroRid=$(DistroRid_Ubuntu1610) $(CommonMSBuildArguments) /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1610) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) /p:DistroRid=$(DistroRid_Ubuntu1610) $(CommonMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -483,7 +483,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1610) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj $(PublishTargetsForInstallers) /p:DistroRid=$(DistroRid_Ubuntu1610) $(CommonMSBuildArguments) $(CommonMSBuildPublishArgs)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1610) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:DistroRid=$(DistroRid_Ubuntu1610) $(CommonMSBuildArguments) $(CommonMSBuildPublishArgs)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -559,7 +559,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Debian8) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(PackageTargetsForInstallers) /p:DistroRid=$(DistroRid_Debian8) $(CommonMSBuildArguments) /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/",
+        "arguments": "run --rm $(DockerCommonRunArgs_Debian8) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) /p:DistroRid=$(DistroRid_Debian8) $(CommonMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -578,7 +578,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Debian8) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj $(PublishTargetsForInstallers) /p:DistroRid=$(DistroRid_Debian8) $(CommonMSBuildArguments) $(CommonMSBuildPublishArgs)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Debian8) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:DistroRid=$(DistroRid_Debian8) $(CommonMSBuildArguments) $(CommonMSBuildPublishArgs)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -806,8 +806,8 @@
     "PB_DebRepoServer": {
       "value": "azure-apt-cat.cloudapp.net"
     },
-    "PackageTargetsForInstallers": {
-      "value": "/t:InitPackage;GenerateVersionBadge;GenerateInstallers"
+    "AdditionalMSBuildProperties": {
+      "value": "/p:UsePrebuiltPortableBinaries=true /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/"
     },
     "PublishTargetsForInstallers": {
       "value": "/t:PublishToAzure;PublishDebFilesToDebianRepo"
