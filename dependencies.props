@@ -16,13 +16,13 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>preview2-25310-01</CoreFxExpectedPrerelease>
+    <CoreFxVersion>4.4.0-preview2-25311-04</CoreFxVersion>
     <PlatformPackageVersion>2.0.0-preview2-25311-04</PlatformPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.0-preview2-25309-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreRuntimeJitPackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</MicrosoftNETCoreRuntimeJitPackageVersion>
     <NETStandardVersion>2.0.0-preview2-25311-01</NETStandardVersion>
     <DiaSymReaderNativeVersion>1.4.1</DiaSymReaderNativeVersion>
-    <WcfExpectedPrerelease>preview2-25311-02</WcfExpectedPrerelease>
+    <WcfVersion>4.4.0-preview2-25311-02</WcfVersion>
   </PropertyGroup>
   
   <!-- Package dependency verification/auto-upgrade configuration. -->
@@ -56,8 +56,13 @@
     
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>CoreFxExpectedPrerelease</ElementName>
-      <BuildInfoName>CoreFx</BuildInfoName>
+      <ElementName>CoreFxVersion</ElementName>
+      <PackageId>Microsoft.CSharp</PackageId>
+    </XmlUpdateStep>
+    <XmlUpdateStep Include="CoreFx">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>PlatformPackageVersion</ElementName>
+      <PackageId>Microsoft.NETCore.Platforms</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
@@ -71,8 +76,8 @@
     </XmlUpdateStep>
     <XmlUpdateStep Include="WCF">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>WcfExpectedPrerelease</ElementName>
-      <BuildInfoName>WCF</BuildInfoName>
+      <ElementName>WcfVersion</ElementName>
+      <PackageId>System.ServiceModel.Duplex</PackageId>
     </XmlUpdateStep>
   </ItemGroup>
 </Project>

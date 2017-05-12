@@ -24,31 +24,31 @@
       <Version>1.6.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Private.CoreFx.UAP">
-      <Version>4.4.0-$(CoreFxExpectedPrerelease)</Version>
+      <Version>$(CoreFxVersion)</Version>
     </PackageReference>
     <PackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR">
       <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Platforms">
-      <Version>2.0.0-$(CoreFxExpectedPrerelease)</Version>
+      <Version>$(PlatformPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>$(NETStandardVersion)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.Duplex">
-      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
+      <Version>$(WcfVersion)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.Http">
-      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
+      <Version>$(WcfVersion)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.NetTcp">
-      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
+      <Version>$(WcfVersion)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.Primitives">
-      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
+      <Version>$(WcfVersion)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.Security">
-      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
+      <Version>$(WcfVersion)</Version>
     </PackageReference>
   </ItemGroup>
 

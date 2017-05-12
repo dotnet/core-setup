@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Private.CoreFx.NETCoreApp">
-      <Version>4.4.0-$(CoreFxExpectedPrerelease)</Version>
+      <Version>$(CoreFxVersion)</Version>
     </PackageReference>
     <PackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR">
       <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
@@ -31,7 +31,7 @@
       <Version>$(DiaSymReaderNativeVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Platforms">
-      <Version>2.0.0-$(CoreFxExpectedPrerelease)</Version>
+      <Version>$(PlatformPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>$(NETStandardVersion)</Version>
