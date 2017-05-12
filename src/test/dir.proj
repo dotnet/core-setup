@@ -51,7 +51,7 @@
       <RestorePrefix Condition="'$(OsEnvironment)' != 'Windows_NT'">DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1</RestorePrefix>
     </PropertyGroup>
 
-    <Exec Command="$(RestorePrefix) $(DotnetSdkToolCommand) restore $(RestoreArgs) %(RestoreTest.Identity)"
+    <Exec Command="$(RestorePrefix) $(DotnetToolCommand) restore $(RestoreArgs) %(RestoreTest.Identity)"
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir.TrimEnd('/').TrimEnd('\'))" />
   </Target>
 
@@ -64,7 +64,7 @@
 
     <Message Text="Building Tests" Importance="High" />
     <Message Importance="High" Text="TestProjects: @(TestProjects)" />
-    <Exec Command="$(DotnetSdkToolCommand) build $(BuildArgs) %(TestProjects.Identity)"
+    <Exec Command="$(DotnetToolCommand) build $(BuildArgs) %(TestProjects.Identity)"
           WorkingDirectory="$([System.IO.Path]::GetDirectoryName(%(TestProjects.Identity)))"
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir.TrimEnd('/').TrimEnd('\'))" />
   </Target>
@@ -88,7 +88,7 @@
       <IsCrossArch Condition="'$(TargetArchitecture)' == 'arm' or '$(TargetArchitecture)' == 'arm64' or '$(TargetArchitecture)' == 'armel'">true</IsCrossArch>
       <TestResultsXml>$(TestsOutputDir)$(TestProjectFilename)-testResults.trx</TestResultsXml>
     </PropertyGroup>
-    <Exec Command="$(DotnetSdkToolCommand) test $(TestArgs) --logger &quot;trx;LogFileName=$(TestResultsXml)&quot;"
+    <Exec Command="$(DotnetToolCommand) test $(TestArgs) --logger &quot;trx;LogFileName=$(TestResultsXml)&quot;"
           WorkingDirectory="$(TestWorkingDirectory)"
           EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir);TEST_ARTIFACTS=$(SystemPathTestsOutputDir);TEST_TARGETRID=$(TestTargetRid);BUILDRID=$(TargetRid);BUILD_ARCHITECTURE=$(TargetArchitecture);MNA_VERSION=$(ProductVersion);DOTNET_SDK_PATH=$(DotnetCliPath)"
           Condition="'$(TestProjectFilename)' != 'HostActivationTests' or '$(IsCrossArch)' != 'true'"
