@@ -14,6 +14,6 @@
   <ItemGroup>
     <RestoreTestFallbackSource Include="$(CoreHostOutputDir.TrimEnd('/').TrimEnd('\'))" />
     <RestoreTestFallbackSource Include="$(PackagesBasePath)packages" />
-    <RestoreTestSource Include="@(DnuSourceList)" />
+    <RestoreTestSource Include="@(DotnetSourceList)" />
   </ItemGroup>
 </Project>
