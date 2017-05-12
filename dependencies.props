@@ -12,6 +12,7 @@
     <CoreFxCurrentRef>f37bb2d81830cefb80a785a2b2ce1bd664ab8a68</CoreFxCurrentRef>
     <CoreClrCurrentRef>a44d1158c8f2cf53d54cf35567f2ec59057b3093</CoreClrCurrentRef>
     <StandardCurrentRef>1117fab956560c88ebb3fbaa339b6fa04c29a364</StandardCurrentRef>
+    <WCFCurrentRef>284ab8a84d40ad2d42e6f3680ce159aaea82d77d</WCFCurrentRef>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -19,8 +20,9 @@
     <PlatformPackageVersion>2.0.0-preview2-25311-04</PlatformPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.0-preview2-25309-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreRuntimeJitPackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</MicrosoftNETCoreRuntimeJitPackageVersion>
-    <NETStandardVersion>2.0.0-preview2-25310-01</NETStandardVersion>
+    <NETStandardVersion>2.0.0-preview2-25311-01</NETStandardVersion>
     <DiaSymReaderNativeVersion>1.4.1</DiaSymReaderNativeVersion>
+    <WcfExpectedPrerelease>preview2-25311-02</WcfExpectedPrerelease>
   </PropertyGroup>
   
   <!-- Package dependency verification/auto-upgrade configuration. -->
@@ -43,6 +45,10 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)standard/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(StandardCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
+    <RemoteDependencyBuildInfo Include="WCF">
+      <BuildInfoPath>$(BaseDotNetBuildInfo)wcf/$(DependencyBranch)</BuildInfoPath>
+      <CurrentRef>$(WCFCurrentRef)</CurrentRef>
+    </RemoteDependencyBuildInfo>
 
     <DependencyBuildInfo Include="@(RemoteDependencyBuildInfo)">
       <RawVersionsBaseUrl>https://raw.githubusercontent.com/dotnet/versions</RawVersionsBaseUrl>
@@ -62,6 +68,11 @@
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>NETStandardVersion</ElementName>
       <PackageId>NETStandard.Library</PackageId>
+    </XmlUpdateStep>
+    <XmlUpdateStep Include="WCF">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>WcfExpectedPrerelease</ElementName>
+      <BuildInfoName>WCF</BuildInfoName>
     </XmlUpdateStep>
   </ItemGroup>
 </Project>

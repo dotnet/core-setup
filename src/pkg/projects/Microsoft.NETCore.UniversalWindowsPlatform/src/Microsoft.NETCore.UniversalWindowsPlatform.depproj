@@ -36,19 +36,19 @@
       <Version>$(NETStandardVersion)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.Duplex">
-      <Version>4.4.0-beta-25205-01</Version>
+      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.Http">
-      <Version>4.4.0-beta-25205-01</Version>
+      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.NetTcp">
-      <Version>4.4.0-beta-25205-01</Version>
+      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.Primitives">
-      <Version>4.4.0-beta-25205-01</Version>
+      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
     </PackageReference>
     <PackageReference Include="System.ServiceModel.Security">
-      <Version>4.4.0-beta-25205-01</Version>
+      <Version>4.4.0-$(WcfExpectedPrerelease)</Version>
     </PackageReference>
   </ItemGroup>
 
