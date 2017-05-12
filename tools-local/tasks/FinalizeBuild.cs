@@ -92,20 +92,13 @@ namespace Microsoft.DotNet.Build.Tasks
 
                 try
                 {
-                    CopyBlobs($"{Channel}/Binaries/{SharedFrameworkNugetVersion}", $"{Channel}/Binaries/Latest/");
+                    CopyBlobs($"Runtime/{SharedFrameworkNugetVersion}", $"Runtime/Latest/");
 
-                    CopyBlobs($"{Channel}/Installers/{SharedFrameworkNugetVersion}", $"{Channel}/Installers/Latest/");
+                    CopyBlobs($"Runtime/{SharedHostNugetVersion}", $"Runtime/Latest/");
 
-                    CopyBlobs($"{Channel}/Installers/{SharedHostNugetVersion}", $"{Channel}/Installers/Latest/");
-
-                    // Generate the Sharedfx Version text files
-                    List<string> versionFiles = PublishRids.Select(p => $"{p.GetMetadata("VersionFileName")}.version").ToList();
-
+                    // Generate the latest version text file
                     string sfxVersion = GetSharedFrameworkVersionFileContent();
-                    foreach(string version in versionFiles)
-                    {
-                        PublishStringToBlob(ContainerName, $"{Channel}/dnvm/latest.sharedfx.{version}", sfxVersion, "text/plain");
-                    }
+                    PublishStringToBlob(ContainerName, $"Runtime/latest.sharedfx", sfxVersion, "text/plain");
                 }
                 finally
                 {
