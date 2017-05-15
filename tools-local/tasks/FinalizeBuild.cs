@@ -37,8 +37,6 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required]
         public string Version { get; set; }
         [Required]
-        public ITaskItem [] PublishRids { get; set; }
-        [Required]
         public string CommitHash { get; set; }
         public bool ForcePublish { get; set; }
 
@@ -92,13 +90,11 @@ namespace Microsoft.DotNet.Build.Tasks
 
                 try
                 {
-                    CopyBlobs($"Runtime/{SharedFrameworkNugetVersion}", $"Runtime/Latest/");
-
-                    CopyBlobs($"Runtime/{SharedHostNugetVersion}", $"Runtime/Latest/");
+                    CopyBlobs($"Runtime/{ProductVersion}", $"Runtime/{Channel}/");
 
                     // Generate the latest version text file
                     string sfxVersion = GetSharedFrameworkVersionFileContent();
-                    PublishStringToBlob(ContainerName, $"Runtime/latest.sharedfx", sfxVersion, "text/plain");
+                    PublishStringToBlob(ContainerName, $"Runtime/{Channel}/latest.version", sfxVersion, "text/plain");
                 }
                 finally
                 {
