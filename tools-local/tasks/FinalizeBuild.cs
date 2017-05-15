@@ -35,6 +35,8 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required]
         public string SharedHostNugetVersion { get; set; }
         [Required]
+        public string ProductVersion { get; set; }
+        [Required]
         public string Version { get; set; }
         [Required]
         public string CommitHash { get; set; }

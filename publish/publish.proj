@@ -94,6 +94,7 @@
                    Version="$(SharedFrameworkNugetVersion)"
                    SharedFrameworkNugetVersion="$(SharedFrameworkNugetVersion)"
                    SharedHostNuGetVersion="$(HostVersion)"
+                   ProductVersion="$(ProductVersion)"
                    CommitHash="$(LatestCommit)"
                    FinalizeContainer="Runtime/$(SharedFrameworkNugetVersion)"
                    ForcePublish="true"                  
