@@ -9,7 +9,7 @@
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.5"
+          "version": "1.0.6-servicing-*"
         },
         "Newtonsoft.Json": "9.0.1-beta1"
       }
