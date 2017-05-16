@@ -3,11 +3,15 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
-  <Target Name="Build">
+  <Target Name="Build"
+          DependsOnTargets="GetLatestCommitHash">
     <MakeDir  Condition="!Exists('$(pOutDir)')" Directories="$(pOutDir)" />
 
     <PropertyGroup>
       <Args>/p:Configuration=$(ConfigurationGroup)</Args>
+      <_EnvironmentVariables>NUGET_PACKAGES=$(PackagesDir)</_EnvironmentVariables>
+      <_EnvironmentVariables Condition="'$(LatestCommit)' != ''">$(_EnvironmentVariables);LatestCommit=$(LatestCommit)</_EnvironmentVariables>
+      <_EnvironmentVariables Condition="'$(BuiltByString)' != ''">$(_EnvironmentVariables);BuiltByString=$(BuiltByString)</_EnvironmentVariables>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,6 +20,6 @@
     </ItemGroup>
 
     <Exec Command="$(DotnetToolCommand) build $(Args) %(PackageProjects.Identity)"
-          EnvironmentVariables="NUGET_PACKAGES=$(PackagesDir)" />
+          EnvironmentVariables="$(_EnvironmentVariables)" />
   </Target>
 </Project>
