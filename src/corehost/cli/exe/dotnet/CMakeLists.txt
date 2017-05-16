@@ -7,3 +7,4 @@ set(SOURCES
     ../../fxr/fx_ver.cpp)
 include(../exe.cmake)
 
+install_library_and_symbols (dotnet)

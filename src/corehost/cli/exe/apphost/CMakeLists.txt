@@ -19,3 +19,4 @@ include(../exe.cmake)
 set(SOURCES)
 add_definitions(-DFEATURE_APPHOST=1)
 
+install_library_and_symbols (apphost)
