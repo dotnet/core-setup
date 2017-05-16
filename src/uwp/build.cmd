@@ -26,9 +26,8 @@ if /i [%1] == [x86]         ( set __BuildArch=x86&&set __VCBuildArch=x86&&shift&
 if /i [%1] == [arm]         ( set __BuildArch=arm&&set __VCBuildArch=x86_arm&&set __SDKVersion="-DCMAKE_SYSTEM_VERSION=10.0"&&shift&goto Arg_Loop)
 if /i [%1] == [x64]         ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&goto Arg_Loop)
 if /i [%1] == [amd64]       ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&goto Arg_Loop)
-if /i [%1] == [rid]         ( set __TargetRid=%2&&shift&&shift&goto Arg_Loop)
-if /i [%1] == [commit]      (set __CommitSha=%2&&shift&&shift&goto Arg_Loop)
 
+if /i [%1] == [rid]         ( set __TargetRid=%2&&shift&&shift&goto Arg_Loop)
 shift
 goto :Arg_Loop
 
@@ -69,7 +68,7 @@ if %__CMakeBinDir% == "" (
 if %__IntermediatesDir% == "" (
     set "__IntermediatesDir=%__binDir%\obj\%__TargetRid%.%CMAKE_BUILD_TYPE%\uwphost"
 )
-set "__ResourcesDir=%__binDir%\obj\%__TargetRid%.%CMAKE_BUILD_TYPE%\uwphostResourceFiles%
+set "__ResourcesDir=%__binDir%\obj\%__TargetRid%.%CMAKE_BUILD_TYPE%\uwphostResourceFiles%"
 set "__CMakeBinDir=%__CMakeBinDir:\=/%"
 set "__IntermediatesDir=%__IntermediatesDir:\=/%"
 
@@ -81,9 +80,9 @@ if not exist "%__IntermediatesDir%" md "%__IntermediatesDir%"
 
 :: Regenerate the VS solution
 
-echo Calling "%__nativeWindowsDir%\gen-buildsys-win.bat %~dp0 %__VSVersion% %__BuildArch% %__CommitSha% %__ResourcesDir% %__CMakeBinDir%
+echo Calling "%__nativeWindowsDir%\gen-buildsys-win.bat" %~dp0 %__BuildArch% %__ResourcesDir% %__CMakeBinDir%
 pushd "%__IntermediatesDir%"
-call "%__nativeWindowsDir%\gen-buildsys-win.bat" %~dp0 %__VSVersion% %__BuildArch% %__CommitSha% %__ResourcesDir% %__CMakeBinDir%
+call "%__nativeWindowsDir%\gen-buildsys-win.bat" %~dp0 %__BuildArch% %__ResourcesDir% %__CMakeBinDir%
 popd
 
 :CheckForProj

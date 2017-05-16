@@ -1,3 +1,4 @@
+include_directories("${CLI_CMAKE_RESOURCE_DIR}/uwpshim") 
 add_executable(UWPShim
   uwpshim.cpp
   native.rc

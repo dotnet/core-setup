@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <AppxFileList Include="clretwrc.dll;coreclr.dll;mscordaccore.dll;mscordbi.dll;mscorrc.debug.dll"/>
-    <AppxFileList Include="mscorrc.dll;System.Private.CoreLib.ni.dll;clrjit.dll" />
+    <AppxFileList Include="mscorrc.dll;System.Private.CoreLib.dll;clrjit.dll" />
   </ItemGroup>
 
   <!-- Add more files to be copied -->

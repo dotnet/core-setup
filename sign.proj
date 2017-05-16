@@ -112,6 +112,7 @@
     <CallTarget Targets="SignFiles" />
   </Target>
 
+  <!-- TODO: Fix the versioning -->
   <Target Name="GetSignUwpAppxPackage">
     <ItemGroup>
       <FilesToSign Include="$(RepoRoot)pgk/bin/packages/Microsoft.NET.CoreRuntime.2.0.appx">

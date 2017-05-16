@@ -1,3 +1,5 @@
+include_directories("${CLI_CMAKE_RESOURCE_DIR}/copywin32resources")
+
 add_executable(CopyWin32Resources
   CopyWin32Resources.cpp
   native.rc

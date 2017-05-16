@@ -5,8 +5,15 @@ rem This file invokes cmake and generates the build system for windows.
 set argC=0
 for %%x in (%*) do Set /A argC+=1
 
-if NOT %argC%==6 GOTO :USAGE
+if NOT %argC%==4 GOTO :USAGE
 if %1=="/?" GOTO :USAGE
+
+echo %1
+echo %2
+echo %3
+echo %4
+echo %5
+echo %6
 
 setlocal
 set __sourceDir=%~dp0..
@@ -14,14 +21,13 @@ set __sourceDir=%~dp0..
 set __VSString=14 2015
 
 :: Set the target architecture to a format cmake understands. ANYCPU defaults to x64
-set cm_BaseRid=win10-%3
-if /i "%3" == "x86"     (set cm_Arch=I386&&set __VSString=%__VSString%)
-if /i "%3" == "x64"     (set cm_Arch=AMD64&&set __VSString=%__VSString% Win64)
-if /i "%3" == "arm"     (set cm_Arch=ARM&&set __VSString=%__VSString% ARM)
+set cm_BaseRid=win10-%2
+if /i "%2" == "x86"     (set cm_Arch=I386&&set __VSString=%__VSString%)
+if /i "%2" == "x64"     (set cm_Arch=AMD64&&set __VSString=%__VSString% Win64)
+if /i "%2" == "arm"     (set cm_Arch=ARM&&set __VSString=%__VSString% ARM)
 
-set __LatestCommit=%4
-set __ResourcesDir=%5
-set __OutputDir=%6
+set __ResourcesDir=%3
+set __OutputDir=%4
 
 echo "Computed RID for native build is %cm_BaseRid%"
 
@@ -33,8 +39,9 @@ for /f "delims=" %%a in ('powershell -NoProfile -ExecutionPolicy ByPass "& .\Win
 popd
 
 :DoGen
-echo "%CMakePath%" %__sourceDir% %__SDKVersion% "-DCLI_CMAKE_PKG_RID:STRING=%cm_BaseRid%" "-DCLI_CMAKE_COMMIT_HASH:STRING=%__LatestCommit%" "-DCLI_CMAKE_PLATFORM_ARCH_%cm_Arch%=1" "-DCMAKE_INSTALL_PREFIX=%__OutputDir%" "-DCLI_CMAKE_RESOURCE_DIR:STRING=%__ResourcesDir%" -G "Visual Studio %__VSString%"
-"%CMakePath%" %__sourceDir% %__SDKVersion% "-DCLI_CMAKE_PKG_RID:STRING=%cm_BaseRid%" "-DCLI_CMAKE_COMMIT_HASH:STRING=%__LatestCommit%" "-DCLI_CMAKE_PLATFORM_ARCH_%cm_Arch%=1" "-DCMAKE_INSTALL_PREFIX=%__OutputDir%" "-DCLI_CMAKE_RESOURCE_DIR:STRING=%__ResourcesDir%" -G "Visual Studio %__VSString%"
+echo "%CMakePath%" %__sourceDir% %__SDKVersion% "-DCLI_CMAKE_PKG_RID:STRING=%cm_BaseRid%" "-DCLI_CMAKE_PLATFORM_ARCH_%cm_Arch%=1" "-DCMAKE_INSTALL_PREFIX=%__OutputDir%" "-DCLI_CMAKE_RESOURCE_DIR:STRING=%__ResourcesDir%" -G "Visual Studio %__VSString%"
+
+"%CMakePath%" %__sourceDir% %__SDKVersion% "-DCLI_CMAKE_PKG_RID:STRING=%cm_BaseRid%" "-DCLI_CMAKE_PLATFORM_ARCH_%cm_Arch%=1" "-DCMAKE_INSTALL_PREFIX=%__OutputDir%" "-DCLI_CMAKE_RESOURCE_DIR:STRING=%__ResourcesDir%" -G "Visual Studio %__VSString%"
 endlocal
 GOTO :DONE
 

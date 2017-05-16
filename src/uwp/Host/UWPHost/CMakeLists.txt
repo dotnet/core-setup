@@ -1,5 +1,7 @@
+include_directories("${CLI_CMAKE_RESOURCE_DIR}/uwphost")
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
- 
+
 set(UWPHost_SOURCES 
     UWPHost.cpp 
     HostEnvironment.cpp
