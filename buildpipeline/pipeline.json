@@ -16,7 +16,7 @@
       },
       "Definitions": [
         {
-          "Name": "Core-Setup-PortableLinux-x64-BT",
+          "Name": "Core-Setup-Linux-BT",
           "Parameters": {
             "PB_DistroRid": "rhel.7.2-x64",
             "PB_DockerTag": "rhel7_prereqs_2",
@@ -31,7 +31,7 @@
           }
         },
         {
-          "Name": "Core-Setup-Linux-BT", 
+          "Name": "Core-Setup-Linux-Arm-BT", 
           "Parameters": { 
             "PB_DistroRid": "ubuntu.14.04-arm", 
             "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239", 
