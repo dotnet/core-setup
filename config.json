@@ -251,7 +251,7 @@
             "DisableCrossgen": "true"
           }
         },
-        "stripSyms": {
+        "strip-symbols": {
           "description": "Strip native symbols.",
           "settings": {
             "StripSymbols": true
