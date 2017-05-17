@@ -1,5 +1,36 @@
 cmake_minimum_required (VERSION 2.6)
 
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    set(CLR_CMAKE_PLATFORM_UNIX 1)
+    message("System name Linux")
+endif(CMAKE_SYSTEM_NAME STREQUAL Linux)
+
+if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(CLR_CMAKE_PLATFORM_UNIX 1)
+    message("System name Darwin")
+endif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+
+if(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+    set(CLR_CMAKE_PLATFORM_UNIX 1)
+    add_definitions(-D_BSD_SOURCE) # required for getline
+    message("System name FreeBSD")
+endif(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+
+if(CMAKE_SYSTEM_NAME STREQUAL OpenBSD)
+    set(CLR_CMAKE_PLATFORM_UNIX 1)
+    message("System name OpenBSD")
+endif(CMAKE_SYSTEM_NAME STREQUAL OpenBSD)
+
+if(CMAKE_SYSTEM_NAME STREQUAL NetBSD)
+    set(CLR_CMAKE_PLATFORM_UNIX 1)
+    message("System name NetBSD")
+endif(CMAKE_SYSTEM_NAME STREQUAL NetBSD)
+
+if(CMAKE_SYSTEM_NAME STREQUAL SunOS)
+    set(CLR_CMAKE_PLATFORM_UNIX 1)
+    message("System name SunOS")
+endif(CMAKE_SYSTEM_NAME STREQUAL SunOS)
+
 if (NOT WIN32)
     if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
         # Ensure that dsymutil and strip are present
@@ -30,6 +61,12 @@ if (NOT WIN32)
 endif ()
 
 function(strip_symbols targetName outputFilename)
+    if(CLR_CMAKE_PLATFORM_UNIX STREQUAL 1)
+        message ("chcosta CLR_CMAKE_PLATFORM_UNIX = 1")
+    else(CLR_CMAKE_PLATFORM_UNIX STREQUAL 1)
+        message ("chcosta CLR_CMAKE_PLATFORM_UNIX is not 1")
+    endif(CLR_CMAKE_PLATFORM_UNIX STREQUAL 1)
+
     if(CLR_CMAKE_PLATFORM_UNIX)
         if(STRIP_SYMBOLS)
 

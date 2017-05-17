@@ -14,7 +14,6 @@
           Condition="'$(OSGroup)' != 'Windows_NT'"
           DependsOnTargets="GetLatestCommitHash">
     <PropertyGroup>
-      <CMakeBuildDir>$(IntermediateOutputRootPath)corehost\cmake\</CMakeBuildDir>
       <BuildArgs>--arch $(TargetArchitecture) --apphostver $(AppHostVersion) --hostver $(HostVersion) --fxrver $(HostResolverVersion) --policyver $(HostPolicyVersion) --commithash $(LatestCommit)</BuildArgs>
       <BuildArgs Condition="'$(PortableBuild)' == 'true'">$(BuildArgs) -portable</BuildArgs>     
       <BuildArgs Condition="'$(CrossBuild)' == 'true'">$(BuildArgs) --cross</BuildArgs>  
@@ -31,8 +30,10 @@
     <ItemGroup>
       <CMakeOutput Include="$(CMakeBuildDir)cli\exe\dotnet\dotnet" />
       <CMakeOutput Include="$(CMakeBuildDir)cli\exe\apphost\apphost" />
-      <CMakeOutput Include="$(CMakeBuildDir)cli\dll\$(HostPolicyBaseName)" />
-      <CMakeOutput Include="$(CMakeBuildDir)cli\fxr\$(DotnetHostFxrBaseName)" />
+      <CMakeOutput Include="$(HostPolicyPath)" />
+      <CMakeOutput Include="$(DotnetHostFxrPath)" />
+      <CMakeOutput Condition="'$(StripSymbols)' == 'true'" Include="$(HostPolicySymbolsPath)" />
+      <CMakeOutput Condition="'$(StripSymbols)' == 'true'" Include="$(DotNetHostFxrSymbolsPath)" />
     </ItemGroup>
 
     <Copy SourceFiles="@(CMakeOutput)"
