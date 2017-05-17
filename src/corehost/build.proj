@@ -32,8 +32,9 @@
       <CMakeOutput Include="$(CMakeBuildDir)cli\exe\apphost\apphost" />
       <CMakeOutput Include="$(HostPolicyPath)" />
       <CMakeOutput Include="$(DotnetHostFxrPath)" />
-      <CMakeOutput Condition="'$(StripSymbols)' == 'true'" Include="$(HostPolicySymbolsPath)" />
-      <CMakeOutput Condition="'$(StripSymbols)' == 'true'" Include="$(DotNetHostFxrSymbolsPath)" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(StripSymbols)' == 'true'">
+      <CMakeOutput Include="@(CmakeOutput -> '%(Identity)$(SymbolFileExtension)')" />
     </ItemGroup>
 
     <Copy SourceFiles="@(CMakeOutput)"

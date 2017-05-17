@@ -19,10 +19,8 @@
     <CMakeBuildDir>$(IntermediateOutputRootPath)corehost\cmake\</CMakeBuildDir>
     <DotnetHostFxrBaseName>$(LibPrefix)hostfxr$(LibSuffix)</DotnetHostFxrBaseName>
     <DotNetHostFxrPath>$(CMakeBuildDir)cli\fxr\$(DotnetHostFxrBaseName)</DotNetHostFxrPath>
-    <DotNetHostFxrSymbolsPath>$(DotNetHostFxrPath)$(SymbolFileExtension)</DotNetHostFxrSymbolsPath>
     <HostPolicyBaseName>$(LibPrefix)hostpolicy$(LibSuffix)</HostPolicyBaseName>      
     <HostPolicyPath>$(CMakeBuildDir)cli\dll\$(HostPolicyBaseName)</HostPolicyPath>
-    <HostPolicySymbolsPath>$(HostPolicyPath)$(SymbolFileExtension)</HostPolicySymbolsPath>
   </PropertyGroup>
 
   <!-- Use actual publishable (non-dummy) package name produced by the build system for this RID -->
