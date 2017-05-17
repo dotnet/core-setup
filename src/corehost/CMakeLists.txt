@@ -61,12 +61,6 @@ if (NOT WIN32)
 endif ()
 
 function(strip_symbols targetName outputFilename)
-    if(CLR_CMAKE_PLATFORM_UNIX STREQUAL 1)
-        message ("chcosta CLR_CMAKE_PLATFORM_UNIX = 1")
-    else(CLR_CMAKE_PLATFORM_UNIX STREQUAL 1)
-        message ("chcosta CLR_CMAKE_PLATFORM_UNIX is not 1")
-    endif(CLR_CMAKE_PLATFORM_UNIX STREQUAL 1)
-
     if(CLR_CMAKE_PLATFORM_UNIX)
         if(STRIP_SYMBOLS)
 
