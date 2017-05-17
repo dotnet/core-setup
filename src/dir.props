@@ -16,11 +16,8 @@
     <SymbolFileExtension Condition="'$(OSGroup)' == 'OSX'">.dwarf</SymbolFileExtension>
     <SymbolFileExtension Condition="'$(OSGroup)' == 'Windows_NT'">.pdb</SymbolFileExtension> 
 
-    <CMakeBuildDir>$(IntermediateOutputRootPath)corehost\cmake\</CMakeBuildDir>
     <DotnetHostFxrBaseName>$(LibPrefix)hostfxr$(LibSuffix)</DotnetHostFxrBaseName>
-    <DotNetHostFxrPath>$(CMakeBuildDir)cli\fxr\$(DotnetHostFxrBaseName)</DotNetHostFxrPath>
     <HostPolicyBaseName>$(LibPrefix)hostpolicy$(LibSuffix)</HostPolicyBaseName>      
-    <HostPolicyPath>$(CMakeBuildDir)cli\dll\$(HostPolicyBaseName)</HostPolicyPath>
   </PropertyGroup>
 
   <!-- Use actual publishable (non-dummy) package name produced by the build system for this RID -->

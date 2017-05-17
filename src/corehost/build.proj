@@ -14,6 +14,10 @@
           Condition="'$(OSGroup)' != 'Windows_NT'"
           DependsOnTargets="GetLatestCommitHash">
     <PropertyGroup>
+      <CMakeBuildDir>$(IntermediateOutputRootPath)corehost\cmake\</CMakeBuildDir>
+      <DotNetHostFxrPath>$(CMakeBuildDir)cli\fxr\$(DotnetHostFxrBaseName)</DotNetHostFxrPath>
+      <HostPolicyPath>$(CMakeBuildDir)cli\dll\$(HostPolicyBaseName)</HostPolicyPath>
+    
       <BuildArgs>--arch $(TargetArchitecture) --apphostver $(AppHostVersion) --hostver $(HostVersion) --fxrver $(HostResolverVersion) --policyver $(HostPolicyVersion) --commithash $(LatestCommit)</BuildArgs>
       <BuildArgs Condition="'$(PortableBuild)' == 'true'">$(BuildArgs) -portable</BuildArgs>     
       <BuildArgs Condition="'$(CrossBuild)' == 'true'">$(BuildArgs) --cross</BuildArgs>  
