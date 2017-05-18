@@ -35,11 +35,11 @@
   <ItemGroup>
     <Content Condition="Exists('$(PackageLicenseFile)')"
              Include="$(PackageLicenseFile)">
-      <PackagePath></PackagePath>
+      <PackagePath />
     </Content>
     <Content Condition="Exists('$(PackageThirdPartyNoticesFile)')"
              Include="$(PackageThirdPartyNoticesFile)">
-      <PackagePath></PackagePath>
+      <PackagePath />
     </Content>
   </ItemGroup>
 
