@@ -5,21 +5,19 @@
 
   <Target Name="Build"
           DependsOnTargets="GetLatestCommitHash">
-    <MakeDir  Condition="!Exists('$(pOutDir)')" Directories="$(pOutDir)" />
-
-    <PropertyGroup>
-      <Args>/p:Configuration=$(ConfigurationGroup)</Args>
-      <_EnvironmentVariables>NUGET_PACKAGES=$(PackagesDir)</_EnvironmentVariables>
-      <_EnvironmentVariables Condition="'$(LatestCommit)' != ''">$(_EnvironmentVariables);LatestCommit=$(LatestCommit)</_EnvironmentVariables>
-      <_EnvironmentVariables Condition="'$(BuiltByString)' != ''">$(_EnvironmentVariables);BuiltByString=$(BuiltByString)</_EnvironmentVariables>
-    </PropertyGroup>
+    <MakeDir Condition="!Exists('$(pOutDir)')" Directories="$(pOutDir)" />
 
     <ItemGroup>
       <PackageProjects Include="$(MSBuildThisFileDirectory)Microsoft.DotNet.PlatformAbstractions/Microsoft.DotNet.PlatformAbstractions.csproj" />
       <PackageProjects Include="$(MSBuildThisFileDirectory)Microsoft.Extensions.DependencyModel/Microsoft.Extensions.DependencyModel.csproj" />
     </ItemGroup>
 
-    <Exec Command="$(DotnetToolCommand) build $(Args) %(PackageProjects.Identity)"
-          EnvironmentVariables="$(_EnvironmentVariables)" />
+    <PropertyGroup>
+      <BuildArgs>/p:Configuration=$(ConfigurationGroup)</BuildArgs>
+      <BuildArgs Condition="'$(LatestCommit)' != ''">$(BuildArgs) /p:LatestCommit=$(LatestCommit)</BuildArgs>
+      <BuildArgs Condition="'$(BuiltByString)' != ''">$(BuildArgs) /p:BuiltByString="$(BuiltByString)"</BuildArgs>
+    </PropertyGroup>
+
+    <Exec Command="$(DotnetToolCommand) build $(BuildArgs) %(PackageProjects.Identity)" />
   </Target>
 </Project>

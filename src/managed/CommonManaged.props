@@ -6,9 +6,7 @@
   <PropertyGroup>
     <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../..'))/</RepoRoot>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <!-- This is consistent with previously packaged assemblies, but it's not clear if it's what we want
-         going forward -->
-    <AssemblyFileVersion>2.0.0</AssemblyFileVersion>
+    <AssemblyFileVersion>$(VersionPrefix)</AssemblyFileVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <IncludeSymbols>true</IncludeSymbols>
