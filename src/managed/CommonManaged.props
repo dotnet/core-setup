@@ -11,7 +11,8 @@
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <IncludeSymbols>true</IncludeSymbols>
     <Serviceable>true</Serviceable>
-    <SkipVersionGeneration>true</SkipVersionGeneration>
+    <PackageLicenseFile>$(RepoRoot)LICENSE.TXT</PackageLicenseFile>
+    <PackageThirdPartyNoticesFile>$(RepoRoot)THIRD-PARTY-NOTICES.TXT</PackageThirdPartyNoticesFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -28,6 +29,18 @@
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
     <Reference Include="System" />
     <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <!-- Add required legal files to packages -->
+  <ItemGroup>
+    <Content Condition="Exists('$(PackageLicenseFile)')"
+             Include="$(PackageLicenseFile)">
+      <PackagePath></PackagePath>
+    </Content>
+    <Content Condition="Exists('$(PackageThirdPartyNoticesFile)')"
+             Include="$(PackageThirdPartyNoticesFile)">
+      <PackagePath></PackagePath>
+    </Content>
   </ItemGroup>
 
   <Import Condition="Exists('$(RepoRoot)Tools/versioning.props')" Project="$(RepoRoot)Tools/versioning.props" /> 
