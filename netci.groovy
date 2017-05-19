@@ -32,7 +32,7 @@ platformList.each { platform ->
     def crossbuildargs = ''
     def buildArgs = "-ConfigurationGroup=${configuration} -TargetArchitecture=${architecture}"
 
-    if (os != 'Windows_NT' && architecture != 'armel' && configuration == 'Release') {
+    if (os != 'Windows_NT' && configuration == 'Release') {
         buildArgs += " -strip-symbols"
     }
 
