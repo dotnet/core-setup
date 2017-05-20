@@ -9,7 +9,6 @@
     <HostFxrRpmPkgName>$(HostFxrRpmPkgName.ToLower())</HostFxrRpmPkgName>
     <SharedFxRpmPkgName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFrameworkNugetVersion)</SharedFxRpmPkgName>
     <SharedFxRpmPkgName>$(SharedFxRpmPkgName.ToLower())</SharedFxRpmPkgName>
-    <ChangelogSourceFilePath>$(MSBuildThisFileDirectory)/templates/changelog</ChangelogSourceFilePath>
     <TemplatesDir>$(MSBuildThisFileDirectory)/templates</TemplatesDir>
     <ScriptsDir>$(MSBuildThisFileDirectory)/scripts</ScriptsDir>
   </PropertyGroup>
