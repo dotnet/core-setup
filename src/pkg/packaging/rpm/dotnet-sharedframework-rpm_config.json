@@ -34,11 +34,11 @@
       "package_version": ""
     },
     {
-      "package_name": "libssl1.0.0",
+      "package_name": "openssl-libs",
       "package_version": ""
     },   
     {
-      "package_name": "libcurl3",
+      "package_name": "libcurl",
       "package_version": ""
     }],
    
