@@ -32,6 +32,14 @@
   "rpm_dependencies": [{
       "package_name": "%HOSTFXR_RPM_PACKAGE_NAME%",
       "package_version": ""
+    },
+    {
+      "package_name": "libssl1.0.0",
+      "package_version": ""
+    },   
+    {
+      "package_name": "libcurl3",
+      "package_version": ""
     }],
    
     "directories" : [
