@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #
 # Copyright (c) .NET Foundation and contributors. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 echo "Removing dotnet host symbolic link"
-sudo unlink /usr/bin/dotnet
+unlink /usr/bin/dotnet
