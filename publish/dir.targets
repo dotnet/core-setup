@@ -77,7 +77,7 @@
         <PackageName>dotnet-hostfxr-$(HostResolverVersion)</PackageName>
       </DebInstallerFile>
       <DebInstallerFile Include="$(SharedFrameworkInstallerStart)$(ProductMoniker).deb">
-        <PackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFrameworkNugetVersion)</PackageName>
+        <PackageName>dotnet-runtime-$(SharedFrameworkName)-$(SharedFrameworkNugetVersion)</PackageName>
       </DebInstallerFile>
 
       <DebInstallerFile>
