@@ -75,6 +75,7 @@ platformList.each { platform ->
     else {
         // Jenkins non-Ubuntu CI machines don't have docker
         buildCommand = "./build.sh ${buildArgs}"
+        os = "OSX10.12"
     }
 
     def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
