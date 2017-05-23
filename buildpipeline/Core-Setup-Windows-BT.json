@@ -254,7 +254,7 @@
         "msbuildArchitecture": "x64",
         "msbuildLocation": ""
       }
-    },    
+    },
     {
       "enabled": true,
       "continueOnError": false,
@@ -308,7 +308,7 @@
         "msbuildArchitecture": "x64",
         "msbuildLocation": ""
       }
-    },    
+    },
     {
       "enabled": true,
       "continueOnError": false,
