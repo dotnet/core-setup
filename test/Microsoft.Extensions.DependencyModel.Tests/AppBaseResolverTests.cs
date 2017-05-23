@@ -144,11 +144,8 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             var resolver = CreateResolver(fileSystem);
             var assemblies = new List<string>();
 
-            var exception = Assert.Throws<InvalidOperationException>(() => resolver.TryResolveAssemblyPaths(library, assemblies));
-            exception.Message.Should()
-                .Contain(BasePath)
-                .And.Contain(BasePathRefs)
-                .And.Contain(TestLibraryFactory.SecondAssembly);
+            resolver.TryResolveAssemblyPaths(library, assemblies).Should().Be(false);
+            assemblies.Should().BeEmpty();
         }
 
         [Fact]
@@ -329,7 +326,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         }
 
         [Fact]
-        public void ShouldThrowForNonResolvedInPublishedApps()
+        public void ShouldReturnFalseForNonResolvedInPublishedApps()
         {
             var fileSystem = FileSystemMockBuilder
                 .Create()
@@ -342,7 +339,8 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             var resolver = CreateResolver(fileSystem);
             var assemblies = new List<string>();
 
-            Assert.Throws<InvalidOperationException>(() => resolver.TryResolveAssemblyPaths(library, assemblies));
+            resolver.TryResolveAssemblyPaths(library, assemblies).Should().Be(false);
+            assemblies.Should().BeEmpty();
         }
 
         [Fact]
