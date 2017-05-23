@@ -278,7 +278,7 @@
     <DisableCrossgen>false</DisableCrossgen>
     <OutputVersionBadge>$(BaseOutputRootPath)sharedfx_$(TargetRid)_$(ConfigurationGroup)_version_badge.svg</OutputVersionBadge>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <CombinedInstallerStart>$(PackagesOutDir)dotnet-runtime-</CombinedInstallerStart>
     <SharedHostInstallerStart>$(PackagesOutDir)dotnet-host-</SharedHostInstallerStart>
