@@ -17,6 +17,7 @@
     <InstallerFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion)$(InstallerExtension)" />
     <InstallerFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion)$(CombinedInstallerExtension)" />
     <CompressedFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion)$(CompressedFileExtension)" />
+    <UWPArtifactsToUpload Include="$(UWPOutputDir)Microsoft.NET.CoreRuntime.2.0*.appx" />
     <RuntimePackageFile Include="$(PackagesOutDir)runtime.*$(SharedFrameworkNuGetVersion).nupkg" />
     <RuntimePackageFile Include="$(PackagesOutDir)runtime.*$(SharedFrameworkNuGetVersion).symbols.nupkg" />
     <RidAgnosticPackageFile Include="$(PackagesOutDir)*$(SharedFrameworkNuGetVersion).nupkg" Exclude="@(RuntimePackageFile)" />
