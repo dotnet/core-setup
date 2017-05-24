@@ -468,7 +468,6 @@ namespace Microsoft.DotNet.Host.Build
             msbuildProps.AppendLine("  <PropertyGroup>");
             msbuildProps.AppendLine($"    <Platform>{platform}</Platform>");
             msbuildProps.AppendLine($"    <DotNetHostBinDir>{Dirs.CorehostLatest}</DotNetHostBinDir>");
-            msbuildProps.AppendLine($"    <UwpHostBinDir>{Dirs.Uwp}</UwpHostBinDir>");
             msbuildProps.AppendLine($"    <HostVersion>{hostVersion.LatestHostVersion.WithoutSuffix}</HostVersion>");
             msbuildProps.AppendLine($"    <AppHostVersion>{hostVersion.LatestAppHostVersion.WithoutSuffix}</AppHostVersion>");
             msbuildProps.AppendLine($"    <HostResolverVersion>{hostVersion.LatestHostFxrVersion.WithoutSuffix}</HostResolverVersion>");

@@ -4,34 +4,54 @@
   <PropertyGroup>
     <HasRuntimePackages>false</HasRuntimePackages>
     <NuGetTargetMoniker>UAP,Version=v10.1</NuGetTargetMoniker>
-    <NuGetRuntimeIdentifier Condition="$(NuGetRuntimeIdentifier) == ''">win10-$(Platform)</NuGetRuntimeIdentifier>
+    <NugetTargetMonikerShort>uap10.1</NugetTargetMonikerShort>
+    <NuGetRuntimeIdentifier Condition="'$(NuGetRuntimeIdentifier)' == ''">win10-$(Platform)</NuGetRuntimeIdentifier>
+    
     <AppxManifestTemplate>$(MSBuildProjectDirectory)\AppxManifest.xml.template</AppxManifestTemplate>
     <AppxManifest>$(IntermediateOutputPath)AppxManifest.xml</AppxManifest>
+
     <AppxName>Microsoft.NET.CoreRuntime</AppxName>
-    <AppxIdentityName>Microsoft.NET.CoreRuntime.$(SimpleVersion.Split('.')[0]).$(SimpleVersion.Split('.')[1])</AppxIdentityName>
-    <AppxDisplayName>Microsoft .Net Core Runtime Package $(SimpleVersion.Split('.')[0]).$(SimpleVersion.Split('.')[1])</AppxDisplayName>
+    <AppxIdentityName>Microsoft.NET.CoreRuntime.$(MajorVersion).$(MinorVersion)</AppxIdentityName>
+    <AppxDisplayName>Microsoft.NET.CoreRuntime.$(MajorVersion).$(MinorVersion)</AppxDisplayName>
+    
     <!-- path to contents of appx that will be zipped -->
     <AppxOutputPath>$(IntermediateOutputPath)$(AppxIdentityName)</AppxOutputPath>
-    <!-- path of generated .appx package -->
-    <AppxOutputPackageName>$(PackageOutputPath)$(AppxIdentityName).appx</AppxOutputPackageName>
     <OutputPath>$(IntermediateOutputPath)$(AppxIdentityName)</OutputPath>
+
+    <!-- path of generated .appx package -->
+    <AppxOutputPackageName>$(UWPOutputDir)$(AppxIdentityName).appx</AppxOutputPackageName>
+    
+    <!-- Indicate that this project contains package references that need to be restored -->
+    <ContainsPackageReferences>true</ContainsPackageReferences>
+    <RidSpecificAssets>true</RidSpecificAssets>
+
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="project.json" />
-  </ItemGroup>
 
   <ItemGroup>
+
+    <!-- Add a reference to the package containing the RID fallback graph -->    
+    <PackageReference Include="Microsoft.NETCore.Platforms">
+      <Version>$(PlatformPackageVersion)</Version>
+    </PackageReference>
+
+    <!-- Add a reference to the CoreCLR package from which to restore the artifacts -->    
+    <PackageReference Include="Microsoft.NETCore.Runtime.CoreCLR">
+      <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
+    </PackageReference>
+
+    <!-- Binaries that we want to include in the AppX FW package -->
     <AppxFileList Include="clretwrc.dll;coreclr.dll;mscordaccore.dll;mscordbi.dll;mscorrc.debug.dll"/>
     <AppxFileList Include="mscorrc.dll;System.Private.CoreLib.dll;clrjit.dll" />
+
   </ItemGroup>
 
-  <!-- Add more files to be copied -->
+  <!-- Compute the set of the files to be included in the Framework AppX package -->
   <Target Name="IncludeAllFiles"
           AfterTargets="ResolveNuGetPackages">
     <ItemGroup>
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'@(AppxFileList->'%(FileName)%(Extension)')' != '%(FileName)%(Extension)'" />
       <ReferenceCopyLocalPaths Include="logo.png" />
-      <ReferenceCopyLocalPaths Include="$(UwpHostBinDir)\uwphost.dll" />
+      <ReferenceCopyLocalPaths Include="$(UWPOutputDir)\uwphost.dll" />
       <ReferenceCopyLocalPaths Include="$(AppxManifest)" />
     </ItemGroup>
  </Target>
@@ -41,7 +61,7 @@
           Inputs="$(AppxManifestTemplate)"
           Outputs="$(AppxManifest)">
     <WriteLinesToFile File="$(AppxManifest)"
-                      Lines="$([System.IO.File]::ReadAllText($(AppxManifestTemplate)).Replace('[AppxBuildArch]', $(Platform)).Replace('[AppxVersion]',$(SimpleVersion)).Replace('[AppxIdentityName]',$(AppxIdentityName)).Replace('[AppxDisplayName]',$(AppxDisplayName)))"
+                      Lines="$([System.IO.File]::ReadAllText($(AppxManifestTemplate)).Replace('[AppxBuildArch]', $(Platform)).Replace('[AppxVersion]',$(MajorVersion).$(MinorVersion).$(BuildNumberMajor).$(BuildNumberMinor)).Replace('[AppxIdentityName]',$(AppxIdentityName)).Replace('[AppxDisplayName]',$(AppxDisplayName)))"
                       Overwrite="true" />
     <ItemGroup>
       <FileWrites Include="$(AppxManifest)" />
