@@ -30,6 +30,7 @@
 
     "debian_dependencies":{
         "%HOSTFXR_DEBIAN_PACKAGE_NAME%" : {},
+        "libssl1.0.0" : {},
         "%LIBICU_PACKAGE_NAME%": {} 
     },
 
