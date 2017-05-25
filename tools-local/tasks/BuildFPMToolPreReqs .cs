@@ -189,6 +189,8 @@ namespace Microsoft.DotNet.Build.Tasks
             parameters.Add(string.Concat("--description ", EscapeArg(configJson.Long_Description)));
             parameters.Add(string.Concat("--maintainer ", configJson.Maintainer_Name));
             parameters.Add(string.Concat("--vendor ", configJson.Vendor));
+            parameters.Add(string.Concat("--maintainer ", EscapeArg(configJson.Maintainer_Name)));
+            parameters.Add(string.Concat("--vendor ", EscapeArg(configJson.Vendor)));            
             parameters.Add(string.Concat("-p ", Path.Combine(OutputDir, configJson.Package_Name + ".rpm")));
             if (configJson.Package_Conflicts != null) parameters.Add(string.Concat("--conflicts ", EscapeArg(string.Join(",", configJson.Package_Conflicts))));
             if (configJson.After_Install_Source != null) parameters.Add(string.Concat("--after-install ", Path.Combine(InputDir, EscapeArg(configJson.After_Install_Source))));
