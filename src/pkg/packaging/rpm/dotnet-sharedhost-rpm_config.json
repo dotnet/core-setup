@@ -1,6 +1,6 @@
 {
     "maintainer_name": ".NET Core Team",
-    "maintainer_email": "dotnetcore@microsoft.com",
+    "maintainer_email": "dotnetpackages@dotnetfoundation.org",
     "vendor": ".NET Foundation",
 
     "package_name": "dotnet-host",
