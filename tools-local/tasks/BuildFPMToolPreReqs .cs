@@ -187,8 +187,6 @@ namespace Microsoft.DotNet.Build.Tasks
             parameters.Add(string.Concat("--rpm-changelog ", EscapeArg(Path.Combine(InputDir, "templates", "changelog")))); // Changelog File
             parameters.Add(string.Concat("--rpm-summary ", EscapeArg(configJson.Short_Description)));
             parameters.Add(string.Concat("--description ", EscapeArg(configJson.Long_Description)));
-            parameters.Add(string.Concat("--maintainer ", configJson.Maintainer_Name));
-            parameters.Add(string.Concat("--vendor ", configJson.Vendor));
             parameters.Add(string.Concat("--maintainer ", EscapeArg(configJson.Maintainer_Name)));
             parameters.Add(string.Concat("--vendor ", EscapeArg(configJson.Vendor)));            
             parameters.Add(string.Concat("-p ", Path.Combine(OutputDir, configJson.Package_Name + ".rpm")));
