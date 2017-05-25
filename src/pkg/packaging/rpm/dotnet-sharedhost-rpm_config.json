@@ -1,7 +1,7 @@
 {
     "maintainer_name": ".NET Core Team",
     "maintainer_email": "dotnetcore@microsoft.com",
-    "vendor": "Microsoft Corporation",
+    "vendor": ".NET Foundation",
 
     "package_name": "dotnet-host",
     "install_root": "/usr/share/dotnet",
