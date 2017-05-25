@@ -97,7 +97,7 @@
         "logProjectEvents": "false",
         "createLogFile": "false",
         "msbuildLocationMethod": "version",
-        "msbuildVersion": "15.0",
+        "msbuildVersion": "latest",
         "msbuildArchitecture": "$(BuildArchitecture)",
         "msbuildLocation": ""
       }
@@ -163,7 +163,7 @@
         "logProjectEvents": "false",
         "createLogFile": "false",
         "msbuildLocationMethod": "version",
-        "msbuildVersion": "15.0",
+        "msbuildVersion": "latest",
         "msbuildArchitecture": "$(BuildArchitecture)",
         "msbuildLocation": ""
       }
@@ -209,7 +209,7 @@
         "logProjectEvents": "false",
         "createLogFile": "false",
         "msbuildLocationMethod": "version",
-        "msbuildVersion": "15.0",
+        "msbuildVersion": "latest",
         "msbuildArchitecture": "$(BuildArchitecture)",
         "msbuildLocation": ""
       }
@@ -274,7 +274,7 @@
         "logProjectEvents": "false",
         "createLogFile": "false",
         "msbuildLocationMethod": "version",
-        "msbuildVersion": "15.0",
+        "msbuildVersion": "latest",
         "msbuildArchitecture": "$(BuildArchitecture)",
         "msbuildLocation": ""
       }
@@ -320,7 +320,7 @@
         "logProjectEvents": "false",
         "createLogFile": "false",
         "msbuildLocationMethod": "version",
-        "msbuildVersion": "15.0",
+        "msbuildVersion": "latest",
         "msbuildArchitecture": "$(BuildArchitecture)",
         "msbuildLocation": ""
       }
