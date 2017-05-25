@@ -1,6 +1,7 @@
 {
-    "maintainer_name":"Microsoft",
+    "maintainer_name": ".NET Core Team (dotnetcore@microsoft.com)",
     "maintainer_email": "dotnetcore@microsoft.com",
+    "vendor": "Microsoft Corporation",
 
     "package_name": "%SHARED_FRAMEWORK_RPM_PACKAGE_NAME%",
     "install_root": "/usr/share/dotnet",
