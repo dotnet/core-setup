@@ -120,6 +120,9 @@
     <UseShippedHostPolicyPackage>false</UseShippedHostPolicyPackage>
     <HostPolicyVersion Condition="'$(UseShippedHostPolicyPackage)' != 'true'">$(ProductVersion)</HostPolicyVersion>
     <HostPolicyVersion Condition="'$(UseShippedHostPolicyPackage)' == 'true'">2.0.0</HostPolicyVersion>
+
+    <BinariesRelativePath>Runtime/$(SharedFrameworkNugetVersion)</BinariesRelativePath>
+    <InstallersRelativePath>Runtime/$(SharedFrameworkNugetVersion)</InstallersRelativePath>
   </PropertyGroup>
 
   <!-- list of nuget package sources passed to dnu -->

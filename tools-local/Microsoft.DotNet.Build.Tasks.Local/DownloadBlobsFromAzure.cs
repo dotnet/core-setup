@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required]
         public ITaskItem[] BlobNames { get; set; }
 
+        public bool KeepFolderLayout { get; set; }
         /// <summary>
         /// Directory to download blob files to.
         /// </summary>
@@ -52,10 +53,19 @@ namespace Microsoft.DotNet.Build.Tasks
             List<Task<bool>> downloadTasks = new List<Task<bool>>();
             foreach (var blobFile in BlobNames)
             {
-                string localBlobFile = Path.Combine(DownloadDirectory, Path.GetFileName(blobFile.ItemSpec));
+                string directory = DownloadDirectory;
+                if( KeepFolderLayout )
+                {
+                    directory = Path.Combine(DownloadDirectory, Path.GetDirectoryName(blobFile.ItemSpec));
+                }
+                if(!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+                string localBlobFile = Path.Combine(directory, Path.GetFileName(blobFile.ItemSpec));
                 Log.LogMessage($"Downloading {blobFile} to {localBlobFile}");
 
-                downloadTasks.Add(DownloadBlobFromAzure.ExecuteAsync(AccountName, AccountKey, ConnectionString, ContainerName, blobFile.ItemSpec, DownloadDirectory, BuildEngine, HostObject));
+                downloadTasks.Add(DownloadBlobFromAzure.ExecuteAsync(AccountName, AccountKey, ConnectionString, ContainerName, blobFile.ItemSpec, directory, BuildEngine, HostObject));
             }
             return downloadTasks;
         }
