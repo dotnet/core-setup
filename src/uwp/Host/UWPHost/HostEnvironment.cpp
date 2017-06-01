@@ -10,6 +10,7 @@
 //
 
 #include "windows.h"
+#include "appmodel.h"
 #include "HostEnvironment.h"
 
 HRESULT HostEnvironment::TryLoadCoreCLR() {
