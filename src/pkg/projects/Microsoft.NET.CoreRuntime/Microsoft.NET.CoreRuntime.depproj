@@ -61,7 +61,7 @@
           Inputs="$(AppxManifestTemplate)"
           Outputs="$(AppxManifest)">
     <WriteLinesToFile File="$(AppxManifest)"
-                      Lines="$([System.IO.File]::ReadAllText($(AppxManifestTemplate)).Replace('[AppxBuildArch]', $(Platform)).Replace('[AppxVersion]',$(MajorVersion).$(MinorVersion).$(BuildNumberMajor).$(BuildNumberMinor)).Replace('[AppxIdentityName]',$(AppxIdentityName)).Replace('[AppxDisplayName]',$(AppxDisplayName)))"
+                      Lines="$([System.IO.File]::ReadAllText($(AppxManifestTemplate)).Replace('[AppxBuildArch]', $(Platform)).Replace('[AppxVersion]',$(MajorVersion).$(MinorVersion).$([System.Int32]::Parse($(BuildNumberMajor))).$([System.Int32]::Parse($(BuildNumberMinor)))).Replace('[AppxIdentityName]',$(AppxIdentityName)).Replace('[AppxDisplayName]',$(AppxDisplayName)))"
                       Overwrite="true" />
     <ItemGroup>
       <FileWrites Include="$(AppxManifest)" />
