@@ -68,7 +68,7 @@ if %__CMakeBinDir% == "" (
 if %__IntermediatesDir% == "" (
     set "__IntermediatesDir=%__binDir%\obj\%__TargetRid%.%CMAKE_BUILD_TYPE%\uwphost"
 )
-set "__ResourcesDir=%__binDir%\obj\%__TargetRid%.%CMAKE_BUILD_TYPE%\uwphostResourceFiles%"
+set "__ResourcesDir=%__binDir%\obj\%__TargetRid%.%CMAKE_BUILD_TYPE%\uwphostResourceFiles"
 set "__CMakeBinDir=%__CMakeBinDir:\=/%"
 set "__IntermediatesDir=%__IntermediatesDir:\=/%"
 
