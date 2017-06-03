@@ -7,7 +7,7 @@ set(CMAKE_SYSTEM_PROCESSOR armv7l)
 ## Specify the toolchain
 set(TOOLCHAIN "arm-linux-gnueabihf")
 
-add_compile_options(-target armv7-linux-gnueabihf)
+add_compile_options(-target arm-linux-gnueabihf)
 add_compile_options(-mthumb)
 add_compile_options(-mfpu=vfpv3)
 add_compile_options(--sysroot=${CROSS_ROOTFS})
