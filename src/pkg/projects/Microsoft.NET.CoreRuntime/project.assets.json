@@ -1,0 +1,302 @@
+{
+  "version": 2,
+  "targets": {
+    "UAP,Version=v10.1": {
+      "Microsoft.NETCore.Jit/2.1.0-preview1-25401-02": {
+        "type": "package"
+      },
+      "Microsoft.NETCore.Platforms/2.1.0-preview1-25324-02": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard1.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard1.0/_._": {}
+        }
+      },
+      "Microsoft.NETCore.Runtime.CoreCLR/2.1.0-preview1-25401-02": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.NETCore.Jit": "2.1.0-preview1-25401-02"
+        },
+        "compile": {
+          "ref/netstandard1.0/_._": {}
+        }
+      }
+    },
+    "UAP,Version=v10.1/win10-x64": {
+      "Microsoft.NETCore.Jit/2.1.0-preview1-25401-02": {
+        "type": "package",
+        "dependencies": {
+          "runtime.win-x64.Microsoft.NETCore.Jit": "2.1.0-preview1-25401-02"
+        }
+      },
+      "Microsoft.NETCore.Platforms/2.1.0-preview1-25324-02": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard1.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard1.0/_._": {}
+        }
+      },
+      "Microsoft.NETCore.Runtime.CoreCLR/2.1.0-preview1-25401-02": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.NETCore.Jit": "2.1.0-preview1-25401-02",
+          "runtime.win-x64.Microsoft.NETCore.Runtime.CoreCLR": "2.1.0-preview1-25401-02"
+        },
+        "compile": {
+          "ref/netstandard1.0/_._": {}
+        }
+      },
+      "runtime.win-x64.Microsoft.NETCore.Jit/2.1.0-preview1-25401-02": {
+        "type": "package",
+        "native": {
+          "runtimes/win-x64/native/clrjit.dll": {}
+        }
+      },
+      "runtime.win-x64.Microsoft.NETCore.Runtime.CoreCLR/2.1.0-preview1-25401-02": {
+        "type": "package",
+        "compile": {
+          "ref/netstandard1.0/_._": {}
+        },
+        "runtime": {
+          "runtimes/win-x64/lib/netstandard1.0/SOS.NETCore.dll": {}
+        },
+        "native": {
+          "runtimes/win-x64/native/System.Private.CoreLib.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-console-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-datetime-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-debug-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-errorhandling-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-file-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-file-l1-2-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-file-l2-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-handle-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-heap-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-interlocked-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-libraryloader-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-localization-l1-2-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-memory-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-namedpipe-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-processenvironment-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-processthreads-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-processthreads-l1-1-1.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-profile-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-rtlsupport-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-string-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-synch-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-synch-l1-2-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-sysinfo-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-timezone-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-core-util-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-conio-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-convert-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-environment-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-filesystem-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-heap-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-locale-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-math-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-multibyte-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-private-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-process-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-runtime-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-stdio-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-string-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-time-l1-1-0.dll": {},
+          "runtimes/win-x64/native/api-ms-win-crt-utility-l1-1-0.dll": {},
+          "runtimes/win-x64/native/clretwrc.dll": {},
+          "runtimes/win-x64/native/coreclr.dll": {},
+          "runtimes/win-x64/native/dbgshim.dll": {},
+          "runtimes/win-x64/native/mscordaccore.dll": {},
+          "runtimes/win-x64/native/mscordbi.dll": {},
+          "runtimes/win-x64/native/mscorrc.debug.dll": {},
+          "runtimes/win-x64/native/mscorrc.dll": {},
+          "runtimes/win-x64/native/sos.dll": {},
+          "runtimes/win-x64/native/ucrtbase.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Microsoft.NETCore.Jit/2.1.0-preview1-25401-02": {
+      "sha512": "HskCLbdY6Hz6G0RZsHkTBRm3K5KnEKscLdh73fqK1mYYy4zAkj26jJKeHywYqYJ4rRQrmOAkx0YBfE5PxcTIew==",
+      "type": "package",
+      "path": "microsoft.netcore.jit/2.1.0-preview1-25401-02",
+      "files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "microsoft.netcore.jit.2.1.0-preview1-25401-02.nupkg.sha512",
+        "microsoft.netcore.jit.nuspec",
+        "runtime.json",
+        "version.txt"
+      ]
+    },
+    "Microsoft.NETCore.Platforms/2.1.0-preview1-25324-02": {
+      "sha512": "9BoZjm75RaHciMi5uGXO53U6Smyi4GnTUriRg5D8canYPk7QK2Y2BD2UXgFkDQ7YtvAL6QMrSSJkd38WNA6Q3A==",
+      "type": "package",
+      "path": "microsoft.netcore.platforms/2.1.0-preview1-25324-02",
+      "files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/netstandard1.0/_._",
+        "microsoft.netcore.platforms.2.1.0-preview1-25324-02.nupkg.sha512",
+        "microsoft.netcore.platforms.nuspec",
+        "runtime.json",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
+    },
+    "Microsoft.NETCore.Runtime.CoreCLR/2.1.0-preview1-25401-02": {
+      "sha512": "g51nR7/PECRTrYBSFN19CuFVgC8AYe/ECX2ToJT+9LbjwV5L5v1UCsjR/Omrk9gJBKcw0GGbf06NiTQb2rSNrQ==",
+      "type": "package",
+      "path": "microsoft.netcore.runtime.coreclr/2.1.0-preview1-25401-02",
+      "files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "microsoft.netcore.runtime.coreclr.2.1.0-preview1-25401-02.nupkg.sha512",
+        "microsoft.netcore.runtime.coreclr.nuspec",
+        "ref/netstandard1.0/_._",
+        "runtime.json",
+        "version.txt"
+      ]
+    },
+    "runtime.win-x64.Microsoft.NETCore.Jit/2.1.0-preview1-25401-02": {
+      "sha512": "ys0F+OoicVWL2KZCVhDwviE7EK5omGTMGg7/B8oONCBCAQhkeQtW7ucyY5AKAf3b1S+XAGiN0tdTSfag7j9E6Q==",
+      "type": "package",
+      "path": "runtime.win-x64.microsoft.netcore.jit/2.1.0-preview1-25401-02",
+      "files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "runtime.win-x64.microsoft.netcore.jit.2.1.0-preview1-25401-02.nupkg.sha512",
+        "runtime.win-x64.microsoft.netcore.jit.nuspec",
+        "runtimes/win-x64-aot/native/_._",
+        "runtimes/win-x64/native/clrjit.dll",
+        "version.txt"
+      ]
+    },
+    "runtime.win-x64.Microsoft.NETCore.Runtime.CoreCLR/2.1.0-preview1-25401-02": {
+      "sha512": "Ae9/WsB4SId6UJZCMlRLkM/unzvF7teq42zV9HmciZiWTmFR4Yo2ToCjyq14FcblsX9RdIaAPEwksKqASgpX3Q==",
+      "type": "package",
+      "path": "runtime.win-x64.microsoft.netcore.runtime.coreclr/2.1.0-preview1-25401-02",
+      "files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "ref/netstandard1.0/_._",
+        "runtime.win-x64.microsoft.netcore.runtime.coreclr.2.1.0-preview1-25401-02.nupkg.sha512",
+        "runtime.win-x64.microsoft.netcore.runtime.coreclr.nuspec",
+        "runtimes/win-x64-aot/lib/netstandard1.0/_._",
+        "runtimes/win-x64-aot/native/_._",
+        "runtimes/win-x64/lib/netstandard1.0/SOS.NETCore.dll",
+        "runtimes/win-x64/native/System.Private.CoreLib.dll",
+        "runtimes/win-x64/native/api-ms-win-core-console-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-datetime-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-debug-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-errorhandling-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-file-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-file-l1-2-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-file-l2-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-handle-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-heap-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-interlocked-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-libraryloader-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-localization-l1-2-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-memory-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-namedpipe-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-processenvironment-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-processthreads-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-processthreads-l1-1-1.dll",
+        "runtimes/win-x64/native/api-ms-win-core-profile-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-rtlsupport-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-string-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-synch-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-synch-l1-2-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-sysinfo-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-timezone-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-core-util-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-conio-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-convert-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-environment-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-filesystem-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-heap-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-locale-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-math-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-multibyte-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-private-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-process-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-runtime-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-stdio-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-string-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-time-l1-1-0.dll",
+        "runtimes/win-x64/native/api-ms-win-crt-utility-l1-1-0.dll",
+        "runtimes/win-x64/native/clretwrc.dll",
+        "runtimes/win-x64/native/coreclr.dll",
+        "runtimes/win-x64/native/dbgshim.dll",
+        "runtimes/win-x64/native/mscordaccore.dll",
+        "runtimes/win-x64/native/mscordbi.dll",
+        "runtimes/win-x64/native/mscorrc.debug.dll",
+        "runtimes/win-x64/native/mscorrc.dll",
+        "runtimes/win-x64/native/sos.dll",
+        "runtimes/win-x64/native/ucrtbase.dll",
+        "tools/crossgen.exe",
+        "version.txt"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "UAP,Version=v10.1": [
+      "Microsoft.NETCore.Platforms >= 2.1.0-preview1-25324-02",
+      "Microsoft.NETCore.Runtime.CoreCLR >= 2.1.0-preview1-25401-02"
+    ]
+  },
+  "packageFolders": {
+    "E:\\GH\\gkhanna79\\core-setup2\\packages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "E:\\GH\\gkhanna79\\core-setup2\\src\\pkg\\projects\\Microsoft.NET.CoreRuntime\\Microsoft.NET.CoreRuntime.depproj",
+      "projectName": "Microsoft.NET.CoreRuntime",
+      "projectPath": "E:\\GH\\gkhanna79\\core-setup2\\src\\pkg\\projects\\Microsoft.NET.CoreRuntime\\Microsoft.NET.CoreRuntime.depproj",
+      "packagesPath": "E:\\GH\\gkhanna79\\core-setup2\\packages",
+      "outputPath": "E:\\GH\\gkhanna79\\core-setup2\\src\\pkg\\projects\\Microsoft.NET.CoreRuntime",
+      "projectStyle": "PackageReference",
+      "originalTargetFrameworks": [
+        "uap10.1"
+      ],
+      "sources": {
+        "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json": {},
+        "https://dotnet.myget.org/F/cli-deps/api/v3/index.json": {},
+        "https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json": {},
+        "https://www.myget.org/F/nugetbuild/api/v3/index.json": {},
+        "https://api.nuget.org/v3/index.json": {},
+        "https://dotnet.myget.org/F/dotnet-corefxlab/api/v3/index.json": {}
+      },
+      "frameworks": {
+        "uap10.1": {
+          "projectReferences": {}
+        }
+      }
+    },
+    "frameworks": {
+      "uap10.1": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": {
+            "target": "Package",
+            "version": "2.1.0-preview1-25324-02"
+          },
+          "Microsoft.NETCore.Runtime.CoreCLR": {
+            "target": "Package",
+            "version": "2.1.0-preview1-25401-02"
+          }
+        }
+      }
+    },
+    "runtimes": {
+      "win10-x64": {
+        "#import": []
+      }
+    }
+  }
+}
