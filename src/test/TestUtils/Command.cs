@@ -258,21 +258,17 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             }
             return this;
         }
+
         public Command WithGlobalLocation(string global)
         {
-
             if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
-               throw new NotImplementedException("Global location override needs work ");
+                throw new NotImplementedException("Global location override needs test improvements for Windows");
             }
             else
             {
-                var current_path = _process.StartInfo.Environment["PATH"];
-                _process.StartInfo.Environment["PATH"] = current_path + Path.PathSeparator + global;
+                throw new NotSupportedException("Global location override not supported for Linux");
             }
-
-           
-            return this;
         }
 
         public Command EnvironmentVariable(string name, string value)
