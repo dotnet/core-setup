@@ -7,5 +7,5 @@ PATCH_VERSION=0
 STABILIZE_PACKAGE_VERSION=false
 LOCK_HOST_VERSION=false
 RELEASE_SUFFIX=dev-di
-CHANNEL=dev/defaultintf 
-BRANCH_NAME=dev/defaultintf 
+CHANNEL=dev/defaultintf
+BRANCH_NAME=dev/defaultintf
