@@ -35,8 +35,6 @@ namespace Microsoft.DotNet.Build.Tasks
 
         public override bool Execute()
         {
-            Console.WriteLine("Attach");
-            Console.ReadLine();
             XDocument xdoc = XDocument.Load(ResultsXml);
 
             var rows = xdoc.Descendants(s_RootElement).Descendants(s_RowElement);

@@ -12,6 +12,7 @@
     <Error Condition="'$(AzureAccessToken)' == ''" Text="Missing required property 'AzureAccessToken'" />
     <Error Condition="'$(AzureAccountName)' == ''" Text="Missing required property 'AzureAccountName'" />
     <Error Condition="'$(ContainerName)' == ''" Text="Missing required property 'ContainerName'" />
+    <Message Importance="High" Text="Retrieving artifact list from Azure..." />
     <ListAzureBlobs AccountName="$(AzureAccountName)"
                       AccountKey="$(AzureAccessToken)"
                       ContainerName="$(ContainerName)"
@@ -21,7 +22,7 @@
   </Target>
 
   <!-- Filter blob list -->
-  <Target Name="GetValidationBlobList"
+  <Target Name="FilterBlobList"
           DependsOnTargets="GetBlobList"
           Inputs="%(_BlobList.Identity)"
           Outputs="fake">
@@ -44,7 +45,7 @@
 
   <!-- Download azure blobs for signing validation -->
   <Target Name="DownloadCoreSetupArtifactsFromAzure"
-          DependsOnTargets="GetValidationBlobList">
+          DependsOnTargets="FilterBlobList">
     <Error Condition="!Exists('$(BuildVersionFile)')" Text="Missing required build version file - '$(BuildVersionFile)', official build id specified was '$(OfficialBuildId)'" />
     <Error Condition="'@(DownloadArtifact)' == ''" Text="No blobs found for signing validation in Container '$(ContainerName)' under path '$(BinariesRelativePath)'." />
 
@@ -53,6 +54,7 @@
     <MakeDir Directories="$(LogDirectory)"
              Condition="!Exists('$(LogDirectory)')" />
 
+    <Message Importance="High" Text="Downloading artifacts from Azure..." />
     <DownloadFromAzure AccountName="$(AzureAccountName)"
                            AccountKey="$(AzureAccessToken)"
                            ContainerName="$(ContainerName)"
@@ -83,6 +85,7 @@
   <Target Name="ValidateBinInspectResults">
     <Error Condition="!Exists('$(BinInspectResultsXml)')" Text="No results found for BinInspect - missing '$(BinInspectResultsXml)'" />
 
+    <Message Importance="High" Text="Comparing BinInspect results ('$(Binto baseline" />
     <ValidateBinInspectResults ResultsXml="$(BinInspectResultsXml)"
                                BaselineFiles="@(BinInspectBaselineFile)" />
   </Target>
