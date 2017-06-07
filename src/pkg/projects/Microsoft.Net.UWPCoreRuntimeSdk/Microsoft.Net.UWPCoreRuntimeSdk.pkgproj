@@ -7,11 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <File Include="files\Microsoft.Net.UWPCoreRuntimeSdk.props">
+    <File Include="files\Microsoft.Net.UWPCoreRuntimeSdk.*">
       <TargetPath>build</TargetPath>
     </File>
-    <File Include="files\Microsoft.Net.UWPCoreRuntimeSdk.targets">
-      <TargetPath>build</TargetPath>
+    <File Include="$(UWPOutputDir)\Microsoft.NET.CoreRuntime.$(MajorVersion).$(MinorVersion).appx">
+      <TargetPath>tools\Appx</TargetPath>
+    </File>
+    <File Include="$(UWPOutputDir)\uwpshim.exe">
+      <TargetPath>tools\AppLocal</TargetPath>
+    </File>
+    <File Include="files\Microsoft.Net.CoreRuntime*.targets">
+      <TargetPath>tools\CoreRuntime</TargetPath>
+    </File>
+    <File Include="$(UWPOutputDir)\copywin32resources.exe">
+      <TargetPath>tools\CoreRuntime</TargetPath>
     </File>
   </ItemGroup>
 
