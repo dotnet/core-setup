@@ -205,7 +205,7 @@
         "signing-validation": {
           "description": "Build signing validation project.",
           "settings": {
-            "Project": "signingvalidation.proj"
+            "Project": "signing\\signingvalidation.proj"
           }
         },
         "GenerateVersion": {

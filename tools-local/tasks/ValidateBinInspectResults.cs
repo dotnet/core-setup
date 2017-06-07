@@ -35,46 +35,43 @@ namespace Microsoft.DotNet.Build.Tasks
 
         public override bool Execute()
         {
+            Console.WriteLine("Attach");
+            Console.ReadLine();
             XDocument xdoc = XDocument.Load(ResultsXml);
 
-            var rows = from data in xdoc.Descendants(s_RootElement)
-                       select new
-                       {
-                           Children = data.Descendants(s_RowElement)
-                       };
+            var rows = xdoc.Descendants(s_RootElement).Descendants(s_RowElement);
             
             List<ITaskItem> reportedFailures = new List<ITaskItem>();
-            foreach (var row in rows)
-            {
-                // Gather all of the rows with error results
-                IEnumerable<XElement> errorRows = from descendant in row.Children
-                                where descendant.Descendants().FirstOrDefault(f => f.Name == s_ResultElement).Value == "False"
-                                select descendant;
 
-                // Filter out baselined files which are stored as regex patterns
-                HashSet<XElement> baselineExcludeElements = new HashSet<XElement>();
-                if(BaselineFiles != null)
+            // Gather all of the rows with error results
+            IEnumerable<XElement> errorRows = from descendant in rows
+                            where descendant.Descendants().FirstOrDefault(f => f.Name == s_ResultElement).Value == "False"
+                            select descendant;
+
+            // Filter out baselined files which are stored as regex patterns
+            HashSet<XElement> baselineExcludeElements = new HashSet<XElement>();
+            if(BaselineFiles != null)
+            {
+                foreach(var baselineFile in BaselineFiles)
                 {
-                    foreach(var baselineFile in BaselineFiles)
+                    Regex ignoreRegEx = new Regex(baselineFile.ItemSpec);
+                    IEnumerable<XElement> baselineExcluded = errorRows.Where(f => ignoreRegEx.IsMatch(f.Descendants(s_NameElement).First().Value));
+                    foreach(var baselineExclude in baselineExcluded)
                     {
-                        Regex ignoreRegEx = new Regex(baselineFile.ItemSpec);
-                        IEnumerable<XElement> baselineExcluded = errorRows.Where(f => ignoreRegEx.IsMatch(f.Descendants(s_NameElement).First().Value));
-                        foreach(var baselineExclude in baselineExcluded)
-                        {
-                            baselineExcludeElements.Add(baselineExclude);
-                        }
+                        baselineExcludeElements.Add(baselineExclude);
                     }
                 }
-                // Gather the results with baselined files filtered out
-                IEnumerable<XElement> baselinedRows = errorRows.Except(baselineExcludeElements);
-
-                foreach (var filteredRow in baselinedRows)
-                {
-                    ITaskItem item = new TaskItem(filteredRow.Descendants(s_NameElement).First().Value);
-                    item.SetMetadata("Error", filteredRow.Descendants(s_ErrorElement).First().Value);
-                    reportedFailures.Add(item);
-                }
             }
+            // Gather the results with baselined files filtered out
+            IEnumerable<XElement> baselinedRows = errorRows.Except(baselineExcludeElements);
+
+            foreach (var filteredRow in baselinedRows)
+            {
+                ITaskItem item = new TaskItem(filteredRow.Descendants(s_NameElement).First().Value);
+                item.SetMetadata("Error", filteredRow.Descendants(s_ErrorElement).First().Value);
+                reportedFailures.Add(item);
+            }
+
             ErrorResults = reportedFailures.ToArray();
             foreach(var result in ErrorResults)
             {
