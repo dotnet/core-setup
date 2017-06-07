@@ -85,7 +85,7 @@
   <Target Name="ValidateBinInspectResults">
     <Error Condition="!Exists('$(BinInspectResultsXml)')" Text="No results found for BinInspect - missing '$(BinInspectResultsXml)'" />
 
-    <Message Importance="High" Text="Comparing BinInspect results ('$(Binto baseline" />
+    <Message Importance="High" Text="Comparing BinInspect results ('$(BinInspectResultsXml)') to baseline" />
     <ValidateBinInspectResults ResultsXml="$(BinInspectResultsXml)"
                                BaselineFiles="@(BinInspectBaselineFile)" />
   </Target>
