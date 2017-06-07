@@ -29,7 +29,7 @@
     <PropertyGroup>
       <BlobName>%(_BlobList.Identity)</BlobName>
       <BlobExtension>%(_BlobList.Extension)</BlobExtension>
-      <BlobFilename>%(_BlobList.Filename)</BlobFilename>
+      <BlobFilename>%(_BlobList.Filename)%(_BlobList.Extension)</BlobFilename>
     </PropertyGroup>
     <ItemGroup>
       <DownloadArtifact Include="$(BlobName)" Condition="'$(BlobExtension)' == '.exe'" />
