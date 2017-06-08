@@ -6,21 +6,20 @@
     <Version>$(ProductVersion)</Version>
   </PropertyGroup>
 
+  <!-- Redistributed package content from other nuget packages-->
   <ItemGroup>
+    <ProjectReference Include="src\Microsoft.NET.UWPCoreRuntimeSdk.depproj">
+      <AdditionalProperties Condition="'$(PackageTargetRuntime)' != ''">NuGetRuntimeIdentifier=$(PackageTargetRuntime)</AdditionalProperties>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- Identity / Reference package content -->
+  <ItemGroup Condition="'$(PackageTargetRuntime)' == ''">
     <File Include="files\build\*">
       <TargetPath>build</TargetPath>
     </File>
-    <File Include="$(UWPOutputDir)\Microsoft.NET.CoreRuntime.$(MajorVersion).$(MinorVersion).appx">
-      <TargetPath>tools\Appx</TargetPath>
-    </File>
-    <File Include="$(UWPOutputDir)\uwpshim.exe">
-      <TargetPath>tools\AppLocal</TargetPath>
-    </File>
     <File Include="files\tools\CoreRuntime\*">
-      <TargetPath>tools\CoreRuntime</TargetPath>
-    </File>
-    <File Include="$(UWPOutputDir)\copywin32resources.exe">
-      <TargetPath>tools\CoreRuntime</TargetPath>
+      <TargetPath>tools/CoreRuntime</TargetPath>
     </File>
   </ItemGroup>
 
