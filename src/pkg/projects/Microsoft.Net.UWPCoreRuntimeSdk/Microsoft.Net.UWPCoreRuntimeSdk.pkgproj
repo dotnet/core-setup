@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <File Include="files\Microsoft.Net.UWPCoreRuntimeSdk.*">
+    <File Include="files\build\*">
       <TargetPath>build</TargetPath>
     </File>
     <File Include="$(UWPOutputDir)\Microsoft.NET.CoreRuntime.$(MajorVersion).$(MinorVersion).appx">
@@ -16,7 +16,7 @@
     <File Include="$(UWPOutputDir)\uwpshim.exe">
       <TargetPath>tools\AppLocal</TargetPath>
     </File>
-    <File Include="files\Microsoft.Net.CoreRuntime*.targets">
+    <File Include="files\tools\CoreRuntime\*">
       <TargetPath>tools\CoreRuntime</TargetPath>
     </File>
     <File Include="$(UWPOutputDir)\copywin32resources.exe">
