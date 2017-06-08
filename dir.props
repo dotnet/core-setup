@@ -15,9 +15,9 @@
     <MinorVersion>1</MinorVersion>
     <PatchVersion>0</PatchVersion>
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
-    <PreReleaseLabel>preview1</PreReleaseLabel>
+    <PreReleaseLabel>dev-di</PreReleaseLabel>
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
-    <ReleaseBrandSuffix>Preview 1</ReleaseBrandSuffix>
+    <ReleaseBrandSuffix>DevDi</ReleaseBrandSuffix>
     <Channel>master</Channel>
     <BranchName>master</BranchName>
   </PropertyGroup>
