@@ -36,17 +36,6 @@
       </FilesToPackage>
     </ItemGroup>
   </Target>
-
-  <Target Name="GetDependenciesToPackage" Condition="'@(DependenciesToPackage)' != ''" DependsOnTargets="ResolveNuGetPackages" Returns="@(_DependenciesToPackageWithVersion)">
-    <ItemGroup>
-      <!-- intersect ReferencedPackage with DependenciesToPackage -->
-      <_DependenciesToPackageWithVersion Include="@(PackageReference)" Condition="'@(PackageReference)' == '@(DependenciesToPackage)' AND '%(Identity)' != ''">
-        <TargetFramework>$(PackageTargetFramework)</TargetFramework>
-      </_DependenciesToPackageWithVersion>
-    </ItemGroup>
-
-    <Message Importance="low" Text="%(_DependenciesToPackageWithVersion.Identity) : %(_DependenciesToPackageWithVersion.Version) : %(_DependenciesToPackageWithVersion.TargetFramework)" />
-  </Target>
  
   <!-- only calculate paths from this project, don't copy -->
   <Target Name="Build" />
