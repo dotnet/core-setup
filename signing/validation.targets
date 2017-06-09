@@ -49,8 +49,11 @@
     <Error Condition="!Exists('$(BuildVersionFile)')" Text="Missing required build version file - '$(BuildVersionFile)', official build id specified was '$(OfficialBuildId)'" />
     <Error Condition="'@(DownloadArtifact)' == ''" Text="No blobs found for signing validation in Container '$(ContainerName)' under path '$(BinariesRelativePath)'." />
 
-    <MakeDir Directories="$(DownloadDirectory)"
-             Condition="!Exists('$(DownloadDirectory)')" />
+    <!-- We don't want to re-validate an old download, so remove the DownloadDirectory -->
+    <RemoveDir Directories="$(DownloadDirectory)" 
+               Condition="Exists('$(DownloadDirectory)')"/>
+
+    <MakeDir Directories="$(DownloadDirectory)" />
     <MakeDir Directories="$(LogDirectory)"
              Condition="!Exists('$(LogDirectory)')" />
 
