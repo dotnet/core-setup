@@ -32,7 +32,7 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "-path $(PB_SourcesDirectory)",
+        "arguments": "-path \"$(PB_SourcesDirectory)\"",
         "workingFolder": "",
         "inlineScript": "param($path)\n\nif (Test-Path $path){\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }\n\nif (Test-Path $path){\n    # in case vbcs is still alive\n     $p = Get-Process -Name \"VBCS\"\n     Stop-Process -InputObject $p\n }",
         "failOnStandardError": "true"
@@ -52,7 +52,7 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "-path $(PB_VsoToolsDir)",
+        "arguments": "-path \"$(VsoToolsDir)\"",
         "workingFolder": "",
         "inlineScript": "param($path)\n\nif (Test-Path $path){\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }\n\nif (Test-Path $path){\n    # in case vbcs is still alive\n     $p = Get-Process -Name \"VBCS\"\n     Stop-Process -InputObject $p\n }",
         "failOnStandardError": "true"
@@ -72,7 +72,7 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "-path $(ToolsRoot)",
+        "arguments": "-path \"$(ToolsRoot)\"",
         "workingFolder": "",
         "inlineScript": "param($path)\n\nif (Test-Path $path){\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }\n\nif (Test-Path $path){\n    # in case vbcs is still alive\n     $p = Get-Process -Name \"VBCS\"\n     Stop-Process -InputObject $p\n }",
         "failOnStandardError": "true"
@@ -110,7 +110,7 @@
       },
       "inputs": {
         "filename": "git",
-        "arguments": "clone $(PB_VsoToolsRepo) $(PB_VsoToolsDir)",
+        "arguments": "clone $(VsoToolsRepo) $(VsoToolsDir)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -128,10 +128,10 @@
       },
       "inputs": {
         "scriptType": "filePath",
-        "scriptName": "$(PB_VsoToolsDir)\\scripts\\DotNet-Trusted-Publish\\Fetch-Tools.ps1",
+        "scriptName": "$(VsoToolsDir)\\scripts\\DotNet-Trusted-Publish\\Fetch-Tools.ps1",
         "arguments": "$(ToolsRoot)",
         "workingFolder": "",
-        "inlineScript": "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\"",
+        "inlineScript": "",
         "failOnStandardError": "true"
       }
     },
@@ -430,10 +430,10 @@
     "TeamName": {
       "value": "DotNetCore"
     },
-    "PB_VsoToolsRepo": {
+    "VsoToolsRepo": {
       "value": "https://$(PB_VsoAccountName):$(PB_VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-BuildPipeline"
     },
-    "PB_VsoToolsDir": {
+    "VsoToolsDir": {
       "value": "$(Build.SourcesDirectory)\\toolsSource"
     },
     "ToolsRoot": {

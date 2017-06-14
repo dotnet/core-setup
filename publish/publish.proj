@@ -157,7 +157,7 @@
     <PropertyGroup>
       <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(BinDir)PackageDownload/</DownloadDirectory>
       <PublishDirectory Condition="'$(PublishDirectory)' == ''">$(BinDir)ForPublishing/</PublishDirectory>
-	  <!-- list of packages that we want to embed symbol signatures in -->
+      <!-- list of packages that we want to embed symbol signatures in -->
       <SymbolPackagesToPublishGlob Condition="'$(SymbolPackagesToPublishGlob)' == ''">$(DownloadDirectory)/**/*.nupkg</SymbolPackagesToPublishGlob>
     </PropertyGroup>
     <MakeDir Directories="$(DownloadDirectory)"
