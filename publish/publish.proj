@@ -179,8 +179,8 @@
 
   <Target Name="SignSymbolPackages" DependsOnTargets="InjectSignedSymbolCatalogIntoSymbolPackages">
     <PropertyGroup>
-      <PowerShellExe Condition=" '$(PowerShellExe)'=='' ">%WINDIR%\System32\WindowsPowerShell\v1.0\powershell.exe</PowerShellExe>
-      <EmbedIndexScriptLocation Condition=" '$(EmbedIndexScriptLocation)'=='' ">$(PB_VsoToolsDir)\scripts\DotNet-Trusted-Publish\Embed-Index.ps1</EmbedIndexScriptLocation>
+      <PowerShellExe Condition=" '$(PowerShellExe)'=='' ">powershell.exe</PowerShellExe>
+      <EmbedIndexScriptLocation Condition=" '$(EmbedIndexScriptLocation)'=='' ">$(VsoToolsDir)\scripts\DotNet-Trusted-Publish\Embed-Index.ps1</EmbedIndexScriptLocation>
     </PropertyGroup>
 
     <Exec Command="$(PowerShellExe) -NonInteractive -ExecutionPolicy Unrestricted  -Command &quot;&amp; { &amp;&apos;$(EmbedIndexScriptLocation)&apos; $(DownloadDirectory) $(PublishDirectory) } &quot;" />
