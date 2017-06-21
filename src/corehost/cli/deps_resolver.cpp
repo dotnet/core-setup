@@ -13,6 +13,16 @@
 #include "fx_ver.h"
 #include "libhost.h"
 
+const pal::string_t MissingAssemblyMessage = _X(
+    "%s:\n"
+    "  An assembly specified in the application dependencies manifest (%s) was not found:\n"
+    "    package: '%s', version: '%s'\n"
+    "    path: '%s'");
+
+const pal::string_t MissingAssemblyMessage2 = _X(
+    "  This assembly was expected to be in the local runtime store as the application was published using the following target manifest files:\n"
+    "    %s");
+
 namespace
 {
 // -----------------------------------------------------------------------------
@@ -303,25 +313,40 @@ bool deps_resolver_t::probe_deps_entry(const deps_entry_t& entry, const pal::str
     return false;
 }
 
-bool report_missing_assembly_in_manifest(const deps_entry_t& entry)
+bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool isWarning)
 {
-    trace::error(_X(
-        "Error:\n"
-        "  An assembly specified in the application dependencies manifest (%s) was not found:\n"
-        "    package: '%s', version: '%s'\n"
-        "    path: '%s'"),
-        entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
+    if (!isWarning && entry.asset_type == deps_entry_t::asset_types::resources)
+    {
+        // Treat missing resource assemblies as a warning, not an error.
+        isWarning = true;
+    }
+
+    if (isWarning)
+    {
+        trace::warning(MissingAssemblyMessage.c_str(), _X("Warning"),
+            entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
+    }
+    else
+    {
+        trace::error(MissingAssemblyMessage.c_str(), _X("Error"),
+            entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
+    }
 
     if (!entry.runtime_store_manifest_list.empty())
     {
-        trace::error(_X(
-            "  This assembly was expected to be in the local runtime store as the application was published using the following target manifest files:\n"
-            "    %s"),
-            entry.runtime_store_manifest_list.c_str());
+        if (isWarning)
+        {
+            trace::warning(MissingAssemblyMessage2.c_str(), entry.runtime_store_manifest_list.c_str());
+        }
+        else
+        {
+            trace::error(MissingAssemblyMessage2.c_str(), entry.runtime_store_manifest_list.c_str());
+        }
     }
 
-    return false;
+    return isWarning;
 }
+
 /**
  *  Resovle the TPA assembly locations
  */
@@ -360,7 +385,7 @@ bool deps_resolver_t::resolve_tpa_list(
         }
         else
         {
-            return report_missing_assembly_in_manifest(entry);
+            return report_missing_assembly_in_manifest(entry, false);
         }
     };
 
@@ -583,12 +608,10 @@ bool deps_resolver_t::resolve_probe_dirs(
             // because of rid-fallback could happen (ex: CentOS falling back to RHEL)
             if ((entry.asset_name == _X("apphost")) && ends_with(entry.library_name, _X(".Microsoft.NETCore.DotNetAppHost"), false))
             {
-                trace::warning(_X("Warning: assembly specified in the dependencies manifest was not found -- package: '%s', version: '%s', path: '%s'"), 
-                    entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
-                return true;
+                return report_missing_assembly_in_manifest(entry, true);
             }
 
-            return report_missing_assembly_in_manifest(entry);
+            return report_missing_assembly_in_manifest(entry, false);
         }
 
         return true;
