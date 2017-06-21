@@ -19,7 +19,7 @@ const pal::string_t MissingAssemblyMessage = _X(
     "    package: '%s', version: '%s'\n"
     "    path: '%s'");
 
-const pal::string_t MissingAssemblyMessage2 = _X(
+const pal::string_t ManifestListMessage = _X(
     "  This assembly was expected to be in the local runtime store as the application was published using the following target manifest files:\n"
     "    %s");
 
@@ -313,38 +313,45 @@ bool deps_resolver_t::probe_deps_entry(const deps_entry_t& entry, const pal::str
     return false;
 }
 
-bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool isWarning)
+bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool isNotError = false)
 {
-    if (!isWarning && entry.asset_type == deps_entry_t::asset_types::resources)
-    {
-        // Treat missing resource assemblies as a warning, not an error.
-        isWarning = true;
-    }
+    bool showManifestListMessage = !entry.runtime_store_manifest_list.empty();
 
-    if (isWarning)
+    if (entry.asset_type == deps_entry_t::asset_types::resources)
+    {
+        // Treat missing resource assemblies as informational.
+        isNotError = true;
+
+        trace::info(MissingAssemblyMessage.c_str(), _X("Info"),
+            entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
+
+        if (showManifestListMessage)
+        {
+            trace::info(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
+        }
+    }
+    else if (isNotError)
     {
         trace::warning(MissingAssemblyMessage.c_str(), _X("Warning"),
             entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
+
+        if (showManifestListMessage)
+        {
+            trace::warning(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
+        }
     }
     else
     {
         trace::error(MissingAssemblyMessage.c_str(), _X("Error"),
             entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
-    }
 
-    if (!entry.runtime_store_manifest_list.empty())
-    {
-        if (isWarning)
+        if (showManifestListMessage)
         {
-            trace::warning(MissingAssemblyMessage2.c_str(), entry.runtime_store_manifest_list.c_str());
-        }
-        else
-        {
-            trace::error(MissingAssemblyMessage2.c_str(), entry.runtime_store_manifest_list.c_str());
+            trace::error(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
         }
     }
 
-    return isWarning;
+    return isNotError;
 }
 
 /**
@@ -385,7 +392,7 @@ bool deps_resolver_t::resolve_tpa_list(
         }
         else
         {
-            return report_missing_assembly_in_manifest(entry, false);
+            return report_missing_assembly_in_manifest(entry);
         }
     };
 
@@ -611,7 +618,7 @@ bool deps_resolver_t::resolve_probe_dirs(
                 return report_missing_assembly_in_manifest(entry, true);
             }
 
-            return report_missing_assembly_in_manifest(entry, false);
+            return report_missing_assembly_in_manifest(entry);
         }
 
         return true;
