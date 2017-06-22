@@ -67,11 +67,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.LightupApp
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(
-                    "Error:" + Environment.NewLine +
-                    "  An assembly specified in the application dependencies manifest (LightupLib.deps.json) was not found:" + Environment.NewLine +
-                    "    package: \'LightupLib\', version: \'1.0.0\'" + Environment.NewLine +
-                    "    path: \'LightupLib.dll\'");
+                .HaveStdOutContaining("Failed to load the lightup assembly!");
         }
 
         // Attempt to run the app with lightup deps.json specified and lightup library present in the expected 

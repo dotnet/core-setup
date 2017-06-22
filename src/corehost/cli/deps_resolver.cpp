@@ -13,16 +13,6 @@
 #include "fx_ver.h"
 #include "libhost.h"
 
-const pal::string_t MissingAssemblyMessage = _X(
-    "%s:\n"
-    "  An assembly specified in the application dependencies manifest (%s) was not found:\n"
-    "    package: '%s', version: '%s'\n"
-    "    path: '%s'");
-
-const pal::string_t ManifestListMessage = _X(
-    "  This assembly was expected to be in the local runtime store as the application was published using the following target manifest files:\n"
-    "    %s");
-
 namespace
 {
 // -----------------------------------------------------------------------------
@@ -313,45 +303,22 @@ bool deps_resolver_t::probe_deps_entry(const deps_entry_t& entry, const pal::str
     return false;
 }
 
-bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool isNotError = false)
+void report_missing_assembly_in_manifest(const deps_entry_t& entry)
 {
-    bool showManifestListMessage = !entry.runtime_store_manifest_list.empty();
+    trace::info(_X(
+        "Info:\n"
+        "  An assembly specified in the application dependencies manifest (%s) was not found:\n"
+        "    package: '%s', version: '%s'\n"
+        "    path: '%s'"),
+        entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
 
-    if (entry.asset_type == deps_entry_t::asset_types::resources)
+    if (!entry.runtime_store_manifest_list.empty())
     {
-        // Treat missing resource assemblies as informational.
-        isNotError = true;
-
-        trace::info(MissingAssemblyMessage.c_str(), _X("Info"),
-            entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
-
-        if (showManifestListMessage)
-        {
-            trace::info(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
-        }
+        trace::info(_X(
+            "  This assembly was expected to be in the local runtime store as the application was published using the following target manifest files:\n"
+            "    %s"),
+            entry.runtime_store_manifest_list.c_str());
     }
-    else if (isNotError)
-    {
-        trace::warning(MissingAssemblyMessage.c_str(), _X("Warning"),
-            entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
-
-        if (showManifestListMessage)
-        {
-            trace::warning(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
-        }
-    }
-    else
-    {
-        trace::error(MissingAssemblyMessage.c_str(), _X("Error"),
-            entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
-
-        if (showManifestListMessage)
-        {
-            trace::error(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
-        }
-    }
-
-    return isNotError;
 }
 
 /**
@@ -388,12 +355,13 @@ bool deps_resolver_t::resolve_tpa_list(
         if (probe_deps_entry(entry, deps_dir, &candidate))
         {
             add_tpa_asset(entry.asset_name, candidate, &items, output);
-            return true;
         }
         else
         {
-            return report_missing_assembly_in_manifest(entry);
+            report_missing_assembly_in_manifest(entry);
         }
+
+        return true;
     };
 
     // First add managed assembly to the TPA.
@@ -611,14 +579,7 @@ bool deps_resolver_t::resolve_probe_dirs(
         }
         else
         {
-            // For standalone apps, apphost.exe will be renamed. Do not use the full package name
-            // because of rid-fallback could happen (ex: CentOS falling back to RHEL)
-            if ((entry.asset_name == _X("apphost")) && ends_with(entry.library_name, _X(".Microsoft.NETCore.DotNetAppHost"), false))
-            {
-                return report_missing_assembly_in_manifest(entry, true);
-            }
-
-            return report_missing_assembly_in_manifest(entry);
+            report_missing_assembly_in_manifest(entry);
         }
 
         return true;
