@@ -313,14 +313,14 @@ bool deps_resolver_t::probe_deps_entry(const deps_entry_t& entry, const pal::str
     return false;
 }
 
-bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool isNotError = false)
+bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool continueResolving = false)
 {
     bool showManifestListMessage = !entry.runtime_store_manifest_list.empty();
 
     if (entry.asset_type == deps_entry_t::asset_types::resources)
     {
         // Treat missing resource assemblies as informational.
-        isNotError = true;
+        continueResolving = true;
 
         trace::info(MissingAssemblyMessage.c_str(), _X("Info"),
             entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
@@ -330,7 +330,7 @@ bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool isNotEr
             trace::info(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
         }
     }
-    else if (isNotError)
+    else if (continueResolving)
     {
         trace::warning(MissingAssemblyMessage.c_str(), _X("Warning"),
             entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.relative_path.c_str());
@@ -351,7 +351,7 @@ bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool isNotEr
         }
     }
 
-    return isNotError;
+    return continueResolving;
 }
 
 /**
