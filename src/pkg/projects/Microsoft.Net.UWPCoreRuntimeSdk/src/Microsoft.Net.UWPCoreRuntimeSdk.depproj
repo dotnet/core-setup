@@ -31,7 +31,7 @@
       <FilesToPackage Include="$(UWPOutputDir)\uwpshim.exe">
         <TargetPath>tools/AppLocal</TargetPath>
       </FilesToPackage>
-      <FilesToPackage Include="$(UWPOutputDir)\Microsoft.NET.CoreRuntime.$(MajorVersion).$(MinorVersion).appx">
+      <FilesToPackage Include="$(MicrosoftNetCoreRuntimeAppxOutputPath)">
         <TargetPath>tools/Appx</TargetPath>
       </FilesToPackage>
     </ItemGroup>
