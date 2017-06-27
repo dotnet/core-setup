@@ -7,10 +7,18 @@
          they will be built during the source build phase -->
     <AdditionalProperties>BuildPackageLibraryReferences=false</AdditionalProperties>
   </PropertyGroup>
+  
+  <!-- required to build the projects in their specified order -->
+  <!-- This ensures the MakeAppx target in Microsoft.NET.CoreRuntime runs before
+       Microsoft.Net.UWPCoreRuntimeSdk's packaging targets -->
+  <PropertyGroup>
+    <SerializeProjects>true</SerializeProjects>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectExclusions Include="$(MSBuildThisFileDirectory)\projects\*\Microsoft.NETCore.UniversalWindowsPlatform.builds" Condition="'$(OSEnvironment)' != 'Windows_NT' or '$(Platform)' == 'arm64'" />
     <ProjectExclusions Include="$(MSBuildThisFileDirectory)\projects\*\Microsoft.NET.CoreRuntime.builds" Condition="'$(OSEnvironment)' != 'Windows_NT' or '$(Platform)' == 'arm64'" />
+    <ProjectExclusions Include="$(MSBuildThisFileDirectory)\projects\*\Microsoft.Net.UWPCoreRuntimeSdk.builds" Condition="'$(OSEnvironment)' != 'Windows_NT' or '$(Platform)' == 'arm64'" />
     <Project Include="$(MSBuildThisFileDirectory)\projects\*\*.builds" Exclude="@(ProjectExclusions)">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
