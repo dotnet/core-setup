@@ -18,7 +18,7 @@
     <File Include="files\build\*">
       <TargetPath>build</TargetPath>
     </File>
-    <File Include="files\tools\CoreRuntime\*">
+    <File Include="files\tools\CoreRuntime\Microsoft.Net.CoreRuntime.targets">
       <TargetPath>tools/CoreRuntime</TargetPath>
     </File>
   </ItemGroup>

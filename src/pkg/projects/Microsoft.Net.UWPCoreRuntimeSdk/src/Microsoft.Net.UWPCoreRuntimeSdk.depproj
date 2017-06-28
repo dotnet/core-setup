@@ -14,6 +14,8 @@
     <RidSpecificAssets Condition="'$(NuGetRuntimeIdentifier)' != ''">true</RidSpecificAssets>
     <IntermediateOutputPath>$(IntermediateOutputPath)$(NuGetRuntimeIdentifier)</IntermediateOutputPath>
     <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
+    <CoreRuntimeSettingsTemplate>$(MSBuildProjectDirectory)\..\files\tools\CoreRuntime\Microsoft.Net.CoreRuntime.settings.targets.template</CoreRuntimeSettingsTemplate>
+    <CoreRuntimeSettings>$(IntermediateOutputPath)Microsoft.Net.CoreRuntime.settings.targets</CoreRuntimeSettings>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +24,26 @@
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
+  <Target Name="GenerateCoreRuntimeSettingsFromTemplate"
+          BeforeTargets="GetFilesToPackage"
+          Inputs="$(CoreRuntimeSettingsTemplate)"
+          Outputs="$(CoreRuntimeSettings)"
+          Condition="'$(PackageTargetRuntime)' == ''">
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <WriteLinesToFile File="$(CoreRuntimeSettings)"
+                      Lines="$([System.IO.File]::ReadAllText($(CoreRuntimeSettingsTemplate)).Replace('[AppxVersion]',$(MajorVersion).$(MinorVersion)))"
+                      Overwrite="true" />
+    <ItemGroup>
+      <FileWrites Include="$(CoreRuntimeSettings)" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="GetFilesToPackage" AfterTargets="Build" Returns="@(FilesToPackage)">
+    <ItemGroup Condition="'$(NuGetRuntimeIdentifier)' == ''">
+      <FilesToPackage Include="$(CoreRuntimeSettings)">
+        <TargetPath>tools/CoreRuntime</TargetPath>
+      </FilesToPackage>
+    </ItemGroup>
     <ItemGroup Condition="'$(NuGetRuntimeIdentifier)' != ''">
       <!-- RID-specific: include all runtime files -->
       <FilesToPackage Include="$(UWPOutputDir)\copywin32resources.exe">
