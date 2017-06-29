@@ -43,6 +43,9 @@
       <FilesToPackage Include="$(CoreRuntimeSettings)">
         <TargetPath>tools/CoreRuntime</TargetPath>
       </FilesToPackage>
+      <FilesToPackage Include="$(CoreRuntimeTaskDir)\*.dll">
+        <TargetPath>tools/CoreRuntime</TargetPath>
+      </FilesToPackage>
     </ItemGroup>
     <ItemGroup Condition="'$(NuGetRuntimeIdentifier)' != ''">
       <!-- RID-specific: include all runtime files -->

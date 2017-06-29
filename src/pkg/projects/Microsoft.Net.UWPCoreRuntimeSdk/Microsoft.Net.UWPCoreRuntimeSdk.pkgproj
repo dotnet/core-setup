@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <Version>$(ProductVersion)</Version>
+    <OmitDependencies>true</OmitDependencies>
   </PropertyGroup>
 
   <!-- Redistributed package content from other nuget packages-->

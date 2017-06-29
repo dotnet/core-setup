@@ -83,5 +83,16 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <Target Name="CopyLocalMicrosoftCci" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <ModifiedCci Include="@(Reference)" Condition="'%(NuGetPackageId)' == 'Microsoft.Cci'">
+        <Private>true</Private>
+      </ModifiedCci>
+      <Reference Remove="@(Reference)" Condition="'%(NuGetPackageId)' == 'Microsoft.Cci'" />
+      <Reference Include="@(ModifiedCci)" />
+    </ItemGroup>
+  </Target>
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
