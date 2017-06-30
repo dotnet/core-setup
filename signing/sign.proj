@@ -57,9 +57,6 @@
       <FilesToSign Include="$(UWPOutputDir)*.exe">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
-      <FilesToSign Include="$(UWPOutputDir)*.appx">
-        <Authenticode>$(CertificateId)</Authenticode>
-      </FilesToSign>
     </ItemGroup>
   </Target>
 
