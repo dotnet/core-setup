@@ -165,7 +165,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- Expected location of result manifest file where it supposed to be dropped by WireUpCoreRuntime -->
       <_TransformedAppxManifestXmlFile>$(_WireUpCoreRuntimeOutputPath)$(_AppxManifestXmlFileName)</_TransformedAppxManifestXmlFile>
 
-      <CoreRuntimeSDKLocation>%(CoreRuntimeSDK.Identity)</CoreRuntimeSDKLocation>
+      <CoreRuntimeSDKLocation Condition="'$(PlatformTarget)' == 'x86'">$(CoreRuntimeSDKRootX86)</CoreRuntimeSDKLocation>
+      <CoreRuntimeSDKLocation Condition="'$(PlatformTarget)' == 'x64'">$(CoreRuntimeSDKRootX64)</CoreRuntimeSDKLocation>
+      <CoreRuntimeSDKLocation Condition="'$(PlatformTarget)' == 'arm'">$(CoreRuntimeSDKRootArm)</CoreRuntimeSDKLocation>
     </PropertyGroup>
   </Target>
 
@@ -240,8 +242,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TargetRuntime="$(TargetRuntime)"
         TargetArch="$(_PlatformTargetForCoreRuntime)"
         FrameworkPackages="@(FrameworkPackagesForTargetArchitecture)"
-        CoreRuntimeExtensionSDKLocation="$(CoreRuntimeSDKLocation)"
-        CopyWin32ResourcesLocation="$(MSBuildThisFileDirectory)CopyWin32Resources.exe"
+        CoreRuntimeSDKLocation="$(CoreRuntimeSDKLocation)"
+        CopyWin32ResourcesLocation="$(CopyWin32ResourcesX86Path)"
     >
       <Output TaskParameter="ErrorCode" PropertyName="_WireUpCoreRuntimeExitCode"/>
       <Output TaskParameter="FrameworkPackagesNeedsToBeDeployed" PropertyName="FrameworkPackagesNeedsToBeDeployed" />

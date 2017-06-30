@@ -59,7 +59,7 @@ namespace Microsoft.Build.Net.CoreRuntimeTask
 
         /// <summary> Gets or sets the CoreRuntime Extension SDK location. This is used to locate the UWPShim.exe </summary>
         [Required]
-        public string CoreRuntimeExtensionSDKLocation { get; set; }
+        public string CoreRuntimeSDKLocation { get; set; }
 
         /// <summary> Location of CopyWin32Resources.exe </summary>
         [Required]
@@ -147,9 +147,8 @@ namespace Microsoft.Build.Net.CoreRuntimeTask
                 XNamespace ns = @"http://schemas.microsoft.com/appx/manifest/foundation/windows10";
                 string inprocServer = UWPShimEXE;
                 var uwpShimLocation = Path.Combine(new [] { 
-                            CoreRuntimeExtensionSDKLocation, 
+                            CoreRuntimeSDKLocation,
                             "AppLocal",
-                            TargetArch,
                             UWPShimEXE} );
 
                 IEnumerable<XAttribute> entryPointExecutables = Enumerable.Empty<XAttribute>();

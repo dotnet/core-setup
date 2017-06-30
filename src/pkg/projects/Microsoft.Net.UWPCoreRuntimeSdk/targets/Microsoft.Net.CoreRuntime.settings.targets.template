@@ -11,9 +11,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
   <PropertyGroup>
     <_CoreRuntimeVersion>[AppxVersion]</_CoreRuntimeVersion>
   </PropertyGroup>
-
 </Project>
