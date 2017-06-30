@@ -24,6 +24,8 @@
     <!-- turn off CLS compliant check to make it work with CCI code -->
     <AssemblyAttributeClsCompliant>false</AssemblyAttributeClsCompliant>
 
+    <AssemblyVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</AssemblyVersion>
+    <AssemblyComVisible>false</AssemblyComVisible>
     <OutputType>Library</OutputType>
     <NuGetTargetMoniker>.NETFramework,Version=v4.6</NuGetTargetMoniker>
     <NuGetTargetMonikerShort>net46</NuGetTargetMonikerShort>
