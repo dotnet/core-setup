@@ -7,8 +7,6 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{49082C55-62B7-4DEC-BC9E-3F57945AC37E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -34,7 +32,7 @@
     <PackageTargetFallback>dnxcore50;portable-net45+win8+wpa81</PackageTargetFallback>
     <ContainsPackageReferences>true</ContainsPackageReferences>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
+    <RestoreOutputPath>obj</RestoreOutputPath>
     <SkipSigning>true</SkipSigning>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
