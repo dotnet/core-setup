@@ -52,8 +52,7 @@ namespace Microsoft.DotNet.Build.Tasks
             {
                 foreach(var baselineFile in BaselineFiles)
                 {
-                    Regex ignoreRegEx = new Regex(baselineFile.ItemSpec);
-                    IEnumerable<XElement> baselineExcluded = errorRows.Where(f => ignoreRegEx.IsMatch(f.Descendants(s_NameElement).First().Value));
+                    IEnumerable<XElement> baselineExcluded = errorRows.Where(f => Regex.IsMatch(f.Descendants(s_NameElement).First().Value), baselineFile.ItemSpec, RegExOptions.IgnoreCase);
                     foreach(var baselineExclude in baselineExcluded)
                     {
                         baselineExcludeElements.Add(baselineExclude);
