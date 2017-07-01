@@ -72,9 +72,6 @@
       <FilesToSign Include="$(OutDir)packages/**/*.cab">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
-      <FilesToSign Include="$(UWPOutputDir)*.appx">
-        <Authenticode>$(CertificateId)</Authenticode>
-      </FilesToSign>
     </ItemGroup>
   </Target>
 
