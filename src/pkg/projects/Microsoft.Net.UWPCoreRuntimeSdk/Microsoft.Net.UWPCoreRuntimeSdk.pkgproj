@@ -16,7 +16,10 @@
 
   <!-- Identity / Reference package content -->
   <ItemGroup Condition="'$(PackageTargetRuntime)' == ''">
-    <File Include="targets\Microsoft.Net.CoreRuntime.targets">
+    <File Include="contents\identity\Microsoft.Net.UWPCoreRuntimeSdk.props">
+      <TargetPath>build</TargetPath>
+    </File>
+    <File Include="contents\identity\Microsoft.Net.CoreRuntime.targets">
       <TargetPath>tools/CoreRuntime</TargetPath>
     </File>
   </ItemGroup>

@@ -14,7 +14,7 @@
     <RidSpecificAssets Condition="'$(NuGetRuntimeIdentifier)' != ''">true</RidSpecificAssets>
     <IntermediateOutputPath>$(IntermediateOutputPath)$(NuGetRuntimeIdentifier)</IntermediateOutputPath>
     <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
-    <CoreRuntimeSettingsTemplate>$(MSBuildProjectDirectory)\..\targets\Microsoft.Net.CoreRuntime.settings.targets.template</CoreRuntimeSettingsTemplate>
+    <CoreRuntimeSettingsTemplate>$(MSBuildProjectDirectory)\..\contents\identity\Microsoft.Net.CoreRuntime.settings.targets.template</CoreRuntimeSettingsTemplate>
     <CoreRuntimeSettings>$(IntermediateOutputPath)Microsoft.Net.CoreRuntime.settings.targets</CoreRuntimeSettings>
 
     <AppxDisplayName>Microsoft.NET.CoreRuntime.$(MajorVersion).$(MinorVersion)</AppxDisplayName>
@@ -23,10 +23,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <RidPackageTransformations Include="$(MSBuildProjectDirectory)\..\rid-templates\Microsoft.Net.UWPCoreRuntimeSdk.props.template">
+    <RidPackageTransformations Include="$(MSBuildProjectDirectory)\..\contents\rid-templates\Microsoft.Net.UWPCoreRuntimeSdk.props.template">
       <OutputPath>$(IntermediateOutputPath)Microsoft.Net.UWPCoreRuntimeSdk.props</OutputPath>
     </RidPackageTransformations>
-    <RidPackageTransformations Include="$(MSBuildProjectDirectory)\..\rid-templates\Microsoft.Net.UWPCoreRuntimeSdk.targets.template">
+    <RidPackageTransformations Include="$(MSBuildProjectDirectory)\..\contents\rid-templates\Microsoft.Net.UWPCoreRuntimeSdk.targets.template">
       <OutputPath>$(IntermediateOutputPath)Microsoft.Net.UWPCoreRuntimeSdk.targets</OutputPath>
     </RidPackageTransformations>
 
