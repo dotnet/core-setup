@@ -5,6 +5,11 @@
   <PropertyGroup>
     <Version>$(ProductVersion)</Version>
     <OmitDependencies>true</OmitDependencies>
+
+  <!-- Reference runtime packages directly so that MSBuild .props / .targets get imported correctly in VS" -->
+    <IsLineupPackage>false</IsLineupPackage>
+    <IncludeRuntimeJson>false</IncludeRuntimeJson>
+    <ExcludeLineupReference>true</ExcludeLineupReference>
   </PropertyGroup>
 
   <!-- Redistributed package content from other nuget packages-->
@@ -23,6 +28,18 @@
       <TargetPath>tools/CoreRuntime</TargetPath>
     </File>
   </ItemGroup>
+
+  <!-- Reference runtime packages directly so that MSBuild .props / .targets get imported correctly in VS" -->
+  <Target Name="InjectNuGetDependencyOnRuntimePackages"
+          BeforeTargets="GenerateNuSpec"
+          DependsOnTargets="DetermineRuntimeDependencies"
+          Condition="'$(PackageTargetRuntime)' == ''">
+    <ItemGroup>
+      <Dependency Include="@(RuntimeDependency)">
+        <TargetFramework>uap10.0.15138</TargetFramework>
+      </Dependency>
+    </ItemGroup>
+  </Target>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

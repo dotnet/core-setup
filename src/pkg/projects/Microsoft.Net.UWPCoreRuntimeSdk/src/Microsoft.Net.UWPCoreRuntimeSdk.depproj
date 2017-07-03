@@ -24,10 +24,10 @@
 
   <ItemGroup>
     <RidPackageTransformations Include="$(MSBuildProjectDirectory)\..\contents\rid-templates\Microsoft.Net.UWPCoreRuntimeSdk.props.template">
-      <OutputPath>$(IntermediateOutputPath)Microsoft.Net.UWPCoreRuntimeSdk.props</OutputPath>
+      <OutputPath>$(IntermediateOutputPath)runtime.$(NuGetRuntimeIdentifier).Microsoft.Net.UWPCoreRuntimeSdk.props</OutputPath>
     </RidPackageTransformations>
     <RidPackageTransformations Include="$(MSBuildProjectDirectory)\..\contents\rid-templates\Microsoft.Net.UWPCoreRuntimeSdk.targets.template">
-      <OutputPath>$(IntermediateOutputPath)Microsoft.Net.UWPCoreRuntimeSdk.targets</OutputPath>
+      <OutputPath>$(IntermediateOutputPath)runtime.$(NuGetRuntimeIdentifier).Microsoft.Net.UWPCoreRuntimeSdk.targets</OutputPath>
     </RidPackageTransformations>
 
     <ProjectReference Include="..\..\Microsoft.Net.CoreRuntime\Microsoft.Net.CoreRuntime.depproj" />
