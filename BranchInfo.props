@@ -7,8 +7,8 @@
     <PreReleaseLabel>preview1</PreReleaseLabel>
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
     <ReleaseBrandSuffix>Preview 1</ReleaseBrandSuffix>
-    <Channel>master</Channel>
-    <BranchName>master</BranchName>
+    <Channel>release/uwp6.0</Channel>
+    <BranchName>release/uwp6.0</BranchName>
     <ContainerName>dotnet</ContainerName>
     <ChecksumContainerName>$(ContainerName)</ChecksumContainerName>
   </PropertyGroup>
