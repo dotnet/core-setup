@@ -36,7 +36,7 @@
           Condition="'$(PackageTargetRuntime)' == ''">
     <ItemGroup>
       <Dependency Include="@(RuntimeDependency)">
-        <TargetFramework>uap10.0.15138</TargetFramework>
+        <TargetFramework>$(UAPvNextTFM)</TargetFramework>
       </Dependency>
     </ItemGroup>
   </Target>
