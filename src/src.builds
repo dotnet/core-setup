@@ -5,7 +5,6 @@
   <!-- required to build the projects in their specified order -->
   <PropertyGroup>
     <SerializeProjects>true</SerializeProjects>
-    <_BuildUwpDependencies Condition="'$(OSGroup)' == 'Windows_NT' and '$(TargetArchitecture)' != 'arm64'">true</_BuildUwpDependencies>
   </PropertyGroup>
 
   <ItemGroup>

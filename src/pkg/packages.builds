@@ -6,12 +6,12 @@
     <!-- don't build project references from pkgprojs during the packages build phase,
          they will be built during the source build phase -->
     <AdditionalProperties>BuildPackageLibraryReferences=false</AdditionalProperties>
-    <ProjectsBasePath>$(MSBuildThisFileDirectory)\projects\</ProjectsBasePath>
+    <ProjectsBasePath>$(MSBuildThisFileDirectory)projects\</ProjectsBasePath>
   </PropertyGroup>  
 
   <ItemGroup>
-    <ProjectExclusions Include="$(ProjectsBasePath)*\Microsoft.NETCore.UniversalWindowsPlatform.builds" Condition="'$(OSEnvironment)' != 'Windows_NT' or '$(Platform)' == 'arm64'" />
-    <ProjectExclusions Include="$(ProjectsBasePath)*\Microsoft.NET.CoreRuntime.builds" Condition="'$(OSEnvironment)' != 'Windows_NT' or '$(Platform)' == 'arm64'" />
+    <ProjectExclusions Include="$(ProjectsBasePath)*\Microsoft.NETCore.UniversalWindowsPlatform.builds" Condition="'$(_BuildUwpDependencies)' != 'true'" />
+    <ProjectExclusions Include="$(ProjectsBasePath)*\Microsoft.Net.UWPCoreRuntimeSdk.builds" Condition="'$(_BuildUwpDependencies)' != 'true'" />
     <Project Include="$(ProjectsBasePath)*\*.builds" Exclude="@(ProjectExclusions)">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
