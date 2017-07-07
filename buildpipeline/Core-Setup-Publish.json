@@ -52,7 +52,7 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "-path \"$(VsoToolsDir)\"",
+        "arguments": "-path \"$(PB_VsoToolsDir)\"",
         "workingFolder": "",
         "inlineScript": "param($path)\n\nif (Test-Path $path){\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }\n\nif (Test-Path $path){\n    # in case vbcs is still alive\n     $p = Get-Process -Name \"VBCS\"\n     Stop-Process -InputObject $p\n }",
         "failOnStandardError": "true"
@@ -72,7 +72,7 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "-path \"$(ToolsRoot)\"",
+        "arguments": "-path \"$(PB_ToolsRoot)\"",
         "workingFolder": "",
         "inlineScript": "param($path)\n\nif (Test-Path $path){\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }\n\nif (Test-Path $path){\n    # in case vbcs is still alive\n     $p = Get-Process -Name \"VBCS\"\n     Stop-Process -InputObject $p\n }",
         "failOnStandardError": "true"
@@ -110,7 +110,7 @@
       },
       "inputs": {
         "filename": "git",
-        "arguments": "clone $(VsoToolsRepo) $(VsoToolsDir)",
+        "arguments": "clone $(PB_VsoToolsRepo) $(PB_VsoToolsDir)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -128,8 +128,8 @@
       },
       "inputs": {
         "scriptType": "filePath",
-        "scriptName": "$(VsoToolsDir)\\scripts\\DotNet-Trusted-Publish\\Fetch-Tools.ps1",
-        "arguments": "$(ToolsRoot)",
+        "scriptName": "$(PB_VsoToolsDir)\\scripts\\DotNet-Trusted-Publish\\Fetch-Tools.ps1",
+        "arguments": "$(PB_ToolsRoot)",
         "workingFolder": "",
         "inlineScript": "",
         "failOnStandardError": "true"
@@ -232,7 +232,7 @@
         "solution": "$(PB_SourcesDirectory)\\publish\\publish.proj",
         "platform": "$(PB_TargetArchitecture)",
         "configuration": "$(BuildConfiguration)",
-        "msbuildArguments": "/p:Configuration=$(BuildConfiguration) $(PB_CommonMSBuildArgs) /p:NuGetFeedUrl=$(NUGET_FEED_URL) /p:NuGetSymbolsFeedUrl=$(NUGET_SYMBOLS_FEED_URL) /p:NuGetApiKey=$(NUGET_API_KEY) /p:AzureAccountName=$(PB_AzureAccountName) /p:AzureAccessToken=$(PB_AzureAccessToken) /p:ChecksumAzureAccountName=$(PB_ChecksumAzureAccountName) /p:ChecksumAzureAccessToken=$(PB_ChecksumAzureAccessToken) /p:GitHubUser=$(PB_GitHubUser) /p:GitHubEmail=$(PB_GitHubEmail) /p:GitHubAuthToken=$(GITHUB_PASSWORD) /p:VersionsRepoOwner=$(PB_VersionsRepoOwner) /p:VersionsRepo=$(PB_VersionsRepo) /p:VersionsRepoPath=build-info/dotnet/$(PB_RepoName)/$(SourceBranch) /p:Finalize=true /flp:v=detailed;LogFile=$(PB_SourcesDirectory)\\publish.log",
+        "msbuildArguments": "/p:Configuration=$(BuildConfiguration) $(PB_CommonMSBuildArgs) /p:NuGetFeedUrl=$(NUGET_FEED_URL) /p:NuGetSymbolsFeedUrl=$(NUGET_SYMBOLS_FEED_URL) /p:NuGetApiKey=$(NUGET_API_KEY) /p:AzureAccountName=$(PB_AzureAccountName) /p:AzureAccessToken=$(PB_AzureAccessToken) /p:ChecksumAzureAccountName=$(PB_ChecksumAzureAccountName) /p:ChecksumAzureAccessToken=$(PB_ChecksumAzureAccessToken) /p:GitHubUser=$(PB_GitHubUser) /p:GitHubEmail=$(PB_GitHubEmail) /p:GitHubAuthToken=$(GITHUB_PASSWORD) /p:VersionsRepoOwner=$(PB_VersionsRepoOwner) /p:VersionsRepo=$(PB_VersionsRepo) /p:VersionsRepoPath=build-info/dotnet/$(PB_RepoName)/$(SourceBranch) /p:Finalize=true /p:VsoToolsDir=$(PB_VsoToolsDir) /flp:v=detailed;LogFile=$(PB_SourcesDirectory)\\publish.log",
         "clean": "false",
         "maximumCpuCount": "false",
         "restoreNugetPackages": "false",
@@ -430,13 +430,13 @@
     "TeamName": {
       "value": "DotNetCore"
     },
-    "VsoToolsRepo": {
+    "PB_VsoToolsRepo": {
       "value": "https://$(PB_VsoAccountName):$(PB_VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-BuildPipeline"
     },
-    "VsoToolsDir": {
+    "PB_VsoToolsDir": {
       "value": "$(Build.SourcesDirectory)\\toolsSource"
     },
-    "ToolsRoot": {
+    "PB_ToolsRoot": {
       "value": "$(Build.SourcesDirectory)\\tools"
     },
     "SymbolCatalogCertificateId": {

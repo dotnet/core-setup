@@ -141,6 +141,7 @@
     <Error Condition="'$(AzureAccessToken)' == ''" Text="Missing required property 'AzureAccessToken'" />
     <Error Condition="'$(AzureAccountName)' == ''" Text="Missing required property 'AzureAccountName'" />
     <Error Condition="'$(ContainerName)' == ''" Text="Missing required property 'ContainerName'" />
+    <Message Condition="'$(WindowsSdkDir)' == ''" Text="Windows SDK not found.  Symbols packages will not be signed." />
   </Target>
 
   <Target Name="DownloadCoreHostPackages">
@@ -157,6 +158,9 @@
     <PropertyGroup>
       <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(BinDir)PackageDownload/</DownloadDirectory>
       <PublishDirectory Condition="'$(PublishDirectory)' == ''">$(BinDir)ForPublishing/</PublishDirectory>
+      <!-- if we're not signing packages, publish directly from the download directory, as we won't be
+	       copying them to the indexed directory -->
+      <PublishDirectory Condition="'$(WindowsSdkDir)' == ''">$(DownloadDirectory)</PublishDirectory>
       <!-- list of packages that we want to embed symbol signatures in -->
       <SymbolPackagesToPublishGlob Condition="'$(SymbolPackagesToPublishGlob)' == ''">$(DownloadDirectory)/**/*.nupkg</SymbolPackagesToPublishGlob>
     </PropertyGroup>
@@ -177,7 +181,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="SignSymbolPackages" DependsOnTargets="InjectSignedSymbolCatalogIntoSymbolPackages">
+  <Target Name="SignSymbolPackages" DependsOnTargets="InjectSignedSymbolCatalogIntoSymbolPackages" Condition="'$(WindowsSdkDir)' != ''">
     <PropertyGroup>
       <PowerShellExe Condition=" '$(PowerShellExe)'=='' ">powershell.exe</PowerShellExe>
       <EmbedIndexScriptLocation Condition=" '$(EmbedIndexScriptLocation)'=='' ">$(VsoToolsDir)\scripts\DotNet-Trusted-Publish\Embed-Index.ps1</EmbedIndexScriptLocation>
