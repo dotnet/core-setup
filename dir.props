@@ -17,7 +17,7 @@
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
     <PreReleaseLabel>preview3</PreReleaseLabel>
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
-    <ReleaseBrandSuffix>Preview 3</ReleaseBrandSuffix>
+    <ReleaseBrandSuffix></ReleaseBrandSuffix>
     <Channel>release/2.0.0</Channel>
     <BranchName>release/2.0.0</BranchName>
   </PropertyGroup>
