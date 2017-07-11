@@ -134,7 +134,7 @@
   </Target>
 
   <Target Name="PublishCoreHostPackagesToFeed"
-          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackages;SignSymbolPackages;PushCoreHostPackagesToFeed"
+          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackages;SignSymbolPackages;DoPushCoreHostPackagesToFeed"
           Condition="'@(_MissingBlobNames)' == ''">
     <Error Condition="'$(NuGetFeedUrl)' ==''" Text="Missing required property NuGetFeedUrl" />
     <Error Condition="'$(NuGetApiKey)' == ''" Text="Missing required property NuGetApiKey" />
@@ -190,7 +190,7 @@
     <Exec Command="$(PowerShellExe) -NonInteractive -ExecutionPolicy Unrestricted  -Command &quot;&amp; { &amp;&apos;$(EmbedIndexScriptLocation)&apos; $(DownloadDirectory) $(PublishDirectory) } &quot;" />
   </Target>
 
-  <Target Name="PushCoreHostPackagesToFeed">
+  <Target Name="DoPushCoreHostPackagesToFeed">
     <Error Condition="'@(_DownloadedSymbolsPackages)' != '' and '$(NuGetSymbolsFeedUrl)' == ''" Text="Missing required property NuGetSymbolsFeedUrl" />
 
     <Message Text="Pushing CoreHost packages to $(NuGetFeedUrl)" />
