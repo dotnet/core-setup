@@ -6,6 +6,7 @@
     <RestorePackages>true</RestorePackages>
     <PrereleaseResolveNuGetPackages>true</PrereleaseResolveNuGetPackages>
     <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
+    <AdditionalRestoreArgs>/p:HasRuntimePackages=false /p:IntermediateOutputPath=$(IntermediateOutputPath)</AdditionalRestoreArgs>
   </PropertyGroup>
 
   <PropertyGroup>
