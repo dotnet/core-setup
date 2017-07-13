@@ -188,7 +188,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <EmbedIndexArgPairs Include="@(SymbolPackagesToPublishGlob -> '%(Identity) $(PublishDirectory)%(Filename)%(Extension)')" />
+      <SymbolPackagesToEmbedIndex Include="$(SymbolPackagesToPublishGlob)" />
+      <EmbedIndexArgPairs Include="@(SymbolPackagesToEmbedIndex -> '%(Identity) $(PublishDirectory)%(Filename)%(Extension)')" />
     </ItemGroup>
 
     <Exec Command="$(PowerShellExe) -NonInteractive -ExecutionPolicy Unrestricted  -Command &quot;&amp; { &amp;&apos;$(EmbedIndexScriptLocation)&apos; %(EmbedIndexArgPairs) } &quot;" />
