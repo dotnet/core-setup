@@ -42,6 +42,7 @@
     "System.Threading.ThreadPool": "4.3.0",
     "Microsoft.DiaSymReader.Native": "1.4.1",
     "Libuv": "1.9.1",
+    "runtime.native.System.Security.Cryptography.Apple": "4.3.1-servicing-25511-01",
     "runtime.native.System.Security.Cryptography.OpenSsl": "4.3.1"
   },
   "frameworks": {
