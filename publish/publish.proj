@@ -182,17 +182,20 @@
   </Target>
 
   <Target Name="SignSymbolPackages" DependsOnTargets="InjectSignedSymbolCatalogIntoSymbolPackages" Condition="'$(WindowsSdkDir)' != ''">
-    <PropertyGroup>
-      <PowerShellExe Condition=" '$(PowerShellExe)'=='' ">powershell.exe</PowerShellExe>
-      <EmbedIndexScriptLocation Condition=" '$(EmbedIndexScriptLocation)'=='' ">$(VsoToolsDir)\scripts\DotNet-Trusted-Publish\Embed-Index.ps1</EmbedIndexScriptLocation>
-    </PropertyGroup>
-
     <ItemGroup>
       <SymbolPackagesToEmbedIndex Include="$(SymbolPackagesToPublishGlob)" />
       <EmbedIndexArgPairs Include="@(SymbolPackagesToEmbedIndex -> '%(Identity) $(PublishDirectory)%(Filename)%(Extension)')" />
+
+      <NormalPackagesToNotEmbedIndex Include="$(DownloadDirectory)**\*.nupkg"
+                                     Exclude="@(SymbolPackagesToEmbedIndex)" />
     </ItemGroup>
 
-    <Exec Command="$(PowerShellExe) -NonInteractive -ExecutionPolicy Unrestricted  -Command &quot;&amp; { &amp;&apos;$(EmbedIndexScriptLocation)&apos; %(EmbedIndexArgPairs) } &quot;" />
+    <!-- Inline the EmbedIndex.ps1 script used in CoreFX and CoreCLR: directly call EmbedIndex. -->
+    <Exec Command="$(DotNetToolDir)\dotnet $(EmbedIndexToolDir)\tools\EmbedIndex.dll %(EmbedIndexArgPairs.Identity)" />
+
+    <!-- Copy any nupkgs we skipped running EmbedIndex on directly to the output folder. -->
+    <Copy SourceFiles="@(NormalPackagesToNotEmbedIndex)"
+          DestinationFolder="$(PublishDirectory)" />
   </Target>
 
   <Target Name="DoPushCoreHostPackagesToFeed">
