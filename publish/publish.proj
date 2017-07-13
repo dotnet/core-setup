@@ -162,7 +162,7 @@
 	       copying them to the indexed directory -->
       <PublishDirectory Condition="'$(WindowsSdkDir)' == ''">$(DownloadDirectory)</PublishDirectory>
       <!-- list of packages that we want to embed symbol signatures in -->
-      <SymbolPackagesToPublishGlob Condition="'$(SymbolPackagesToPublishGlob)' == ''">$(DownloadDirectory)/**/*.nupkg</SymbolPackagesToPublishGlob>
+      <SymbolPackagesToPublishGlob Condition="'$(SymbolPackagesToPublishGlob)' == ''">$(DownloadDirectory)/**/*.symbols.nupkg</SymbolPackagesToPublishGlob>
     </PropertyGroup>
     <MakeDir Directories="$(DownloadDirectory)"
              Condition="!Exists('$(DownloadDirectory)')" />
@@ -187,7 +187,11 @@
       <EmbedIndexScriptLocation Condition=" '$(EmbedIndexScriptLocation)'=='' ">$(VsoToolsDir)\scripts\DotNet-Trusted-Publish\Embed-Index.ps1</EmbedIndexScriptLocation>
     </PropertyGroup>
 
-    <Exec Command="$(PowerShellExe) -NonInteractive -ExecutionPolicy Unrestricted  -Command &quot;&amp; { &amp;&apos;$(EmbedIndexScriptLocation)&apos; $(DownloadDirectory) $(PublishDirectory) } &quot;" />
+    <ItemGroup>
+      <EmbedIndexArgPairs Include="@(SymbolPackagesToPublishGlob -> '%(Identity) $(PublishDirectory)%(Filename)%(Extension)')" />
+    </ItemGroup>
+
+    <Exec Command="$(PowerShellExe) -NonInteractive -ExecutionPolicy Unrestricted  -Command &quot;&amp; { &amp;&apos;$(EmbedIndexScriptLocation)&apos; %(EmbedIndexArgPairs) } &quot;" />
   </Target>
 
   <Target Name="DoPushCoreHostPackagesToFeed">
