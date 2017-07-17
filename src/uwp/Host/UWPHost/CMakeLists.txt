@@ -1,5 +1,5 @@
 include_directories("${CLI_CMAKE_RESOURCE_DIR}/uwphost")
-
+add_definitions(-E)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(UWPHost_SOURCES 
