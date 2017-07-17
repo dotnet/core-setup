@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.DotNet.InternalAbstractions;
 using Xunit;
 
@@ -9,6 +10,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
 {
     public class GivenThatICareAboutMultilevelSDKLookup
     {
+        private static readonly Mutex id_mutex = new Mutex();
         private static IDictionary<string, string> s_DefaultEnvironment = new Dictionary<string, string>()
         {
             {"COREHOST_TRACE", "1" },
@@ -23,15 +25,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
         private string _currentWorkingDir;
         private string _userDir;
         private string _executableDir;
-        private string _globalDir;
         private string _cwdSdkBaseDir;
         private string _userSdkBaseDir;
         private string _exeSdkBaseDir;
-        private string _globalSdkBaseDir;
         private string _cwdSelectedMessage;
         private string _userSelectedMessage;
         private string _exeSelectedMessage;
-        private string _globalSelectedMessage;
         private string _sdkDir;
 
         private const string _dotnetSdkDllMessageTerminator = "dotnet.dll]";
@@ -49,12 +48,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             string multilevelDir = CalculateMultilevelDirectory(baseMultilevelDir);
 
             // The three tested locations will be the cwd, the user folder and the exe dir. cwd and user are no longer supported.
-            // Both exe  and user dir will be placed inside the multilevel folder
-            
+
             _currentWorkingDir = Path.Combine(multilevelDir, "cwd");
             _userDir = Path.Combine(multilevelDir, "user");
             _executableDir = Path.Combine(multilevelDir, "exe");
-            _globalDir = Path.Combine(multilevelDir, "global");
 
             // It's necessary to copy the entire publish folder to the exe dir because
             // we'll need to build from it. The CopyDirectory method automatically creates the dest dir
@@ -66,13 +63,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             _cwdSdkBaseDir = Path.Combine(_currentWorkingDir, "sdk");
             _userSdkBaseDir = Path.Combine(_userDir, ".dotnet", RepoDirectories.BuildArchitecture, "sdk");
             _exeSdkBaseDir = Path.Combine(_executableDir, "sdk");
-            _globalSdkBaseDir = Path.Combine(_globalDir, "dotnet", "sdk");
 
             // Create directories
             Directory.CreateDirectory(_cwdSdkBaseDir);
             Directory.CreateDirectory(_userSdkBaseDir);
             Directory.CreateDirectory(_exeSdkBaseDir);
-            Directory.CreateDirectory(_globalSdkBaseDir);
 
             // Restore and build PortableApp from exe dir
             PreviouslyBuiltAndRestoredPortableTestProjectFixture = new TestProjectFixture("PortableApp", RepoDirectories)
@@ -101,86 +96,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             _cwdSelectedMessage = $"Using dotnet SDK dll=[{_cwdSdkBaseDir}";
             _userSelectedMessage = $"Using dotnet SDK dll=[{_userSdkBaseDir}";
             _exeSelectedMessage = $"Using dotnet SDK dll=[{_exeSdkBaseDir}";
-            _globalSelectedMessage = $"Using dotnet SDK dll=[{_globalSdkBaseDir}";
-        }
-
-        [Fact]
-        public void SdkLookup_MultiLevel_LookUp()
-        {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
-                .Copy();
-
-            var dotnet = fixture.BuiltDotnet;
-
-            // Add some dummy versions
-            AddAvailableSdkVersions(_exeSdkBaseDir, "9999.0.0", "9999.0.0-dummy");
-            AddAvailableSdkVersions(_globalSdkBaseDir, "9999.0.0");
-
-            // Specified CLI version: none
-            // CWD: empty
-            // User: empty
-            // Exe: 9999.0.0, 9999.0.0-dummy
-            // global: 9999.0.0
-            // Expected: 9999.0.0 from exe dir
-            dotnet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0", _dotnetSdkDllMessageTerminator));
-
-            // Add some dummy versions
-            AddAvailableSdkVersions(_globalSdkBaseDir, "9999.0.1");
-
-            // Specified CLI version: none
-            // CWD: empty
-            // User: empty
-            // Exe: 9999.0.0, 9999.0.0-dummy
-            // global: 9999.0.0, 9999.0.1
-            // Expected: 9999.0.1 from global dir
-            dotnet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_globalSelectedMessage, "9999.0.1", _dotnetSdkDllMessageTerminator));
-            
-            // Add a prerelease dummy version in the cwd
-            AddAvailableSdkVersions(_cwdSdkBaseDir, "9999.0.0-global-dummy");
-
-            // Specified CLI version: none
-            // CWD: empty
-            // User: empty
-            // Exe: 9999.0.0, 9999.0.0-dummy, 9999.0.4
-            // global: 9999.0.0, 9999.0.1
-            // Expected: 9999.0.4 from exe dir
-            dotnet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.4", _dotnetSdkDllMessageTerminator));
         }
 
         [Fact]
@@ -201,14 +116,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // CWD: empty
             // User: empty
             // Exe: 9999.0.1, 9999.0.0-dummy
-            // global: empty
             // Expected: 9999.0.1 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
                 .CaptureStdOut()
                 .CaptureStdErr()
@@ -225,14 +137,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // CWD: empty
             // User: empty
             // Exe: 9999.0.1, 9999.0.0-dummy, 9999.0.4
-            // global: empty
             // Expected: 9999.0.4 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
                 .CaptureStdOut()
                 .CaptureStdErr()
@@ -249,14 +158,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // CWD: empty
             // User: empty
             // Exe: 9999.0.1, 9999.0.0-dummy, 9999.0.4, 9999.0.6-dummy
-            // global: empty
             // Expected: 9999.0.6-dummy from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
                 .CaptureStdOut()
                 .CaptureStdErr()
@@ -273,14 +179,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // CWD: empty
             // User: empty
             // Exe: 9999.0.1, 9999.0.0-dummy, 9999.0.4, 9999.0.6-dummy, 9999.0.0-global-dummy
-            // global: empty
             // Expected: 9999.0.0-global-dummy from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
                 .CaptureStdOut()
                 .CaptureStdErr()
@@ -306,14 +209,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // CWD: empty
             // User: empty
             // Exe: -1.-1.-1
-            // global: empty
             // Expected: no compatible version and a specific error message
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
                 .CaptureStdOut()
                 .CaptureStdErr()
@@ -330,14 +230,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // CWD: empty
             // User: empty
             // Exe: -1.-1.-1, 9999.0.4
-            // global: empty
             // Expected: 9999.0.4 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
                 .CaptureStdOut()
                 .CaptureStdErr()
@@ -363,14 +260,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // CWD: empty
             // User: empty
             // Exe: 9999.0.0, 9999.0.1-dummy
-            // global: empty
             // Expected: 9999.0.1-dummy from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
@@ -388,14 +282,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // CWD: 10000.0.0                 --> should not be picked
             // User: 9999.0.2                 --> should not be picked
             // Exe: 9999.0.0, 9999.0.1-dummy, 9999.0.1
-            // global: empty
             // Expected: 9999.0.1 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
@@ -411,14 +302,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // CWD: 10000.0.0                 --> should not be picked
             // User: 9999.0.2                 --> should not be picked
             // Exe: 9999.0.0, 9999.0.1-dummy, 9999.0.1, 10000.0.0-dummy
-            // global: empty
             // Expected: 10000.0.0-dummy from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
@@ -427,28 +315,25 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
                 .And
                 .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "10000.0.0-dummy", _dotnetSdkDllMessageTerminator));
 
-            // Add a dummy version in the user dir
-            AddAvailableSdkVersions(_globalSdkBaseDir, "10000.0.0");
+            // Add a dummy version in the exe dir
+            AddAvailableSdkVersions(_exeSdkBaseDir, "10000.0.0");
 
             // Specified CLI version: none
             // CWD: 10000.0.0                 --> should not be picked
             // User: 9999.0.2                 --> should not be picked
-            // Exe: 9999.0.0, 9999.0.1-dummy, 9999.0.1, 10000.0.0-dummy
-            // global: 10000.0.0
-            // Expected: 10000.0.0 from global dir
+            // Exe: 9999.0.0, 9999.0.1-dummy, 9999.0.1, 10000.0.0-dummy, 10000.0.0
+            // Expected: 10000.0.0 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("ProgramFiles", _globalDir)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
                 .Should()
                 .Pass()
                 .And
-                .HaveStdErrContaining(Path.Combine(_globalSelectedMessage, "10000.0.0", _dotnetSdkDllMessageTerminator));
+                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "10000.0.0", _dotnetSdkDllMessageTerminator));
         }
 
         // This method adds a list of new sdk version folders in the specified
@@ -560,6 +445,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
         // We must locate the first non existing id.
         private string CalculateMultilevelDirectory(string baseMultilevelDir)
         {
+            id_mutex.WaitOne();
+
             int count = 0;
             string multilevelDir;
 
@@ -569,6 +456,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
                 count++;
             } while (Directory.Exists(multilevelDir));
 
+            id_mutex.ReleaseMutex();
+        
             return multilevelDir;
         }
     }
