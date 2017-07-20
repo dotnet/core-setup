@@ -2,6 +2,13 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Condition="Exists('..\dir.props')" Project="..\dir.props" />
 
+  <!-- Define vNext UAP Moniker -->
+  <PropertyGroup>
+    <UAPvNextVersion>10.0.15138</UAPvNextVersion>
+    <UAPvNextTFMFull>UAP,Version=v$(UAPvNextVersion)</UAPvNextTFMFull>
+    <UAPvNextTFM>uap$(UAPvNextVersion)</UAPvNextTFM>
+  </PropertyGroup>
+
   <Import Project="dependencies.props" />
 
   <!-- Build as portable by default -->
@@ -229,6 +236,7 @@
 
     <CoreHostOutputDir>$(BaseOutputRootPath)corehost\</CoreHostOutputDir>
     <UWPOutputDir>$(BaseOutputRootPath)uwp\</UWPOutputDir>
+    <CoreRuntimeTaskDir>$(BaseOutputRootPath)Microsoft.Build.Net.CoreRuntimeTask</CoreRuntimeTaskDir>
 
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)/</PackagesBasePath>
     <PackagesOutDir Condition="'$(PackagesOutDir)'==''">$(PackagesBasePath)packages/</PackagesOutDir>

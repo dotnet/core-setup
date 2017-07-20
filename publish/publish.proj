@@ -11,7 +11,7 @@
   
   <Target Name="PublishFinalOutput"
           Condition="'$(Finalize)' == 'true'"
-          DependsOnTargets="FinalizeBuildInAzure;PublishCoreHostPackagesToFeed;UpdatePublishedVersions" />
+          DependsOnTargets="PublishCoreHostPackagesToFeed;FinalizeBuildInAzure;UpdatePublishedVersions" />
           
   <Target Name="ExcludeSymbolsPackagesFromPublishedVersions" BeforeTargets="UpdatePublishedVersions" >
     <ItemGroup>
@@ -112,7 +112,7 @@
                    ProductVersion="$(ProductVersion)"
                    CommitHash="$(LatestCommit)"
                    FinalizeContainer="Runtime/$(SharedFrameworkNugetVersion)"
-                   ForcePublish="true"                  
+                   ForcePublish="true"
                    Condition="'@(_MissingBlobNames)' == ''" />
     <Error Condition="'$(ChecksumAzureAccessToken)' == ''" Text="Missing required property 'ChecksumAzureAccessToken'" />
     <Error Condition="'$(ChecksumAzureAccountName)' == ''" Text="Missing required property 'ChecksumAzureAccountName'" />
@@ -134,14 +134,17 @@
   </Target>
 
   <Target Name="PublishCoreHostPackagesToFeed"
-          DependsOnTargets="CheckIfAllBuildsHavePublished"
+          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackages;SignSymbolPackages;DoPushCoreHostPackagesToFeed"
           Condition="'@(_MissingBlobNames)' == ''">
     <Error Condition="'$(NuGetFeedUrl)' ==''" Text="Missing required property NuGetFeedUrl" />
     <Error Condition="'$(NuGetApiKey)' == ''" Text="Missing required property NuGetApiKey" />
     <Error Condition="'$(AzureAccessToken)' == ''" Text="Missing required property 'AzureAccessToken'" />
     <Error Condition="'$(AzureAccountName)' == ''" Text="Missing required property 'AzureAccountName'" />
     <Error Condition="'$(ContainerName)' == ''" Text="Missing required property 'ContainerName'" />
+    <Message Condition="'$(WindowsSdkDir)' == ''" Text="Windows SDK not found.  Symbols packages will not be signed." />
+  </Target>
 
+  <Target Name="DownloadCoreHostPackages">
     <ListAzureBlobs AccountName="$(AzureAccountName)"
                       AccountKey="$(AzureAccessToken)"
                       ContainerName="$(ContainerName)"
@@ -153,7 +156,11 @@
     </ItemGroup>
 
     <PropertyGroup>
-      <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(BinDir)ForPublishing/</DownloadDirectory>
+      <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(BinDir)PackageDownload/</DownloadDirectory>
+      <PublishDirectory Condition="'$(PublishDirectory)' == ''">$(BinDir)ForPublishing/</PublishDirectory>
+      <!-- if we're not signing packages, publish directly from the download directory, as we won't be
+	       copying them to the indexed directory -->
+      <PublishDirectory Condition="'$(WindowsSdkDir)' == ''">$(DownloadDirectory)</PublishDirectory>
     </PropertyGroup>
     <MakeDir Directories="$(DownloadDirectory)"
              Condition="!Exists('$(DownloadDirectory)')" />
@@ -164,14 +171,45 @@
                            BlobNamePrefix="Runtime/$(SharedFrameworkNugetVersion)"
                            DownloadDirectory="$(DownloadDirectory)" />
     <ItemGroup>
-      <_DownloadedPackages Include="@(_CoreHostPackages->'$(DownloadDirectory)%(Filename)%(Extension)')" />
+      <_DownloadedPackages Include="@(_CoreHostPackages->'$(PublishDirectory)%(Filename)%(Extension)')" />
       <_DownloadedSymbolsPackages Include="%(_DownloadedPackages.Identity)" 
                                  Condition="$([System.String]::new('%(_DownloadedPackages.Identity)').EndsWith('.symbols.nupkg'))" />
       <_DownloadedStandardPackages Include="@(_DownloadedPackages)"
                                   Exclude="@(_DownloadedSymbolsPackages)" />
     </ItemGroup>
+  </Target>
+
+  <Target Name="FindDownloadedPackagesForSigning">
+    <PropertyGroup>
+      <!-- Glob matching packages that we want to embed symbol signatures in. Used in BuildTools. -->
+      <SymbolPackagesToPublishGlob Condition="'$(SymbolPackagesToPublishGlob)' == ''">$(DownloadDirectory)**\*.symbols.nupkg</SymbolPackagesToPublishGlob>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <SymbolPackagesToEmbedIndex Include="$(SymbolPackagesToPublishGlob)" />
+      <NormalPackagesToNotEmbedIndex Include="$(DownloadDirectory)**\*.nupkg"
+                                     Exclude="@(SymbolPackagesToEmbedIndex)" />
+    </ItemGroup>
+
+    <!-- Copy any nupkgs we skip running EmbedIndex on directly to the output folder. -->
+    <Copy SourceFiles="@(NormalPackagesToNotEmbedIndex)"
+          DestinationFolder="$(PublishDirectory)" />
+  </Target>
+
+  <Target Name="SignSymbolPackages"
+          DependsOnTargets="FindDownloadedPackagesForSigning;InjectSignedSymbolCatalogIntoSymbolPackages"
+          Condition="'$(WindowsSdkDir)' != ''">
+    <ItemGroup>
+      <EmbedIndexArgPairs Include="@(SymbolPackagesToEmbedIndex -> '%(Identity) $(PublishDirectory)%(Filename)%(Extension)')" />
+    </ItemGroup>
+
+    <!-- Inline the EmbedIndex.ps1 script used in CoreFX and CoreCLR: directly call EmbedIndex. -->
+    <Exec Command="$(DotNetToolDir)\dotnet $(EmbedIndexToolDir)\tools\EmbedIndex.dll %(EmbedIndexArgPairs.Identity)" />
+  </Target>
+
+  <Target Name="DoPushCoreHostPackagesToFeed">
     <Error Condition="'@(_DownloadedSymbolsPackages)' != '' and '$(NuGetSymbolsFeedUrl)' == ''" Text="Missing required property NuGetSymbolsFeedUrl" />
-    
+
     <Message Text="Pushing CoreHost packages to $(NuGetFeedUrl)" />
     <PropertyGroup>
       <NuGetPushCommand>$(DotnetToolCommand) nuget push --source $(NuGetFeedUrl) --api-key $(NuGetApiKey) --timeout $(NuGetPushTimeoutSeconds)</NuGetPushCommand>
@@ -184,7 +222,7 @@
     <Message Condition="'@(_DownloadedSymbolsPackages)' != ''" Text="Pushing CoreHost symbols packages to $(NuGetSymbolsFeedUrl)" />
     <Exec Condition="'@(_DownloadedSymbolsPackages)' != ''" Command="$(NuGetPushSymbolsCommand) %(_DownloadedSymbolsPackages.Identity)" />
   </Target>
-  
+
   <Target Name="PublishDebToolPackageToFeed"
           Condition="'$(PublishDebToolToFeed)' == 'true'">
     <Error Condition="'$(CliNuGetFeedUrl)' ==''" Text="Missing required property CliNuGetFeedUrl" />
