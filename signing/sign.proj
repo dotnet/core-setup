@@ -36,6 +36,9 @@
       <FilesToSign Include="$(OutDir)corehost/**/dotnet.exe">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
+      <FilesToSign Include="$(OutDir)Microsoft.Build.Net.CoreRuntimeTask/**/Microsoft.Build.Net.CoreRuntimeTask.dll">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
     </ItemGroup>
 
     <ItemGroup>
@@ -60,6 +63,18 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="SignAppxFiles" DependsOnTargets="GetSignAppxFiles">
+    <CallTarget Targets="SignFiles" />
+  </Target>
+  
+  <Target Name="GetSignAppxFiles">
+    <ItemGroup>
+      <FilesToSign Include="$(UWPOutputDir)*.appx">
+        <Authenticode>Appx</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
+
   <Target Name="SignMsiAndCab" DependsOnTargets="GetSignMsiAndCabFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
@@ -71,18 +86,6 @@
       </FilesToSign>
       <FilesToSign Include="$(OutDir)packages/**/*.cab">
         <Authenticode>$(CertificateId)</Authenticode>
-      </FilesToSign>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="SignAppx" DependsOnTargets="GetSignAppxFiles">
-    <CallTarget Targets="SignFiles" />
-  </Target>
-
-  <Target Name="GetSignAppxFiles">
-    <ItemGroup>
-      <FilesToSign Include="$(UWPOutputDir)*.appx">
-        <Authenticode>Appx</Authenticode>
       </FilesToSign>
     </ItemGroup>
   </Target>
