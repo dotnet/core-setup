@@ -168,7 +168,7 @@
                            AccountKey="$(AzureAccessToken)"
                            ContainerName="$(ContainerName)"
                            BlobNames="@(_CoreHostPackages)"
-                           BlobNamePrefix="Runtime/$(SharedFrameworkNugetVersion)"
+                           BlobNamePrefix="Runtime/$(SharedFrameworkNugetVersion)/"
                            DownloadDirectory="$(DownloadDirectory)" />
     <ItemGroup>
       <_DownloadedPackages Include="@(_CoreHostPackages->'$(PublishDirectory)%(Filename)%(Extension)')" />
