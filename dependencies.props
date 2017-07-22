@@ -9,16 +9,16 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>401c80913afdea5399e0f39376db88e465ae62c9</CoreFxCurrentRef>
-    <CoreClrCurrentRef>401c80913afdea5399e0f39376db88e465ae62c9</CoreClrCurrentRef>
+    <CoreFxCurrentRef>d257b2ff83ef91c397f543a62c9be3aa3af7ac73</CoreFxCurrentRef>
+    <CoreClrCurrentRef>e3b2a8fe876146e3becf39c0947ca45b01c95806</CoreClrCurrentRef>
     <StandardCurrentRef>401c80913afdea5399e0f39376db88e465ae62c9</StandardCurrentRef>
     <WCFCurrentRef>4d3456e4db27f7ecd3b9e9900460d73918ff8f16</WCFCurrentRef>
   </PropertyGroup>
   
   <PropertyGroup>
-    <CoreFxVersion>4.5.0-preview1-25505-02</CoreFxVersion>
+    <CoreFxVersion>4.5.0-preview1-25522-01</CoreFxVersion>
     <PlatformPackageVersion>2.1.0-preview1-25324-02</PlatformPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview2-25505-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview1-25521-04</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreRuntimeJitPackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</MicrosoftNETCoreRuntimeJitPackageVersion>
     <MicrosoftNetNativeCompilerPackageVersion>2.0.0-preview-25518-00</MicrosoftNetNativeCompilerPackageVersion>
     <NETStandardVersion>2.1.0-preview1-25518-01</NETStandardVersion>
