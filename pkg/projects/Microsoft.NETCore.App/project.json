@@ -3,7 +3,7 @@
     "Microsoft.CodeAnalysis.CSharp": "1.3.0",
     "Microsoft.CodeAnalysis.VisualBasic": "1.3.0",
     "Microsoft.CSharp": "4.3.0",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.3-servicing-25524-01",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.3-servicing-25525-01",
     "Microsoft.VisualBasic": "10.1.0",
     "NETStandard.Library": "1.6.1",
     "System.Buffers": "4.3.0",
@@ -42,7 +42,7 @@
     "System.Threading.ThreadPool": "4.3.0",
     "Microsoft.DiaSymReader.Native": "1.4.1",
     "Libuv": "1.9.1",
-    "runtime.native.System.Security.Cryptography.Apple": "4.3.1-servicing-25524-01",
+    "runtime.native.System.Security.Cryptography.Apple": "4.3.1-servicing-25526-03",
     "runtime.native.System.Security.Cryptography.OpenSsl": "4.3.1"
   },
   "frameworks": {
