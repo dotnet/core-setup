@@ -17,7 +17,7 @@
 
   <PropertyGroup>
     <PlatformPackageVersion>2.0.0</PlatformPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.4.0-preview3-25519-03</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.4.0-preview3-25526-01</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftPrivateCoreFxUAPPackageVersion>4.4.0-preview3-25519-03</MicrosoftPrivateCoreFxUAPPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.0</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreRuntimeJitPackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</MicrosoftNETCoreRuntimeJitPackageVersion>
