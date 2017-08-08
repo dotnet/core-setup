@@ -489,10 +489,10 @@
   "queue": {
     "pool": {
       "id": 83,
-      "name": "DotNetCore-Test"
+      "name": "DotNet-Build"
     },
     "id": 159,
-    "name": "DotNetCore-Test"
+    "name": "DotNet-Build"
   },
   "path": "\\",
   "type": "build",
