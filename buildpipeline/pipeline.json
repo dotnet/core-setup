@@ -33,7 +33,7 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
-            "PB_DistroRid": "rhel.6.9-x64",
+            "PB_DistroRid": "rhel.6-x64",
             "PB_DockerTag": "centos-6-783abde-20171304101322",
             "PB_AdditionalBuildArguments":"-PortableBuild=false -strip-symbols",
             "PB_PortableBuild": "false"
