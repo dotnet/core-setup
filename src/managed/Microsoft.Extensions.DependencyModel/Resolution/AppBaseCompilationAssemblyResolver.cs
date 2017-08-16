@@ -47,7 +47,8 @@ namespace Microsoft.Extensions.DependencyModel.Resolution
             var isPackage = string.Equals(library.Type, "package", StringComparison.OrdinalIgnoreCase);
             if (!isProject &&
                 !isPackage &&
-                !string.Equals(library.Type, "referenceassembly", StringComparison.OrdinalIgnoreCase))
+                !string.Equals(library.Type, "referenceassembly", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(library.Type, "reference", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }

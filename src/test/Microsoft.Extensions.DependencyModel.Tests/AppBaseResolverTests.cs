@@ -90,6 +90,23 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         }
 
         [Fact]
+        public void ResolvesReferenceType()
+        {
+            var fileSystem = FileSystemMockBuilder
+                .Create()
+                .AddFiles(BasePathRefs, TestLibraryFactory.DefaultAssembly)
+                .Build();
+            var resolver = CreateResolver(fileSystem);
+            var library = TestLibraryFactory.Create(
+                TestLibraryFactory.ReferenceType,
+                assemblies: TestLibraryFactory.EmptyAssemblies);
+
+            var result = resolver.TryResolveAssemblyPaths(library, null);
+
+            Assert.True(result);
+        }
+
+        [Fact]
         public void RequiresExistingRefsFolderForNonProjects()
         {
             var fileSystem = FileSystemMockBuilder
