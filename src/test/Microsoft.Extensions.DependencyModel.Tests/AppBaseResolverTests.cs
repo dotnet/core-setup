@@ -147,6 +147,27 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         }
 
         [Fact]
+        public void ResolvesDirectReferenceWithoutRefsFolder()
+        {
+            var fileSystem = FileSystemMockBuilder
+                .Create()
+                .AddFiles(BasePath, TestLibraryFactory.DefaultAssembly, TestLibraryFactory.SecondAssembly)
+                .Build();
+            var library = TestLibraryFactory.Create(
+                TestLibraryFactory.ReferenceType,
+                assemblies: TestLibraryFactory.TwoAssemblies);
+            var resolver = CreateResolver(fileSystem);
+            var assemblies = new List<string>();
+
+            var result = resolver.TryResolveAssemblyPaths(library, assemblies);
+
+            Assert.True(result);
+            assemblies.Should().HaveCount(2);
+            assemblies.Should().Contain(Path.Combine(BasePath, TestLibraryFactory.DefaultAssembly));
+            assemblies.Should().Contain(Path.Combine(BasePath, TestLibraryFactory.SecondAssembly));
+        }
+
+        [Fact]
         public void RequiresAllLibrariesToExist()
         {
             var fileSystem = FileSystemMockBuilder

@@ -45,9 +45,10 @@ namespace Microsoft.Extensions.DependencyModel.Resolution
                 string.Equals(library.Type, "msbuildproject", StringComparison.OrdinalIgnoreCase);
 
             var isPackage = string.Equals(library.Type, "package", StringComparison.OrdinalIgnoreCase);
+            var isReferenceAssembly = string.Equals(library.Type, "referenceassembly", StringComparison.OrdinalIgnoreCase);
             if (!isProject &&
                 !isPackage &&
-                !string.Equals(library.Type, "referenceassembly", StringComparison.OrdinalIgnoreCase) &&
+                !isReferenceAssembly &&
                 !string.Equals(library.Type, "reference", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
@@ -57,7 +58,7 @@ namespace Microsoft.Extensions.DependencyModel.Resolution
             var isPublished = _fileSystem.Directory.Exists(refsPath);
 
             // Resolving reference assebmlies requires refs folder to exist
-            if (!isProject && !isPackage && !isPublished)
+            if (isReferenceAssembly && !isPublished)
             {
                 return false;
             }
