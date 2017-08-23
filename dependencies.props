@@ -9,22 +9,22 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>14864e97c4423ef9d858ce5cd254902e36c3c0ec</CoreFxCurrentRef>
-    <CoreClrCurrentRef>14864e97c4423ef9d858ce5cd254902e36c3c0ec</CoreClrCurrentRef>
-    <StandardCurrentRef>14864e97c4423ef9d858ce5cd254902e36c3c0ec</StandardCurrentRef>
-    <WCFCurrentRef>14864e97c4423ef9d858ce5cd254902e36c3c0ec</WCFCurrentRef>
+    <CoreFxCurrentRef>737eb34589d27136c7d9708df75b8ab4b3d39057</CoreFxCurrentRef>
+    <CoreClrCurrentRef>737eb34589d27136c7d9708df75b8ab4b3d39057</CoreClrCurrentRef>
+    <StandardCurrentRef>737eb34589d27136c7d9708df75b8ab4b3d39057</StandardCurrentRef>
+    <WCFCurrentRef>737eb34589d27136c7d9708df75b8ab4b3d39057</WCFCurrentRef>
   </PropertyGroup>
   
   <PropertyGroup>
     <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-preview1-25531-01</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftPrivateCoreFxUAPPackageVersion>4.5.0-preview1-25622-01</MicrosoftPrivateCoreFxUAPPackageVersion>
-    <PlatformPackageVersion>2.1.0-preview1-25622-01</PlatformPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview1-25622-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftPrivateCoreFxUAPPackageVersion>4.5.0-preview1-25623-01</MicrosoftPrivateCoreFxUAPPackageVersion>
+    <PlatformPackageVersion>2.1.0-preview1-25623-01</PlatformPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview1-25623-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreRuntimeJitPackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</MicrosoftNETCoreRuntimeJitPackageVersion>
     <MicrosoftNetNativeCompilerPackageVersion>2.0.0-preview-25617-00</MicrosoftNetNativeCompilerPackageVersion>
-    <NETStandardVersion>2.1.0-preview1-25621-01</NETStandardVersion>
+    <NETStandardVersion>2.1.0-preview1-25622-01</NETStandardVersion>
     <DiaSymReaderNativeVersion>1.4.1</DiaSymReaderNativeVersion>
-    <WcfVersion>4.5.0-preview1-25622-01</WcfVersion>
+    <WcfVersion>4.5.0-preview1-25623-01</WcfVersion>
   </PropertyGroup>
   
   <!-- Package dependency verification/auto-upgrade configuration. -->
