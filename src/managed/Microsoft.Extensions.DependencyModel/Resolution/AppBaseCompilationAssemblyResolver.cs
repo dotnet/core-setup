@@ -57,7 +57,7 @@ namespace Microsoft.Extensions.DependencyModel.Resolution
             var refsPath = Path.Combine(_basePath, RefsDirectoryName);
             var isPublished = _fileSystem.Directory.Exists(refsPath);
 
-            // Resolving reference assebmlies requires refs folder to exist
+            // Resolving reference assemblies requires refs folder to exist
             if (isReferenceAssembly && !isPublished)
             {
                 return false;
