@@ -9,14 +9,14 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>7c9dd01e718d2a671ed1237b5c7531073642ecd0</CoreFxCurrentRef>
+    <CoreFxCurrentRef>ab76168d787512b9fc03d859108c2c4f069e7bc0</CoreFxCurrentRef>
     <CoreClrCurrentRef>7c9dd01e718d2a671ed1237b5c7531073642ecd0</CoreClrCurrentRef>
     <StandardCurrentRef>2e5350d86e51bf0e609d10408dd0ad7879472b78</StandardCurrentRef>
     <WCFCurrentRef>7c9dd01e718d2a671ed1237b5c7531073642ecd0</WCFCurrentRef>
   </PropertyGroup>
   
   <PropertyGroup>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-preview1-25531-01</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-preview1-25626-04</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftPrivateCoreFxUAPPackageVersion>4.5.0-preview1-25625-01</MicrosoftPrivateCoreFxUAPPackageVersion>
     <PlatformPackageVersion>2.1.0-preview1-25625-01</PlatformPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview1-25625-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
