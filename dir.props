@@ -18,8 +18,8 @@
     <PreReleaseLabel>dev-di</PreReleaseLabel>
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
     <ReleaseBrandSuffix>DevDi</ReleaseBrandSuffix>
-    <Channel>master</Channel>
-    <BranchName>master</BranchName>
+    <Channel>dev/defaultintf</Channel>
+    <BranchName>dev/defaultintf</BranchName>
   </PropertyGroup>
   
   <PropertyGroup>
