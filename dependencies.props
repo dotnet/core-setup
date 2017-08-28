@@ -9,22 +9,22 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>ab76168d787512b9fc03d859108c2c4f069e7bc0</CoreFxCurrentRef>
-    <CoreClrCurrentRef>7c9dd01e718d2a671ed1237b5c7531073642ecd0</CoreClrCurrentRef>
-    <StandardCurrentRef>2e5350d86e51bf0e609d10408dd0ad7879472b78</StandardCurrentRef>
-    <WCFCurrentRef>7c9dd01e718d2a671ed1237b5c7531073642ecd0</WCFCurrentRef>
+    <CoreFxCurrentRef>1fe3c36279b702b526ca9441412d441f1b6a4821</CoreFxCurrentRef>
+    <CoreClrCurrentRef>1fe3c36279b702b526ca9441412d441f1b6a4821</CoreClrCurrentRef>
+    <StandardCurrentRef>1fe3c36279b702b526ca9441412d441f1b6a4821</StandardCurrentRef>
+    <WCFCurrentRef>1fe3c36279b702b526ca9441412d441f1b6a4821</WCFCurrentRef>
   </PropertyGroup>
   
   <PropertyGroup>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-preview1-25626-04</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftPrivateCoreFxUAPPackageVersion>4.5.0-preview1-25625-01</MicrosoftPrivateCoreFxUAPPackageVersion>
-    <PlatformPackageVersion>2.1.0-preview1-25625-01</PlatformPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview1-25625-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-preview1-25531-01</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxUAPPackageVersion>4.5.0-preview1-25628-01</MicrosoftPrivateCoreFxUAPPackageVersion>
+    <PlatformPackageVersion>2.1.0-preview1-25628-01</PlatformPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview1-25626-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreRuntimeJitPackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</MicrosoftNETCoreRuntimeJitPackageVersion>
     <MicrosoftNetNativeCompilerPackageVersion>2.0.0-preview-25624-03</MicrosoftNetNativeCompilerPackageVersion>
-    <NETStandardVersion>2.1.0-preview1-25624-01</NETStandardVersion>
+    <NETStandardVersion>2.1.0-preview1-25625-01</NETStandardVersion>
     <DiaSymReaderNativeVersion>1.4.1</DiaSymReaderNativeVersion>
-    <WcfVersion>4.5.0-preview1-25625-01</WcfVersion>
+    <WcfVersion>4.5.0-preview1-25628-01</WcfVersion>
   </PropertyGroup>
   
   <!-- Package dependency verification/auto-upgrade configuration. -->
