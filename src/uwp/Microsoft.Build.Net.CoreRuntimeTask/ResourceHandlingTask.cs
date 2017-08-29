@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using System.Diagnostics;
 using System.IO;
 using System.Xml.Linq;
 using System.Collections;
@@ -160,7 +161,6 @@ namespace Microsoft.Build.Net.CoreRuntimeTask
             UnprocessedAssemblyList = null;
 
             List<ITaskItem> unprocessedAssemblyList = new List<ITaskItem>();
-            List<ITaskItem> frameworkReswList = new List<ITaskItem>();
             List<ITaskItem> reswList = new List<ITaskItem>();
 
             _state = ReadStateFile(StateFile);
@@ -226,13 +226,13 @@ namespace Microsoft.Build.Net.CoreRuntimeTask
                                     newTaskItem.SetMetadata("NeutralResourceLanguage", reswInfo.NeutralResourceLanguage);
                                 }
 
-                                if (containsFrameworkResources)
-                                {
-                                    frameworkReswList.Add(newTaskItem);
-                                }
-                                else
+                                if (!containsFrameworkResources)
                                 {
                                     newTaskItem.SetMetadata("OriginalItemSpec", reswInfo.ResWPath); // Original GenerateResource behavior creates this additional metadata item on processed non-framework assemblies
+                                    reswList.Add(newTaskItem);
+                                }
+                                else if (!SkipFrameworkResources)
+                                {
                                     reswList.Add(newTaskItem);
                                 }
                             }
@@ -241,16 +241,7 @@ namespace Microsoft.Build.Net.CoreRuntimeTask
                     }
 
                     UnprocessedAssemblyList = unprocessedAssemblyList.ToArray(); // For now this list will always be empty
-                    
-                    if (SkipFrameworkResources)
-                    {
-                        ReswFileList = reswList.ToArray();
-                    }
-                    else
-                    {
-                        ReswFileList = reswList.Concat(frameworkReswList).ToArray();
-                    }
-
+                    ReswFileList = reswList.ToArray();
                     WriteStateFile(StateFile, _state);
                 } 
                 catch (Exception e)
@@ -335,7 +326,8 @@ namespace Microsoft.Build.Net.CoreRuntimeTask
                 resourceIndexName = resourceFileName;
                 neutralResourceLanguage = "en-US";
             }
-            else {
+            else
+            {
                 string culturePath = "";
                 string culture = assembly.Culture;
                 string assemblyName = assembly.Name.Value;
@@ -348,10 +340,11 @@ namespace Microsoft.Build.Net.CoreRuntimeTask
                 {
                     culturePath = neutralResourceLanguage + Path.DirectorySeparatorChar;
                 }
+                // Do not handle the case where culture is Invariant and no NeutralResourcesLanguageAttribute is declared
+                // This should already be taken care of in method ExtractAssemblyResWList
                 else
                 {
-                    // Do not handle the case where culture is Invariant and no NeutralResourcesLanguageAttribute is declared
-                    // This should already be taken care of in method ExtractAssemblyResWList
+                    Debug.Assert(false, "Assembly with the Invariant culture and no NeutralResourcesLanguageAttribute is being extracted for embedded resources. This should have been caught by earlier checks.");
                 }
 
                 if (resourceFileName.EndsWith("." + culture, StringComparison.OrdinalIgnoreCase))
@@ -434,7 +427,7 @@ namespace Microsoft.Build.Net.CoreRuntimeTask
             if (String.IsNullOrEmpty(assembly.Culture) && !TryGetNeutralResourcesLanguageAttribute(assembly, out neutralResourceLanguage))
             {
                 // Must have NeutralResourcesLanguageAttribute
-                // warning MSB3817: The assembly "C:\Users\zamont\source\repos\08_22_ResGenBeforeAttempt_CSharpApp\ClassLibrary1\bin\x86\Debug\ClassLibrary1.dll" does not have a NeutralResourcesLanguageAttribute on it. To be used in an app package, portable libraries must define a NeutralResourcesLanguageAttribute on their main assembly (ie, the one containing code, not a satellite assembly).
+                // warning MSB3817: The assembly "<FullPath>\ClassLibrary1.dll" does not have a NeutralResourcesLanguageAttribute on it. To be used in an app package, portable libraries must define a NeutralResourcesLanguageAttribute on their main assembly (ie, the one containing code, not a satellite assembly).
                 return null;
             }
 
