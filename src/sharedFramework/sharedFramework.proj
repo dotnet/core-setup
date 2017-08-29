@@ -138,6 +138,9 @@
 
     <RemoveDir Directories="$(CoreHostLockedDir)" />
 
+    <!-- Create packages directory if it doesn't exist -->
+    <MakeDir Directories="$(PackagesOutDir)" />
+
     <Exec Command="$(DotnetRestoreCommand) --source $(PackagesOutDir) $(CommonLockedHostArgs)"
           WorkingDirectory="$(LockedHostSourceRoot)" />
 
