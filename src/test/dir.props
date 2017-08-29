@@ -5,10 +5,12 @@
   <PropertyGroup>
     <TestDir>$(ProjectDir)/src/test</TestDir>
     <TestAssetsDir>$(TestDir)/Assets</TestAssetsDir>
+    <!-- Disabling some test projects from running since on this release branch we won't be building some packages that are required for the tests to pass. -->
+    <BuildAllTests>false</BuildAllTests>
   </PropertyGroup>
 
   <ItemGroup>
-    <TestProjects Include="$(TestDir)/HostActivationTests/HostActivationTests.csproj" />
+    <TestProjects Include="$(TestDir)/HostActivationTests/HostActivationTests.csproj" Condition="'$(BuildAllTests)' != 'false'" />
     <TestProjects Include="$(TestDir)/Microsoft.Extensions.DependencyModel.Tests/Microsoft.Extensions.DependencyModel.Tests.csproj" />
   </ItemGroup>
   <ItemGroup>
