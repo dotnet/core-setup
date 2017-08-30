@@ -32,33 +32,9 @@
           }
         },
         {
-          "Name": "Core-Setup-Fedora23-x64",
-          "ReportingParameters": {
-            "OperatingSystem": "Fedora 23",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
           "Name": "Core-Setup-Fedora24-x64",
           "ReportingParameters": {
             "OperatingSystem": "Fedora 24",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-OpenSuse13.2-x64",
-          "ReportingParameters": {
-            "OperatingSystem": "OpenSuse 13.2",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-OpenSuse42.1-x64",
-          "ReportingParameters": {
-            "OperatingSystem": "OpenSuse 42.1",
             "Type": "build/product/",
             "Platform": "x64"
           }
@@ -108,14 +84,6 @@
           "Name": "Core-Setup-Ubuntu16.04-x64",
           "ReportingParameters": {
             "OperatingSystem": "Ubuntu 16.04",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-Ubuntu16.10-x64",
-          "ReportingParameters": {
-            "OperatingSystem": "Ubuntu 16.10",
             "Type": "build/product/",
             "Platform": "x64"
           }
