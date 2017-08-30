@@ -32,22 +32,6 @@
           }
         },
         {
-          "Name": "Core-Setup-Fedora23-x64",
-          "ReportingParameters": {
-            "OperatingSystem": "Fedora 23",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-OpenSuse13.2-x64",
-          "ReportingParameters": {
-            "OperatingSystem": "OpenSuse 13.2",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
           "Name": "Core-Setup-OSX-x64",
           "ReportingParameters": {
             "OperatingSystem": "OSX",
