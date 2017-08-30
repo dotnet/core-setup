@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Host.Build
                 string leaseId = AzurePublisherTool.AcquireLeaseOnBlob(semaphoreBlob);
 
                 // Prevent race conditions by dropping a version hint of what version this is. If we see this file
-                // and it is the same as our version then we know that a race happened where two+ builds finished 
+                // and it is the same as our version then we know that a race happened where two+ builds finished
                 // at the same time and someone already took care of publishing and we have no work to do.
                 if (AzurePublisherTool.IsLatestSpecifiedVersion(targetVersionFile))
                 {
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Host.Build
                     CopyBlobs($"{Channel}/Installers/{SharedFrameworkNugetVersion}/", $"{Channel}/Installers/Latest/");
 
                     // Generate the Sharedfx Version text files
-                    List<string> versionFiles = new List<string>() 
+                    List<string> versionFiles = new List<string>()
                     {
                         "win.x86.version",
                         "win.x64.version",
@@ -128,10 +128,9 @@ namespace Microsoft.DotNet.Host.Build
                         "osx.x64.version",
                         "debian.x64.version",
                         "centos.x64.version",
-                        "fedora.24.x64.version",
-                        "opensuse.42.1.x64.version"
+                        "fedora.24.x64.version"
                     };
-                    
+
                     c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackagesToFeed));
                     c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
 
@@ -212,8 +211,7 @@ namespace Microsoft.DotNet.Host.Build
                  { "sharedfx_OSX_x64", false },
                  { "sharedfx_Debian_x64", false },
                  { "sharedfx_CentOS_x64", false },
-                 { "sharedfx_Fedora_24_x64", false },
-                 { "sharedfx_openSUSE_42_1_x64", false }
+                 { "sharedfx_Fedora_24_x64", false }
              };
 
             List<string> blobs = new List<string>(AzurePublisherTool.ListBlobs($"{Channel}/Binaries/{SharedFrameworkNugetVersion}/"));
