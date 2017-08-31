@@ -162,8 +162,10 @@ int run(const int argc, const pal::char_t* argv[])
         trace::println(_X("Usage: dotnet [path-to-application]"));
         trace::println();
         trace::println(_X("Options:"));
-        trace::println(_X("  -h|--help            Display help."));
-        trace::println(_X("  --version         Display version."));
+        trace::println(_X("  -h|--help         Display help."));
+        trace::println(_X("  --version         Display SDK version."));
+        trace::println(_X("  --versions        Display the list of SDK versions."));
+        trace::println(_X("  --runtimes        Display the list of runtime versions."));
         trace::println();
         trace::println(_X("path-to-application:"));
         trace::println(_X("  The path to an application .dll file to execute."));

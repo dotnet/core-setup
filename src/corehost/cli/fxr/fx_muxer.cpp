@@ -15,39 +15,153 @@
 #include "deps_format.h"
 
 
+void get_all_fx_versions(
+    host_mode_t mode,
+    const pal::string_t& own_dir,
+    const pal::string_t& fx_name,
+    std::vector<pal::string_t>* fx_versions)
+{
+    // No FX resolution for standalone apps
+    if (mode == host_mode_t::standalone)
+    {
+        trace::verbose(_X("Standalone mode detected. Not gathering shared FX locations"));
+        return;
+    }
+
+    // No FX resolution for mixed apps
+    if (mode == host_mode_t::split_fx)
+    {
+        trace::verbose(_X("Split/FX mode detected. Not gathering shared FX locations"));
+        return;
+    }
+
+    pal::string_t local_dir;
+    std::vector<pal::string_t> global_dirs;
+
+    // own_dir contains DIR_SEPARATOR appended that we need to remove.
+    pal::string_t own_dir_temp = own_dir;
+    remove_trailing_dir_seperator(&own_dir_temp);
+
+    std::vector<pal::string_t> hive_dir;
+    hive_dir.push_back(own_dir_temp);
+
+    if (pal::get_global_dotnet_dirs(&global_dirs))
+    {
+        for (pal::string_t dir : global_dirs)
+        {
+            if (dir != own_dir_temp)
+            {
+                hive_dir.push_back(dir);
+            }
+        }
+    }
+
+    for (pal::string_t dir : hive_dir)
+    {
+        auto fx_dir = dir;
+        trace::verbose(_X("Gathering FX locations in [%s]"), fx_dir.c_str());
+
+        append_path(&fx_dir, _X("shared"));
+        append_path(&fx_dir, fx_name.c_str());
+
+        if (pal::directory_exists(fx_dir))
+        {
+            std::vector<pal::string_t> versions;
+            pal::readdir(fx_dir, &versions);
+            for (const auto& ver : versions)
+            {
+                // Make sure we filter out any non-version folders.
+                fx_ver_t parsed(-1, -1, -1);
+                if (fx_ver_t::parse(ver, &parsed, false))
+                {
+                    trace::verbose(_X("Found FX version [%s]"), ver.c_str());
+                    fx_versions->push_back(ver);
+                }
+            }
+        }
+    }
+}
+
+void get_all_sdk_versions(
+    const pal::string_t& own_dir,
+    std::vector<pal::string_t>* sdk_versions)
+{
+    trace::verbose(_X("Gathering SDK locations in [%s]"), own_dir.c_str());
+
+    auto sdk_dir = own_dir;
+    append_path(&sdk_dir, _X("sdk"));
+
+    if (pal::directory_exists(sdk_dir))
+    {
+        std::vector<pal::string_t> versions;
+        pal::readdir(sdk_dir, &versions);
+        for (const auto& ver : versions)
+        {
+            // Make sure we filter out any non-version folders.
+            fx_ver_t parsed(-1, -1, -1);
+            if (fx_ver_t::parse(ver, &parsed, false))
+            {
+                trace::verbose(_X("Found SDK version [%s]"), ver.c_str());
+                sdk_versions->push_back(ver);
+            }
+        }
+    }
+}
+
 /**
  * When the framework is not found, display detailed error message
  *   about available frameworks and installation of new framework.
  */
-void handle_missing_framework_error(const pal::string_t& fx_name, const pal::string_t& fx_version, const pal::string_t& fx_dir)
+void handle_missing_framework_error(
+    host_mode_t mode,
+    const pal::string_t& fx_name,
+    const pal::string_t& fx_version,
+    const pal::string_t& fx_dir,
+    const pal::string_t& own_dir)
 {
-    pal::string_t fx_ver_dirs = get_directory(fx_dir);
+    std::vector<pal::string_t> fx_versions;
+    pal::string_t fx_ver_dirs;
+    if (fx_dir.length())
+    {
+        fx_ver_dirs = fx_dir;
+        get_all_fx_versions(mode, get_directory(fx_dir), fx_name, &fx_versions);
+    }
+    else
+    {
+        fx_ver_dirs = own_dir;
+    }
+
+    get_all_fx_versions(mode, own_dir, fx_name, &fx_versions);
 
     // Display the error message about missing FX.
-    trace::error(_X("The specified framework '%s', version '%s' was not found."), fx_name.c_str(), fx_version.c_str());
+    if (fx_version.length())
+    {
+        trace::error(_X("The specified framework '%s', version '%s' was not found."), fx_name.c_str(), fx_version.c_str());
+    }
+    else
+    {
+        trace::error(_X("No framworks were found."));
+    }
+
     trace::error(_X("  - Check application dependencies and target a framework version installed at:"));
     trace::error(_X("      %s"), fx_ver_dirs.c_str());
+    trace::error(_X("  - The Dotnet framework can be installed from:"));
+    trace::error(_X("      %s"), DOTNET_CORE_RUNTIME_URL);
+    trace::error(_X("  - The Dotnet framework and SDK can be installed from:"));
+    trace::error(_X("      %s"), DOTNET_CORE_URL);
 
     // Gather the list of versions installed at the shared FX location.
     bool is_print_header = true;
-    std::vector<pal::string_t> versions;
-    pal::readdir(fx_ver_dirs, &versions);
-    for (const auto& ver : versions)
+    for (pal::string_t ver : fx_versions)
     {
-        // Make sure we filter out any non-version folders at shared FX location.
-        fx_ver_t parsed(-1, -1, -1);
-        if (fx_ver_t::parse(ver, &parsed, false))
+        // Print banner only once before printing the versions
+        if (is_print_header)
         {
-            // Print banner only once before printing the versions
-            if (is_print_header)
-            {
-                trace::error(_X("  - The following versions are installed:"));
-                is_print_header = false;
-            }
-            trace::error(_X("      %s"), ver.c_str());
+            trace::error(_X("  - The following versions are installed:"));
+            is_print_header = false;
         }
+        trace::error(_X("      %s"), ver.c_str());
     }
-    trace::error(_X("  - Alternatively, install the framework version '%s'."), fx_version.c_str());
 }
 
 /**
@@ -292,7 +406,7 @@ bool fx_muxer_t::resolve_hostpolicy_dir(host_mode_t mode,
         if (!pal::directory_exists(fx_dir))
         {
             pal::string_t fx_version = specified_fx_version.empty() ? config.get_fx_version() : specified_fx_version;
-            handle_missing_framework_error(config.get_fx_name(), fx_version, fx_dir);
+            handle_missing_framework_error(mode, config.get_fx_name(), fx_version, fx_dir, own_dir);
             return false;
         }
         
@@ -843,6 +957,30 @@ int muxer_usage(bool is_sdk_present)
     return StatusCode::InvalidArgFailure;
 }
 
+int versions_runtime_info(pal::string_t own_dir)
+{
+    std::vector<pal::string_t> fx_versions;
+    get_all_fx_versions(host_mode_t::muxer, own_dir, _X("Microsoft.NETCore.App"), &fx_versions);
+    for (pal::string_t ver : fx_versions)
+    {
+        trace::println(_X("%s"), ver.c_str());
+    }
+
+    return StatusCode::Success;
+}
+
+int versions_sdk_info(pal::string_t own_dir)
+{
+    std::vector<pal::string_t> sdk_versions;
+    get_all_sdk_versions(own_dir, &sdk_versions);
+    for (pal::string_t ver : sdk_versions)
+    {
+        trace::println(_X("%s"), ver.c_str());
+    }
+
+    return StatusCode::Success;
+}
+
 // Convert "path" to realpath (merging working dir if needed) and append to "realpaths" out param.
 void append_probe_realpath(const pal::string_t& path, std::vector<pal::string_t>* realpaths, const pal::string_t& tfm)
 {
@@ -1146,11 +1284,20 @@ int fx_muxer_t::execute(const int argc, const pal::char_t* argv[])
     }
 
     int result = parse_args_and_execute(own_dir, own_dll, 1, argc, argv, false, host_mode_t::muxer, &is_an_app); // arg offset 1 for dotnet
-   
 
     if (is_an_app)
     {
         return result;
+    }
+
+    // Check for options that shouldn't depend on SDK to be loaded
+    if (pal::strcasecmp(_X("--versions"), argv[1]) == 0)
+    {
+        return versions_sdk_info(own_dir);
+    }
+    else if (pal::strcasecmp(_X("--runtimes"), argv[1]) == 0)
+    {
+        return versions_runtime_info(own_dir);
     }
 
     //
@@ -1170,7 +1317,7 @@ int fx_muxer_t::execute(const int argc, const pal::char_t* argv[])
         {
             return muxer_info();
         }
-        trace::error(_X("Did you mean to run dotnet SDK commands? Please install dotnet SDK from: "));
+        trace::error(_X("Did you mean to run dotnet SDK commands? Please install dotnet SDK from:"));
         trace::error(_X("  %s"), DOTNET_CORE_URL);
         return StatusCode::LibHostSdkFindFailure;
     }
@@ -1200,5 +1347,3 @@ int fx_muxer_t::execute(const int argc, const pal::char_t* argv[])
 
     return result;
 }
-
-
