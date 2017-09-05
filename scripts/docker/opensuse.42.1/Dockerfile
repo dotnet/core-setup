@@ -15,6 +15,7 @@ RUN zypper -n install -r "oss42.2" \
               which \
               gcc \
               llvm-clang \
+              libstdc++-devel \
               tar \
               ncurses-utils \
               curl \
