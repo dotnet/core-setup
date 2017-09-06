@@ -270,7 +270,7 @@ namespace Microsoft.DotNet.Host.Build
             msbuildProps.AppendLine($"    <BuildNumberMajor>{hostVersion.LatestHostBuildMajor}</BuildNumberMajor>");
             msbuildProps.AppendLine($"    <BuildNumberMinor>{hostVersion.LatestHostBuildMinor}</BuildNumberMinor>");
             msbuildProps.AppendLine($"    <PreReleaseLabel>servicing</PreReleaseLabel>");
-            msbuildProps.AppendLine($"    <EnsureStableVersion>{hostVersion.EnsureStableVersion}</EnsureStableVersion>");
+            msbuildProps.AppendLine($"    <EnsureStableVersion>{HostVersion.EnsureStableVersion}</EnsureStableVersion>");
             msbuildProps.AppendLine("  </PropertyGroup>");
             msbuildProps.AppendLine("</Project>");
 
