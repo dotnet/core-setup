@@ -7,14 +7,22 @@
          they will be built during the source build phase -->
     <AdditionalProperties>BuildPackageLibraryReferences=false</AdditionalProperties>
     <ProjectsBasePath>$(MSBuildThisFileDirectory)projects\</ProjectsBasePath>
+    <!-- Only build packages for uwp6.0 release -->
+    <BuildAllPackages>false</BuildAllPackages>
   </PropertyGroup>  
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(BuildAllPackages)' != 'false'">
     <ProjectExclusions Include="$(ProjectsBasePath)*\Microsoft.NETCore.UniversalWindowsPlatform.builds" Condition="'$(_BuildUwpDependencies)' != 'true'" />
     <ProjectExclusions Include="$(ProjectsBasePath)*\Microsoft.Net.UWPCoreRuntimeSdk.builds" Condition="'$(_BuildUwpDependencies)' != 'true'" />
     <Project Include="$(ProjectsBasePath)*\*.builds" Exclude="@(ProjectExclusions)">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-  </ItemGroup>  
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildAllpackages)' == 'false'">
+    <Project Include="$(ProjectsBasePath)Microsoft.Net.UWPCoreRuntimeSdk\Microsoft.Net.UWPCoreRuntimeSdk.builds" Condition="'$(_BuildUwpDependencies)' == 'true'" />
+    <Project Include="$(ProjectsBasePath)Microsoft.NETCore.UniversalWindowsPlatform\Microsoft.NETCore.UniversalWindowsPlatform.builds" Condition="'$(_BuildUwpDependencies)' == 'true'" />
+  </ItemGroup>
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
