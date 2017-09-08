@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .HaveStdErrContaining(_exeSelectedMessage);
 
             // Verify we have the expected runtime versions
-            dotnet.Exec("--runtimes")
+            dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .WithUserProfile(_userDir)
@@ -217,7 +217,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .HaveStdErrContaining("It was not possible to find any compatible framework version");
 
             // Verify we have the expected runtime versions
-            dotnet.Exec("--runtimes")
+            dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .CaptureStdOut()
                 .Execute()
@@ -287,7 +287,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.1"));
 
             // Verify we have the expected runtime versions
-            dotnet.Exec("--runtimes")
+            dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .EnvironmentVariable("DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX", "1")
                 .CaptureStdOut()
@@ -335,7 +335,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .HaveStdErrContaining("It was not possible to find any compatible framework version");
 
             // Verify we have the expected runtime versions
-            dotnet.Exec("--runtimes")
+            dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .EnvironmentVariable("DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX", "1")
                 .CaptureStdOut()

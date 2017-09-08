@@ -163,9 +163,9 @@ int run(const int argc, const pal::char_t* argv[])
         trace::println();
         trace::println(_X("Options:"));
         trace::println(_X("  -h|--help         Display help."));
-        trace::println(_X("  --version         Display SDK version."));
-        trace::println(_X("  --versions        Display the list of SDK versions."));
-        trace::println(_X("  --runtimes        Display the list of runtime versions."));
+        trace::println(_X("  --version         Display the current SDK version."));
+        trace::println(_X("  --list-sdks       Display the list of installed SDKs."));
+        trace::println(_X("  --list-runtimes   Display the list of installed runtimes."));
         trace::println();
         trace::println(_X("path-to-application:"));
         trace::println(_X("  The path to an application .dll file to execute."));
