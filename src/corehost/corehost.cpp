@@ -99,7 +99,7 @@ pal::string_t resolve_fxr_path(const pal::string_t& own_dir)
         trace::info(_X("Reading fx resolver directory=[%s]"), fxr_dir.c_str());
 
         std::vector<pal::string_t> list;
-        pal::readdir(fxr_dir, &list);
+        pal::readdir_onlydirectories(fxr_dir, &list);
 
         fx_ver_t max_ver(-1, -1, -1);
         for (const auto& dir : list)

@@ -206,6 +206,8 @@ namespace pal
     inline bool directory_exists(const string_t& path) { return file_exists(path); }
     void readdir(const string_t& path, const string_t& pattern, std::vector<pal::string_t>* list);
     void readdir(const string_t& path, std::vector<pal::string_t>* list);
+    void readdir_onlydirectories(const string_t& path, const string_t& pattern, std::vector<pal::string_t>* list);
+    void readdir_onlydirectories(const string_t& path, std::vector<pal::string_t>* list);
 
     bool get_own_executable_path(string_t* recv);
     bool getenv(const char_t* name, string_t* recv);

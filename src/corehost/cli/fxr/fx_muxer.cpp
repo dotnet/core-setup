@@ -90,33 +90,30 @@ void get_all_fx_versions(
             else
             {
                 // Read all frameworks, including "Microsoft.NETCore.App"
-                pal::readdir(fx_shared_dir, &fx_names);
+                pal::readdir_onlydirectories(fx_shared_dir, &fx_names);
             }
 
             for (pal::string_t fx_name : fx_names)
             {
-                if (fx_name != _X(".") && fx_name != _X(".."))
+                auto fx_dir = fx_shared_dir;
+                append_path(&fx_dir, fx_name.c_str());
+
+                if (pal::directory_exists(fx_dir))
                 {
-                    auto fx_dir = fx_shared_dir;
-                    append_path(&fx_dir, fx_name.c_str());
+                    trace::verbose(_X("Gathering FX locations in [%s]"), fx_dir.c_str());
 
-                    if (pal::directory_exists(fx_dir))
+                    std::vector<pal::string_t> versions;
+                    pal::readdir_onlydirectories(fx_dir, &versions);
+                    for (const auto& ver : versions)
                     {
-                        trace::verbose(_X("Gathering FX locations in [%s]"), fx_dir.c_str());
-
-                        std::vector<pal::string_t> versions;
-                        pal::readdir(fx_dir, &versions);
-                        for (const auto& ver : versions)
+                        // Make sure we filter out any non-version folders.
+                        fx_ver_t parsed(-1, -1, -1);
+                        if (fx_ver_t::parse(ver, &parsed, false))
                         {
-                            // Make sure we filter out any non-version folders.
-                            fx_ver_t parsed(-1, -1, -1);
-                            if (fx_ver_t::parse(ver, &parsed, false))
-                            {
-                                trace::verbose(_X("Found FX version [%s]"), ver.c_str());
-                                fx_framework_names->push_back(fx_name);
-                                fx_versions->push_back(ver);
-                                fx_locations->push_back(fx_shared_dir);
-                            }
+                            trace::verbose(_X("Found FX version [%s]"), ver.c_str());
+                            fx_framework_names->push_back(fx_name);
+                            fx_versions->push_back(ver);
+                            fx_locations->push_back(fx_shared_dir);
                         }
                     }
                 }
@@ -161,7 +158,7 @@ void get_all_sdk_versions(
         if (pal::directory_exists(sdk_dir))
         {
             std::vector<pal::string_t> versions;
-            pal::readdir(sdk_dir, &versions);
+            pal::readdir_onlydirectories(sdk_dir, &versions);
             for (const auto& ver : versions)
             {
                 // Make sure we filter out any non-version folders.
@@ -668,7 +665,7 @@ pal::string_t fx_muxer_t::resolve_fx_dir(host_mode_t mode,
         {
             std::vector<pal::string_t> list;
             std::vector<fx_ver_t> version_list;
-            pal::readdir(fx_dir, &list);
+            pal::readdir_onlydirectories(fx_dir, &list);
 
             for (const auto& version : list)
             {
@@ -784,7 +781,7 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path, bool parse_only_produc
     pal::string_t retval;
     std::vector<pal::string_t> versions;
 
-    pal::readdir(sdk_path, &versions);
+    pal::readdir_onlydirectories(sdk_path, &versions);
     fx_ver_t max_ver(-1, -1, -1);
     for (const auto& version : versions)
     {
