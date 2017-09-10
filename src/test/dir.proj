@@ -27,15 +27,7 @@
 
   <Target Name="RestoreTests">
     <ItemGroup>
-      <RestoreProjectExclusions Include="$(TestDir)/**/LightupClient.csproj" />
-      <RestoreProjectExclusions Include="$(TestDir)/**/LightupLib.csproj" />
-      <RestoreProjectExclusions Include="$(TestDir)/**/PortableApp.csproj" />
-      <RestoreProjectExclusions Include="$(TestDir)/**/PortableTestApp.csproj" />
-      <RestoreProjectExclusions Include="$(TestDir)/**/ResourceLookup.csproj" />
-      <RestoreProjectExclusions Include="$(TestDir)/**/SharedFxLookupPortableApp.csproj" />
-      <RestoreProjectExclusions Include="$(TestDir)/**/StandaloneApp.csproj" />
-      <RestoreProjectExclusions Include="$(TestDir)/**/StandaloneTestApp.csproj" />
-      <RestoreTest Include="$(TestDir)/**/*.csproj" Exclude="@(RestoreProjectExclusions)" />
+      <RestoreTest Include="$(TestDir)/**/*.csproj" />
     </ItemGroup>
 
     <PropertyGroup>

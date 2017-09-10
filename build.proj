@@ -10,7 +10,6 @@
   <PropertyGroup>
     <!-- To disable the restoration of packages, set RestoreDuringBuild=false or pass /p:RestoreDuringBuild=false.-->
     <RestoreDuringBuild Condition="'$(RestoreDuringBuild)'==''">true</RestoreDuringBuild>
-    <BuildPackagingProject>false</BuildPackagingProject>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -28,7 +27,7 @@
 
   <ItemGroup>
     <Project Include="src/dir.proj" />
-    <Project Include="src/pkg/packaging/dir.proj" Condition="'$(BuildPackagingProject)' != 'false'" />
+    <Project Include="src/pkg/packaging/dir.proj"/>
     <Project Include="$(MSBuildThisFileDirectory)src/test/dir.proj" Condition="'$(SkipTests)' != 'true'"/>
   </ItemGroup>
 

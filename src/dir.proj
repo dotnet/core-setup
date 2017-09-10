@@ -5,13 +5,12 @@
   <!-- required to build the projects in their specified order -->
   <PropertyGroup>
     <SerializeProjects>true</SerializeProjects>
-    <BuildSharedFrameworkProject>false</BuildSharedFrameworkProject>
   </PropertyGroup>
 
   <ItemGroup>
     <Project Include="$(MSBuildThisFileDirectory)src.builds" />
     <Project Include="$(MSBuildThisFileDirectory)pkg/dir.proj" />
-    <Project Include="$(MSBuildThisFileDirectory)sharedFramework/sharedFramework.proj" Condition="'$(BuildSharedFrameworkProject)' != 'false'"/>
+    <Project Include="$(MSBuildThisFileDirectory)sharedFramework/sharedFramework.proj" />
   </ItemGroup>
 
   <!-- Tasks from buildtools for easy project.json dependency updates -->
