@@ -6,6 +6,14 @@
     <PrereleaseResolveNuGetPackages>true</PrereleaseResolveNuGetPackages>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!--
+      If we are stabilizing set the StableVersion property for the packages.
+      Needs to happen in dir.targets to allow all the pkgproj's to set Version property first.
+    -->
+    <StableVersion Condition="'$(StabilizePackageVersion)' =='true'">$(Version)</StableVersion>
+  </PropertyGroup>
+
   <!--
     Finds symbol files and injects them into the package build.
   -->
