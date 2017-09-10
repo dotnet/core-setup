@@ -3,10 +3,10 @@
     <MajorVersion>2</MajorVersion>
     <MinorVersion>1</MinorVersion>
     <PatchVersion>0</PatchVersion>
-    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
-    <PreReleaseLabel>servicingUWP</PreReleaseLabel>
+    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
+    <PreReleaseLabel>preview1</PreReleaseLabel>
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
-    <ReleaseBrandSuffix></ReleaseBrandSuffix>
+    <ReleaseBrandSuffix>Preview 1</ReleaseBrandSuffix>
     <Channel>release/uwp6.0</Channel>
     <BranchName>release/uwp6.0</BranchName>
     <ContainerName>dotnet</ContainerName>
