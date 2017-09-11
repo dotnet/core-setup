@@ -27,7 +27,15 @@
 
   <Target Name="RestoreTests">
     <ItemGroup>
-      <RestoreTest Include="$(TestDir)/**/*.csproj" />
+      <RestoreProjectExclusions Include="$(TestDir)/**/LightupClient.csproj" />
+      <RestoreProjectExclusions Include="$(TestDir)/**/LightupLib.csproj" />
+      <RestoreProjectExclusions Include="$(TestDir)/**/PortableApp.csproj" />
+      <RestoreProjectExclusions Include="$(TestDir)/**/PortableTestApp.csproj" />
+      <RestoreProjectExclusions Include="$(TestDir)/**/ResourceLookup.csproj" />
+      <RestoreProjectExclusions Include="$(TestDir)/**/SharedFxLookupPortableApp.csproj" />
+      <RestoreProjectExclusions Include="$(TestDir)/**/StandaloneApp.csproj" />
+      <RestoreProjectExclusions Include="$(TestDir)/**/StandaloneTestApp.csproj" />
+      <RestoreTest Include="$(TestDir)/**/*.csproj" Exclude="@(RestoreProjectExclusions)" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -42,6 +50,7 @@
 
     <RemoveDir Directories="@(DirsToClean)" />
     <MakeDir Directories="$(TempFolderRoot)NuGetFallbackFolder" />
+    <MakeDir Directories="$(PackagesBasePath)packages" />
 
     <PropertyGroup>
       <RestoreSourceArg>@(RestoreTestSource->'--source %(Identity)', ' ')</RestoreSourceArg>
