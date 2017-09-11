@@ -105,7 +105,10 @@ platformList.each { platform ->
     def archiveString = ["tar.gz", "zip", "deb", "msi", "pkg", "exe", "nupkg"].collect { "Bin/*/packages/*.${it},Bin/*/corehost/*.${it}" }.join(",")
     settings.addFiles(archiveString)
     settings.setArchiveOnSuccess()
-    settings.setFailIfNothingArchived()
+
+    if (os == 'Windows_NT') {
+        settings.setFailIfNothingArchived()
+    }
 
     Utilities.addArchival(newJob, settings)
 }
