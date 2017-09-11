@@ -16,51 +16,6 @@
       },
       "Definitions": [
         {
-          "Name": "Core-Setup-Linux-BT",
-          "Parameters": {
-            "PB_DistroRid": "rhel.7.2-x64",
-            "PB_DockerTag": "rhel7_prereqs_2",
-            "PB_AdditionalBuildArguments":"-PortableBuild=true -strip-symbols",
-            "PB_PortableBuild": "true"
-          },
-          "ReportingParameters": {
-            "SubType": "PortableBuild",
-            "OperatingSystem": "RedHat 7",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
-          "Name": "Core-Setup-Linux-Arm-BT", 
-          "Parameters": { 
-            "PB_DistroRid": "ubuntu.14.04-arm", 
-            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239", 
-            "PB_TargetArchitecture": "arm", 
-            "PB_AdditionalBuildArguments":"-TargetArchitecture=arm -DistroRid=linux-arm -DisableCrossgen=true -PortableBuild=true -SkipTests=true -CrossBuild=true -strip-symbols",
-            "PB_CrossBuildArgs": "-e ROOTFS_DIR ",
-            "PB_PortableBuild": "true" 
-          }, 
-          "ReportingParameters": { 
-            "SubType": "PortableBuild", 
-            "OperatingSystem": "Ubuntu 14.04", 
-            "Type": "build/product/", 
-            "Platform": "arm" 
-          } 
-        },         
-        {
-          "Name": "Core-Setup-OSX-BT",
-          "Parameters": {
-            "PB_PortableBuildArg": "-PortableBuild=true -strip-symbols",
-            "PB_PortableBuild": "true"
-          },
-          "ReportingParameters": {
-            "SubType": "PortableBuild",
-            "OperatingSystem": "OSX",
-            "Type": "build/product/",
-            "Platform": "x64"
-          }
-        },
-        {
           "Name": "Core-Setup-Windows-Arm-BT",
           "Parameters": {
             "PB_AdditionalBuildArguments": "/p:SkipTests=true",
