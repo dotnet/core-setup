@@ -1,6 +1,6 @@
 {
   "description": "Abstractions for making code that uses file system and environment testable.",
-  "version": "1.1.3-servicing-*",
+  "version": "1.1.4-servicing-*",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk",
