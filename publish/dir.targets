@@ -11,7 +11,7 @@
       <PublishFile Condition="'$(PublishRidAgnosticPackages)' == 'true'" Include="@(RidAgnosticPackageFile)" />
       <Project Include="publish.proj">
         <PublishTarget>UploadToAzure</PublishTarget>
-        <AdditionalProperties>%(Project.AdditionalProperties);ItemsToPublish=@(PublishFile);$(OutputVersionBadge);RelativeBlobPath=$(BinariesRelativePath)</AdditionalProperties>
+        <AdditionalProperties>%(Project.AdditionalProperties);ItemsToPublish=@(PublishFile);RelativeBlobPath=$(BinariesRelativePath)</AdditionalProperties>
       </Project>
     </ItemGroup>
   </Target>
@@ -100,13 +100,16 @@
                       FilterBlobNames="Runtime/$(SharedFrameworkNugetVersion)/">
       <Output TaskParameter="BlobNames" ItemName="_BlobNames" />
     </ListAzureBlobs>
+    <PropertyGroup>
+      <FailBuildIfMissingBlob>false</FailBuildIfMissingBlob>
+    </PropertyGroup>
     <ItemGroup>
       <_FoundBlobNames Include="%(_BlobNames.FileName)%(_BlobNames.Extension)" Condition="'%(_BlobNames.Extension)' == '.svg'" />
       <_MissingBlobNames Include="@(PublishRid->'sharedfx_%(Identity)_$(ConfigurationGroup)_version_badge.svg')" 
                          Exclude="@(_FoundBlobNames)" />
     </ItemGroup>
     <Error Text="Missing publish output from all legs of the build. Missing blobs are '@(_MissingBlobNames)'"
-           Condition="'@(_MissingBlobNames)' != ''" />
+           Condition="'@(_MissingBlobNames)' != '' and '$(FailBuildIfMissingBlob)' !=  'false'" />
   </Target>
 
   <Import Project="..\dir.targets" />
