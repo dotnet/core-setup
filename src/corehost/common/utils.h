@@ -14,9 +14,7 @@ struct host_option
 
 #define _STRINGIFY(s) _X(s)
 #define DOTNET_CORE_URL _X("http://go.microsoft.com/fwlink/?LinkID=798306&clcid=0x409")
-
-// TODO: We need a forwarding link here
-#define DOTNET_CORE_RUNTIME_URL _X("https://www.microsoft.com/net/download/core#/runtime")
+#define DOTNET_CORE_DOWNLOAD_RUNTIME_URL _X("https://aka.ms/dotnet-download-runtime")
 
 #define RUNTIME_STORE_DIRECTORY_NAME _X("store")
 

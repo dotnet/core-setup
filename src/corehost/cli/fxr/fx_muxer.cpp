@@ -216,7 +216,7 @@ void handle_missing_framework_error(
     trace::error(_X("  - Check application dependencies and target a framework version installed at:"));
     trace::error(_X("      %s"), fx_ver_dirs.c_str());
     trace::error(_X("  - The .NET framework can be installed from:"));
-    trace::error(_X("      %s"), DOTNET_CORE_RUNTIME_URL);
+    trace::error(_X("      %s"), DOTNET_CORE_DOWNLOAD_RUNTIME_URL);
     trace::error(_X("  - The .NET framework and SDK can be installed from:"));
     trace::error(_X("      %s"), DOTNET_CORE_URL);
 
@@ -993,6 +993,8 @@ int muxer_usage(bool is_sdk_present)
     {
         trace::println(_X("  %-34s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
     }
+    trace::println(_X("  --list-runtimes                     Display the installed runtimes"));
+    trace::println(_X("  --list-sdks                         Display the installed SDKs"));
 
     trace::println();
 
@@ -1004,7 +1006,6 @@ int muxer_usage(bool is_sdk_present)
         trace::println(_X("  --info                              Displays the host information"));
         trace::println();
     }
-
 
     return StatusCode::InvalidArgFailure;
 }
