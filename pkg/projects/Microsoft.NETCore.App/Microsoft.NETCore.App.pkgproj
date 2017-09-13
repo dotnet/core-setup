@@ -67,10 +67,10 @@
       <Version>4.0.1</Version>
     </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="Microsoft.NETCore.DotNetHostPolicy">
-      <Version>1.0.5</Version>
+      <Version>1.0.7</Version>
     </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="Microsoft.NETCore.Runtime.CoreCLR">
-      <Version>1.0.8</Version>
+      <Version>1.0.9</Version>
     </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="Microsoft.VisualBasic">
       <Version>10.0.1</Version>
