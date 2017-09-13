@@ -41,7 +41,7 @@
     "System.Threading.Thread": "4.3.0",
     "System.Threading.ThreadPool": "4.3.0",
     "Microsoft.DiaSymReader.Native": "1.4.1",
-    "Libuv": "1.9.1",
+    "Libuv": "1.9.2",
     "runtime.native.System.IO.Compression": "4.3.1",
     "runtime.native.System.Security.Cryptography": "4.3.2",
     "runtime.native.System.Security.Cryptography.Apple": "4.3.1",
