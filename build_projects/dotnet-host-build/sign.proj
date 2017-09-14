@@ -38,6 +38,7 @@
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
   <Target Name="SignSharedFrameworkCrossgenedAssemblies" DependsOnTargets="GetSignSharedFrameworkCrossgenedAssembliesFiles">
@@ -69,6 +70,7 @@
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
   <Target Name="SignEngine" DependsOnTargets="GetSignEngineFiles">
@@ -81,6 +83,7 @@
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
   <Target Name="SignBundle" DependsOnTargets="GetSignBundleFiles">
@@ -93,6 +96,7 @@
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
 </Project>
