@@ -104,7 +104,8 @@ bool pal::load_library(const string_t* in_path, dll_t* dll)
     //Adding the assert to ensure relative paths which are not just filenames are not used for LoadLibrary Calls
     assert(!LongFile::IsPathNotFullyQualified(path) || !LongFile::ContainsDirectorySeparator(path));
 
-    *dll = ::LoadLibraryExW(path.c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+    // LOAD_WITH_ALTERED_SEARCH_PATH looks in the directory specified by the first argument, and then the default locations.
+    *dll = ::LoadLibraryExW(path.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     if (*dll == nullptr)
     {
         trace::error(_X("Failed to load the dll from [%s], HRESULT: 0x%X"), path, HRESULT_FROM_WIN32(GetLastError()));
