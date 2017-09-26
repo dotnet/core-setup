@@ -623,7 +623,7 @@
       "value": "PassedViaPipeBuild"
     },
     "MsbuildSigningArguments": {
-      "value": "/p:CertificateId=$(CertificateId) /v:detailed"
+      "value": "/p:CertificateId=$(CertificateId) /v:detailed /p:SignType=$(PB_SignType)"
     },
     "NUGET_API_KEY": {
       "value": "PassedViaPipeBuild"
@@ -676,7 +676,7 @@
       "value": "false"
     },
     "PB_SignType": {
-      "value": "real"
+      "value": "oss"
     },
     "PB_SourcesDirectory": {
       "value": "$(Build.SourcesDirectory)\\core-setup"
