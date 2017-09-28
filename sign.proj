@@ -22,7 +22,7 @@
     <Error Condition="!Exists('$(OutDir)')" Text="'OutDir' folder '$(OutDir)' does not exist."/>
   </Target>
 
-  <Target Name="SignBinaries" DependsOnTargets="GetSignBinaryFiles">
+  <Target Name="SignBinaries" Condition="'$(SignType)' == 'real'" DependsOnTargets="GetSignBinaryFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
 
@@ -53,7 +53,7 @@
     <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
-  <Target Name="SignMsiAndCab" DependsOnTargets="GetSignMsiAndCabFiles">
+  <Target Name="SignMsiAndCab" Condition="'$(SignType)' == 'real'" DependsOnTargets="GetSignMsiAndCabFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
 
@@ -69,7 +69,7 @@
     <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
-  <Target Name="SignEngine" DependsOnTargets="GetSignEngineFiles">
+  <Target Name="SignEngine" Condition="'$(SignType)' == 'real'" DependsOnTargets="GetSignEngineFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
 
@@ -82,7 +82,7 @@
     <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
-  <Target Name="SignBundle" DependsOnTargets="GetSignBundleFiles">
+  <Target Name="SignBundle" Condition="'$(SignType)' == 'real'" DependsOnTargets="GetSignBundleFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
 
