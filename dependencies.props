@@ -15,6 +15,8 @@
     <WCFCurrentRef>7c9dd01e718d2a671ed1237b5c7531073642ecd0</WCFCurrentRef>
   </PropertyGroup>
   
+ <!-- queue a build -->
+
   <PropertyGroup>
     <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-preview1-25531-01</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftPrivateCoreFxUAPPackageVersion>4.5.0-preview1-25708-01</MicrosoftPrivateCoreFxUAPPackageVersion>
