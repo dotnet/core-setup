@@ -30,7 +30,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "signType": "$(PB_SignType)",
+        "signType": "real",
         "zipSources": "false",
         "version": "",
         "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json"
@@ -433,7 +433,7 @@
       "value": "win10-x86"
     },
     "MsbuildSigningArguments": {
-      "value": "/p:RID=$(RID) /p:CertificateId=$(CertificateId) /v:detailed"
+      "value": "/p:RID=$(RID) /p:CertificateId=$(CertificateId) /v:detailed /p:SignType=$(PB_SignType)"
     },
     "TeamName": {
       "value": "DotNetCore"
