@@ -34,7 +34,7 @@
     "System.Security.Cryptography.Algorithms": "4.3.0",
     "System.Security.Cryptography.Encoding": "4.3.0",
     "System.Security.Cryptography.Primitives": "4.3.0",
-    "System.Security.Cryptography.X509Certificates": "4.3.1",
+    "System.Security.Cryptography.X509Certificates": "4.3.2-servicing-25807-02",
     "System.Threading.Tasks.Dataflow": "4.7.0",
     "System.Threading.Tasks.Extensions": "4.3.0",
     "System.Threading.Tasks.Parallel": "4.3.0",
