@@ -97,7 +97,6 @@ if [ ! -e $__BUILD_TOOLS_PATH ]; then
 fi
 
 echo "Initializing BuildTools..."
-RunningInitTools=true
 echo "Running: $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR" >> $__init_tools_log
 
 # Executables restored with .NET Core 2.0 do not have executable permission flags. https://github.com/NuGet/Home/issues/4424

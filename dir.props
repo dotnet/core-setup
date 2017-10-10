@@ -263,7 +263,7 @@
   <!-- Set up handling of build warnings -->
   <PropertyGroup>
     <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors Condition="'$(RunningInitTools)' != 'true'">true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>

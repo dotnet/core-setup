@@ -71,8 +71,6 @@ if NOT exist "%BUILD_TOOLS_PATH%init-tools.cmd" (
 :afterbuildtoolsrestore
 
 echo Initializing BuildTools...
-:: Setting RunnintInitTools to true since the restore of project.csproj will throw some warnings for package downgrades and we want to disable TreatWarningsAsErrors.
-set RunningInitTools=true
 echo Running: "%BUILD_TOOLS_PATH%init-tools.cmd" "%~dp0" "%DOTNET_CMD%" "%TOOLRUNTIME_DIR%" >> "%INIT_TOOLS_LOG%"
 call "%BUILD_TOOLS_PATH%init-tools.cmd" "%~dp0" "%DOTNET_CMD%" "%TOOLRUNTIME_DIR%" >> "%INIT_TOOLS_LOG%"
 set INIT_TOOLS_ERRORLEVEL=%ERRORLEVEL%
