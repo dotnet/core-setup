@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class DependencyVersions
     {
-        public static readonly string CoreCLRVersion = "1.1.5-servicing-25807-02";
-        public static readonly string JitVersion = "1.1.5-servicing-25807-02";
+        public static readonly string CoreCLRVersion = "1.1.5";
+        public static readonly string JitVersion = "1.1.5";
     }
 }
