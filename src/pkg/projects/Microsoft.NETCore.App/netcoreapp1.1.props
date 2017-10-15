@@ -122,7 +122,7 @@
       <Version>4.3.0</Version>
     </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="System.Security.Cryptography.X509Certificates">
-      <Version>4.3.1</Version>
+      <Version>4.3.2</Version>
     </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="System.Security.Cryptography.OpenSsl">
       <Version>4.3.1</Version>
