@@ -395,12 +395,7 @@
     <!-- These properties should be passed through to new msbuild instances (like 'dotnet build') 
          in order to get the correct output directories in the child project.
     -->
-    <MSBuildPassThroughPropertyList>/p:OSGroup=$(OSGroup) /p:DistroRid=$(DistroRid) /p:PortableBuild=$(PortableBuild) /p:TargetArchitecture=$(TargetArchitecture) /p:ConfigurationGroup=$(ConfigurationGroup)</MSBuildPassThroughPropertyList>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <!-- source-build currently uses a newer CLI version that requires `no-restore` to be passed into build/publish -->
-    <NoRestoreArg Condition="'$(DotNetBuildFromSource)' == 'true'">--no-restore</NoRestoreArg>
+    <MSBuildPassThroughPropertyList>/p:OSGroup=$(OSGroup) /p:PortableBuild=$(PortableBuild) /p:TargetArchitecture=$(TargetArchitecture) /p:ConfigurationGroup=$(ConfigurationGroup)</MSBuildPassThroughPropertyList>
   </PropertyGroup>
 
   <!-- Use Roslyn Compilers to build, if we are not using the .NET SDK to build --> 
