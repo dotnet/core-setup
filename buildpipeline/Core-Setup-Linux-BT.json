@@ -1123,7 +1123,7 @@
       "value": "/p:AzureAccountName=$(PB_AzureAccountName) /p:AzureAccessToken=$(PB_AzureAccessToken) /p:ChecksumAzureAccountName=$(PB_ChecksumAzureAccountName) /p:ChecksumAzureAccessToken=$(PB_ChecksumAzureAccessToken) /p:DebRepoUser=$(PB_DebRepoUser) /p:DebRepoServer=$(PB_DebRepoServer) /p:DebRepoPass=$(DEB_REPO_PASSWORD) $(PB_DebianKeys)"
     },
     "PB_DebianKeys": {
-      "value": "/p:DebianId_ubuntu1404-x64=$(PB_DebianId_ubuntu1404-x64) /p:DebianId_debian8-x64=$(PB_DebianId_debian8-x64) /p:DebianId_debian9-x64=$(PB_DebianId_debian9-x64) /p:DebianId_ubuntu1604-x64=$(PB_DebianId_ubuntu1604-x64) /p:DebianId_ubuntu1610-x64=$(PB_DebianId_ubuntu1610-x64)  /p:DebianId_ubuntu1704-x64=$(PB_DebianId_ubuntu1704-x64)"
+      "value": "/p:DebianId_ubuntu1404-x64=$(PB_DebianId_ubuntu1404-x64) /p:DebianId_debian8-x64=$(PB_DebianId_debian8-x64) /p:DebianId_debian9-x64=$(PB_DebianId_debian9-x64) /p:DebianId_ubuntu1604-x64=$(PB_DebianId_ubuntu1604-x64) /p:DebianId_ubuntu1610-x64=$(PB_DebianId_ubuntu1610-x64) /p:DebianId_ubuntu1704-x64=$(PB_DebianId_ubuntu1704-x64)"
     },
     "DockerTag_Ubuntu1404": {
       "value": "ubuntu-14.04-debpkg-e5cf912-20175003025046"
@@ -1211,7 +1211,7 @@
       "value": "ubuntu.17.04-$(PB_TargetArchitecture)"
     },
     "DockerCommonRunArgs_Ubuntu1704": {
-      "value": "--name $(PB_DockerContainerName)$(DockerTag_Ubuntu1704) -v \\\"$(PB_SourcesDirectory):$(PB_GitDirectory)\\\" -v $(Build.StagingDirectory)/sharedFrameworkPublish/:/root/sharedFrameworkPublish/ -w=\\\"$(PB_GitDirectory)\\\" $(DockerImageName_Ubuntu1704)"
+      "value": "--name $(PB_DockerContainerName)$(DockerTag_Ubuntu1704) -v \"$(PB_SourcesDirectory):$(PB_GitDirectory)\" -v $(Build.StagingDirectory)/sharedFrameworkPublish/:/root/sharedFrameworkPublish/ -w=\"$(PB_GitDirectory)\" $(DockerImageName_Ubuntu1704)"
     },
     "DockerImageName_Ubuntu1704": {
       "value": "$(PB_DockerRepository):$(DockerTag_Ubuntu1704)"
