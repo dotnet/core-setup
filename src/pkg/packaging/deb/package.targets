@@ -45,7 +45,7 @@
           Condition="'$(BuildDebPackage)'=='true'" />
           
   <Target Name="BuildDebs"
-          DependsOnTargets="InitializeDotnetDebTool;GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb;GenerateRuntimeMetaDeb"
+          DependsOnTargets="InitializeDotnetDebTool;GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb;GenerateRuntimeDependenciesDeb"
           Condition="'$(BuildDebPackage)'=='true' and '$(DebuildPresent)' == 'true'" />
 
   <Target Name="GenerateSharedHostDeb">
@@ -285,12 +285,11 @@
 
   </Target>
   
-  <Target Name="GenerateRuntimeMetaDeb">
-  
+  <Target Name="GenerateRuntimeDependenciesDeb">
     <PropertyGroup>
-      <DebPackageName>$(RuntimeMetaDebPkgName)</DebPackageName>
+      <DebPackageName>$(RuntimeDependenciesDebPkgName)</DebPackageName>
       <DebPackageVersion>$(SharedFrameworkNugetVersion)</DebPackageVersion>
-      <DebFile>$(DotnetRuntimeMetaPackageInstallerFile)</DebFile>
+      <DebFile>$(DotnetRuntimeDependenciesPackageInstallerFile)</DebFile>
       <ConfigJsonName>dotnet-runtime-deps-debian_config.json</ConfigJsonName>
       <ConfigJsonFile>$(debPackaginfConfigPath)$(ConfigJsonName)</ConfigJsonFile>
       <debIntermediatesDir>$(PackagesIntermediateDir)$(DebPackageName)/$(DebPackageVersion)</debIntermediatesDir>
@@ -312,9 +311,9 @@
           ConsoleToMSBuild="true"> 
        <Output TaskParameter="ConsoleOutput" PropertyName="LibIcuPackageName" /> 
     </Exec> 
-	
-	<!-- Compute LIBSSL Version -->
-	    <Exec Command="apt-cache search --names-only '^libssl[.0-9]+$' | cut -d' ' -f1" 
+
+    <!-- Compute LIBSSL Version -->
+    <Exec Command="apt-cache search --names-only '^libssl[.0-9]+$' | cut -d' ' -f1" 
           ConsoleToMSBuild="true"> 
        <Output TaskParameter="ConsoleOutput" PropertyName="LibSSLPackageName" /> 
     </Exec> 
@@ -330,7 +329,7 @@
     <!-- Replace config json variables -->
     <ItemGroup>
       <SharedFrameworkTokenValue Include="%RUNTIME_DEPS_DEBIAN_PACKAGE_NAME%">
-        <ReplacementString>$(RuntimeMetaDebPkgName)</ReplacementString>
+        <ReplacementString>$(RuntimeDependenciesDebPkgName)</ReplacementString>
       </SharedFrameworkTokenValue>
       <SharedFrameworkTokenValue Include="%RUNTIME_DEPS_VERSION%">
         <ReplacementString>$(SharedFrameworkNugetVersion)</ReplacementString>
