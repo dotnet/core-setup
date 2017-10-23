@@ -65,9 +65,12 @@
       <RepoIds Include="DebianId_ubuntu1610-x64">
         <Key>$(DebianId_ubuntu1610-x64)</Key>
       </RepoIds>
+      <RepoIds Include="DebianId_ubuntu1704-x64">
+        <Key>$(DebianId_ubuntu1704-x64)</Key>
+      </RepoIds>
     </ItemGroup>
     <PropertyGroup>
-      <RidWithoutDots>$([System.String]::Copy($(DistroRid)).Replace('.', ''))</RidWithoutDots>
+      <RidWithoutDots>$([System.String]::Copy($(OutputRid)).Replace('.', ''))</RidWithoutDots>
       <DebRepoId Condition="$([System.String]::Copy(%(RepoIds.Identity)).EndsWith('$(RidWithoutDots)'))">%(RepoIds.Key)</DebRepoId>
     </PropertyGroup>
     <Error Condition="'$(DebRepoId)'=='' OR '$(DebRepoUser)'=='' OR '$(DebRepoPass)'=='' OR '$(DebRepoServer)'==''"
