@@ -194,7 +194,7 @@
     
   </Target>
 
-  <Target Name="GenerateSharedFrameworkDeb">
+  <Target Name="GenerateSharedFrameworkDeb" DependsOnTargets="GetLibIcuPackageName">
   
     <PropertyGroup>
       <DebPackageName>$(SharedFxDebPkgName)</DebPackageName>
@@ -217,12 +217,6 @@
 
     <RemoveDir Condition="Exists('$(debIntermediatesDir)')" Directories="$(debIntermediatesDir)" />
     <MakeDir Directories="$(debIntermediatesDir)" />
-
-    <!-- Compute ICU Version --> 
-    <Exec Command="apt-cache search --names-only '^libicu[0-9]+$' | cut -d' ' -f1" 
-          ConsoleToMSBuild="true"> 
-       <Output TaskParameter="ConsoleOutput" PropertyName="LibIcuPackageName" /> 
-    </Exec> 
 
     <!-- Create empty debian layout -->
     <RemoveDir Condition="Exists('$(debLayoutDirectory)')" Directories="$(debLayoutDirectory)" />
@@ -285,7 +279,7 @@
 
   </Target>
   
-  <Target Name="GenerateRuntimeDependenciesDeb">
+  <Target Name="GenerateRuntimeDependenciesDeb" DependsOnTargets="GetLibIcuPackageName">
     <PropertyGroup>
       <DebPackageName>$(RuntimeDependenciesDebPkgName)</DebPackageName>
       <DebPackageVersion>$(SharedFrameworkNugetVersion)</DebPackageVersion>
@@ -305,12 +299,6 @@
 
     <RemoveDir Condition="Exists('$(debIntermediatesDir)')" Directories="$(debIntermediatesDir)" />
     <MakeDir Directories="$(debIntermediatesDir)" />
-
-    <!-- Compute ICU Version --> 
-    <Exec Command="apt-cache search --names-only '^libicu[0-9]+$' | cut -d' ' -f1" 
-          ConsoleToMSBuild="true"> 
-       <Output TaskParameter="ConsoleOutput" PropertyName="LibIcuPackageName" /> 
-    </Exec> 
 
     <!-- Compute LIBSSL Version -->
     <Exec Command="apt-cache search --names-only '^libssl[.0-9]+$' | cut -d' ' -f1" 
@@ -383,5 +371,13 @@
     <Message Condition=" '$(DebuildPresent)'  != 'true' "
              Text="Debuild Not found, Debian packages will not be built."
              Importance="High" />
+  </Target>
+
+  <!-- Compute LibIcu Package Name -->
+  <Target Name="GetLibIcuPackageName">
+    <Exec Command="apt-cache search --names-only '^libicu[0-9]+$' | cut -d' ' -f1" 
+          ConsoleToMSBuild="true"> 
+       <Output TaskParameter="ConsoleOutput" PropertyName="LibIcuPackageName" /> 
+    </Exec>
   </Target>
 </Project>
