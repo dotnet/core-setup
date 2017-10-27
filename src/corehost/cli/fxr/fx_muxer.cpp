@@ -1268,8 +1268,18 @@ int fx_muxer_t::execute(const int argc, const pal::char_t* argv[])
 {
     pal::string_t own_path;
 
+    // Try to use argv[0] as own_path to allow for hosts located elsewhere
+    if (argc >= 1)
+    {
+        own_path = argv[0];
+        if (!pal::realpath(&own_path))
+        {
+            own_path.clear();
+        }
+    }
+
     // Get the full name of the application
-    if (!pal::get_own_executable_path(&own_path) || !pal::realpath(&own_path))
+    if (own_path.empty() && (!pal::get_own_executable_path(&own_path) || !pal::realpath(&own_path)))
     {
         trace::error(_X("Failed to resolve full path of the current executable [%s]"), own_path.c_str());
         return StatusCode::LibHostCurExeFindFailure;

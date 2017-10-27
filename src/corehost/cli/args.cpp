@@ -61,8 +61,19 @@ bool parse_arguments(
     const int argc, const pal::char_t* argv[], arguments_t* arg_out)
 {
     arguments_t& args = *arg_out;
+
+    // Try to use argv[0] as own_path to allow for hosts located elsewhere
+    if (argc >= 1)
+    {
+        args.own_path = argv[0];
+        if (!pal::realpath(&args.own_path))
+        {
+            args.own_path.clear();
+        }
+    }
+
     // Get the full name of the application
-    if (!pal::get_own_executable_path(&args.own_path) || !pal::realpath(&args.own_path))
+    if (args.own_path.empty() && (!pal::get_own_executable_path(&args.own_path) || !pal::realpath(&args.own_path)))
     {
         trace::error(_X("Failed to resolve full path of the current executable [%s]"), args.own_path.c_str());
         return false;
