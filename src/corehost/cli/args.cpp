@@ -66,7 +66,7 @@ bool parse_arguments(
     if (argc >= 1)
     {
         args.own_path = argv[0];
-        if (!pal::realpath(&args.own_path) || !pal::file_exists(args.own_path))
+        if (!args.own_path.empty() && (!pal::realpath(&args.own_path) || !pal::file_exists(args.own_path)))
         {
             trace::warning(_X("Failed to resolve argv[0] as path [%s]. Using location of current executable instead."), args.own_path.c_str());
             args.own_path.clear();
