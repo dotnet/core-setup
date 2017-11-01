@@ -397,11 +397,6 @@ bool deps_resolver_t::resolve_tpa_list(
     };
 
     // First add managed assembly to the TPA.
-    // TODO: Remove: the deps should contain the managed DLL.
-    // Workaround for: csc.deps.json doesn't have the csc.dll
-    pal::string_t managed_app_asset = get_filename_without_ext(m_managed_app);
-    add_tpa_asset(managed_app_asset, m_managed_app, &items, output);
-
     const auto& deps_entries = m_deps->get_entries(deps_entry_t::asset_types::runtime);
     for (const auto& entry : deps_entries)
     {
