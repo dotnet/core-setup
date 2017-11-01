@@ -47,7 +47,6 @@
         {
           "Name": "Core-Setup-Linux-Arm-BT",
           "Parameters": {
-            "PB_DistroRid": "alpine.3.6-x64",
             "PB_DockerTag": "alpine-3.6-3148f11-20171119021156",
             "PB_TargetArchitecture": "x64",
             "PB_AdditionalBuildArguments":"-TargetArchitecture=x64 -PortableBuild=false -strip-symbols",
