@@ -88,10 +88,6 @@ bool pal::load_library(const string_t* in_path, dll_t* dll)
 {
     string_t path = *in_path;
 
-    // LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR:
-    //   In portable apps, coreclr would come from another directory than the host,
-    //   so make sure coreclr dependencies can be resolved from coreclr.dll load dir.
-
     if (LongFile::IsPathNotFullyQualified(path))
     {
         if (!pal::realpath(&path))
@@ -101,10 +97,16 @@ bool pal::load_library(const string_t* in_path, dll_t* dll)
         }
     }
     
-    //Adding the assert to ensure relative paths which are not just filenames are not used for LoadLibrary Calls
+    // Adding the assert to ensure relative paths which are not just filenames are not used for LoadLibrary Calls
     assert(!LongFile::IsPathNotFullyQualified(path) || !LongFile::ContainsDirectorySeparator(path));
 
-    *dll = ::LoadLibraryExW(path.c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+    // Prevent LoadLibrary from looking in the current directory.
+    ::SetDllDirectoryW(_X(""));
+
+    // LOAD_WITH_ALTERED_SEARCH_PATH looks in the directory specified by the first argument, and then the default locations.
+    // This is necessary when using the shared runtime because coreclr is in a different directory than the host,
+    // so make sure coreclr dependencies can be resolved in the directory coreclr.dll exists in.
+    *dll = ::LoadLibraryExW(path.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     if (*dll == nullptr)
     {
         trace::error(_X("Failed to load the dll from [%s], HRESULT: 0x%X"), path, HRESULT_FROM_WIN32(GetLastError()));
