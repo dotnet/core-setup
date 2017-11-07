@@ -18,12 +18,6 @@
       "values": ["x86", "arm", "x64", "amd64"],
       "defaultValue": "x64"
     },
-    "Architecture":{
-      "description": "Build on the specified architecture (x64 or x86 (supported only on Windows), default: x64)",
-      "valueType": "property",
-      "values": ["x64", "x86"],
-      "defaultValue": "x64"
-    },
     "PortableBuild": {
       "description": "Indicates if this is a portable build.",
       "valueType": "property",
@@ -35,12 +29,6 @@
       "valueType": "property",
       "values": [ "True", "False"],
       "defaultValue": "False"
-    },
-    "DistroRid": {
-      "description": "Specifies the distro rid for Unix OS.",
-      "valueType": "property",
-      "values": [],
-      "defaultValue": "${OSRid}-${CPUArch}"
     },
     "TargetArchitecture":{
       "description": "Build for the specified architecture (x64, x86 (supported only on Windows), arm, or arm64, default: x64)",
@@ -267,11 +255,9 @@
       "defaultValues":{
         "toolName": "msbuild",
         "settings": {
-          "Architecture": "default", 
            "TargetArchitecture": "default",
            "OSGroup": "default",
            "MsBuildLogging":"default",
-           "DistroRid":"default",
            "Project":"build.proj"
         }
       }
@@ -294,7 +280,6 @@
       "defaultValues":{
         "toolName": "msbuild",
         "settings": {
-          "Architecture": "default", 
            "TargetArchitecture": "default",
            "Framework": "default",
            "OSGroup": "default",

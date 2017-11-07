@@ -16,14 +16,18 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PlatformPackageVersion>2.0.0</PlatformPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.4.3-servicing-25902-01</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>2.0.0</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.4.2-servicing-25708-01</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftPrivateCoreFxUAPPackageVersion>4.4.0-preview3-25526-01</MicrosoftPrivateCoreFxUAPPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.4-servicing-25902-03</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <MicrosoftNETCoreRuntimeJitPackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</MicrosoftNETCoreRuntimeJitPackageVersion>
-    <NETStandardVersion>2.0.1</NETStandardVersion>
-    <DiaSymReaderNativeVersion>1.4.1</DiaSymReaderNativeVersion>
-    <WcfVersion>4.4.0-preview3-25503-01</WcfVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.2-servicing-25708-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <NETStandardLibraryPackageVersion>2.0.0</NETStandardLibraryPackageVersion>
+    <MicrosoftDiaSymReaderNativePackageVersion>1.4.1</MicrosoftDiaSymReaderNativePackageVersion>
+
+    <SystemServiceModelDuplexPackageVersion>4.4.0-preview3-25503-01</SystemServiceModelDuplexPackageVersion>
+    <SystemServiceModelHttpPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelHttpPackageVersion>
+    <SystemServiceModelNetTcpPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelNetTcpPackageVersion>
+    <SystemServiceModelPrimitivesPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelPrimitivesPackageVersion>
+    <SystemServiceModelSecurityPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelSecurityPackageVersion>
   </PropertyGroup>
 
   <!-- Package dependency verification/auto-upgrade configuration. -->
@@ -31,6 +35,16 @@
     <BaseDotNetBuildInfo>build-info/dotnet/</BaseDotNetBuildInfo>
     <DependencyBranch>release/2.0.0</DependencyBranch>
     <CurrentRefXmlPath>$(MSBuildThisFileFullPath)</CurrentRefXmlPath>
+  </PropertyGroup>
+
+  <!-- infrastructure and test only dependencies -->
+  <PropertyGroup>
+    <MicrosoftBuildPackageVersion>15.1.1012</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
+    <MicrosoftBuildTasksCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildTasksCorePackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
+
+    <MicrosoftDotNetPlatformAbstractionsPackageVersion>1.1.1</MicrosoftDotNetPlatformAbstractionsPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -60,7 +74,7 @@
 
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>PlatformPackageVersion</ElementName>
+      <ElementName>MicrosoftNETCorePlatformsPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Platforms</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreFx">
@@ -80,16 +94,29 @@
     </XmlUpdateStep>
     <XmlUpdateStep Include="Standard">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>NETStandardVersion</ElementName>
+      <ElementName>NETStandardLibraryPackageVersion</ElementName>
       <PackageId>NETStandard.Library</PackageId>
     </XmlUpdateStep>
     <!--
       Disable updating wcf as it isn't needed in the release/2.0.0 branch
     <XmlUpdateStep Include="WCF">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>WcfVersion</ElementName>
+      <ElementName>SystemServiceModelDuplexPackageVersion</ElementName>
       <PackageId>System.ServiceModel.Duplex</PackageId>
     </XmlUpdateStep>
     -->
   </ItemGroup>
+
+  <!-- Override isolated build dependency versions with versions from Repo API. -->
+  <Import Project="$(DotNetPackageVersionPropsPath)"
+          Condition="'$(DotNetPackageVersionPropsPath)' != ''" />
+
+  <!--
+    Map PackageVersion properties that don't match the Repo API naming conventions. This must be
+    defined after the DotNetPackageVersionPropsPath Import so overrides apply correctly.
+  -->
+  <PropertyGroup>
+    <!-- Backward compatibility for BuildTools usage. -->
+    <PlatformPackageVersion>$(MicrosoftNETCorePlatformsPackageVersion)</PlatformPackageVersion>
+  </PropertyGroup>
 </Project>
