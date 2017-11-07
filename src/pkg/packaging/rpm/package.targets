@@ -6,9 +6,7 @@
   <UsingTask TaskName="BuildFPMToolPreReqs" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
 
   <PropertyGroup>
-    <IsRPMBasedDistro Condition="$(PackageTargetRid.StartsWith('rhel')) or
-                                 $(PackageTargetRid.StartsWith('centos')) or 
-                                 $(PackageTargetRid.StartsWith('opensuse'))">true</IsRPMBasedDistro>>true</IsRPMBasedDistro>
+    <IsRPMBasedDistro Condition="'$(InstallerExtension)' == '.rpm'">true</IsRPMBasedDistro>
     <BuildRpmPackage Condition="'$(IsRPMBasedDistro)' == true and '$(TargetArchitecture)' == 'x64'">true</BuildRpmPackage>
   </PropertyGroup>
 
