@@ -17,10 +17,10 @@
 
   <PropertyGroup>
     <MicrosoftNETCorePlatformsPackageVersion>2.0.0</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.4.2-servicing-25708-01</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.4.3-servicing-25902-01</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftPrivateCoreFxUAPPackageVersion>4.4.0-preview3-25526-01</MicrosoftPrivateCoreFxUAPPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.2-servicing-25708-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <NETStandardLibraryPackageVersion>2.0.0</NETStandardLibraryPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.4-servicing-25902-03</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <NETStandardLibraryPackageVersion>2.0.1</NETStandardLibraryPackageVersion>
     <MicrosoftDiaSymReaderNativePackageVersion>1.4.1</MicrosoftDiaSymReaderNativePackageVersion>
 
     <SystemServiceModelDuplexPackageVersion>4.4.0-preview3-25503-01</SystemServiceModelDuplexPackageVersion>
