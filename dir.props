@@ -46,7 +46,7 @@
 
     <SharedFrameworkNugetVersion>$(ProductVersion)</SharedFrameworkNugetVersion>
 
-    <UWPCoreRuntimeSdkVersion>6.0.1</UWPCoreRuntimeSdkVersion>
+    <UWPCoreRuntimeSdkVersion>6.0.2</UWPCoreRuntimeSdkVersion>
     <UWPCoreRuntimeSdkFullVersion>$(UWPCoreRuntimeSdkVersion)$(ProductVersionSuffix)</UWPCoreRuntimeSdkFullVersion>
 
     <NuGetVersion>$(SharedFrameworkNugetVersion)</NuGetVersion>
@@ -88,6 +88,15 @@
     <HostPolicyVersion Condition="'$(UseShippedHostPolicyPackage)' != 'true'">$(ProductVersion)</HostPolicyVersion>
     <HostPolicyVersion Condition="'$(UseShippedHostPolicyPackage)' == 'true'">2.0.0</HostPolicyVersion>
 
+    <!--
+         UWPCoreRuntimeSdk package version is only updated whenever there is a change in it.
+         If there is ever a need to use a shipped version of the package, then set the property
+         below to true.
+    -->
+    <UseShippedUwpCoreRuntimeSdkPackage>true</UseShippedUwpCoreRuntimeSdkPackage>
+    <RuntimeSdkPackageVersion>$(ProductVersion)</RuntimeSdkPackageVersion>
+    <RuntimeSdkPackageVersion>2.1.1</RuntimeSdkPackageVersion>
+    
     <BinariesRelativePath>Runtime/$(SharedFrameworkNugetVersion)</BinariesRelativePath>
     <InstallersRelativePath>Runtime/$(SharedFrameworkNugetVersion)</InstallersRelativePath>
   </PropertyGroup>

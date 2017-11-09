@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllpackages)' == 'false'">
-    <Project Include="$(ProjectsBasePath)Microsoft.Net.UWPCoreRuntimeSdk\Microsoft.Net.UWPCoreRuntimeSdk.builds" Condition="'$(_BuildUwpDependencies)' == 'true'" />
+    <Project Include="$(ProjectsBasePath)Microsoft.Net.UWPCoreRuntimeSdk\Microsoft.Net.UWPCoreRuntimeSdk.builds" Condition="'$(_BuildUwpDependencies)' == 'true' and $(UseShippedUwpCoreRuntimeSdkPackage) != 'true'" />
     <Project Include="$(ProjectsBasePath)Microsoft.NETCore.UniversalWindowsPlatform\Microsoft.NETCore.UniversalWindowsPlatform.builds" Condition="'$(_BuildUwpDependencies)' == 'true'" />
   </ItemGroup>
 
