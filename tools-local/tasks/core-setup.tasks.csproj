@@ -25,7 +25,9 @@
     <Compile Include="*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
+    <PackageReference Include="NuGet.ProjectModel">
+      <Version>$(NuGetProjectModelPackageVersion)</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyModel">
       <Version>1.1.1</Version>
     </PackageReference>
