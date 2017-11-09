@@ -28,6 +28,8 @@
     <SystemServiceModelNetTcpPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelNetTcpPackageVersion>
     <SystemServiceModelPrimitivesPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelPrimitivesPackageVersion>
     <SystemServiceModelSecurityPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelSecurityPackageVersion>
+
+    <NuGetProjectModelPackageVersion>4.3.0-preview2-4095</NuGetProjectModelPackageVersion>
   </PropertyGroup>
 
   <!-- Package dependency verification/auto-upgrade configuration. -->
