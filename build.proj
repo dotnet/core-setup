@@ -66,7 +66,7 @@
 
       <ItemGroup>
         <CustomTaskDependencies Include="$(BuildToolsTaskDir)Newtonsoft.Json.dll" />
-        <CustomTaskDependencies Include="$(BuildToolsTaskDir)Microsoft.DotNet.PlatformAbstractions.dll" />
+        <CustomTaskDependencies Include="$(PackagesDir)microsoft.dotnet.platformabstractions\$(MicrosoftDotNetPlatformAbstractionsPackageVersion)\lib\$(DependencyModelTFM)\Microsoft.DotNet.PlatformAbstractions.dll" />
         <CustomTaskDependencies Include="$(PackagesDir)microsoft.extensions.dependencymodel\1.1.1\lib\$(DependencyModelTFM)\Microsoft.Extensions.DependencyModel.dll" />
       </ItemGroup>
       <Copy SourceFiles="@(CustomTaskDependencies)"
