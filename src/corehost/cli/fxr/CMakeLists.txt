@@ -46,7 +46,9 @@ if(WIN32)
         ../../common/pal.windows.cpp
         ../../common/longfile.windows.cpp)
 else()
-    list(APPEND SOURCES ../../common/pal.unix.cpp)
+    list(APPEND SOURCES
+        ../../common/pal.unix.cpp
+        ${VERSION_FILE_PATH})
 endif()
 
 add_definitions(-D_NO_ASYNCRTIMP)
@@ -58,6 +60,7 @@ if(WIN32)
     list(APPEND RESOURCES ../native.rc)
 endif()
 add_library(hostfxr SHARED ${SOURCES} ${RESOURCES})
+set_target_properties(hostfxr PROPERTIES MACOSX_RPATH TRUE)
 
 # Specify the import library to link against for Arm32 build since the default set is minimal
 if (WIN32 AND CLI_CMAKE_PLATFORM_ARCH_ARM)

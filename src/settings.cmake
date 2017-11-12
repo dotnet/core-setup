@@ -35,6 +35,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL SunOS)
 endif(CMAKE_SYSTEM_NAME STREQUAL SunOS)
 
 if (NOT WIN32)
+    # Try to locate the paxctl tool. Failure to find it is not fatal,
+    # but the generated executables won't work on a system where PAX is set
+    # to prevent applications to create executable memory mappings.
+    find_program(PAXCTL paxctl)
+
     if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
         # Ensure that dsymutil and strip are present
         find_program(DSYMUTIL dsymutil)
@@ -126,6 +131,24 @@ function(install_library_and_symbols targetName)
     endif()
 endfunction()
 
+# Disable PAX mprotect that would prevent JIT and other codegen in coreclr from working.
+# PAX mprotect prevents:
+# - changing the executable status of memory pages that were
+#   not originally created as executable,
+# - making read-only executable pages writable again,
+# - creating executable pages from anonymous memory,
+# - making read-only-after-relocations (RELRO) data pages writable again.
+function(disable_pax_mprotect targetName)
+    if (NOT PAXCTL STREQUAL "PAXCTL-NOTFOUND")
+        add_custom_command(
+            TARGET ${targetName}
+            POST_BUILD
+            VERBATIM
+            COMMAND ${PAXCTL} -c -m $<TARGET_FILE:${targetName}>
+        )
+    endif()
+endfunction()
+
 if(WIN32)
     add_definitions(-DWIN32)
     add_definitions(-D_WIN32=1)
@@ -155,8 +178,8 @@ if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG /PDBCOMPRESS")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:1572864")
 
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /guard:cf")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /guard:cf")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /GUARD:CF")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /GUARD:CF")
 
     # Debug build specific flags
     set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "/NOVCFEATURE")

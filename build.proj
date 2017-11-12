@@ -6,7 +6,7 @@
   <PropertyGroup>
     <SerializeProjects>true</SerializeProjects>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <!-- To disable the restoration of packages, set RestoreDuringBuild=false or pass /p:RestoreDuringBuild=false.-->
     <RestoreDuringBuild Condition="'$(RestoreDuringBuild)'==''">true</RestoreDuringBuild>
@@ -16,8 +16,8 @@
     <TraversalBuildDependencies>
       CreateOrUpdateCurrentVersionFile;
       CreateVersionInfoFile;
+      CreateHostMachineInfoFile;
       BatchRestorePackages;
-      ValidateExactRestore;
       BuildCustomTasks;
     </TraversalBuildDependencies>
     <TraversalBuildDependsOn>
@@ -35,42 +35,29 @@
   <Target Name="BuildTraversalBuildDependencies"
           DependsOnTargets="$(TraversalBuildDependencies)" />
 
-  <Target Name="BuildCustomTasks">
-      <MSBuild Projects="tools-local/tasks/core-setup.tasks.builds" />
+  <Target Name="CreateHostMachineInfoFile">
+    <GetTargetMachineInfo>
+      <Output PropertyName="HostMachineRid" TaskParameter="RuntimeIdentifier" />
+    </GetTargetMachineInfo>
 
     <PropertyGroup>
-      <DependencyModelTFM>netstandard1.3</DependencyModelTFM>
-      <DependencyModelTFM Condition="'$(MSBuildRuntimeType)' != 'Core'">net451</DependencyModelTFM>
+      <HostMachineInfoPropsContent>
+&lt;Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"&gt;
+  &lt;PropertyGroup&gt;
+    &lt;HostMachineRid&gt;$(HostMachineRid)&lt;/HostMachineRid&gt;
+  &lt;/PropertyGroup&gt;
+&lt;/Project&gt;
+      </HostMachineInfoPropsContent>
     </PropertyGroup>
-    
-    <ItemGroup>
-      <CustomTaskDependencies Include="$(BuildToolsTaskDir)Newtonsoft.Json.dll" />
-      <CustomTaskDependencies Include="$(BuildToolsTaskDir)Microsoft.DotNet.PlatformAbstractions.dll" />
-      <CustomTaskDependencies Include="$(PackagesDir)microsoft.extensions.dependencymodel\1.1.1\lib\$(DependencyModelTFM)\Microsoft.Extensions.DependencyModel.dll" />
-    </ItemGroup>        
-    <Copy SourceFiles="@(CustomTaskDependencies)"
-          DestinationFolder="$(LocalBuildToolsTaskDir)"
-          OverwriteReadOnlyFiles="true"
-          SkipUnchangedFiles="true" />
+
+    <WriteLinesToFile File="$(HostMachineInfoProps)"
+                      Lines="$(HostMachineInfoPropsContent)"
+                      Overwrite="True" />
   </Target>
 
   <Target Name="BatchRestorePackages" Condition="'$(RestoreDuringBuild)'=='true'">
-    <!-- Restore packages in a separate msbuild instance so that the buildversion props file generated in
-         CreateVersionInfoFile target gets evaluated, this ensures VersionSuffix is set (especially during 
-         'dotnet restore') to work around https://github.com/NuGet/Home/issues/4337 -->
-    <MSBuild Projects="$(MSBuildThisFileDirectory)restore.proj" />
-  </Target>
-
-  <!-- Task from buildtools that uses lockfiles to validate that packages restored are exactly what were specified. -->
-  <UsingTask TaskName="ValidateExactRestore" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll" />
-
-  <Target Name="ValidateExactRestore"
-          Condition="'$(AllowInexactRestore)'!='true'">
-    <ItemGroup>
-      <ProjectJsonTemplateFiles Include="$(MSBuildThisFileDirectory)**\project.json.template" />
-      <ProjectJsonsExcludingTemplateFiles Include="@(ProjectJsonFiles)" Exclude="@(ProjectJsonTemplateFiles)" />
-    </ItemGroup>
-    <ValidateExactRestore ProjectLockJsons="@(ProjectJsonsExcludingTemplateFiles->'%(RootDir)%(Directory)%(Filename).lock.json')" />
+    <Message Importance="High" Text="Restoring all packages..." />
+    <Exec Condition="'@(SdkRestoreProjects)' != ''" Command="$(DotnetRestoreCommand) &quot;%(SdkRestoreProjects.FullPath)&quot; $(MSBuildPassThroughPropertyList)" StandardOutputImportance="Low" />
   </Target>
 
   <Import Project="dir.targets" />

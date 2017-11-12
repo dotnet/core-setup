@@ -150,6 +150,14 @@ pal::string_t get_directory(const pal::string_t& path)
     return ret.substr(0, pos + 1) + DIR_SEPARATOR;
 }
 
+void remove_trailing_dir_seperator(pal::string_t* dir)
+{
+    if (dir->back() == DIR_SEPARATOR)
+    {
+        dir->pop_back();
+    }
+}
+
 void replace_char(pal::string_t* path, pal::char_t match, pal::char_t repl)
 {
     int pos = 0;
@@ -294,4 +302,21 @@ bool get_global_shared_store_dirs(std::vector<pal::string_t>*  dirs, const pal::
         dirs->push_back(dir);
     }
     return true;
+}
+
+/**
+* Multilevel Lookup is enabled by default
+*  It can be disabled by setting DOTNET_MULTILEVEL_LOOKUP env var to a value that is not 1
+*/
+bool multilevel_lookup_enabled()
+{
+    pal::string_t env_lookup;
+    bool multilevel_lookup = true;
+
+    if (pal::getenv(_X("DOTNET_MULTILEVEL_LOOKUP"), &env_lookup))
+    {
+        auto env_val = pal::xtoi(env_lookup.c_str());
+        multilevel_lookup = (env_val == 1);
+    }
+    return multilevel_lookup;
 }
