@@ -32,7 +32,9 @@ if(WIN32)
         ../../../common/pal.windows.cpp
         ../../../common/longfile.windows.cpp)
 else()
-    list(APPEND SOURCES ../../../common/pal.unix.cpp)
+    list(APPEND SOURCES
+        ../../../common/pal.unix.cpp
+        ${VERSION_FILE_PATH})
 endif()
 
 set(RESOURCES)
@@ -41,6 +43,11 @@ if(WIN32 AND NOT SKIP_VERSIONING)
 endif()
 
 add_executable(${DOTNET_HOST_EXE_NAME} ${SOURCES} ${RESOURCES})
+
+if(NOT WIN32)
+    disable_pax_mprotect(${DOTNET_HOST_EXE_NAME})
+endif()
+
 install(TARGETS ${DOTNET_HOST_EXE_NAME} DESTINATION bin)
 
 # Specify the import library to link against for Arm32 build since the default set is minimal

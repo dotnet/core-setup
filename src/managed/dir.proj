@@ -13,9 +13,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-      <BuildArgs>/p:Configuration=$(ConfigurationGroup)</BuildArgs>
-      <BuildArgs Condition="'$(LatestCommit)' != ''">$(BuildArgs) /p:LatestCommit=$(LatestCommit)</BuildArgs>
-      <BuildArgs Condition="'$(BuiltByString)' != ''">$(BuildArgs) /p:BuiltByString="$(BuiltByString)"</BuildArgs>
+      <BuildArgs>$(NoRestoreArg) $(MSBuildPassThroughPropertyList) /p:BaseOutputPath=$(IntermediateOutputForPackaging)</BuildArgs>
     </PropertyGroup>
 
     <Exec Command="$(DotnetToolCommand) build $(BuildArgs) %(PackageProjects.Identity)" />

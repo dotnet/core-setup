@@ -1,0 +1,16 @@
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MajorVersion>2</MajorVersion>
+    <MinorVersion>1</MinorVersion>
+    <PatchVersion>0</PatchVersion>
+    <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
+    <PreReleaseLabel>dev-di</PreReleaseLabel>
+    <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
+    <ReleaseBrandSuffix>DevDi</ReleaseBrandSuffix>
+    <Channel>dev/defaultintf</Channel>
+    <BranchName>dev/defaultintf</BranchName>
+    <ContainerName>dotnet</ContainerName>
+    <ChecksumContainerName>$(ContainerName)</ChecksumContainerName>
+    <NETCoreAppMaximumVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppMaximumVersion>
+  </PropertyGroup>
+</Project>

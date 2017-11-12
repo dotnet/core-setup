@@ -6,15 +6,15 @@
     <!-- don't build project references from pkgprojs during the packages build phase,
          they will be built during the source build phase -->
     <AdditionalProperties>BuildPackageLibraryReferences=false</AdditionalProperties>
-  </PropertyGroup>
+    <ProjectsBasePath>$(MSBuildThisFileDirectory)projects\</ProjectsBasePath>
+  </PropertyGroup>  
 
   <ItemGroup>
-    <ProjectExclusions Include="$(MSBuildThisFileDirectory)\projects\*\Microsoft.NETCore.UniversalWindowsPlatform.builds" Condition="'$(OSEnvironment)' != 'Windows_NT' or '$(Platform)' == 'arm64'" />
-    <ProjectExclusions Include="$(MSBuildThisFileDirectory)\projects\*\Microsoft.NET.CoreRuntime.builds" Condition="'$(OSEnvironment)' != 'Windows_NT' or '$(Platform)' == 'arm64'" />
-    <Project Include="$(MSBuildThisFileDirectory)\projects\*\*.builds" Exclude="@(ProjectExclusions)">
+    <ProjectExclusions Include="$(ProjectsBasePath)*\Microsoft.NETCore.UniversalWindowsPlatform.builds" Condition="'$(_BuildUwpDependencies)' != 'true'" />
+    <ProjectExclusions Include="$(ProjectsBasePath)*\Microsoft.Net.UWPCoreRuntimeSdk.builds" Condition="'$(_BuildUwpDependencies)' != 'true'" />
+    <Project Include="$(ProjectsBasePath)*\*.builds" Exclude="@(ProjectExclusions)">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-  </ItemGroup>
-
+  </ItemGroup>  
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>

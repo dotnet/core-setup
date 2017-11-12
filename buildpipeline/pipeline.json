@@ -18,9 +18,9 @@
         {
           "Name": "Core-Setup-Linux-BT",
           "Parameters": {
-            "PB_DistroRid": "rhel.7.2-x64",
-            "PB_DockerTag": "rhel7_prereqs_2",
-            "PB_AdditionalBuildArguments":"-PortableBuild=true -strip-symbols",
+            "PB_DockerTag": "centos-7-d485f41-20173404063424",
+            "PB_AdditionalBuildArguments":"-PortableBuild=true -strip-symbols -SkipTests=$(PB_SkipTests)",
+            "PB_AdditionalMSBuildArguments":"/p:DotNetRestoreSources=$(PB_RestoreSource)",
             "PB_PortableBuild": "true"
           },
           "ReportingParameters": {
@@ -31,26 +31,57 @@
           }
         },
         {
-          "Name": "Core-Setup-Linux-Arm-BT", 
-          "Parameters": { 
-            "PB_DistroRid": "ubuntu.14.04-arm", 
-            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20172211042239", 
-            "PB_TargetArchitecture": "arm", 
-            "PB_AdditionalBuildArguments":"-TargetArchitecture=arm -DistroRid=linux-arm -DisableCrossgen=true -PortableBuild=true -SkipTests=true -CrossBuild=true -strip-symbols",
+          "Name": "Core-Setup-Linux-Arm-BT",
+          "Parameters": {
+            "PB_DockerTag": "centos-6-376e1a3-20174311014331",
+            "PB_TargetArchitecture": "x64",
+            "PB_AdditionalBuildArguments":"-TargetArchitecture=x64 -PortableBuild=false -strip-symbols -SkipTests=$(PB_SkipTests)",
+            "PB_AdditionalMSBuildArguments":"/p:OutputRid=rhel.6-x64 /p:DotNetRestoreSources=$(PB_RestoreSource)",
+            "PB_PortableBuild": "false"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "RedHat6",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        },
+        {
+          "Name": "Core-Setup-Linux-Arm-BT",
+          "Parameters": {
+            "PB_DockerTag": "alpine-3.6-3148f11-20171119021156",
+            "PB_TargetArchitecture": "x64",
+            "PB_AdditionalBuildArguments":"-TargetArchitecture=x64 -PortableBuild=false -strip-symbols -SkipTests=$(PB_SkipTests)",
+            "PB_AdditionalMSBuildArguments":"/p:OutputRid=alpine.3.6-x64 /p:DotNetRestoreSources=$(PB_RestoreSource)",
+            "PB_PortableBuild": "false"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Alpine3.6",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        },
+        {
+          "Name": "Core-Setup-Linux-Arm-BT",
+          "Parameters": {
+            "PB_DockerTag": "ubuntu-14.04-cross-0cd4667-20170319080304",
+            "PB_TargetArchitecture": "arm",
+            "PB_AdditionalBuildArguments":"-TargetArchitecture=arm -DisableCrossgen=true -PortableBuild=true -SkipTests=true -CrossBuild=true -strip-symbols",
+            "PB_AdditionalMSBuildArguments": "/p:DotNetRestoreSources=$(PB_RestoreSource)",
             "PB_CrossBuildArgs": "-e ROOTFS_DIR ",
-            "PB_PortableBuild": "true" 
-          }, 
-          "ReportingParameters": { 
-            "SubType": "PortableBuild", 
-            "OperatingSystem": "Ubuntu 14.04", 
-            "Type": "build/product/", 
-            "Platform": "arm" 
-          } 
-        },         
+            "PB_PortableBuild": "true"
+          },
+          "ReportingParameters": {
+            "SubType": "PortableBuild",
+            "OperatingSystem": "Ubuntu 14.04",
+            "Type": "build/product/",
+            "Platform": "arm"
+          }
+        },
         {
           "Name": "Core-Setup-OSX-BT",
           "Parameters": {
-            "PB_PortableBuildArg": "-PortableBuild=true -strip-symbols",
+            "PB_AdditionalBuildArguments": "-PortableBuild=true -strip-symbols -SkipTests=$(PB_SkipTests)",
+            "PB_AdditionalMSBuildArguments": "/p:DotNetRestoreSources=$(PB_RestoreSource)",
             "PB_PortableBuild": "true"
           },
           "ReportingParameters": {
@@ -63,9 +94,8 @@
         {
           "Name": "Core-Setup-Windows-Arm-BT",
           "Parameters": {
-            "PB_AdditionalBuildArguments": "/p:SkipTests=true",
+            "PB_AdditionalMSBuildArguments": "/p:SkipTests=true /p:DotNetRestoreSources=$(PB_RestoreSource)",
             "PB_TargetArchitecture": "arm",
-            "PB_DistroRid": "win-arm",
             "PB_PortableBuild": "true"
           },
           "ReportingParameters": {
@@ -78,9 +108,8 @@
         {
           "Name": "Core-Setup-Windows-Arm-BT",
           "Parameters": {
-            "PB_AdditionalBuildArguments": "/p:SkipTests=true /p:NativeToolSetDir=C:\\tools\\clr",
+            "PB_AdditionalMSBuildArguments": "/p:SkipTests=true /p:NativeToolSetDir=C:\\tools\\clr /p:DotNetRestoreSources=$(PB_RestoreSource)",
             "PB_TargetArchitecture": "arm64",
-            "PB_DistroRid": "win-arm64",
             "PB_PortableBuild": "true"
           },
           "ReportingParameters": {
@@ -93,9 +122,9 @@
         {
           "Name": "Core-Setup-Windows-BT",
           "Parameters": {
-            "PB_DistroRid": "win7-x64",
             "PB_TargetArchitecture": "x64",
             "PB_PortableBuild": "true",
+            "PB_AdditionalMSBuildArguments": "/p:SkipTests=$(PB_SkipTests) /p:DotNetRestoreSources=$(PB_RestoreSource)",
             "PB_PublishRidAgnosticPackages": "true",
             "PB_BuildFullPlatformManifest": "true"
           },
@@ -109,9 +138,9 @@
         {
           "Name": "Core-Setup-Windows-BT",
           "Parameters": {
-            "PB_DistroRid": "win7-x86",
             "PB_TargetArchitecture": "x86",
-            "PB_PortableBuild": "true"
+            "PB_PortableBuild": "true",
+            "PB_AdditionalMSBuildArguments": "/p:SkipTests=$(PB_SkipTests) /p:DotNetRestoreSources=$(PB_RestoreSource)"
           },
           "ReportingParameters": {
             "OperatingSystem": "Windows",
@@ -134,11 +163,37 @@
         {
           "Name": "Core-Setup-Publish",
           "Parameters": {
-            "PB_TargetArchitecture": "x64",
+            "PB_TargetArchitecture": "x64"
           },
           "ReportingParameters": {
             "OperatingSystem": "Windows",
             "SubType": "Publish",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        }
+      ],
+      "DependsOn": [
+        "Trusted-All-Release"
+      ]
+    },
+    {
+      "Name": "Signing validation",
+      "Parameters": {
+        "TreatWarningsAsErrors": "false"
+      },
+      "BuildParameters": {
+        "BuildConfiguration": "Release"
+      },
+      "Definitions": [
+        {
+          "Name": "Core-Setup-Signing-Validation",
+          "Parameters": {
+            "PB_TargetArchitecture": "x64"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Windows",
+            "SubType": "Validation",
             "Type": "build/product/",
             "Platform": "x64"
           }

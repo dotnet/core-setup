@@ -2,6 +2,7 @@ using Microsoft.DotNet.Cli.Build;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Microsoft.DotNet.CoreSetup.Test
 {
@@ -52,7 +53,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
             string dotnetInstallPath = null,
             string currentRid = null,
             string builtDotnetOutputPath = null,
-            string framework = "netcoreapp2.0")
+            string framework = "netcoreapp2.1")
         {
             ValidateRequiredDirectories(repoDirectoriesProvider);
 
@@ -143,7 +144,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 sourceTestProject.ProjectName,
                 testArtifactDirectory);
 
-            EnsureGlobalJson(testArtifactDirectory);
+            EnsureDirectoryBuildProps(testArtifactDirectory);
 
             sourceTestProject.CopyProjectFiles(copiedTestProjectDirectory);
             return new TestProject(
@@ -153,18 +154,24 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 sharedLibraryPrefix);
         }
 
-        private void EnsureGlobalJson(string testArtifactDirectory)
+        private void EnsureDirectoryBuildProps(string testArtifactDirectory)
         {
-            string globalJsonPath = Path.Combine(testArtifactDirectory, "global.json");
+            string directoryBuildPropsPath = Path.Combine(testArtifactDirectory, "Directory.Build.props");
             Directory.CreateDirectory(testArtifactDirectory);
 
-            for(int i = 0; i < 3 && !File.Exists(globalJsonPath); i++)
+            for(int i = 0; i < 3 && !File.Exists(directoryBuildPropsPath); i++)
             {
                 try
                 {
-                    // write an empty global.json to ensure that restore doesn't look elsewhere
-                    // for package dependencies to replace with projects.
-                    File.WriteAllText(globalJsonPath, "{}");
+                    StringBuilder propsFile = new StringBuilder();
+
+                    propsFile.AppendLine("<Project>");
+                    propsFile.AppendLine("  <Import Project=\"$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), TestProjects.props))\\TestProjects.props\" />");
+                    propsFile.AppendLine("</Project>");
+
+                    // write an empty Directory.Build.props to ensure that msbuild doesn't pick up
+                    // the repo's root Directory.Build.props.
+                    File.WriteAllText(directoryBuildPropsPath, propsFile.ToString());
                 }
                 catch (IOException)
                 {}
@@ -210,6 +217,8 @@ namespace Microsoft.DotNet.CoreSetup.Test
             _framework = framework;
 
             var buildArgs = new List<string>();
+            buildArgs.Add("--no-restore");
+
             if (runtime != null)
             {
                 buildArgs.Add("--runtime");
@@ -286,8 +295,10 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 storeArgs.Add(outputDirectory);
             }
 
-            storeArgs.Add("--working-dir");
-            storeArgs.Add("store_workin_dir");
+            storeArgs.Add($"/p:MNAVersion={_repoDirectoriesProvider.MicrosoftNETCoreAppVersion}");
+
+            // Ensure the project's OutputType isn't 'Exe', since that causes issues with 'dotnet store'
+            storeArgs.Add("/p:OutputType=Library");
 
             dotnet.Store(storeArgs.ToArray())
                 .WorkingDirectory(_testProject.ProjectDirectory)
@@ -315,6 +326,8 @@ namespace Microsoft.DotNet.CoreSetup.Test
             _framework = framework;
 
             var publishArgs = new List<string>();
+            publishArgs.Add("--no-restore");
+
             if (runtime != null)
             {
                 publishArgs.Add("--runtime");

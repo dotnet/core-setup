@@ -6,10 +6,9 @@
 
   <!-- Target that builds UWP Host for CoreCLR.
   -->
-  <Target Name="Build" DependsOnTargets="BuildUWPHost" /> 
+  <Target Name="Build" DependsOnTargets="BuildUWPHost;BuildMSBuildTask" />
 
   <Target Name="BuildUWPHost" DependsOnTargets="GetLatestCommitHash">
-
     <!-- Generate Version files -->
     <ItemGroup>
       <HostFiles Include="uwphost;uwpshim;copywin32resources" />
@@ -18,7 +17,7 @@
              Properties="GenerateNativeVersionInfo=true;AssemblyName=%(HostFiles.Identity);NativeVersionFileDir=$(IntermediateOutputRootPath)uwphostResourceFiles\%(HostFiles.Identity);NativeVersionHeaderFile=$(IntermediateOutputRootPath)uwphostResourceFiles\%(HostFiles.Identity)\version_info.h"
              Targets="GenerateVersionHeader" />
     <PropertyGroup>
-      <BuildArgs>$(ConfigurationGroup) $(TargetArchitecture) rid $(TargetRid)</BuildArgs>
+      <BuildArgs>$(ConfigurationGroup) $(TargetArchitecture) rid $(OutputRid)</BuildArgs>
     </PropertyGroup>
 
     <!-- Run script that invokes Cmake to create VS files, and then calls msbuild to compile them -->
@@ -27,11 +26,15 @@
 
     <ItemGroup>
       <CMakeOutput Include="$(IntermediateOutputRootPath)uwphost\host\uwphost\$(ConfigurationGroup)\uwphost.dll" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)uwphost\host\uwpshim\$(ConfigurationGroup)\uwpshim.exe" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)uwpshim\$(ConfigurationGroup)\uwpshim.exe" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)uwphost\copywin32resources\$(ConfigurationGroup)\copywin32resources.exe" />
     </ItemGroup>
     
     <Copy SourceFiles="@(CMakeOutput)"
           DestinationFolder="$(UWPOutputDir)"/>
+  </Target>
+
+  <Target Name="BuildMSBuildTask" DependsOnTargets="GetLatestCommitHash">
+    <MSBuild Projects="$(MSBuildThisFileDirectory)Microsoft.Build.Net.CoreRuntimeTask/Microsoft.Build.Net.CoreRuntimeTask.builds" />
   </Target>
 </Project>
