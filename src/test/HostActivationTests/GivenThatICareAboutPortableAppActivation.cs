@@ -69,11 +69,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
 
             // Change *.dll to *.exe
             var appDll = fixture.TestProject.AppDll;
-            var appDll2 = appDll.Replace(".dll", ".exe");
-            File.Copy(appDll, appDll2);
+            var appExe = appDll.Replace(".dll", ".exe");
+            File.Copy(appDll, appExe);
             File.Delete(appDll);
 
-            dotnet.Exec("exec", appDll2)
+            dotnet.Exec("exec", appExe)
                 .CaptureStdErr()
                 .Execute()
                 .Should()

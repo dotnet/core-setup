@@ -63,6 +63,7 @@ void add_unique_path(
     existing->insert(real);
 }
 
+// Return the filename from deps path; a deps path always uses a '/' for the separator.
 pal::string_t get_deps_filename(const pal::string_t& path)
 {
     if (path.empty())
@@ -83,7 +84,7 @@ pal::string_t get_deps_filename(const pal::string_t& path)
 
   // -----------------------------------------------------------------------------
   // A uniqifying append helper that doesn't let two entries with the same
-  // "asset_name" be part of the "output" paths.
+  // "asset_name" be part of the "items" paths.
   //
 void deps_resolver_t::add_tpa_asset(
     const pal::string_t& asset_name,
