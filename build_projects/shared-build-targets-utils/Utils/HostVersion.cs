@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Cli.Build
         //
 
         // Full versions and package information.
-        public static bool EnsureStableVersion => true;
+        public static bool EnsureStableVersion => false;
         public string LatestHostPrerelease => "servicing";
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
@@ -76,8 +76,8 @@ namespace Microsoft.DotNet.Cli.Build
         public VerInfo LatestHostFxrVersion => new VerInfo(1, 0, 1, "", "", "", CommitCountString);
         public VerInfo LatestHostPolicyVersion =>
             (HostVersion.EnsureStableVersion ?
-            new VerInfo(1, 0, 8, "", "", "", CommitCountString) :
-            new VerInfo(1, 0, 8, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
+            new VerInfo(1, 0, 9, "", "", "", CommitCountString) :
+            new VerInfo(1, 0, 9, LatestHostPrerelease, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
             );
 
         public Dictionary<string, VerInfo> LatestHostPackages => new Dictionary<string, VerInfo>()
