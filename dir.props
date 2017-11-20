@@ -46,7 +46,7 @@
 
     <SharedFrameworkNugetVersion>$(ProductVersion)</SharedFrameworkNugetVersion>
 
-    <UWPCoreRuntimeSdkVersion>6.0.2</UWPCoreRuntimeSdkVersion>
+    <UWPCoreRuntimeSdkVersion>6.0.3</UWPCoreRuntimeSdkVersion>
     <UWPCoreRuntimeSdkFullVersion>$(UWPCoreRuntimeSdkVersion)$(ProductVersionSuffix)</UWPCoreRuntimeSdkFullVersion>
 
     <NuGetVersion>$(SharedFrameworkNugetVersion)</NuGetVersion>
@@ -95,7 +95,7 @@
     -->
     <UseShippedUwpCoreRuntimeSdkPackage>true</UseShippedUwpCoreRuntimeSdkPackage>
     <RuntimeSdkPackageVersion>$(ProductVersion)</RuntimeSdkPackageVersion>
-    <RuntimeSdkPackageVersion>2.1.1</RuntimeSdkPackageVersion>
+    <RuntimeSdkPackageVersion Condition="'$(UseShippedUwpCoreRuntimeSdkPackage)' == 'true'">2.1.1</RuntimeSdkPackageVersion>
     
     <BinariesRelativePath>Runtime/$(SharedFrameworkNugetVersion)</BinariesRelativePath>
     <InstallersRelativePath>Runtime/$(SharedFrameworkNugetVersion)</InstallersRelativePath>
