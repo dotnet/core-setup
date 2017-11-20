@@ -59,7 +59,7 @@
       <Version>4.0.0</Version>
     </NetCore50Dependency>
     <NetCore50Dependency Include="System.Net.WebSockets.Client">
-      <Version>4.0.0</Version>
+      <Version>4.0.2</Version>
     </NetCore50Dependency>
     <NetCore50Dependency Include="System.Numerics.Vectors.WindowsRuntime">
       <Version>4.0.1</Version>
