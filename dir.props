@@ -384,6 +384,11 @@
     <SharedHostInstallerFile>$(SharedHostInstallerStart)$(ProductMoniker)$(InstallerExtension)</SharedHostInstallerFile>
     <HostFxrInstallerFile>$(HostFxrInstallerStart)$(HostResolverVersionMoniker)$(InstallerExtension)</HostFxrInstallerFile>
     <SharedFrameworkInstallerFile>$(SharedFrameworkInstallerStart)$(ProductMoniker)$(InstallerExtension)</SharedFrameworkInstallerFile>
+    <!-- Runtime Deb packages are Distro version agnostic --> 
+    <SharedHostInstallerFile Condition="'$(InstallerExtension)' == '.deb'">$(SharedHostInstallerStart)$(SharedFrameworkNugetVersion)$(InstallerExtension)</SharedHostInstallerFile>
+    <HostFxrInstallerFile Condition="'$(InstallerExtension)' == '.deb'">$(HostFxrInstallerStart)$(HostResolverVersion)$(InstallerExtension)</HostFxrInstallerFile>
+    <SharedFrameworkInstallerFile Condition="'$(InstallerExtension)' == '.deb'">$(SharedFrameworkInstallerStart)$(SharedFrameworkNugetVersion)$(InstallerExtension)</SharedFrameworkInstallerFile>
+    
     <DotnetRuntimeDependenciesPackageInstallerFile>$(DotnetRuntimeDependenciesPackageInstallerStart)$(ProductMoniker)$(InstallerExtension)</DotnetRuntimeDependenciesPackageInstallerFile>
   </PropertyGroup>
 

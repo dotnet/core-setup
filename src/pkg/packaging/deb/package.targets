@@ -9,6 +9,11 @@
                                     $(PackageTargetRid.StartsWith('debian'))">true</IsDebianBasedDistro>
     <BuildDebPackage Condition="'$(IsDebianBasedDistro)' == true and '$(TargetArchitecture)' == 'x64'">true</BuildDebPackage>
     <DebianConfigJsonName>debian_config.json</DebianConfigJsonName>
+    <RuntimeDebsDependsOn>
+      GenerateSharedHostDeb;
+      GenerateHostFxrDeb;
+      GenerateSharedFrameworkDeb;
+    </RuntimeDebsDependsOn>
   </PropertyGroup>
 
   <Target Name="InitializeDotnetDebTool">
@@ -41,8 +46,13 @@
                             BuildDebs;"
           Condition="'$(BuildDebPackage)'=='true'" />
 
+  <!-- Build only on Ubuntu14.04 -->
+  <Target Name="GenerateRuntimeDebs" 
+          DependsOnTargets="$(RuntimeDebsDependsOn)"
+          Condition="'$(PackageTargetRid)' == 'ubuntu.14.04-x64'" />
+
   <Target Name="BuildDebs"
-          DependsOnTargets="InitializeDotnetDebTool;GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb;GenerateRuntimeDependenciesDeb"
+          DependsOnTargets="InitializeDotnetDebTool;GenerateRuntimeDebs;GenerateRuntimeDependenciesDeb"
           Condition="'$(BuildDebPackage)'=='true' and '$(DebuildPresent)' == 'true'" />
 
   <Target Name="GenerateSharedHostDeb">
@@ -89,6 +99,12 @@
     <ItemGroup>
       <SharedHostTokenValue Include="%SHARED_HOST_BRAND_NAME%">
         <ReplacementString>$(SharedHostBrandName)</ReplacementString>
+      </SharedHostTokenValue>
+     <SharedHostTokenValue Include="%RUNTIME_DEPS_DEBIAN_PACKAGE_NAME%">
+        <ReplacementString>$(RuntimeDependenciesDebPkgName)</ReplacementString>
+      </SharedHostTokenValue>
+      <SharedHostTokenValue Include="%RUNTIME_DEPS_VERSION%">
+        <ReplacementString>$(SharedFrameworkNugetVersion)</ReplacementString>
       </SharedHostTokenValue>
     </ItemGroup>
 
@@ -191,7 +207,7 @@
 
   </Target>
 
-  <Target Name="GenerateSharedFrameworkDeb" DependsOnTargets="GetLibIcuPackageName">
+  <Target Name="GenerateSharedFrameworkDeb">
   
     <PropertyGroup>
       <DebPackageName>$(SharedFxDebPkgName)</DebPackageName>
@@ -199,7 +215,6 @@
       <InputRoot>$(SharedFrameworkPublishRoot)</InputRoot>
       <DebFile>$(SharedFrameworkInstallerFile)</DebFile>
       <ConfigJsonName>dotnet-sharedframework-debian_config.json</ConfigJsonName>
-      <ConfigJsonName  Condition="$(PackageTargetRid.StartsWith('debian.9'))">dotnet-sharedframework-debian9_config.json</ConfigJsonName>
       <ConfigJsonFile>$(debPackaginfConfigPath)$(ConfigJsonName)</ConfigJsonFile>
       <debIntermediatesDir>$(PackagesIntermediateDir)$(DebPackageName)/$(DebPackageVersion)</debIntermediatesDir>
     </PropertyGroup>
@@ -247,10 +262,6 @@
       <SharedFrameworkTokenValue Include="%SHARED_FRAMEWORK_BRAND_NAME%">
         <ReplacementString>$(SharedFrameworkBrandName)</ReplacementString>
       </SharedFrameworkTokenValue>
-      <SharedFrameworkTokenValue Include="%LIBICU_PACKAGE_NAME%">
-        <ReplacementString>$(LibIcuPackageName)</ReplacementString>
-      </SharedFrameworkTokenValue>
-
     </ItemGroup>
 
     <ReplaceFileContents InputFile="$(ConfigJsonFile)"
@@ -282,6 +293,7 @@
       <DebPackageVersion>$(SharedFrameworkNugetVersion)</DebPackageVersion>
       <DebFile>$(DotnetRuntimeDependenciesPackageInstallerFile)</DebFile>
       <ConfigJsonName>dotnet-runtime-deps-debian_config.json</ConfigJsonName>
+      <ConfigJsonName  Condition="$(PackageTargetRid.StartsWith('debian.9'))">dotnet-runtime-deps-debian9_config.json</ConfigJsonName>
       <ConfigJsonFile>$(debPackaginfConfigPath)$(ConfigJsonName)</ConfigJsonFile>
       <debIntermediatesDir>$(PackagesIntermediateDir)$(DebPackageName)/$(DebPackageVersion)</debIntermediatesDir>
     </PropertyGroup>
