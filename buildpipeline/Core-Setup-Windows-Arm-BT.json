@@ -68,7 +68,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "signType": "$(PB_SignType)",
+        "signType": "real",
         "zipSources": "false",
         "version": "",
         "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json"
@@ -392,7 +392,7 @@
       "value": "400"
     },
     "MsbuildSigningArguments": {
-      "value": "/p:CertificateId=$(CertificateId) /v:detailed"
+      "value": "/p:CertificateId=$(CertificateId) /v:detailed /p:SignType=$(PB_SignType)"
     },
     "TeamName": {
       "value": "DotNetCore"
@@ -444,7 +444,8 @@
       "value": "HEAD"
     },
     "PB_SignType": {
-      "value": "real"
+      "value": "real",
+      "allowOverride": true
     },
     "PB_CommonMSBuildArgs": {
       "value": "/p:ConfigurationGroup=$(BuildConfiguration) /p:TargetArchitecture=$(PB_TargetArchitecture) /p:PortableBuild=$(PB_PortableBuild) /p:DisableCrossgen=true $(PB_AdditionalBuildArguments)"

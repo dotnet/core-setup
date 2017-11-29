@@ -14,19 +14,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <CompressedFile Include="$(PackagesOutDir)**/*$(CompressedFileExtension)">
+  
+    <CompressedFile Include="$(AssetOutputPath)**/*$(CompressedFileExtension)">
       <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
     </CompressedFile>
-    <RuntimePackageFile Include="$(PackagesOutDir)**/runtime.*.nupkg" >
+    <RuntimePackageFile Include="$(PackageOutputPath)**/runtime.*.nupkg" >
       <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
     </RuntimePackageFile>
-    <RidAgnosticPackageFile Include="$(PackagesOutDir)**/*.nupkg" Exclude="@(RuntimePackageFile)" >
+    <RidAgnosticPackageFile Include="$(PackageOutputPath)**/*.nupkg" Exclude="@(RuntimePackageFile)" >
       <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
     </RidAgnosticPackageFile>
-    <InstallerFile Include="$(PackagesOutDir)**/*$(InstallerExtension)" Condition="'$(InstallerExtension)' != ''" >
+    <InstallerFile Include="$(AssetOutputPath)**/*$(InstallerExtension)" Condition="'$(InstallerExtension)' != ''" >
       <RelativeBlobPath>$(InstallersRelativePath)</RelativeBlobPath>
     </InstallerFile>
-    <InstallerFile Include="$(PackagesOutDir)**/*$(CombinedInstallerExtension)" Condition="'$(CombinedInstallerExtension)' != ''" >
+    <InstallerFile Include="$(AssetOutputPath)**/*$(CombinedInstallerExtension)" Condition="'$(CombinedInstallerExtension)' != ''">
       <RelativeBlobPath>$(InstallersRelativePath)</RelativeBlobPath>
     </InstallerFile>
   </ItemGroup>
