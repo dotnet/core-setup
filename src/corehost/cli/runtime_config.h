@@ -27,11 +27,10 @@ public:
     bool get_patch_roll_fwd() const;
     bool get_prerelease_roll_fwd() const;
     int get_roll_fwd_on_no_candidate_fx() const;
-    void set_get_roll_fwd_on_no_candidate_fx(int value);
+    void set_roll_fwd_on_no_candidate_fx(int value);
     bool get_portable() const;
     bool parse_opts(const json_value& opts);
     void combine_properties(std::unordered_map<pal::string_t, pal::string_t>& combined_properties) const;
-    static void get_properties(std::unordered_map<pal::string_t, pal::string_t>& combined_properties, std::vector<pal::string_t>* keys, std::vector<pal::string_t>* values);
 
 private:
     bool ensure_parsed();

@@ -121,14 +121,14 @@ public:
         const pal::string_t& additional_deps_serialized,
         const std::vector<pal::string_t>& probe_paths,
         const host_mode_t mode,
-        const std::vector<fx_definition_t*>& fx_definitions)
+        const fx_definition_vector_t& fx_definitions)
         : m_deps_file(deps_file)
         , m_additional_deps_serialized(additional_deps_serialized)
-        , m_portable(fx_definitions[0]->get_runtime_config().get_portable())
+        , m_portable(get_app(fx_definitions).get_runtime_config().get_portable())
         , m_probe_paths(probe_paths)
         , m_host_mode(mode)
         , m_host_interface()
-        , m_tfm(fx_definitions[0]->get_runtime_config().get_tfm())
+        , m_tfm(get_app(fx_definitions).get_runtime_config().get_tfm())
     {
         make_cstr_arr(m_clr_keys, &m_clr_keys_cstr);
         make_cstr_arr(m_clr_values, &m_clr_values_cstr);
@@ -136,30 +136,31 @@ public:
 
         int fx_count = fx_definitions.size();
         m_fx_names.reserve(fx_count);
-        m_fx_names_cstr.reserve(fx_count);
         m_fx_dirs.reserve(fx_count);
-        m_fx_dirs_cstr.reserve(fx_count);
         m_fx_requested_versions.reserve(fx_count);
-        m_fx_requested_versions_cstr.reserve(fx_count);
         m_fx_found_versions.reserve(fx_count);
-        m_fx_found_versions_cstr.reserve(fx_count);
 
         std::unordered_map<pal::string_t, pal::string_t> combined_properties;
-        for (int i = 0; i < fx_count; ++i)
+        for (auto& fx : fx_definitions)
         {
-            fx_definitions[i]->get_runtime_config().combine_properties(combined_properties);
+            fx->get_runtime_config().combine_properties(combined_properties);
 
-            m_fx_names.push_back(fx_definitions[i]->get_name());
-            m_fx_names_cstr.push_back(fx_definitions[i]->get_name().c_str());
-            m_fx_dirs.push_back(fx_definitions[i]->get_dir());
-            m_fx_dirs_cstr.push_back(fx_definitions[i]->get_dir().c_str());
-            m_fx_requested_versions.push_back(fx_definitions[i]->get_requested_version());
-            m_fx_requested_versions_cstr.push_back(fx_definitions[i]->get_requested_version().c_str());
-            m_fx_found_versions.push_back(fx_definitions[i]->get_found_version());
-            m_fx_found_versions_cstr.push_back(fx_definitions[i]->get_found_version().c_str());
+            m_fx_names.push_back(fx->get_name());
+            m_fx_dirs.push_back(fx->get_dir());
+            m_fx_requested_versions.push_back(fx->get_requested_version());
+            m_fx_found_versions.push_back(fx->get_found_version());
         }
 
-        runtime_config_t::get_properties(combined_properties, &m_clr_keys, &m_clr_values);
+        for (const auto& kv : combined_properties)
+        {
+            m_clr_keys.push_back(kv.first);
+            m_clr_values.push_back(kv.second);
+        }
+
+        make_cstr_arr(m_fx_names, &m_fx_names_cstr);
+        make_cstr_arr(m_fx_dirs, &m_fx_dirs_cstr);
+        make_cstr_arr(m_fx_requested_versions, &m_fx_requested_versions_cstr);
+        make_cstr_arr(m_fx_found_versions, &m_fx_found_versions_cstr);
     }
 
     const pal::string_t& tfm() const
@@ -234,7 +235,6 @@ private:
     }
 };
 
-
 struct hostpolicy_init_t
 {
     std::vector<std::vector<char>> cfg_keys;
@@ -242,8 +242,7 @@ struct hostpolicy_init_t
     pal::string_t deps_file;
     pal::string_t additional_deps_serialized;
     std::vector<pal::string_t> probe_paths;
-    std::vector<std::unique_ptr<fx_definition_t>> fx_definitions_owned;
-    std::vector<fx_definition_t*> fx_definitions;
+    fx_definition_vector_t fx_definitions;
     pal::string_t tfm;
     host_mode_t host_mode;
     bool patch_roll_forward;
@@ -320,24 +319,20 @@ struct hostpolicy_init_t
             make_palstr_arr(input->fx_requested_versions.len, input->fx_requested_versions.arr, &fx_requested_versions);
             make_palstr_arr(input->fx_found_versions.len, input->fx_found_versions.arr, &fx_found_versions);
 
-            init->fx_definitions_owned.reserve(fx_count);
             init->fx_definitions.reserve(fx_count);
             for (int i = 0; i < fx_count; ++i)
             {
                 auto fx = new fx_definition_t(fx_names[i], fx_dirs[i], fx_requested_versions[i], fx_found_versions[i]);
-                init->fx_definitions_owned.push_back(std::unique_ptr<fx_definition_t>(fx));
-                init->fx_definitions.push_back(fx);
+                init->fx_definitions.push_back(std::unique_ptr<fx_definition_t>(fx));
             }
         }
         else
         {
             // Backward compat; create the fx_definitions[0] and [1] from the previous information
-            init->fx_definitions_owned.reserve(2);
             init->fx_definitions.reserve(2);
 
             auto fx = new fx_definition_t();
-            init->fx_definitions_owned.push_back(std::unique_ptr<fx_definition_t>(fx));
-            init->fx_definitions.push_back(fx);
+            init->fx_definitions.push_back(std::unique_ptr<fx_definition_t>(fx));
 
             if (init->is_portable)
             {
@@ -346,11 +341,14 @@ struct hostpolicy_init_t
 
                 // The found_ver was not passed previously, so obtain that from fx_dir
                 pal::string_t fx_found_ver;
-                get_found_version_from_fx_dir(fx_dir, &fx_found_ver);
+                int index = fx_dir.rfind(DIR_SEPARATOR);
+                if (index != pal::string_t::npos)
+                {
+                    fx_found_ver = fx_dir.substr(index + 1);
+                }
 
                 fx = new fx_definition_t(fx_name, fx_dir, fx_requested_ver, fx_found_ver);
-                init->fx_definitions_owned.push_back(std::unique_ptr<fx_definition_t>(fx));
-                init->fx_definitions.push_back(fx);
+                init->fx_definitions.push_back(std::unique_ptr<fx_definition_t>(fx));
             }
         }
 
@@ -373,16 +371,6 @@ private:
         for (int i = 0; i < argc; ++i)
         {
             pal::pal_clrstring(pal::string_t(argv[i]), &(*out)[i]);
-        }
-    }
-
-    // Obtain the found_version from the fx_dir
-    static void get_found_version_from_fx_dir(const pal::string_t& fx_dir, pal::string_t* found_version)
-    {
-        int index = fx_dir.rfind(DIR_SEPARATOR);
-        if (index != pal::string_t::npos)
-        {
-            found_version->assign(fx_dir.substr(index + 1));
         }
     }
 };

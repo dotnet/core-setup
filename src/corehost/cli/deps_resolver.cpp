@@ -583,10 +583,7 @@ void deps_resolver_t::resolve_additional_deps(const hostpolicy_init_t& init)
         }
     }
 
-    // The rid graph is obtained from the root framework
-    int root_framework = m_fx_definitions.size() - 1;
-    auto rids = m_fx_definitions[root_framework]->get_deps().get_rid_fallback_graph();
-
+    auto rids = get_root_framework(m_fx_definitions).get_deps().get_rid_fallback_graph();
     for (pal::string_t json_file : m_additional_deps_files)
     {
         m_additional_deps.push_back(std::unique_ptr<deps_json_t>(
@@ -707,7 +704,7 @@ bool deps_resolver_t::resolve_probe_dirs(
     // Add fx package locations to fx_dir
     for (int i = 1; i < m_fx_definitions.size(); ++i)
     {
-        const auto& fx_entries = m_portable ? m_fx_definitions[i]->get_deps().get_entries(asset_type) : empty;
+        const auto& fx_entries = m_fx_definitions[i]->get_deps().get_entries(asset_type);
         for (const auto& entry : fx_entries)
         {
             if (!add_package_cache_entry(entry, m_fx_definitions[i]->get_dir()))

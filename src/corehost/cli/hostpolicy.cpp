@@ -100,16 +100,13 @@ int run(const arguments_t& args)
     pal::pal_clrstring(probe_paths.native, &native_dirs_cstr);
     pal::pal_clrstring(probe_paths.resources, &resources_dirs_cstr);
 
+    pal::string_t fx_deps_str;
     if (resolver.get_fx_definitions().size() >= 2)
     {
-        // Use the first fx to define FX_DEPS_FILE
-        pal::pal_clrstring(resolver.get_fx_definitions()[1]->get_deps_file(), &fx_deps);
+        // Use the root fx to define FX_DEPS_FILE
+        fx_deps_str = get_root_framework(resolver.get_fx_definitions()).get_deps_file();
     }
-    else
-    {
-        pal::string_t empty;
-        pal::pal_clrstring(empty, &fx_deps);
-    }
+    pal::pal_clrstring(fx_deps_str, &fx_deps);
 
     // Get all deps files
     pal::string_t allDeps;

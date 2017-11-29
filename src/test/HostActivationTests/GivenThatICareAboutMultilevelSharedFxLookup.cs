@@ -199,7 +199,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("9999.0.0");
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0");
+
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0");
+            DeleteAvailableSharedFxVersions(_cwdSharedFxBaseDir, "9999.0.0");
         }
 
         [Fact]
@@ -212,7 +215,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
             var appDll = fixture.TestProject.AppDll;
 
             // Add some dummy versions
-            AddAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.2", "9999.0.0-dummy2", "9999.0.0", "9999.0.3", "9999.0.0-dummy3");
+            AddAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0", "9999.0.2", "9999.0.0-dummy2", "9999.0.3", "9999.0.0-dummy3");
 
             // Version: 9999.0.0 (through --fx-version arg)
             // Exe: 9999.0.2, 9999.0.0-dummy2, 9999.0.0, 9999.0.3, 9999.0.0-dummy3
@@ -252,15 +255,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("9999.0.0")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
                 .And
-                .HaveStdOutContaining("9999.0.0-dummy2")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy2")
                 .And
-                .HaveStdOutContaining("9999.0.2")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.2")
                 .And
-                .HaveStdOutContaining("9999.0.3");
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.3")
+                .And
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy3");
 
-            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0", "9999.0.3", "9999.0.0-dummy3", "9999.0.2", "9999.0.0-dummy2");
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0", "9999.0.2", "9999.0.0-dummy2", "9999.0.3", "9999.0.0-dummy3");
         }
 
         [Fact]
@@ -323,11 +328,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("9999.1.1")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.1.1")
                 .And
-                .HaveStdOutContaining("10000.1.1")
+                .HaveStdOutContaining("Microsoft.NETCore.App 10000.1.1")
                 .And
-                .HaveStdOutContaining("10000.1.3");
+                .HaveStdOutContaining("Microsoft.NETCore.App 10000.1.3");
+
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "10000.1.1", "10000.1.3");
         }
 
         [Fact]
@@ -371,15 +378,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("9998.0.1")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9998.0.1")
                 .And
-                .HaveStdOutContaining("9998.1.0")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9998.1.0")
                 .And
-                .HaveStdOutContaining("9999.0.0")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
                 .And
-                .HaveStdOutContaining("9999.0.1")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.1")
                 .And
-                .HaveStdOutContaining("9999.1.0");
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.1.0");
+
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9998.0.1", "9998.1.0", "9999.0.0", "9999.0.1", "9999.1.0");
         }
 
         [Fact]
@@ -450,13 +459,16 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("9999.0.0")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
                 .And
-                .HaveStdOutContaining("9999.0.1")
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.1")
                 .And
-                .HaveStdOutContaining("7777.0.0")
+                .HaveStdOutContaining("Microsoft.UberFramework 7777.0.0")
                 .And
-                .HaveStdOutContaining("7777.0.1");
+                .HaveStdOutContaining("Microsoft.UberFramework 7777.0.1");
+
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0", "9999.0.1");
+            DeleteAvailableSharedFxVersions(_exeSharedUberFxBaseDir, "7777.0.0", "7777.0.1");
         }
 
         [Fact]
@@ -512,6 +524,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.0"))
                 .And
                 .HaveStdErrContaining(Path.Combine(_exeFoundUberFxMessage, "7777.0.0"));
+
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.1.0");
+            DeleteAvailableSharedFxVersions(_exeSharedUberFxBaseDir, "7777.0.0");
         }
 
         [Fact]
@@ -544,6 +559,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .HaveStdErrContaining(Path.Combine("7777.0.0", "System.Collections.Immutable.dll"))
                 .And
                 .HaveStdErrContaining(Path.Combine("9999.0.0", "System.Collections.dll"));
+
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0");
+            DeleteAvailableSharedFxVersions(_exeSharedUberFxBaseDir, "7777.0.0");
         }
 
         // This method adds a list of new framework version folders in the specified
@@ -795,8 +813,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
             // Copy the test assembly
             string fileSource = Path.Combine(builtSharedFxDir, testAssembly + ".dll");
             string fileDest = Path.Combine(builtSharedUberFxDir, testAssembly + ".dll");
-            FileInfo fileInfo = new FileInfo(fileSource);
-            fileInfo.CopyTo(fileDest);
+            File.Copy(fileSource, fileDest);
         }
     }
 }

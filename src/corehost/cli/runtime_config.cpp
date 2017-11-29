@@ -255,7 +255,7 @@ int runtime_config_t::get_roll_fwd_on_no_candidate_fx() const
     return m_roll_fwd_on_no_candidate_fx;
 }
 
-void runtime_config_t::set_get_roll_fwd_on_no_candidate_fx(int value)
+void runtime_config_t::set_roll_fwd_on_no_candidate_fx(int value)
 {
     assert(m_valid);
     m_roll_fwd_on_no_candidate_fx = value;
@@ -281,14 +281,5 @@ void runtime_config_t::combine_properties(std::unordered_map<pal::string_t, pal:
         {
             combined_properties[kv.first] = kv.second;
         }
-    }
-}
-
-/*static*/ void runtime_config_t::get_properties(std::unordered_map<pal::string_t, pal::string_t>& combined_properties, std::vector<pal::string_t>* keys, std::vector<pal::string_t>* values)
-{
-    for (const auto& kv : combined_properties)
-    {
-        keys->push_back(kv.first);
-        values->push_back(kv.second);
     }
 }

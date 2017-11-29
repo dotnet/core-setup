@@ -118,15 +118,15 @@ public:
 
     const deps_json_t& get_deps() const
     {
-        return m_fx_definitions[0]->get_deps();
+        return get_app(m_fx_definitions).get_deps();
     }
 
     const pal::string_t& get_deps_file() const
     {
-        return m_fx_definitions[0]->get_deps_file();
+        return get_app(m_fx_definitions).get_deps_file();
     }
 
-    const std::vector<fx_definition_t*>& get_fx_definitions() const
+    const fx_definition_vector_t& get_fx_definitions() const
     {
         return m_fx_definitions;
     }
@@ -164,7 +164,7 @@ private:
         const pal::string_t& deps_dir,
         pal::string_t* candidate);
 
-    std::vector<fx_definition_t*>& m_fx_definitions;
+    fx_definition_vector_t& m_fx_definitions;
 
     pal::string_t m_app_dir;
 

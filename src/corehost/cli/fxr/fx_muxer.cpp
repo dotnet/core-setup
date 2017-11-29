@@ -387,21 +387,19 @@ pal::string_t get_deps_file(
     bool portable,
     const pal::string_t& app_candidate,
     const pal::string_t& specified_deps_file,
-    const std::vector<fx_definition_t*>& fx_definitions
+    const fx_definition_vector_t& fx_definitions
 )
 {
     if (portable)
     {
         // The hostpolicy is resolved from the root framework's name and location.
-        int root_framework = fx_definitions.size() - 1;
-
-        pal::string_t deps_file = fx_definitions[root_framework]->get_dir();
+        pal::string_t deps_file = get_root_framework(fx_definitions).get_dir();
         if (!deps_file.empty() && deps_file.back() != DIR_SEPARATOR)
         {
             deps_file.push_back(DIR_SEPARATOR);
         }
 
-        return deps_file + fx_definitions[root_framework]->get_name() + _X(".deps.json");
+        return deps_file + get_root_framework(fx_definitions).get_name() + _X(".deps.json");
     }
     else
     {
@@ -416,14 +414,14 @@ pal::string_t get_deps_file(
 bool fx_muxer_t::resolve_hostpolicy_dir(
     host_mode_t mode,
     const pal::string_t& own_dir,
-    const std::vector<fx_definition_t*>& fx_definitions,
+    const fx_definition_vector_t& fx_definitions,
     const pal::string_t& app_candidate,
     const pal::string_t& specified_deps_file,
     const pal::string_t& specified_fx_version,
     const std::vector<pal::string_t>& probe_realpaths,
     pal::string_t* impl_dir)
 {
-    bool portable = fx_definitions[0]->get_runtime_config().get_portable();
+    bool portable = get_app(fx_definitions).get_runtime_config().get_portable();
 
     // Obtain deps file for the given configuration.
     pal::string_t resolved_deps = get_deps_file(portable, app_candidate, specified_deps_file, fx_definitions);
@@ -447,8 +445,7 @@ bool fx_muxer_t::resolve_hostpolicy_dir(
     if (portable)
     {
         // The hostpolicy is required to be in the root framework's location
-        int root_framework = fx_definitions.size() - 1;
-        expected.assign(fx_definitions[root_framework]->get_dir());
+        expected.assign(get_root_framework(fx_definitions).get_dir());
         assert(pal::directory_exists(expected));
     }
     else
@@ -486,19 +483,21 @@ bool fx_muxer_t::resolve_hostpolicy_dir(
         LIBHOSTPOLICY_NAME, expected.c_str());
     if (mode == host_mode_t::muxer && !portable)
     {
-        if (!pal::file_exists(fx_definitions[0]->get_runtime_config().get_path()))
+        if (!pal::file_exists(get_app(fx_definitions).get_runtime_config().get_path()))
         {
-            trace::error(_X("Failed to run as a standalone app because there is no '%s' file. If this should be a portable app instead, add that file specifying the appropriate framework."), fx_definitions[0]->get_runtime_config().get_path().c_str());
+            trace::error(_X("Failed to run as a standalone app because there is no '%s' file. If this should be a portable app instead, add that file specifying the appropriate framework."),
+                get_app(fx_definitions).get_runtime_config().get_path().c_str());
         }
-        else if (fx_definitions[0]->get_runtime_config().get_fx_name().empty())
+        else if (get_app(fx_definitions).get_runtime_config().get_fx_name().empty())
         {
-            trace::error(_X("Failed to run as a standalone app because there is no framework specified in '%s'. If this should be a portable app instead, specify the appropriate framework in that file."), fx_definitions[0]->get_runtime_config().get_path().c_str());
+            trace::error(_X("Failed to run as a standalone app because there is no framework specified in '%s'. If this should be a portable app instead, specify the appropriate framework in that file."),
+                get_app(fx_definitions).get_runtime_config().get_path().c_str());
         }
     }
     return false;
 }
 
-fx_ver_t resolve_framework_version(const std::vector<fx_ver_t>& version_list,
+fx_ver_t fx_muxer_t::resolve_framework_version(const std::vector<fx_ver_t>& version_list,
     const pal::string_t& fx_ver,
     const fx_ver_t& specified,
     const bool& patch_roll_fwd,
@@ -570,7 +569,7 @@ fx_ver_t resolve_framework_version(const std::vector<fx_ver_t>& version_list,
     return most_compatible;
 }
 
-fx_definition_t* resolve_fx_dir(
+fx_definition_t* fx_muxer_t::resolve_fx(
     host_mode_t mode,
     const runtime_config_t& config,
     const pal::string_t& own_dir,
@@ -1239,13 +1238,9 @@ int fx_muxer_t::read_config_and_execute(
     }
 
     // Read config
-    // The fx_definitions_owned variable controls object lifetime
-    std::vector<std::unique_ptr<fx_definition_t>> fx_definitions_owned;
-    std::vector<fx_definition_t*> fx_definitions;
-
+    fx_definition_vector_t fx_definitions;
     auto app = new fx_definition_t();
-    fx_definitions_owned.push_back(std::unique_ptr<fx_definition_t>(app));
-    fx_definitions.push_back(app);
+    fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
 
     int rc = read_config(*app, app_candidate, runtime_config);
     if (rc)
@@ -1263,7 +1258,7 @@ int fx_muxer_t::read_config_and_execute(
     // The env var condition is verified in the config file processing
     if (!roll_fwd_on_no_candidate_fx.empty())
     {
-        config.set_get_roll_fwd_on_no_candidate_fx(pal::xtoi(roll_fwd_on_no_candidate_fx.c_str()));
+        config.set_roll_fwd_on_no_candidate_fx(pal::xtoi(roll_fwd_on_no_candidate_fx.c_str()));
     }
 
     // Determine additional deps
@@ -1282,16 +1277,15 @@ int fx_muxer_t::read_config_and_execute(
         auto version = fx_version_specified;
         while (!config.get_fx_name().empty() && !config.get_fx_version().empty())
         {
-            fx_definition_t* fx = resolve_fx_dir(mode, config, own_dir, version);
+            fx_definition_t* fx = resolve_fx(mode, config, own_dir, version);
             if (fx == nullptr)
             {
                 pal::string_t searched_version = fx_version_specified.empty() ? config.get_fx_version() : fx_version_specified;
                 handle_missing_framework_error(mode, config.get_fx_name(), searched_version, pal::string_t(), own_dir);
-                return CoreHostLibMissingFailure;
+                return FrameworkMissingFailure;
             }
 
-            fx_definitions_owned.push_back(std::unique_ptr<fx_definition_t>(fx));
-            fx_definitions.push_back(fx);
+            fx_definitions.push_back(std::unique_ptr<fx_definition_t>(fx));
 
             pal::string_t config_file;
             pal::string_t dev_config_file;
@@ -1312,16 +1306,21 @@ int fx_muxer_t::read_config_and_execute(
 
     // Append specified probe paths first and then config file probe paths into realpaths.
     std::vector<pal::string_t> probe_realpaths;
+
+    // The tfm is taken from the app.
+    pal::string_t tfm = get_app(fx_definitions).get_runtime_config().get_tfm();
+
     for (const auto& path : spec_probe_paths)
     {
-        append_probe_realpath(path, &probe_realpaths, fx_definitions[0]->get_runtime_config().get_tfm());
+        append_probe_realpath(path, &probe_realpaths, tfm);
     }
-    // Each framework can add probe paths, but the tfm is taken from the app.
-    for (int i = 0; i < fx_definitions.size(); ++i)
+
+    // Each framework can add probe paths
+    for (const auto& fx : fx_definitions)
     {
-        for (const auto& path : fx_definitions[i]->get_runtime_config().get_probe_paths())
+        for (const auto& path : fx->get_runtime_config().get_probe_paths())
         {
-            append_probe_realpath(path, &probe_realpaths, fx_definitions[0]->get_runtime_config().get_tfm());
+            append_probe_realpath(path, &probe_realpaths, tfm);
         }
     }
 

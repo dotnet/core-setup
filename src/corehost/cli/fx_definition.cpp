@@ -40,4 +40,3 @@ void fx_definition_t::parse_deps(const deps_json_t::rid_fallback_graph_t& graph)
 {
     m_deps.parse(true, m_deps_file, graph);
 }
-
