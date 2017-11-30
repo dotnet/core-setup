@@ -287,13 +287,12 @@
 
   </Target>
   
-  <Target Name="GenerateRuntimeDependenciesDeb" DependsOnTargets="GetLibIcuPackageName">
+  <Target Name="GenerateRuntimeDependenciesDeb">
     <PropertyGroup>
       <DebPackageName>$(RuntimeDependenciesDebPkgName)</DebPackageName>
       <DebPackageVersion>$(SharedFrameworkNugetVersion)</DebPackageVersion>
       <DebFile>$(DotnetRuntimeDependenciesPackageInstallerFile)</DebFile>
-      <ConfigJsonName>dotnet-runtime-deps-debian_config.json</ConfigJsonName>
-      <ConfigJsonName  Condition="$(PackageTargetRid.StartsWith('debian.9'))">dotnet-runtime-deps-debian9_config.json</ConfigJsonName>
+      <ConfigJsonName>dotnet-runtime-deps-debian_config_$(OutputRid).json</ConfigJsonName>
       <ConfigJsonFile>$(debPackaginfConfigPath)$(ConfigJsonName)</ConfigJsonFile>
       <debIntermediatesDir>$(PackagesIntermediateDir)$(DebPackageName)/$(DebPackageVersion)</debIntermediatesDir>
     </PropertyGroup>
@@ -306,14 +305,11 @@
       <debLayoutDocs>$(debLayoutDirectory)docs</debLayoutDocs>
     </PropertyGroup>
 
+    <!-- Error out if the configuration file doesn't exist -->
+    <Error Condition="!Exists('$(ConfigJsonFile)')" Text="Config file does not exist : '$(ConfigJsonFile)'" />
+
     <RemoveDir Condition="Exists('$(debIntermediatesDir)')" Directories="$(debIntermediatesDir)" />
     <MakeDir Directories="$(debIntermediatesDir)" />
-
-    <!-- Compute LIBSSL Version -->
-    <Exec Command="apt-cache search --names-only '^libssl[.0-9]+$' | cut -d' ' -f1" 
-          ConsoleToMSBuild="true"> 
-       <Output TaskParameter="ConsoleOutput" PropertyName="LibSSLPackageName" /> 
-    </Exec> 
 
     <!-- Create empty debian layout -->
     <RemoveDir Condition="Exists('$(debLayoutDirectory)')" Directories="$(debLayoutDirectory)" />
@@ -331,13 +327,6 @@
       <SharedFrameworkTokenValue Include="%RUNTIME_DEPS_VERSION%">
         <ReplacementString>$(SharedFrameworkNugetVersion)</ReplacementString>
       </SharedFrameworkTokenValue>
-      <SharedFrameworkTokenValue Include="%LIBSSL_PACKAGE_NAME%">
-        <ReplacementString>$(LibSSLPackageName)</ReplacementString>
-      </SharedFrameworkTokenValue>
-      <SharedFrameworkTokenValue Include="%LIBICU_PACKAGE_NAME%"> 
-        <ReplacementString>$(LibIcuPackageName)</ReplacementString> 
-      </SharedFrameworkTokenValue> 
-
     </ItemGroup>
 
     <ReplaceFileContents InputFile="$(ConfigJsonFile)"
