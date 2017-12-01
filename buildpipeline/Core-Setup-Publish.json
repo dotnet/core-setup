@@ -494,7 +494,7 @@
     "PB_SymbolServerPAT": {
       "value": null,
       "isSecret": true
-    }
+    },
     "PB_SymbolExpirationInDays": {
       "value": ""
     }
