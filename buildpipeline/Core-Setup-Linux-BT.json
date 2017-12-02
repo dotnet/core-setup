@@ -137,7 +137,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments)",
+        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(PB_AdditionalMSBuildArguments)",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
@@ -249,7 +249,7 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Package Runtime Dep  - Ubuntu 14.04 ",
+      "displayName": "Package Runtime Dep - Ubuntu 14.04 ",
       "timeoutInMinutes": 0,
       "refName": "Task13",
       "task": {
@@ -259,7 +259,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) $(DistroSpecificMSBuildArguments)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -299,7 +299,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) $(DistroSpecificMSBuildArguments)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=ubuntu.16.04-$(PB_TargetArchitecture)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -319,7 +319,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs) /p:OutputRid=ubuntu.16.04-$(PB_TargetArchitecture)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -339,7 +339,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) $(DistroSpecificMSBuildArguments)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=ubuntu.17.04-$(PB_TargetArchitecture)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -359,7 +359,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs) /p:OutputRid=ubuntu.17.04-$(PB_TargetArchitecture)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -379,7 +379,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) $(DistroSpecificMSBuildArguments)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=ubuntu.17.10-$(PB_TargetArchitecture)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -399,7 +399,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs) /p:OutputRid=ubuntu.17.10-$(PB_TargetArchitecture)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -419,7 +419,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) $(DistroSpecificMSBuildArguments)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=debian.8-$(PB_TargetArchitecture)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -439,7 +439,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs) /p:OutputRid=debian.8-$(PB_TargetArchitecture)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -449,7 +449,7 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Package Runtime - Debian 9",
+      "displayName": "Package Runtime Dep - Debian 9",
       "timeoutInMinutes": 0,
       "refName": "Task33",
       "task": {
@@ -459,7 +459,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) /p:OutputRid=debian.9-$(PB_TargetArchitecture) $(DistroSpecificMSBuildArguments)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) /p:OutputRid=debian.9-$(PB_TargetArchitecture) $(DistroSpecificMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -509,7 +509,7 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Init tools - Rhel7",
+      "displayName": "Clean - Rhel7",
       "timeoutInMinutes": 0,
       "refName": "Task36",
       "task": {
@@ -519,7 +519,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Rhel7) /bin/bash -c \"HOME=$(PB_GitDirectory); git clean -X -d -f; $(PB_GitDirectory)/init-tools.sh\"",
+        "arguments": "run --rm $(DockerCommonRunArgs_Rhel7) /bin/bash $(DockerCommonCleanCommands)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -559,7 +559,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Rhel7) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) $(DistroSpecificMSBuildArguments)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Rhel7) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -599,7 +599,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Rhel7) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) $(DistroSpecificMSBuildArguments) /p:OutputRid=opensuse.42-$(PB_TargetArchitecture)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Rhel7) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=opensuse.42-$(PB_TargetArchitecture)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -631,6 +631,7 @@
       "alwaysRun": false,
       "displayName": "Cleanup Docker",
       "timeoutInMinutes": 0,
+      "condition": "always()",
       "refName": "Task40",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -651,6 +652,7 @@
       "alwaysRun": true,
       "displayName": "Copy Files to: $(Build.StagingDirectory)\\BuildLogs",
       "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
       "refName": "CopyFiles1",
       "task": {
         "id": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
@@ -667,11 +669,13 @@
       }
     },
     {
+      "environment": {},
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": true,
       "displayName": "Publish Artifact: BuildLogs",
       "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
       "refName": "PublishBuildArtifacts2",
       "task": {
         "id": "2ff763a7-ce83-4e1f-bc89-0ae63477cebe",
@@ -694,6 +698,7 @@
       "alwaysRun": false,
       "displayName": "Cleanup VSTS Agent",
       "timeoutInMinutes": 0,
+      "condition": "always()",
       "refName": "Task42",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -845,14 +850,17 @@
     "PB_PortableBuild": {
       "value": "false"
     },
-    "AdditionalMSBuildProperties": {
+    "AdditionalMSBuildPackagingArguments": {
       "value": "/p:UsePrebuiltPortableBinariesForInstallers=true /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/"
+    },
+    "PB_AdditionalMSBuildArguments": {
+      "value": ""
     },
     "DistroSpecificMSBuildArguments": {
       "value": "/flp:v=diag /p:TargetArchitecture=$(PB_TargetArchitecture) /p:PortableBuild=false /p:ConfigurationGroup=$(BuildConfiguration) /p:OSGroup=Linux /p:OfficialBuildId=$(OfficialBuildId)"
     },
     "DistroSpecificMSBuildPublishArgs": {
-      "value": "/p:AzureAccountName=$(PB_AzureAccountName) /p:ContainerName=$(PB_ContainerName) /p:AzureAccessToken=$(PB_AzureAccessToken) /p:ChecksumAzureAccountName=$(PB_ChecksumAzureAccountName) /p:ChecksumContainerName=$(PB_ChecksumContainerName) /p:ChecksumAzureAccessToken=$(PB_ChecksumAzureAccessToken) /p:DebRepoUser=$(PB_DebRepoUser) /p:DebRepoServer=$(PB_DebRepoServer) /p:DebRepoPass=$(DEB_REPO_PASSWORD) $(PB_DebianKeys)"
+      "value": "/p:AzureAccountName=$(PB_AzureAccountName) /p:ContainerName=$(PB_ContainerName) /p:AzureAccessToken=$(PB_AzureAccessToken) /p:ChecksumAzureAccountName=$(PB_ChecksumAzureAccountName) /p:ChecksumContainerName=$(PB_ChecksumContainerName) /p:ChecksumAzureAccessToken=$(PB_ChecksumAzureAccessToken)"
     },
     "DockerTag_Ubuntu1404": {
       "value": "ubuntu-14.04-debpkg-e5cf912-20175003025046"
@@ -874,6 +882,9 @@
     },
     "PB_PackageVersionPropsUrl": {
       "value": ""
+    },
+    "DockerCommonCleanCommands": {
+      "value": "-c \"HOME=$(PB_GitDirectory); $(PB_GitDirectory)/clean.sh\""
     }
   },
   "demands": [
@@ -941,7 +952,7 @@
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418098259,
+    "revision": 418098432,
     "visibility": "organization"
   }
 }
