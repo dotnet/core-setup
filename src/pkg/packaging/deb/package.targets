@@ -371,11 +371,4 @@
              Importance="High" />
   </Target>
 
-  <!-- Compute LibIcu Package Name -->
-  <Target Name="GetLibIcuPackageName">
-    <Exec Command="apt-cache search --names-only '^libicu[0-9]+$' | cut -d' ' -f1" 
-          ConsoleToMSBuild="true"> 
-       <Output TaskParameter="ConsoleOutput" PropertyName="LibIcuPackageName" /> 
-    </Exec>
-  </Target>
 </Project>
