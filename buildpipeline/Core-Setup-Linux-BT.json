@@ -299,7 +299,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=ubuntu.16.04-$(PB_TargetArchitecture)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=ubuntu.16.04-$(PB_TargetArchitecture) /p:BuildRuntimeDebs=false",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -339,7 +339,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=ubuntu.17.04-$(PB_TargetArchitecture)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=ubuntu.17.04-$(PB_TargetArchitecture) /p:BuildRuntimeDebs=false",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -379,7 +379,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=ubuntu.17.10-$(PB_TargetArchitecture)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=ubuntu.17.10-$(PB_TargetArchitecture) /p:BuildRuntimeDebs=false",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -419,7 +419,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=debian.8-$(PB_TargetArchitecture)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) $(DistroSpecificMSBuildArguments) /p:OutputRid=debian.8-$(PB_TargetArchitecture) /p:BuildRuntimeDebs=false",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -459,7 +459,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) /p:OutputRid=debian.9-$(PB_TargetArchitecture) $(DistroSpecificMSBuildArguments)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildPackagingArguments) /p:OutputRid=debian.9-$(PB_TargetArchitecture) $(DistroSpecificMSBuildArguments) /p:BuildRuntimeDebs=false",
         "workingFolder": "",
         "failOnStandardError": "false"
       }

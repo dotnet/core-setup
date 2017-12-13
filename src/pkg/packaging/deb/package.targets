@@ -9,11 +9,7 @@
                                     $(PackageTargetRid.StartsWith('debian'))">true</IsDebianBasedDistro>
     <BuildDebPackage Condition="'$(IsDebianBasedDistro)' == true and '$(TargetArchitecture)' == 'x64'">true</BuildDebPackage>
     <DebianConfigJsonName>debian_config.json</DebianConfigJsonName>
-    <RuntimeDebsDependsOn>
-      GenerateSharedHostDeb;
-      GenerateHostFxrDeb;
-      GenerateSharedFrameworkDeb;
-    </RuntimeDebsDependsOn>
+    <BuildRuntimeDebs>true</BuildRuntimeDebs>
   </PropertyGroup>
 
   <Target Name="InitializeDotnetDebTool">
@@ -46,10 +42,9 @@
                             BuildDebs;"
           Condition="'$(BuildDebPackage)'=='true'" />
 
-  <!-- Build only on Ubuntu14.04 -->
   <Target Name="GenerateRuntimeDebs" 
-          DependsOnTargets="$(RuntimeDebsDependsOn)"
-          Condition="'$(PackageTargetRid)' == 'ubuntu.14.04-x64'" />
+          DependsOnTargets="GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb"
+          Condition="''$(BuildRuntimeDebs)' == 'true'" />
 
   <Target Name="BuildDebs"
           DependsOnTargets="InitializeDotnetDebTool;GenerateRuntimeDebs;GenerateRuntimeDependenciesDeb"
@@ -104,7 +99,7 @@
         <ReplacementString>$(RuntimeDependenciesDebPkgName)</ReplacementString>
       </SharedHostTokenValue>
       <SharedHostTokenValue Include="%RUNTIME_DEPS_VERSION%">
-        <ReplacementString>$(SharedFrameworkNugetVersion)</ReplacementString>
+        <ReplacementString>$(RuntimeDepsDebVersion)</ReplacementString>
       </SharedHostTokenValue>
     </ItemGroup>
 
@@ -325,7 +320,7 @@
         <ReplacementString>$(RuntimeDependenciesDebPkgName)</ReplacementString>
       </SharedFrameworkTokenValue>
       <SharedFrameworkTokenValue Include="%RUNTIME_DEPS_VERSION%">
-        <ReplacementString>$(SharedFrameworkNugetVersion)</ReplacementString>
+        <ReplacementString>$(RuntimeDepsDebVersion)</ReplacementString>
       </SharedFrameworkTokenValue>
     </ItemGroup>
 

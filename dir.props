@@ -66,6 +66,8 @@
 
     <SharedFrameworkNugetVersion>$(ProductVersion)</SharedFrameworkNugetVersion>
 
+    <RuntimeDepsDebVersion Condition="'$(RuntimeDepsDebVersion)'==''">$(ProductVersion)</RuntimeDepsDebVersion>
+
     <UWPCoreRuntimeSdkVersion>6.1.0</UWPCoreRuntimeSdkVersion>
     <UWPCoreRuntimeSdkFullVersion>$(UWPCoreRuntimeSdkVersion)$(ProductVersionSuffix)</UWPCoreRuntimeSdkFullVersion>
 
