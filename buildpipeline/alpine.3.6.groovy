@@ -4,7 +4,6 @@
 // Note that the parameters will be set as env variables so we cannot use names that conflict
 // with the engineering system parameter names.
 // CGroup - Build configuration.
-// TestOuter - If true, runs outerloop, if false runs just innerloop
 
 simpleDockerNode('microsoft/dotnet-buildtools-prereqs:alpine-3.6-3148f11-20171119021156') {
     stage ('Checkout source') {
@@ -12,6 +11,6 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:alpine-3.6-3148f11-2017111
     }
 
     stage ('Build Product') {
-        sh "./build.sh -ConfigurationGroup=${params.CGroup} -TargetArchitecture=x64 -PortableBuild=false -strip-symbols -SkipTests=false -- /p:OutputRid=alpine.3.6-x64 /p:DotNetRestoreSources="
+        sh "./build.sh -ConfigurationGroup=${params.CGroup} -TargetArchitecture=${params.AGroup} -PortableBuild=false -strip-symbols -SkipTests=false -- /p:OutputRid=alpine.3.6-${params.AGroup}"
     }
 }
