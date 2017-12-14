@@ -36,11 +36,6 @@
     <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
   </PropertyGroup>
 
-  <!-- Import Build tools common props file where repo-independent properties are found -->
-  <Import Condition="Exists('$(ToolsDir)Build.Common.props')" Project="$(ToolsDir)Build.Common.props" />
-  
-  <Import Project="dependencies.props" />
-
   <PropertyGroup Condition="'$(DotNetBuildOffline)' != 'true'">
     <!-- list of nuget package sources passed to NuGet -->
     <RestoreSources>
@@ -54,6 +49,11 @@
       https://dotnet.myget.org/F/dotnet-corefxlab/api/v3/index.json;
     </RestoreSources>
   </PropertyGroup>
+  
+  <!-- Import Build tools common props file where repo-independent properties are found -->
+  <Import Condition="Exists('$(ToolsDir)Build.Common.props')" Project="$(ToolsDir)Build.Common.props" />
+  
+  <Import Project="dependencies.props" />
 
   <!-- Versioning -->
   <PropertyGroup>
