@@ -508,7 +508,7 @@ fx_ver_t fx_muxer_t::resolve_framework_version(const std::vector<fx_ver_t>& vers
     fx_ver_t most_compatible = specified;
     if (!specified.is_prerelease())
     {
-        if (roll_fwd_on_no_candidate_fx != roll_fwd_on_no_candidate_fx_option::disabled)
+        if (roll_fwd_on_no_candidate_fx != roll_fwd_on_no_candidate_fx_option::roll_fwd_disabled)
         {
             fx_ver_t next_lowest(-1, -1, -1);
 
@@ -520,7 +520,7 @@ fx_ver_t fx_muxer_t::resolve_framework_version(const std::vector<fx_ver_t>& vers
             {
                 if (!ver.is_prerelease() && ver >= specified)
                 {
-                    if (roll_fwd_on_no_candidate_fx == roll_fwd_on_no_candidate_fx_option::minor)
+                    if (roll_fwd_on_no_candidate_fx == roll_fwd_on_no_candidate_fx_option::roll_fwd_minor)
                     {
                         // We only want to roll forward on minor
                         if (ver.get_major() != specified.get_major())
@@ -542,7 +542,7 @@ fx_ver_t fx_muxer_t::resolve_framework_version(const std::vector<fx_ver_t>& vers
                 {
                     if (ver.is_prerelease() && ver >= specified)
                     {
-                        if (roll_fwd_on_no_candidate_fx == roll_fwd_on_no_candidate_fx_option::minor)
+                        if (roll_fwd_on_no_candidate_fx == roll_fwd_on_no_candidate_fx_option::roll_fwd_minor)
                         {
                             // We only want to roll forward on minor
                             if (ver.get_major() != specified.get_major())
@@ -680,7 +680,7 @@ fx_definition_t* fx_muxer_t::resolve_fx(
             if (!specified.is_prerelease())
             {
                 // If production and no roll forward use given version.
-                do_roll_forward = (config.get_patch_roll_fwd()) || (config.get_roll_fwd_on_no_candidate_fx() != roll_fwd_on_no_candidate_fx_option::disabled);
+                do_roll_forward = (config.get_patch_roll_fwd()) || (config.get_roll_fwd_on_no_candidate_fx() != roll_fwd_on_no_candidate_fx_option::roll_fwd_disabled);
             }
             else
             {
@@ -1297,7 +1297,7 @@ int fx_muxer_t::read_config_and_execute(
 
     auto config = app->get_runtime_config();
 
-    // 'Roll forward on no candidate fx' is set to 1 (roll_fwd_on_no_candidate_fx_option::minor) by default. It can be changed through:
+    // 'Roll forward on no candidate fx' is set to 1 (roll_fwd_on_no_candidate_fx_option::roll_fwd_minor) by default. It can be changed through:
     // 1. Command line argument (--roll-forward-on-no-candidate-fx). Only defaults the app's config.
     // 2. Runtimeconfig json file ('rollForwardOnNoCandidateFx' property), which is used as a default for lower level frameworks if they don't specify a value.
     // 3. DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX env var. Only defaults the app's config.

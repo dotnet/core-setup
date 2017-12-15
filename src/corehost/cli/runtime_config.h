@@ -13,9 +13,9 @@ typedef web::json::value json_value;
 
 enum roll_fwd_on_no_candidate_fx_option
 {
-    disabled = 0,
-    minor,
-    major_or_minor
+    roll_fwd_disabled = 0,
+    roll_fwd_minor,
+    roll_fwd_major_or_minor
 };
 
 class runtime_config_t

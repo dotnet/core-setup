@@ -11,7 +11,7 @@
 runtime_config_t::runtime_config_t()
     : m_patch_roll_fwd(true)
     , m_prerelease_roll_fwd(false)
-    , m_roll_fwd_on_no_candidate_fx(roll_fwd_on_no_candidate_fx_option::minor)
+    , m_roll_fwd_on_no_candidate_fx(roll_fwd_on_no_candidate_fx_option::roll_fwd_minor)
     , m_portable(false)
     , m_valid(false)
 {
