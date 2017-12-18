@@ -33,8 +33,7 @@
 
   <Target Name="PublishFinalOutput"
           Condition="'$(Finalize)' == 'true'"
-          DependsOnTargets="PublishCoreHostPackages;FinalizeBuildInAzure;UpdateVersionsRepo" />
-
+          DependsOnTargets="PublishCoreHostPackages;SetupPublishSymbols;PublishSymbols;FinalizeBuildInAzure;UpdateVersionsRepo" />
   <!--
     Target wrapping UpdatePublishedVersions: ensures that ShippedNuGetPackage items are created and
     disables versions repo update if no auth token is defined. Otherwise, not specifying an auth
@@ -219,8 +218,9 @@
 
   <Target Name="SetupPublishSymbols" Condition="'$(SymbolServerPath)'!=''" >
     <PropertyGroup>
-      <SymbolExpirationInDays Condition="'$(SymbolExpirationInDays)'=='' and '$(SymbolExpirationDate)'==''">1</SymbolExpirationInDays>
-      <ConvertPortablePdbsToWindowsPdbs>true</ConvertPortablePdbsToWindowsPdbs>
+      <SymbolExpirationInDays Condition="'$(SymbolExpirationInDays)'=='' and '$(SymbolExpirationDate)'==''">5</SymbolExpirationInDays>
+      <SymbolVerboseLogging>true</SymbolVerboseLogging>
+      <ConvertPortablePdbsToWindowsPdbs>false</ConvertPortablePdbsToWindowsPdbs>
     </PropertyGroup>
     <ItemGroup>
       <SymbolPackagesToPublish Include="$(DownloadDirectory)**\*.symbols.nupkg" />
