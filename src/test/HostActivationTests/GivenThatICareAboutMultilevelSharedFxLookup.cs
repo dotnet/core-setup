@@ -464,12 +464,30 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .And
                 .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.2.1"));
 
-            // Add a preview version with same major.minor
+            // Add a preview version with same major.minor as production
             AddAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.2.1-dummy1");
 
             // Version: 9999.0.0
             // 'Roll forward on no candidate fx' default value of 1 (minor)
             // exe: 9999.1.1-dummy1, 9999.2.1, 9999.2.1-dummy1
+            // Expected: 9999.2.1 since we favor production over preview
+            dotnet.Exec(appDll)
+                .WorkingDirectory(_currentWorkingDir)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.2.1"));
+
+            // Add a preview version with same major.minor as production but higher patch version
+            AddAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.2.2-dummy1");
+
+            // Version: 9999.0.0
+            // 'Roll forward on no candidate fx' default value of 1 (minor)
+            // exe: 9999.1.1-dummy1, 9999.2.1, 9999.2.1-dummy1, 9999.2.2-dummy1
             // Expected: 9999.2.1 since we favor production over preview
             dotnet.Exec(appDll)
                 .WorkingDirectory(_currentWorkingDir)
@@ -494,9 +512,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 .And
                 .HaveStdOutContaining("Microsoft.NETCore.App 9999.2.1")
                 .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.2.1-dummy1");
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.2.1-dummy1")
+                .And
+                .HaveStdOutContaining("Microsoft.NETCore.App 9999.2.2-dummy1");
 
-            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.1.1-dummy1", "9999.2.1", "9999.2.1-dummy1");
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.1.1-dummy1", "9999.2.1", "9999.2.1-dummy1", "9999.2.2-dummy1");
         }
 
         [Fact]
