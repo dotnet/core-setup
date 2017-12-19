@@ -11,7 +11,7 @@
 runtime_config_t::runtime_config_t()
     : m_patch_roll_fwd(true)
     , m_prerelease_roll_fwd(false)
-    , m_roll_fwd_on_no_candidate_fx(roll_fwd_on_no_candidate_fx_option::roll_fwd_minor)
+    , m_roll_fwd_on_no_candidate_fx(roll_fwd_on_no_candidate_fx_option::minor)
     , m_portable(false)
     , m_valid(false)
 {
@@ -251,13 +251,13 @@ bool runtime_config_t::get_prerelease_roll_fwd() const
     return m_prerelease_roll_fwd;
 }
 
-enum roll_fwd_on_no_candidate_fx_option runtime_config_t::get_roll_fwd_on_no_candidate_fx() const
+roll_fwd_on_no_candidate_fx_option runtime_config_t::get_roll_fwd_on_no_candidate_fx() const
 {
     assert(m_valid);
     return m_roll_fwd_on_no_candidate_fx;
 }
 
-void runtime_config_t::set_roll_fwd_on_no_candidate_fx(enum roll_fwd_on_no_candidate_fx_option value)
+void runtime_config_t::set_roll_fwd_on_no_candidate_fx(roll_fwd_on_no_candidate_fx_option value)
 {
     assert(m_valid);
     m_roll_fwd_on_no_candidate_fx = value;
