@@ -22,7 +22,7 @@
             Condition="'$(OSGroup)' == 'Windows_NT' and '$(GenerateMSI)' == 'true'">
       
       <PropertyGroup>
-        <WixVersion Condition="'$(WixVersion)' == ''">3.10.2</WixVersion>
+        <WixVersion Condition="'$(WixVersion)' == ''">3.10.4</WixVersion>
         <WixFilename>wix.$(WixVersion).zip</WixFilename>
       </PropertyGroup>
 
