@@ -368,9 +368,9 @@ Daily Builds
 [opensuse-42.1-version-1.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/release/1.1.0/dnvm/latest.sharedfx.opensuse.42.1.x64.version
 [opensuse-42.1-targz-1.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/release/1.1.0/Binaries/Latest/dotnet-opensuse.42.1-x64.latest.tar.gz
 
-[rhel-6-badge-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/master/sharedfx_rhel.6-x64_Release_version_badge.svg
-[rhel-6-version-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/master/latest.sharedfx.rhel.6.x64.version
-[rhel-6-targz-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/master/dotnet-runtime-latest-rhel.6-x64.tar.gz
+[rhel-6-badge-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/sharedfx_rhel.6-x64_Release_version_badge.svg
+[rhel-6-version-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/latest.version
+[rhel-6-targz-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-rhel.6-x64.tar.gz
 
 [rhel-6-badge-2.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.0.0/sharedfx_rhel.6-x64_Release_version_badge.svg
 [rhel-6-version-2.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.0.0/latest.sharedfx.rhel.6.x64.version
