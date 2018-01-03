@@ -41,7 +41,9 @@ set(SOURCES
     ../coreclr.cpp
     ../deps_resolver.cpp
     ../deps_format.cpp
-    ../deps_entry.cpp)
+    ../deps_entry.cpp
+    ../fx_definition.cpp
+)
 
 
 if(WIN32)
@@ -49,7 +51,9 @@ if(WIN32)
         ../../common/pal.windows.cpp
         ../../common/longfile.windows.cpp)
 else()
-    list(APPEND SOURCES ../../common/pal.unix.cpp)
+    list(APPEND SOURCES
+        ../../common/pal.unix.cpp
+        ${VERSION_FILE_PATH})
 endif()
 
 add_definitions(-D_NO_ASYNCRTIMP)

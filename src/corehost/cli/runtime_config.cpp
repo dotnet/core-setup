@@ -8,17 +8,48 @@
 #include "runtime_config.h"
 #include <cassert>
 
-runtime_config_t::runtime_config_t(const pal::string_t& path, const pal::string_t& dev_path)
+runtime_config_t::runtime_config_t()
     : m_patch_roll_fwd(true)
     , m_prerelease_roll_fwd(false)
-    , m_roll_fwd_on_no_candidate_fx(0)
-    , m_path(path)
-    , m_dev_path(dev_path)
+    , m_roll_fwd_on_no_candidate_fx(roll_fwd_on_no_candidate_fx_option::minor)
     , m_portable(false)
+    , m_valid(false)
 {
+}
+
+void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev_path, const runtime_config_t* defaults)
+{
+    m_path = path;
+    m_dev_path = dev_path;
+
+    // Apply the defaults from previous config.
+    if (defaults)
+    {
+        m_patch_roll_fwd = defaults->m_patch_roll_fwd;
+        m_prerelease_roll_fwd = defaults->m_prerelease_roll_fwd;
+        m_roll_fwd_on_no_candidate_fx = defaults->m_roll_fwd_on_no_candidate_fx;
+    }
+    else
+    {
+        // Since there is no previous config, this is the app's config, so default m_roll_fwd_on_no_candidate_fx from the env variable.
+        // The value will be overwritten during parsing if the setting exists in the config file.
+        pal::string_t env_no_candidate;
+        if (pal::getenv(_X("DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX"), &env_no_candidate))
+        {
+            m_roll_fwd_on_no_candidate_fx = static_cast<roll_fwd_on_no_candidate_fx_option>(pal::xtoi(env_no_candidate.c_str()));
+        }
+    }
+
     m_valid = ensure_parsed();
+
+    // Overwrite values that can't be changed from previous config.
+    if (defaults)
+    {
+        m_tfm = defaults->m_tfm;
+    }
+
     trace::verbose(_X("Runtime config [%s] is valid=[%d]"), path.c_str(), m_valid);
-} 
+}
 
 bool runtime_config_t::parse_opts(const json_value& opts)
 {
@@ -30,7 +61,7 @@ bool runtime_config_t::parse_opts(const json_value& opts)
     }
 
     const auto& opts_obj = opts.as_object();
-    
+
     auto properties = opts_obj.find(_X("configProperties"));
     if (properties != opts_obj.end())
     {
@@ -75,15 +106,7 @@ bool runtime_config_t::parse_opts(const json_value& opts)
     auto roll_fwd_on_no_candidate_fx = opts_obj.find(_X("rollForwardOnNoCandidateFx"));
     if (roll_fwd_on_no_candidate_fx != opts_obj.end())
     {
-        m_roll_fwd_on_no_candidate_fx = roll_fwd_on_no_candidate_fx->second.as_integer();
-    }
-    else
-    {
-        pal::string_t env_no_candidate;
-        if (pal::getenv(_X("DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX"), &env_no_candidate))
-        {
-            m_roll_fwd_on_no_candidate_fx = pal::xtoi(env_no_candidate.c_str());
-        }
+        m_roll_fwd_on_no_candidate_fx = static_cast<roll_fwd_on_no_candidate_fx_option>(roll_fwd_on_no_candidate_fx->second.as_integer());
     }
 
     auto tfm = opts_obj.find(_X("tfm"));
@@ -103,6 +126,7 @@ bool runtime_config_t::parse_opts(const json_value& opts)
     const auto& fx_obj = framework->second.as_object();
     m_fx_name = fx_obj.at(_X("name")).as_string();
     m_fx_ver = fx_obj.at(_X("version")).as_string();
+
     return true;
 }
 
@@ -113,7 +137,7 @@ bool runtime_config_t::ensure_dev_config_parsed()
     pal::string_t retval;
     if (!pal::file_exists(m_dev_path))
     {
-        // Not existing is not an error.
+        // Not existing is valid.
         return true;
     }
 
@@ -227,10 +251,16 @@ bool runtime_config_t::get_prerelease_roll_fwd() const
     return m_prerelease_roll_fwd;
 }
 
-int runtime_config_t::get_roll_fwd_on_no_candidate_fx() const
+roll_fwd_on_no_candidate_fx_option runtime_config_t::get_roll_fwd_on_no_candidate_fx() const
 {
     assert(m_valid);
     return m_roll_fwd_on_no_candidate_fx;
+}
+
+void runtime_config_t::set_roll_fwd_on_no_candidate_fx(roll_fwd_on_no_candidate_fx_option value)
+{
+    assert(m_valid);
+    m_roll_fwd_on_no_candidate_fx = value;
 }
 
 bool runtime_config_t::get_portable() const
@@ -243,11 +273,15 @@ const std::list<pal::string_t>& runtime_config_t::get_probe_paths() const
     return m_probe_paths;
 }
 
-void runtime_config_t::config_kv(std::vector<pal::string_t>* keys, std::vector<pal::string_t>* values) const
+// Add each property to combined_properties unless the property already exists.
+// The effect is the first value wins, which would typically be the app's value.
+void runtime_config_t::combine_properties(std::unordered_map<pal::string_t, pal::string_t>& combined_properties) const
 {
     for (const auto& kv : m_properties)
     {
-        keys->push_back(kv.first);
-        values->push_back(kv.second);
+        if (combined_properties.find(kv.first) == combined_properties.end())
+        {
+            combined_properties[kv.first] = kv.second;
+        }
     }
 }

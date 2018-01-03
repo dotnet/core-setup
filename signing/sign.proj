@@ -11,7 +11,7 @@
   <Import Project="$(ToolsDir)MicroBuild.Core.targets" />
 
   <Target Name="SetSigningProperties">
-    <Error Condition="'$(TargetRid)' == ''" Text="Missing required property 'TargetRid'." />
+    <Error Condition="'$(OutputRid)' == ''" Text="Missing required property 'OutputRid'." />
     <Error Condition="'$(CertificateId)' == ''" Text="Missing required property 'CertificateId'." />
     <PropertyGroup>
       <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
@@ -19,9 +19,10 @@
       <OutDir Condition="'$(OutDir)' == ''">$(BaseOutputRootPath)/</OutDir>
       <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(IntermediateOutputRootPath)</IntermediateOutputPath>
     </PropertyGroup>
+    <Error Condition="!Exists('$(OutDir)')" Text="'OutDir' folder '$(OutDir)' does not exist."/>
   </Target>
 
-  <Target Name="SignBinaries" DependsOnTargets="GetSignBinaryFiles">
+  <Target Name="SignBinaries" Condition="'$(SignType)' == 'real'" DependsOnTargets="GetSignBinaryFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
 
@@ -62,9 +63,10 @@
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
-  <Target Name="SignAppxFiles" DependsOnTargets="GetSignAppxFiles">
+  <Target Name="SignAppxFiles" Condition="'$(SignType)' == 'real'" DependsOnTargets="GetSignAppxFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
   
@@ -74,9 +76,10 @@
         <Authenticode>Appx</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == '' AND '$(Platform)' != 'arm64'" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
-  <Target Name="SignMsiAndCab" DependsOnTargets="GetSignMsiAndCabFiles">
+  <Target Name="SignMsiAndCab" Condition="'$(SignType)' == 'real'" DependsOnTargets="GetSignMsiAndCabFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
 
@@ -89,9 +92,10 @@
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
-  <Target Name="SignEngine" DependsOnTargets="GetSignEngineFiles">
+  <Target Name="SignEngine" Condition="'$(SignType)' == 'real'" DependsOnTargets="GetSignEngineFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
 
@@ -101,9 +105,10 @@
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
-  <Target Name="SignBundle" DependsOnTargets="GetSignBundleFiles">
+  <Target Name="SignBundle" Condition="'$(SignType)' == 'real'" DependsOnTargets="GetSignBundleFiles">
     <CallTarget Targets="SignFiles" />
   </Target>
 
@@ -113,6 +118,7 @@
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/>
   </Target>
 
 </Project>

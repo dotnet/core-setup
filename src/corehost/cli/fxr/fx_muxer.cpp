@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "libhost.h"
 #include "args.h"
+#include "fx_definition.h"
 #include "fx_ver.h"
 #include "fx_muxer.h"
 #include "trace.h"
@@ -14,46 +15,215 @@
 #include "error_codes.h"
 #include "deps_format.h"
 
-
-/**
- * When the framework is not found, display detailed error message
- *   about available frameworks and installation of new framework.
- */
-void handle_missing_framework_error(const pal::string_t& fx_name, const pal::string_t& fx_version, const pal::string_t& fx_dir)
+void get_all_fx_versions(
+    host_mode_t mode,
+    const pal::string_t& own_dir,
+    const pal::string_t& fx_name,
+    std::vector<pal::string_t>* fx_framework_names,
+    std::vector<pal::string_t>* fx_versions,
+    std::vector<pal::string_t>* fx_locations)
 {
-    pal::string_t fx_ver_dirs = get_directory(fx_dir);
-
-    // Display the error message about missing FX.
-    trace::error(_X("The specified framework '%s', version '%s' was not found."), fx_name.c_str(), fx_version.c_str());
-    trace::error(_X("  - Check application dependencies and target a framework version installed at:"));
-    trace::error(_X("      %s"), fx_ver_dirs.c_str());
-
-    // Gather the list of versions installed at the shared FX location.
-    bool is_print_header = true;
-    std::vector<pal::string_t> versions;
-    pal::readdir(fx_ver_dirs, &versions);
-    for (const auto& ver : versions)
+    // No FX resolution for standalone apps
+    if (mode == host_mode_t::standalone)
     {
-        // Make sure we filter out any non-version folders at shared FX location.
-        fx_ver_t parsed(-1, -1, -1);
-        if (fx_ver_t::parse(ver, &parsed, false))
+        trace::verbose(_X("Standalone mode detected. Not gathering shared FX locations"));
+        return;
+    }
+
+    // No FX resolution for mixed apps
+    if (mode == host_mode_t::split_fx)
+    {
+        trace::verbose(_X("Split/FX mode detected. Not gathering shared FX locations"));
+        return;
+    }
+
+    std::vector<pal::string_t> global_dirs;
+    bool multilevel_lookup = multilevel_lookup_enabled();
+
+    // own_dir contains DIR_SEPARATOR appended that we need to remove.
+    pal::string_t own_dir_temp = own_dir;
+    remove_trailing_dir_seperator(&own_dir_temp);
+
+    std::vector<pal::string_t> hive_dir;
+    hive_dir.push_back(own_dir_temp);
+
+    if (multilevel_lookup && pal::get_global_dotnet_dirs(&global_dirs))
+    {
+        for (pal::string_t dir : global_dirs)
         {
-            // Print banner only once before printing the versions
-            if (is_print_header)
+            if (dir != own_dir_temp)
             {
-                trace::error(_X("  - The following versions are installed:"));
-                is_print_header = false;
+                hive_dir.push_back(dir);
             }
-            trace::error(_X("      %s"), ver.c_str());
         }
     }
-    trace::error(_X("  - Alternatively, install the framework version '%s'."), fx_version.c_str());
+
+    for (pal::string_t dir : hive_dir)
+    {
+        auto fx_shared_dir = dir;
+        append_path(&fx_shared_dir, _X("shared"));
+
+        if (pal::directory_exists(fx_shared_dir))
+        {
+            std::vector<pal::string_t> fx_names;
+            if (fx_name.length())
+            {
+                // Use the provided framework name
+                fx_names.push_back(fx_name);
+            }
+            else
+            {
+                // Read all frameworks, including "Microsoft.NETCore.App"
+                pal::readdir_onlydirectories(fx_shared_dir, &fx_names);
+            }
+
+            for (pal::string_t fx_name : fx_names)
+            {
+                auto fx_dir = fx_shared_dir;
+                append_path(&fx_dir, fx_name.c_str());
+
+                if (pal::directory_exists(fx_dir))
+                {
+                    trace::verbose(_X("Gathering FX locations in [%s]"), fx_dir.c_str());
+
+                    std::vector<pal::string_t> versions;
+                    pal::readdir_onlydirectories(fx_dir, &versions);
+                    for (const auto& ver : versions)
+                    {
+                        // Make sure we filter out any non-version folders.
+                        fx_ver_t parsed(-1, -1, -1);
+                        if (fx_ver_t::parse(ver, &parsed, false))
+                        {
+                            trace::verbose(_X("Found FX version [%s]"), ver.c_str());
+                            fx_framework_names->push_back(fx_name);
+                            fx_versions->push_back(ver);
+                            fx_locations->push_back(fx_shared_dir);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void get_all_sdk_versions(
+    const pal::string_t& own_dir,
+    std::vector<pal::string_t>* sdk_versions,
+    std::vector<pal::string_t>* sdk_locations)
+{
+    std::vector<pal::string_t> global_dirs;
+    bool multilevel_lookup = multilevel_lookup_enabled();
+
+    // own_dir contains DIR_SEPARATOR appended that we need to remove.
+    pal::string_t own_dir_temp = own_dir;
+    remove_trailing_dir_seperator(&own_dir_temp);
+
+    std::vector<pal::string_t> hive_dir;
+    hive_dir.push_back(own_dir_temp);
+
+    if (multilevel_lookup && pal::get_global_dotnet_dirs(&global_dirs))
+    {
+        for (pal::string_t dir : global_dirs)
+        {
+            if (dir != own_dir_temp)
+            {
+                hive_dir.push_back(dir);
+            }
+        }
+    }
+
+    for (pal::string_t dir : hive_dir)
+    {
+        auto sdk_dir = dir;
+        trace::verbose(_X("Gathering SDK locations in [%s]"), sdk_dir.c_str());
+
+        append_path(&sdk_dir, _X("sdk"));
+
+        if (pal::directory_exists(sdk_dir))
+        {
+            std::vector<pal::string_t> versions;
+            pal::readdir_onlydirectories(sdk_dir, &versions);
+            for (const auto& ver : versions)
+            {
+                // Make sure we filter out any non-version folders.
+                fx_ver_t parsed(-1, -1, -1);
+                if (fx_ver_t::parse(ver, &parsed, false))
+                {
+                    trace::verbose(_X("Found SDK version [%s]"), ver.c_str());
+                    sdk_versions->push_back(ver.c_str());
+                    sdk_locations->push_back(sdk_dir.c_str());
+                }
+            }
+        }
+    }
 }
 
 /**
- * Resolve the hostpolicy version from deps.
- *  - Scan the deps file's libraries section and find the hostpolicy version in the file.
- */
+* When the framework is not found, display detailed error message
+*   about available frameworks and installation of new framework.
+*/
+void handle_missing_framework_error(
+    host_mode_t mode,
+    const pal::string_t& fx_name,
+    const pal::string_t& fx_version,
+    const pal::string_t& fx_dir,
+    const pal::string_t& own_dir)
+{
+    std::vector<pal::string_t> fx_framework_names;
+    std::vector<pal::string_t> fx_versions;
+    std::vector<pal::string_t> fx_locations;
+    pal::string_t fx_ver_dirs;
+    if (fx_dir.length())
+    {
+        fx_ver_dirs = fx_dir;
+        get_all_fx_versions(mode, get_directory(fx_dir), fx_name, &fx_framework_names, &fx_versions, &fx_locations);
+    }
+    else
+    {
+        fx_ver_dirs = own_dir;
+    }
+
+    get_all_fx_versions(mode, own_dir, fx_name, &fx_framework_names, &fx_versions, &fx_locations);
+    assert(fx_framework_names.size() == fx_versions.size());
+    assert(fx_framework_names.size() == fx_locations.size());
+
+    // Display the error message about missing FX.
+    if (fx_version.length())
+    {
+        trace::error(_X("The specified framework '%s', version '%s' was not found."), fx_name.c_str(), fx_version.c_str());
+    }
+    else
+    {
+        trace::error(_X("No frameworks were found."));
+    }
+
+    trace::error(_X("  - Check application dependencies and target a framework version installed at:"));
+    trace::error(_X("      %s"), fx_ver_dirs.c_str());
+    trace::error(_X("  - The .NET framework can be installed from:"));
+    trace::error(_X("      %s"), DOTNET_CORE_DOWNLOAD_RUNTIME_URL);
+    trace::error(_X("  - The .NET framework and SDK can be installed from:"));
+    trace::error(_X("      %s"), DOTNET_CORE_URL);
+
+    // Gather the list of versions installed at the shared FX location.
+    bool is_print_header = true;
+
+    for (int i = 0; i < fx_versions.size(); i++)
+    {
+        // Print banner only once before printing the versions
+        if (is_print_header)
+        {
+            trace::error(_X("  - The following versions are installed:"));
+            is_print_header = false;
+        }
+
+        trace::error(_X("      %s at [%s]"), fx_versions[i].c_str(), fx_locations[i].c_str());
+    }
+}
+
+/**
+* Resolve the hostpolicy version from deps.
+*  - Scan the deps file's libraries section and find the hostpolicy version in the file.
+*/
 pal::string_t resolve_hostpolicy_version_from_deps(const pal::string_t& deps_json)
 {
     trace::verbose(_X("--- Resolving %s version from deps json [%s]"), LIBHOSTPOLICY_NAME, deps_json.c_str());
@@ -107,9 +277,9 @@ pal::string_t resolve_hostpolicy_version_from_deps(const pal::string_t& deps_jso
 }
 
 /**
- * Given a directory and a version, find if the package relative
- *     dir under the given directory contains hostpolicy.dll
- */
+* Given a directory and a version, find if the package relative
+*     dir under the given directory contains hostpolicy.dll
+*/
 bool to_hostpolicy_package_dir(const pal::string_t& dir, const pal::string_t& version, pal::string_t* candidate)
 {
     assert(!version.empty());
@@ -129,7 +299,7 @@ bool to_hostpolicy_package_dir(const pal::string_t& dir, const pal::string_t& ve
     append_path(&path, version.c_str());                  // package version
     append_path(&path, rel_dir.c_str());                  // relative dir containing hostpolicy library
 
-    // Check if "path" contains the required library.
+                                                          // Check if "path" contains the required library.
     if (!library_exists_in_dir(path, LIBHOSTPOLICY_NAME, nullptr))
     {
         trace::verbose(_X("Did not find %s in directory %s"), LIBHOSTPOLICY_NAME, path.c_str());
@@ -144,9 +314,9 @@ bool to_hostpolicy_package_dir(const pal::string_t& dir, const pal::string_t& ve
 }
 
 /**
- * Given a nuget version, detect if a serviced hostpolicy is available at
- *   platform servicing location.
- */
+* Given a nuget version, detect if a serviced hostpolicy is available at
+*   platform servicing location.
+*/
 bool hostpolicy_exists_in_svc(const pal::string_t& version, pal::string_t* resolved_dir)
 {
     if (version.empty())
@@ -161,8 +331,8 @@ bool hostpolicy_exists_in_svc(const pal::string_t& version, pal::string_t* resol
 }
 
 /**
- * Given path to app binary, say app.dll or app.exe, retrieve the app.deps.json.
- */
+* Given path to app binary, say app.dll or app.exe, retrieve the app.deps.json.
+*/
 pal::string_t get_deps_from_app_binary(const pal::string_t& app)
 {
     assert(app.find(DIR_SEPARATOR) != pal::string_t::npos);
@@ -172,7 +342,6 @@ pal::string_t get_deps_from_app_binary(const pal::string_t& app)
     pal::string_t deps_file;
     deps_file.assign(get_directory(app));
 
-
     // Then the app name and the file extension
     pal::string_t app_name = get_filename(app);
     deps_file.append(app_name, 0, app_name.find_last_of(_X(".")));
@@ -181,9 +350,9 @@ pal::string_t get_deps_from_app_binary(const pal::string_t& app)
 }
 
 /**
- * Given a version and probing paths, find if package layout
- *    directory containing hostpolicy exists.
- */
+* Given a version and probing paths, find if package layout
+*    directory containing hostpolicy exists.
+*/
 bool resolve_hostpolicy_dir_from_probe_paths(const pal::string_t& version, const std::vector<pal::string_t>& probe_realpaths, pal::string_t* candidate)
 {
     if (probe_realpaths.empty() || version.empty())
@@ -212,24 +381,25 @@ bool resolve_hostpolicy_dir_from_probe_paths(const pal::string_t& version, const
 }
 
 /**
- * Given FX location, app binary and specified --depsfile, return deps that contains hostpolicy.dll
- */
+* Return name of deps file for app.
+*/
 pal::string_t get_deps_file(
-    const pal::string_t& fx_dir,
+    bool portable,
     const pal::string_t& app_candidate,
     const pal::string_t& specified_deps_file,
-    const runtime_config_t& config)
+    const fx_definition_vector_t& fx_definitions
+)
 {
-    if (config.get_portable())
+    if (portable)
     {
-        pal::string_t deps_file = fx_dir;
-        
+        // The hostpolicy is resolved from the root framework's name and location.
+        pal::string_t deps_file = get_root_framework(fx_definitions).get_dir();
         if (!deps_file.empty() && deps_file.back() != DIR_SEPARATOR)
         {
             deps_file.push_back(DIR_SEPARATOR);
         }
-        // Portable app's hostpolicy is resolved from FX deps
-        return deps_file + config.get_fx_name() + _X(".deps.json");
+
+        return deps_file + get_root_framework(fx_definitions).get_name() + _X(".deps.json");
     }
     else
     {
@@ -239,44 +409,29 @@ pal::string_t get_deps_file(
 }
 
 /**
-* Multilevel Lookup is enabled by default
-*  It can be disabled by setting DOTNET_MULTILEVEL_LOOKUP env var to a value that is not 1
+* Return location that is expected to contain hostpolicy
 */
-bool multilevel_lookup_enabled()
-{
-    pal::string_t env_lookup;
-    bool multilevel_lookup = true;
-
-    if (pal::getenv(_X("DOTNET_MULTILEVEL_LOOKUP"), &env_lookup))
-    {
-        auto env_val = pal::xtoi(env_lookup.c_str());
-        multilevel_lookup = (env_val == 1);
-    }
-    return multilevel_lookup;
-}
-
-/**
- * Given own location, FX location, app binary and specified --depsfile and probe paths
- *     return location that is expected to contain hostpolicy
- */
-bool fx_muxer_t::resolve_hostpolicy_dir(host_mode_t mode,
+bool fx_muxer_t::resolve_hostpolicy_dir(
+    host_mode_t mode,
     const pal::string_t& own_dir,
-    const pal::string_t& fx_dir,
+    const fx_definition_vector_t& fx_definitions,
     const pal::string_t& app_candidate,
     const pal::string_t& specified_deps_file,
     const pal::string_t& specified_fx_version,
     const std::vector<pal::string_t>& probe_realpaths,
-    const runtime_config_t& config,
     pal::string_t* impl_dir)
 {
+    bool portable = get_app(fx_definitions).get_runtime_config().get_portable();
+
     // Obtain deps file for the given configuration.
-    pal::string_t resolved_deps = get_deps_file(fx_dir, app_candidate, specified_deps_file, config);
+    pal::string_t resolved_deps = get_deps_file(portable, app_candidate, specified_deps_file, fx_definitions);
 
     // Resolve hostpolicy version out of the deps file.
     pal::string_t version = resolve_hostpolicy_version_from_deps(resolved_deps);
     if (trace::is_enabled() && version.empty() && pal::file_exists(resolved_deps))
     {
-        trace::warning(_X("Dependency manifest %s does not contain an entry for %s"), resolved_deps.c_str(), _STRINGIFY(HOST_POLICY_PKG_NAME));
+        trace::warning(_X("Dependency manifest %s does not contain an entry for %s"),
+            resolved_deps.c_str(), _STRINGIFY(HOST_POLICY_PKG_NAME));
     }
 
     // Check if the given version of the hostpolicy exists in servicing.
@@ -287,16 +442,11 @@ bool fx_muxer_t::resolve_hostpolicy_dir(host_mode_t mode,
 
     // Get the expected directory that would contain hostpolicy.
     pal::string_t expected;
-    if (config.get_portable())
+    if (portable)
     {
-        if (!pal::directory_exists(fx_dir))
-        {
-            pal::string_t fx_version = specified_fx_version.empty() ? config.get_fx_version() : specified_fx_version;
-            handle_missing_framework_error(config.get_fx_name(), fx_version, fx_dir);
-            return false;
-        }
-        
-        expected = fx_dir;
+        // The hostpolicy is required to be in the root framework's location
+        expected.assign(get_root_framework(fx_definitions).get_dir());
+        assert(pal::directory_exists(expected));
     }
     else
     {
@@ -329,37 +479,85 @@ bool fx_muxer_t::resolve_hostpolicy_dir(host_mode_t mode,
     }
 
     // If it still couldn't be found, somebody upstack messed up. Flag an error for the "expected" location.
-    trace::error(_X("A fatal error was encountered. The library '%s' required to execute the application was not found in '%s'."), LIBHOSTPOLICY_NAME, expected.c_str());
+    trace::error(_X("A fatal error was encountered. The library '%s' required to execute the application was not found in '%s'."),
+        LIBHOSTPOLICY_NAME, expected.c_str());
+    if (mode == host_mode_t::muxer && !portable)
+    {
+        if (!pal::file_exists(get_app(fx_definitions).get_runtime_config().get_path()))
+        {
+            trace::error(_X("Failed to run as a standalone app because there is no '%s' file. If this should be a portable app instead, add that file specifying the appropriate framework."),
+                get_app(fx_definitions).get_runtime_config().get_path().c_str());
+        }
+        else if (get_app(fx_definitions).get_runtime_config().get_fx_name().empty())
+        {
+            trace::error(_X("Failed to run as a standalone app because there is no framework specified in '%s'. If this should be a portable app instead, specify the appropriate framework in that file."),
+                get_app(fx_definitions).get_runtime_config().get_path().c_str());
+        }
+    }
     return false;
 }
 
 fx_ver_t fx_muxer_t::resolve_framework_version(const std::vector<fx_ver_t>& version_list,
     const pal::string_t& fx_ver,
     const fx_ver_t& specified,
-    const bool& patch_roll_fwd,
-    const int& roll_fwd_on_no_candidate_fx)
+    bool patch_roll_fwd,
+    roll_fwd_on_no_candidate_fx_option roll_fwd_on_no_candidate_fx)
 {
     trace::verbose(_X("Attempting FX roll forward starting from [%s]"), fx_ver.c_str());
-
 
     fx_ver_t most_compatible = specified;
     if (!specified.is_prerelease())
     {
-        if (roll_fwd_on_no_candidate_fx > 0)
+        if (roll_fwd_on_no_candidate_fx != roll_fwd_on_no_candidate_fx_option::disabled)
         {
-            trace::verbose(_X("'Roll forward on no candidate fx' enabled. Looking for the least production greater than or equal to [%s]"), fx_ver.c_str());
             fx_ver_t next_lowest(-1, -1, -1);
+
+            // Look for the least production version
+            trace::verbose(_X("'Roll forward on no candidate fx' enabled with value [%d]. Looking for the least production greater than or equal to [%s]"),
+                roll_fwd_on_no_candidate_fx, fx_ver.c_str());
+
             for (const auto& ver : version_list)
             {
-                
                 if (!ver.is_prerelease() && ver >= specified)
                 {
+                    if (roll_fwd_on_no_candidate_fx == roll_fwd_on_no_candidate_fx_option::minor)
+                    {
+                        // We only want to roll forward on minor
+                        if (ver.get_major() != specified.get_major())
+                        {
+                            continue;
+                        }
+                    }
                     next_lowest = (next_lowest == fx_ver_t(-1, -1, -1)) ? ver : std::min(next_lowest, ver);
                 }
             }
+
             if (next_lowest == fx_ver_t(-1, -1, -1))
             {
-                trace::verbose(_X("No production greater than or equal to [%s] found."), fx_ver.c_str());
+                // Look for the least preview version
+                trace::verbose(_X("No production greater than or equal to [%s] found. Looking for the least preview greater than [%s]"),
+                    fx_ver.c_str(), fx_ver.c_str());
+
+                for (const auto& ver : version_list)
+                {
+                    if (ver.is_prerelease() && ver >= specified)
+                    {
+                        if (roll_fwd_on_no_candidate_fx == roll_fwd_on_no_candidate_fx_option::minor)
+                        {
+                            // We only want to roll forward on minor
+                            if (ver.get_major() != specified.get_major())
+                            {
+                                continue;
+                            }
+                        }
+                        next_lowest = (next_lowest == fx_ver_t(-1, -1, -1)) ? ver : std::min(next_lowest, ver);
+                    }
+                }
+            }
+
+            if (next_lowest == fx_ver_t(-1, -1, -1))
+            {
+                trace::verbose(_X("No preview greater than or equal to [%s] found."), fx_ver.c_str());
             }
             else
             {
@@ -367,6 +565,7 @@ fx_ver_t fx_muxer_t::resolve_framework_version(const std::vector<fx_ver_t>& vers
                 most_compatible = next_lowest;
             }
         }
+
         if (patch_roll_fwd)
         {
             trace::verbose(_X("Applying patch roll forward from [%s]"), most_compatible.as_str().c_str());
@@ -374,11 +573,11 @@ fx_ver_t fx_muxer_t::resolve_framework_version(const std::vector<fx_ver_t>& vers
             {
                 trace::verbose(_X("Inspecting version... [%s]"), ver.as_str().c_str());
 
-                if (!ver.is_prerelease() && //  only prod. prevents roll forward to prerelease.
+                if (most_compatible.is_prerelease() == ver.is_prerelease() && // prevent production from rolling forward to preview on patch
                     ver.get_major() == most_compatible.get_major() &&
                     ver.get_minor() == most_compatible.get_minor())
                 {
-                    // Pick the greatest production that differs only in patch.
+                    // Pick the greatest that differs only in patch.
                     most_compatible = std::max(ver, most_compatible);
                 }
             }
@@ -406,11 +605,12 @@ fx_ver_t fx_muxer_t::resolve_framework_version(const std::vector<fx_ver_t>& vers
     return most_compatible;
 }
 
-pal::string_t fx_muxer_t::resolve_fx_dir(host_mode_t mode,
-    const pal::string_t& own_dir,
+fx_definition_t* fx_muxer_t::resolve_fx(
+    host_mode_t mode,
     const runtime_config_t& config,
-    const pal::string_t& specified_fx_version,
-    const int& roll_fwd_on_no_candidate_fx_val)
+    const pal::string_t& own_dir,
+    const pal::string_t& specified_fx_version
+)
 {
     // No FX resolution for standalone apps.
     assert(mode != host_mode_t::standalone);
@@ -418,19 +618,21 @@ pal::string_t fx_muxer_t::resolve_fx_dir(host_mode_t mode,
     // If invoking using FX dotnet.exe, use own directory.
     if (mode == host_mode_t::split_fx)
     {
-        return own_dir;
+        return new fx_definition_t(config.get_fx_name(), own_dir, pal::string_t(), pal::string_t());
     }
-    assert(mode == host_mode_t::muxer);
 
-    trace::verbose(_X("--- Resolving FX directory, specified '%s'"), specified_fx_version.c_str());
-    const auto fx_name = config.get_fx_name();
+    assert(!config.get_fx_name().empty());
+    assert(!config.get_fx_version().empty());
+
+    trace::verbose(_X("--- Resolving FX directory, name '%s' version '%s'"),
+        config.get_fx_name().c_str(), config.get_fx_version().c_str());
+
     const auto fx_ver = specified_fx_version.empty() ? config.get_fx_version() : specified_fx_version;
-
     fx_ver_t specified(-1, -1, -1);
     if (!fx_ver_t::parse(fx_ver, &specified, false))
     {
         trace::error(_X("The specified framework version '%s' could not be parsed"), fx_ver.c_str());
-        return pal::string_t();
+        return nullptr;
     }
 
     // Multi-level SharedFX lookup will look for the most appropriate version in several locations
@@ -440,21 +642,28 @@ pal::string_t fx_muxer_t::resolve_fx_dir(host_mode_t mode,
     // If it is not activated, then only .exe directory will be considered
 
     std::vector<pal::string_t> hive_dir;
-    pal::string_t local_dir;
     std::vector<pal::string_t> global_dirs;
     bool multilevel_lookup = multilevel_lookup_enabled();
 
-    hive_dir.push_back(own_dir);
+    // own_dir contains DIR_SEPARATOR appended that we need to remove.
+    pal::string_t own_dir_temp = own_dir;
+    remove_trailing_dir_seperator(&own_dir_temp);
+
+    hive_dir.push_back(own_dir_temp);
     if (multilevel_lookup && pal::get_global_dotnet_dirs(&global_dirs))
     {
         for (pal::string_t dir : global_dirs)
         {
-            hive_dir.push_back(dir);
+            // Avoid duplicate of own_dir_temp
+            if (dir != own_dir_temp)
+            {
+                hive_dir.push_back(dir);
+            }
         }
     }
 
-    bool patch_roll_fwd_enabled = config.get_patch_roll_fwd();
     pal::string_t selected_fx_dir;
+    pal::string_t selected_fx_version;
     fx_ver_t selected_ver(-1, -1, -1);
 
     for (pal::string_t dir : hive_dir)
@@ -463,7 +672,7 @@ pal::string_t fx_muxer_t::resolve_fx_dir(host_mode_t mode,
         trace::verbose(_X("Searching FX directory in [%s]"), fx_dir.c_str());
 
         append_path(&fx_dir, _X("shared"));
-        append_path(&fx_dir, fx_name.c_str());
+        append_path(&fx_dir, config.get_fx_name().c_str());
 
         bool do_roll_forward = false;
         if (specified_fx_version.empty())
@@ -471,7 +680,7 @@ pal::string_t fx_muxer_t::resolve_fx_dir(host_mode_t mode,
             if (!specified.is_prerelease())
             {
                 // If production and no roll forward use given version.
-                do_roll_forward = (patch_roll_fwd_enabled) || (roll_fwd_on_no_candidate_fx_val > 0);
+                do_roll_forward = (config.get_patch_roll_fwd()) || (config.get_roll_fwd_on_no_candidate_fx() != roll_fwd_on_no_candidate_fx_option::disabled);
             }
             else
             {
@@ -485,20 +694,21 @@ pal::string_t fx_muxer_t::resolve_fx_dir(host_mode_t mode,
         if (!do_roll_forward)
         {
             trace::verbose(_X("Did not roll forward because specified version='%s', patch_roll_fwd=%d, roll_fwd_on_no_candidate_fx=%d, chose [%s]"),
-                specified_fx_version.c_str(), patch_roll_fwd_enabled, roll_fwd_on_no_candidate_fx_val, fx_ver.c_str());
-            
+                specified_fx_version.c_str(), config.get_patch_roll_fwd(), config.get_roll_fwd_on_no_candidate_fx(), fx_ver.c_str());
+
             append_path(&fx_dir, fx_ver.c_str());
             if (pal::directory_exists(fx_dir))
             {
-                trace::verbose(_X("Chose FX version [%s]"), fx_dir.c_str());
-                return fx_dir;
+                selected_fx_dir = fx_dir;
+                selected_fx_version = fx_ver;
+                break;
             }
         }
         else
         {
             std::vector<pal::string_t> list;
             std::vector<fx_ver_t> version_list;
-            pal::readdir(fx_dir, &list);
+            pal::readdir_onlydirectories(fx_dir, &list);
 
             for (const auto& version : list)
             {
@@ -509,24 +719,28 @@ pal::string_t fx_muxer_t::resolve_fx_dir(host_mode_t mode,
                 }
             }
 
-            fx_ver_t resolved_ver = resolve_framework_version(version_list, fx_ver, specified, patch_roll_fwd_enabled, roll_fwd_on_no_candidate_fx_val);
+            fx_ver_t resolved_ver = resolve_framework_version(version_list, fx_ver, specified, config.get_patch_roll_fwd(), config.get_roll_fwd_on_no_candidate_fx());
 
             pal::string_t resolved_ver_str = resolved_ver.as_str();
             append_path(&fx_dir, resolved_ver_str.c_str());
 
             if (pal::directory_exists(fx_dir))
             {
-                //Continue to search for a better match if available
-                std::vector<fx_ver_t> version_list;
-                version_list.push_back(resolved_ver);
-                version_list.push_back(selected_ver);
-                resolved_ver = resolve_framework_version(version_list, fx_ver, specified, patch_roll_fwd_enabled, roll_fwd_on_no_candidate_fx_val);
+                if (selected_ver != fx_ver_t(-1, -1, -1))
+                {
+                    // Compare the previous hive_dir selection with the current hive_dir to see which one is the better match
+                    std::vector<fx_ver_t> version_list;
+                    version_list.push_back(resolved_ver);
+                    version_list.push_back(selected_ver);
+                    resolved_ver = resolve_framework_version(version_list, fx_ver, specified, config.get_patch_roll_fwd(), config.get_roll_fwd_on_no_candidate_fx());
+                }
 
                 if (resolved_ver != selected_ver)
                 {
                     trace::verbose(_X("Changing Selected FX version from [%s] to [%s]"), selected_fx_dir.c_str(), fx_dir.c_str());
                     selected_ver = resolved_ver;
                     selected_fx_dir = fx_dir;
+                    selected_fx_version = resolved_ver_str;
                 }
             }
         }
@@ -535,11 +749,12 @@ pal::string_t fx_muxer_t::resolve_fx_dir(host_mode_t mode,
     if (selected_fx_dir.empty())
     {
         trace::error(_X("It was not possible to find any compatible framework version"));
-        return pal::string_t();
+        return nullptr;
     }
 
     trace::verbose(_X("Chose FX version [%s]"), selected_fx_dir.c_str());
-    return selected_fx_dir;
+
+    return new fx_definition_t(config.get_fx_name(), selected_fx_dir, fx_ver, selected_fx_version);
 }
 
 pal::string_t fx_muxer_t::resolve_cli_version(const pal::string_t& global_json)
@@ -588,7 +803,7 @@ pal::string_t fx_muxer_t::resolve_cli_version(const pal::string_t& global_json)
     catch (const std::exception& je)
     {
         pal::string_t jes;
-        (void) pal::utf8_palstring(je.what(), &jes);
+        (void)pal::utf8_palstring(je.what(), &jes);
         trace::error(_X("A JSON parsing exception occurred in [%s]: %s"), global_json.c_str(), jes.c_str());
     }
     trace::verbose(_X("CLI version is [%s] in global json file [%s]"), retval.c_str(), global_json.c_str());
@@ -614,7 +829,7 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path, bool parse_only_produc
     pal::string_t retval;
     std::vector<pal::string_t> versions;
 
-    pal::readdir(sdk_path, &versions);
+    pal::readdir_onlydirectories(sdk_path, &versions);
     fx_ver_t max_ver(-1, -1, -1);
     for (const auto& version : versions)
     {
@@ -623,9 +838,9 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path, bool parse_only_produc
         fx_ver_t ver(-1, -1, -1);
         if (fx_ver_t::parse(version, &ver, parse_only_production))
         {
-            if (global_cli_version.empty() || 
-                    // Pick the greatest version that differs only in patch if a global cli version is specified.
-                    (ver.get_major() == specified.get_major() && ver.get_minor() == specified.get_minor()))
+            if (global_cli_version.empty() ||
+                // Pick the greatest version that differs only in patch if a global cli version is specified.
+                (ver.get_major() == specified.get_major() && ver.get_minor() == specified.get_minor()))
             {
                 max_ver = std::max(ver, max_ver);
             }
@@ -666,11 +881,11 @@ bool higher_sdk_version(const pal::string_t& new_version, pal::string_t* version
 
     if (fx_ver_t::parse(new_version, &new_ver, parse_only_production))
     {
-       if (!fx_ver_t::parse(*version, &ver, parse_only_production) || (new_ver > ver))
-       {
-           version->assign(new_version);
-           retval = true;
-       }
+        if (!fx_ver_t::parse(*version, &ver, parse_only_production) || (new_ver > ver))
+        {
+            version->assign(new_version);
+            retval = true;
+        }
     }
 
     return retval;
@@ -704,7 +919,6 @@ bool fx_muxer_t::resolve_sdk_dotnet_path(const pal::string_t& own_dir, const pal
     }
 
     std::vector<pal::string_t> hive_dir;
-    pal::string_t local_dir;
     std::vector<pal::string_t> global_dirs;
     bool multilevel_lookup = multilevel_lookup_enabled();
 
@@ -809,7 +1023,6 @@ int muxer_info()
 
 int muxer_usage(bool is_sdk_present)
 {
-
     std::vector<host_option> known_opts = fx_muxer_t::get_known_opts(true, host_mode_t::invalid, true);
 
     if (!is_sdk_present)
@@ -827,6 +1040,8 @@ int muxer_usage(bool is_sdk_present)
     {
         trace::println(_X("  %-34s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
     }
+    trace::println(_X("  --list-runtimes                     Display the installed runtimes"));
+    trace::println(_X("  --list-sdks                         Display the installed SDKs"));
 
     trace::println();
 
@@ -839,8 +1054,37 @@ int muxer_usage(bool is_sdk_present)
         trace::println();
     }
 
-    
     return StatusCode::InvalidArgFailure;
+}
+
+int versions_runtime_info(pal::string_t own_dir)
+{
+    std::vector<pal::string_t> fx_framework_names;
+    std::vector<pal::string_t> fx_versions;
+    std::vector<pal::string_t> fx_locations;
+    get_all_fx_versions(host_mode_t::muxer, own_dir, _X(""), &fx_framework_names, &fx_versions, &fx_locations);
+    assert(fx_framework_names.size() == fx_versions.size());
+    assert(fx_framework_names.size() == fx_locations.size());
+    for (int i = 0; i < fx_versions.size(); i++)
+    {
+        trace::println(_X("%s %s [%s]"), fx_framework_names[i].c_str(), fx_versions[i].c_str(), fx_locations[i].c_str());
+    }
+
+    return StatusCode::Success;
+}
+
+int versions_sdk_info(pal::string_t own_dir)
+{
+    std::vector<pal::string_t> sdk_versions;
+    std::vector<pal::string_t> sdk_locations;
+    get_all_sdk_versions(own_dir, &sdk_versions, &sdk_locations);
+    assert(sdk_versions.size() == sdk_locations.size());
+    for (int i = 0; i < sdk_versions.size(); i++)
+    {
+        trace::println(_X("%s [%s]"), sdk_versions[i].c_str(), sdk_locations[i].c_str());
+    }
+
+    return StatusCode::Success;
 }
 
 // Convert "path" to realpath (merging working dir if needed) and append to "realpaths" out param.
@@ -873,12 +1117,12 @@ void append_probe_realpath(const pal::string_t& path, std::vector<pal::string_t>
             }
             else
             {
-                trace::verbose(_X("Ignoring host interpreted additional probing path %s as it does not exist."),probe_path.c_str());
+                trace::verbose(_X("Ignoring host interpreted additional probing path %s as it does not exist."), probe_path.c_str());
             }
         }
         else
         {
-            trace::verbose(_X("Ignoring additional probing path %s as it does not exist."),probe_path.c_str());
+            trace::verbose(_X("Ignoring additional probing path %s as it does not exist."), probe_path.c_str());
         }
     }
 }
@@ -919,7 +1163,7 @@ int fx_muxer_t::parse_args_and_execute(
         trace::error(_X("Failed to parse supported options or their values:"));
         for (const auto& arg : known_opts)
         {
-            trace::error(_X("  %s"), arg.option.c_str());
+            trace::error(_X("  %s"), (arg.option + _X(" ") + arg.argument).c_str());
         }
         return InvalidArgFailure;
     }
@@ -979,31 +1223,12 @@ int fx_muxer_t::parse_args_and_execute(
     return read_config_and_execute(own_dir, app_candidate, opts, new_argc, new_argv, mode);
 }
 
-int fx_muxer_t::read_config_and_execute(
-    const pal::string_t& own_dir, 
+int read_config(
+    fx_definition_t& app,
     const pal::string_t& app_candidate,
-    const std::unordered_map<pal::string_t, std::vector<pal::string_t>>& opts,
-    int new_argc, const pal::char_t** new_argv, host_mode_t mode)
+    pal::string_t& runtime_config
+)
 {
-    pal::string_t opts_fx_version = _X("--fx-version");
-    pal::string_t opts_roll_fwd_on_no_candidate_fx = _X("--roll-forward-on-no-candidate-fx");
-    pal::string_t opts_deps_file = _X("--depsfile");
-    pal::string_t opts_probe_path = _X("--additionalprobingpath");
-    pal::string_t opts_additional_deps = _X("--additional-deps");
-    pal::string_t opts_runtime_config = _X("--runtimeconfig");
-
-    pal::string_t fx_version = get_last_known_arg(opts, opts_fx_version, _X(""));
-    pal::string_t roll_fwd_on_no_candidate_fx = get_last_known_arg(opts, opts_roll_fwd_on_no_candidate_fx, _X(""));
-    pal::string_t deps_file = get_last_known_arg(opts, opts_deps_file, _X(""));
-    pal::string_t additional_deps = get_last_known_arg(opts, opts_additional_deps, _X(""));
-    pal::string_t runtime_config = get_last_known_arg(opts, opts_runtime_config, _X(""));
-    std::vector<pal::string_t> spec_probe_paths = opts.count(opts_probe_path) ? opts.find(opts_probe_path)->second : std::vector<pal::string_t>();
-
-    if (!deps_file.empty() && (!pal::realpath(&deps_file) || !pal::file_exists(deps_file)))
-    {
-        trace::error(_X("The specified deps.json [%s] does not exist"), deps_file.c_str());
-        return StatusCode::InvalidArgFailure;
-    }
     if (!runtime_config.empty() && (!pal::realpath(&runtime_config) || !pal::file_exists(runtime_config)))
     {
         trace::error(_X("The specified runtimeconfig.json [%s] does not exist"), runtime_config.c_str());
@@ -1023,73 +1248,163 @@ int fx_muxer_t::read_config_and_execute(
         get_runtime_config_paths_from_arg(runtime_config, &config_file, &dev_config_file);
     }
 
-    runtime_config_t config(config_file, dev_config_file);
-    if (!config.is_valid())
+    app.parse_runtime_config(config_file, dev_config_file, nullptr);
+    if (!app.get_runtime_config().is_valid())
     {
-        trace::error(_X("Invalid runtimeconfig.json [%s] [%s]"), config.get_path().c_str(), config.get_dev_path().c_str());
+        trace::error(_X("Invalid runtimeconfig.json [%s] [%s]"), app.get_runtime_config().get_path().c_str(), app.get_runtime_config().get_dev_path().c_str());
         return StatusCode::InvalidConfigFile;
     }
 
-    // Append specified probe paths first and then config file probe paths into realpaths.
-    std::vector<pal::string_t> probe_realpaths;
-    for (const auto& path : spec_probe_paths)
+    return 0;
+}
+
+int fx_muxer_t::read_config_and_execute(
+    const pal::string_t& own_dir,
+    const pal::string_t& app_candidate,
+    const std::unordered_map<pal::string_t, std::vector<pal::string_t>>& opts,
+    int new_argc, const pal::char_t** new_argv, host_mode_t mode)
+{
+    pal::string_t opts_fx_version = _X("--fx-version");
+    pal::string_t opts_roll_fwd_on_no_candidate_fx = _X("--roll-forward-on-no-candidate-fx");
+    pal::string_t opts_deps_file = _X("--depsfile");
+    pal::string_t opts_probe_path = _X("--additionalprobingpath");
+    pal::string_t opts_additional_deps = _X("--additional-deps");
+    pal::string_t opts_runtime_config = _X("--runtimeconfig");
+
+    pal::string_t fx_version_specified = get_last_known_arg(opts, opts_fx_version, _X(""));
+    pal::string_t roll_fwd_on_no_candidate_fx = get_last_known_arg(opts, opts_roll_fwd_on_no_candidate_fx, _X(""));
+    pal::string_t deps_file = get_last_known_arg(opts, opts_deps_file, _X(""));
+    pal::string_t additional_deps = get_last_known_arg(opts, opts_additional_deps, _X(""));
+    pal::string_t runtime_config = get_last_known_arg(opts, opts_runtime_config, _X(""));
+    std::vector<pal::string_t> spec_probe_paths = opts.count(opts_probe_path) ? opts.find(opts_probe_path)->second : std::vector<pal::string_t>();
+
+    if (!deps_file.empty() && (!pal::realpath(&deps_file) || !pal::file_exists(deps_file)))
     {
-        append_probe_realpath(path, &probe_realpaths, config.get_tfm());
-    }
-    for (const auto& path : config.get_probe_paths())
-    {
-        append_probe_realpath(path, &probe_realpaths, config.get_tfm());
+        trace::error(_X("The specified deps.json [%s] does not exist"), deps_file.c_str());
+        return StatusCode::InvalidArgFailure;
     }
 
-    // 'Roll forward on no candidate fx' is disabled by default. It can be enabled through:
-    // 1. Command line argument (--roll-forward-on-no-candidate-fx)
-    // 2. Runtimeconfig json file ('rollForwardOnNoCandidateFx' property)
-    // 3. DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX env var
+    // Read config
+    fx_definition_vector_t fx_definitions;
+    auto app = new fx_definition_t();
+    fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
+
+    int rc = read_config(*app, app_candidate, runtime_config);
+    if (rc)
+    {
+        return rc;
+    }
+
+    auto config = app->get_runtime_config();
+
+    // 'Roll forward on no candidate fx' is set to 1 (roll_fwd_on_no_candidate_fx_option::minor) by default. It can be changed through:
+    // 1. Command line argument (--roll-forward-on-no-candidate-fx). Only defaults the app's config.
+    // 2. Runtimeconfig json file ('rollForwardOnNoCandidateFx' property), which is used as a default for lower level frameworks if they don't specify a value.
+    // 3. DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX env var. Only defaults the app's config.
     // The conflicts will be resolved by following the priority rank described above (from 1 to 3).
     // The env var condition is verified in the config file processing
-    int roll_fwd_on_no_candidate_fx_val = config.get_roll_fwd_on_no_candidate_fx();
     if (!roll_fwd_on_no_candidate_fx.empty())
     {
-        roll_fwd_on_no_candidate_fx_val = pal::xtoi(roll_fwd_on_no_candidate_fx.c_str());
+        config.set_roll_fwd_on_no_candidate_fx(static_cast<roll_fwd_on_no_candidate_fx_option>(pal::xtoi(roll_fwd_on_no_candidate_fx.c_str())));
     }
 
+    // Determine additional deps
     pal::string_t additional_deps_serialized;
-    
     bool is_portable = config.get_portable();
-    if (is_portable) {
+    if (is_portable)
+    {
         additional_deps_serialized = additional_deps;
         if (additional_deps_serialized.empty())
         {
             // additional_deps_serialized stays empty if DOTNET_ADDITIONAL_DEPS env var is not defined
             pal::getenv(_X("DOTNET_ADDITIONAL_DEPS"), &additional_deps_serialized);
         }
+
+        // Obtain frameworks\platforms
+        auto version = fx_version_specified;
+        while (!config.get_fx_name().empty() && !config.get_fx_version().empty())
+        {
+            fx_definition_t* fx = resolve_fx(mode, config, own_dir, version);
+            if (fx == nullptr)
+            {
+                pal::string_t searched_version = fx_version_specified.empty() ? config.get_fx_version() : fx_version_specified;
+                handle_missing_framework_error(mode, config.get_fx_name(), searched_version, pal::string_t(), own_dir);
+                return FrameworkMissingFailure;
+            }
+
+            fx_definitions.push_back(std::unique_ptr<fx_definition_t>(fx));
+
+            pal::string_t config_file;
+            pal::string_t dev_config_file;
+            get_runtime_config_paths(fx->get_dir(), config.get_fx_name(), &config_file, &dev_config_file);
+            fx->parse_runtime_config(config_file, dev_config_file, &config);
+
+            config = fx->get_runtime_config();
+            if (!config.is_valid())
+            {
+                trace::error(_X("Invalid framework config.json [%s]"), config.get_path().c_str());
+                return StatusCode::InvalidConfigFile;
+            }
+
+            // Only the first framework can have a specified version (through --fx-version)
+            version.clear();
+        }
     }
 
-    pal::string_t fx_dir = is_portable ? resolve_fx_dir(mode, own_dir, config, fx_version, roll_fwd_on_no_candidate_fx_val) : _X("");
+    // Append specified probe paths first and then config file probe paths into realpaths.
+    std::vector<pal::string_t> probe_realpaths;
+
+    // The tfm is taken from the app.
+    pal::string_t tfm = get_app(fx_definitions).get_runtime_config().get_tfm();
+
+    for (const auto& path : spec_probe_paths)
+    {
+        append_probe_realpath(path, &probe_realpaths, tfm);
+    }
+
+    // Each framework can add probe paths
+    for (const auto& fx : fx_definitions)
+    {
+        for (const auto& path : fx->get_runtime_config().get_probe_paths())
+        {
+            append_probe_realpath(path, &probe_realpaths, tfm);
+        }
+    }
 
     trace::verbose(_X("Executing as a %s app as per config file [%s]"),
-        (is_portable ? _X("portable") : _X("standalone")), config_file.c_str());
+        (is_portable ? _X("portable") : _X("standalone")), config.get_path().c_str());
 
     pal::string_t impl_dir;
-    if (!resolve_hostpolicy_dir(mode, own_dir, fx_dir, app_candidate, deps_file, fx_version, probe_realpaths, config, &impl_dir))
+    if (!resolve_hostpolicy_dir(mode, own_dir, fx_definitions, app_candidate, deps_file, fx_version_specified, probe_realpaths, &impl_dir))
     {
         return CoreHostLibMissingFailure;
     }
 
-    corehost_init_t init(deps_file, additional_deps_serialized, probe_realpaths, fx_dir, mode, config);
+    corehost_init_t init(deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions);
     return execute_app(impl_dir, &init, new_argc, new_argv);
 }
 
 /**
- *  Main entrypoint to detect operating mode and perform corehost, muxer,
- *  standalone application activation and the SDK activation.
- */
+*  Main entrypoint to detect operating mode and perform corehost, muxer,
+*  standalone application activation and the SDK activation.
+*/
 int fx_muxer_t::execute(const int argc, const pal::char_t* argv[])
 {
     pal::string_t own_path;
 
+    // Try to use argv[0] as own_path to allow for hosts located elsewhere
+    if (argc >= 1)
+    {
+        own_path = argv[0];
+        if (!own_path.empty() && (!pal::realpath(&own_path) || !pal::file_exists(own_path)))
+        {
+            trace::warning(_X("Failed to resolve argv[0] as path [%s]. Using location of current executable instead."), own_path.c_str());
+            own_path.clear();
+        }
+    }
+
     // Get the full name of the application
-    if (!pal::get_own_executable_path(&own_path) || !pal::realpath(&own_path))
+    if (own_path.empty() && (!pal::get_own_executable_path(&own_path) || !pal::realpath(&own_path)))
     {
         trace::error(_X("Failed to resolve full path of the current executable [%s]"), own_path.c_str());
         return StatusCode::LibHostCurExeFindFailure;
@@ -1146,23 +1461,32 @@ int fx_muxer_t::execute(const int argc, const pal::char_t* argv[])
     }
 
     int result = parse_args_and_execute(own_dir, own_dll, 1, argc, argv, false, host_mode_t::muxer, &is_an_app); // arg offset 1 for dotnet
-   
 
     if (is_an_app)
     {
         return result;
     }
 
+    // Check for commands that don't depend on the CLI SDK to be loaded
+    if (pal::strcasecmp(_X("--list-sdks"), argv[1]) == 0)
+    {
+        return versions_sdk_info(own_dir);
+    }
+    else if (pal::strcasecmp(_X("--list-runtimes"), argv[1]) == 0)
+    {
+        return versions_runtime_info(own_dir);
+    }
+
     //
-    // Could not execute as an app, try the CLI SDK dotnet.dll
+    // Did not exececute the app or run other commands, so try the CLI SDK dotnet.dll
     //
 
     pal::string_t sdk_dotnet;
     if (!resolve_sdk_dotnet_path(own_dir, &sdk_dotnet))
     {
         assert(argc > 1);
-        if ( pal::strcasecmp(_X("-h"), argv[1]) == 0 ||
-             pal::strcasecmp(_X("--help"), argv[1]) == 0 )
+        if (pal::strcasecmp(_X("-h"), argv[1]) == 0 ||
+            pal::strcasecmp(_X("--help"), argv[1]) == 0)
         {
             return muxer_usage(false);
         }
@@ -1170,7 +1494,7 @@ int fx_muxer_t::execute(const int argc, const pal::char_t* argv[])
         {
             return muxer_info();
         }
-        trace::error(_X("Did you mean to run dotnet SDK commands? Please install dotnet SDK from: "));
+        trace::error(_X("Did you mean to run dotnet SDK commands? Please install dotnet SDK from:"));
         trace::error(_X("  %s"), DOTNET_CORE_URL);
         return StatusCode::LibHostSdkFindFailure;
     }
@@ -1200,5 +1524,3 @@ int fx_muxer_t::execute(const int argc, const pal::char_t* argv[])
 
     return result;
 }
-
-

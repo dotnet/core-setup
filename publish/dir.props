@@ -9,11 +9,6 @@
     <ChecksumsRelativePath>Runtime/$(ProductVersion)</ChecksumsRelativePath>
     <ChecksumExtension>.sha512</ChecksumExtension>
   </PropertyGroup>
-  
-  <PropertyGroup>
-    <ProductMoniker>$(DistroRid).$(SharedFrameworkNugetVersion)</ProductMoniker>
-    <HostResolverVersionMoniker>$(DistroRid).$(HostResolverVersion)</HostResolverVersionMoniker>
-  </PropertyGroup>
 
   <ItemGroup>
     <!-- IgnorableErrorMessages applies to the "ExectWithRetriesForNuGetPush" task.
@@ -26,24 +21,24 @@
       <ConditionalErrorMessage>Pushing took too long</ConditionalErrorMessage>
     </IgnorableErrorMessages>
   </ItemGroup>
-  
+
   <ItemGroup>
-    <CompressedFile Include="$(PackagesOutDir)**/*$(CompressedFileExtension)">
+    <CompressedFile Include="$(AssetOutputPath)**/*$(CompressedFileExtension)">
       <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
     </CompressedFile>
-    <RuntimePackageFile Include="$(PackagesOutDir)**/runtime.*.nupkg" >
+    <RuntimePackageFile Include="$(PackageOutputPath)**/runtime.*.nupkg" >
       <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
     </RuntimePackageFile>
     <UWPArtifactsToUpload Include="$(MicrosoftNetCoreRuntimeAppxOutputPath)" Condition="Exists('$(MicrosoftNetCoreRuntimeAppxOutputPath)')" >
       <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
     </UWPArtifactsToUpload>
-    <RidAgnosticPackageFile Include="$(PackagesOutDir)**/*.nupkg" Exclude="@(RuntimePackageFile)" >
+    <RidAgnosticPackageFile Include="$(PackageOutputPath)**/*.nupkg" Exclude="@(RuntimePackageFile)" >
       <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
     </RidAgnosticPackageFile>
-    <InstallerFile Include="$(PackagesOutDir)**/*$(InstallerExtension)" Condition="'$(InstallerExtension)' != ''" >
+    <InstallerFile Include="$(AssetOutputPath)**/*$(InstallerExtension)" Condition="'$(InstallerExtension)' != ''" >
       <RelativeBlobPath>$(InstallersRelativePath)</RelativeBlobPath>
     </InstallerFile>
-    <InstallerFile Include="$(PackagesOutDir)**/*$(CombinedInstallerExtension)" Condition="'$(CombinedInstallerExtension)' != ''">
+    <InstallerFile Include="$(AssetOutputPath)**/*$(CombinedInstallerExtension)" Condition="'$(CombinedInstallerExtension)' != ''">
       <RelativeBlobPath>$(InstallersRelativePath)</RelativeBlobPath>
     </InstallerFile>
   </ItemGroup>
@@ -51,7 +46,8 @@
   <ItemGroup>
     <PublishRid Include="ubuntu.14.04-x64" />
     <PublishRid Include="ubuntu.16.04-x64" />
-    <PublishRid Include="ubuntu.16.10-x64" />
+    <PublishRid Include="ubuntu.17.04-x64" />
+    <PublishRid Include="ubuntu.17.10-x64" />
     <PublishRid Include="debian.8-x64" />
     <PublishRid Include="debian.9-x64" />
     <PublishRid Include="linux-x64" />
@@ -62,5 +58,6 @@
     <PublishRid Include="win-arm64" />
     <PublishRid Include="linux-arm" />
     <PublishRid Include="rhel.7-x64" />
+    <PublishRid Include="opensuse.42-x64" />
   </ItemGroup>
 </Project>

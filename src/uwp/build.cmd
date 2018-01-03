@@ -77,6 +77,7 @@ if NOT "%__BuildArch%" == "arm64" (
 )
 
 :SetupDirs
+
 :: Setup to cmake the native components
 echo Commencing build of native UWP components
 echo.
@@ -137,7 +138,7 @@ exit /b 0
     IF ERRORLEVEL 1 (
         exit /b 1
     )
-    
+
     goto :eof
 
 :Failure

@@ -4,12 +4,13 @@
     <MinorVersion>1</MinorVersion>
     <PatchVersion>0</PatchVersion>
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
-    <PreReleaseLabel>preview2</PreReleaseLabel>
+    <PreReleaseLabel>preview1</PreReleaseLabel>
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
-    <ReleaseBrandSuffix>Preview 2</ReleaseBrandSuffix>
+    <ReleaseBrandSuffix>Preview 1</ReleaseBrandSuffix>
     <Channel>master</Channel>
     <BranchName>master</BranchName>
     <ContainerName>dotnet</ContainerName>
     <ChecksumContainerName>$(ContainerName)</ChecksumContainerName>
+    <NETCoreAppMaximumVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppMaximumVersion>
   </PropertyGroup>
 </Project>

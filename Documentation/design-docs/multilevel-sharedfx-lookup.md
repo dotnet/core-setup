@@ -1,4 +1,4 @@
-﻿# Multi-level SharedFX Lookup
+# Multi-level SharedFX Lookup
 
 ## Introduction
 
@@ -19,7 +19,7 @@ Versions that are not pre-releases are called productions.
 	For instance, a valid Semantic Versioning number sort would be:
 	1.0.0 -> 1.0.1-alpha -> 1.0.1 -> 1.1.0-alpha -> 1.1.0-rc1 -> 1.1.0 -> 1.1.1 -> 2.0.0.
 
-## Executable
+ ## Executable
 
 The executable’s only task is to find and load the hostfxr.dll file and pass on its arguments.
 
@@ -65,6 +65,46 @@ Hostfxr must then locate the hostpolicy.dll file:
 
 The hostpolicy is then loaded into memory and executed.
 
+### Proposed hostfxr changes for 2.1 (and 2.0.x long-term-servicing)
+There can only be one framework in 2.0. That framework is located in the app's runtimeconfig.json:
+```javascript
+{
+  "runtimeOptions": {
+    "tfm": "netcoreapp2.0",
+    "framework": {
+      "name": "Microsoft.NETCore.App",
+      "version": "2.0.0"
+    }
+  }
+}
+```
+
+From the framework's `name` and `version` the appropriate framework location is found as explained earlier.
+
+In order for other frameworks (or platforms such as ASP.NET) to get the same benefits of roll-forward and self-containment for serviceability, 2.1 will support multiple frameworks.
+
+For 2.1, a given framework can only depend upon another single framework. An app can still only depend upon a single framework as well. Thus it repesents a "vertical" hierarchy. It is possible to allow additional frameworks in a "horizontal" manner, but that is out of scope for 2.1.
+
+Each framework has its own roll-forward semantics. This means ASP.NET can roll-forward independently of NETCore.App even though ASP.NET depends upon the NETCore.App framework.
+
+NETCore.App in 2.0 has its own deps.json file in its own folder that lists its assemblies. In 2.1, other frameworks will also have their own deps.jon. In addition, each framework has an optional runtimeconfig.json that describes its framework dependency as well as other settings that exist today (applyPatches, preReleaseRollForward, rollForwardOnNoCandidateFx). If the runtimeconfig.json file does not exist, or does not have a value for a setting, it uses the value from the higher-level runtimeconfig.json.
+
+For example, an MVC app's runtimeconfig.json would contain (actual framework names TBD):
+```javascript
+"framework": {
+      "name": "Microsoft.AspNetCore.All",
+      "version": "2.1.0"
+    }
+```
+and Microsoft.AspNetCore.All's runtimeconfig.json would contain:
+```javascript
+"framework": {
+      "name": "Microsoft.NETCore.App",
+      "version": "2.1.0"
+    }
+```
+and Microsoft.NETCore.App would not have a runtimeconfig.json because it doesn't have any framework dependency or need to change other settings.
+
 ## Hostpolicy
 
 Hostpolicy is in charge of looking for all dependencies files required for the application. That includes the coreclr.dll file which is necessary to run it.
@@ -78,20 +118,29 @@ Both files carry the filenames for dependencies that must be found. They can be 
 
 At last, the coreclr is loaded into memory and called to run the application.
 
-## Proposed changes
+### Proposed hostpolicy changes for 2.1 (and 2.0.x long-term-servicing)
+For 2.0, there are several probing paths that are used to find the dependencies. These paths follow a certain order and the first assembly found wins and that location will be passed to the coreclr. For example, the local app location has priority over the shared framework locations and if the same assembly exists in both locations, the coreclr will end up using the local app's copy of that assembly.
 
-Almost every file search is done in relation to the executable directory. It would be better to be able to search for some files in other directories as well, namely the global .NET location. The  global folders may vary depending on the running operational system. They are defined as follows:
+These semantics will be unchanged for 2.1 except when a roll-forward is performed at a non-patch version (meaning a change to the major or minor version). For these cases, the highest assembly version wins. This is necessary in run-time scenarios to prevent assembly load exceptions which occur when an assembly is referencing a higher version of another assembly, but a lower version is actually found.
+
+There will be some checks added to hostpolicy to catch these conflicts during development scenarios, but since this conflict scenario should only occur during roll-forward, and on a version of the framework likely not even released yet during development, these checks will focus on correctness of the currently targeted framework. This ennsures that any duplicate versions higher up the framework stack have a newer assembly version than the copies of that assembly in the lower level frameworks.
+
+This situation of having assembly conflicts (or duplicates) is more likely to occur when there are multiple frameworks (as convered in hostfxr's proposed changes for 2.1), so it is important to address in the 2.1 timeframe.
+
+## Global locations
+
+In addition to searching the executable directory, the global .NET location is also searched. The global folders may vary depending on the running operational system. They are defined as follows:
 
 Global .NET location:
 
 	Windows 32-bit: %SystemDrive%\Program Files\dotnet
 	Windows 64-bit (32-bit application): %SystemDrive%\Program Files (x86)\dotnet
 	Windows 64-bit (64-bit application): %SystemDrive%\Program Files\dotnet
-	Unix: the directory of “dotnet” defined in the system path.
-
+	Unix: none
+	
 ### Framework search
 
-It’s being proposed that, if the specified version is defined through the configuration json file, the search must be conducted as follows:
+If the specified version is defined through the configuration json file, the search must be conducted as follows:
 
 - For productions:
 
@@ -105,7 +154,7 @@ It’s being proposed that, if the specified version is defined through the conf
 
 In the case that the desired version is defined through an argument, the multi-level lookup will happen as well but it will only consider the exact specified version (it will not roll forward).
 
-### Tests
+#### Tests
 
 To make sure that the changes are working correctly, the following behavior conditions will be verified through tests:
 
@@ -115,13 +164,14 @@ To make sure that the changes are working correctly, the following behavior cond
 - If the version is specified through an argument, then roll forwards are not allowed to happen.
 - If no compatible version folder is found, then an error message must be returned and the process must end.
 
-## Future changes
 
 ### SDK search
 
-By following similar logic, it will be possible to implement future changes in the SDK search. Instead of looking for it only in relation to the executable directory, we could do it in the folders specified above by following the same priority rank.
+Like the Framework search, the SDK is searched for a compatible version. Instead of looking for it only in relation to the executable directory, it is also searched in the folders specified above by following the same priority rank.
 
-The search would be conducted as follows:
+The search is conducted as follows:
 
 1.	In relation to the executable directory: search for the specified version. If it cannot be found, choose the most appropriate available version. If there’s no available version, proceed to the next step.
-2.	In relation to the global location: search for the specified version. If it cannot be found, choose the most appropriate available version. If there’s no available version, then we were not able to find any version folder and an error message must be returned.
+2.	In relation to the global location: search for the specified version. If it cannot be found, choose the most appropriate available version. If there’s no available version, then we were not able to find any version folder and an error message is returned.
+
+Unlike the Framework search, the SDK search does a roll-forward for pre-release versions when the patch version changes. For example, if you install v2.0.1-pre, it will be used over v2.0.0.

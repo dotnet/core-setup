@@ -36,17 +36,20 @@ set(SOURCES
     ../json/casablanca/src/json/json_parsing.cpp
     ../json/casablanca/src/json/json_serialization.cpp
     ../json/casablanca/src/utilities/asyncrt_utils.cpp
+    ../fx_definition.cpp
     ./hostfxr.cpp
     ./fx_ver.cpp
-    ./fx_muxer.cpp)
-
+    ./fx_muxer.cpp
+)
 
 if(WIN32)
     list(APPEND SOURCES
         ../../common/pal.windows.cpp
         ../../common/longfile.windows.cpp)
 else()
-    list(APPEND SOURCES ../../common/pal.unix.cpp)
+    list(APPEND SOURCES
+        ../../common/pal.unix.cpp
+        ${VERSION_FILE_PATH})
 endif()
 
 add_definitions(-D_NO_ASYNCRTIMP)

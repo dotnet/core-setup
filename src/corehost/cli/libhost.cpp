@@ -9,20 +9,9 @@
 void get_runtime_config_paths_from_app(const pal::string_t& app, pal::string_t* cfg, pal::string_t* dev_cfg)
 {
     auto name = get_filename_without_ext(app);
+    auto path = get_directory(app);
 
-    auto json_name = name + _X(".runtimeconfig.json");
-    auto dev_json_name = name + _X(".runtimeconfig.dev.json");
-
-    auto json_path = get_directory(app);
-    auto dev_json_path = json_path;
-
-    append_path(&json_path, json_name.c_str());
-    append_path(&dev_json_path, dev_json_name.c_str());
-
-    trace::verbose(_X("Runtime config is cfg=%s dev=%s"), json_path.c_str(), dev_json_path.c_str());
-
-    dev_cfg->assign(dev_json_path);
-    cfg->assign(json_path);
+    get_runtime_config_paths(path, name, cfg, dev_cfg);
 }
 
 void get_runtime_config_paths_from_arg(const pal::string_t& arg, pal::string_t* cfg, pal::string_t* dev_cfg)
@@ -42,6 +31,21 @@ void get_runtime_config_paths_from_arg(const pal::string_t& arg, pal::string_t* 
 
     dev_cfg->assign(dev_json_path);
     cfg->assign(json_path);
+}
+
+void get_runtime_config_paths(const pal::string_t& path, const pal::string_t& name, pal::string_t* cfg, pal::string_t* dev_cfg)
+{
+    auto json_path = path;
+    auto json_name = name + _X(".runtimeconfig.json");
+    append_path(&json_path, json_name.c_str());
+    cfg->assign(json_path);
+
+    auto dev_json_path = path;
+    auto dev_json_name = name + _X(".runtimeconfig.dev.json");
+    append_path(&dev_json_path, dev_json_name.c_str());
+    dev_cfg->assign(dev_json_path);
+
+    trace::verbose(_X("Runtime config is cfg=%s dev=%s"), json_path.c_str(), dev_json_path.c_str());
 }
 
 host_mode_t detect_operating_mode(const pal::string_t& own_dir, const pal::string_t& own_dll, const pal::string_t& own_name)
@@ -78,7 +82,7 @@ void try_patch_roll_forward_in_dir(const pal::string_t& cur_dir, const fx_ver_t&
     pal::string_t maj_min_star = start_ver.patch_glob();
 
     std::vector<pal::string_t> list;
-    pal::readdir(path, maj_min_star, &list);
+    pal::readdir_onlydirectories(path, maj_min_star, &list);
 
     fx_ver_t max_ver = start_ver;
     fx_ver_t ver(-1, -1, -1);
@@ -112,7 +116,7 @@ void try_prerelease_roll_forward_in_dir(const pal::string_t& cur_dir, const fx_v
     pal::string_t maj_min_pat_star = start_ver.prerelease_glob();
 
     std::vector<pal::string_t> list;
-    pal::readdir(path, maj_min_pat_star, &list);
+    pal::readdir_onlydirectories(path, maj_min_pat_star, &list);
 
     fx_ver_t max_ver = start_ver;
     fx_ver_t ver(-1, -1, -1);

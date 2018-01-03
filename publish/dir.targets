@@ -24,17 +24,17 @@
       </Project>
     </ItemGroup>
   </Target>
-  
+
   <Target Name="GatherPublishToAzureChecksums" DependsOnTargets="CreateChecksums" >
     <ItemGroup>
-      <ChecksumItems Include="$(PackagesOutDir)**/*$(ChecksumExtension)" />
+      <ChecksumItems Include="$(AssetOutputPath)**/*$(ChecksumExtension)" />
       <Project Include="publish.proj">
         <PublishTarget>UploadChecksumsToAzure</PublishTarget>
         <AdditionalProperties>%(Project.AdditionalProperties);ItemsToPublish=@(ChecksumItems);RelativeBlobPath=$(ChecksumsRelativePath)</AdditionalProperties>
       </Project>
     </ItemGroup>
   </Target>
-  
+
   <Target Name="CreateChecksums">
     <ItemGroup>
       <ItemsToChecksum Include="@(CompressedFile)" />
@@ -48,31 +48,34 @@
 
   <Target Name="GenerateDebRepoFiles"
           Condition="('$(TargetsUbuntu)' == 'true' or '$(TargetsDebian)' == 'true') and '$(TargetArchitecture)' == 'x64'">
-          
+
     <ItemGroup>
-      <RepoIds Include="DebianId_ubuntu1404-x64">
-        <Key>$(DebianId_ubuntu1404-x64)</Key>
-      </RepoIds>
       <RepoIds Include="DebianId_debian8-x64">
         <Key>$(DebianId_debian8-x64)</Key>
       </RepoIds>
       <RepoIds Include="DebianId_debian9-x64">
         <Key>$(DebianId_debian9-x64)</Key>
       </RepoIds>
+      <RepoIds Include="DebianId_ubuntu1404-x64">
+        <Key>$(DebianId_ubuntu1404-x64)</Key>
+      </RepoIds>
       <RepoIds Include="DebianId_ubuntu1604-x64">
         <Key>$(DebianId_ubuntu1604-x64)</Key>
       </RepoIds>
-      <RepoIds Include="DebianId_ubuntu1610-x64">
-        <Key>$(DebianId_ubuntu1610-x64)</Key>
+      <RepoIds Include="DebianId_ubuntu1704-x64">
+        <Key>$(DebianId_ubuntu1704-x64)</Key>
+      </RepoIds>
+      <RepoIds Include="DebianId_ubuntu1710-x64">
+        <Key>$(DebianId_ubuntu1710-x64)</Key>
       </RepoIds>
     </ItemGroup>
     <PropertyGroup>
-      <RidWithoutDots>$([System.String]::Copy($(DistroRid)).Replace('.', ''))</RidWithoutDots>
+      <RidWithoutDots>$([System.String]::Copy($(OutputRid)).Replace('.', ''))</RidWithoutDots>
       <DebRepoId Condition="$([System.String]::Copy(%(RepoIds.Identity)).EndsWith('$(RidWithoutDots)'))">%(RepoIds.Key)</DebRepoId>
     </PropertyGroup>
     <Error Condition="'$(DebRepoId)'=='' OR '$(DebRepoUser)'=='' OR '$(DebRepoPass)'=='' OR '$(DebRepoServer)'==''"
            Text=" Missing parameters for debian publish." />
-           
+
     <ItemGroup>
       <DebInstallerFile Include="$(SharedHostInstallerFile)" >
         <PackageName>$(SharedHostDebPkgName)</PackageName>
@@ -85,7 +88,7 @@
       </DebInstallerFile>
 
       <DebInstallerFile>
-        <UploadJsonFilename>$(PackagesOutDir)%(PackageName)_package_upload.json</UploadJsonFilename>
+        <UploadJsonFilename>$(AssetOutputPath)%(PackageName)_package_upload.json</UploadJsonFilename>
       </DebInstallerFile>
     </ItemGroup>
 
@@ -105,7 +108,7 @@
     </ListAzureBlobs>
     <ItemGroup>
       <_FoundBlobNames Include="%(_BlobNames.FileName)%(_BlobNames.Extension)" Condition="'%(_BlobNames.Extension)' == '.svg'" />
-      <_MissingBlobNames Include="@(PublishRid->'sharedfx_%(Identity)_$(ConfigurationGroup)_version_badge.svg')" 
+      <_MissingBlobNames Include="@(PublishRid->'sharedfx_%(Identity)_$(ConfigurationGroup)_version_badge.svg')"
                          Exclude="@(_FoundBlobNames)" />
     </ItemGroup>
     <Error Text="Missing publish output from all legs of the build. Missing blobs are '@(_MissingBlobNames)'"

@@ -86,8 +86,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // locate the sdkDir from which we can get the files contained in the version folder
             string sdkBaseDir = Path.Combine(fixture.SdkDotnet.BinPath, "sdk");
 
-            var sdkVersionDirs = Directory.EnumerateDirectories(sdkBaseDir);
+            var sdkVersionDirs = Directory.EnumerateDirectories(sdkBaseDir)
+                .Select(p => Path.GetFileName(p));
+
             string greatestVersionSdk = sdkVersionDirs
+                .Where(p => !string.Equals(p, "NuGetFallbackFolder", StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(p => p.ToLower())
                 .First();
 
@@ -98,7 +101,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             _userSelectedMessage = $"Using dotnet SDK dll=[{_userSdkBaseDir}";
             _exeSelectedMessage = $"Using dotnet SDK dll=[{_exeSdkBaseDir}";
         }
-
+        
         [Fact]
         public void SdkLookup_Global_Json_Patch_Rollup()
         {
@@ -193,6 +196,26 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
                 .Pass()
                 .And
                 .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0-global-dummy", _dotnetSdkDllMessageTerminator));
+
+            // Verify we have the expected sdk versions
+            dotnet.Exec("--list-sdks")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("9999.0.0-dummy")
+                .And
+                .HaveStdOutContaining("9999.0.0-global-dummy")
+                .And
+                .HaveStdOutContaining("9999.0.1")
+                .And
+                .HaveStdOutContaining("9999.0.4")
+                .And
+                .HaveStdOutContaining("9999.0.6-dummy");
         }
 
         [Fact]
@@ -244,6 +267,19 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
                 .Pass()
                 .And
                 .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.4", _dotnetSdkDllMessageTerminator));
+
+            // Verify we have the expected sdk versions
+            dotnet.Exec("--list-sdks")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("9999.0.4");
         }
 
         [Fact]
@@ -316,7 +352,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
                 .And
                 .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "10000.0.0-dummy", _dotnetSdkDllMessageTerminator));
 
-            // Add a dummy version in the exe dir
+            // Add a dummy version in the user dir
             AddAvailableSdkVersions(_exeSdkBaseDir, "10000.0.0");
 
             // Specified CLI version: none
@@ -335,6 +371,26 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
                 .Pass()
                 .And
                 .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "10000.0.0", _dotnetSdkDllMessageTerminator));
+
+            // Verify we have the expected sdk versions
+            dotnet.Exec("--list-sdks")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("9999.0.0")
+                .And
+                .HaveStdOutContaining("9999.0.1-dummy")
+                .And
+                .HaveStdOutContaining("9999.0.1")
+                .And
+                .HaveStdOutContaining("10000.0.0")
+                .And
+                .HaveStdOutContaining("10000.0.0-dummy");
         }
 
         // This method adds a list of new sdk version folders in the specified
