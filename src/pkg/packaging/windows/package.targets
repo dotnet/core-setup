@@ -25,7 +25,7 @@
         <WixFilename>wix.$(WixVersion).zip</WixFilename>
       </PropertyGroup>
 
-      <Exec Command="powershell -NoProfile -NoLogo $(GetWixScript) -WixVersion $(WixVersion) -WixFilename $(WixFilename) -OutputDir $(WixToolsDir)" />
+      <Exec Command="powershell -NoProfile -NoLogo $(GetWixScript) -WixFilename $(WixFilename) -OutputDir $(WixToolsDir)" />
       
       <ItemGroup>
         <_filelist Include="$(WixToolsDir)\**" />
