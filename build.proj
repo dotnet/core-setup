@@ -55,7 +55,7 @@
                       Overwrite="True" />
   </Target>
 
-  <Target Name="BuildCustomTasks">
+  <Target Name="BuildCustomTasks" Condition="'$(DotNetBuildOffline)' != 'true'" >
       <MSBuild Projects="tools-local/Microsoft.DotNet.Build.Tasks.Local/Microsoft.DotNet.Build.Tasks.Local.builds" />
       <MSBuild Projects="tools-local/tasks/core-setup.tasks.builds" />
 
