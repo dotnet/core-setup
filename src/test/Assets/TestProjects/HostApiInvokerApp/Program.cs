@@ -79,7 +79,7 @@ namespace StandaloneApp
                 Marshal.FreeHGlobal(argv[i]);
             }
 
-            if (rc == 1)
+            if (rc == 0)
             {
                 Console.WriteLine("hostfxr_get_native_search_directories:Success");
                 Console.WriteLine($"hostfxr_get_native_search_directories buffer:[{buffer}]");

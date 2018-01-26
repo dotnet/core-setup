@@ -202,6 +202,7 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
         {
             assert(out_host_command_result != nullptr);
             pal::clr_palstring(property_values[1], out_host_command_result);
+            exit_code = 0; // Success
         }
 
         return exit_code;
@@ -392,7 +393,7 @@ SHARED_API int corehost_main_with_output_buffer(const int argc, const pal::char_
         {
             pal::string_t output_string;
             rc = run(args, &output_string);
-            if (rc == 1)
+            if (!rc)
             {
                 // Get length in character count not including null terminator
                 int len = output_string.length();

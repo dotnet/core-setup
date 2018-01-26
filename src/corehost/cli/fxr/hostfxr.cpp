@@ -283,13 +283,13 @@ SHARED_API int32_t hostfxr_resolve_sdk(
 //      The size of the buffer argument in pal::char_t units.
 //
 //    required_buffer_size
-//      If the apis fails because of insufficient buffer size,
-//      required_buffer_size is set to the minimium buffer size
-//      necessary to contain the result.
+//      If the return value is HostApiBufferTooSmall, then
+//      required_buffer_size is set to the minimium buffer
+//      size necessary to contain the result.
 //
 // Return value:
-//   1 on success, otherwise failure
-//   0x800080980  - Buffer is too small (HostApiBufferTooSmall)
+//   0 on success, otherwise failure
+//   0x800080980 - Buffer is too small (HostApiBufferTooSmall)
 //
 // String encoding:
 //   Windows     - UTF-16 (pal::char_t is 2 byte wchar_t)

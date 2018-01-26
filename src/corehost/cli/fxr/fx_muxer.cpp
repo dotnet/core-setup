@@ -1214,7 +1214,7 @@ int fx_muxer_t::parse_args(
         return InvalidArgFailure;
     }
 
-    return 1;
+    return 0;
 }
 
 int read_config(
@@ -1432,7 +1432,7 @@ int fx_muxer_t::parse_path_args(
     append_path(&own_dll, own_dll_filename.c_str());
 
     trace::info(_X("Own dll path '%s'"), own_dll.c_str());
-    return 1;
+    return 0;
 }
 
 /**
@@ -1452,7 +1452,7 @@ int fx_muxer_t::execute(
     pal::string_t own_name;
 
     int result = parse_path_args(argc, argv, own_dir, own_dll, own_name);
-    if (result != 1)
+    if (result)
     {
         return result;
     }
@@ -1503,7 +1503,7 @@ int fx_muxer_t::execute(
         }
     }
 
-    if (result == 1 && is_an_app)
+    if (!result && is_an_app)
     {
         // Transform dotnet [exec] [--additionalprobingpath path] [--depsfile file] [dll] [args] -> dotnet [dll] [args]
         result = handle_exec_host_command(host_command, own_dir, app_candidate, opts, argc, argv, new_argoff, mode, result_buffer, buffer_size, required_buffer_size);
@@ -1616,7 +1616,7 @@ int fx_muxer_t::handle_cli(
     opt_map_t opts;
     
     int result = parse_args(own_dir, own_dll, 1, new_argv.size(), new_argv.data(), false, host_mode_t::muxer, &is_an_app, &new_argoff, app_candidate, opts); // arg offset 1 for dotnet
-    if (result == 1)
+    if (!result)
     {
         // Transform dotnet [exec] [--additionalprobingpath path] [--depsfile file] [dll] [args] -> dotnet [dll] [args]
         result = handle_exec(own_dir, app_candidate, opts, new_argv.size(), new_argv.data(), new_argoff, host_mode_t::muxer);
