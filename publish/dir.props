@@ -8,6 +8,8 @@
 
     <ChecksumsRelativePath>Runtime/$(ProductVersion)</ChecksumsRelativePath>
     <ChecksumExtension>.sha512</ChecksumExtension>
+
+    <ManifestBuildData>ProductVersion=$(ProductVersion)</ManifestBuildData>
   </PropertyGroup>
 
   <ItemGroup>
