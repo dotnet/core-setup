@@ -103,12 +103,6 @@
       </SharedHostTokenValue>
     </ItemGroup>
 
-    <!-- Copying dependencies of ReplaceFileContents task to local folder -->
-    <ItemGroup>
-      <__ReplaceFileContentsDependencies Include="$(ToolsDir)/Microsoft.DotNet.Build.CloudTestTasks*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(__ReplaceFileContentsDependencies)" DestinationFolder="$(LocalBuildToolsTaskDir)" />
-
     <ReplaceFileContents InputFile="$(ConfigJsonFile)"
                          DestinationFile="$(debLayoutDirectory)$(DebianConfigJsonName)"
                          ReplacementItems="@(SharedHostTokenValue)" />
