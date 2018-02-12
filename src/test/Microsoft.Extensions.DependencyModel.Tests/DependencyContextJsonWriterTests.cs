@@ -345,7 +345,29 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         }
 
         [Fact]
+        public void WritesRuntimeTargetForNonPortableLegacy()
+        {
+            var group = new RuntimeAssetGroup(string.Empty, "Banana.dll");
+            var assetGroup = WritesRuntimeTarget(group);
+
+            var files = assetGroup.Should().HavePropertyAsObject("runtime").Subject;
+            files.Should().HaveProperty("Banana.dll");
+        }
+
+        [Fact]
         public void WritesRuntimeTargetForNonPortable()
+        {
+            RuntimeFile[] runtimeFiles = { new RuntimeFile("Banana.dll", "1.2.3", "7.8.9") };
+            var group = new RuntimeAssetGroup(string.Empty, runtimeFiles);
+            var assetGroup = WritesRuntimeTarget(group);
+
+            var files = assetGroup.Should().HavePropertyAsObject("runtime").Subject;
+            var file = files.Should().HavePropertyAsObject("Banana.dll").Subject;
+            file.Should().HavePropertyValue("assemblyVersion", "1.2.3");
+            file.Should().HavePropertyValue("fileVersion", "7.8.9");
+        }
+
+        private JObject WritesRuntimeTarget(RuntimeAssetGroup group)
         {
             var result = Save(Create(
                             "Target",
@@ -359,7 +381,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                                         "1.2.3",
                                         "HASH",
                                         new [] {
-                                            new RuntimeAssetGroup(string.Empty, "Banana.dll")
+                                            group
                                         },
                                         new [] {
                                             new RuntimeAssetGroup(string.Empty, "runtimes\\osx\\native\\native.dylib")
@@ -377,22 +399,22 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             // targets
             var targets = result.Should().HavePropertyAsObject("targets").Subject;
             var target = targets.Should().HavePropertyAsObject("Target/runtime").Subject;
-            var library = target.Should().HavePropertyAsObject("PackageName/1.2.3").Subject;
-            var dependencies = library.Should().HavePropertyAsObject("dependencies").Subject;
+            var assetGroup = target.Should().HavePropertyAsObject("PackageName/1.2.3").Subject;
+            var dependencies = assetGroup.Should().HavePropertyAsObject("dependencies").Subject;
             dependencies.Should().HavePropertyValue("Fruits.Abstract.dll", "2.0.0");
-            library.Should().HavePropertyAsObject("runtime")
-                .Subject.Should().HaveProperty("Banana.dll");
-            library.Should().HavePropertyAsObject("native")
+            assetGroup.Should().HavePropertyAsObject("native")
                 .Subject.Should().HaveProperty("runtimes/osx/native/native.dylib");
 
             //libraries
             var libraries = result.Should().HavePropertyAsObject("libraries").Subject;
-            library = libraries.Should().HavePropertyAsObject("PackageName/1.2.3").Subject;
+            var library = libraries.Should().HavePropertyAsObject("PackageName/1.2.3").Subject;
             library.Should().HavePropertyValue("sha512", "HASH");
             library.Should().HavePropertyValue("type", "package");
             library.Should().HavePropertyValue("serviceable", true);
             library.Should().HavePropertyValue("path", "PackagePath");
             library.Should().HavePropertyValue("hashPath", "PackageHashPath");
+
+            return assetGroup;
         }
 
         [Fact]

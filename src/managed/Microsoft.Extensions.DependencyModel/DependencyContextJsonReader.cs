@@ -304,8 +304,8 @@ namespace Microsoft.Extensions.DependencyModel
         private TargetLibrary ReadTargetLibrary(JsonTextReader reader, string targetLibraryName)
         {
             IEnumerable<Dependency> dependencies = null;
-            List<string> runtimes = null;
-            List<string> natives = null;
+            List<RuntimeFile> runtimes = null;
+            List<RuntimeFile> natives = null;
             List<string> compilations = null;
             List<RuntimeTargetEntryStub> runtimeTargets = null;
             List<ResourceAssembly> resources = null;
@@ -321,10 +321,10 @@ namespace Microsoft.Extensions.DependencyModel
                         dependencies = ReadTargetLibraryDependencies(reader);
                         break;
                     case DependencyContextStrings.RuntimeAssembliesKey:
-                        runtimes = ReadPropertyNames(reader);
+                        runtimes = ReadRuntimeFiles(reader);
                         break;
                     case DependencyContextStrings.NativeLibrariesKey:
-                        natives = ReadPropertyNames(reader);
+                        natives = ReadRuntimeFiles(reader);
                         break;
                     case DependencyContextStrings.CompileTimeAssembliesKey:
                         compilations = ReadPropertyNames(reader);
@@ -396,6 +396,46 @@ namespace Microsoft.Extensions.DependencyModel
             reader.CheckEndObject();
 
             return runtimes;
+        }
+
+        private List<RuntimeFile> ReadRuntimeFiles(JsonTextReader reader)
+        {
+            var runtimeFiles = new List<RuntimeFile>();
+
+            reader.ReadStartObject();
+
+            while (reader.Read() && reader.TokenType == JsonToken.PropertyName)
+            {
+                string assemblyVersion = null;
+                string fileVersion = null;
+
+                var path = (string)reader.Value;
+
+                reader.ReadStartObject();
+
+                string propertyName;
+                string propertyValue;
+
+                while (reader.TryReadStringProperty(out propertyName, out propertyValue))
+                {
+                    if (propertyName == DependencyContextStrings.AssemblyVersionPropertyName)
+                    {
+                        assemblyVersion = propertyValue;
+                    }
+                    else if (propertyName == DependencyContextStrings.FileVersionPropertyName)
+                    {
+                        fileVersion = propertyValue;
+                    }
+                }
+
+                reader.CheckEndObject();
+
+                runtimeFiles.Add(new RuntimeFile(path, assemblyVersion, fileVersion));
+            }
+
+            reader.CheckEndObject();
+
+            return runtimeFiles;
         }
 
         private List<RuntimeTargetEntryStub> ReadTargetLibraryRuntimeTargets(JsonTextReader reader)
@@ -698,9 +738,9 @@ namespace Microsoft.Extensions.DependencyModel
 
             public IEnumerable<Dependency> Dependencies;
 
-            public List<string> Runtimes;
+            public List<RuntimeFile> Runtimes;
 
-            public List<string> Natives;
+            public List<RuntimeFile> Natives;
 
             public List<string> Compilations;
 

@@ -402,7 +402,18 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         [Fact]
         public void ReadsRuntimeLibrariesWithSubtargetsFromMainTargetForPortable()
         {
-            var context = Read(
+            ReadsRuntimeLibrariesWithSubtargetsFromMainTargetForPortable(false);
+        }
+
+        [Fact]
+        public void ReadsRuntimeLibrariesWithSubtargetsFromMainTargetForPortableWithAssemblyVersions()
+        {
+            ReadsRuntimeLibrariesWithSubtargetsFromMainTargetForPortable(true);
+        }
+
+        private void ReadsRuntimeLibrariesWithSubtargetsFromMainTargetForPortable(bool useAssemblyVersions)
+        {
+            string json =
 @"{
     ""runtimeTarget"": {
         ""name"": "".NETCoreApp,Version=v1.0""
@@ -422,8 +433,22 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                     ""System.Foo"": ""1.0.0""
                 },
                 ""runtime"": {
-                    ""lib/dotnet5.4/System.Banana.dll"": { }
-                },
+                    ""lib/dotnet5.4/System.Banana.dll"": {";
+
+            if (useAssemblyVersions)
+            {
+                json +=
+@"                            ""assemblyVersion"": ""1.2.3"",
+                            ""fileVersion"": ""7.8.9""
+                    }";
+            }
+            else
+            {
+                json += " }";
+            }
+
+            json +=
+@"                },
                 ""runtimeTargets"": {
                     ""lib/win7/System.Banana.dll"": { ""assetType"": ""runtime"", ""rid"": ""win7-x64""},
                     ""lib/win7/Banana.dll"": { ""assetType"": ""native"", ""rid"": ""win7-x64""}
@@ -447,13 +472,14 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             ""runtimeStoreManifestName"": ""placeHolderManifest.xml""
         },
     }
-}");
+}";
+            var context = Read(json);
+
             context.CompileLibraries.Should().HaveCount(2);
             var project = context.RuntimeLibraries.Should().Contain(l => l.Name == "MyApp").Subject;
             project.Version.Should().Be("1.0.1");
             project.RuntimeAssemblyGroups.GetDefaultAssets().Should().Contain("MyApp.dll");
             project.Type.Should().Be("project");
-
 
             var package = context.RuntimeLibraries.Should().Contain(l => l.Name == "System.Banana").Subject;
             package.Version.Should().Be("1.0.0");
@@ -466,7 +492,20 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             package.ResourceAssemblies.Should().Contain(a => a.Path == "System.Banana.resources.dll")
                 .Subject.Locale.Should().Be("en-US");
 
-            package.RuntimeAssemblyGroups.GetDefaultAssets().Should().Contain("lib/dotnet5.4/System.Banana.dll");
+            if (useAssemblyVersions)
+            {
+                var assets = package.RuntimeAssemblyGroups.GetDefaultRuntimeFiles();
+                assets.Should().HaveCount(1);
+                var runtimeFile = assets.First();
+                runtimeFile.Path.Should().Be("lib/dotnet5.4/System.Banana.dll");
+                runtimeFile.AssemblyVersion.Should().Be("1.2.3");
+                runtimeFile.FileVersion.Should().Be("7.8.9");
+            }
+            else
+            {
+                package.RuntimeAssemblyGroups.GetDefaultAssets().Should().Contain("lib/dotnet5.4/System.Banana.dll");
+            }
+
             package.RuntimeAssemblyGroups.GetRuntimeAssets("win7-x64").Should().Contain("lib/win7/System.Banana.dll");
             package.NativeLibraryGroups.GetRuntimeAssets("win7-x64").Should().Contain("lib/win7/Banana.dll");
         }
