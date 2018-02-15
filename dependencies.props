@@ -60,7 +60,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--
     <RemoteDependencyBuildInfo Include="CoreFx">
       <BuildInfoPath>$(BaseDotNetBuildInfo)corefx/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(CoreFxCurrentRef)</CurrentRef>
@@ -73,6 +72,7 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)standard/release/2.0.0</BuildInfoPath>
       <CurrentRef>$(StandardCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
+    <!--
     <RemoteDependencyBuildInfo Include="WCF">
       <BuildInfoPath>$(BaseDotNetBuildInfo)wcf/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(WCFCurrentRef)</CurrentRef>
@@ -87,7 +87,6 @@
       <RawVersionsBaseUrl>https://raw.githubusercontent.com/dotnet/versions</RawVersionsBaseUrl>
     </DependencyBuildInfo>
 
-    <!--
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>MicrosoftPrivateCoreFxNETCoreAppPackageVersion</ElementName>
@@ -113,6 +112,7 @@
       <ElementName>NETStandardLibraryPackageVersion</ElementName>
       <PackageId>NETStandard.Library</PackageId>
     </XmlUpdateStep>
+    <!--
     <XmlUpdateStep Include="WCF">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>SystemServiceModelDuplexPackageVersion</ElementName>
