@@ -56,7 +56,7 @@
     <!-- Generate Version files -->
     <ItemGroup>
       <HostFiles Include="dotnet">
-       <AssemblyName>.NET Core Runtime - $(HostVersion)</AssemblyName>
+       <AssemblyName>.NET Core Host</AssemblyName>
       </HostFiles>
       <HostFiles Include="hostfxr">
         <AssemblyName>.NET Core Host Resolver - $(HostResolverVersion)</AssemblyName>
