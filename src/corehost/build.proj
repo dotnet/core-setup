@@ -56,18 +56,18 @@
     <!-- Generate Version files -->
     <ItemGroup>
       <HostFiles Include="dotnet">
-       <AssemblyName>.NET Core Host</AssemblyName>
+       <FileDescription>.NET Core Host</FileDescription>
       </HostFiles>
       <HostFiles Include="hostfxr">
-        <AssemblyName>.NET Core Host Resolver - $(HostResolverVersion)</AssemblyName>
+        <FileDescription>.NET Core Host Resolver - $(HostResolverVersion)</FileDescription>
       </HostFiles>
       <HostFiles Include="hostpolicy">
-        <AssemblyName>.NET Core Host Policy - $(HostPolicyVersion)</AssemblyName>
+        <FileDescription>.NET Core Host Policy - $(HostPolicyVersion)</FileDescription>
       </HostFiles>
     </ItemGroup>
     
     <MSBuild Projects="$(MSBuildProjectFullPath)"
-             Properties="GenerateNativeVersionInfo=true;AssemblyName=%(HostFiles.AssemblyName);NativeVersionFileDir=$(IntermediateOutputRootPath)hostResourceFiles\%(HostFiles.Identity);NativeVersionHeaderFile=$(IntermediateOutputRootPath)hostResourceFiles\%(HostFiles.Identity)\version_info.h"
+             Properties="GenerateNativeVersionInfo=true;FileDescription=%(HostFiles.FileDescription);NativeVersionFileDir=$(IntermediateOutputRootPath)hostResourceFiles\%(HostFiles.Identity);NativeVersionHeaderFile=$(IntermediateOutputRootPath)hostResourceFiles\%(HostFiles.Identity)\version_info.h"
              Targets="GenerateVersionHeader" />
     <PropertyGroup>
       <BuildArgs>$(ConfigurationGroup) $(TargetArchitecture) apphostver $(AppHostVersion) hostver $(HostVersion) fxrver $(HostResolverVersion) policyver $(HostPolicyVersion) commit $(LatestCommit) rid $(OutputRid)</BuildArgs>
