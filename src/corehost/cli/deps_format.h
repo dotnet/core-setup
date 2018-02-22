@@ -92,6 +92,7 @@ private:
         const std::function<bool(const pal::string_t&)>& library_exists_fn,
         const std::function<const vec_asset_t&(const pal::string_t&, int, bool*)>& get_assets_fn);
 
+    pal::string_t get_optional_property(const json_object& properties, const pal::string_t& key) const;
     pal::string_t get_optional_path(const json_object& properties, const pal::string_t& key) const;
 
     pal::string_t get_current_rid(const rid_fallback_graph_t& rid_fallback_graph);

@@ -25,7 +25,7 @@ const deps_entry_t& deps_json_t::try_ni(const deps_entry_t& entry) const
     return entry;
 }
 
-pal::string_t deps_json_t::get_optional_path(
+pal::string_t deps_json_t::get_optional_property(
     const json_object& properties,
     const pal::string_t& key) const
 {
@@ -36,11 +36,20 @@ pal::string_t deps_json_t::get_optional_path(
     if (iter != properties.end())
     {
         path = iter->second.as_string();
+    }
 
-        if (_X('/') != DIR_SEPARATOR)
-        {
-            replace_char(&path, _X('/'), DIR_SEPARATOR);
-        }
+    return path;
+}
+
+pal::string_t deps_json_t::get_optional_path(
+    const json_object& properties,
+    const pal::string_t& key) const
+{
+    pal::string_t path = get_optional_property(properties, key);
+
+    if (path.length() > 0 && _X('/') != DIR_SEPARATOR)
+    {
+        replace_char(&path, _X('/'), DIR_SEPARATOR);
     }
 
     return path;
@@ -206,7 +215,6 @@ bool deps_json_t::perform_rid_fallback(rid_specific_assets_t* portable_assets, c
 
 bool deps_json_t::process_runtime_targets(const json_value& json, const pal::string_t& target_name, const rid_fallback_graph_t& rid_fallback_graph, rid_specific_assets_t* p_assets)
 {
-    version_t empty;
     rid_specific_assets_t& assets = *p_assets;
     for (const auto& package : json.at(_X("targets")).at(target_name).as_object())
     {
@@ -226,7 +234,32 @@ bool deps_json_t::process_runtime_targets(const json_value& json, const pal::str
                 if (pal::strcasecmp(type.c_str(), deps_entry_t::s_known_asset_types[i]) == 0)
                 {
                     const auto& rid = file.second.at(_X("rid")).as_string();
-                    deps_asset_t asset(file.first, empty, empty);
+
+                    version_t assembly_version, file_version;
+                    const auto& properties = file.second.as_object();
+
+                    pal::string_t assembly_version_str = get_optional_property(properties, _X("assemblyVersion"));
+                    if (assembly_version_str.length() > 0)
+                    {
+                        version_t::parse(assembly_version_str, &assembly_version);
+                    }
+
+                    pal::string_t file_version_str = get_optional_property(properties, _X("fileVersion"));
+                    if (file_version_str.length() > 0)
+                    {
+                        version_t::parse(file_version_str, &file_version);
+                    }
+
+                    deps_asset_t asset(file.first, assembly_version, file_version);
+
+                    trace::info(_X("Adding runtimeTargets %s asset %s rid=%s assemblyVersion=%s fileVersion=%s from %s"),
+                        deps_entry_t::s_known_asset_types[i],
+                        asset.relative_path.c_str(),
+                        rid.c_str(),
+                        asset.assembly_version.as_str().c_str(),
+                        asset.file_version.as_str().c_str(),
+                        package.first.c_str());
+
                     assets.libs[package.first].rid_assets[rid][i].push_back(asset);
                 }
             }
@@ -257,13 +290,13 @@ bool deps_json_t::process_targets(const json_value& json, const pal::string_t& t
                     const auto& properties = file.second.as_object();
                     version_t assembly_version, file_version;
 
-                    pal::string_t assembly_version_str = get_optional_path(properties, _X("assemblyVersion"));
+                    pal::string_t assembly_version_str = get_optional_property(properties, _X("assemblyVersion"));
                     if (assembly_version_str.length() > 0)
                     {
                         version_t::parse(assembly_version_str, &assembly_version);
                     }
 
-                    pal::string_t file_version_str = get_optional_path(properties, _X("fileVersion"));
+                    pal::string_t file_version_str = get_optional_property(properties, _X("fileVersion"));
                     if (file_version_str.length() > 0)
                     {
                         version_t::parse(file_version_str, &file_version);

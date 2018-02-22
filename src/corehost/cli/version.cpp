@@ -5,9 +5,10 @@
 #include "pal.h"
 #include "version.h"
 
-// This type is made to match semantics of System.Version used by tooling and differs from ver_t:
+// This type matches semantics of System.Version used by tooling and differs from fx_ver_t:
 // -- version_t does not require the third segment
 // -- version_t does not support the "pre" label behavior
+// -- if version_t is an empty value (-1 for all segments) then as_str() returns an empty string
 // -- Different terminology; fx_ver_t(major, minor, patch, build) vs version_t(major, minor, build, revision)
 
 version_t::version_t() : version_t(-1, -1, -1, -1) { }
