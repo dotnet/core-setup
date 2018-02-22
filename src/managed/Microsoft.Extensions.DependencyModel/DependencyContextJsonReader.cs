@@ -415,16 +415,16 @@ namespace Microsoft.Extensions.DependencyModel
 
                 string propertyName;
                 string propertyValue;
-
                 while (reader.TryReadStringProperty(out propertyName, out propertyValue))
                 {
-                    if (propertyName == DependencyContextStrings.AssemblyVersionPropertyName)
+                    switch (propertyName)
                     {
-                        assemblyVersion = propertyValue;
-                    }
-                    else if (propertyName == DependencyContextStrings.FileVersionPropertyName)
-                    {
-                        fileVersion = propertyValue;
+                        case DependencyContextStrings.AssemblyVersionPropertyName:
+                            assemblyVersion = propertyValue;
+                            break;
+                        case DependencyContextStrings.FileVersionPropertyName:
+                            fileVersion = propertyValue;
+                            break;
                     }
                 }
 
@@ -462,6 +462,12 @@ namespace Microsoft.Extensions.DependencyModel
                             break;
                         case DependencyContextStrings.AssetTypePropertyName:
                             runtimeTarget.Type = Pool(propertyValue);
+                            break;
+                        case DependencyContextStrings.AssemblyVersionPropertyName:
+                            runtimeTarget.AssemblyVersion = propertyValue;
+                            break;
+                        case DependencyContextStrings.FileVersionPropertyName:
+                            runtimeTarget.FileVersion = propertyValue;
                             break;
                     }
                 }
@@ -645,26 +651,26 @@ namespace Microsoft.Extensions.DependencyModel
                     {
                         var groupRuntimeAssemblies = ridGroup
                             .Where(e => e.Type == DependencyContextStrings.RuntimeAssetType)
-                            .Select(e => e.Path)
+                            .Select(e => new RuntimeFile(e.Path, e.AssemblyVersion, e.FileVersion))
                             .ToArray();
 
                         if (groupRuntimeAssemblies.Any())
                         {
                             runtimeAssemblyGroups.Add(new RuntimeAssetGroup(
                                 ridGroup.Key,
-                                groupRuntimeAssemblies.Where(a => Path.GetFileName(a) != "_._")));
+                                groupRuntimeAssemblies.Where(a => Path.GetFileName(a.Path) != "_._")));
                         }
 
                         var groupNativeLibraries = ridGroup
                             .Where(e => e.Type == DependencyContextStrings.NativeAssetType)
-                            .Select(e => e.Path)
+                            .Select(e => new RuntimeFile(e.Path, e.AssemblyVersion, e.FileVersion))
                             .ToArray();
 
                         if (groupNativeLibraries.Any())
                         {
                             nativeLibraryGroups.Add(new RuntimeAssetGroup(
                                 ridGroup.Key,
-                                groupNativeLibraries.Where(a => Path.GetFileName(a) != "_._")));
+                                groupNativeLibraries.Where(a => Path.GetFileName(a.Path) != "_._")));
                         }
                     }
                 }
@@ -758,6 +764,10 @@ namespace Microsoft.Extensions.DependencyModel
             public string Path;
 
             public string Rid;
+
+            public string AssemblyVersion;
+
+            public string FileVersion;
         }
 
         private struct LibraryStub

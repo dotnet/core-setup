@@ -19,13 +19,13 @@ namespace Microsoft.Extensions.DependencyModel
             return self.RuntimeLibraries.SelectMany(library => library.GetDefaultNativeAssets(self));
         }
 
-        public static IEnumerable<RuntimeFile> GetDefaultNativeRuntimeFiles(this DependencyContext self)
+        public static IEnumerable<RuntimeFile> GetDefaultNativeRuntimeFileAssets(this DependencyContext self)
         {
             if (self == null)
             {
                 throw new ArgumentNullException(nameof(self));
             }
-            return self.RuntimeLibraries.SelectMany(library => library.GetDefaultNativeRuntimeFiles(self));
+            return self.RuntimeLibraries.SelectMany(library => library.GetDefaultNativeRuntimeFileAssets(self));
         }
 
         public static IEnumerable<string> GetRuntimeNativeAssets(this DependencyContext self, string runtimeIdentifier)
@@ -41,7 +41,7 @@ namespace Microsoft.Extensions.DependencyModel
             return self.RuntimeLibraries.SelectMany(library => library.GetRuntimeNativeAssets(self, runtimeIdentifier));
         }
 
-        public static IEnumerable<RuntimeFile> GetRuntimeNativeRuntimeFiles(this DependencyContext self, string runtimeIdentifier)
+        public static IEnumerable<RuntimeFile> GetRuntimeNativeRuntimeFileAssets(this DependencyContext self, string runtimeIdentifier)
         {
             if (self == null)
             {
@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 throw new ArgumentNullException(nameof(runtimeIdentifier));
             }
-            return self.RuntimeLibraries.SelectMany(library => library.GetRuntimeNativeRuntimeFiles(self, runtimeIdentifier));
+            return self.RuntimeLibraries.SelectMany(library => library.GetRuntimeNativeRuntimeFileAssets(self, runtimeIdentifier));
         }
 
         public static IEnumerable<string> GetDefaultNativeAssets(this RuntimeLibrary self, DependencyContext context)
@@ -63,7 +63,7 @@ namespace Microsoft.Extensions.DependencyModel
             return ResolveAssets(context, string.Empty, self.NativeLibraryGroups);
         }
 
-        public static IEnumerable<RuntimeFile> GetDefaultNativeRuntimeFiles(this RuntimeLibrary self, DependencyContext context)
+        public static IEnumerable<RuntimeFile> GetDefaultNativeRuntimeFileAssets(this RuntimeLibrary self, DependencyContext context)
         {
             if (self == null)
             {
@@ -89,7 +89,7 @@ namespace Microsoft.Extensions.DependencyModel
             return ResolveAssets(context, runtimeIdentifier, self.NativeLibraryGroups);
         }
 
-        public static IEnumerable<RuntimeFile> GetRuntimeNativeRuntimeFiles(this RuntimeLibrary self, DependencyContext context, string runtimeIdentifier)
+        public static IEnumerable<RuntimeFile> GetRuntimeNativeRuntimeFileAssets(this RuntimeLibrary self, DependencyContext context, string runtimeIdentifier)
         {
             if (self == null)
             {
@@ -221,7 +221,7 @@ namespace Microsoft.Extensions.DependencyModel
             }
 
             // Return the RID-agnostic group
-            return groups.GetDefaultRuntimeFiles();
+            return groups.GetDefaultRuntimeFileAssets();
         }
     }
 }

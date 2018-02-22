@@ -192,6 +192,23 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         [Fact]
         public void WritesRuntimeLibrariesToRuntimeTarget()
         {
+            var group = new RuntimeAssetGroup("win7-x64", "Banana.Win7-x64.dll");
+            WritesRuntimeLibrariesToRuntimeTarget(group);
+        }
+
+        [Fact]
+        public void WritesRuntimeLibrariesToRuntimeTargetWithAssemblyVersions()
+        {
+            RuntimeFile[] runtimeFile = { new RuntimeFile("Banana.Win7-x64.dll", "1.2.3", "7.8.9") };
+            var group = new RuntimeAssetGroup("win7-x64", runtimeFile);
+
+            var runtimeAssembly = WritesRuntimeLibrariesToRuntimeTarget(group);
+            runtimeAssembly.Should().HavePropertyValue("assemblyVersion", "1.2.3");
+            runtimeAssembly.Should().HavePropertyValue("fileVersion", "7.8.9");
+        }
+
+        private JObject WritesRuntimeLibrariesToRuntimeTarget(RuntimeAssetGroup group)
+        {
             var result = Save(Create(
                             "Target",
                             "runtime",
@@ -205,7 +222,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                                         "HASH",
                                         new [] {
                                             new RuntimeAssetGroup(string.Empty, "Banana.dll"),
-                                            new RuntimeAssetGroup("win7-x64", "Banana.Win7-x64.dll")
+                                            group
                                         },
                                         new [] {
                                             new RuntimeAssetGroup(string.Empty, "runtimes\\linux\\native\\native.so"),
@@ -257,6 +274,8 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             library.Should().HavePropertyValue("path", "PackagePath");
             library.Should().HavePropertyValue("hashPath", "PackageHashPath");
             library.Should().HavePropertyValue("runtimeStoreManifestName", "placeHolderManifest.xml");
+
+            return runtimeAssembly;
         }
 
         [Fact]

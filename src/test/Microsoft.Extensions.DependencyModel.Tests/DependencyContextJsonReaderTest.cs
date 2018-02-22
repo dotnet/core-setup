@@ -63,7 +63,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         [Fact]
         public void GroupsRuntimeAssets()
         {
-            var context = Read(@"
+            string json = @"
  {
      ""targets"": {
          "".NETStandard,Version=v1.5"": {
@@ -85,14 +85,58 @@ namespace Microsoft.Extensions.DependencyModel.Tests
              ""sha512"": ""HASH-System.Banana""
          },
      }
- }");
+ }";
+
+            ReadGroupsRuntimeAssets(json);
+        }
+
+        [Fact]
+        public void GroupsRuntimeAssetsWithAssemblyVersions()
+        {
+            string json = @"
+ {
+     ""targets"": {
+         "".NETStandard,Version=v1.5"": {
+             ""System.Banana/1.0.0"": {
+                 ""runtimeTargets"": {
+                     ""runtimes/unix/Banana.dll"": { ""rid"": ""unix"", ""assetType"": ""runtime"", ""assemblyVersion"": ""1.2.3"", ""fileVersion"": ""4.5.6"" },
+                     ""runtimes/win7/Banana.dll"": { ""rid"": ""win7"",  ""assetType"": ""runtime"", ""fileVersion"": ""1.2.3""},
+
+                     ""runtimes/native/win7/Apple.dll"": { ""rid"": ""win7"",  ""assetType"": ""native"" },
+                     ""runtimes/native/unix/libapple.so"": { ""rid"": ""unix"",  ""assetType"": ""native"" }
+                 }
+             }
+         }
+     },
+     ""libraries"": {
+         ""System.Banana/1.0.0"": {
+             ""type"": ""package"",
+             ""serviceable"": false,
+             ""sha512"": ""HASH-System.Banana""
+         },
+     }
+ }";
+
+            RuntimeLibrary runtimeLib = ReadGroupsRuntimeAssets(json);
+            runtimeLib.RuntimeAssemblyGroups.GetRuntimeFileAssets("unix").Single().AssemblyVersion.Should().Be("1.2.3");
+            runtimeLib.RuntimeAssemblyGroups.GetRuntimeFileAssets("unix").Single().FileVersion.Should().Be("4.5.6");
+            runtimeLib.RuntimeAssemblyGroups.GetRuntimeFileAssets("win7").Single().AssemblyVersion.Should().BeNull();
+            runtimeLib.RuntimeAssemblyGroups.GetRuntimeFileAssets("win7").Single().FileVersion.Should().Be("1.2.3");
+        }
+
+        private RuntimeLibrary ReadGroupsRuntimeAssets(string json)
+        {
+            var context = Read(json);
+
             context.RuntimeLibraries.Should().HaveCount(1);
-            var runtimeLib = context.RuntimeLibraries.Single();
+            RuntimeLibrary runtimeLib = context.RuntimeLibraries.Single();
             runtimeLib.RuntimeAssemblyGroups.Should().HaveCount(2);
             runtimeLib.RuntimeAssemblyGroups.All(g => g.AssetPaths.Count == 1).Should().BeTrue();
 
             runtimeLib.NativeLibraryGroups.Should().HaveCount(2);
             runtimeLib.NativeLibraryGroups.All(g => g.AssetPaths.Count == 1).Should().BeTrue();
+
+            return runtimeLib;
         }
 
         [Fact]
@@ -494,7 +538,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
             if (useAssemblyVersions)
             {
-                var assets = package.RuntimeAssemblyGroups.GetDefaultRuntimeFiles();
+                var assets = package.RuntimeAssemblyGroups.GetDefaultRuntimeFileAssets();
                 assets.Should().HaveCount(1);
                 var runtimeFile = assets.First();
                 runtimeFile.Path.Should().Be("lib/dotnet5.4/System.Banana.dll");

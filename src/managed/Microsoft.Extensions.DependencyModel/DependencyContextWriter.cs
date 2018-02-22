@@ -298,12 +298,22 @@ namespace Microsoft.Extensions.DependencyModel
         {
             foreach (var asset in assets)
             {
-                target.Add(new JProperty(NormalizePath(asset.Path),
-                    new JObject(
+                var asset_props = new JObject(
                         new JProperty(DependencyContextStrings.RidPropertyName, runtime),
                         new JProperty(DependencyContextStrings.AssetTypePropertyName, assetType)
-                        )
-                    ));
+                        );
+
+                if (asset.AssemblyVersion != null)
+                {
+                    asset_props.Add(DependencyContextStrings.AssemblyVersionPropertyName, asset.AssemblyVersion);
+                }
+
+                if (asset.FileVersion != null)
+                {
+                    asset_props.Add(DependencyContextStrings.FileVersionPropertyName, asset.FileVersion);
+                }
+
+                target.Add(new JProperty(NormalizePath(asset.Path), asset_props));
             }
         }
 

@@ -37,7 +37,7 @@ namespace System.Collections.Generic
                 .SelectMany(a => a.AssetPaths);
         }
 
-        public static IEnumerable<RuntimeFile> GetDefaultRuntimeFiles(this IEnumerable<RuntimeAssetGroup> self) => GetRuntimeFiles(self, string.Empty);
+        public static IEnumerable<RuntimeFile> GetDefaultRuntimeFileAssets(this IEnumerable<RuntimeAssetGroup> self) => GetRuntimeFiles(self, string.Empty);
         public static IEnumerable<RuntimeFile> GetRuntimeFileAssets(this IEnumerable<RuntimeAssetGroup> self, string runtime)
         {
             if (string.IsNullOrEmpty(runtime))
