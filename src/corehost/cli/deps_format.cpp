@@ -29,16 +29,16 @@ pal::string_t deps_json_t::get_optional_property(
     const json_object& properties,
     const pal::string_t& key) const
 {
-    pal::string_t path;
+    pal::string_t value;
 
     const auto& iter = properties.find(key);
 
     if (iter != properties.end())
     {
-        path = iter->second.as_string();
+        value = iter->second.as_string();
     }
 
-    return path;
+    return value;
 }
 
 pal::string_t deps_json_t::get_optional_path(
