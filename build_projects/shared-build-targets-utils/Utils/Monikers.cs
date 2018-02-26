@@ -1,4 +1,4 @@
-﻿using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.InternalAbstractions;
 using System;
 using System.Collections.Generic;
@@ -10,9 +10,9 @@ namespace Microsoft.DotNet.Cli.Build
     public class Monikers
     {
         public const string SharedFrameworkName = "Microsoft.NETCore.App";
-        public const string SharedFxBrandName = "Microsoft .NET Core 1.0.10 - Runtime";
-        public const string SharedHostBrandName = "Microsoft .NET Core 1.0.10 - Host";
-        public const string HostFxrBrandName = "Microsoft .NET Core 1.0.10 - Host FX Resolver";
+        public const string SharedFxBrandName = "Microsoft .NET Core 1.0.11 - Runtime";
+        public const string SharedHostBrandName = "Microsoft .NET Core 1.0.11 - Host";
+        public const string HostFxrBrandName = "Microsoft .NET Core 1.0.11 - Host FX Resolver";
 
         public static string GetProductMoniker(BuildTargetContext c, string artifactPrefix, string version)
         {
