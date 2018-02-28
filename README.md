@@ -181,7 +181,7 @@ Daily Builds
 [alpine.3.6-x64-badge-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/sharedfx_alpine.3.6-x64_Release_version_badge.svg
 [alpine.3.6-x64-version-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/latest.sharedfx.alpine.3.6.x64.version
 [alpine.3.6-x64-targz-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-alpine.3.6-x64.tar.gz
-[alpine.3.6-x64-targz-checksum-master]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-alpine.3.6-x64tar.gz.sha512
+[alpine.3.6-x64-targz-checksum-master]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-alpine.3.6-x64.tar.gz.sha512
 [alpine.3.6-x64-symbols-targz-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-symbols-latest-alpine.3.6-x64.tar.gz
 
 [linux-x64-badge-2.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.0.0/sharedfx_linux-x64_Release_version_badge.svg
