@@ -78,7 +78,7 @@ class runtime_config_t
 {
 public:
     runtime_config_t();
-    void parse(const pal::string_t& path, const pal::string_t& dev_path, const runtime_config_t* previous_config, const runtime_config_t* app_config);
+    void parse(const pal::string_t& path, const pal::string_t& dev_path, const runtime_config_t* higher_layer_config, const runtime_config_t* app_config);
     bool is_valid() const { return m_valid; }
     const pal::string_t& get_path() const { return m_path; }
     const pal::string_t& get_dev_path() const { return m_dev_path; }

@@ -1330,8 +1330,8 @@ int fx_muxer_t::read_config_and_execute(
 
     // 'Roll forward on no candidate fx' is set to 1 (roll_fwd_on_no_candidate_fx_option::minor) by default. It can be changed through:
     // 1. Command line argument (--roll-forward-on-no-candidate-fx).
-    // 2. Runtimeconfig json file ('rollForwardOnNoCandidateFx' property), which is used as a default for lower level frameworks if they don't specify a value.
-    // 3. Runtimeconfig json file ('rollForwardOnNoCandidateFx' property in "framework" section:).
+    // 2. Runtimeconfig json file ('rollForwardOnNoCandidateFx' property in "framework" section:).
+    // 3. Runtimeconfig json file ('rollForwardOnNoCandidateFx' property), which is used as a default for lower level frameworks if they don't specify a value.
     // 4. DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX env var. Only defaults the app's config.
     // The conflicts will be resolved by following the priority rank described above (from 1 to 4).
     // The env var condition is verified in the config file processing

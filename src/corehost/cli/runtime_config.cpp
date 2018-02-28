@@ -25,16 +25,16 @@ runtime_config_t::runtime_config_t()
 {
 }
 
-void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev_path, const runtime_config_t* previous_config, const runtime_config_t* app_config)
+void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev_path, const runtime_config_t* higher_layer_config, const runtime_config_t* app_config)
 {
     m_path = path;
     m_dev_path = dev_path;
 
-    // Step #1: apply the defaults from the environment (for the app) or previous layer (for a framework)
-    if (previous_config != nullptr)
+    // Step #1: apply the defaults from the environment (for the app) or previous\higher layer (for a framework)
+    if (higher_layer_config != nullptr)
     {
         // Copy the previous defaults so we can default the next framework; these may be changed by the current fx
-        copy_framework_settings_to(previous_config->m_fx_global, m_fx_global);
+        copy_framework_settings_to(higher_layer_config->m_fx_global, m_fx_global);
 
         // Apply the defaults
         set_effective_values(m_fx_global);
