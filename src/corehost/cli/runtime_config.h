@@ -73,7 +73,6 @@ private:
     roll_fwd_on_no_candidate_fx_option roll_fwd_on_no_candidate_fx;
 };
 
-class runtime_config_t;
 class runtime_config_t
 {
 public:
@@ -99,8 +98,8 @@ private:
 
     std::unordered_map<pal::string_t, pal::string_t> m_properties;
     std::unordered_map<pal::string_t, runtime_config_framework_t> m_additional_frameworks;
-    runtime_config_framework_t m_fx_global;     // the defaults applied to the next lower layer (Step #2)
-    runtime_config_framework_t m_fx;            // the settings in the "framework" section (Step #3)
+    runtime_config_framework_t m_fx_global;     // the settings that will be applied to the next lower layer; does not include version (Step #1)
+    runtime_config_framework_t m_fx;            // the settings in the current "framework" section (Step #3)
     runtime_config_framework_t m_fx_readonly;   // the settings that can't be changed by lower layers (Step #4)
     std::vector<std::string> m_prop_keys;
     std::vector<std::string> m_prop_values;

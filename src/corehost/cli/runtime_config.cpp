@@ -10,12 +10,12 @@
 
 
 // The semantics of applying the runtimeconfig.json values follows, in the following steps from
-// first to last, where last always wins.
-// 1a) If the app, use the default values from the environment; apply as defaults for current layer
-// 1b) If the framework, use the default values from the higher framework
-// 2) Use the global values in the current framework's runtimeconfig.json; apply as defaults for current layer
-// 3) Use the values in the app's "additionalFrameworks" section for the targeted framework
-// 4) Use the idempotent values which are the settings that can't be changed by lower layers
+// first to last, where last always wins. These steps are also annotated in the code here.
+// 1a) If the app, apply the default values from the environment
+// 1b) If the framework, apply the default values from the higher framework
+// 2) Apply the values in the current "framework" section; use these as defaults for current layer
+// 3) Apply the values in the app's "additionalFrameworks" section for the targeted framework
+// 4) Apply the readonly values which are the settings that can't be changed by lower layers
 
 runtime_config_t::runtime_config_t()
     : m_patch_roll_fwd(true)
@@ -55,7 +55,7 @@ void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev
 
     if (m_valid)
     {
-        // Step #4: Use the readonly values
+        // Step #4: apply the readonly values
         if (app_config != nullptr)
         {
             m_tfm = app_config->m_tfm;
@@ -74,8 +74,6 @@ bool runtime_config_t::parse_opts(const json_value& opts)
     {
         return true;
     }
-
-    // Step #2: Use the global values
 
     const auto& opts_obj = opts.as_object();
 
@@ -128,6 +126,8 @@ bool runtime_config_t::parse_opts(const json_value& opts)
         m_tfm = tfm->second.as_string();
     }
 
+    // Step #2: apply the "framework" section
+
     auto framework =  opts_obj.find(_X("framework"));
     if (framework == opts_obj.end())
     {
@@ -140,7 +140,6 @@ bool runtime_config_t::parse_opts(const json_value& opts)
 
     m_fx_name = fx_obj.at(_X("name")).as_string();
 
-    // Step #3: Use the values in the app's "framework" section
     bool rc = parse_framework(fx_obj);
     if (rc)
     {
@@ -294,8 +293,8 @@ bool runtime_config_t::ensure_parsed(const runtime_config_t* app_config)
             {
                 if (app_config == nullptr)
                 {
-                    // For the app, populate the additionalFrameworks section that is used to override framework values
-                    // and remember the settings so we can apply later while each framework's runtimeconfig is being read.
+                    // If there is no app_config yet, then we are the app
+                    // Read the additionalFrameworks section so we can apply later when each framework's runtimeconfig is read
                     const auto& opts_obj = iter->second.as_object();
                     const auto iter = opts_obj.find(_X("additionalFrameworks"));
                     if (iter != opts_obj.end())
@@ -323,11 +322,11 @@ bool runtime_config_t::ensure_parsed(const runtime_config_t* app_config)
                         }
                     }
 
-                    // Use the framework specified if it exists in the additionalFramework
+                    // Follow through to step #3 in case the framework is also specified in the additionalFrameworks section
                     app_config = this;
                 }
 
-                // For the framework, apply the overrides that the app specified
+                // Step #3: apply the values from "additionalFrameworks"
                 auto overrides = app_config->m_additional_frameworks.find(m_fx_name);
                 if (overrides != app_config->m_additional_frameworks.end())
                 {
