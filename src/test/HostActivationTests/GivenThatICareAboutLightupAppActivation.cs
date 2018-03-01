@@ -128,61 +128,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.LightupApp
                 .HaveStdOutContaining("Hello LightupClient");
         }
 
-        // Attempt to run the app with a bad lightup deps.json specified.
-        [Fact]
-        public void Muxer_activation_of_LightupApp_With_Bad_JsonFile_Fails()
-        {
-            var fixtureLib = PreviouslyBuiltAndRestoredLightupLibTestProjectFixture
-                .Copy();
-
-            var fixtureApp = PreviouslyBuiltAndRestoredLightupAppTestProjectFixture
-                .Copy();
-
-            var dotnet = fixtureApp.BuiltDotnet;
-            var appDll = fixtureApp.TestProject.AppDll;
-            var libDll = fixtureLib.TestProject.AppDll;
-
-            // Get the version number of the SharedFX we just built since that is the version
-            // going to be specified in the test's runtimeconfig.json.
-            var builtSharedFXVersion = Path.GetFileName(dotnet.GreatestVersionSharedFxPath);
-
-            // Create the M.N.App specific folder where lightup.deps.json can be found.
-            var baseDir = fixtureApp.TestProject.ProjectDirectory;
-            var customLightupPath = Path.Combine(baseDir, "shared");
-
-            // Delete any existing artifacts
-            if (Directory.Exists(customLightupPath))
-            {
-                Directory.Delete(customLightupPath, true);
-            }
-
-            customLightupPath = Path.Combine(customLightupPath, "Microsoft.NETCore.App");
-            customLightupPath = Path.Combine(customLightupPath, builtSharedFXVersion);
-
-            // Create the folder to which lightup.deps.json will be copied to.
-            Directory.CreateDirectory(customLightupPath);
-
-            // Copy the lightup.deps.json
-            var libDepsJson = fixtureLib.TestProject.DepsJson;
-            string path = Path.Combine(customLightupPath, Path.GetFileName(libDepsJson));
-
-            File.WriteAllText(path, "THIS IS A BAD JSON FILE");
-
-            // Copy the library to the location of the lightup app (app-local)
-            var destLibPath = Path.Combine(Path.GetDirectoryName(appDll), Path.GetFileName(libDll));
-            File.Copy(libDll, destLibPath);
-
-            // Execute the test using the custom lightup path where lightup.deps.json can be found.
-            dotnet.Exec("exec", "--additional-deps", baseDir, appDll)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .Execute()
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("An error occurred while parsing: " + path);
-        }
-
         // Attempt to run the app without lightup deps.json specified but lightup library present in the expected 
         // probe location (of being app-local).
         [Fact]
