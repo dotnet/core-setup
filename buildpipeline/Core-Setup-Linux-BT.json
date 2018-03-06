@@ -251,7 +251,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:PublishDebToolToFeed=true /p:CliNuGetFeedUrl=$(CLI_NUGET_FEED_URL) /p:CliNuGetApiKey=$(CLI_NUGET_API_KEY) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs)",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1404) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj /p:CliNuGetFeedUrl=$(CLI_NUGET_FEED_URL) /p:CliNuGetApiKey=$(CLI_NUGET_API_KEY) $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
