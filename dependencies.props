@@ -12,7 +12,6 @@
     <CoreFxCurrentRef>db08090a0ba0f41c231aa140c2585256adb2ba7d</CoreFxCurrentRef>
     <CoreClrCurrentRef>68a8d0815ead29d27b491e52bd27539b65800f79</CoreClrCurrentRef>
     <StandardCurrentRef>6298244e25cf84d91e3cda9627315f2425274624</StandardCurrentRef>
-    <WCFCurrentRef>db08090a0ba0f41c231aa140c2585256adb2ba7d</WCFCurrentRef>
     <BuildToolsCurrentRef>68a8d0815ead29d27b491e52bd27539b65800f79</BuildToolsCurrentRef>
   </PropertyGroup>
 
@@ -20,16 +19,9 @@
     <MicrosoftNETCorePlatformsPackageVersion>2.1.0-preview2-26305-02</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>2.0.0</MicrosoftNETCoreTargetsPackageVersion>
     <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-preview2-26305-02</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftPrivateCoreFxUAPPackageVersion>4.6.0-preview2-26305-02</MicrosoftPrivateCoreFxUAPPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview2-26305-12</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <NETStandardLibraryPackageVersion>2.0.1</NETStandardLibraryPackageVersion>
-    <MicrosoftNetNativeCompilerPackageVersion>2.0.0-preview-25429-00</MicrosoftNetNativeCompilerPackageVersion>
     <MicrosoftDiaSymReaderNativePackageVersion>1.4.1</MicrosoftDiaSymReaderNativePackageVersion>
-    <SystemServiceModelDuplexPackageVersion>4.5.0-preview2-26305-01</SystemServiceModelDuplexPackageVersion>
-    <SystemServiceModelHttpPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelHttpPackageVersion>
-    <SystemServiceModelNetTcpPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelNetTcpPackageVersion>
-    <SystemServiceModelPrimitivesPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelPrimitivesPackageVersion>
-    <SystemServiceModelSecurityPackageVersion>$(SystemServiceModelDuplexPackageVersion)</SystemServiceModelSecurityPackageVersion>
   </PropertyGroup>
 
   <!-- Package dependency verification/auto-upgrade configuration. -->
@@ -73,10 +65,6 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)standard/release/2.0.0</BuildInfoPath>
       <CurrentRef>$(StandardCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Include="WCF">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)wcf/$(DependencyBranch)</BuildInfoPath>
-      <CurrentRef>$(WCFCurrentRef)</CurrentRef>
-    </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="BuildTools">
       <BuildInfoPath>$(BaseDotNetBuildInfo)buildtools/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(BuildToolsCurrentRef)</CurrentRef>
@@ -93,11 +81,6 @@
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>MicrosoftPrivateCoreFxUAPPackageVersion</ElementName>
-      <PackageId>Microsoft.Private.CoreFx.UAP</PackageId>
-    </XmlUpdateStep>
-    <XmlUpdateStep Include="CoreFx">
-      <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>MicrosoftNETCorePlatformsPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Platforms</PackageId>
     </XmlUpdateStep>
@@ -110,11 +93,6 @@
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>NETStandardLibraryPackageVersion</ElementName>
       <PackageId>NETStandard.Library</PackageId>
-    </XmlUpdateStep>
-    <XmlUpdateStep Include="WCF">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>SystemServiceModelDuplexPackageVersion</ElementName>
-      <PackageId>System.ServiceModel.Duplex</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="BuildTools">
        <Path>$(MSBuildThisFileFullPath)</Path>
