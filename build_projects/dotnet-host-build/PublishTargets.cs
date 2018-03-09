@@ -250,7 +250,6 @@ namespace Microsoft.DotNet.Host.Build
         [Target(
             nameof(PublishTargets.PublishInstallerFilesToAzure),
             nameof(PublishTargets.PublishArchivesToAzure),
-            nameof(PublishTargets.PublishDotnetDebToolPackage),
             nameof(PublishTargets.PublishDebFilesToDebianRepo),
             nameof(PublishTargets.PublishCoreHostPackages),
             nameof(PublishTargets.PublishManagedPackages),
