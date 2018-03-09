@@ -135,7 +135,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,PublishSharedFrameworkAndSharedHost",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,PublishSharedFrameworkAndSharedHost $(BuildArguments)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -181,7 +181,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,Test,InitPackage,GenerateVersionBadge,GenerateZip,GenerateMsis",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,Test,InitPackage,GenerateVersionBadge,GenerateZip,GenerateMsis $(BuildArguments)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -227,7 +227,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,GenerateBundles",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,GenerateBundles $(BuildArguments)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -246,7 +246,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,ExtractEngineFromBundle",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,ExtractEngineFromBundle $(BuildArguments)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -292,7 +292,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,ReattachEngineToBundle",
+        "arguments": "-Configuration $(BuildConfiguration) -Targets Prepare,ReattachEngineToBundle $(BuildArguments)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -396,6 +396,9 @@
     "BuildConfiguration": {
       "value": "Release",
       "allowOverride": true
+    },
+    "BuildArguments": {
+      "value": "-env-vars 'NUGET_API_KEY=$(NUGET_API_KEY)', 'GITHUB_PASSWORD=$(GITHUB_PASSWORD)'"
     },
     "COREHOST_TRACE": {
       "value": "0",

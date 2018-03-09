@@ -123,7 +123,7 @@
       "value": "Release"
     },
     "BuildArguments": {
-      "value": "--skip-prereqs --configuration $(BuildConfiguration)  --docker ubuntu.16.04 --targets Default"
+      "value": "--skip-prereqs --configuration $(BuildConfiguration)  --docker ubuntu.16.04 --targets Default --env-vars 'NUGET_API_KEY=$(NUGET_API_KEY)', 'GITHUB_PASSWORD=$(GITHUB_PASSWORD)', 'REPO_PASS=$(REPO_PASS)'"
     },
     "CONNECTION_STRING": {
       "value": "ENV_VAR_EMPTY_WORKAROUND"

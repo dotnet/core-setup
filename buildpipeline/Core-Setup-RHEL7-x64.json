@@ -161,7 +161,7 @@
       "allowOverride": true
     },
     "BuildArguments": {
-      "value": "--skip-prereqs --configuration $(BuildConfiguration) --targets Default",
+      "value": "--skip-prereqs --configuration $(BuildConfiguration) --targets Default --env-vars 'NUGET_API_KEY=$(NUGET_API_KEY)', 'GITHUB_PASSWORD=$(GITHUB_PASSWORD)'",
       "allowOverride": true
     },
     "BuildEnvironmentVariables": {
