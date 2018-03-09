@@ -124,7 +124,7 @@
       "allowOverride": true
     },
     "BuildArguments": {
-      "value": "--skip-prereqs --configuration $(BuildConfiguration) --targets Default --env-vars 'NUGET_API_KEY=$(NUGET_API_KEY)', 'GITHUB_PASSWORD=$(GITHUB_PASSWORD)'",
+      "value": "--skip-prereqs --configuration $(BuildConfiguration) --targets Default --env-vars 'NUGET_API_KEY=$(NUGET_API_KEY)', 'GITHUB_PASSWORD=$(GITHUB_PASSWORD)', 'REPO_PASS=$(REPO_PASS)'",
       "allowOverride": true
     },
     "CONNECTION_STRING": {
