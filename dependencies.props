@@ -9,17 +9,17 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>938d646c3810f4e1601c88534cfe844ecc5ed954</CoreFxCurrentRef>
-    <CoreClrCurrentRef>938d646c3810f4e1601c88534cfe844ecc5ed954</CoreClrCurrentRef>
+    <CoreFxCurrentRef>9e78f7c3937c98cda5564d94d124ef53898d4490</CoreFxCurrentRef>
+    <CoreClrCurrentRef>9e78f7c3937c98cda5564d94d124ef53898d4490</CoreClrCurrentRef>
     <StandardCurrentRef>6298244e25cf84d91e3cda9627315f2425274624</StandardCurrentRef>
-    <BuildToolsCurrentRef>d6b3c82aed663b00f6075e6832008eac5e589948</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>9e78f7c3937c98cda5564d94d124ef53898d4490</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftNETCorePlatformsPackageVersion>2.1.0-preview1-26218-04</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-preview1-26218-04</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftPrivateCoreFxUAPPackageVersion>4.6.0-preview1-26218-04</MicrosoftPrivateCoreFxUAPPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview1-26218-05</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>2.1.0-preview1-26216-02</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-preview1-26216-02</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxUAPPackageVersion>4.6.0-preview1-26216-02</MicrosoftPrivateCoreFxUAPPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview1-26216-04</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <NETStandardLibraryPackageVersion>2.0.1</NETStandardLibraryPackageVersion>
     <MicrosoftNetNativeCompilerPackageVersion>2.0.0-preview-25429-00</MicrosoftNetNativeCompilerPackageVersion>
     <MicrosoftDiaSymReaderNativePackageVersion>1.4.1</MicrosoftDiaSymReaderNativePackageVersion>
@@ -49,7 +49,7 @@
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
-    <FeedTasksPackageVersion>2.1.0-preview1-02523-01</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>2.1.0-preview1-02609-02</FeedTasksPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
