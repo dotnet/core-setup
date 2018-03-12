@@ -31,7 +31,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Configuration Release -Targets Init,Compile,Package,Publish -TargetArch arm -Framework netcoreapp2.0",
+        "arguments": "-Configuration Release -Targets Init,Compile,Package,Publish -TargetArch arm -Framework netcoreapp2.0 $(BuildArguments)",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -82,6 +82,9 @@
     }
   ],
   "variables": {
+    "BuildArguments": {
+      "value": "-env-vars 'NUGET_API_KEY=$(NUGET_API_KEY)','GITHUB_PASSWORD=$(GITHUB_PASSWORD)','REPO_PASS=$(REPO_PASS)','CONNECTION_STRING=$(CONNECTION_STRING)'"
+    },
     "NUGET_FEED_URL": {
       "value": "ENV_VAR_EMPTY_WORKAROUND"
     },
