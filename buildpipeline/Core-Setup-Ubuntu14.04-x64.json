@@ -124,7 +124,7 @@
       "allowOverride": true
     },
     "BuildArguments": {
-      "value": "--skip-prereqs --configuration $(BuildConfiguration) --docker ubuntu.14.04 --targets Default --env-vars 'NUGET_API_KEY=$(NUGET_API_KEY)','GITHUB_PASSWORD=$(GITHUB_PASSWORD)','REPO_PASS=$(REPO_PASS)'",
+      "value": "--skip-prereqs --configuration $(BuildConfiguration) --docker ubuntu.14.04 --targets Default --env-vars 'NUGET_API_KEY=$(NUGET_API_KEY)','GITHUB_PASSWORD=$(GITHUB_PASSWORD)','REPO_PASS=$(REPO_PASS)','CONNECTION_STRING=$(CONNECTION_STRING)'",
       "allowOverride": true
     },
     "CONNECTION_STRING": {
