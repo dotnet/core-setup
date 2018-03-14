@@ -39,7 +39,7 @@
     <!-- Specify a separate 'packages' directory in case we are building an already built version of Microsoft.NETCore.App and the $(PackagesDir)
          already contains the same version as we are building.  (ex. building source-build for `2.0.0` when `2.0.0` has already shipped.
     -->
-    <Exec Command="$(DotnetRestoreCommandNoPackages) --source $(PackageOutputPath) --packages $(SharedFrameworkIntermediatePackagesDir) $(CommonSharedFrameworkArgs)"
+    <Exec Command="$(DotnetRestoreCommandNoPackages) --source $(PackageOutputPath) --source $(SourceBuiltPackagesPath) --packages $(SharedFrameworkIntermediatePackagesDir) $(CommonSharedFrameworkArgs)"
           WorkingDirectory="$(SharedFrameworkSourceRoot)" />
 
     <!-- We publish to a sub folder of the PublishRoot so tools like heat and zip can generate folder structures easier. -->
