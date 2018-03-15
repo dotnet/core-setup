@@ -28,20 +28,6 @@ bool compare_by_name_and_version(const framework_info &a, const framework_info &
     const pal::string_t& fx_name,
     std::vector<framework_info>* framework_infos)
 {
-    // No FX resolution for standalone apps
-    if (mode == host_mode_t::standalone)
-    {
-        trace::verbose(_X("Standalone mode detected. Not gathering shared FX locations"));
-        return;
-    }
-
-    // No FX resolution for mixed apps
-    if (mode == host_mode_t::split_fx)
-    {
-        trace::verbose(_X("Split/FX mode detected. Not gathering shared FX locations"));
-        return;
-    }
-
     std::vector<pal::string_t> global_dirs;
     bool multilevel_lookup = multilevel_lookup_enabled();
 
