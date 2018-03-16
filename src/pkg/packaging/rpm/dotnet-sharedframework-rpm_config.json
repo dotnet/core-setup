@@ -15,7 +15,7 @@
         "package_version":"1.0.0.0",
         "package_revision":"1",
         "urgency" : "low",
-        "changelog_message" : "Initial shared framework."
+        "changelog_message" : "https://github.com/dotnet/core/tree/master/release-notes"
     },
    
     "control": {
@@ -32,14 +32,6 @@
     
   "rpm_dependencies": [{
       "package_name": "%HOSTFXR_RPM_PACKAGE_NAME%",
-      "package_version": ""
-    },
-    {
-      "package_name": "openssl-libs",
-      "package_version": ""
-    },   
-    {
-      "package_name": "libcurl",
       "package_version": ""
     }],
    
