@@ -13,8 +13,9 @@ struct host_option
 };
 
 #define _STRINGIFY(s) _X(s)
-#define DOTNET_CORE_URL _X("http://go.microsoft.com/fwlink/?LinkID=798306&clcid=0x409")
+#define DOTNET_CORE_GETTING_STARTED_URL _X("http://go.microsoft.com/fwlink/?LinkID=798306&clcid=0x409")
 #define DOTNET_CORE_DOWNLOAD_RUNTIME_URL _X("https://aka.ms/dotnet-download-runtime")
+#define DOTNET_CORE_DOWNLOAD_URL _X("https://aka.ms/dotnet-download")
 
 #define RUNTIME_STORE_DIRECTORY_NAME _X("store")
 
@@ -32,6 +33,7 @@ bool library_exists_in_dir(const pal::string_t& lib_dir, const pal::string_t& li
 bool coreclr_exists_in_dir(const pal::string_t& candidate);
 void remove_trailing_dir_seperator(pal::string_t* dir);
 void replace_char(pal::string_t* path, pal::char_t match, pal::char_t repl);
+pal::string_t get_replaced_char(const pal::string_t& path, pal::char_t match, pal::char_t repl);
 const pal::char_t* get_arch();
 pal::string_t get_last_known_arg(
     const opt_map_t& opts,
@@ -48,4 +50,6 @@ bool get_env_shared_store_dirs(std::vector<pal::string_t>* dirs, const pal::stri
 bool get_global_shared_store_dirs(std::vector<pal::string_t>* dirs, const pal::string_t& arch, const pal::string_t& tfm);
 bool multilevel_lookup_enabled();
 bool get_path_from_argv(pal::string_t *path);
+size_t index_of_non_numeric(const pal::string_t& str, unsigned i);
+bool try_stou(const pal::string_t& str, unsigned* num);
 #endif
