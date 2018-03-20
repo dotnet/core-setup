@@ -1005,7 +1005,7 @@
       "value": "$(PB_DockerRepository):$(DockerTag_Ubuntu1804)"
     },
     "DockerTag_Ubuntu1804": {
-      "value": "ubuntu-18.04-debpkg-66216d3-20180319211855"
+      "value": "ubuntu-18.04-debpkg-66216d3-20180320152209"
     }
   },
   "demands": [
