@@ -440,6 +440,78 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Init tools - Ubuntu18.04",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "docker",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1804) /bin/bash -c \"HOME=$(PB_GitDirectory); git clean -X -d -f; $(PB_GitDirectory)/init-tools.sh\"",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Build traversal build dependencies - Ubuntu 18.04",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "docker",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1804) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/build.proj /t:BuildTraversalBuildDependencies $(DistroSpecificMSBuildArguments)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Package - Ubuntu 18.04",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "docker",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1804) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/src/pkg/packaging/dir.proj $(AdditionalMSBuildProperties) $(DistroSpecificMSBuildArguments)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Publish - Ubuntu 18.04",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "docker",
+        "arguments": "run --rm $(DockerCommonRunArgs_Ubuntu1804) $(PB_GitDirectory)/Tools/msbuild.sh $(PB_GitDirectory)/publish/publish.proj $(DistroSpecificMSBuildArguments) $(DistroSpecificMSBuildPublishArgs)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },    
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "Initialize docker - Debian 8",
       "timeoutInMinutes": 0,
       "task": {
@@ -925,6 +997,15 @@
     "CliNuGetApiKey": {
       "value": null,
       "isSecret": true
+    },
+    "DockerCommonRunArgs_Ubuntu1804": {
+      "value": "--name $(PB_DockerContainerName)$(DockerTag_Ubuntu1804) -v \"$(PB_SourcesDirectory):$(PB_GitDirectory)\" -v $(Build.StagingDirectory)/sharedFrameworkPublish/:/root/sharedFrameworkPublish/ -w=\"$(PB_GitDirectory)\" $(DockerImageName_Ubuntu1804)"
+    },
+    "DockerImageName_Ubuntu1804": {
+      "value": "$(PB_DockerRepository):$(DockerTag_Ubuntu1804)"
+    },
+    "DockerTag_Ubuntu1804": {
+      "value": "ubuntu-18.04-debpkg-66216d3-20180320152209"
     }
   },
   "demands": [
