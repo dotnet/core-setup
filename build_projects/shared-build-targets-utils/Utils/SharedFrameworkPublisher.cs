@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli.Build
             string sharedFrameworkTarget)
         {
             _repoRoot = repoRoot;
-            _corehostLockedDirectory = corehostLockedDirectory;
+            _corehostLockedDirectory = corehostLatestDirectory;
             _corehostLatestDirectory = corehostLatestDirectory;
             _corehostPackageSource = corehostPackageSource;
             _crossgenUtil = new Crossgen(DependencyVersions.CoreCLRVersion, DependencyVersions.JitVersion, sharedFrameworkRid == "win10-arm64" ? sharedFrameworkRid : null);
