@@ -3,6 +3,8 @@
 REM Copyright (c) .NET Foundation and contributors. All rights reserved.
 REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+set "__ProjectDir=%~dp0"
+
 :Arg_Loop
 :: Since the native build requires some configuration information before msbuild is called, we have to do some manual args parsing
 if [%1] == [] goto :InvokeBuild
@@ -20,5 +22,5 @@ shift
 goto :Arg_Loop
 
 :InvokeBuild
-powershell -NoProfile -NoLogo -Command "%~dp0build_projects\dotnet-host-build\build.ps1 %*; exit $LastExitCode;"
+powershell -NoProfile -NoLogo -Command "%__ProjectDir%build_projects\dotnet-host-build\build.ps1 %*; exit $LastExitCode;"
 if %errorlevel% neq 0 exit /b %errorlevel%
