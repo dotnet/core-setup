@@ -76,7 +76,7 @@
       <Version>1.0.2</Version>
     </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="Microsoft.NETCore.Runtime.CoreCLR">
-      <Version>1.0.13</Version>
+      <Version>1.0.13-servicing-26320-01</Version>
     </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="Microsoft.VisualBasic">
       <Version>10.0.1</Version>
