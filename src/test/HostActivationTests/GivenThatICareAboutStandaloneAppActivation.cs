@@ -197,13 +197,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
         [Fact]
         public void Running_Publish_Output_Standalone_EXE_With_DOTNET_ROOT_Fails()
         {
-            // Limit OS here to avoid having to invoke IsWow64Process since running under WOW64
-            // uses DOTNET_ROOT(x86) as the environment variable instead of DOTNET_ROOT.
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.ProcessArchitecture == Architecture.X86)
-            {
-                return;
-            }
-
             var fixture = PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
                 .Copy();
 
@@ -216,24 +209,27 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
             string newOutDir = Path.Combine(currentOutDir, relativeNewPath);
             Directory.Move(currentOutDir, newOutDir);
 
-            // Move the apphost exe back to original location
+            // Move just the apphost exe back to original location
             string appExeName = Path.GetFileName(appExe);
             string sourceAppExePath = Path.Combine(newOutDir, appExeName);
             Directory.CreateDirectory(Path.GetDirectoryName(appExe));
             File.Move(sourceAppExePath, appExe);
 
-            // This verifies a standalone app layout cannot use DOTNET_ROOT to specify a
-            // self-contained framework since a flat layout of the framework is not supported.
+            // This verifies a self-contained apphost cannot use DOTNET_ROOT to reference a flat
+            // self-contained layout since a flat layout of the shared framework is not supported.
             Command.Create(appExe)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .EnvironmentVariable("DOTNET_ROOT", newOutDir)
+                .EnvironmentVariable("DOTNET_ROOT(x86)", newOutDir)
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute(fExpectedToFail: true)
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining($"Using environment variable DOTNET_ROOT=[{Path.GetFullPath(newOutDir)}] as runtime location.")
+                .HaveStdErrContaining($"Using environment variable DOTNET_ROOT") // use the first part avoiding "(x86)" if present
+                .And
+                .HaveStdErrContaining($"=[{Path.GetFullPath(newOutDir)}] as runtime location.") // use the last part
                 .And
                 .HaveStdErrContaining("A fatal error occurred");
         }
