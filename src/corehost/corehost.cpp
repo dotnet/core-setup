@@ -130,13 +130,23 @@ bool resolve_fxr_path(const pal::string_t& host_path, const pal::string_t& app_r
     }
 
     // For framework-dependent apps, use DOTNET_ROOT
-    if (!get_dotnet_root_from_env(out_dotnet_root))
+
+    pal::string_t default_install_location;
+    pal::string_t dotnet_root_env_var_name = get_dotnet_root_env_var_name();
+    if (get_file_path_from_env(dotnet_root_env_var_name.c_str(), out_dotnet_root))
+    {
+        trace::info(_X("Using environment variable %s=[%s] as runtime location."), dotnet_root_env_var_name.c_str(), out_dotnet_root->c_str());
+    }
+    else
     {
         // Check default installation root as fallback
-        if (!pal::get_default_installation_dir(out_dotnet_root))
+        if (!pal::get_default_installation_dir(&default_install_location))
         {
+            trace::error(_X("A fatal error occurred, the default install location cannot be obtained."));
             return false;
         }
+        trace::info(_X("Using default installation location [%s] as runtime location."), default_install_location.c_str());
+        out_dotnet_root->assign(default_install_location);
     }
 
     pal::string_t fxr_dir = *out_dotnet_root;
@@ -148,7 +158,22 @@ bool resolve_fxr_path(const pal::string_t& host_path, const pal::string_t& app_r
     append_path(&fxr_dir, _X("fxr"));
     if (!pal::directory_exists(fxr_dir))
     {
-        trace::error(_X("A fatal error occurred, the folder [%s] does not exist"), fxr_dir.c_str());
+#if FEATURE_APPHOST
+        if (default_install_location.empty())
+        {
+            pal::get_default_installation_dir(&default_install_location);
+        }
+
+        trace::error(_X("A fatal error occurred, the required library %s could not be found.\n"
+            "If this is a self-contained application, that library should exist in [%s].\n"
+            "If this is a framework-dependent application, install the runtime in the default location [%s] or use the %s environment variable to specify the runtime location."),
+            LIBFXR_NAME,
+            app_root.c_str(),
+            default_install_location.c_str(),
+            dotnet_root_env_var_name.c_str());
+#else
+        trace::error(_X("A fatal error occurred, the folder [%s] does not exist"), fxr_dir.c_str()); 
+#endif
         return false;
     }
 

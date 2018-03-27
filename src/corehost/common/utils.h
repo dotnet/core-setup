@@ -53,5 +53,5 @@ bool multilevel_lookup_enabled();
 bool get_file_path_from_env(const pal::char_t* env_key, pal::string_t* recv);
 size_t index_of_non_numeric(const pal::string_t& str, unsigned i);
 bool try_stou(const pal::string_t& str, unsigned* num);
-bool get_dotnet_root_from_env(pal::string_t* recv);
+pal::string_t get_dotnet_root_env_var_name();
 #endif

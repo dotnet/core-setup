@@ -51,13 +51,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
 
             var appExe = fixture.TestProject.AppExe;
 
-            // TODO: Use FS.Chmod when build utility project is converted to csproj.
-            // See https://github.com/NuGet/Home/issues/4424
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Command.Create("chmod", "u+x", appExe).Execute().EnsureSuccessful();
-            }
-
             Command.Create(appExe)
                 .CaptureStdErr()
                 .CaptureStdOut()
@@ -75,13 +68,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 .Copy();
 
             var appExe = fixture.TestProject.AppExe;
-
-            // TODO: Use FS.Chmod when build utility project is converted to csproj.
-            // See https://github.com/NuGet/Home/issues/4424
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Command.Create("chmod", "u+x", appExe).Execute().EnsureSuccessful();
-            }
 
             Command.Create(appExe)
                 .CaptureStdErr()
@@ -162,13 +148,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
 
             File.Copy(appExe, renamedAppExe, true);
 
-            // TODO: Use FS.Chmod when build utility project is converted to csproj.
-            // See https://github.com/NuGet/Home/issues/4424
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Command.Create("chmod", "u+x", renamedAppExe).Execute().EnsureSuccessful();
-            }
-
             Command.Create(renamedAppExe)
                 .CaptureStdErr()
                 .CaptureStdOut()
@@ -205,13 +184,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
             string startupConfigPath = Path.Combine(currentOutDir, startupConfigFileName);
             SetStartupConfigJson(startupConfigPath, relativeNewPath);
 
-            // TODO: Use FS.Chmod when build utility project is converted to csproj.
-            // See https://github.com/NuGet/Home/issues/4424
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Command.Create("chmod", "u+x", appExe).Execute().EnsureSuccessful();
-            }
-
             Command.Create(appExe)
                 .CaptureStdErr()
                 .CaptureStdOut()
@@ -220,6 +192,50 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello World");
+        }
+
+        [Fact]
+        public void Running_Publish_Output_Standalone_EXE_With_DOTNET_ROOT_Fails()
+        {
+            // Limit OS here to avoid having to invoke IsWow64Process since running under WOW64
+            // uses DOTNET_ROOT(x86) as the environment variable instead of DOTNET_ROOT.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.ProcessArchitecture == Architecture.X86)
+            {
+                return;
+            }
+
+            var fixture = PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+                .Copy();
+
+            var appExe = fixture.TestProject.AppExe;
+
+            // Move whole directory to a subdirectory
+            string currentOutDir = fixture.TestProject.OutputDirectory;
+            string relativeNewPath = "..";
+            relativeNewPath = Path.Combine(relativeNewPath, "newDir2");
+            string newOutDir = Path.Combine(currentOutDir, relativeNewPath);
+            Directory.Move(currentOutDir, newOutDir);
+
+            // Move the apphost exe back to original location
+            string appExeName = Path.GetFileName(appExe);
+            string sourceAppExePath = Path.Combine(newOutDir, appExeName);
+            Directory.CreateDirectory(Path.GetDirectoryName(appExe));
+            File.Move(sourceAppExePath, appExe);
+
+            // This verifies a standalone app layout cannot use DOTNET_ROOT to specify a
+            // self-contained framework since a flat layout of the framework is not supported.
+            Command.Create(appExe)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .EnvironmentVariable("DOTNET_ROOT", newOutDir)
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining($"Using environment variable DOTNET_ROOT=[{Path.GetFullPath(newOutDir)}] as runtime location.")
+                .And
+                .HaveStdErrContaining("A fatal error occurred");
         }
 
         [Fact]

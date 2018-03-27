@@ -5,10 +5,6 @@
 #define __STARTUP_CONFIG_H__
 
 #include "pal.h"
-#include "cpprest/json.h"
-
-typedef web::json::value json_value;
-typedef web::json::object json_object;
 
 class startup_config_t
 {

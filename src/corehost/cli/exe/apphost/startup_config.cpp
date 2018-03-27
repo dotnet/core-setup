@@ -46,7 +46,7 @@ bool startup_config_t::parse_internal(const pal::string_t& path)
 
     try
     {
-        const auto root = json_value::parse(file);
+        const auto root = web::json::value::parse(file);
         const auto& json = root.as_object();
         const auto options = json.find(_X("startupOptions"));
         if (options != json.end())

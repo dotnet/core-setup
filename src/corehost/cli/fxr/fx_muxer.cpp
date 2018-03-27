@@ -974,10 +974,9 @@ std::vector<host_option> fx_muxer_t::get_known_opts(bool exec_mode, host_mode_t 
     {
         known_opts.push_back({ _X("--depsfile"), _X("<path>"), _X("Path to <application>.deps.json file")});
         known_opts.push_back({ _X("--runtimeconfig"), _X("<path>"), _X("Path to <application>.runtimeconfig.json file")});
-        known_opts.push_back({ _X("--dotnet-path"), _X("<path>"), _X("Path to the installed Shared Framework to use to run the application.")});
     }
 
-    if (get_all_options || mode == host_mode_t::muxer || mode == host_mode_t::apphost )
+    if (get_all_options || mode == host_mode_t::muxer || mode == host_mode_t::apphost)
     {
         // If mode=host_mode_t::apphost, these are only used when the app is framework-dependent.
         known_opts.push_back({ _X("--fx-version"), _X("<version>"), _X("Version of the installed Shared Framework to use to run the application.")});

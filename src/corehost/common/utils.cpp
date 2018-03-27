@@ -374,12 +374,12 @@ bool try_stou(const pal::string_t& str, unsigned* num)
     return true;
 }
 
-bool get_dotnet_root_from_env(pal::string_t* recv)
+pal::string_t get_dotnet_root_env_var_name()
 {
     if (pal::is_running_in_wow64())
     {
-        return get_file_path_from_env(_X("DOTNET_ROOT(x86)"), recv);
+        return pal::string_t(_X("DOTNET_ROOT(x86)"));
     }
 
-    return get_file_path_from_env(_X("DOTNET_ROOT"), recv);
+    return pal::string_t(_X("DOTNET_ROOT"));
 }
