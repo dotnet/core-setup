@@ -26,7 +26,7 @@
     <OfficialBuildRID Include="linux-arm64">
       <Platform>arm64</Platform>
     </OfficialBuildRID>
-    
+
     <!-- The following RIDs are not officically supported and are not 
          built during official builds, however we wish to include them 
          in our runtime.json to enable others to provide them.  -->
