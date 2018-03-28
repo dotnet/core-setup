@@ -38,6 +38,7 @@
     <PublishRid Include="ubuntu.16.10-x64" />
     <PublishRid Include="ubuntu.18.04-x64" />
     <PublishRid Include="debian.8-x64" />
+    <PublishRid Include="debian.9-x64" />
     <PublishRid Include="linux-x64" />
     <PublishRid Include="win-x86" />
     <PublishRid Include="win-x64" />
@@ -46,5 +47,7 @@
     <PublishRid Include="win-arm64" />
     <PublishRid Include="linux-arm" />
     <PublishRid Include="rhel.7-x64" />
+    <PublishRid Include="opensuse.42-x64" />
+
   </ItemGroup>
 </Project>
