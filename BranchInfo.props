@@ -4,7 +4,7 @@
     <MinorVersion>0</MinorVersion>
     <PatchVersion>7</PatchVersion>
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
-    <PreReleaseLabel></PreReleaseLabel>
+    <PreReleaseLabel>servicing</PreReleaseLabel>
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
     <ReleaseBrandSuffix></ReleaseBrandSuffix>
     <Channel>release/2.0.0</Channel>
