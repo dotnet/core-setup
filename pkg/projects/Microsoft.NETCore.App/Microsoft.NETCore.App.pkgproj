@@ -96,6 +96,9 @@
     <NETCoreApp10Dependency Include="System.ComponentModel.Annotations">
       <Version>4.1.0</Version>
     </NETCoreApp10Dependency>
+    <NETCoreApp10Dependency Include="System.Console">
+      <Version>4.0.1</Version>
+    </NETCoreApp10Dependency>
     <NETCoreApp10Dependency Include="System.Diagnostics.DiagnosticSource">
       <Version>4.0.0</Version>
     </NETCoreApp10Dependency>
