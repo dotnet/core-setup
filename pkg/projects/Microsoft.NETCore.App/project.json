@@ -11,6 +11,7 @@
     "System.Collections.Immutable": "1.2.0",
     "System.ComponentModel": "4.0.1",
     "System.ComponentModel.Annotations": "4.1.0",
+    "System.Console": "4.0.1",
     "System.Diagnostics.DiagnosticSource": "4.0.0",
     "System.Diagnostics.Process": "4.1.0",
     "System.Dynamic.Runtime": "4.0.11",

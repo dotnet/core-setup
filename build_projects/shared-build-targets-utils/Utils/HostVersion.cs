@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Cli.Build
         //
 
         // Full versions and package information.
-        public static bool EnsureStableVersion => false;
+        public static bool EnsureStableVersion => true;
         public string LatestHostPrerelease => "servicing";
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
