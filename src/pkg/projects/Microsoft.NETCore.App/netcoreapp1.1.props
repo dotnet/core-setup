@@ -57,6 +57,9 @@
     <NETCoreApp11Dependency Include="System.ComponentModel.Annotations">
       <Version>4.3.0</Version>
     </NETCoreApp11Dependency>
+    <NETCoreApp11Dependency Include="System.Console">
+      <Version>4.3.1</Version>
+    </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="System.Diagnostics.DiagnosticSource">
       <Version>4.3.1</Version>
     </NETCoreApp11Dependency>
