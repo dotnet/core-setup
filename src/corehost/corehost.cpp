@@ -8,7 +8,6 @@
 #include "utils.h"
 
 #if FEATURE_APPHOST
-#include "startup_config.h"
 #define CURHOST_TYPE    _X("apphost")
 #define CUREXE_PKG_VER APPHOST_PKG_VER
 #else // !FEATURE_APPHOST
@@ -71,46 +70,6 @@ bool is_exe_enabled_for_execution(const pal::string_t& host_path, pal::string_t*
     }
 
     trace::info(_X("The managed DLL bound to this executable is: '%s'"), app_dll->c_str());
-    return true;
-}
-
-bool resolve_app_root(const pal::string_t& host_path, pal::string_t* out_app_root, bool* requires_v2_hostfxr_interface)
-{
-    // For self-contained, the startupconfig.json specifies app_root which is used later to assign dotnet_root
-    // For framework-dependent, the startupconfig.json specifies app_root which does not affect dotnet_root
-    pal::string_t config_path = strip_executable_ext(host_path);
-    config_path += _X(".startupconfig.json");
-    startup_config_t startup_config;
-    startup_config.parse(config_path);
-    if (!startup_config.is_valid())
-    {
-        return false;
-    }
-
-    if (startup_config.get_app_root().empty())
-    {
-        out_app_root->assign(get_directory(host_path));
-    }
-    else
-    {
-        *requires_v2_hostfxr_interface = true;
-        if (pal::is_path_rooted(startup_config.get_app_root()))
-        {
-            out_app_root->assign(startup_config.get_app_root());
-        }
-        else
-        {
-            out_app_root->assign(get_directory(host_path));
-            append_path(out_app_root, startup_config.get_app_root().c_str());
-        }
-        if (!pal::realpath(out_app_root))
-        {
-            trace::error(_X("The app root [%s] specified in [%s] does not exist."),
-                out_app_root->c_str(), config_path.c_str());
-            return false;
-        }
-    }
-
     return true;
 }
 #endif
@@ -226,25 +185,38 @@ int run(const int argc, const pal::char_t* argv[])
         return StatusCode::CoreHostCurExeFindFailure;
     }
 
-    pal::string_t app_root;
     pal::string_t app_path;
+    pal::string_t app_root;
     bool requires_v2_hostfxr_interface = false;
 
 #if FEATURE_APPHOST
-    pal::string_t app_dll_name;
-    if (!is_exe_enabled_for_execution(host_path, &app_dll_name))
+    pal::string_t embedded_app_name;
+    if (!is_exe_enabled_for_execution(host_path, &embedded_app_name))
     {
         trace::error(_X("A fatal error was encountered. This executable was not bound to load a managed DLL."));
         return StatusCode::AppHostExeNotBoundFailure;
     }
 
-    if (!resolve_app_root(host_path, &app_root, &requires_v2_hostfxr_interface))
+    if (_X('/') != DIR_SEPARATOR)
     {
+        replace_char(&embedded_app_name, _X('/'), DIR_SEPARATOR);
+    }
+
+    auto pos_path_char = embedded_app_name.find(DIR_SEPARATOR);
+    if (pos_path_char != pal::string_t::npos)
+    {
+        requires_v2_hostfxr_interface = true;
+    }
+
+    app_path.assign(get_directory(host_path));
+    append_path(&app_path, embedded_app_name.c_str());
+    if (!pal::realpath(&app_path))
+    {
+        trace::error(_X("The application to execute does not exist: '%s'."), app_path.c_str());
         return StatusCode::LibHostAppRootFindFailure;
     }
 
-    app_path.assign(app_root);
-    append_path(&app_path, app_dll_name.c_str());
+    app_root.assign(get_directory(app_path));
 #else
     pal::string_t own_name = strip_executable_ext(get_filename(host_path));
 
@@ -271,7 +243,7 @@ int run(const int argc, const pal::char_t* argv[])
         return StatusCode::InvalidArgFailure;
     }
 
-    app_root.assign(host_path);
+    app_root.assign(get_directory(host_path));
     app_path.assign(app_root);
     append_path(&app_path, own_name.c_str());
     app_path.append(_X(".dll"));
@@ -317,7 +289,7 @@ int run(const int argc, const pal::char_t* argv[])
     {
         if (requires_v2_hostfxr_interface)
         {
-            trace::error(_X("The required library %s does not support startupconfig.json functionality."), fxr_path.c_str());
+            trace::error(_X("The required library %s does not support relative app dll paths."), fxr_path.c_str());
             rc = StatusCode::CoreHostEntryPointFailure;
         }
         else
