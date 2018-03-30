@@ -10,7 +10,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def platformList = ['Linux:x64:Release', 'Linux:arm:Release', 'OSX:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'Windows_NT:arm:Debug', 'Tizen:armel:Release']
+def platformList = ['Linux:x64:Release', 'Linux:arm:Release', 'Linux:arm64:Release', 'OSX:x64:Release', 'Windows_NT:x64:Release', 'Windows_NT:x86:Debug', 'Windows_NT:arm:Debug', 'Tizen:armel:Release']
 
 def static getBuildJobName(def configuration, def os, def architecture) {
     return configuration.toLowerCase() + '_' + os.toLowerCase() + '_' + architecture.toLowerCase()
@@ -54,10 +54,20 @@ platformList.each { platform ->
     else if (os == "Linux") {
 
         // Prep for Portable Linux builds take place on Ubuntu 14.04
-        if (architecture == 'arm' || architecture == 'armel') {
-            dockerContainer = "ubuntu-14.04-cross-0cd4667-20172211042239"
+        if (architecture == 'arm' || architecture == 'armel' || architecture == 'arm64') {
+            if (architecture == 'arm64') {
+                dockerContainer = "ubuntu-16.04-cross-arm64-a3ae44b-20180316023254"
+            }
+            else {
+                dockerContainer = "ubuntu-14.04-cross-e435274-20180323032140"
+            }
             dockerCommand = "docker run -e ROOTFS_DIR=/crossrootfs/${architecture} --name ${dockerContainer} --rm -v \${WORKSPACE}:${dockerWorkingDirectory} -w=${dockerWorkingDirectory} ${dockerRepository}:${dockerContainer}"
-            buildArgs += " -SkipTests=true -DisableCrossgen=true -CrossBuild=true"
+            buildArgs += " -SkipTests=true -CrossBuild=true"
+
+            if (architecture == 'armel' || architecture == 'arm64') {
+                buildArgs += " -DisableCrossgen=true"
+            }
+
             buildCommand = "${dockerCommand} ./build.sh ${buildArgs}"
 
             osForGHTrigger = "Linux"
@@ -95,7 +105,7 @@ platformList.each { platform ->
     Utilities.setMachineAffinity(newJob, os, version)
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
 
-    if (!(architecture == 'arm' || architecture == 'armel') ) {
+    if (!(architecture == 'arm' || architecture == 'armel' || architecture == 'arm64')) {
         Utilities.addMSTestResults(newJob, '**/*-testResults.trx')
     }
 
