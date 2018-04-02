@@ -132,8 +132,18 @@ namespace Microsoft.DotNet.Host.Build
                         "opensuse.42.1.x64.version"
                     };
 
-                    c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackagesToFeed));
-                    c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
+                    BuildTargetResult feedResult = null;
+                    BuildTargetResult versionsResult = null;
+
+                    feedResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackagesToFeed));
+                    if (!feedResult.Success){
+                        return feedResult;
+                    }
+
+                    versionsResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
+                    if (!versionsResult.Success){
+                        return versionResult;
+                    }
 
                     string sfxVersion = Utils.GetSharedFrameworkVersionFileContent(c);
                     foreach (string version in versionFiles)
