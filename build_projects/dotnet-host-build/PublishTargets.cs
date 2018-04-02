@@ -132,16 +132,15 @@ namespace Microsoft.DotNet.Host.Build
                         "opensuse.42.1.x64.version"
                     };
 
-                    BuildTargetResult feedResult = null;
-                    BuildTargetResult versionsResult = null;
-
-                    feedResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackagesToFeed));
-                    if (!feedResult.Success){
+                    BuildTargetResult feedResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackagesToFeed));
+                    if (!feedResult.Success)
+                    {
                         return feedResult;
                     }
 
-                    versionsResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
-                    if (!versionsResult.Success){
+                    BuildTargetResult versionsResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
+                    if (!versionsResult.Success)
+                    {
                         return versionResult;
                     }
 
