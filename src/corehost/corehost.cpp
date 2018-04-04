@@ -25,18 +25,20 @@ typedef int(*hostfxr_main_startupinfo_fn) (const int argc, const pal::char_t* ar
  *
  *    - The exe is built with a known hash string at some offset in the image
  *    - The exe is useless as is with the built-in hash value, and will fail with an error message
- *    - The hash value should be replaced with the managed DLL filename using "NUL terminated UTF-8" by "dotnet build"
+ *    - The hash value should be replaced with the managed DLL filename with optional relative path
+ *    - The optional path is relative to the location of the apphost executable
+ *    - The relative path plus filename are verified to reference a valid file
+ *    - The filename should be "NUL terminated UTF-8" by "dotnet build"
+ *    - The managed DLL filename does not have to be the same name as the apphost executable name
  *    - The exe may be signed at this point by the app publisher
- *    - When the exe runs, the managed DLL name is validated against the executable's own name
- *    - If validation passes, the embedded managed DLL name will be loaded by the exe
- *    - Note: the maximum size of the managed DLL file name can be 1024 bytes in UTF-8 (not including NUL)
+ *    - Note: the maximum size of the filename and relative path is 1024 bytes in UTF-8 (not including NUL)
  *        o https://en.wikipedia.org/wiki/Comparison_of_file_systems
  *          has more details on maximum file name sizes.
  */
 #define EMBED_HASH_HI_PART_UTF8 "c3ab8ff13720e8ad9047dd39466b3c89" // SHA-256 of "foobar" in UTF-8
 #define EMBED_HASH_LO_PART_UTF8 "74e592c2fa383d4a3960714caef0c4f2"
 #define EMBED_HASH_FULL_UTF8    (EMBED_HASH_HI_PART_UTF8 EMBED_HASH_LO_PART_UTF8) // NUL terminated
-bool is_exe_enabled_for_execution(const pal::string_t& host_path, pal::string_t* app_dll)
+bool is_exe_enabled_for_execution(pal::string_t* app_dll)
 {
     constexpr int EMBED_SZ = sizeof(EMBED_HASH_FULL_UTF8) / sizeof(EMBED_HASH_FULL_UTF8[0]);
     constexpr int EMBED_MAX = (EMBED_SZ > 1025 ? EMBED_SZ : 1025); // 1024 DLL name length, 1 NUL
@@ -191,7 +193,7 @@ int run(const int argc, const pal::char_t* argv[])
 
 #if FEATURE_APPHOST
     pal::string_t embedded_app_name;
-    if (!is_exe_enabled_for_execution(host_path, &embedded_app_name))
+    if (!is_exe_enabled_for_execution(&embedded_app_name))
     {
         trace::error(_X("A fatal error was encountered. This executable was not bound to load a managed DLL."));
         return StatusCode::AppHostExeNotBoundFailure;
