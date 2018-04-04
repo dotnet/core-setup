@@ -398,11 +398,7 @@
       },
       "inputs": {
         "filename": "docker",
-<<<<<<< HEAD
-        "arguments": "$(CommonDockerCommandToBuildRuntimeDepDebPackage) /p:OutputRid=linuxmint.7-$(PB_TargetArchitecture) $(PB_AdditionalMSBuildArguments)",
-=======
-        "arguments": "$(CommonDockerCommandToBuildRuntimeDepDebPackage) /p:OutputRid=linuxmint.17-$(PB_TargetArchitecture)",
->>>>>>> upstream/release/2.1
+        "arguments": "$(CommonDockerCommandToBuildRuntimeDepDebPackage) /p:OutputRid=linuxmint.17-$(PB_TargetArchitecture) $(PB_AdditionalMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -421,11 +417,7 @@
       },
       "inputs": {
         "filename": "docker",
-<<<<<<< HEAD
-        "arguments": "$(CommonDockerCommandToPublishRuntimeDepDebPackage) /p:OutputRid=linuxmint.7-$(PB_TargetArchitecture) $(PB_AdditionalMSBuildArguments)",
-=======
-        "arguments": "$(CommonDockerCommandToPublishRuntimeDepDebPackage) /p:OutputRid=linuxmint.17-$(PB_TargetArchitecture)",
->>>>>>> upstream/release/2.1
+        "arguments": "$(CommonDockerCommandToPublishRuntimeDepDebPackage) /p:OutputRid=linuxmint.17-$(PB_TargetArchitecture) $(PB_AdditionalMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -444,11 +436,7 @@
       },
       "inputs": {
         "filename": "docker",
-<<<<<<< HEAD
-        "arguments": "$(CommonDockerCommandToBuildRuntimeDepDebPackage) /p:OutputRid=linuxmint.8-$(PB_TargetArchitecture) $(PB_AdditionalMSBuildArguments)",
-=======
-        "arguments": "$(CommonDockerCommandToBuildRuntimeDepDebPackage) /p:OutputRid=linuxmint.18-$(PB_TargetArchitecture)",
->>>>>>> upstream/release/2.1
+        "arguments": "$(CommonDockerCommandToBuildRuntimeDepDebPackage) /p:OutputRid=linuxmint.18-$(PB_TargetArchitecture) $(PB_AdditionalMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -467,11 +455,7 @@
       },
       "inputs": {
         "filename": "docker",
-<<<<<<< HEAD
-        "arguments": "$(CommonDockerCommandToPublishRuntimeDepDebPackage) /p:OutputRid=linuxmint.8-$(PB_TargetArchitecture) $(PB_AdditionalMSBuildArguments)",
-=======
-        "arguments": "$(CommonDockerCommandToPublishRuntimeDepDebPackage) /p:OutputRid=linuxmint.18-$(PB_TargetArchitecture)",
->>>>>>> upstream/release/2.1
+        "arguments": "$(CommonDockerCommandToPublishRuntimeDepDebPackage) /p:OutputRid=linuxmint.18-$(PB_TargetArchitecture) $(PB_AdditionalMSBuildArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
