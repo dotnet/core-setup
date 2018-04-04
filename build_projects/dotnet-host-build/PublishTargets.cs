@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.Host.Build
                     BuildTargetResult versionsResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
                     if (!versionsResult.Success)
                     {
-                        return versionResult;
+                        return versionsResult;
                     }
 
                     string sfxVersion = Utils.GetSharedFrameworkVersionFileContent(c);
