@@ -418,10 +418,40 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Build and run tests",
+      "displayName": "Test Msi",
       "timeoutInMinutes": 0,
       "condition": "and(succeeded(), ne(variables.PB_SkipTests, 'true'))",
       "refName": "Task19",
+      "task": {
+      "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
+      "versionSpec": "1.*",
+      "definitionType": "task"
+    },
+    "inputs": {
+      "solution": "$(PB_SourcesDirectory)\\src\\test\\dir.proj",
+      "msbuildLocationMethod": "version",
+      "msbuildVersion": "latest",
+      "msbuildArchitecture": "x64",
+      "msbuildLocation": "",
+      "platform": "$(PB_TargetArchitecture)",
+      "configuration": "$(BuildConfiguration)",
+      "msbuildArguments": "/t:TestInstallers ",
+      "clean": "false",
+      "maximumCpuCount": "false",
+      "restoreNugetPackages": "false",
+      "logProjectEvents": "false",
+      "createLogFile": "false"
+    }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Build and run tests",
+      "timeoutInMinutes": 0,
+      "condition": "and(succeeded(), ne(variables.PB_SkipTests, 'true'))",
+      "refName": "Task20",
       "task": {
         "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
         "versionSpec": "1.*",
@@ -450,7 +480,7 @@
       "alwaysRun": false,
       "displayName": "Publish",
       "timeoutInMinutes": 0,
-      "refName": "Task20",
+      "refName": "Task21",
       "task": {
         "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
         "versionSpec": "1.*",
@@ -480,7 +510,7 @@
       "displayName": "Cleanup VSTS Agent",
       "timeoutInMinutes": 0,
       "condition": "always()",
-      "refName": "Task21",
+      "refName": "Task22",
       "task": {
         "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
         "versionSpec": "1.*",
@@ -510,7 +540,7 @@
       "displayName": "Perform Cleanup Tasks",
       "timeoutInMinutes": 0,
       "condition": "always()",
-      "refName": "Task22",
+      "refName": "Task23",
       "task": {
         "id": "521a94ea-9e68-468a-8167-6dcf361ea776",
         "versionSpec": "1.*",

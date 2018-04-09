@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk" >
+	
+  <PropertyGroup>
+	<TargetFrameworks>net46</TargetFrameworks>
+	<AssemblyName>Msi.Tests</AssemblyName>
+	<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
+  <ItemGroup>
+	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
+        <PackageReference Include="xunit" Version="2.2.0" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+	<PackageReference Include="Microsoft.Deployment.WindowsInstaller" Version="1.0.0" />
+  </ItemGroup>		
+</Project>

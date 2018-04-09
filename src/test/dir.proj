@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="dir.props" />
+  <Import Project="../../src/pkg/packaging/windows/package.props" />
   <UsingTask TaskName="GetTargetMachineInfo" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll" />
 
   <PropertyGroup>
@@ -11,7 +12,7 @@
         RunTests;
     </BuildTestTargets>
   </PropertyGroup>
-
+  
   <Target Name="Build" DependsOnTargets="$(BuildTestTargets)" />
 
   <Target Name="DetermineTestOutputDirectory">
@@ -125,6 +126,54 @@
 
     <Copy SourceFiles="@(SharedFrameworkPublishFiles)"
           DestinationFiles="@(SharedFrameworkPublishFiles->'$(TestsOutputDir)sharedFrameworkPublish/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="TestInstallers" DependsOnTargets="TestDocker;TestMsi" />
+
+  <Target Name="TestMsi"
+         Condition="'$(OSGroup)' == 'Windows_NT' and '$(GenerateMSI)' == 'true' and '$(DockerPresent)' == 'true' "  >
+
+   <PropertyGroup>
+     <TestMsiPowershellScript>$(TestDir)\test-installer\testmsi.ps1</TestMsiPowershellScript>
+     <ProductionVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</ProductionVersion>
+     <RuntimeExe>$(CombinedInstallerFile)</RuntimeExe>   
+   </PropertyGroup>
+
+   <ItemGroup>
+     <MsiFileName Include="$(SharedHostInstallerFile)" />
+     <MsiFileName Include="$(HostFxrInstallerFile)" />
+     <MsiFileName Include="$(SharedFrameworkInstallerFile)" />
+   </ItemGroup>
+	
+   <PropertyGroup>
+     <TestOSPlatformConfig>$(TestTargetRid).$(ConfigurationGroup)</TestOSPlatformConfig>
+     <TestsOutputDir Condition="'$(TestsOutputDir)' == ''">$(BaseOutputPath)tests/$(TestOSPlatformConfig)/</TestsOutputDir>
+     <MsiTestsOutputDir>$(TestsOutputDir)Msi.Tests/</MsiTestsOutputDir>
+   </PropertyGroup>
+
+   <RemoveDir Condition="Exists('$(MsiTestsOutputDir)')" Directories="$(MsiTestsOutputDir)" />
+   <MakeDir Directories="$(MsiTestsOutputDir)" />
+
+   <Exec Command ="powershell -NoProfile -NoLogo $(TestMsiPowershellScript) -TestDir $(MsiTestsOutputDir) -InputMsi @(MsiFileName, ', ') -InputExe $(RuntimeExe) -ProductVersion $(ProductionVersion)" />
+
+  </Target>
+
+  <Target Name="TestDocker">
+
+    <!-- run Docker -->
+    <Exec Command="docker -v" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="DockerExitCode" />
+    </Exec>
+
+    <!-- Check if it returned 0 -->
+    <PropertyGroup>
+      <DockerPresent>false</DockerPresent>
+      <DockerPresent Condition=" '$(DockerExitCode)' == '0' ">true</DockerPresent>
+    </PropertyGroup>
+
+    <Message Condition=" '$(DockerPresent)'  != 'true' "
+             Text="Docker Not found, Msi Tests will not be executed."
+             Importance="Normal" />
   </Target>
 
 </Project>
