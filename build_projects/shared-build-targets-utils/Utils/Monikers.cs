@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             string rid = Environment.GetEnvironmentVariable("TARGETRID") ?? RuntimeEnvironment.GetRuntimeIdentifier();
 
-            if (rid == "ubuntu.16.04-x64" || rid == "ubuntu.16.10-x64" || rid == "fedora.23-x64" || rid == "fedora.24-x64" || rid == "opensuse.13.2-x64" || rid == "opensuse.42.1-x64")
+            if (rid == "ubuntu.16.04-x64" || rid == "ubuntu.16.10-x64" || rid == "ubuntu.18.04-x64" || rid == "fedora.23-x64" || rid == "fedora.24-x64" ||  rid == "fedora.27-x64" || rid == "opensuse.13.2-x64" || rid == "opensuse.42.1-x64" || rid == "opensuse.42.3-x64")
             {
                 return $"{artifactPrefix}-{rid}.{version}";
             }
@@ -38,14 +38,20 @@ namespace Microsoft.DotNet.Cli.Build
                      return "Ubuntu_16_04_x64";
                 case "ubuntu.16.10-x64":
                      return "Ubuntu_16_10_x64";
+                case "ubuntu.18.04-x64":
+                     return "Ubuntu_18_04_x64";
                 case "fedora.23-x64":
                      return "Fedora_23_x64";
                 case "fedora.24-x64":
                      return "Fedora_24_x64";
+                case "fedora.27-x64":
+                     return "Fedora_27_x64";
                 case "opensuse.13.2-x64":
                      return "openSUSE_13_2_x64";
                 case "opensuse.42.1-x64":
                      return "openSUSE_42_1_x64";
+                case "opensuse.42.3-x64":
+                     return "openSUSE_42_3_x64";
             }
 
             return $"{CurrentPlatform.Current}_{Environment.GetEnvironmentVariable("TARGETPLATFORM") ?? CurrentArchitecture.Current.ToString()}";
