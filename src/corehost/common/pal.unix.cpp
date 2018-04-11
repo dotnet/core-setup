@@ -79,7 +79,13 @@ bool pal::load_library(const string_t* path, dll_t* dll)
 
 pal::proc_t pal::get_symbol(dll_t library, const char* name)
 {
-    return dlsym(library, name);
+    auto result = dlsym(library, name);
+    if (result == nullptr)
+    {
+        trace::info(_X("Probed for and did not find library symbol %s, error: %s"), name, dlerror());
+    }
+
+    return result;
 }
 
 void pal::unload_library(dll_t library)
