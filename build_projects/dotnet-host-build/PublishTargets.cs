@@ -37,8 +37,8 @@ namespace Microsoft.DotNet.Host.Build
             AzurePublisherTool = new AzurePublisher();
             DebRepoPublisherTool = new DebRepoPublisher(Dirs.Packages);
             SharedFrameworkNugetVersion = c.BuildContext.Get<string>("SharedFrameworkNugetVersion");
-            SharedHostNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostVersion.ToString();
-            HostFxrNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LockedHostFxrVersion.ToString();
+            SharedHostNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LatestHostVersion.ToString();
+            HostFxrNugetVersion = c.BuildContext.Get<HostVersion>("HostVersion").LatestHostFxrVersion.ToString();
             Channel = c.BuildContext.Get<string>("Channel");
             CommitHash = c.BuildContext.Get<string>("CommitHash");
 
