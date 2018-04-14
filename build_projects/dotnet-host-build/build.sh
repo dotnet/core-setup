@@ -72,13 +72,18 @@ if which "clang-3.5" > /dev/null 2>&1; then
 elif which "clang-3.6" > /dev/null 2>&1; then
     export CC="$(which clang-3.6)"
     export CXX="$(which clang++-3.6)"
+elif which "clang-3.9" > /dev/null 2>&1; then
+    export CC="$(which clang-3.9)"
+    export CXX="$(which clang++-3.9)"
+elif which "clang-4.0" > /dev/null 2>&1; then
+    export CC="$(which clang-4.0)"
+    export CXX="$(which clang++-4.0)"
 elif which clang > /dev/null 2>&1; then
     export CC="$(which clang)"
     export CXX="$(which clang++)"
 else
     error "Unable to find Clang Compiler"
-    error "Install clang-3.5 or clang3.6"
-    exit 1
+    error "Install clang-3.5 or clang3.6"    exit 1
 fi
 
 # Load Branch Info
@@ -94,8 +99,8 @@ done < "$REPOROOT/branchinfo.txt"
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
 
-DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.sh"
-curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --version 1.0.0-preview3-003223-6 --verbose
+DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/release/2.1.3xx/scripts/obtain/dotnet-install.sh"
+curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --version 1.0.0-preview3-003223 --verbose
 
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"
