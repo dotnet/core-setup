@@ -84,6 +84,7 @@ pal::proc_t pal::get_symbol(dll_t library, const char* name)
     {
         trace::info(_X("Probed for and did not find library symbol %s, error: %s"), name, dlerror());
     }
+
     return result;
 }
 
