@@ -64,7 +64,7 @@
 
     <PropertyGroup>
       <_crossDir Condition="'$(TargetArchitecture)' == 'arm'">/x86_arm</_crossDir>
-      <_crossDir Condition="'$(NuGetRuntimeIdentifier)' == 'win10-arm64' or '$(NuGetRuntimeIdentifier)' == 'win-arm64'">/x64_arm64</_crossDir>
+      <_crossDir Condition="'$(TargetArchitecture)' == 'arm64'">/x64_arm64</_crossDir>
     </PropertyGroup>
 
     <PropertyGroup Condition="'@(_runtimeCLR)' != ''">
@@ -146,9 +146,15 @@
         <TargetPath Condition="'%(FilesToPackage.IsNative)' != 'true'">runtimes/$(NuGetRuntimeIdentifier)/lib/$(PackageTargetFramework)</TargetPath>
         <TargetPath Condition="'%(FilesToPackage.IsNative)' == 'true'">runtimes/$(NuGetRuntimeIdentifier)/native</TargetPath>
       </FilesToPackage>
-      <FilesToPackage Include="$(_runtimePackagePath)/tools/*.*">
+      <_ToolsToPackage Include="$(_runtimePackagePath)/tools/**/*.*"/>
+      <FilesToPackage Include="@(_ToolsToPackage)">
         <NuGetPackageId>$(_runtimePackageId)</NuGetPackageId>
-        <TargetPath>tools</TargetPath>
+        <TargetPath>tools/%(RecursiveDir)</TargetPath>
+        <IsNative>true</IsNative>
+      </FilesToPackage>
+      <FilesToPackage Condition="'$(_crossDir)' != ''" Include="$(_jitPackagePath)/runtimes$(_crossDir)/native/*.*">
+        <TargetPath>runtimes$(_crossDir)/native</TargetPath>
+        <IsNative>true</IsNative>
       </FilesToPackage>
     </ItemGroup>
 
