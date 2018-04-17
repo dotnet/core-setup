@@ -3,10 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using Microsoft.Deployment.WindowsInstaller;
-using Microsoft.Deployment.WindowsInstaller.Package;
 
 namespace Msi.Tests
 {
