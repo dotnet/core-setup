@@ -174,27 +174,28 @@ void deps_resolver_t::setup_shared_store_probes(
     const hostpolicy_init_t& init,
     const arguments_t& args)
 {
-    for (const auto& shared : args.env_shared_store)
+    for (const auto& env_store : args.env_shared_stores)
     {
-        if (pal::directory_exists(shared))
+        if (pal::directory_exists(env_store))
         {
-            // Shared Store probe: DOTNET_SHARED_STORE
-            m_probes.push_back(probe_config_t::lookup(shared));
+            m_probes.push_back(probe_config_t::lookup(env_store));
         }
     }
 
-    if (pal::directory_exists(args.dotnet_shared_store))
+    for (const auto& dotnet_store : args.dotnet_shared_stores)
     {
-        m_probes.push_back(probe_config_t::lookup(args.dotnet_shared_store));
+        if (pal::directory_exists(dotnet_store))
+        {
+            m_probes.push_back(probe_config_t::lookup(dotnet_store));
+        }
     }
 
-    
-    for (const auto& global_shared : args.global_shared_stores)
+    for (const auto& global_store : args.global_shared_stores)
     {
-        if (global_shared != args.dotnet_shared_store && pal::directory_exists(global_shared))
+        auto existing = find(args.dotnet_shared_stores.begin(), args.dotnet_shared_stores.end(), global_store);
+        if (existing != args.dotnet_shared_stores.end() && pal::directory_exists(global_store))
         {
-            // Shared Store probe: DOTNET_SHARED_STORE
-            m_probes.push_back(probe_config_t::lookup(global_shared));
+            m_probes.push_back(probe_config_t::lookup(global_store));
         }
     }
 }
@@ -522,20 +523,6 @@ bool deps_resolver_t::resolve_tpa_list(
         get_dir_assemblies(m_app_dir, _X("local"), &items);
     }
 
-    // If additional deps files were specified that need to be treated as part of the
-    // application, then add them to the mix as well.
-    for (const auto& additional_deps : m_additional_deps)
-    {
-        auto additional_deps_entries = additional_deps->get_entries(deps_entry_t::asset_types::runtime);
-        for (auto entry : additional_deps_entries)
-        {
-            if (!process_entry(m_app_dir, entry, 0, false))
-            {
-                return false;
-            }
-        }
-    }
-
     // Probe FX deps entries after app assemblies are added.
     for (int i = 1; i < m_fx_definitions.size(); ++i)
     {
@@ -546,6 +533,21 @@ bool deps_resolver_t::resolve_tpa_list(
         for (const auto& entry : deps_entries)
         {
             if (!process_entry(m_fx_definitions[i]->get_dir(), entry, i, is_minor_or_major_roll_forward))
+            {
+                return false;
+            }
+        }
+    }
+
+    // If additional deps files were specified that need to be treated as part of the
+    // application, then add them to the mix as well.
+    for (const auto& additional_deps : m_additional_deps)
+    {
+        auto additional_deps_entries = additional_deps->get_entries(deps_entry_t::asset_types::runtime);
+        for (auto entry : additional_deps_entries)
+        {
+            // Always compare on version for duplicates
+            if (!process_entry(m_app_dir, entry, 0, true))
             {
                 return false;
             }
@@ -632,23 +634,54 @@ void deps_resolver_t::resolve_additional_deps(const hostpolicy_init_t& init)
         {
             for (int i = 1; i < m_fx_definitions.size(); ++i)
             {
-                // We'll search deps files in 'base_dir'/shared/fx_name/fx_requested_ver
+                fx_ver_t most_compatible_version(-1, -1, -1);
+                fx_ver_t found_version(-1, -1, -1);
+                fx_ver_t::parse(m_fx_definitions[i]->get_found_version(), &found_version);
+
+                // We'll search deps directories in 'base_dir'/shared/fx_name/ for closest compatible version
                 pal::string_t additional_deps_path_fx = additional_deps_path;
                 append_path(&additional_deps_path_fx, _X("shared"));
                 append_path(&additional_deps_path_fx, m_fx_definitions[i]->get_name().c_str());
-                append_path(&additional_deps_path_fx, m_fx_definitions[i]->get_requested_version().c_str()); // Use requested version as that is what the app deployed with
+                trace::verbose(_X("Searching for most compatible deps directory in [%s]"), additional_deps_path_fx.c_str());
+                std::vector<pal::string_t> deps_dirs;
+                pal::readdir_onlydirectories(additional_deps_path_fx, &deps_dirs);
 
-                // The resulting list will be empty if 'additional_deps_path_fx' is not a valid directory path
-                std::vector<pal::string_t> list;
-                pal::readdir(additional_deps_path_fx, _X("*.deps.json"), &list);
-                for (pal::string_t json_file : list)
+                for (pal::string_t dir : deps_dirs)
                 {
-                    pal::string_t json_full_path = additional_deps_path_fx;
-                    append_path(&json_full_path, json_file.c_str());
-                    m_additional_deps_files.push_back(json_full_path);
+                    fx_ver_t ver(-1, -1, -1);
+                    if (fx_ver_t::parse(dir, &ver))
+                    {
+                        if (ver > most_compatible_version &&
+                            ver <= found_version &&
+                            ver.get_major() == found_version.get_major())
+                        {
+                            most_compatible_version = ver;
+                        }
+                    }
+                }
 
-                    trace::verbose(_X("Using specified additional deps.json: '%s'"),
-                        json_full_path.c_str());
+                if (most_compatible_version == fx_ver_t(-1, -1, -1))
+                {
+                    trace::verbose(_X("No additional deps directory less than or equal to [%s] found with same major version."), found_version.as_str().c_str());
+                }
+                else
+                {
+                    trace::verbose(_X("Found additional deps directory [%s]"), most_compatible_version.as_str().c_str());
+
+                    append_path(&additional_deps_path_fx, most_compatible_version.as_str().c_str());
+
+                    // The resulting list will be empty if 'additional_deps_path_fx' is not a valid directory path
+                    std::vector<pal::string_t> list;
+                    pal::readdir(additional_deps_path_fx, _X("*.deps.json"), &list);
+                    for (pal::string_t json_file : list)
+                    {
+                        pal::string_t json_full_path = additional_deps_path_fx;
+                        append_path(&json_full_path, json_file.c_str());
+                        m_additional_deps_files.push_back(json_full_path);
+
+                        trace::verbose(_X("Using specified additional deps.json: '%s'"),
+                            json_full_path.c_str());
+                    }
                 }
             }
         }
@@ -760,19 +793,6 @@ bool deps_resolver_t::resolve_probe_dirs(
         (void) library_exists_in_dir(m_app_dir, LIBCLRJIT_NAME, &m_clrjit_path);
     }
 
-    // Handle any additional deps.json that were specified.
-    for (const auto& additional_deps : m_additional_deps)
-    {
-        const auto additional_deps_entries = additional_deps->get_entries(asset_type);
-        for (const auto entry : additional_deps_entries)
-        {
-            if (!add_package_cache_entry(entry, m_app_dir, 0))
-            {
-                return false;
-            }
-        }
-    }
-
     // Add fx package locations to fx_dir
     for (int i = 1; i < m_fx_definitions.size(); ++i)
     {
@@ -781,6 +801,19 @@ bool deps_resolver_t::resolve_probe_dirs(
         for (const auto& entry : fx_entries)
         {
             if (!add_package_cache_entry(entry, m_fx_definitions[i]->get_dir(), i))
+            {
+                return false;
+            }
+        }
+    }
+
+    // Handle any additional deps.json that were specified.
+    for (const auto& additional_deps : m_additional_deps)
+    {
+        const auto additional_deps_entries = additional_deps->get_entries(asset_type);
+        for (const auto entry : additional_deps_entries)
+        {
+            if (!add_package_cache_entry(entry, m_app_dir, 0))
             {
                 return false;
             }

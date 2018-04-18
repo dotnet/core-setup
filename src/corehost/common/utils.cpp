@@ -296,11 +296,32 @@ bool get_env_shared_store_dirs(std::vector<pal::string_t>* dirs, const pal::stri
         if (pal::realpath(&tok))
         {
             append_path(&tok, arch.c_str());
+
+            pal::string_t any_tfm = tok;
+
             append_path(&tok, tfm.c_str());
             dirs->push_back(tok);
+
+            append_path(&any_tfm, _X("any"));
+            dirs->push_back(any_tfm);
         }
     }
     return true;
+}
+
+void get_dotnet_shared_store_dirs(std::vector<pal::string_t>*  dirs, const pal::string_t& own_dir, const pal::string_t& arch, const pal::string_t& tfm)
+{
+    pal::string_t dir = own_dir;
+    append_path(&dir, RUNTIME_STORE_DIRECTORY_NAME);
+    append_path(&dir, arch.c_str());
+
+    pal::string_t any_tfm = dir;
+
+    append_path(&dir, tfm.c_str());
+    dirs->push_back(dir);
+
+    append_path(&any_tfm, _X("any"));
+    dirs->push_back(any_tfm);
 }
 
 bool get_global_shared_store_dirs(std::vector<pal::string_t>*  dirs, const pal::string_t& arch, const pal::string_t& tfm)
@@ -315,8 +336,14 @@ bool get_global_shared_store_dirs(std::vector<pal::string_t>*  dirs, const pal::
     {
         append_path(&dir, RUNTIME_STORE_DIRECTORY_NAME);
         append_path(&dir, arch.c_str());
+
+        pal::string_t any_tfm = dir;
+
         append_path(&dir, tfm.c_str());
         dirs->push_back(dir);
+
+        append_path(&any_tfm, _X("any"));
+        dirs->push_back(any_tfm);
     }
     return true;
 }
