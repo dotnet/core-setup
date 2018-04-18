@@ -52,7 +52,13 @@
     <ProjectReference Include="fedora.27\Microsoft.NETCore.DotNetHostPolicy.pkgproj">
       <Platform>amd64</Platform>
     </ProjectReference>
+    <ProjectReference Include="fedora.28\Microsoft.NETCore.DotNetHostPolicy.pkgproj">
+      <Platform>amd64</Platform>
+    </ProjectReference>
     <ProjectReference Include="debian\Microsoft.NETCore.DotNetHostPolicy.pkgproj">
+      <Platform>amd64</Platform>
+    </ProjectReference>
+    <ProjectReference Include="debian.9\Microsoft.NETCore.DotNetHostPolicy.pkgproj">
       <Platform>amd64</Platform>
     </ProjectReference>
     <ProjectReference Include="opensuse.13.2\Microsoft.NETCore.DotNetHostPolicy.pkgproj">

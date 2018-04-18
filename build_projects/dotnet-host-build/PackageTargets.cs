@@ -240,8 +240,7 @@ namespace Microsoft.DotNet.Host.Build
             }
 
             Cmd("tar", "-czf", artifactPath, "-C", directory, ".")
-                .Execute()
-                .EnsureSuccessful();
+                .Execute();
         }
 
         private static void FixPermissions(string directory)

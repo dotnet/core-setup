@@ -123,7 +123,7 @@
       "value": "Release"
     },
     "BuildArguments": {
-      "value": "--skip-prereqs --configuration $(BuildConfiguration)  --docker ubuntu.18.04 --skiptests --targets Default --env-vars NUGET_API_KEY=$(NUGET_API_KEY),GITHUB_PASSWORD=$(GITHUB_PASSWORD),REPO_PASS=$(REPO_PASS),CONNECTION_STRING=$(CONNECTION_STRING)"
+      "value": "--skip-prereqs --configuration $(BuildConfiguration)  --docker fedora.27 --skiptests --targets Default --env-vars NUGET_API_KEY=$(NUGET_API_KEY),GITHUB_PASSWORD=$(GITHUB_PASSWORD),REPO_PASS=$(REPO_PASS),CONNECTION_STRING=$(CONNECTION_STRING)"
     },
     "CONNECTION_STRING": {
       "value": "ENV_VAR_EMPTY_WORKAROUND"
@@ -140,18 +140,6 @@
     },
     "GITHUB_PASSWORD": {
       "value": "ENV_VAR_EMPTY_WORKAROUND"
-    },
-    "REPO_ID": {
-      "value": "575f40f3797ef7280505232f"
-    },
-    "REPO_USER": {
-      "value": "ENV_VAR_EMPTY_WORKAROUND"
-    },
-    "REPO_SERVER": {
-      "value": "ENV_VAR_EMPTY_WORKAROUND"
-    },
-    "REPO_PASS": {
-      "value": "ENV_VAR_EMPTY_WORKAROUND"
     }
   },
   "demands": [
@@ -167,7 +155,7 @@
         "FilePath",
         "SymbolStore"
       ],
-      "daysToKeep": 2,
+      "daysToKeep": 7,
       "minimumToKeep": 1,
       "deleteBuildRecord": true,
       "deleteTestResults": true
@@ -206,8 +194,8 @@
   },
   "path": "\\",
   "type": "build",
-  "id": 3583,
-  "name": "Core-Setup-Ubuntu18.04-x64",
+  "id": 4339,
+  "name": "Core-Setup-Fedora28-x64",
   "project": {
     "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "name": "DevDiv",

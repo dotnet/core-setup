@@ -1,8 +1,8 @@
 {
   "dependencies": {
     "Microsoft.CSharp": "4.3.0",
-    "Microsoft.NETCore.Platforms": "1.1.1-servicing-26406-01",
-    "Microsoft.NETCore.Targets": "1.1.3-servicing-26406-01",
+    "Microsoft.NETCore.Platforms": "1.1.1-servicing-26423-01",
+    "Microsoft.NETCore.Targets": "1.1.3-servicing-26423-01",
     "Microsoft.VisualBasic": "10.1.0",
     "System.AppContext": "4.3.0",
     "System.Collections": "4.3.0",

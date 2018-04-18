@@ -128,9 +128,11 @@ namespace Microsoft.DotNet.Host.Build
                         "rhel.x64.version",
                         "osx.x64.version",
                         "debian.x64.version",
+                        "debian.9.x64.version",
                         "centos.x64.version",
                         "fedora.24.x64.version",
                         "fedora.27.x64.version",
+                        "fedora.28.x64.version",
                         "opensuse.42.1.x64.version",
                         "opensuse.42.3.x64.version"
                     };
@@ -224,9 +226,11 @@ namespace Microsoft.DotNet.Host.Build
                  { "sharedfx_RHEL_x64", false },
                  { "sharedfx_OSX_x64", false },
                  { "sharedfx_Debian_x64", false },
+                 { "sharedfx_Debian_9_x64", false },
                  { "sharedfx_CentOS_x64", false },
                  { "sharedfx_Fedora_24_x64", false },
                  { "sharedfx_Fedora_27_x64", false },
+                 { "sharedfx_Fedora_28_x64", false },
                  { "sharedfx_openSUSE_42_1_x64", false },
                  { "sharedfx_openSUSE_42_3_x64", false }
              };
