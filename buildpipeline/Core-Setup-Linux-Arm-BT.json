@@ -414,7 +414,8 @@
       "isSecret": true
     },
     "PB_PackageVersionPropsUrl": {
-      "value": ""
+      "value": "",
+      "isSecret": true
     }
   },
   "demands": [

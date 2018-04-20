@@ -84,7 +84,9 @@
       }
     },
     {
-      "environment": {},
+      "environment": {
+        "PACKAGEVERSIONPROPSURL":"$(PB_PackageVersionPropsUrl)"
+      },
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
@@ -713,10 +715,8 @@
       "value": "DotNetCore"
     },
     "PB_PackageVersionPropsUrl": {
-      "value": ""
-    },
-    "PACKAGEVERSIONPROPSURL": {
-      "value": "$(PB_PackageVersionPropsUrl)"
+      "value": "",
+      "isSecret": true
     }
   },
   "demands": [

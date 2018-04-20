@@ -1032,7 +1032,8 @@
       "value": "--name $(PB_DockerContainerName)$(DockerTag_Rhel7) -v \"$(PB_SourcesDirectory):$(PB_GitDirectory)\" -v $(Build.StagingDirectory)/sharedFrameworkPublish/:/root/sharedFrameworkPublish/ -w=\"$(PB_GitDirectory)\" $(DockerImageName_Rhel7)"
     },
     "PB_PackageVersionPropsUrl": {
-      "value": ""
+      "value": "",
+      "isSecret": true
     },
     "DockerCommonCleanCommands": {
       "value": "-c \"HOME=$(PB_GitDirectory); $(PB_GitDirectory)/clean.sh\""
