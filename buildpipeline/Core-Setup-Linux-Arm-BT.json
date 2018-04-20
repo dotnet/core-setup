@@ -416,6 +416,14 @@
     "PB_PackageVersionPropsUrl": {
       "value": "",
       "isSecret": true
+    },
+    "PB_RestoreSource": {
+      "value": "",
+      "isSecret": true
+    },
+    "PB_AssetRootUrl": {
+      "value": "",
+      "isSecret": true
     }
   },
   "demands": [

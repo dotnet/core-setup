@@ -229,8 +229,13 @@
       "value": "",
       "isSecret": true
     },
-    "PACKAGEVERSIONPROPSURL": {
-      "value": "$(PB_PackageVersionPropsUrl)"
+    "PB_RestoreSource": {
+      "value": "",
+      "isSecret": true
+    },
+    "PB_AssetRootUrl": {
+      "value": "",
+      "isSecret": true
     }
   },
   "demands": [

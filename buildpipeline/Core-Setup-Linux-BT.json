@@ -1034,7 +1034,15 @@
     "PB_PackageVersionPropsUrl": {
       "value": "",
       "isSecret": true
+    },,
+    "PB_RestoreSource": {
+      "value": "",
+      "isSecret": true
     },
+    "PB_AssetRootUrl": {
+      "value": "",
+      "isSecret": true
+    }
     "DockerCommonCleanCommands": {
       "value": "-c \"HOME=$(PB_GitDirectory); $(PB_GitDirectory)/clean.sh\""
     },
