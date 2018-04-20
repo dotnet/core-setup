@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
         private string _builtSharedFxDir;
         private string _builtSharedUberFxDir;
 
+        private string _storeSharedFxBaseDir;
+
         private string _cwdSelectedMessage;
         private string _userSelectedMessage;
         private string _exeSelectedMessage;
@@ -69,6 +71,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
             _userSharedFxBaseDir = Path.Combine(_userDir, ".dotnet", RepoDirectories.BuildArchitecture, "shared", "Microsoft.NETCore.App");
             _exeSharedFxBaseDir = Path.Combine(_executableDir, "shared", "Microsoft.NETCore.App");
             _globalSharedFxBaseDir = Path.Combine(_globalDir, "shared", "Microsoft.NETCore.App");
+
+            _storeSharedFxBaseDir = Path.Combine(_executableDir, "store");
 
             _cwdSharedUberFxBaseDir = Path.Combine(_currentWorkingDir, "shared", "Microsoft.UberFramework");
             _userSharedUberFxBaseDir = Path.Combine(_userDir, ".dotnet", RepoDirectories.BuildArchitecture, "shared", "Microsoft.UberFramework");
@@ -996,17 +1000,24 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
             string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
             SetRuntimeConfigJson(runtimeConfig, "9999.0.0");
 
-            // Create a deps.json file in the folder "additionalDeps\shared\Microsoft.NETCore.App\9999.0.0"
             string additionalDepsRootPath = Path.Combine(_exeSharedFxBaseDir, "additionalDeps");
+
+            // Create a deps.json file in the folder "additionalDeps\shared\Microsoft.NETCore.App\9999.0.0"
             string additionalDepsPath = Path.Combine(additionalDepsRootPath, "shared", "Microsoft.NETCore.App", "9999.0.0", "myAddtionalDeps.deps.json");
             FileInfo additionalDepsFile = new FileInfo(additionalDepsPath);
             additionalDepsFile.Directory.Create();
-            File.WriteAllText(additionalDepsFile.FullName, "THIS IS A BAD JSON FILE");
+            File.WriteAllText(additionalDepsFile.FullName, "THIS IS A BAD JSON FILE 1");
+
+            // Create a deps.json file in the folder "additionalDeps\shared\Microsoft.NETCore.App\9999.0.1"
+            additionalDepsPath = Path.Combine(additionalDepsRootPath, "shared", "Microsoft.NETCore.App", "9999.0.1", "myAddtionalDeps.deps.json");
+            additionalDepsFile = new FileInfo(additionalDepsPath);
+            additionalDepsFile.Directory.Create();
+            File.WriteAllText(additionalDepsFile.FullName, "THIS IS A BAD JSON FILE 2");
 
             // Version: NetCoreApp 9999.0.0
             // Exe: NetCoreApp 9999.0.1
             // Expected: 9999.0.1
-            // Expected: the "specified" location (9999.0.0) is used to find the lightup folder, not the "found" location (9999.0.1)
+            // Expected: the "found" location (9999.0.1) is used to find the lightup folder, not the "specified" location (9999.0.0)
             dotnet.Exec("exec", "--additional-deps", additionalDepsRootPath, appDll)
                 .WorkingDirectory(_currentWorkingDir)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
@@ -1070,6 +1081,134 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
 
             DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0");
             DeleteAvailableSharedFxVersions(_exeSharedUberFxBaseDir, "7777.1.0");
+        }
+
+        [Fact]
+        public void Muxer_Activation_With_Store_And_AnyTfm_Succeeds()
+        {
+            // This is not technically a multi-level lookup test, but we use the test infrastructure to create a mutable store next to dotnet.exe
+            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+                .Copy();
+
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            // Set desired version = 9999.0.0
+            string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
+            SetRuntimeConfigJson(runtimeConfig, "9999.0.0", null, null, false, null, fixture.Framework);
+
+            AddAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0");
+
+            var store_path = CreateAStore(fixture);
+
+            var destRuntimeDevConfig = fixture.TestProject.RuntimeDevConfigJson;
+            if (File.Exists(destRuntimeDevConfig))
+            {
+                File.Delete(destRuntimeDevConfig);
+            }
+
+            // Make a copy of the tfm->tfm store
+            string tfm_store_path = Path.Combine(store_path, fixture.RepoDirProvider.BuildArchitecture, fixture.Framework);
+            string dest_tfm_store_path = Path.Combine(_storeSharedFxBaseDir, fixture.RepoDirProvider.BuildArchitecture, fixture.Framework);
+            CopyDirectory(tfm_store_path, dest_tfm_store_path);
+
+            // Make a copy of the tfm->any store
+            string dest_any_tfm_store_path = Path.Combine(_storeSharedFxBaseDir, fixture.RepoDirProvider.BuildArchitecture, "any");
+            CopyDirectory(tfm_store_path, dest_any_tfm_store_path);
+
+            // The original tfm is preferred over the "any"
+            dotnet.ExecAlternateHost(_executableDir, appDll)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World")
+                .And
+                .HaveStdErrContaining($"Adding tpa entry: {dest_tfm_store_path}");
+
+            Directory.Delete(dest_tfm_store_path, true);
+
+            // The "any" tfm should now be selected
+            dotnet.ExecAlternateHost(_executableDir, appDll)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World")
+                .And
+                .HaveStdErrContaining($"Adding tpa entry: {dest_any_tfm_store_path}");
+
+            Directory.Delete(dest_any_tfm_store_path, true);
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0");
+        }
+
+        [Fact]
+        public void SharedFxLookup_Wins_Over_Additional_Deps()
+        {
+            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+                .Copy();
+
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            // Add version in the exe folder
+            AddAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0");
+
+            // Set desired version = 9999.0.0
+            string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
+            SetRuntimeConfigJson(runtimeConfig, "9999.0.0", null, null, false, null, fixture.Framework);
+
+            // Create a deps.json file in the folder "additionalDeps\shared\Microsoft.NETCore.App\9999.0.0"
+            string additionalDepsRootPath = Path.Combine(_exeSharedFxBaseDir, "additionalDeps");
+            string additionalDepsPath = CreateAdditionalDeps(additionalDepsRootPath);
+
+            // Expected: the framework's version of System.Collections.Immutable is used
+            string fxAssemblyPath = Path.Combine(_exeSharedFxBaseDir, "9999.0.0", "System.Collections.Immutable");
+            dotnet.Exec("exec", "--additional-deps", additionalDepsPath, appDll)
+                .WorkingDirectory(_currentWorkingDir)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdErrContaining($"Using specified additional deps.json: '{additionalDepsPath}'")
+                .And
+                .HaveStdErrContaining($"Adding tpa entry: {fxAssemblyPath}");
+
+            JObject versionInfo = new JObject();
+            versionInfo.Add(new JProperty("assemblyVersion", "999.1.2"));
+            additionalDepsPath = CreateAdditionalDeps(additionalDepsRootPath, versionInfo);
+
+            // Ensure the app's copy of the assembly can be found
+            string destAssembly = Path.Combine(fixture.TestProject.OutputDirectory, "System.Collections.Immutable.dll");
+            File.Copy(fxAssemblyPath + ".dll", destAssembly);
+
+            // Version: NetCoreApp 9999.0.0
+            // Exe: NetCoreApp 9999.0.0
+            // Expected: 9999.0.0
+            // Expected: the framework's version of System.Collections.Immutable is used
+            dotnet.Exec("exec", "--additional-deps", additionalDepsPath, appDll)
+                .WorkingDirectory(_currentWorkingDir)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdErrContaining($"Using specified additional deps.json: '{additionalDepsPath}'")
+                .And
+                .HaveStdErrContaining($"Replacing deps entry [{fxAssemblyPath}");
+
+            DeleteAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0", "additionalDeps");
         }
 
         // This method adds a list of new framework version folders in the specified
@@ -1210,7 +1349,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
          *   }
          * }
         */
-        private void SetRuntimeConfigJson(string destFile, string version, int? rollFwdOnNoCandidateFx = null, string testConfigPropertyValue = null, bool? useUberFramework = false, JArray additionalFrameworks = null)
+        private void SetRuntimeConfigJson(string destFile, string version, int? rollFwdOnNoCandidateFx = null, string testConfigPropertyValue = null, bool? useUberFramework = false, JArray additionalFrameworks = null, string tfm = null)
         {
             string name = useUberFramework.HasValue && useUberFramework.Value ? "Microsoft.UberFramework" : "Microsoft.NETCore.App";
 
@@ -1222,6 +1361,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                     )
                 )
             );
+
+            if (tfm != null)
+            {
+                runtimeOptions.Add("tfm", tfm);
+            }
 
             if (rollFwdOnNoCandidateFx.HasValue)
             {
@@ -1287,11 +1431,52 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
 
             dir.Create();
 
-            string fxName = "UberFx";
-            string testPackage = "System.Collections.Immutable/1.0.0";
-            string testAssembly = "System.Collections.Immutable";
+            JObject versionInfo = new JObject();
+            if (assemblyVersion != null)
+            {
+                versionInfo.Add(new JProperty("assemblyVersion", assemblyVersion));
+            }
 
-            // Create the deps.json. Generated file:
+            if (fileVersion != null)
+            {
+                versionInfo.Add(new JProperty("fileVersion", fileVersion));
+            }
+
+            JObject depsjson = CreateDepsJson("UberFx", "System.Collections.Immutable/1.0.0", "System.Collections.Immutable", versionInfo);
+            string depsFile = Path.Combine(builtSharedUberFxDir, "Microsoft.UberFramework.deps.json");
+            File.WriteAllText(depsFile, depsjson.ToString());
+
+            // Copy the test assembly
+            string fileSource = Path.Combine(builtSharedFxDir, "System.Collections.Immutable.dll");
+            string fileDest = Path.Combine(builtSharedUberFxDir, "System.Collections.Immutable.dll");
+            File.Copy(fileSource, fileDest);
+        }
+
+        static private string CreateAdditionalDeps(string destDir, JObject versionInfo = null)
+        {
+            DirectoryInfo dir = new DirectoryInfo(destDir);
+            if (dir.Exists)
+            {
+                dir.Delete(true);
+            }
+
+            dir.Create();
+
+            if (versionInfo == null)
+            {
+                versionInfo = new JObject();
+            }
+
+            JObject depsjson = CreateDepsJson("Microsoft.NETCore.App", "System.Collections.Immutable/1.0.0", "System.Collections.Immutable", versionInfo);
+            string depsFile = Path.Combine(destDir, "My.deps.json");
+            File.WriteAllText(depsFile, depsjson.ToString());
+
+            return depsFile;
+        }
+
+        static private JObject CreateDepsJson(string fxName, string testPackage, string testAssembly, JObject versionInfo)
+        {
+            // Create the deps.json. Generated file (example)
             /*
                 {
                   "runtimeTarget": {
@@ -1315,16 +1500,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                   }
                 }
              */
-            JObject versionInfo = new JObject();
-            if (assemblyVersion != null)
-            {
-                versionInfo.Add(new JProperty("assemblyVersion", assemblyVersion));
-            }
-
-            if (fileVersion != null)
-            {
-                versionInfo.Add(new JProperty("fileVersion", fileVersion));
-            }
 
             JObject depsjson = new JObject(
                 new JProperty("runtimeTarget",
@@ -1364,14 +1539,20 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
                 )
             );
 
-            string depsFile = Path.Combine(builtSharedUberFxDir, "Microsoft.UberFramework.deps.json");
+            return depsjson;
+        }
 
-            File.WriteAllText(depsFile, depsjson.ToString());
+        static private string CreateAStore(TestProjectFixture testProjectFixture)
+        {
+            var storeoutputDirectory = Path.Combine(testProjectFixture.TestProject.ProjectDirectory, "store");
+            if (!Directory.Exists(storeoutputDirectory))
+            {
+                Directory.CreateDirectory(storeoutputDirectory);
+            }
 
-            // Copy the test assembly
-            string fileSource = Path.Combine(builtSharedFxDir, testAssembly + ".dll");
-            string fileDest = Path.Combine(builtSharedUberFxDir, testAssembly + ".dll");
-            File.Copy(fileSource, fileDest);
+            testProjectFixture.StoreProject(outputDirectory: storeoutputDirectory);
+
+            return storeoutputDirectory;
         }
 
         static private void AddImmutableAssemblyToDepsJson(string jsonFile)

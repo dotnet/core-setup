@@ -22,6 +22,11 @@ namespace Microsoft.DotNet.Cli.Build
 
         public Command Exec(string command, params string[] args)
         {
+            return ExecAlternateHost(BinPath, command, args);
+        }
+
+        public Command ExecAlternateHost(string hostDir, string command, params string[] args)
+        {
             var newArgs = args.ToList();
             newArgs.Insert(0, command);
 
@@ -30,7 +35,7 @@ namespace Microsoft.DotNet.Cli.Build
                 newArgs.Insert(0, "-v");
             }
 
-            return Command.Create(Path.Combine(BinPath, $"dotnet{Constants.ExeSuffix}"), newArgs)
+            return Command.Create(Path.Combine(hostDir, $"dotnet{Constants.ExeSuffix}"), newArgs)
                 .EnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "1");
         }
 

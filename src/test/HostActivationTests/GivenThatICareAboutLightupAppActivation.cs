@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.LightupApp
                     "    path: \'LightupLib.dll\'");
         }
 
-        // Attempt to run the app with lightup deps.json specified and lightup library present in the expected 
+        // Attempt to run the app with lightup deps.json specified and lightup library present in the expected
         // probe locations.
         [Fact]
         public void Muxer_activation_of_LightupApp_WithLightupLib_Succeeds()
@@ -126,6 +126,82 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.LightupApp
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello LightupClient");
+        }
+
+        // Success case with roll-backwards support
+        [Fact]
+        public void Muxer_activation_of_LightupApp_WithLightupLib_and_Roll_Backwards_Succeeds()
+        {
+            var fixtureLib = PreviouslyBuiltAndRestoredLightupLibTestProjectFixture
+                .Copy();
+
+            var fixtureApp = PreviouslyBuiltAndRestoredLightupAppTestProjectFixture
+                .Copy();
+
+            var dotnet = fixtureApp.BuiltDotnet;
+            var appDll = fixtureApp.TestProject.AppDll;
+            var libDll = fixtureLib.TestProject.AppDll;
+            var libDepsJson = fixtureLib.TestProject.DepsJson;
+
+            // Copy the library to the location of the lightup app (app-local)
+            var destLibPath = Path.Combine(Path.GetDirectoryName(appDll), Path.GetFileName(libDll));
+            File.Copy(libDll, destLibPath);
+
+            // Create the M.N.App specific folder where lightup.deps.json can be found.
+            var baseDir = fixtureApp.TestProject.ProjectDirectory;
+            var customLightupPath = Path.Combine(baseDir, "shared");
+
+            // Delete any existing artifacts
+            if (Directory.Exists(customLightupPath))
+            {
+                Directory.Delete(customLightupPath, true);
+            }
+
+            customLightupPath = Path.Combine(customLightupPath, "Microsoft.NETCore.App");
+
+            // Get the version number of the SharedFX we just built since that is the version
+            // going to be specified in the test's runtimeconfig.json.
+            var builtSharedFXVersion = Path.GetFileName(dotnet.GreatestVersionSharedFxPath);
+            string[] versionArr = builtSharedFXVersion.Split('.');
+            int major = int.Parse(versionArr[0]);
+            int minor = int.Parse(versionArr[1]);
+
+            // Highest patch version (not selected)
+            string version = $"{major}.{minor}.0-z-0-0";
+            CreateLightupFolder(customLightupPath, version, libDepsJson);
+
+            // Lowest patch version (not selected)
+            version = $"{major}.{minor}.0-a-0-0";
+            CreateLightupFolder(customLightupPath, version, libDepsJson);
+
+            // Closest backwards patch version (selected)
+            version = $"{major}.{minor}.0-a-0-1";
+            CreateLightupFolder(customLightupPath, version, libDepsJson);
+            string selectedLightupPath = Path.Combine(customLightupPath, version);
+
+            // The roll backwards functionality should select the closest version (backwards)
+            dotnet.Exec("exec", "--additional-deps", baseDir, appDll)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello LightupClient")
+                .And
+                .HaveStdErrContaining($"Using specified additional deps.json: '{selectedLightupPath}");
+        }
+
+        static private void CreateLightupFolder(string customLightupPath, string version, string libDepsJson)
+        {
+            customLightupPath = Path.Combine(customLightupPath, version);
+
+            // Create the folder to which lightup.deps.json will be copied to.
+            Directory.CreateDirectory(customLightupPath);
+
+            // Copy the lightup.deps.json
+            File.Copy(libDepsJson, Path.Combine(customLightupPath, Path.GetFileName(libDepsJson)));
         }
 
         // Attempt to run the app without lightup deps.json specified but lightup library present in the expected 
