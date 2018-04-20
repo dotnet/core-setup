@@ -414,7 +414,16 @@
       "isSecret": true
     },
     "PB_PackageVersionPropsUrl": {
-      "value": ""
+      "value": "",
+      "isSecret": true
+    },
+    "PB_RestoreSource": {
+      "value": "",
+      "isSecret": true
+    },
+    "PB_AssetRootUrl": {
+      "value": "",
+      "isSecret": true
     }
   },
   "demands": [
