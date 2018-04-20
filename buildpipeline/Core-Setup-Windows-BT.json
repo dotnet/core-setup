@@ -725,7 +725,7 @@
     "PB_AssetRootUrl": {
       "value": "",
       "isSecret": true
-    },
+    }
   },
   "demands": [
     "Agent.OS -equals Windows_NT"
