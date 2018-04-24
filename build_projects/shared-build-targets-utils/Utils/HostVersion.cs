@@ -77,8 +77,19 @@ namespace Microsoft.DotNet.Cli.Build
         //
         // These should only be incremented in a servicing release if we are updating one (or more) of the host packages.
 
-        public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
-        public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
+        // public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
+        public VerInfo LatestHostVersion =>
+            (HostVersion.EnsureStableVersion ?
+            new VerInfo(1, 1, 9, "", "", "", CommitCountString) :
+            new VerInfo(1, 1, 9, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
+            );
+        // public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
+        public VerInfo LatestHostFxrVersion =>
+            (HostVersion.EnsureStableVersion ?
+            new VerInfo(1, 1, 9, "", "", "", CommitCountString) :
+            new VerInfo(1, 1, 9, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
+            );
+
         public VerInfo LatestHostPolicyVersion =>
             (HostVersion.EnsureStableVersion ?
             new VerInfo(1, 1, 9, "", "", "", CommitCountString) :
@@ -109,7 +120,7 @@ namespace Microsoft.DotNet.Cli.Build
         //
         // These are used for generating platform installers.
         //
-        public bool IsLocked = true; // Set this variable to toggle muxer locking.
+        public bool IsLocked = false; // Set this variable to toggle muxer locking.
         public VerInfo LockedHostFxrVersion => IsLocked ? new VerInfo(1, 1, 0, "", "", "", CommitCountString) : LatestHostFxrVersion;
         public VerInfo LockedHostVersion    => IsLocked ? new VerInfo(1, 1, 0, "", "", "", CommitCountString) : LatestHostVersion;
         public bool fExplicitHostFXRMSIVersion = true; //This should be set to false when we no longer need to override the MSI version to be different from the HostFXR nuget package version".

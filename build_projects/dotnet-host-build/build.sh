@@ -4,6 +4,68 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+#!/usr/bin/env bash
+
+Init_Tools()
+{
+    if [ -e $DOTNET_INSTALL_DIR ]; then
+        rm -rf "$DOTNET_INSTALL_DIR"
+    fi
+    
+    if [ -z "$__DOTNET_PKG" ]; then
+        OSName=$(uname -s)
+        case $OSName in
+            Darwin)
+                __PKG_RID=osx
+                OS=OSX
+                ulimit -n 2048
+                ;;
+
+            Linux)
+                __PKG_RID=linux
+                OS=Linux
+                
+                if [ -e /etc/os-release ]; then
+                    source /etc/os-release
+                    __DISTRO_NAME=$ID.$VERSION_ID
+                    if  [ "$__DISTRO_NAME" == 'ubuntu.16.04' ] ||
+                        [ "$__DISTRO_NAME" == 'ubuntu.16.10' ] ||
+                        [ "$__DISTRO_NAME" == 'ubuntu.18.04' ] ||
+                        [ "$__DISTRO_NAME" == 'fedora.23' ] ||
+                        [ "$__DISTRO_NAME" == 'fedora.24' ] ||
+                        [ "$__DISTRO_NAME" == 'fedora.27' ] ||
+                        [ "$__DISTRO_NAME" == 'opensuse.13.2' ] ||
+                        [ "$__DISTRO_NAME" == 'opensuse.42.1' ]; then
+                        __PKG_RID=$__DISTRO_NAME
+                    fi
+                fi
+                
+                ;;
+            *)
+            echo "Unsupported OS '$OSName' detected. Downloading linux-x64 tools."
+                OS=Linux
+                __PKG_RID=linux
+                ;;
+        esac
+        
+        __DOTNET_PKG=dotnet-dev-$__PKG_RID-x64
+    fi
+
+    __DOTNET_LOCATION="https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$1/${__DOTNET_PKG}.$1.tar.gz"
+    # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
+    echo "Installing '${__DOTNET_LOCATION}' to '$DOTNET_INSTALL_DIR/dotnet.tar'"
+    which curl > /dev/null 2> /dev/null
+    if [ $? -ne 0 ]; then
+        mkdir -p "$DOTNET_INSTALL_DIR"
+        wget -q -O $DOTNET_INSTALL_DIR/dotnet.tar ${__DOTNET_LOCATION}
+    else
+        curl --retry 10 -sSL --create-dirs -o $DOTNET_INSTALL_DIR/dotnet.tar ${__DOTNET_LOCATION}
+    fi
+    pushd $DOTNET_INSTALL_DIR
+    tar -xf $DOTNET_INSTALL_DIR/dotnet.tar
+    popd
+}
+
 set -e
 
 SOURCE="${BASH_SOURCE[0]}"
@@ -32,6 +94,9 @@ while [[ $# > 0 ]]; do
         --env-vars)
             IFS=',' read -r -a envVars <<< $2
             shift
+            ;;
+        --skiptests)
+            export DOTNET_BUILD_SKIP_TESTS=1
             ;;
         --nopackage)
             export DOTNET_BUILD_SKIP_PACKAGING=1
@@ -72,12 +137,24 @@ if which "clang-3.5" > /dev/null 2>&1; then
 elif which "clang-3.6" > /dev/null 2>&1; then
     export CC="$(which clang-3.6)"
     export CXX="$(which clang++-3.6)"
+elif which "clang-3.9" > /dev/null 2>&1; then
+    export CC="$(which clang-3.9)"
+    export CXX="$(which clang++-3.9)"
+elif which "clang-4.0" > /dev/null 2>&1; then
+    export CC="$(which clang-4.0)"
+    export CXX="$(which clang++-4.0)"
+elif which "clang-5.0" > /dev/null 2>&1; then
+    export CC="$(which clang-5.0)"
+    export CXX="$(which clang++-5.0)"
+elif which "clang-6.0" > /dev/null 2>&1; then
+    export CC="$(which clang-6.0)"
+    export CXX="$(which clang++-6.0)"
 elif which clang > /dev/null 2>&1; then
     export CC="$(which clang)"
     export CXX="$(which clang++)"
 else
     error "Unable to find Clang Compiler"
-    error "Install clang-3.5 or clang3.6"
+    error "Install clang-3.5 or higher"
     exit 1
 fi
 
@@ -94,8 +171,7 @@ done < "$REPOROOT/branchinfo.txt"
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
 
-DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.sh"
-curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --version 1.0.0-preview3-003223-6 --verbose
+Init_Tools 1.0.0-preview3-003223
 
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"

@@ -32,6 +32,14 @@
           }
         },
         {
+          "Name": "Core-Setup-Debian9-x64",
+          "ReportingParameters": {
+            "OperatingSystem": "Debian 9",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        },
+        {
           "Name": "Core-Setup-Fedora24-x64",
           "ReportingParameters": {
             "OperatingSystem": "Fedora 24",
@@ -40,9 +48,33 @@
           }
         },
         {
+          "Name": "Core-Setup-Fedora27-x64",
+          "ReportingParameters": {
+            "OperatingSystem": "Fedora 27",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        },
+        {
+          "Name": "Core-Setup-Fedora28-x64",
+          "ReportingParameters": {
+            "OperatingSystem": "Fedora 28",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        },
+        {
           "Name": "Core-Setup-OpenSuse42.1-x64",
           "ReportingParameters": {
             "OperatingSystem": "OpenSuse 42.1",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        },
+       {
+          "Name": "Core-Setup-OpenSuse42.3-x64",
+          "ReportingParameters": {
+            "OperatingSystem": "OpenSuse 42.3",
             "Type": "build/product/",
             "Platform": "x64"
           }
@@ -92,6 +124,14 @@
           "Name": "Core-Setup-Ubuntu16.04-x64",
           "ReportingParameters": {
             "OperatingSystem": "Ubuntu 16.04",
+            "Type": "build/product/",
+            "Platform": "x64"
+          }
+        },
+        {
+          "Name": "Core-Setup-Ubuntu18.04-x64",
+          "ReportingParameters": {
+            "OperatingSystem": "Ubuntu 18.04",
             "Type": "build/product/",
             "Platform": "x64"
           }
