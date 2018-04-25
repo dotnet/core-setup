@@ -159,7 +159,7 @@
         "targetType": "inline",
         "filePath": "",
         "arguments": "",
-        "script": "if (Test-Path \"$(AgentToolsPath)\\end.ps1\") {\n   \"$(AgentToolsPath)\\end.ps1 script found. Executing...\"\n    & $(AgentToolsPath)\\end.ps1\n} else {\n   \"$(AgentToolsPath)\\end.ps1 script does not exist. Moving on...\"\n}",
+        "script": "if (Test-Path \"$Env:AgentToolsPath\\end.ps1\") {\n   \"$Env:AgentToolsPath\\end.ps1 script found. Executing...\"\n    & $Env:AgentToolsPath\\end.ps1\n} else {\n   \"$Env:AgentToolsPath\\end.ps1 script does not exist. Moving on...\"\n}",
         "errorActionPreference": "continue",
         "failOnStderr": "false",
         "ignoreLASTEXITCODE": "true",
