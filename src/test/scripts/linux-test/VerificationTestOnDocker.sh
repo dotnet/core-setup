@@ -2,7 +2,7 @@
 
 InstallationTestResult="result.txt"
 InstallationTestLogFile="logfile.txt"
-ImagesFile="images"
+ImagesFile="images.txt"
 
 current_user=$(whoami)
 if [ $current_user != "root" ]; then

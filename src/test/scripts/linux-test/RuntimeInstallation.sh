@@ -10,8 +10,8 @@ source /etc/os-release
 distro="$ID"
 version="$VERSION_ID"
 arch="x64"
-result_file="/docker/result2.txt"
-log_file="/docker/logfile2.txt"
+result_file="/docker/result.txt"
+log_file="/docker/logfile.txt"
 
 exec &>> $log_file
 
