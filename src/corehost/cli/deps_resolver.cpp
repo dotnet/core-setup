@@ -174,28 +174,26 @@ void deps_resolver_t::setup_shared_store_probes(
     const hostpolicy_init_t& init,
     const arguments_t& args)
 {
-    for (const auto& env_store : args.env_shared_stores)
+    for (const auto& shared : args.env_shared_store)
     {
-        if (pal::directory_exists(env_store))
+        if (pal::directory_exists(shared))
         {
-            m_probes.push_back(probe_config_t::lookup(env_store));
+            // Shared Store probe: DOTNET_SHARED_STORE
+            m_probes.push_back(probe_config_t::lookup(shared));
         }
     }
 
-    for (const auto& dotnet_store : args.dotnet_shared_stores)
+    if (pal::directory_exists(args.dotnet_shared_store))
     {
-        if (pal::directory_exists(dotnet_store))
-        {
-            m_probes.push_back(probe_config_t::lookup(dotnet_store));
-        }
+        m_probes.push_back(probe_config_t::lookup(args.dotnet_shared_store));
     }
 
-    for (const auto& global_store : args.global_shared_stores)
+    for (const auto& global_shared : args.global_shared_stores)
     {
-        auto existing = find(args.dotnet_shared_stores.begin(), args.dotnet_shared_stores.end(), global_store);
-        if (existing != args.dotnet_shared_stores.end() && pal::directory_exists(global_store))
+        if (global_shared != args.dotnet_shared_store && pal::directory_exists(global_shared))
         {
-            m_probes.push_back(probe_config_t::lookup(global_store));
+            // Shared Store probe: DOTNET_SHARED_STORE
+            m_probes.push_back(probe_config_t::lookup(global_shared));
         }
     }
 }
@@ -546,7 +544,7 @@ bool deps_resolver_t::resolve_tpa_list(
         auto additional_deps_entries = additional_deps->get_entries(deps_entry_t::asset_types::runtime);
         for (auto entry : additional_deps_entries)
         {
-            // Always compare on version for duplicates
+            // Always check version numbers to support upgrade scenario where additional deps has newer versions
             if (!process_entry(m_app_dir, entry, 0, true))
             {
                 return false;
@@ -638,7 +636,7 @@ void deps_resolver_t::resolve_additional_deps(const hostpolicy_init_t& init)
                 fx_ver_t found_version(-1, -1, -1);
                 fx_ver_t::parse(m_fx_definitions[i]->get_found_version(), &found_version);
 
-                // We'll search deps directories in 'base_dir'/shared/fx_name/ for closest compatible version
+                // We'll search deps directories in 'base_dir'/shared/fx_name/ for closest compatible patch version
                 pal::string_t additional_deps_path_fx = additional_deps_path;
                 append_path(&additional_deps_path_fx, _X("shared"));
                 append_path(&additional_deps_path_fx, m_fx_definitions[i]->get_name().c_str());
@@ -653,7 +651,8 @@ void deps_resolver_t::resolve_additional_deps(const hostpolicy_init_t& init)
                     {
                         if (ver > most_compatible_version &&
                             ver <= found_version &&
-                            ver.get_major() == found_version.get_major())
+                            ver.get_major() == found_version.get_major() &&
+                            ver.get_minor() == found_version.get_minor())
                         {
                             most_compatible_version = ver;
                         }
@@ -662,7 +661,7 @@ void deps_resolver_t::resolve_additional_deps(const hostpolicy_init_t& init)
 
                 if (most_compatible_version == fx_ver_t(-1, -1, -1))
                 {
-                    trace::verbose(_X("No additional deps directory less than or equal to [%s] found with same major version."), found_version.as_str().c_str());
+                    trace::verbose(_X("No additional deps directory less than or equal to [%s] found with same major and minor version."), found_version.as_str().c_str());
                 }
                 else
                 {
