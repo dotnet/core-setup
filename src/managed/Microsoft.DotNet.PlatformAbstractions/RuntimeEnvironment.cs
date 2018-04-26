@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.PlatformAbstractions
 #if NET45
             return Environment.Is64BitProcess ? "x64" : "x86";
 #else
-            return RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant();
+            return RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 #endif
         }
 
