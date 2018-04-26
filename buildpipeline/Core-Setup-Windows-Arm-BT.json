@@ -84,7 +84,9 @@
       }
     },
     {
-      "environment": {},
+      "environment": {
+        "PACKAGEVERSIONPROPSURL":"$(PB_PackageVersionPropsUrl)"
+      },
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
@@ -497,10 +499,16 @@
       "value": "false"
     },
     "PB_PackageVersionPropsUrl": {
-      "value": ""
+      "value": "",
+      "isSecret": true
     },
-    "PACKAGEVERSIONPROPSURL": {
-      "value": "$(PB_PackageVersionPropsUrl)"
+    "PB_RestoreSource": {
+      "value": "",
+      "isSecret": true
+    },
+    "PB_AssetRootUrl": {
+      "value": "",
+      "isSecret": true
     }
   },
   "demands": [
