@@ -1049,9 +1049,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
             string appDepsJson = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.deps.json");
             AddImmutableAssemblyToDepsJson(appDepsJson);
 
-            // Expected: the uber framework's version of System.Collections.Immutable is used
-            string additionalDepsAssemblyPath = Path.Combine(fixture.TestProject.OutputDirectory, "System.Collections.Immutable");
-
             // Version: NetCoreApp 9999.0.0
             //          UberFramework 7777.0.0
             // Exe: NetCoreApp 9999.0.0
