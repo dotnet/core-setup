@@ -632,9 +632,9 @@ void deps_resolver_t::resolve_additional_deps(const hostpolicy_init_t& init)
         {
             for (int i = 1; i < m_fx_definitions.size(); ++i)
             {
-                fx_ver_t most_compatible_version(-1, -1, -1);
-                fx_ver_t found_version(-1, -1, -1);
-                fx_ver_t::parse(m_fx_definitions[i]->get_found_version(), &found_version);
+                fx_ver_t most_compatible_deps_folder_version(-1, -1, -1);
+                fx_ver_t framework_found_version(-1, -1, -1);
+                fx_ver_t::parse(m_fx_definitions[i]->get_found_version(), &framework_found_version);
 
                 // We'll search deps directories in 'base_dir'/shared/fx_name/ for closest compatible patch version
                 pal::string_t additional_deps_path_fx = additional_deps_path;
@@ -649,25 +649,25 @@ void deps_resolver_t::resolve_additional_deps(const hostpolicy_init_t& init)
                     fx_ver_t ver(-1, -1, -1);
                     if (fx_ver_t::parse(dir, &ver))
                     {
-                        if (ver > most_compatible_version &&
-                            ver <= found_version &&
-                            ver.get_major() == found_version.get_major() &&
-                            ver.get_minor() == found_version.get_minor())
+                        if (ver > most_compatible_deps_folder_version &&
+                            ver <= framework_found_version &&
+                            ver.get_major() == framework_found_version.get_major() &&
+                            ver.get_minor() == framework_found_version.get_minor())
                         {
-                            most_compatible_version = ver;
+                            most_compatible_deps_folder_version = ver;
                         }
                     }
                 }
 
-                if (most_compatible_version == fx_ver_t(-1, -1, -1))
+                if (most_compatible_deps_folder_version == fx_ver_t(-1, -1, -1))
                 {
-                    trace::verbose(_X("No additional deps directory less than or equal to [%s] found with same major and minor version."), found_version.as_str().c_str());
+                    trace::verbose(_X("No additional deps directory less than or equal to [%s] found with same major and minor version."), framework_found_version.as_str().c_str());
                 }
                 else
                 {
-                    trace::verbose(_X("Found additional deps directory [%s]"), most_compatible_version.as_str().c_str());
+                    trace::verbose(_X("Found additional deps directory [%s]"), most_compatible_deps_folder_version.as_str().c_str());
 
-                    append_path(&additional_deps_path_fx, most_compatible_version.as_str().c_str());
+                    append_path(&additional_deps_path_fx, most_compatible_deps_folder_version.as_str().c_str());
 
                     // The resulting list will be empty if 'additional_deps_path_fx' is not a valid directory path
                     std::vector<pal::string_t> list;
