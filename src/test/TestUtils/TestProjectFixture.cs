@@ -231,6 +231,8 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 buildArgs.Add(framework);
             }
 
+            buildArgs.Add($"/p:MNAVersion={_repoDirectoriesProvider.MicrosoftNETCoreAppVersion}");
+
             if (outputDirectory != null)
             {
                 buildArgs.Add("-o");
@@ -346,6 +348,8 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 publishArgs.Add("-o");
                 publishArgs.Add(outputDirectory);
             }
+
+            publishArgs.Add($"/p:MNAVersion={_repoDirectoriesProvider.MicrosoftNETCoreAppVersion}");
 
             dotnet.Publish(publishArgs.ToArray())
                 .WorkingDirectory(_testProject.ProjectDirectory)
