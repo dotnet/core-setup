@@ -10,6 +10,7 @@ FROM microsoft/dotnet-buildtools-prereqs:ubuntu-18.04-debpkg-66216d3-20180320152
 RUN apt-get update && \
     apt-get -qqy install \
         curl \
+        libcurl3 \
         unzip \
         gettext \
         sudo && \
