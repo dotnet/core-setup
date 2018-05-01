@@ -18,7 +18,7 @@ RUN apt-get update && \
     
 RUN apt-get update && \
     apt-get -qqy install \
-        libcurl3 \
+        libcurl3 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
