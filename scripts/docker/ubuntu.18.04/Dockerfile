@@ -15,12 +15,6 @@ RUN apt-get update && \
         sudo && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-    
-RUN apt-get update && \
-    apt-get -qqy install \
-        libcurl3 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 # Setup User to match Host User, and give superuser permissions
 ARG USER_ID=0
