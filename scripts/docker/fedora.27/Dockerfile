@@ -3,7 +3,7 @@ FROM fedora:27
 # Install packages required for core-setup build steps
 RUN dnf install -y bash git cmake wget which python clang llvm-devel make libicu-devel lldb-devel.x86_64 \
                    libunwind-devel lttng-ust-devel uuid-devel libuuid-devel glibc-locale-source zlib-devel libcurl-devel \
-                   krb5-devel openssl-devel autoconf libtool hostname
+                   krb5-devel openssl-devel autoconf libtool hostname compat-openssl10-devel
 
 RUN dnf upgrade -y nss
 
