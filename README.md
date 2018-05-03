@@ -30,7 +30,7 @@ They can be downloaded from [here](https://www.microsoft.com/net/download#core).
 Daily Builds
 ------------
 
-|   Platform   |   Master<br>[![][build-badge-master]][build-master]   |   Release/2.1.X<br>[![][build-badge-2.1.X]][build-2.1.X]   |   Release/2.0.X<br>[![][build-badge-2.0.X]][build-2.0.X]   |   Release/1.1.X<br>[![][build-badge-1.X.X]][build-1.X.X]   |   Release/1.0.X<br>[![][build-badge-1.0.X]][build-1.0.X]   |
+|   Platform   |   Master   |   Release/2.1.X   |   Release/2.0.X   |   Release/1.1.X   |   Release/1.0.X   |
 |---------|:----------:|:----------:|:----------:|:----------:|:----------:|
 |   **Windows (x64)**        |   [![][win-x64-badge-master]][win-x64-version-master]<br>[Installer][win-x64-installer-master] ([Checksum][win-x64-installer-checksum-master])<br>[zip][win-x64-zip-master] ([Checksum][win-x64-zip-checksum-master])<br>[Symbols (zip)][win-x64-symbols-zip-master]   |   [![][win-x64-badge-2.1.X]][win-x64-version-2.1.X]<br>[Installer][win-x64-installer-2.1.X] ([Checksum][win-x64-installer-checksum-2.1.X])<br>[zip][win-x64-zip-2.1.X] ([Checksum][win-x64-zip-checksum-2.1.X])<br>[Symbols (zip)][win-x64-symbols-zip-2.1.X]   |   [![][win-x64-badge-2.0.X]][win-x64-version-2.0.X]<br>[Installer][win-x64-installer-2.0.X] ([Checksum][win-x64-installer-checksum-2.0.X])<br>[zip][win-x64-zip-2.0.X] ([Checksum][win-x64-zip-checksum-2.0.X])<br>[Symbols (zip)][win-x64-symbols-zip-2.0.X]   |   [![][win-x64-badge-1.1.X]][win-x64-version-1.1.X]<br>[Installer][win-x64-installer-1.1.X]<br>[zip][win-x64-zip-1.1.X]   |   [![][win-x64-badge-preview]][win-x64-version-preview]<br>[Installer][win-x64-installer-preview]<br>[zip][win-x64-zip-preview]   |
 |   **Windows (x86)**        |   [![][win-x86-badge-master]][win-x86-version-master]<br>[Installer][win-x86-installer-master] ([Checksum][win-x86-installer-checksum-master])<br>[zip][win-x86-zip-master] ([Checksum][win-x86-zip-checksum-master])<br>[Symbols (zip)][win-x86-symbols-zip-master]   |   [![][win-x86-badge-2.1.X]][win-x86-version-2.1.X]<br>[Installer][win-x86-installer-2.1.X] ([Checksum][win-x86-installer-checksum-2.1.X])<br>[zip][win-x86-zip-2.1.X] ([Checksum][win-x86-zip-checksum-2.1.X])<br>[Symbols (zip)][win-x86-symbols-zip-2.1.X]   |   [![][win-x86-badge-2.0.X]][win-x86-version-2.0.X]<br>[Installer][win-x86-installer-2.0.X] ([Checksum][win-x86-installer-checksum-2.0.X])<br>[zip][win-x86-zip-2.0.X] ([Checksum][win-x86-zip-checksum-2.0.X])<br>[Symbols (zip)][win-x86-symbols-zip-2.0.X]   |[![][win-x86-badge-1.1.X]][win-x86-version-1.1.X]<br>[Installer][win-x86-installer-1.1.X]<br>[zip][win-x86-zip-1.1.X]   |   [![][win-x86-badge-preview]][win-x86-version-preview]<br>[Installer][win-x86-installer-preview]<br>[zip][win-x86-zip-preview]   |
@@ -57,21 +57,6 @@ Daily Builds
 |   **Linux-musl (x64)** |   [![][linux-musl-x64-badge-master]][linux-musl-x64-version-master]<br>[tar.gz][linux-musl-x64-targz-master] ([Checksum][linux-musl-x64-targz-checksum-master])<br>[Symbols (tar.gz)][linux-musl-x64-symbols-targz-master]   |   [![][linux-musl-x64-badge-2.1.X]][linux-musl-x64-version-2.1.X]<br>[tar.gz][linux-musl-x64-targz-2.1.X] ([Checksum][linux-musl-x64-targz-checksum-2.1.X])<br>[Symbols (tar.gz)][linux-musl-x64-symbols-targz-2.1.X]   |   N/A   |   N/A   |   N/A   |
 
 *Note: Our Linux packages (.deb and .rpm) are put together slightly differently than the Windows and Mac specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the installer files (via dpkg or similar), then you'll need to install them in the order presented above.*
-
-[build-badge-master]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/3160/badge
-[build-master]: https://devdiv.visualstudio.com/DevDiv/_build/index?definitionId=3160&_a=completed
-
-[build-badge-2.1.X]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/TODO/badge
-[build-2.1.X]: https://devdiv.visualstudio.com/DevDiv/_build/index?definitionId=TODO&_a=completed
-
-[build-badge-2.0.X]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6161/badge
-[build-2.0.X]: https://devdiv.visualstudio.com/DevDiv/_build/index?definitionId=6161&_a=completed
-
-[build-badge-1.X.X]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/4188/badge
-[build-1.X.X]: https://devdiv.visualstudio.com/DevDiv/_build/index?definitionId=4188&_a=completed
-
-[build-badge-1.0.X]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/4187/badge
-[build-1.0.X]: https://devdiv.visualstudio.com/DevDiv/_build/index?definitionId=4187&_a=completed
 
 
 [win-x64-badge-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/sharedfx_win-x64_Release_version_badge.svg
