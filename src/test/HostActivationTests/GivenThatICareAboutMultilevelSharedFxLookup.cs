@@ -1043,20 +1043,20 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
 
             // Set desired version = 7777.0.0
             string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
-            SetRuntimeConfigJson(runtimeConfig, "7777.0.0", null, useUberFramework: true);
+            SharedFramework.SetRuntimeConfigJson(runtimeConfig, "7777.0.0", null, useUberFramework: true);
 
             // Add versions in the exe folder
-            SharedFramework.AddAvailableSharedFxVersions(_exeSharedFxBaseDir, "9999.0.0");
-            SharedFramework.AddAvailableSharedUberFxVersions(_exeSharedUberFxBaseDir, "9999.0.0", null, "7777.1.0");
+            SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.0.0");
+            SharedFramework.AddAvailableSharedUberFxVersions(_builtSharedUberFxDir, _exeSharedUberFxBaseDir, "9999.0.0", null, "7777.1.0");
 
             // Copy NetCoreApp's copy of the assembly to the app location
-            string fxAssemblyPath = Path.Combine(_exeSharedFxBaseDir, "9999.0.0", "System.Collections.Immutable.dll");
+            string netcoreAssembly = Path.Combine(_exeSharedFxBaseDir, "9999.0.0", "System.Collections.Immutable.dll");
             string appAssembly = Path.Combine(fixture.TestProject.OutputDirectory, "System.Collections.Immutable.dll");
-            File.Copy(fxAssemblyPath, appAssembly);
+            File.Copy(netcoreAssembly, appAssembly);
 
             // Modify the app's deps.json to add System.Collections.Immmutable
             string appDepsJson = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.deps.json");
-            SharedFramework.AddImmutableAssemblyToDepsJson(appDepsJson);
+            AddImmutableAssemblyToDepsJson(appDepsJson);
 
             // Version: NetCoreApp 9999.0.0
             //          UberFramework 7777.0.0
