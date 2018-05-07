@@ -10,13 +10,13 @@ RUN apt-get update && \
         sudo  \
         debhelper \
         build-essential \
-        devscripts &&
+        devscripts && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Use clang as c++ compiler
-RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.5 100
-RUN update-alternatives --set c++ /usr/bin/clang++-3.5
+RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
+RUN update-alternatives --set c++ /usr/bin/clang++
 
 # Setup User to match Host User, and give superuser permissions
 ARG USER_ID=0
