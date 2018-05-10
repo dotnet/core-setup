@@ -149,7 +149,7 @@
   </Target>
 
   <Target Name="PublishCoreHostPackagesToFeed"
-          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackagesFromAzure;SignPackages;DoPushCoreHostPackagesToFeed"
+          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackagesFromAzure;SignPackages;PushSignedCoreHostPackagesToFeed"
           Condition="'@(_MissingBlobNames)' == '' AND '$(NuGetFeedUrl)' != ''"/>
 
   <Target Name="DownloadCoreHostPackagesFromAzure">
@@ -195,6 +195,7 @@
         <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/> 
     <Message Importance="High" Text="Attempting to sign package '%(FilesToSign.Identity)'" />
   </Target>
 
@@ -203,7 +204,7 @@
           DependsOnTargets="GetPackagesToSign;SignFiles">
   </Target>
 
-  <Target Name="DoPushCoreHostPackagesToFeed">
+  <Target Name="PushSignedCoreHostPackagesToFeed">
     <Message Text="Pushing CoreHost packages to $(NuGetFeedUrl)" />
     <PropertyGroup>
       <NuGetPushCommand>$(DotnetToolCommand) nuget push --source $(NuGetFeedUrl) --api-key $(NuGetApiKey) --timeout $(NuGetPushTimeoutSeconds)</NuGetPushCommand>
