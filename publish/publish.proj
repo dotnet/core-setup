@@ -149,8 +149,10 @@
   </Target>
 
   <Target Name="PublishCoreHostPackagesToFeed"
-          DependsOnTargets="CheckIfAllBuildsHavePublished"
-          Condition="'@(_MissingBlobNames)' == '' AND '$(NuGetFeedUrl)' != ''">
+          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackagesFromAzure;SignPackages;PushSignedCoreHostPackagesToFeed"
+          Condition="'@(_MissingBlobNames)' == '' AND '$(NuGetFeedUrl)' != ''"/>
+
+  <Target Name="DownloadCoreHostPackagesFromAzure">
     <Error Condition="'$(NuGetApiKey)' == ''" Text="Missing required property NuGetApiKey" />
     <Error Condition="'$(AzureAccessToken)' == ''" Text="Missing required property 'AzureAccessToken'" />
     <Error Condition="'$(AzureAccountName)' == ''" Text="Missing required property 'AzureAccountName'" />
@@ -185,6 +187,24 @@
     </ItemGroup>
     <Error Condition="'@(_DownloadedSymbolsPackages)' != '' and '$(NuGetSymbolsFeedUrl)' == ''" Text="Missing required property NuGetSymbolsFeedUrl" />
     
+  </Target>
+
+  <Target Name="GetPackagesToSign">
+    <ItemGroup>
+      <FilesToSign Include="@(_DownloadedStandardPackages)">
+        <Authenticode>NuGet</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+    <Error Condition="'@(FilesToSign)' == ''" Text="There are no files to sign. FilesToSign group is empty."/> 
+    <Message Importance="High" Text="Attempting to sign package '%(FilesToSign.Identity)'" />
+  </Target>
+
+  <Target Name="SignPackages"
+          Condition="'$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
+          DependsOnTargets="GetPackagesToSign;SignFiles">
+  </Target>
+
+  <Target Name="PushSignedCoreHostPackagesToFeed">
     <Message Text="Pushing CoreHost packages to $(NuGetFeedUrl)" />
     <PropertyGroup>
       <NuGetPushCommand>$(DotnetToolCommand) nuget push --source $(NuGetFeedUrl) --api-key $(NuGetApiKey) --timeout $(NuGetPushTimeoutSeconds)</NuGetPushCommand>
