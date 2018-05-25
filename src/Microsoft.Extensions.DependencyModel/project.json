@@ -1,14 +1,12 @@
 {
   "description": "Abstractions for reading `.deps` files.",
-  "version": "1.1.4-servicing-*",
+  "version": "1.1.9-servicing-*",
   "buildOptions": {
     "warningsAsErrors": true,
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.DotNet.PlatformAbstractions": {
-      "target": "project"
-    },
+    "Microsoft.DotNet.PlatformAbstractions": "1.1.2",
     "Newtonsoft.Json": "9.0.1"
   },
   "frameworks": {
