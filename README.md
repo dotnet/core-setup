@@ -12,7 +12,7 @@ thought up for installing .NET Core bits.
 
 ## Filing issues
 This repo should contain issues that are tied to the installation of the "muxer" (the `dotnet` binary) and installation 
-of the .NET Core runtime and libraries. 
+of the .NET Core runtime and libraries.
 
 For other issues, please use the following repos:
 
