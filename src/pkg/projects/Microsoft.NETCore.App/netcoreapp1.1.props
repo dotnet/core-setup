@@ -25,7 +25,7 @@
       <Version>1.1.8</Version>
     </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="Microsoft.NETCore.Targets">
-      <Version>1.1.2</Version>
+      <Version>1.1.3-servicing-26605-03</Version>
     </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="Microsoft.VisualBasic">
       <Version>10.1.0</Version>
@@ -33,14 +33,23 @@
     <NETCoreApp11Dependency Include="NETStandard.Library">
       <Version>1.6.1</Version>
     </NETCoreApp11Dependency>
+    <NETCoreApp11Dependency Include="runtime.native.System">
+      <Version>4.3.1-servicing-26605-03</Version>
+    </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="runtime.native.System.IO.Compression">
-      <Version>4.3.1</Version>
+      <Version>4.3.2-servicing-26605-03</Version>
+    </NETCoreApp11Dependency>
+    <NETCoreApp11Dependency Include="runtime.native.System.Net.Http">
+      <Version>4.3.1-servicing-26605-03</Version>
+    </NETCoreApp11Dependency>
+    <NETCoreApp11Dependency Include="runtime.native.System.Security">
+      <Version>4.3.1-servicing-26605-03</Version>
     </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="runtime.native.System.Security.Cryptography.OpenSsl">
-      <Version>4.3.2</Version>
+      <Version>4.3.3-servicing-26605-03</Version>
     </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="runtime.native.System.Security.Cryptography">
-      <Version>4.3.3</Version>
+      <Version>4.3.4-servicing-26605-03</Version>
     </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="runtime.native.System.Security.Cryptography.Apple">
       <Version>4.3.1</Version>
