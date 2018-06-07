@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <BuildAllPackages Condition="'$(BuildAllPackages)' == ''">true</BuildAllPackages>
+    <BuildAllPackages Condition="'$(BuildAllPackages)' == ''">false</BuildAllPackages>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'true'" >
@@ -12,7 +12,7 @@
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false'" >
     <Project Include="Microsoft.NETCore.App\Microsoft.NETCore.App.builds" />
-    <Project Include="Microsoft.NETCore.DotNetHost\Microsoft.NETCore.DotNetHostPolicy.builds" />
+    <Project Include="Microsoft.NETCore.DotNetHost\*.builds" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
