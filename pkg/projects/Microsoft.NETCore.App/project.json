@@ -13,7 +13,7 @@
     "runtime.native.System": "4.3.1-servicing-26605-03",
     "runtime.native.System.IO.Compression": "4.3.2-servicing-26605-03",
     "runtime.native.System.Net.Http": "4.3.1-servicing-26605-03",
-    "runtime.native.System.Security": "4.3.1-servicing-26605-03",
+    "runtime.native.System.Net.Security": "4.3.1-servicing-26605-03",
     "runtime.native.System.Security.Cryptography": "4.3.4-servicing-26605-03",
     "runtime.native.System.Security.Cryptography.Apple": "4.3.1",
     "runtime.native.System.Security.Cryptography.OpenSsl": "4.3.3-servicing-26605-03",
