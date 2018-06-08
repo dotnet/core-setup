@@ -22,7 +22,7 @@
       <Version>1.1.8</Version>
     </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="Microsoft.NETCore.Runtime.CoreCLR">
-      <Version>1.1.9-servicing-26607-01</Version>
+      <Version>1.1.8</Version>
     </NETCoreApp11Dependency>
     <NETCoreApp11Dependency Include="Microsoft.NETCore.Targets">
       <Version>1.1.3-servicing-26605-03</Version>
