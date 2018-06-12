@@ -203,11 +203,11 @@
   "quality": "definition",
   "queue": {
     "pool": {
-      "id": 83,
-      "name": "DotNetCore-Test"
+      "id": 160,
+      "name": "DotNetCore-Servicing"
     },
-    "id": 159,
-    "name": "DotNetCore-Test"
+    "id": 1001,
+    "name": "DotNetCore-Servicing"
   },
   "path": "\\",
   "type": "build",
