@@ -148,6 +148,11 @@
                    ForcePublish="true" />
   </Target>
 
+  <PropertyGroup>
+    <!-- The SignFiles target needs OutDir to be defined -->
+    <OutDir>$(BinDir)ForPublishing</OutDir>
+  </PropertyGroup>
+
   <Target Name="PublishCoreHostPackagesToFeed"
           DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackagesFromAzure;SignPackages;PushSignedCoreHostPackagesToFeed"
           Condition="'@(_MissingBlobNames)' == '' AND '$(NuGetFeedUrl)' != ''"/>
@@ -169,7 +174,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-      <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(BinDir)ForPublishing/</DownloadDirectory>
+      <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(OutDir)/</DownloadDirectory>
     </PropertyGroup>
     <MakeDir Directories="$(DownloadDirectory)"
              Condition="!Exists('$(DownloadDirectory)')" />
