@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="dir.props" />
+  <Import Project="dir.targets" />
+  <Import Project="..\AzureBlob.props" />
+  <Import Project="$(ToolsDir)PublishContent.targets" />
+  <Import Project="$(ToolsDir)versioning.targets" />
+
+  <!-- gathers the items to be published -->
+  <Target Name="GatherItemsForPattern">
+    <Error Condition="'$(PublishPattern)' == ''" Text="Please specify a value for PublishPattern using standard msbuild 'include' syntax." />
+    <ItemGroup>
+      <ForPublishing Include="$(PublishPattern)" />
+    </ItemGroup>
+    <!-- add relative blob path metadata -->
+    <ItemGroup>
+      <ForPublishing>
+        <RelativeBlobPath>$(__BuildType)/%(RecursiveDir)%(Filename)%(Extension)</RelativeBlobPath>  
+      </ForPublishing>
+    </ItemGroup>
+    <Error Condition="'@(ForPublishing)' == ''" Text="No items were found matching pattern '$(PublishPattern)'." />
+  </Target>
+
+  <PropertyGroup>
+    <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackagesBinDir)**\*.nupkg</PublishPattern>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageDownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)AzureTransfer\$(ConfigurationGroup)</PackageDownloadDirectory>
+    <FinalPublishPattern>$(PackageDownloadDirectory)\**\*.nupkg</FinalPublishPattern>
+    <FinalPublishPrivatePattern>$(PackageDownloadDirectory)\**\*Private*.nupkg</FinalPublishPrivatePattern>
+    <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
+    <!-- The SignFiles target needs OutDir to be defined -->
+    <OutDir>$(PackageDownloadDirectory)</OutDir>
+  </PropertyGroup>
+
+  <Target Name="GetPackagesToSign">
+    <ItemGroup>
+      <FilesToSign Include="$(FinalPublishPattern)" Exclude="$(FinalPublishPrivatePattern);$(FinalSymbolsPackagesPattern)">
+        <Authenticode>NuGet</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+    <Message Importance="High" Text="Attempting to sign package '%(FilesToSign.Identity)'" />
+  </Target>
+
+  <Target Name="SignPackages"
+          Condition="'$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
+          DependsOnTargets="GetPackagesToSign;SignFiles">
+  </Target>
+
+  <Target Name="CreateContainerName"
+          DependsOnTargets="CreateVersionFileDuringBuild"
+          Condition="'$(ContainerName)' == ''">
+    <PropertyGroup>
+      <ContainerName>coreclr-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</ContainerName>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="CreateContainerName;UploadToAzure" />
+</Project>
