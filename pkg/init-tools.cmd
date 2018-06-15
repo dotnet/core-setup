@@ -19,6 +19,14 @@ set SYNC_JSON_PATH=%PACKAGES_DIR%
 set SYNC_JSON_FILE=%SYNC_JSON_PATH%\project.json
 set SYNC_JSON_CONTENTS={ "dependencies": { "Microsoft.DotNet.BuildTools": "%SYNCTOOLS_VERSION%" }, "frameworks": { "netcoreapp1.0": { } } }
 
+set MSBUILD_PROJECT_PATH=%PACKAGES_DIR%
+set MSBUILD_PROJECT_FILE=%MSBUILD_PROJECT_PATH%\SyncToolsVersion.props
+set MSBUILD_PROJECT_CONTENTS= ^
+ ^^^<Project Sdk=^"Microsoft.NET.Sdk^"^^^> ^
+  ^^^<PropertyGroup^^^> ^
+    ^^^<SyncToolsVersion^^^>%SYNCTOOLS_VERSION%^^^</SyncToolsVersion^^^> ^
+  ^^^</PropertyGroup^^^> ^
+ ^^^</Project^^^>
 set BUILD_TOOLS_SEMAPHORE=%PROJECT_JSON_PATH%\init-tools.completed
 
 :: if force option is specified then clean the tool runtime and build tools package directory to force it to get recreated
@@ -41,6 +49,7 @@ echo %PROJECT_JSON_CONTENTS% > "%PROJECT_JSON_FILE%"
 if NOT exist "%SYNC_JSON_PATH%" mkdir "%SYNC_JSON_PATH%"
 echo %SYNC_JSON_CONTENTS% > "%SYNC_JSON_FILE%"
 
+echo %MSBUILD_PROJECT_CONTENTS% > "%MSBUILD_PROJECT_FILE%"
 echo Running %0 > "%INIT_TOOLS_LOG%"
 
 if exist "%DOTNET_CMD%" goto :afterdotnetrestore
