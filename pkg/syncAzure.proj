@@ -11,6 +11,7 @@
   <PropertyGroup>
     <BlobNamePrefix>$(Channel)/Binaries/$(BuildNumber)</BlobNamePrefix>
     <DownloadDirectory>$(PackagesDir)AzureTransfer</DownloadDirectory>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
 
   <Import Project="$(PackagesDir)SyncToolsVersion.props" />

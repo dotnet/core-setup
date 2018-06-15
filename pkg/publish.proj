@@ -1,42 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="dir.props" />
-  <Import Project="dir.targets" />
-  <Import Project="..\AzureBlob.props" />
+
+  <PropertyGroup>
+    <SkipValidateArgs>true</SkipValidateArgs>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)dir.props" />
   <Import Project="$(ToolsDir)PublishContent.targets" />
   <Import Project="$(ToolsDir)versioning.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)dir.targets" />
+  <Import Project="..\AzureBlob.props" />
+
+  <PropertyGroup>
+    <PackageDownloadDirectory>$(MSBuildThisFileDirectory)packages\AzureTransfer\</PackageDownloadDirectory>
+    <SignPattern>$(PackageDownloadDirectory)*.nupkg</SignPattern>
+    <SymbolPattern>$(PackageDownloadDirectory)*.symbols.nupkg</SymbolPattern>
+    <PublishPattern>$(PackageDownloadDirectory)*</PublishPattern>
+    <OutDir>$(PackageDownloadDirectory)</OutDir>
+    <UnsignedFolder Condition="'$(Unsigned)' == 'true'">/Unsigned</UnsignedFolder>
+    <BlobNamePrefix>$(Channel)/Binaries/$(BuildNumber)$(UnsignedFolder)</BlobNamePrefix>
+  </PropertyGroup>
 
   <!-- gathers the items to be published -->
   <Target Name="GatherItemsForPattern">
-    <Error Condition="'$(PublishPattern)' == ''" Text="Please specify a value for PublishPattern using standard msbuild 'include' syntax." />
     <ItemGroup>
       <ForPublishing Include="$(PublishPattern)" />
     </ItemGroup>
     <!-- add relative blob path metadata -->
     <ItemGroup>
       <ForPublishing>
-        <RelativeBlobPath>$(__BuildType)/%(RecursiveDir)%(Filename)%(Extension)</RelativeBlobPath>  
+        <RelativeBlobPath>$(BlobNamePrefix)/%(RecursiveDir)%(Filename)%(Extension)</RelativeBlobPath>  
       </ForPublishing>
     </ItemGroup>
     <Error Condition="'@(ForPublishing)' == ''" Text="No items were found matching pattern '$(PublishPattern)'." />
   </Target>
 
-  <PropertyGroup>
-    <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackagesBinDir)**\*.nupkg</PublishPattern>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <PackageDownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)AzureTransfer\$(ConfigurationGroup)</PackageDownloadDirectory>
-    <FinalPublishPattern>$(PackageDownloadDirectory)\**\*.nupkg</FinalPublishPattern>
-    <FinalPublishPrivatePattern>$(PackageDownloadDirectory)\**\*Private*.nupkg</FinalPublishPrivatePattern>
-    <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
-    <!-- The SignFiles target needs OutDir to be defined -->
-    <OutDir>$(PackageDownloadDirectory)</OutDir>
-  </PropertyGroup>
-
   <Target Name="GetPackagesToSign">
     <ItemGroup>
-      <FilesToSign Include="$(FinalPublishPattern)" Exclude="$(FinalPublishPrivatePattern);$(FinalSymbolsPackagesPattern)">
+      <FilesToSign Include="$(SignPattern)" Exclude="$(SymbolPattern)">
         <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
@@ -48,13 +49,5 @@
           DependsOnTargets="GetPackagesToSign;SignFiles">
   </Target>
 
-  <Target Name="CreateContainerName"
-          DependsOnTargets="CreateVersionFileDuringBuild"
-          Condition="'$(ContainerName)' == ''">
-    <PropertyGroup>
-      <ContainerName>coreclr-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</ContainerName>
-    </PropertyGroup>
-  </Target>
-
-  <Target Name="Build" DependsOnTargets="CreateContainerName;UploadToAzure" />
+  <Target Name="Build" DependsOnTargets="UploadToAzure" />
 </Project>
