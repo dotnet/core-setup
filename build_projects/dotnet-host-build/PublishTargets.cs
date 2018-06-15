@@ -76,6 +76,7 @@ namespace Microsoft.DotNet.Host.Build
         [Target]
         public static BuildTargetResult FinalizeBuild(BuildTargetContext c)
         {
+
             if (CheckIfAllBuildsHavePublished())
             {
                 string targetContainer = $"{Channel}/Binaries/Latest/";
@@ -131,12 +132,6 @@ namespace Microsoft.DotNet.Host.Build
                         "debian.x64.version",
                         "centos.x64.version",
                     };
-                    
-                    BuildTargetResult feedResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackagesToFeed));
-                    if (!feedResult.Success)
-                    {
-                        return feedResult;
-                    }
 
                     BuildTargetResult versionsResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
                     if (!versionsResult.Success)
@@ -155,6 +150,27 @@ namespace Microsoft.DotNet.Host.Build
                     AzurePublisherTool.ReleaseLeaseOnBlob(semaphoreBlob, leaseId);
                 }
             }
+
+            return c.Success();
+        }
+
+        [Target(nameof(PrepareTargets.Init),
+        nameof(PublishTargets.InitPublish))]
+        public static BuildTargetResult WriteAzureBlobInfoFile(BuildTargetContext c)
+        {
+            List<string> lines = new List<string>()
+            {
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+                "<Project ToolsVersion=\"14.0\" DefaultTargets=\"Build\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">",
+                "\t<PropertyGroup>",
+                "\t\t<ContainerName>" + Environment.GetEnvironmentVariable("CONTAINER_NAME") + "</ContainerName>",
+                "\t\t<Channel>" + Channel + "</Channel>",
+                "\t\t<BuildNumber>" + SharedFrameworkNugetVersion + "</BuildNumber>",
+                "\t</PropertyGroup>",
+                "</Project>"
+            };
+
+            System.IO.File.WriteAllLines(Dirs.RepoRoot + "\\AzureBlob.props", lines);
 
             return c.Success();
         }
