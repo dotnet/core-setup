@@ -20,6 +20,8 @@
     <ToolRuntimePath>$(PackagesDir)Microsoft.DotNet.BuildTools/$(SyncToolsVersion)/lib/</ToolRuntimePath>
     <ToolsDir>$(ToolRuntimePath)</ToolsDir>
     <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolRuntimePath)dotnetcli/bin/</DotnetCliPath>
+
+    <!-- We expect to only build this project on windows, so we hard-code the net46 path !-->
     <BuildToolsTaskDir>$(ToolsDir)net46/</BuildToolsTaskDir>
   </PropertyGroup>
 
