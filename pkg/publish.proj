@@ -49,5 +49,12 @@
           DependsOnTargets="GetPackagesToSign;SignFiles">
   </Target>
 
+  <Target Name="CopyPackagesToPkgDir"
+          DependsOnTargets="GetPackagesToSign">
+    <Copy SourceFiles="@(FilesToSign)"
+          DestinationFolder="$(PackageDownloadDirectory)pkg"
+    />
+  </Target>
+
   <Target Name="Build" DependsOnTargets="UploadToAzure" />
 </Project>

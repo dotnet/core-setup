@@ -44,6 +44,27 @@
       }
     },
     {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Fetch custom tooling (NuGet)",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "scriptType": "filePath",
+        "scriptName": "scripts/DotNet-Trusted-Publish/Fetch-Tools.ps1",
+        "arguments": "$(Build.StagingDirectory)\\ToolingDownload",
+        "workingFolder": "",
+        "inlineScript": "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\"",
+        "failOnStandardError": "true"
+      }
+    },
+    {
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
@@ -123,7 +144,7 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Publish Unsigned Packages",
+      "displayName": "Publish Unsigned Packages To Azure",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -161,7 +182,7 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Publish Signed Packages",
+      "displayName": "Publish Signed Packages To Azure",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -173,6 +194,47 @@
         "arguments": "pkg\\publish.proj /p:CloudDropAccountName=$(CloudDropAccountName) /p:CloudDropAccessToken=$(CloudDropAccessToken) /p:OverwriteOnPublish=true",
         "workingFolder": "$(Pipeline.SourcesDirectory)",
         "failOnStandardError": "false"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Copy Signed Packages To Separate Directory For Publishing",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "msbuild",
+        "arguments": "pkg\\publish.proj /t:CopyPackagesToPkgDir",
+        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Publish Signed Packages To MyGet",
+      "timeoutInMinutes": 0,
+      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.BuildConfiguration, 'Release'))",
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "scriptType": "inlineScript",
+        "scriptName": "",
+        "arguments": "-ApiKey $(NUGET_API_KEY) -ConfigurationGroup $(BuildConfiguration) -PackagesGlob $(AzureContainerPackageDirectory)$(AzureContainerPackageGlob) -MyGetFeedUrl $(NUGET_FEED_URL)",
+        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "inlineScript": "param($ApiKey, $ConfigurationGroup, $PackagesGlob, $MyGetFeedUrl)\n\nif ($ConfigurationGroup.ToLower() -ne \"release\") { Write-host \"Chose not to publish\"; exit }\n\nmsbuild /t:NuGetPush /v:Normal `\n/p:NuGetExePath=$env:CustomNuGetPath `\n/p:NuGetApiKey=$ApiKey `\n/p:NuGetSource=$MyGetFeedUrl `\n/p:PackagesGlob=$PackagesGlob",
+        "failOnStandardError": "true"
       }
     },
     {
@@ -234,6 +296,13 @@
     }
   ],
   "variables": {
+    "AzureContainerPackageDirectory": {
+      "value": "$(Pipeline.SourcesDirectory)\\pkg\\packages\\AzureTransfer\\",
+      "allowOverride": true
+    },
+    "AzureContainerPackageGlob": {
+      "value": "pkg\\*.nupkg",
+    },
     "BuildConfiguration": {
       "value": "Release",
       "allowOverride": true
