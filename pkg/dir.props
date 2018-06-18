@@ -61,7 +61,7 @@
     <HostFullVersion>$(HostVersion)$(PreReleaseSuffix)</HostFullVersion>
   </PropertyGroup>
 
-  <Target Name="ValidateArgs" Condition="Condition='$(SkipValidateArgs)' != 'true' and'$(CLIBuildVersion)'==''">
+  <Target Name="ValidateArgs" Condition="'$(SkipValidateArgs)' != 'true' and '$(CLIBuildVersion)'==''">
     <Error Condition="'$(EnsureStableVersion)'==''" Text="EnsureStableVersion is undefined" />
     <Error Condition="'$(HostPolicyVersion)'==''" Text="HostPolicyVersion is undefined" />
     <Error Condition="'$(HostResolverVersion)'==''" Text="HostResolverVersion is undefined" />
