@@ -45,7 +45,7 @@
     },
     {
       "environment": {},
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Fetch custom tooling (NuGet)",
@@ -198,7 +198,7 @@
     },
     {
       "environment": {},
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Copy Signed Packages To Separate Directory For Publishing",
@@ -217,7 +217,7 @@
     },
     {
       "environment": {},
-      "enabled": true,
+      "enabled": false,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Publish Signed Packages To MyGet",

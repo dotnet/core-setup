@@ -133,6 +133,12 @@ namespace Microsoft.DotNet.Host.Build
                         "centos.x64.version",
                     };
 
+                    BuildTargetResult feedResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackagesToFeed));
+                    if (!feedResult.Success)
+                    {
+                        return feedResult;
+                    }
+
                     BuildTargetResult versionsResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
                     if (!versionsResult.Success)
                     {
