@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.Host.Build
                 "</Project>"
             };
 
-            System.IO.File.WriteAllLines(Dirs.RepoRoot + "\\AzureBlob.props", lines);
+            System.IO.File.WriteAllLines(Dirs.RepoRoot + "\\pkg\\bin\\AzureBlob.props", lines);
 
             return c.Success();
         }

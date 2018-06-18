@@ -9,7 +9,7 @@
   <Import Project="$(ToolsDir)PublishContent.targets" />
   <Import Project="$(ToolsDir)versioning.targets" />
   <Import Project="$(MSBuildThisFileDirectory)dir.targets" />
-  <Import Project="..\AzureBlob.props" />
+  <Import Project="$(MSBuildThisFileDirectory)bin\AzureBlob.props" />
 
   <PropertyGroup>
     <PackageDownloadDirectory>$(MSBuildThisFileDirectory)packages\AzureTransfer\</PackageDownloadDirectory>

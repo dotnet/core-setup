@@ -18,8 +18,8 @@ namespace Microsoft.DotNet.Cli.Build
     public class AzurePublisher
     {
         private static readonly string s_dotnetBlobRootUrl = "https://dotnetcli.blob.core.windows.net/dotnet/";
-        private static readonly string s_dotnetBlobContainerName = Environment.GetEnvironmentVariable("CONTAINER_NAME");
-
+        private static readonly string s_dotnetBlobContainerName = Environment.GetEnvironmentVariable("CONTAINER_NAME") ?? "dotnet";
+        
         private Task _leaseRenewalTask = null;
         private CancellationTokenSource _cancellationTokenSource = null;
 
