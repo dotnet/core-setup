@@ -2,6 +2,8 @@
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
 
+    <BuildToolsTargets45 Condition="'$(OS)'=='Windows_NT'">true</BuildToolsTargets45>
+
     <!-- Output directories -->
     <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
@@ -62,7 +64,7 @@
     <HostFullVersion>$(HostVersion)$(PreReleaseSuffix)</HostFullVersion>
   </PropertyGroup>
 
-  <Target Name="ValidateArgs" Condition="'$(CLIBuildVersion)'==''">
+  <Target Name="ValidateArgs" Condition="'$(SkipValidateArgs)' != 'true' and '$(CLIBuildVersion)'==''">
     <Error Condition="'$(EnsureStableVersion)'==''" Text="EnsureStableVersion is undefined" />
     <Error Condition="'$(HostPolicyVersion)'==''" Text="HostPolicyVersion is undefined" />
     <Error Condition="'$(HostResolverVersion)'==''" Text="HostResolverVersion is undefined" />

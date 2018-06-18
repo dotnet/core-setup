@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <SkipValidateArgs>true</SkipValidateArgs>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)dir.props" />
+  <Import Project="$(ToolsDir)PublishContent.targets" />
+  <Import Project="$(ToolsDir)versioning.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)dir.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)bin\AzureBlob.props" />
+
+  <PropertyGroup>
+    <PackageDownloadDirectory>$(MSBuildThisFileDirectory)packages\AzureTransfer\</PackageDownloadDirectory>
+    <SignPattern>$(PackageDownloadDirectory)*.nupkg</SignPattern>
+    <SymbolPattern>$(PackageDownloadDirectory)*.symbols.nupkg</SymbolPattern>
+    <PublishPattern>$(PackageDownloadDirectory)*</PublishPattern>
+    <OutDir>$(PackageDownloadDirectory)</OutDir>
+    <UnsignedFolder Condition="'$(Unsigned)' == 'true'">/Unsigned</UnsignedFolder>
+    <BlobNamePrefix>$(Channel)/Binaries/$(BuildNumber)$(UnsignedFolder)</BlobNamePrefix>
+  </PropertyGroup>
+
+  <!-- gathers the items to be published -->
+  <Target Name="GatherItemsForPattern">
+    <ItemGroup>
+      <ForPublishing Include="$(PublishPattern)" />
+    </ItemGroup>
+    <!-- add relative blob path metadata -->
+    <ItemGroup>
+      <ForPublishing>
+        <RelativeBlobPath>$(BlobNamePrefix)/%(RecursiveDir)%(Filename)%(Extension)</RelativeBlobPath>  
+      </ForPublishing>
+    </ItemGroup>
+    <Error Condition="'@(ForPublishing)' == ''" Text="No items were found matching pattern '$(PublishPattern)'." />
+  </Target>
+
+  <Target Name="GetPackagesToSign">
+    <ItemGroup>
+      <FilesToSign Include="$(SignPattern)" Exclude="$(SymbolPattern)">
+        <Authenticode>NuGet</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+    <Message Importance="High" Text="Attempting to sign package '%(FilesToSign.Identity)'" />
+  </Target>
+
+  <Target Name="SignPackages"
+          Condition="'$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
+          DependsOnTargets="GetPackagesToSign;SignFiles">
+  </Target>
+
+  <Target Name="CopyPackagesToPkgDir"
+          DependsOnTargets="GetPackagesToSign">
+    <Copy SourceFiles="@(FilesToSign)"
+          DestinationFolder="$(PackageDownloadDirectory)pkg"
+    />
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="UploadToAzure" />
+</Project>

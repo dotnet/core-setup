@@ -473,6 +473,11 @@
     "BuildArguments": {
       "value": "-envVars 'NUGET_API_KEY=$(NUGET_API_KEY)','GITHUB_PASSWORD=$(GITHUB_PASSWORD)','REPO_PASS=$(REPO_PASS)','CONNECTION_STRING=$(CONNECTION_STRING)'"
     },
+    "CloudDropAccessToken": {
+      "value": null,
+      "allowOverride": true,
+      "isSecret": true
+    },
     "COREHOST_TRACE": {
       "value": "0",
       "allowOverride": true

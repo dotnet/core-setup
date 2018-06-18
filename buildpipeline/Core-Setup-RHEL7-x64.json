@@ -210,6 +210,11 @@
       "value": "-e CHANNEL -e CONNECTION_STRING -e REPO_ID -e REPO_USER -e REPO_PASS -e REPO_SERVER -e DOTNET_BUILD_SKIP_CROSSGEN -e PUBLISH_TO_AZURE_BLOB -e DOCKER_HUB_REPO -e DOCKER_HUB_TRIGGER_TOKEN -e NUGET_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD -e CLI_NUGET_FEED_URL -e CLI_NUGET_API_KEY",
       "allowOverride": true
     },
+    "CloudDropAccessToken": {
+      "value": null,
+      "allowOverride": true,
+      "isSecret": true
+    },
     "DockerContainerName": {
       "value": "dotnetcore-setup-build-container-rhel",
       "allowOverride": true
