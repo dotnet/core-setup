@@ -44,8 +44,8 @@ platformList.each { platform ->
         }
     }
     else if (os == 'Tizen') {
-        dockerRepository = "gbalykov/dotnet-buildtools-prereqs"
-        dockerContainer = "ubuntu-16.04-cross-e435274-20180426002255-tizen-rootfs-4.0m2"
+        dockerRepository = "tizendotnet/dotnet-buildtools-prereqs"
+        dockerContainer = "ubuntu-14.04-cross-e435274-20180426002420-tizen-rootfs-5.0m1"
 
         dockerCommand = "docker run -e ROOTFS_DIR=/crossrootfs/${architecture}.tizen.build --name ${dockerContainer} --rm -v \${WORKSPACE}:${dockerWorkingDirectory} -w=${dockerWorkingDirectory} ${dockerRepository}:${dockerContainer}"
         buildArgs += " -SkipTests=true -DisableCrossgen=true -PortableBuild=false -CrossBuild=true -- /p:OverridePackageSource=https:%2F%2Ftizen.myget.org/F/dotnet-core/api/v3/index.json /p:OutputRid=tizen.4.0.0-${architecture}"
