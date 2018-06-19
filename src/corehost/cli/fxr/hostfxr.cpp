@@ -184,6 +184,7 @@ SHARED_API int hostfxr_main(const int argc, const pal::char_t* argv[])
     return muxer.execute(pal::string_t(), argc, argv, startup_info, nullptr, 0, nullptr);
 }
 
+// [OBSOLETE] Replaced by hostfxr_resolve_sdk2
 //
 // Determines the directory location of the SDK accounting for
 // global.json and multi-level lookup policy.
@@ -272,6 +273,105 @@ SHARED_API int32_t hostfxr_resolve_sdk(
     }
 
     return cli_sdk.size() + 1;
+}
+
+typedef void (*hostfxr_resolve_sdk2_result_fn)(
+    const pal::char_t* resolved_sdk_dir, 
+    const pal::char_t* global_json_path);
+
+enum hostfxr_resolve_sdk2_flags_t : int32_t
+{
+    disallow_prerelease = 0x1,
+};
+
+//
+// Determines the directory location of the SDK accounting for
+// global.json and multi-level lookup policy.
+//
+// Invoked via MSBuild SDK resolver to locate SDK props and targets
+// from an msbuild other than the one bundled by the CLI.
+//
+// Parameters:
+//    exe_dir
+//      The main directory where SDKs are located in sdk\[version]
+//      sub-folders. Pass the directory of a dotnet executable to
+//      mimic how that executable would search in its own directory.
+//      It is also valid to pass nullptr or empty, in which case
+//      multi-level lookup can still search other locations if 
+//      it has not been disabled by the user's environment.
+//
+//    working_dir
+//      The directory where the search for global.json (which can
+//      control the resolved SDK version) starts and proceeds
+//      upwards. 
+//
+//   flags
+//      Bitwise flags that influence resolution.
+//         disallow_prerelease (0x1)
+//           do not allow resolution to return a prerelease SDK version 
+//           unless  prerelease version was specified via global.json.
+//
+//   result
+//      Callback invoked to return the resolved sdk directory and 
+//      global.json path used.
+//      
+//      If resolution succeeds, resolved_sdk_dir will hold the
+//      path to the resolved SDK director, otherwise it will
+//      be null.
+//
+//      If global.json is used, then global_json_path will hold
+//      the path to global.json. If there was global.json found,
+//      or the contents of global.json did not impact resolution
+//      (e.g. no version specified), then global_json_path will
+//      be null.
+//
+// Return value:
+//   0 on success, otherwise failure
+//   0x8000809b - SDK could not be resolved (SdkResolverResolveFailure)
+// 
+// String encoding:
+//   Windows     - UTF-16 (pal::char_t is 2 byte wchar_t)
+//   Unix        - UTF-8  (pal::char_t is 1 byte char)
+//
+SHARED_API int32_t hostfxr_resolve_sdk2(
+    const pal::char_t* exe_dir,
+    const pal::char_t* working_dir,
+    int32_t flags,
+    hostfxr_resolve_sdk2_result_fn result)
+{
+    trace::setup();
+
+    trace::info(_X("--- Invoked hostfxr [commit hash: %s] hostfxr_resolve_sdk2"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    if (exe_dir == nullptr)
+    {
+        exe_dir = _X("");
+    }
+
+    if (working_dir == nullptr)
+    {
+        working_dir = _X("");
+    }
+
+    pal::string_t resolved_sdk_dir;
+    pal::string_t global_json_path;
+
+    bool success = sdk_resolver_t::resolve_sdk_dotnet_path(
+        exe_dir, 
+        working_dir,
+        &resolved_sdk_dir,
+        (flags & hostfxr_resolve_sdk2_flags_t::disallow_prerelease) != 0,
+        &global_json_path);
+
+    assert(success || resolved_sdk_dir.empty());
+
+    result(
+        resolved_sdk_dir.empty() ? nullptr : resolved_sdk_dir.c_str(),
+        global_json_path.empty() ? nullptr : global_json_path.c_str());
+
+    return success
+        ? StatusCode::Success 
+        : StatusCode::SdkResolverResolveFailure;
 }
 
 //

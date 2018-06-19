@@ -76,6 +76,12 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path, bool parse_only_produc
             trace::error(_X("The specified SDK version '%s' could not be parsed"), global_cli_version.c_str());
             return pal::string_t();
         }
+
+        // Always consider prereleases when the version specified in global.json is itself a prerelease
+        if (specified.is_prerelease())
+        {
+            parse_only_production = false;
+        }
     }
 
     trace::verbose(_X("--- Resolving SDK version from SDK dir [%s]"), sdk_path.c_str());
@@ -148,7 +154,12 @@ bool higher_sdk_version(const pal::string_t& new_version, pal::string_t* version
     return retval;
 }
 
-bool sdk_resolver_t::resolve_sdk_dotnet_path(const pal::string_t& dotnet_root, const pal::string_t& cwd, pal::string_t* cli_sdk)
+bool sdk_resolver_t::resolve_sdk_dotnet_path(
+    const pal::string_t& dotnet_root, 
+    const pal::string_t& cwd, 
+    pal::string_t* cli_sdk,
+    bool parse_only_production,
+    pal::string_t* global_json_path)
 {
     pal::string_t global;
 
@@ -206,7 +217,6 @@ bool sdk_resolver_t::resolve_sdk_dotnet_path(const pal::string_t& dotnet_root, c
         trace::verbose(_X("Searching SDK directory in [%s]"), dir.c_str());
         pal::string_t current_sdk_path = dir;
         append_path(&current_sdk_path, _X("sdk"));
-        bool parse_only_production = false;  // false -- implies both production and prerelease.
 
         if (global_cli_version.empty())
         {
@@ -218,6 +228,11 @@ bool sdk_resolver_t::resolve_sdk_dotnet_path(const pal::string_t& dotnet_root, c
         }
         else
         {
+            if (global_json_path != nullptr)
+            {
+                global_json_path->assign(global);
+            }
+
             pal::string_t probing_sdk_path = current_sdk_path;
             append_path(&probing_sdk_path, global_cli_version.c_str());
 
