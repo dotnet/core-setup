@@ -7,12 +7,12 @@
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "Microsoft.CSharp": "4.0.1",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.7-servicing-25107-01",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.14",
     "System.Runtime.Serialization.Primitives": "4.1.1",
     "Microsoft.DotNet.Cli.Build.Framework": {
       "target": "project"
     },
-    "NuGet.Versioning": "3.5.0-rc-1285",
+    "NuGet.Versioning": "3.5.0-rc1-final",
     "Newtonsoft.Json": "7.0.1",
     "Octokit": "0.18.0",
     "Microsoft.Net.Http": "2.2.29"
