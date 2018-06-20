@@ -24,6 +24,25 @@
       }
     },
     {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run script $(VS140COMNTOOLS)\\VsDevCmd.bat",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(VS140COMNTOOLS)\\VsDevCmd.bat",
+        "arguments": "",
+        "modifyEnvironment": "true",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
       "environment": {},
       "enabled": true,
       "continueOnError": false,
