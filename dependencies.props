@@ -82,11 +82,13 @@
       <ElementName>MicrosoftPrivateCoreFxNETCoreAppPackageVersion</ElementName>
       <PackageId>Microsoft.Private.CoreFx.NETCoreApp</PackageId>
     </XmlUpdateStep>
+    <!--
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>MicrosoftPrivateCoreFxUAPPackageVersion</ElementName>
       <PackageId>Microsoft.Private.CoreFx.UAP</PackageId>
     </XmlUpdateStep>
+  -->
     <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>MicrosoftNETCoreRuntimeCoreCLRPackageVersion</ElementName>
