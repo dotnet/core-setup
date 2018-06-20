@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             if (fExplicitHostFXRMSIVersion && CurrentPlatform.Current == BuildPlatform.Windows)
             {
-                version = new VerInfo(1, 1, 2, "", "", "", CommitCountString);
+                version = new VerInfo(1, 1, 9, "", "", "", CommitCountString);
             }
 
             return version;
