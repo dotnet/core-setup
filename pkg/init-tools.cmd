@@ -22,7 +22,8 @@ set SYNC_JSON_CONTENTS={ "dependencies": { "Microsoft.DotNet.BuildTools": "%SYNC
 set MSBUILD_PROJECT_PATH=%PACKAGES_DIR%
 set MSBUILD_PROJECT_FILE=%MSBUILD_PROJECT_PATH%\SyncToolsVersion.props
 set MSBUILD_PROJECT_CONTENTS= ^
- ^^^<Project Sdk=^"Microsoft.NET.Sdk^"^^^> ^
+ ^^^<?xml version=^"1.0^" encoding=^"utf-8^"?^^^> ^
+ ^^^<Project ToolsVersion=^"12.0^" DefaultTargets=^"Build^" xmlns=^"http://schemas.microsoft.com/developer/msbuild/2003^"^^^> ^
   ^^^<PropertyGroup^^^> ^
     ^^^<SyncToolsVersion^^^>%SYNCTOOLS_VERSION%^^^</SyncToolsVersion^^^> ^
   ^^^</PropertyGroup^^^> ^
