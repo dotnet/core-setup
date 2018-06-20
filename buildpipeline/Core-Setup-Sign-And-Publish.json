@@ -154,7 +154,7 @@
       "inputs": {
         "filename": "msbuild",
         "arguments": "pkg\\syncAzure.proj /p:CloudDropAccountName=$(CloudDropAccountName) /p:CloudDropAccessToken=$(CloudDropAccessToken)",
-        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "workingFolder": "",
         "failOnStandardError": "false"
       }
     },
@@ -173,7 +173,7 @@
       "inputs": {
         "filename": "msbuild",
         "arguments": "pkg\\publish.proj /p:CloudDropAccountName=$(CloudDropAccountName) /p:CloudDropAccessToken=$(CloudDropAccessToken) /p:Unsigned=true",
-        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "workingFolder": "",
         "failOnStandardError": "false"
       }
     },
@@ -192,7 +192,7 @@
       "inputs": {
         "filename": "msbuild",
         "arguments": "pkg\\publish.proj /t:SignPackages /p:SignType=$(PB_SignType)",
-        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "workingFolder": "",
         "failOnStandardError": "false"
       }
     },
@@ -211,7 +211,7 @@
       "inputs": {
         "filename": "msbuild",
         "arguments": "pkg\\publish.proj /p:CloudDropAccountName=$(CloudDropAccountName) /p:CloudDropAccessToken=$(CloudDropAccessToken) /p:OverwriteOnPublish=true",
-        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "workingFolder": "",
         "failOnStandardError": "false"
       }
     },
@@ -230,7 +230,7 @@
       "inputs": {
         "filename": "msbuild",
         "arguments": "pkg\\publish.proj /t:CopyPackagesToPkgDir",
-        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "workingFolder": "",
         "failOnStandardError": "false"
       }
     },
@@ -251,7 +251,7 @@
         "scriptType": "inlineScript",
         "scriptName": "",
         "arguments": "-ApiKey $(NUGET_API_KEY) -ConfigurationGroup $(BuildConfiguration) -PackagesGlob $(AzureContainerPackageDirectory)$(AzureContainerPackageGlob) -MyGetFeedUrl $(NUGET_FEED_URL)",
-        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "workingFolder": "",
         "inlineScript": "param($ApiKey, $ConfigurationGroup, $PackagesGlob, $MyGetFeedUrl)\n\nif ($ConfigurationGroup.ToLower() -ne \"release\") { Write-host \"Chose not to publish\"; exit }\n\nmsbuild /t:NuGetPush /v:Normal `\n/p:NuGetExePath=$env:CustomNuGetPath `\n/p:NuGetApiKey=$ApiKey `\n/p:NuGetSource=$MyGetFeedUrl `\n/p:PackagesGlob=$PackagesGlob",
         "failOnStandardError": "true"
       }
