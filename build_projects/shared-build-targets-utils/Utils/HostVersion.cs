@@ -127,6 +127,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         // This method returns the locked hostfxr version based on the flag fExplicitHostFXRMSIVersion and the current platform.
         // For MSI (Windows) generation we specify a newer version for handling issue #1574 and for non-Windows platform we return the LockedHostFxrVersion.
+        // We are currently locked at 1.1.9 because we updated the HostFXR Platform Installer with new RIDs during the 1.1.9 release. At such a time when we 
+        // update the installer again, we will again have to bump the installer version.
         public VerInfo GetLockedHostFXRPlatformInstallerVersion()
         {
             VerInfo version = LockedHostFxrVersion;
