@@ -138,13 +138,12 @@ namespace Microsoft.DotNet.Host.Build
                         "opensuse.42.3.x64.version"
                     };
 
-/*
                     BuildTargetResult feedResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackagesToFeed));
                     if (!feedResult.Success)
                     {
                         return feedResult;
                     }
-*/
+
                     BuildTargetResult versionsResult = c.BuildContext.RunTarget(nameof(PublishTargets.PublishCoreHostPackageVersionsToVersionsRepo));
                     if (!versionsResult.Success)
                     {
