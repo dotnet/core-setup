@@ -5,10 +5,10 @@ using FluentAssertions;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.CoreSetup.Test;
 using Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp;
+using Microsoft.DotNet.PlatformAbstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -34,15 +34,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
         {
             get
             {
-                if (Fixture20 != null)
-                {
-                    yield return new object[] { Fixture20 };
-                }
-
-                if (Fixture21 != null)
-                {
-                    yield return new object[] { Fixture21 };
-                }
+                yield return new object[] { Fixture20 };
+                yield return new object[] { Fixture21 };
             }
         }
 
@@ -50,6 +43,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
         [MemberData(nameof(PreviousVersions))]
         public void Latest_Host_Is_Backwards_Compatible_With_Older_Runtime(TestProjectFixture previousVersionFixture)
         {
+            if (!IsRidSupported())
+            {
+                return;
+            }
+
             TestProjectFixture fixture = previousVersionFixture.Copy();
             string appExe = fixture.TestProject.AppExe;
 
@@ -108,6 +106,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
         [MemberData(nameof(PreviousVersions))]
         public void Old_Host_Is_Forward_Compatible_With_Latest_Runtime(TestProjectFixture previousVersionFixture)
         {
+            if (!IsRidSupported())
+            {
+                return;
+            }
+
             TestProjectFixture fixture = FixtureLatest.Copy();
             string appExe = fixture.TestProject.AppExe;
 
@@ -154,26 +157,26 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
             // Use standalone instead of framework-dependent for ease of deployment.
             var publishFixture = new TestProjectFixture(testName, repoDirectories, framework: netCoreAppFramework, assemblyName: "StandaloneApp");
 
-            try 
+            if (IsRidSupported())
             {
                 publishFixture
                     .EnsureRestoredForRid(publishFixture.CurrentRid, repoDirectories.CorehostPackages)
                     .PublishProject(runtime: publishFixture.CurrentRid);
             }
-            catch (BuildFailureException)
-            {
-                // Some RIDs didn't exist in 2.0+ so if we get an error publishing, ignore.
-                // However, to catch real issues, allow Windows and OSX to throw here since they currently should never fail because of RIDs.
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-                    RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    throw;
-                }
-
-                return null;
-            }
 
             return publishFixture;
+        }
+
+        private static bool IsRidSupported()
+        {
+            Platform platform = RuntimeEnvironment.OperatingSystemPlatform;
+
+            // Some current Linux RIDs are not supported in 2.0\2.1; just test for Ubuntu 16.
+            return (
+                platform == Platform.Windows ||
+                platform == Platform.Darwin ||
+                (platform == Platform.Linux && RuntimeEnvironment.GetRuntimeIdentifier() == "ubuntu.16.04-x64")
+            );
         }
     }
 }
