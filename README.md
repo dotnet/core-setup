@@ -30,7 +30,7 @@ They can be downloaded from [here](https://www.microsoft.com/net/download#core).
 Daily Builds
 ------------
 
-[What build has the changes I want?](https://github.com/dotnet/core-setup/Documentation/project-docs/how-to-track-changes.md)
+[What build version has the CoreFX/CoreCLR commits I want?](Documentation/project-docs/how-to-track-changes.md)
 
 |   Platform   |   Master   |   Release/2.1.X   |   Release/2.0.X   |   Release/1.1.X   |   Release/1.0.X   |
 |---------|:----------:|:----------:|:----------:|:----------:|:----------:|
