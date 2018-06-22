@@ -12,8 +12,8 @@ public:
 
     static bool resolve_sdk_dotnet_path(
         const pal::string_t& dotnet_root,
-        const pal::string_t& cwd, 
+        const pal::string_t& cwd,
         pal::string_t* cli_sdk,
-        bool parse_only_production = false,
+        bool disallow_prerelease = false,
         pal::string_t* global_json_path = nullptr);
 };
