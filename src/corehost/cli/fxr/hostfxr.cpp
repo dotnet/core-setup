@@ -10,6 +10,7 @@
 #include "error_codes.h"
 #include "libhost.h"
 #include "runtime_config.h"
+#include "sdk_info.h"
 #include "sdk_resolver.h"
 
 typedef int(*corehost_load_fn) (const host_interface_t* init);
@@ -372,6 +373,68 @@ SHARED_API int32_t hostfxr_resolve_sdk2(
     return success
         ? StatusCode::Success 
         : StatusCode::SdkResolverResolveFailure;
+}
+
+
+typedef void (*hostfxr_get_available_sdks_result_fn)(
+    int32_t sdk_count,
+    const pal::char_t *sdk_dirs[]);
+
+//
+// Returns the list of all available SDKs ordered by ascending version.
+//
+// Invoked by MSBuild resolver when the latest SDK used without global.json
+// present is incompatible with the current MSBuild version. It will select
+// the compatible SDK that is closest to the end of this list.
+//
+// Parameters:
+//    exe_dir
+//      The path to the dotnet executable.
+//
+//    result
+//      Callback invoke to return the list of SDKs by their directory paths.
+//
+// Return value:
+//   0 on success, otherwise failure
+//
+// String encoding:
+//   Windows     - UTF-16 (pal::char_t is 2 byte wchar_t)
+//   Unix        - UTF-8  (pal::char_t is 1 byte char)
+//
+SHARED_API int32_t hostfxr_get_available_sdks(
+    const pal::char_t* exe_dir,
+    hostfxr_get_available_sdks_result_fn result)
+{
+    trace::setup();
+
+    trace::info(_X("--- Invoked hostfxr [commit hash: %s] hostfxr_get_available_sdks"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    if (exe_dir == nullptr)
+    {
+        exe_dir = _X("");
+    }
+
+    std::vector<sdk_info> sdk_infos;
+    sdk_info::get_all_sdk_infos(exe_dir, &sdk_infos);
+
+    if (sdk_infos.empty())
+    {
+        result(0, nullptr);
+    }
+    else
+    {
+        std::vector<const pal::char_t*> sdk_dirs;
+        sdk_dirs.reserve(sdk_infos.size());
+
+        for (const auto& sdk_info : sdk_infos)
+        {
+            sdk_dirs.push_back(sdk_info.full_path.c_str());
+        }
+
+        result(sdk_dirs.size(), &sdk_dirs[0]);
+    }
+    
+    return StatusCode::Success;
 }
 
 //
