@@ -3,7 +3,7 @@
 Recently I checked in a change to one of our various dotnet repos (coreclr) and 
 I wanted to figure out when the change would appear in our various NuGet 
 packages and installers. I didn't know how the changes flowed through our 
-build, setup, and publication processes so I asked around (thanks Davis!) and 
+build, setup, and publication processes so I asked around (thanks @Dagood!) and 
 wrote up what I learned. If you discover this doc is inaccurate or incomplete, 
 kindly update it! 
 
@@ -24,7 +24,7 @@ These packages aggregate the binaries that were built from many other repos
 and this is what customers use - though more often Preview and RTM builds 
 instead of the less tested daily builds. 
 The daily builds of installers and Microsoft.NetCore.App do not necessarily
-have the latest builds from each constiuent repo, thus the build versions
+have the latest builds from each constituent repo, thus the build versions
 from individual repos may not match the build version of Microsoft.NetCore.App 
 or an installer that aggregated them.
 
@@ -32,7 +32,7 @@ or an installer that aggregated them.
 
 In my case I had a git commit: [435a69a9aca037f348a09e00dffef8a0888682a7 
 in the coreclr repo](https://github.com/dotnet/coreclr/commit/435a69a9aca037f348a09e00dffef8a0888682a7) 
-and I wanted to know where this code had a propogated to. Alternatively
+and I wanted to know where this code had propagated to. Alternatively
 you may be starting from a particular package or installer and wondering
 what source it contains. Lets start exploring!
 
@@ -43,7 +43,7 @@ For many of the dotnet repos such as CoreCLR the daily builds are posted to the
 [dotnet-core](https://dotnet.myget.org/gallery/dotnet-core) feed. Other repos or 
 specific branches might publish elsewhere in which case hopefully you can find 
 that in the repo docs or by searching [the gallery](https://dotnet.myget.org/gallery) 
-for a appropriate sounding feed name.
+for an appropriate sounding feed name.
 
 
 ## What (intermediate) NuGet packages does a given repo produce?
@@ -53,10 +53,10 @@ Whenever a dotnet repo publishes new builds it makes a commit in the
 packages got published. For example during the night after I merged my 
 example CoreCLR change 
 [this commit](https://github.com/dotnet/versions/commit/cf8930fbe52e5eacf8ab0d7fb06f032d19cda5d5#diff-5f6099c37f777c410c4397b3f1e38870)
-showed up in dotnet/versions. Looking at the 
+was merged in dotnet/versions. Looking at 
 [Last_Build_Packages.txt](https://github.com/dotnet/versions/blob/master/build-info/dotnet/coreclr/master/Last_Build_Packages.txt) 
-that commit edited you can see a list of NuGet packages that CoreCLR repo 
-publishes.
+which was modified in that commit you can see a list of NuGet packages that 
+CoreCLR repo publishes.
 
 
 ## What git commit was a NuGet package built from (answer via MyGet)?
