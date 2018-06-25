@@ -25,6 +25,10 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var newArgs = args.ToList();
             newArgs.Insert(0, command);
+            if (command == "restore")
+            {
+                newArgs.Insert(1, "--no-cache");
+            }
 
             if (EnvVars.Verbose)
             {
