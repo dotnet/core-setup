@@ -3,7 +3,7 @@
 Recently I checked in a change to one of our various dotnet repos (coreclr) and 
 I wanted to figure out when the change would appear in our various NuGet 
 packages and installers. I didn't know how the changes flowed through our 
-build, setup, and publication processes so I asked around (thanks @Dagood!) and 
+build, setup, and publication processes so I asked around (thanks @dagood!) and 
 wrote up what I learned. If you discover this doc is inaccurate or incomplete, 
 kindly update it! 
 
@@ -72,10 +72,10 @@ package that has been published. For example the
 [2.2.0-preview1-26608-04](https://dotnet.myget.org/feed/dotnet-core/package/nuget/runtime.win-x64.Microsoft.NETCore.Runtime.CoreCLR/2.2.0-preview1-26608-04) 
 build description says:
 
-    Internal implementation package not meant for direct consumption. Please do not reference directly. The .NET Core runtime,
-    called CoreCLR, and the base library, called System.Private.CoreLib. It includes the garbage collector, JIT compiler, base .NET
-    data types and many low-level classes. 311322beb96c5475fd7030fcd2f6e7ff14918853 When using NuGet 3.x this package
-    requires at least version 3.4.
+> Internal implementation package not meant for direct consumption. Please do not reference directly. The .NET Core runtime,
+called CoreCLR, and the base library, called System.Private.CoreLib. It includes the garbage collector, JIT compiler, base .NET
+data types and many low-level classes. 311322beb96c5475fd7030fcd2f6e7ff14918853 When using NuGet 3.x this package
+requires at least version 3.4.
 
 This NuGet package has all the code from commit [311322beb96c5475fd7030fcd2f6e7ff14918853](https://github.com/dotnet/coreclr/commit/311322beb96c5475fd7030fcd2f6e7ff14918853) 
 
@@ -94,8 +94,9 @@ the corefx and coreclr builds that were aggregated as well.
 
 ## What git commit was a particular binary built from?
 
-The git commit hash is appended to the version resource in our binaries. You
-can use any tool that views file versions such as a debugger or filever.
+The git commit hash is appended to the version resource in many of our 
+binaries. You can use any tool that views file versions such as a debugger 
+or filever.
 
 
 ## What repo build version has a particular commit I am looking for?
