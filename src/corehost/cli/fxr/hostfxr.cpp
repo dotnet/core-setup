@@ -276,14 +276,20 @@ SHARED_API int32_t hostfxr_resolve_sdk(
     return cli_sdk.size() + 1;
 }
 
-typedef void (*hostfxr_resolve_sdk2_result_fn)(
-    const pal::char_t* resolved_sdk_dir, 
-    const pal::char_t* global_json_path);
-
 enum hostfxr_resolve_sdk2_flags_t : int32_t
 {
     disallow_prerelease = 0x1,
 };
+
+enum class hostfxr_resolve_sdk2_result_key_t : int32_t
+{
+    resolved_sdk_dir = 0,
+    global_json_path = 1,
+};
+
+typedef void (*hostfxr_resolve_sdk2_result_fn)(
+    hostfxr_resolve_sdk2_result_key_t key,
+    const pal::char_t* value);
 
 //
 // Determines the directory location of the SDK accounting for
@@ -313,18 +319,20 @@ enum hostfxr_resolve_sdk2_flags_t : int32_t
 //           unless  prerelease version was specified via global.json.
 //
 //   result
-//      Callback invoked to return the resolved sdk directory and 
-//      global.json path used.
-//      
-//      If resolution succeeds, resolved_sdk_dir will hold the
+//      Callback invoked to return values. It can be invoked more
+//      than once.
+//
+//      If resolution succeeds, result will be invoked with
+//      resolved_sdk_dir key and the value will hold the
 //      path to the resolved SDK director, otherwise it will
 //      be null.
 //
-//      If global.json is used, then global_json_path will hold
-//      the path to global.json. If there was global.json found,
+//      If global.json is used then result will be invoked with
+//      global_json_path key and the value  will hold the path
+//      to global.json. If there was no global.json found,
 //      or the contents of global.json did not impact resolution
-//      (e.g. no version specified), then global_json_path will
-//      be null.
+//      (e.g. no version specified), then result will not be
+//      invoked with global_json_path key.
 //
 // Return value:
 //   0 on success, otherwise failure
@@ -364,11 +372,19 @@ SHARED_API int32_t hostfxr_resolve_sdk2(
         (flags & hostfxr_resolve_sdk2_flags_t::disallow_prerelease) != 0,
         &global_json_path);
 
-    assert(success || resolved_sdk_dir.empty());
+    if (success)
+    {
+        result(
+            hostfxr_resolve_sdk2_result_key_t::resolved_sdk_dir,
+            resolved_sdk_dir.c_str());
+    }
 
-    result(
-        resolved_sdk_dir.empty() ? nullptr : resolved_sdk_dir.c_str(),
-        global_json_path.empty() ? nullptr : global_json_path.c_str());
+    if (!global_json_path.empty())
+    {
+        result(
+            hostfxr_resolve_sdk2_result_key_t::global_json_path,
+            global_json_path.c_str());
+    }
 
     return success
         ? StatusCode::Success 
