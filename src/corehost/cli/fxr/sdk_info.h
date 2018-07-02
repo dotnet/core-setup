@@ -8,7 +8,7 @@
 
 struct sdk_info
 {
-    sdk_info(pal::string_t base_path, pal::string_t full_path, fx_ver_t version, int32_t hive_depth)
+    sdk_info(const pal::string_t& base_path, const pal::string_t& full_path, const fx_ver_t& version, int32_t hive_depth)
         : base_path(base_path)
         , full_path(full_path)
         , version(version)
