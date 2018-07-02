@@ -320,7 +320,8 @@ typedef void (*hostfxr_resolve_sdk2_result_fn)(
 //
 //   result
 //      Callback invoked to return values. It can be invoked more
-//      than once.
+//      than once. String values passed are valid only for the
+//      duration of a call.
 //
 //      If resolution succeeds, result will be invoked with
 //      resolved_sdk_dir key and the value will hold the
@@ -409,6 +410,7 @@ typedef void (*hostfxr_get_available_sdks_result_fn)(
 //
 //    result
 //      Callback invoke to return the list of SDKs by their directory paths.
+//      String array and its elements are valid for the duration of the call.
 //
 // Return value:
 //   0 on success, otherwise failure
