@@ -34,7 +34,6 @@ bool compare_by_version_ascending_then_hive_depth_descending(const sdk_info &a, 
     // and not 5.0 from global dir.
     if (a.version == b.version)
     {
-        assert(a.hive_depth != b.hive_depth);
         return a.hive_depth > b.hive_depth;
     }
 
