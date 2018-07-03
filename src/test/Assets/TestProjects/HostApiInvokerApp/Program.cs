@@ -7,7 +7,13 @@ namespace StandaloneApp
     public static class Program
     {
         [DllImport("hostfxr", CharSet = CharSet.Unicode)]
-        static extern uint hostfxr_get_native_search_directories(int argc, IntPtr argv, StringBuilder buffer, int bufferSize, ref int required_buffer_size);
+        static extern uint hostfxr_get_native_search_directories(
+            int argc, 
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
+            string[] argv, 
+            StringBuilder buffer, 
+            int bufferSize, 
+            ref int required_buffer_size);
 
         const uint HostApiBufferTooSmall = 0x80008098;
 
@@ -50,12 +56,7 @@ namespace StandaloneApp
 
             string pathToDotnet = args[1];
             string pathToApp = args[2];
-
-            IntPtr[] argv = new IntPtr[2];
-            argv[0] = Marshal.StringToHGlobalUni(pathToDotnet);
-            argv[1] = Marshal.StringToHGlobalUni(pathToApp);
-
-            GCHandle gch = GCHandle.Alloc(argv, GCHandleType.Pinned);
+            string[] argv = new[] { pathToDotnet, pathToApp };
 
             // Start with 0 bytes allocated to test re-entry and required_buffer_size
             StringBuilder buffer = new StringBuilder(0);
@@ -64,19 +65,13 @@ namespace StandaloneApp
             uint rc = 0;
             for (int i = 0; i < 2; i++)
             {
-                rc = hostfxr_get_native_search_directories(argv.Length, gch.AddrOfPinnedObject(), buffer, buffer.Capacity + 1, ref required_buffer_size);
+                rc = hostfxr_get_native_search_directories(argv.Length, argv, buffer, buffer.Capacity + 1, ref required_buffer_size);
                 if (rc != HostApiBufferTooSmall)
                 {
                     break;
                 }
 
                 buffer = new StringBuilder(required_buffer_size);
-            }
-
-            gch.Free();
-            for (int i = 0; i < argv.Length; ++i)
-            {
-                Marshal.FreeHGlobal(argv[i]);
             }
 
             if (rc == 0)
