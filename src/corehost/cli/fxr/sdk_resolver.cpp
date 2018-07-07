@@ -136,8 +136,9 @@ bool sdk_resolver_t::resolve_sdk_dotnet_path(const pal::string_t& dotnet_root, p
     return resolve_sdk_dotnet_path(dotnet_root, cwd, cli_sdk);
 }
 
-bool higher_sdk_version(const pal::string_t& new_version, pal::string_t* version, bool disallow_prerelease)
+bool higher_sdk_version(const pal::string_t& new_version, pal::string_t* version)
 {
+    bool disallow_prerelease = false;
     bool retval = false;
     fx_ver_t ver(-1, -1, -1);
     fx_ver_t new_ver(-1, -1, -1);
@@ -221,7 +222,7 @@ bool sdk_resolver_t::resolve_sdk_dotnet_path(
         if (global_cli_version.empty())
         {
             pal::string_t new_cli_version = resolve_sdk_version(current_sdk_path, disallow_prerelease, global_cli_version);
-            if (higher_sdk_version(new_cli_version, &cli_version, disallow_prerelease))
+            if (higher_sdk_version(new_cli_version, &cli_version))
             {
                 sdk_path = current_sdk_path;
             }
@@ -247,7 +248,7 @@ bool sdk_resolver_t::resolve_sdk_dotnet_path(
             else
             {
                 pal::string_t new_cli_version = resolve_sdk_version(current_sdk_path, disallow_prerelease, global_cli_version);
-                if (higher_sdk_version(new_cli_version, &cli_version, disallow_prerelease))
+                if (higher_sdk_version(new_cli_version, &cli_version))
                 {
                     sdk_path = current_sdk_path;
                 }
