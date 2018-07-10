@@ -7,13 +7,22 @@
 #include "trace.h"
 #include "breadcrumbs.h"
 
-breadcrumb_writer_t::breadcrumb_writer_t(const std::unordered_set<pal::string_t>* files)
+breadcrumb_writer_t::breadcrumb_writer_t(bool enabled, const std::unordered_set<pal::string_t>* files)
     : m_status(false)
+    , m_enabled(enabled)
     , m_files(files)
 {
-    if (!pal::get_default_breadcrumb_store(&m_breadcrumb_store))
+    if (enabled && !pal::get_default_breadcrumb_store(&m_breadcrumb_store))
     {
         m_breadcrumb_store.clear();
+    }
+}
+
+breadcrumb_writer_t::~breadcrumb_writer_t()
+{
+    if (m_enabled)
+    {
+        end_write();
     }
 }
 
@@ -21,6 +30,7 @@ breadcrumb_writer_t::breadcrumb_writer_t(const std::unordered_set<pal::string_t>
 // thread to write breadcrumbs.
 void breadcrumb_writer_t::begin_write()
 {
+    assert(m_enabled);
     trace::verbose(_X("--- Begin breadcrumb write"));
     if (m_breadcrumb_store.empty())
     {
@@ -88,4 +98,3 @@ bool breadcrumb_writer_t::end_write()
     trace::verbose(_X("--- End breadcrumb write %d"), m_status);
     return m_status;
 }
-
