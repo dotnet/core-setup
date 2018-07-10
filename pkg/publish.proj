@@ -8,6 +8,7 @@
   <Import Project="$(MSBuildThisFileDirectory)dir.props" />
   <Import Project="$(ToolsDir)PublishContent.targets" />
   <Import Project="$(ToolsDir)versioning.targets" />
+  <Import Project="$(ToolsDir)Build.Common.Props" />
   <Import Project="$(MSBuildThisFileDirectory)dir.targets" />
   <Import Project="$(MSBuildThisFileDirectory)bin\AzureBlob.props" />
 
