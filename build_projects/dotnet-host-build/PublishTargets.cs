@@ -249,7 +249,7 @@ namespace Microsoft.DotNet.Host.Build
                  { "sharedfx_RHEL_x64", false },
                  { "sharedfx_OSX_x64", false },
                  { "sharedfx_Debian_x64", false },
-                 //{ "sharedfx_Debian_9_x64", false }, See https://github.com/dotnet/core-setup/issues/4173
+                 { "sharedfx_Debian_9_x64", false },
                  { "sharedfx_CentOS_x64", false },
                  { "sharedfx_Fedora_24_x64", false },
                  { "sharedfx_Fedora_27_x64", false },
