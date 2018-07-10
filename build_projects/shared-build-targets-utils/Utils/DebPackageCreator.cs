@@ -129,10 +129,21 @@ namespace Microsoft.DotNet.Cli.Build
                 "-n", packageName,
                 "-v", packageVersion)
                 .WorkingDirectory(_consumingProjectDirectory)
+                .Environment("DEB_BUILD_OPTIONS", "noddebs") // don't make -dbgsym packages since we don't use them
                 .Execute()
                 .EnsureSuccessful();
 
-            var debianFile = Directory.EnumerateFiles(intermediatesOutputDirectory, "*.deb").First();
+            string[] debianFiles = Directory.EnumerateFiles(intermediatesOutputDirectory, "*.deb").ToArray();
+            if (debianFiles.Length == 0)
+            {
+                throw new BuildFailureException($"Couldn't find any .deb files in '{intermediatesOutputDirectory}'.");
+            }
+            if (debianFiles.Length > 1)
+            {
+                throw new BuildFailureException($"Found more than one .deb file in '{intermediatesOutputDirectory}'.{Environment.NewLine}{string.Join(Environment.NewLine, debianFiles)}");
+            }
+
+            var debianFile = debianFiles[0];
             File.Copy(debianFile, outputFile, true);
         }
 
