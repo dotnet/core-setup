@@ -14,11 +14,12 @@
 
   <PropertyGroup>
     <PackageDownloadDirectory>$(MSBuildThisFileDirectory)packages\AzureTransfer\</PackageDownloadDirectory>
+    <!-- SignFiles needs IntermediateOutputPath & OutDir to be set -->
     <IntermediateOutputPath>$(MSBuildThisFileDirectory)bin\obj</IntermediateOutputPath>
+    <OutDir>$(PackageDownloadDirectory)</OutDir>
     <SignPattern>$(PackageDownloadDirectory)*.nupkg</SignPattern>
     <SymbolPattern>$(PackageDownloadDirectory)*.symbols.nupkg</SymbolPattern>
     <PublishPattern>$(PackageDownloadDirectory)*</PublishPattern>
-    <OutDir>$(PackageDownloadDirectory)</OutDir>
     <UnsignedFolder Condition="'$(Unsigned)' == 'true'">/Unsigned</UnsignedFolder>
     <BlobNamePrefix>$(Channel)/Binaries/$(BuildNumber)$(UnsignedFolder)</BlobNamePrefix>
   </PropertyGroup>
