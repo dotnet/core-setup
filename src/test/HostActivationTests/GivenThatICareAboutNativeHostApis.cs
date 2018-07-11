@@ -60,6 +60,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             var appDll = fixture.TestProject.AppDll;
 
             dotnet.Exec(appDll)
+                .EnvironmentVariable("CORE_BREADCRUMBS", sharedTestState.BreadcrumbLocation)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .CaptureStdOut()
                 .CaptureStdErr()
@@ -80,6 +81,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             var appDll = fixture.TestProject.AppDll;
 
             dotnet.Exec(appDll)
+                .EnvironmentVariable("CORE_BREADCRUMBS", sharedTestState.BreadcrumbLocation)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .CaptureStdOut()
                 .CaptureStdErr()
@@ -102,6 +104,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             public TestProjectFixture PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture { get; set; }
             public RepoDirectoriesProvider RepoDirectories { get; set; }
 
+            public string BreadcrumbLocation { get; set; }
+
             public SharedTestState()
             {
                 RepoDirectories = new RepoDirectoriesProvider();
@@ -117,6 +121,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
                 PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture = new TestProjectFixture("PortableAppWithException", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
+
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    BreadcrumbLocation = Path.Combine(
+                        PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture.TestProject.OutputDirectory,
+                        "opt",
+                        "corebreadcrumbs");
+                    Directory.CreateDirectory(BreadcrumbLocation);
+                }
             }
 
             public void Dispose()
