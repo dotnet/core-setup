@@ -7,7 +7,13 @@ namespace StandaloneApp
 {
     public static class Program
     {
-        [DllImport("hostfxr", CharSet = CharSet.Unicode)]
+#if WINDOWS
+       const CharSet OSCharSet = CharSet.Unicode;
+#else
+       const CharSet OSCharSet = CharSet.Ansi; // actually UTF8 on Unix
+#endif
+
+        [DllImport("hostfxr", CharSet = OSCharSet)]
         static extern uint hostfxr_get_native_search_directories(
             int argc, 
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
@@ -16,7 +22,6 @@ namespace StandaloneApp
             int bufferSize, 
             ref int required_buffer_size);
 
-        
         [Flags]
         internal enum hostfxr_resolve_sdk2_flags_t : int
         {
@@ -29,25 +34,25 @@ namespace StandaloneApp
             global_json_path = 1,
         }
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = OSCharSet)]
         internal delegate void hostfxr_resolve_sdk2_result_fn(
             hostfxr_resolve_sdk2_result_key_t key,
             string value);
 
-        [DllImport("hostfxr", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("hostfxr", CharSet = OSCharSet, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int hostfxr_resolve_sdk2(
             string exe_dir,
             string working_dir,
             hostfxr_resolve_sdk2_flags_t flags,
             hostfxr_resolve_sdk2_result_fn result);
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = OSCharSet)]
         internal delegate void hostfxr_get_available_sdks_result_fn(
             int sdk_count,
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
             string[] sdk_dirs);
 
-        [DllImport("hostfxr", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("hostfxr", CharSet = OSCharSet, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int hostfxr_get_available_sdks(
             string exe_dir,
             hostfxr_get_available_sdks_result_fn result);

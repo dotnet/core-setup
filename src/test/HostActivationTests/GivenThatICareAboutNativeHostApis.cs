@@ -22,14 +22,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
         [Fact]
         public void Muxer_activation_of_Publish_Output_Portable_DLL_hostfxr_get_native_search_directories_Succeeds()
         {
-            // https://github.com/dotnet/core-setup/issues/4344
-            // Currently the native API is used only on Windows, although it has been manually tested on Unix.
-            // Limit OS here to avoid issues with DllImport not being able to find the shared library.
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableTestProjectFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
@@ -56,14 +48,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
         
          [Fact]
          public void Hostfxr_resolve_sdk2_and_hostfxr_get_available_sdks_work()
-        {
-            // https://github.com/dotnet/core-setup/issues/4344
-            // Limit OS here to avoid issues with DllImport not being able to find the shared library.
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
+         {
             var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableTestProjectFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
@@ -94,30 +79,33 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             }
 
             var dotnetLocation = Path.Combine(dotnet.BinPath, $"dotnet{fixture.ExeExtension}");
+            string expectedList;
 
-            // With multi-level lookup: get local and global sdks sorted by ascending version,
-            // with global sdk coming before local sdk when versions are equal
-            var expectedList = string.Join(';', new[]
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // multilevel lookup does not exist otherwise
             {
-                 Path.Combine(localSdkDir, "0.1.2"),
-                 Path.Combine(globalSdkDir, "1.2.3"),
-                 Path.Combine(localSdkDir, "1.2.3"),
-                 Path.Combine(globalSdkDir, "2.3.4-preview"), 
-                 Path.Combine(globalSdkDir, "4.5.6"),
-                 Path.Combine(localSdkDir, "5.6.7-preview"),
-            });
-
-            dotnet.Exec(appDll, new[] { "hostfxr_get_available_sdks", exeDir } )
-                .EnvironmentVariable("TEST_MULTILEVEL_LOOKUP_PROGRAM_FILES", programFiles)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("hostfxr_get_available_sdks:Success")
-                .And
-                .HaveStdOutContaining($"hostfxr_get_available_sdks sdks:[{expectedList}]");
+                // With multi-level lookup (windows onnly): get local and global sdks sorted by ascending version,
+                // with global sdk coming before local sdk when versions are equal
+                expectedList = string.Join(';', new[]
+                {
+                     Path.Combine(localSdkDir, "0.1.2"),
+                     Path.Combine(globalSdkDir, "1.2.3"),
+                     Path.Combine(localSdkDir, "1.2.3"),
+                     Path.Combine(globalSdkDir, "2.3.4-preview"), 
+                     Path.Combine(globalSdkDir, "4.5.6"),
+                     Path.Combine(localSdkDir, "5.6.7-preview"),
+                });
+                dotnet.Exec(appDll, new[] { "hostfxr_get_available_sdks", exeDir } )
+                    .EnvironmentVariable("TEST_MULTILEVEL_LOOKUP_PROGRAM_FILES", programFiles)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining("hostfxr_get_available_sdks:Success")
+                    .And
+                    .HaveStdOutContaining($"hostfxr_get_available_sdks sdks:[{expectedList}]");
+            }
 
             // Without multi-level lookup: get only sdks sorted by ascending version
             expectedList = string.Join(';', new[]
@@ -158,11 +146,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             // without global.json and disallowing previews, pick latest non-preview
             expectedData = string.Join(';', new[]
             {
-                ("resolved_sdk_dir", Path.Combine(globalSdkDir, "4.5.6"))
+                ("resolved_sdk_dir", Path.Combine(localSdkDir, "1.2.3"))
             });
 
             dotnet.Exec(appDll, new[] { "hostfxr_resolve_sdk2", exeDir, workingDir, "disallow_prerelease" })
-                .EnvironmentVariable("TEST_MULTILEVEL_LOOKUP_PROGRAM_FILES", programFiles)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
@@ -197,7 +184,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
 
         public class SharedTestState : IDisposable
         {
-            public TestProjectFixture PreviouslyBuiltAndRestoredPortableTestProjectFixture { get; set; }
             public TestProjectFixture PreviouslyPublishedAndRestoredPortableTestProjectFixture { get; set; }
             public RepoDirectoriesProvider RepoDirectories { get; set; }
 
@@ -205,18 +191,27 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                PreviouslyBuiltAndRestoredPortableTestProjectFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
-                    .EnsureRestored(RepoDirectories.CorehostPackages)
-                    .BuildProject();
-
-                PreviouslyPublishedAndRestoredPortableTestProjectFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
+                var fixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
+                
+                // On non-Windows, we can't just P/Invoke to already loaded hostfxr, so copy it next to the app dll.
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    var hostfxr = Path.Combine(
+                        fixture.BuiltDotnet.GreatestVersionHostFxrPath, 
+                        $"{fixture.SharedLibraryPrefix}hostfxr{fixture.SharedLibraryExtension}");
+
+                    File.Copy(
+                        hostfxr, 
+                        Path.GetDirectoryName(fixture.TestProject.AppDll));
+                }
+
+                PreviouslyPublishedAndRestoredPortableTestProjectFixture = fixture;
             }
 
             public void Dispose()
             {
-                PreviouslyBuiltAndRestoredPortableTestProjectFixture.Dispose();
                 PreviouslyPublishedAndRestoredPortableTestProjectFixture.Dispose();
             }
         }
