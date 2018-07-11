@@ -275,12 +275,9 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
     std::vector<char> managed_app;
     pal::pal_clrstring(args.managed_application, &managed_app);
 
+    // Leave breadcrumbs for servicing.
     breadcrumb_writer_t writer(breadcrumbs_enabled, &breadcrumbs);
-    if (breadcrumbs_enabled)
-    {
-        // Leave breadcrumbs for servicing.
-        writer.begin_write();
-    }
+    writer.begin_write();
 
     // Previous hostpolicy trace messages must be printed before executing assembly
     trace::flush();
