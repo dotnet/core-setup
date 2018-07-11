@@ -14,6 +14,7 @@
 
   <PropertyGroup>
     <PackageDownloadDirectory>$(MSBuildThisFileDirectory)packages\AzureTransfer\</PackageDownloadDirectory>
+    <IntermediateOutputPath>$(MSBuildThisFileDirectory)bin\obj</IntermediateOutputPath>
     <SignPattern>$(PackageDownloadDirectory)*.nupkg</SignPattern>
     <SymbolPattern>$(PackageDownloadDirectory)*.symbols.nupkg</SymbolPattern>
     <PublishPattern>$(PackageDownloadDirectory)*</PublishPattern>
