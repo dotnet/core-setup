@@ -121,6 +121,8 @@ namespace StandaloneApp
                 case nameof(hostfxr_get_available_sdks):
                     Test_hostfxr_get_available_sdks(args);
                     break;
+                default:
+                    throw new ArgumentException($"Invalid API to test passed as args[0]): {apiToTest}");
             }
         }
 
