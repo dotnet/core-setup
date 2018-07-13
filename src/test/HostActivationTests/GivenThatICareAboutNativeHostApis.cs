@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
         [Fact]
         public void Muxer_activation_of_Publish_Output_Portable_DLL_hostfxr_get_native_search_directories_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableTestProjectFixture.Copy();
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableApiTestProjectFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -45,11 +45,56 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
                 .And
                 .HaveStdOutContaining("hostfxr_get_native_search_directories buffer:[" + dotnet.GreatestVersionSharedFxPath);
         }
+
+        [Fact]
+        public void Breadcrumb_thread_finishes_when_app_closes_normally()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppProjectFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            dotnet.Exec(appDll)
+                .EnvironmentVariable("CORE_BREADCRUMBS", sharedTestState.BreadcrumbLocation)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World")
+                .And
+                .HaveStdErrContaining("Waiting for breadcrumb thread to exit...");
+        }
+
+        [Fact]
+        public void Breadcrumb_thread_does_not_finish_when_app_has_unhandled_exception()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            dotnet.Exec(appDll)
+                .EnvironmentVariable("CORE_BREADCRUMBS", sharedTestState.BreadcrumbLocation)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining("Unhandled Exception: System.Exception: Goodbye World")
+                .And
+                // The breadcrumb thread does not wait since destructors are not called when an exception is thrown.
+                // However, destructors will be called when the caller (such as a custom host) is compiled with SEH Exceptions (/EHa) and has a try\catch.
+                // Todo: add a native host test app so we can verify this behavior.
+                .NotHaveStdErrContaining("Waiting for breadcrumb thread to exit...");
+        }
         
          [Fact]
          public void Hostfxr_resolve_sdk2_and_hostfxr_get_available_sdks_work()
          {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableTestProjectFixture.Copy();
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableApiTestProjectFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -184,20 +229,39 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
 
         public class SharedTestState : IDisposable
         {
-            public TestProjectFixture PreviouslyPublishedAndRestoredPortableTestProjectFixture { get; set; }
+            public TestProjectFixture PreviouslyPublishedAndRestoredPortableApiTestProjectFixture { get; set; }
+            public TestProjectFixture PreviouslyPublishedAndRestoredPortableAppProjectFixture { get; set; }
+            public TestProjectFixture PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture { get; set; }
             public RepoDirectoriesProvider RepoDirectories { get; set; }
+
+            public string BreadcrumbLocation { get; set; }
 
             public SharedTestState()
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                var fixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
+                PreviouslyPublishedAndRestoredPortableApiTestProjectFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
+                    .EnsureRestored(RepoDirectories.CorehostPackages)
+                    .BuildProject();
+
+                PreviouslyPublishedAndRestoredPortableAppProjectFixture = new TestProjectFixture("PortableApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
-                
-                // On non-Windows, we can't just P/Invoke to already loaded hostfxr, so copy it next to the app dll.
+
+                PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture = new TestProjectFixture("PortableAppWithException", RepoDirectories)
+                    .EnsureRestored(RepoDirectories.CorehostPackages)
+                    .PublishProject();
+
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
+                    BreadcrumbLocation = Path.Combine(
+                        PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture.TestProject.OutputDirectory,
+                        "opt",
+                        "corebreadcrumbs");
+                    Directory.CreateDirectory(BreadcrumbLocation);
+
+                    // On non-Windows, we can't just P/Invoke to already loaded hostfxr, so copy it next to the app dll.
+                    var fixture = PreviouslyPublishedAndRestoredPortableApiTestProjectFixture;
                     var hostfxr = Path.Combine(
                         fixture.BuiltDotnet.GreatestVersionHostFxrPath, 
                         $"{fixture.SharedLibraryPrefix}hostfxr{fixture.SharedLibraryExtension}");
@@ -206,13 +270,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
                         hostfxr, 
                         Path.GetDirectoryName(fixture.TestProject.AppDll));
                 }
-
-                PreviouslyPublishedAndRestoredPortableTestProjectFixture = fixture;
             }
 
             public void Dispose()
             {
-                PreviouslyPublishedAndRestoredPortableTestProjectFixture.Dispose();
+                PreviouslyPublishedAndRestoredPortableApiTestProjectFixture.Dispose();
+                PreviouslyPublishedAndRestoredPortableAppProjectFixture.Dispose();
+                PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture.Dispose();
             }
         }
     }
