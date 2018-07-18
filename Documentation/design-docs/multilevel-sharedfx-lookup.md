@@ -156,7 +156,8 @@ The best practices for a runtimeconfig.json:
 - <B>No Circular References:</B> there should not be any circular dependencies between frameworks.
   - It is not normally a desirable design for the same reasons why circular references in assemblies and packages are not supported or supported well (chicken-egg creation, simultaneous version changes).
   - One potential future case where is makes sense to have "pseudo-circular" dependencies is when framework "foo" loads a light-up framework which depends on "foo". Internally the foo->lightup reference may be treated as a late-bound framework reference, thus causing a cycle. This potential feature may replace the "additional deps" feature in a way that allows for richer light-up scenarios by allowing the lightup to specify framework dependency(s) and have a small deps.json.
-
+- <B>No Downgrading:</B> a newer version of a shared framework should keep or increase the version to another shared framework (never decrease the version number).
+  
 By following these best practices we have optimal run-time performance (less processing and probing) and less chance of incompatible framework references.
 
 Discussion points:
