@@ -295,7 +295,7 @@
 
     <MakeDir Directories="$(_crossGenSymbolsOutputDirectory)" />
 
-    <Exec Command="$(_crossGenPath) @$(_crossGenSymbolsResponseFile)" WorkingDirectory="$(_clrDirectory)" EnvironmentVariables="COMPlus_PartialNGen=0" />
+    <Exec Command="$(_crossGenPath) @$(_crossGenSymbolsResponseFile)" WorkingDirectory="$(_clrDirectory)" EnvironmentVariables="COMPlus_PartialNGen=1" />
 
     <Touch Files="%(_filesToCrossGen.CrossGenSymbolSemaphorePath)" AlwaysCreate="true" />
   </Target>
