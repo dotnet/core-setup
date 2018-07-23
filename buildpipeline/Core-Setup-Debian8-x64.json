@@ -108,10 +108,10 @@
         "definitionType": "task"
       },
       "inputs": {
-        "scriptPath": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools/msbuildrun.sh",
+        "scriptPath": "$(ReleaseToolsDir)/msbuildrun.sh",
         "args": "--target DownloadFromAzure --properties ContainerName=$(CoreFxAzureContainer),DownloadDirectory=$(Build.SourcesDirectory)/AzureCoreFxDownload,AccountName=$(AzureAccountName),AccessToken=$(AzureAccessToken),FilterBlobNames=Release/",
         "disableAutoCwd": "false",
-        "cwd": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools",
+        "cwd": "$(ReleaseToolsDir)",
         "failOnStandardError": "false"
       }
     },
@@ -128,10 +128,10 @@
         "definitionType": "task"
       },
       "inputs": {
-        "scriptPath": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools/msbuildrun.sh",
+        "scriptPath": "$(ReleaseToolsDir)/msbuildrun.sh",
         "args": "--target AddSourceToNuGetConfig --properties NuGetConfigFile=$(Build.SourcesDirectory)/NuGet.Config,SourceName=LocalDownload,SourcePath=./AzureCoreFxDownload/Release",
         "disableAutoCwd": "false",
-        "cwd": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools",
+        "cwd": "$(ReleaseToolsDir)",
         "failOnStandardError": "false"
       }
     },
@@ -148,10 +148,10 @@
         "definitionType": "task"
       },
       "inputs": {
-        "scriptPath": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools/msbuildrun.sh",
+        "scriptPath": "$(ReleaseToolsDir)/msbuildrun.sh",
         "args": "--target AddSourceToNuGetConfig --properties NuGetConfigFile=$(Build.SourcesDirectory)/NuGet.Config,SourceName=LocalDownload2,SourcePath=./AzureCoreFxDownload/Release/pkg",
         "disableAutoCwd": "false",
-        "cwd": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools",
+        "cwd": "$(ReleaseToolsDir)",
         "failOnStandardError": "false"
       }
     },
@@ -362,8 +362,11 @@
     "ReleaseToolsGitUrl": {
       "value": "https://dn-bot:$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Release-Tools"
     },
+    "ReleaseToolsDir": {
+      "value": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools"
+    },
     "PB_InternalBuild": {
-      "value": false
+      "value": "false"
     }
   },
   "demands": [
