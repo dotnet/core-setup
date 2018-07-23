@@ -700,7 +700,7 @@
       "value": "https://dn-bot:$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Release-Tools"
     },
     "PB_InternalBuild": {
-      "value": false
+      "value": "false"
     }
   },
   "demands": [
