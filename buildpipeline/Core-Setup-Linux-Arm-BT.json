@@ -24,6 +24,24 @@
     {
       "enabled": true,
       "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Remove Release Tools directory",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "rm",
+        "arguments": "-rf DotNet-Core-Release-Tools",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": true,
       "alwaysRun": false,
       "displayName": "Cleanup previous build",
       "timeoutInMinutes": 0,
@@ -135,6 +153,119 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Clone release tools",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "git",
+        "arguments": "clone $(ReleaseToolsGitUrl)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Create CoreFX drop directory",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "mkdir",
+        "arguments": "$(PB_SourcesDirectory)/AzureCoreFxDownload",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Download Azure Internal drop",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "6c731c3c-3c68-459a-a5c9-bde6e6595b5b",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "scriptPath": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools/msbuildrun.sh",
+        "args": "--target DownloadFromAzure --properties ContainerName=$(Internal_CoreFX_AzureContainer),DownloadDirectory=$(PB_SourcesDirectory)/AzureCoreFxDownload,AccountName=$(Internal_CoreFX_AzureAccountName),AccessToken=$(Internal_CoreFX_AzureAccessToken),FilterBlobNames=Release/",
+        "disableAutoCwd": "false",
+        "cwd": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Add CoreFX drop to NuGet.config",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "6c731c3c-3c68-459a-a5c9-bde6e6595b5b",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "scriptPath": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools/msbuildrun.sh",
+        "args": "--target AddSourceToNuGetConfig --properties NuGetConfigFile=$(PB_SourcesDirectory)/NuGet.config,SourceName=LocalDownload,SourcePath=./AzureCoreFxDownload/Release",
+        "disableAutoCwd": "false",
+        "cwd": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Copy $(PB_SourcesDirectory)/AzureCoreFxDownload/Release/pkg (*.nupkg) -> $(PB_SourcesDirectory)/AzureCoreFxDownload/Release",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "SourceFolder": "$(PB_SourcesDirectory)/AzureCoreFxDownload/Release/pkg",
+        "Contents": "*.nupkg",
+        "TargetFolder": "$(PB_SourcesDirectory)/AzureCoreFxDownload/Release",
+        "CleanTargetFolder": "false",
+        "OverWrite": "false",
+        "flattenFolders": "true"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Add CoreCLR drop to NuGet.config (AzureCoreFxDownload/Release/pkg)",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "6c731c3c-3c68-459a-a5c9-bde6e6595b5b",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "scriptPath": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools/msbuildrun.sh",
+        "args": "--target AddSourceToNuGetConfig --properties NuGetConfigFile=$(PB_SourcesDirectory)/NuGet.config,SourceName=LocalDownload2,SourcePath=./AzureCoreFxDownload/Release/pkg",
+        "disableAutoCwd": "false",
+        "cwd": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "Build",
       "timeoutInMinutes": 0,
       "task": {
@@ -144,7 +275,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(PB_AdditionalMSBuildArguments)",
+        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(PB_AdditionalMSBuildArguments) /p:OverridePackageSource=$(PB_GitDirectory)/AzureCoreFxDownload/Release",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
@@ -224,6 +355,42 @@
         "cwd": "",
         "failOnStandardError": "false",
         "script": "if [ -f \"$AGENTTOOLSPATH/end.sh\" ]; then echo \"$AGENTTOOLSPATH/end.sh script found. Executing...\"; $AGENTTOOLSPATH/end.sh ; else echo \"$AGENTTOOLSPATH/end.sh script does not exist. Moving on.\" ; fi"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Remove Azure CoreFX drop directory",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "rm",
+        "arguments": "-rf $(PB_SourcesDirectory)/AzureCoreFxDownload",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Remove Release Tools directory",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "rm",
+        "arguments": "-rf DotNet-Core-Release-Tools",
+        "workingFolder": "",
+        "failOnStandardError": "false"
       }
     }
   ],
@@ -416,6 +583,22 @@
     "PB_ChecksumAzureAccessToken": {
       "value": null,
       "isSecret": true
+    },
+    "Internal_CoreFX_AzureContainer": {
+      "value": "PassedViaPipeBuild"
+    },
+    "Internal_CoreFX_AzureAccountName": {
+      "value": "PassedViaPipeBuild"
+    },
+    "Internal_CoreFX_AzureAccessToken": {
+      "value": null,
+      "isSecret": true
+    },
+    "ReleaseToolsGitUrl": {
+      "value": "https://dn-bot:$(PB_VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Release-Tools"
+    },
+    "OverridePackageSource": {
+      "value": "$(PB_SourcesDirectory)/AzureCoreFxDownload/Release"
     }
   },
   "demands": [
