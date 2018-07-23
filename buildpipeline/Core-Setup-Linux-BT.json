@@ -200,10 +200,10 @@
         "definitionType": "task"
       },
       "inputs": {
-        "scriptPath": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools/msbuildrun.sh",
+        "scriptPath": "$(ReleaseToolsDir)/msbuildrun.sh",
         "args": "--target DownloadFromAzure --properties ContainerName=$(Internal_CoreFX_AzureContainer),DownloadDirectory=$(PB_SourcesDirectory)/AzureCoreFxDownload,AccountName=$(Internal_CoreFX_AzureAccountName),AccessToken=$(Internal_CoreFX_AzureAccessToken),FilterBlobNames=Release/",
         "disableAutoCwd": "false",
-        "cwd": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools",
+        "cwd": "$(ReleaseToolsDir)",
         "failOnStandardError": "false"
       }
     },
@@ -220,10 +220,10 @@
         "definitionType": "task"
       },
       "inputs": {
-        "scriptPath": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools/msbuildrun.sh",
+        "scriptPath": "$(ReleaseToolsDir)/msbuildrun.sh",
         "args": "--target AddSourceToNuGetConfig --properties NuGetConfigFile=$(PB_SourcesDirectory)/NuGet.config,SourceName=LocalDownload,SourcePath=./AzureCoreFxDownload/Release",
         "disableAutoCwd": "false",
-        "cwd": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools",
+        "cwd": "$(ReleaseToolsDir)",
         "failOnStandardError": "false"
       }
     },
@@ -261,10 +261,10 @@
         "definitionType": "task"
       },
       "inputs": {
-        "scriptPath": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools/msbuildrun.sh",
+        "scriptPath": "$(ReleaseToolsDir)/msbuildrun.sh",
         "args": "--target AddSourceToNuGetConfig --properties NuGetConfigFile=$(PB_SourcesDirectory)/NuGet.config,SourceName=LocalDownload2,SourcePath=./AzureCoreFxDownload/Release/pkg",
         "disableAutoCwd": "false",
-        "cwd": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools",
+        "cwd": "$(ReleaseToolsDir)",
         "failOnStandardError": "false"
       }
     },
@@ -1291,6 +1291,9 @@
     },
     "ReleaseToolsGitUrl": {
       "value": "https://dn-bot:$(PB_VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Release-Tools"
+    },
+    "ReleaseToolsDir": {
+      "value": "$(Build.SourcesDirectory)/DotNet-Core-Release-Tools"
     },
     "CLI_NUGET_API_KEY": {
       "value": ""
