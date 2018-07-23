@@ -87,7 +87,7 @@ For 2.1, a given framework can only depend upon another single framework. An app
 
 Each framework has its own roll-forward semantics. This means ASP.NET can roll-forward independently of NETCore.App even though ASP.NET depends upon the NETCore.App framework.
 
-NETCore.App in 2.0 has its own deps.json file in its own folder that lists its assemblies. In 2.1, other frameworks will also have their own deps.jon. In addition, each framework has an optional runtimeconfig.json that describes its framework dependency including optional setting overrides (applyPatches, rollForwardOnNoCandidateFx). If the runtimeconfig.json file does not exist, or does not have a value for a setting, it uses the values from the app's runtimeconfig.json or from environment variables.
+NETCore.App in 2.0 has its own deps.json file in its own folder that lists its assemblies. In 2.1, other frameworks will also have their own deps.json. In addition, each framework has an optional runtimeconfig.json that describes its framework dependency including optional setting overrides (applyPatches, rollForwardOnNoCandidateFx). If the runtimeconfig.json file does not exist, or does not have a value for a setting, it uses the values from the app's runtimeconfig.json or from environment variables.
 
 For example, an MVC app's runtimeconfig.json would contain:
 ```javascript
@@ -111,6 +111,8 @@ The 2.1 release added support for a chain of frameworks, where each framework ca
 The runtimeconfig.json will have a new `frameworks` array section that allows more than one framework to be specified:
 ```javascript
 "runtimeOptions": {
+	"rollForwardOnNoCandidateFx" : 1,
+	"applyPatches" : true,
 	"frameworks": [
 			{
 					"name": "Microsoft.AspNetCore.All",
@@ -126,15 +128,15 @@ The runtimeconfig.json will have a new `frameworks` array section that allows mo
 }
 ```
 
-If an entry also exists in the `framework` section, it is treated as the first element in the `frameworks` array. The `framework` section is no longer required but is supported for backwards compatibility.
+If an entry also exists in the `framework` section, it is treated as the first element in the `frameworks` array. Thus the `framework` section is no longer required but is supported for backwards compatibility.
 
-The `applyPatches` and `rollForwardOnNoCandidateFx` can be specified individually for each framework. These per-framework settings override any corresponding values that may be present in the `runtimeOptions` section.
+The `applyPatches` and `rollForwardOnNoCandidateFx` continue to be supported globally in the `runtimeOptions` section, but can now also be specified individually for each framework. These per-framework settings override any corresponding values in the `runtimeOptions` section.
 
 By allowing more than one framework reference, we may encounter issues with multiple references to the same framework but with different versions or with different roll-forward settings. The rules to reconcile that include:
 - All existing roll-forward rules are applied to each reference to a framework individually, respecting each `version`, `applyPatches` and `rollForwardOnNoCandidateFx` value.
 - The *most restrictive* value of every `applyPatches` and `rollForwardOnNoCandidateFx` entry are used when resolving a given framework:
   - `applyPatches` `false` is more restrictive than `true`
-  - `rollForwardOnNoCandidateFx` `0` (no roll-forward on Major or Minor) is more restrictive than `1` (Minor only) or `2` (Major and Minor).
+  - `rollForwardOnNoCandidateFx` `0` (no roll-forward) is more restrictive than `1` (Patch and Minor) or `2` (Patch, Minor and Major).
   - `rollForwardOnNoCandidateFx` `1` is more restrictive than `2`.
   - Note that if there are no explicit values for `rollForwardOnNoCandidateFx`, then the environment variable `DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX` is used (there is no environment variable for `applyPatches`). If there is no environment or config settings, then the default values are used: `applyPatches=true`, and `rollForwardOnNoCandidateFx=1`.
 - The highest `version` value of a given framework is selected.
@@ -145,21 +147,42 @@ So, for example, if there are two references:
 
 then that will always fail and result in a framework not found error. This example fails because `2.1.0` does not allow roll-forward on Minor (`rollForwardOnNoCandidateFx=0`) and because of the specified version `2.2.0`.
 
-The best practices for a runtimeconfig.json:
-- <B>No Restrictive Roll-Forward Overrides:</B> do not specify `applyPatches` and `rollForwardOnNoCandidateFx` in the runtimeconfig.json unless absolutely necessary. These should only be considered to work around issues in the field, by the end user, and not deployed with a framework.   
+#### Best practices for a runtimeconfig.json:
+- <B>No Restrictive Roll-Forward Overrides:</B> do not specify `applyPatches` and `rollForwardOnNoCandidateFx` in the runtimeconfig.json unless absolutely necessary. These should only be considered to work around issues in the field, by the end user, and not set by default by any framework.
  - The rollForwardOnNoCandidateFx can also be controlled by environment variables, it should be very rare that we need to override these in the runtimeconfig.json, and especially at a per-framework level.
- - The one exception to this is to use a *less restrictive* setting by specifying `rollForwardOnNoCandidateFx=2` which allows roll-forward by Major (in addition to Minor). The default value is `1` (Minor only).
+ - The one exception to this is to use a *less restrictive* setting by specifying `rollForwardOnNoCandidateFx=2` which allows roll-forward by Major (in addition to Minor and Patch). The default value is `1` (Minor \ Patch only).
 - <B>No Redundant References:</B> when a given framework "foo" ships it should not create a case of having more than one reference to the another framework "bar". The reason is that base frameworks already specify "bar" so there is no reason to re-specify it. However, there are potential valid reasons to re-specify the framework:
 	- To force a newer version of a given framework which is referenced by lower-level frameworks. However assuming first-party frameworks are coordinated, this reason should not be exist for first-party runtimeconfig.json files.
 	- To be redundant if there are several "smaller" or "optional" frameworks being used and no guarantee that a base framework will always reference the smaller frameworks over time.
 	- To provide a hint of the newest framework version. This would likely only be in the app's runtimeconfig.json, and during roll-forward scenarios. This would be used to prevent re-resolving the frameworks (finding the most compatible framework on disk) which can happen when a lower-level framework requires a newer version of a another framework that was already resolved. By providing the hint at a higher-level, the correct framework version will be found the first time.
 - <B>No Circular References:</B> there should not be any circular dependencies between frameworks.
   - It is not normally a desirable design for the same reasons why circular references in assemblies and packages are not supported or supported well (chicken-egg creation, simultaneous version changes).
-  - One potential future case where is makes sense to have "pseudo-circular" dependencies is when framework "foo" loads a light-up framework which depends on "foo". Internally the foo->lightup reference may be treated as a late-bound framework reference, thus causing a cycle. This potential feature may replace the "additional deps" feature in a way that allows for richer light-up scenarios by allowing the lightup to specify framework dependency(s) and have a small deps.json.
+  - One potential future case is to allow "pseudo-circular" dependencies where framework "foo" loads a light-up framework which depends on "foo". Internally the foo->lightup reference may be treated as a late-bound framework reference, thus causing a cycle. This potential feature may replace the "additional deps" feature in a way that allows for richer light-up scenarios by allowing the lightup to specify framework dependency(s) and have a small deps.json.
 
 By following these best practices we have optimal run-time performance (less processing and probing) and less chance of incompatible framework references.
 
-Discussion points:
+#### Algorithm
+Terminology:
+- `framework list`: entries for a single runtimeconfig.json which consists of framework `name`, `version`, optional `applyPatches`, and optional `rollForwardOnNoCandidateFx`.
+- `newest map`: a map keyed off of framework name that contains the highest framework version requested. It is used to perform "soft" roll-forwards to compatible references without reading the disk or performing excessive re-try (Step 12).
+
+Algorithm:
+1. In the application's runtimeconfig.json, obtain the framework information specified in `runtimeOptions.framework.name` and `runtimeOptions.framework.version`. It is not required to be present.
+1. Parse the application's runtimecofig.json file `runtimeOptions.frameworks` section in order to obtain the `framework list`.
+1. If there exists a value from step 1, insert that framework into the beginning of the `framework list`
+1. For each framework in `framework list`
+1. --> If the framework is not currently in the `newest map` list then add it.
+1. For each framework in `framework list`
+1. --> If the framework has not previously been reconciled then
+1. ----> If the framework exists in `newest map` then then perform a "soft" roll-forward. We may fail here if not compatible.
+1. ----> Else Reconcile the framework by reading the disk to find the most compatible version based on current settings. We may fail here if a compatible framework is not found. This is a recursive call back to Step 4 but with keeping the current and updated `newest map` but passing in a new `framework list` based upon the values from the newly resolved framework's runtime.config which may reference additional frameworks.
+1. --> Else (_the framework was already reconciled_)
+1. ----> If the new reference is compatible with the reconciled framework (same version or lower), then perform a "soft" roll-forward. We may fail here if not compatible.
+1. ----> Else (_the framework is not compatible because a higher version was requested_) then re-start the algorithm (goto Step 1) with new \ clear state except for the `newest map` so that we attempt to use the newer version next time.
+
+This algorithm for resolving the various framework references assumes the <B>No Circular References</B> best practice explained above in order to prevent loading a newer version of a framework than necessary.
+
+#### Discussion points:
 - By choosing the "most restrictive" values for `applyPatches` and `rollForwardOnNoCandidateFx` we limit what changes the app developer can do to work around issues without being forced to modify the framework's runtimeconfig.json files.
   - For example, if a framework "foo" depends on framework "bar" version 2.0.0. with an explicit framework setting of `rollForwardOnNoCandidateFx=0` and only 2.1.0 is installed, a framework load error will occur at runtime and the app developer will not be able to force 2.1.0 to be loaded (without modifying the framework's runtimeconfig.json file).
 	- According to the best practice "No Restrictive Roll-Forward Overrides", the framework reference to "bar" should not specify `rollForwardOnNoCandidateFx=0`, and thus we would not encounter this issue.
