@@ -275,7 +275,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- /p:OverridePackageSource=$(PB_GitDirectory)/AzureCoreFxDownload/Release",
+        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(OverridePackageSource)",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
@@ -1283,9 +1283,6 @@
     },
     "ReleaseToolsGitUrl": {
       "value": "https://dn-bot:$(PB_VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Release-Tools"
-    },
-    "OverridePackageSource": {
-      "value": "$(PB_SourcesDirectory)/AzureCoreFxDownload/Release"
     },
     "CLI_NUGET_API_KEY": {
       "value": ""
