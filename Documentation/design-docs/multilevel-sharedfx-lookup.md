@@ -158,29 +158,33 @@ then that will always fail and result in a framework not found error. This examp
 - <B>No Circular References:</B> there should not be any circular dependencies between frameworks.
   - It is not normally a desirable design for the same reasons why circular references in assemblies and packages are not supported or supported well (chicken-egg creation, simultaneous version changes).
   - One potential future case is to allow "pseudo-circular" dependencies where framework "foo" loads a light-up framework which depends on "foo". Internally the foo->lightup reference may be treated as a late-bound framework reference, thus causing a cycle. This potential feature may replace the "additional deps" feature in a way that allows for richer light-up scenarios by allowing the lightup to specify framework dependency(s) and have a small deps.json.
-
+- <B>No Downgrading:</B> a newer version of a shared framework should keep or increase the version to another shared framework (never decrease the version number).
 By following these best practices we have optimal run-time performance (less processing and probing) and less chance of incompatible framework references.
 
 #### Algorithm
 Terminology:
-- `framework list`: entries for a single runtimeconfig.json which consists of framework `name`, `version`, optional `applyPatches`, and optional `rollForwardOnNoCandidateFx`.
-- `newest map`: a map keyed off of framework name that contains the highest framework version requested. It is used to perform "soft" roll-forwards to compatible references without reading the disk or performing excessive re-try (Step 12).
+- `config list`: entries for a single runtimeconfig.json which consists of framework `name`, `version`, optional `applyPatches`, and optional `rollForwardOnNoCandidateFx`.
+- `newest list`: entries keyed off of framework name that contain the highest framework version requested. It is used to perform "soft" roll-forwards to compatible references of the same framework name without reading the disk or performing excessive re-try (Step 7).
+- `resolved list`: a list of frameworks that have been resolved, meaning a compatible framework was found on disk.
 
 Algorithm:
-1. In the application's runtimeconfig.json, obtain the framework information specified in `runtimeOptions.framework.name` and `runtimeOptions.framework.version`. It is not required to be present.
-1. Parse the application's runtimecofig.json file `runtimeOptions.frameworks` section in order to obtain the `framework list`.
-1. If there exists a value from step 1, insert that framework into the beginning of the `framework list`
-1. For each framework in `framework list`
-1. --> If the framework is not currently in the `newest map` list then add it.
-1. For each framework in `framework list`
-1. --> If the framework has not previously been reconciled then
-1. ----> If the framework exists in `newest map` then then perform a "soft" roll-forward. We may fail here if not compatible.
-1. ----> Else Reconcile the framework by reading the disk to find the most compatible version based on current settings. We may fail here if a compatible framework is not found. This is a recursive call back to Step 4 but with keeping the current and updated `newest map` but passing in a new `framework list` based upon the values from the newly resolved framework's runtime.config which may reference additional frameworks.
-1. --> Else (_the framework was already reconciled_)
-1. ----> If the new reference is compatible with the reconciled framework (same version or lower), then perform a "soft" roll-forward. We may fail here if not compatible.
-1. ----> Else (_the framework is not compatible because a higher version was requested_) then re-start the algorithm (goto Step 1) with new \ clear state except for the `newest map` so that we attempt to use the newer version next time.
+1. Determine the `config list`:
+  - Parse the application's runtimeconfig.json `runtimeOptions.frameworks` section.
+  - If the `runtimeOptions.framework.name` and `runtimeOptions.framework.version` exist, Then insert that framework into the beginning of the `config list`.
+1. For each framework in `config list`:
+1. --> If the framework is not currently in the `newest map` list Then add it.
+  - By doing this here, before the next loop, we minimize the number of re-try attempts.
+1. For each framework in `config list`:
+1. --> If the framework is not in `resolved list` Then resolve the framework
+ - Update `newest list` if current version is newer
+ - We may fail here if not compatible.
+ - Probe for the framework on disk
+ - If success add it to `resolved list` and make a recursive call back to Step 2 with but pass in a new `config list` based upon the values from the newly resolved framework's runtimeconfig.json which may reference additional frameworks.
+1. --> ElseIf the version is < resolved version  Then perform a "soft" roll-forward.
+  - We may fail here if not compatible.
+1. --> Else re-start the algorithm (goto Step 1) with new \ clear state except for  `newest list` so we attempt to use the newer version next time.
 
-This algorithm for resolving the various framework references assumes the <B>No Circular References</B> best practice explained above in order to prevent loading a newer version of a framework than necessary.
+This algorithm for resolving the various framework references assumes the <B>>No Downgrading</B> best practice explained above in order to prevent loading a newer version of a framework than necessary.
 
 #### Discussion points:
 - By choosing the "most restrictive" values for `applyPatches` and `rollForwardOnNoCandidateFx` we limit what changes the app developer can do to work around issues without being forced to modify the framework's runtimeconfig.json files.
