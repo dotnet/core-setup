@@ -154,7 +154,7 @@
   </PropertyGroup>
 
   <Target Name="PublishCoreHostPackagesToFeed"
-          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackagesFromAzure;SignPackages;PushSignedCoreHostPackagesToFeed"
+          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackagesFromAzure;SignPackages;PushSignedCoreHostPackagesToAzure;PushSignedCoreHostPackagesToFeed"
           Condition="'@(_MissingBlobNames)' == '' AND '$(NuGetFeedUrl)' != ''"/>
 
   <Target Name="DownloadCoreHostPackagesFromAzure">
@@ -207,6 +207,26 @@
   <Target Name="SignPackages"
           Condition="'$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
           DependsOnTargets="GetPackagesToSign;SignFiles">
+  </Target>
+
+  <Target Name="PushSignedCoreHostPackagesToAzure">
+    <Message Text="Re-uploading signed CoreHost packages to Azure" />
+
+    <ItemGroup>
+      <ItemsToPublish Include="@(_DownloadedStandardPackages)" />
+    </ItemGroup>
+    <!-- add relative blob path metadata -->
+    <ItemGroup>
+      <ItemsToPublish>
+        <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
+      </ItemsToPublish>
+    </ItemGroup>
+
+    <UploadToAzure AccountName="$(AzureAccountName)"
+                   AccountKey="$(AzureAccessToken)"
+                   ContainerName="$(ContainerName)"
+                   Items="@(ItemsToPublish)"
+                   Overwrite="true" />
   </Target>
 
   <Target Name="PushSignedCoreHostPackagesToFeed">
