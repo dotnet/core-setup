@@ -263,12 +263,16 @@
       <_crossGenArgs Include="-platform_assemblies_paths $(_crossgenPlatformAssemblies)" />
       <_crossGenArgs Include="-JITPath $(_jitPath)" />
     </ItemGroup>
+    <PropertyGroup>
+      <_partialNgen Condition="'$(OS)' == 'Windows_NT'">1</_partialNgen>
+      <_partialNgen Condition="'$(OS)' != 'Windows_NT'">0</_partialNgen>
+    </PropertyGroup>
 
     <MakeDir Directories="$(_crossGenIntermediatePath)" />
     <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('%(_filesToCrossGen.CrossGenedPath)'))" />
     <WriteLinesToFile File="$(_crossGenResponseFile)" Lines="@(_crossGenArgs)" Overwrite="true" />
 
-    <Exec Command="$(_crossGenPath) @$(_crossGenResponseFile)" WorkingDirectory="$(_clrDirectory)" EnvironmentVariables="COMPlus_PartialNGen=0" />
+    <Exec Command="$(_crossGenPath) @$(_crossGenResponseFile)" WorkingDirectory="$(_clrDirectory)" EnvironmentVariables="COMPlus_PartialNGen=$(_partialNgen)" />
   </Target>
 
   <Target Name="CreateCrossGenSymbols"
@@ -295,7 +299,7 @@
 
     <MakeDir Directories="$(_crossGenSymbolsOutputDirectory)" />
 
-    <Exec Command="$(_crossGenPath) @$(_crossGenSymbolsResponseFile)" WorkingDirectory="$(_clrDirectory)" EnvironmentVariables="COMPlus_PartialNGen=1" />
+    <Exec Command="$(_crossGenPath) @$(_crossGenSymbolsResponseFile)" WorkingDirectory="$(_clrDirectory)" EnvironmentVariables="COMPlus_PartialNGen=0" />
 
     <Touch Files="%(_filesToCrossGen.CrossGenSymbolSemaphorePath)" AlwaysCreate="true" />
   </Target>
