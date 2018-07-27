@@ -213,11 +213,7 @@
     <Message Text="Re-uploading signed CoreHost packages to Azure" />
 
     <ItemGroup>
-      <SignedPackagesToPublish Include="@(_DownloadedStandardPackages)" />
-    </ItemGroup>
-    <!-- add relative blob path metadata -->
-    <ItemGroup>
-      <SignedPackagesToPublish>
+      <SignedPackagesToPublish Include="@(_DownloadedStandardPackages)">
         <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
       </SignedPackagesToPublish>
     </ItemGroup>
