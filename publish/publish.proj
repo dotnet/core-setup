@@ -213,19 +213,19 @@
     <Message Text="Re-uploading signed CoreHost packages to Azure" />
 
     <ItemGroup>
-      <ItemsToPublish Include="@(_DownloadedStandardPackages)" />
+      <SignedPackagesToPublish Include="@(_DownloadedStandardPackages)" />
     </ItemGroup>
     <!-- add relative blob path metadata -->
     <ItemGroup>
-      <ItemsToPublish>
+      <SignedPackagesToPublish>
         <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
-      </ItemsToPublish>
+      </SignedPackagesToPublish>
     </ItemGroup>
 
     <UploadToAzure AccountName="$(AzureAccountName)"
                    AccountKey="$(AzureAccessToken)"
                    ContainerName="$(ContainerName)"
-                   Items="@(ItemsToPublish)"
+                   Items="@(SignedPackagesToPublish)"
                    Overwrite="true" />
   </Target>
 
