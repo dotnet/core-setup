@@ -154,7 +154,7 @@
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Clone release tools",
-      "condition": "ne(variables.PB_InternalBuild, 'true')",
+      "condition": "eq(variables.PB_InternalBuild, 'true')",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -173,7 +173,7 @@
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Create CoreFX drop directory",
-      "condition": "ne(variables.PB_InternalBuild, 'true')",
+      "condition": "eq(variables.PB_InternalBuild, 'true')",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -192,7 +192,7 @@
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Download Azure Internal drop",
-      "condition": "ne(variables.PB_InternalBuild, 'true')",
+      "condition": "eq(variables.PB_InternalBuild, 'true')",
       "timeoutInMinutes": 0,
       "task": {
         "id": "6c731c3c-3c68-459a-a5c9-bde6e6595b5b",
@@ -212,7 +212,7 @@
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Add CoreFX drop to NuGet.config",
-      "condition": "ne(variables.PB_InternalBuild, 'true')",
+      "condition": "eq(variables.PB_InternalBuild, 'true')",
       "timeoutInMinutes": 0,
       "task": {
         "id": "6c731c3c-3c68-459a-a5c9-bde6e6595b5b",
@@ -232,7 +232,7 @@
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Copy $(PB_SourcesDirectory)/AzureCoreFxDownload/Release/pkg (*.nupkg) -> $(PB_SourcesDirectory)/AzureCoreFxDownload/Release",
-      "condition": "ne(variables.PB_InternalBuild, 'true')",
+      "condition": "eq(variables.PB_InternalBuild, 'true')",
       "timeoutInMinutes": 0,
       "task": {
         "id": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
@@ -253,7 +253,7 @@
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Add CoreCLR drop to NuGet.config (AzureCoreFxDownload/Release/pkg)",
-      "condition": "ne(variables.PB_InternalBuild, 'true')",
+      "condition": "eq(variables.PB_InternalBuild, 'true')",
       "timeoutInMinutes": 0,
       "task": {
         "id": "6c731c3c-3c68-459a-a5c9-bde6e6595b5b",
@@ -346,7 +346,7 @@
       "continueOnError": true,
       "alwaysRun": true,
       "displayName": "Remove Azure CoreFX drop directory",
-      "condition": "ne(variables.PB_InternalBuild, 'true')",
+      "condition": "eq(variables.PB_InternalBuild, 'true')",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -365,7 +365,7 @@
       "continueOnError": true,
       "alwaysRun": true,
       "displayName": "Remove Release Tools directory",
-      "condition": "ne(variables.PB_InternalBuild, 'true')",
+      "condition": "eq(variables.PB_InternalBuild, 'true')",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
