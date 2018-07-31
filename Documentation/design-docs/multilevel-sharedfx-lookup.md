@@ -171,18 +171,18 @@ Algorithm:
 1. Determine the `config list`:
   - Parse the application's runtimeconfig.json `runtimeOptions.frameworks` section.
   - If the `runtimeOptions.framework.name` and `runtimeOptions.framework.version` exist, Then insert that framework into the beginning of the `config list`.
-1. For each framework in `config list`:
-1. --> If the framework is not currently in the `newest map` list Then add it.
+2. For each framework in `config list`:
+3. --> If the framework is not currently in the `newest list` list Then add it.
   - By doing this here, before the next loop, we minimize the number of re-try attempts.
-1. For each framework in `config list`:
-1. --> If the framework is not in `resolved list` Then resolve the framework
- - Update `newest list` if current version is newer
+4. For each framework in `config list`:
+5. --> If the framework is not in `resolved list` Then resolve the framework
+ - Use the framework version from `newest list` if newer than the reference, otherwise update `newest list` if reference is newer.
  - We may fail here if not compatible.
  - Probe for the framework on disk
- - If success add it to `resolved list` and make a recursive call back to Step 2 with but pass in a new `config list` based upon the values from the newly resolved framework's runtimeconfig.json which may reference additional frameworks.
-1. --> ElseIf the version is < resolved version  Then perform a "soft" roll-forward.
+ - If success add it to `resolved list` and make a recursive call back to Step 2 but pass in a new `config list` based upon the values from the newly resolved framework's runtimeconfig.json which may reference additional frameworks.
+6. --> ElseIf the version is < resolved version  Then perform a "soft" roll-forward.
   - We may fail here if not compatible.
-1. --> Else re-start the algorithm (goto Step 1) with new \ clear state except for  `newest list` so we attempt to use the newer version next time.
+7. --> Else re-start the algorithm (goto Step 1) with new \ clear state except for `newest list` so we attempt to use the newer version next time.
 
 This algorithm for resolving the various framework references assumes the <B>>No Downgrading</B> best practice explained above in order to prevent loading a newer version of a framework than necessary.
 
