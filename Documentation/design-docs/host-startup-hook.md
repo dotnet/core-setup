@@ -7,7 +7,7 @@ to run before the main application's entry point.
 
 This would allow hosting providers to put configuration and policy in
 a single location, including settings that potentially influence load
-behavior of the main entry point such as the AssemblyLoadContext
+behavior of the main entry point such as the `AssemblyLoadContext`
 behavior. This could be used to set up callbacks for handling
 Debug.Assert (if we make such an API available), or other
 environment-dependent behavior. The hook needs to be separate from the
@@ -16,8 +16,8 @@ entry point, so that user code doesn't need to be modified.
 ## Proposed behavior
 
 Environment variables or `<appname>.runtimeconfig.json` can be used to
-specify a managed assembly and type that contains an `Initialize`
-method.
+specify a managed assembly and type that contains a `public void
+Initialize()` method.
 
 ```
 DOTNET_MANAGED_HOST_ASSEMBLY=/path/to/ManagedHost.dll
@@ -45,7 +45,7 @@ globally, if desired.
 Specifically, hostpolicy starts up coreclr and sets up a new AppDomain
 with `ManagedHost.dll` on the TPA list. It then invokes
 `ManagedHost.Initialize()`. This gives `ManagedHost` a chance to set
-up new AssemblyLoadContexts, or register other callbacks. After
+up new `AssemblyLoadContext`s, or register other callbacks. After
 `Initialize()` returns, hostpolicy starts up the main entry point of
 the app like usual.
 
@@ -63,9 +63,9 @@ same or lower version of .NET Core than the app.
 
 ## Example
 
-This could be used with AssemblyLoadContext APIs to resolve
+This could be used with `AssemblyLoadContext` APIs to resolve
 non-framework dependencies from a shared location, similar to the GAC
-on full framework. Future changes to AssemblyLoadContext could make
+on full framework. Future changes to `AssemblyLoadContext` could make
 this easier to use by making the default load context modifiable.
 
 ```
