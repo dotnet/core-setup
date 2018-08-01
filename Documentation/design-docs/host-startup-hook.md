@@ -36,12 +36,14 @@ DOTNET_MANAGED_HOST_TYPE=ManagedHostNamespace.ManagedHostType
 The environment variables, if set, take precedence over the
 `<appname>.runtimeconfig.json` settings. These settings result in
 `ManagedHostType.Initialize()` being called in hostpolicy, before the
-main assembly is loaded.
+main assembly is loaded. If it read these settings from environment
+variables, they will be inherited by child processes by default. It is
+up to the ManagedHost.dll and user code to decide what to do about
+this - ManagedHost.dll may clear them to prevent this behavior
+globally, if desired.
 
 Specifically, hostpolicy starts up coreclr and sets up a new AppDomain
-with `ManagedHost.dll` on the TPA list. If it read these settings from
-environment variables, it clears them so that child processes do not
-inherit these settings. It then invokes
+with `ManagedHost.dll` on the TPA list. It then invokes
 `ManagedHost.Initialize()`. This gives `ManagedHost` a chance to set
 up new AssemblyLoadContexts, or register other callbacks. After
 `Initialize()` returns, hostpolicy starts up the main entry point of
@@ -55,7 +57,9 @@ so desires.
 The producer of `ManagedHost.dll` needs to ensure that
 `ManagedHost.dll` is compatible with the dependencies specified in the
 main application's deps.json, since those dependencies are put on the
-TPA list when the runtime is started.
+TPA list during the runtime startup, before `ManagedHost.dll` is
+loaded. This means that `ManagedHost.dll` needs to built against the
+same or lower version of .NET Core than the app.
 
 ## Example
 
