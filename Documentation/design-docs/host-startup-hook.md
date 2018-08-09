@@ -1,72 +1,74 @@
 # Host startup hook
 
-For .NET Core 3+, we want to provide a hook that allows managed code
-to run before the main application's entry point.
+For .NET Core 3+, we want to provide a low-level hook that allows
+injecting managed code to run before the main application's entry
+point. This hook will make it possible for the host to customize the
+behavior of managed applications during process launch, after they
+have been deployed.
 
 ## Motivation
 
-This would allow hosting providers to put configuration and policy in
-a single location, including settings that potentially influence load
-behavior of the main entry point such as the `AssemblyLoadContext`
-behavior. This could be used to set up callbacks for handling
+This would allow hosting providers to define custom configuration and
+policy in managed code, including settings that potentially influence
+load behavior of the main entry point such as the
+`AssemblyLoadContext` behavior. The hook could be used to set up
+tracing or telemetry injection, to set up callbacks for handling
 Debug.Assert (if we make such an API available), or other
-environment-dependent behavior. The hook needs to be separate from the
-entry point, so that user code doesn't need to be modified.
+environment-dependent behavior. The hook is separate from the entry
+point, so that user code doesn't need to be modified.
 
 ## Proposed behavior
 
-Environment variables or `<appname>.runtimeconfig.json` can be used to
-specify a managed assembly and type that contains a `public void
-Initialize()` method.
+The `DOTNET_STARTUP_HOOKS` environment variable can be used to specify
+a list of managed assemblies and optional type names that contain
+`public void Initialize()` methods, which will be called in the order
+specified, before the `Main` entry point:
 
 ```
-DOTNET_MANAGED_HOST_ASSEMBLY=/path/to/ManagedHost.dll
-DOTNET_MANAGED_HOST_TYPE=ManagedHostNamespace.ManagedHostType
+DOTNET_STARTUP_HOOKS=/path/to/StartupHook1.dll;/path/to/StartupHook2.dll!StartupHookNamespace.StartupHookType2
 ```
 
-```
-{
-    "runtimeOptions": {
-        "managedHostAssembly": "/path/to/ManagedHost.dll",
-        "managedHostType": "ManagedHostNamespace.ManagedHostType"
-    }
-}
-```
+The list is a semicolon-delimited list of assembly paths (absolute, or
+relative to the working directory), each with an optional type name
+(following an exclamation mark). If no type name is specified, the
+default is `StartupHook.Initializer`.
 
-The environment variables, if set, take precedence over the
-`<appname>.runtimeconfig.json` settings. These settings result in
-`ManagedHostType.Initialize()` being called in hostpolicy, before the
-main assembly is loaded. If it read these settings from environment
-variables, they will be inherited by child processes by default. It is
-up to the ManagedHost.dll and user code to decide what to do about
-this - ManagedHost.dll may clear them to prevent this behavior
-globally, if desired.
+Setting this environment variable will cause each of the specified
+types' `public void Initialize()` method to be called before the main
+assembly is loaded. The environment variable will be inherited by
+child processes by default. It is up to the `StartupHook.dll`s and
+user code to decide what to do about this - `StartupHook.dll` may
+clear them to prevent this behavior globally, if desired.
 
 Specifically, hostpolicy starts up coreclr and sets up a new AppDomain
-with `ManagedHost.dll` on the TPA list. It then invokes
-`ManagedHost.Initialize()`. This gives `ManagedHost` a chance to set
-up new `AssemblyLoadContext`s, or register other callbacks. After
-`Initialize()` returns, hostpolicy starts up the main entry point of
-the app like usual.
+with each `StartupHook.dll` on the TPA list. It then invokes a private
+method in `System.Private.CoreLib`, which will call each
+`StartupHookType.Initialize()` in turn. This gives `StartupHookType` a
+chance to set up new `AssemblyLoadContext`s, or register other
+callbacks. After the `Initialize()` methods return, control returns to
+hostpolicy, which starts up the main entry point of the app like
+usual.
 
 Rather than forcing all configuration to be done through a single
 predefined API, this creates a place where such configuration could be
 centralized, while still allowing user code to do its own thing if it
 so desires.
 
-The producer of `ManagedHost.dll` needs to ensure that
-`ManagedHost.dll` is compatible with the dependencies specified in the
+The producer of `StartupHook.dll` needs to ensure that
+`StartupHook.dll` is compatible with the dependencies specified in the
 main application's deps.json, since those dependencies are put on the
-TPA list during the runtime startup, before `ManagedHost.dll` is
-loaded. This means that `ManagedHost.dll` needs to built against the
+TPA list during the runtime startup, before `StartupHook.dll` is
+loaded. This means that `StartupHook.dll` needs to built against the
 same or lower version of .NET Core than the app.
 
 ## Example
 
 This could be used with `AssemblyLoadContext` APIs to resolve
-non-framework dependencies from a shared location, similar to the GAC
-on full framework. Future changes to `AssemblyLoadContext` could make
-this easier to use by making the default load context modifiable.
+dependencies not on the TPA list from a shared location, similar to
+the GAC on full framework. It could also be used to forcibly preload
+assemblies that are on the TPA list from a different location. Future
+changes to `AssemblyLoadContext` could make this easier to use by
+making the default load context or TPA list modifiable.
 
 ```
 namespace SharedHostPolicy
