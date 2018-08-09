@@ -178,8 +178,8 @@
     },
     {
       "environment": {},
-      "enabled": false,
-      "continueOnError": true,
+      "enabled": true,
+      "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Copy Signed Packages To Separate Directory For Publishing",
       "timeoutInMinutes": 0,
