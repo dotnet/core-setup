@@ -641,3 +641,9 @@ bool pal::is_running_in_wow64()
 {
     return false;
 }
+
+bool pal::are_paths_equal_with_normalized_casing(const string_t& path1, const string_t& path2)
+{
+    // On Unix paths are case-sensitive.
+    return path1 == path2;
+}
