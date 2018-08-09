@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Host.Build
 
         [Target(nameof(PrepareTargets.Init),
         nameof(PublishTargets.InitPublish),
-        nameof(PublishTargets.PublishArtifacts),
+        nameof(PublishTargets.PublishArtifacts))]
         [Environment("PUBLISH_TO_AZURE_BLOB", "1", "true")] // This is set by CI systems
         public static BuildTargetResult Publish(BuildTargetContext c)
         {
