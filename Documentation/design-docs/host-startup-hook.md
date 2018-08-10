@@ -20,34 +20,34 @@ point, so that user code doesn't need to be modified.
 ## Proposed behavior
 
 The `DOTNET_STARTUP_HOOKS` environment variable can be used to specify
-a list of managed assemblies and optional type names that contain
-`public void Initialize()` methods, which will be called in the order
+a list of managed assemblies and type names that contain `public
+static void Initialize()` methods, which will be called in the order
 specified, before the `Main` entry point:
 
 ```
-DOTNET_STARTUP_HOOKS=/path/to/StartupHook1.dll;/path/to/StartupHook2.dll!StartupHookNamespace.StartupHookType2
+DOTNET_STARTUP_HOOKS=/path/to/StartupHook1.dll!StartupHookNamespace.StartupHookType1;/path/to/StartupHook2.dll!StartupHookNamespace.StartupHookType2
 ```
 
 The list is a semicolon-delimited list of assembly paths (absolute, or
-relative to the working directory), each with an optional type name
-(following an exclamation mark). If no type name is specified, the
-default is `StartupHook.Initializer`.
+relative to the working directory), each with a type name following an
+exclamation mark.
 
 Setting this environment variable will cause each of the specified
-types' `public void Initialize()` method to be called before the main
-assembly is loaded. The environment variable will be inherited by
-child processes by default. It is up to the `StartupHook.dll`s and
-user code to decide what to do about this - `StartupHook.dll` may
-clear them to prevent this behavior globally, if desired.
+types' `public static void Initialize()` methods to be called in
+order, synchronously, before the main assembly is loaded. The
+environment variable will be inherited by child processes by
+default. It is up to the `StartupHook.dll`s and user code to decide
+what to do about this - `StartupHook.dll` may clear them to prevent
+this behavior globally, if desired.
 
 Specifically, hostpolicy starts up coreclr and sets up a new AppDomain
 with each `StartupHook.dll` on the TPA list. It then invokes a private
 method in `System.Private.CoreLib`, which will call each
-`StartupHookType.Initialize()` in turn. This gives `StartupHookType` a
-chance to set up new `AssemblyLoadContext`s, or register other
-callbacks. After the `Initialize()` methods return, control returns to
-hostpolicy, which starts up the main entry point of the app like
-usual.
+`StartupHookType.Initialize()` in turn synchronously. This gives
+`StartupHookType` a chance to set up new `AssemblyLoadContext`s, or
+register other callbacks. After all of the `Initialize()` methods
+return, control returns to hostpolicy, which then calls the main entry
+point of the app like usual.
 
 Rather than forcing all configuration to be done through a single
 predefined API, this creates a place where such configuration could be
