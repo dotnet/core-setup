@@ -33,9 +33,19 @@ typedef pal::hresult_t(STDMETHODCALLTYPE *coreclr_execute_assembly_fn)(
     const char* managedAssemblyPath,
     unsigned int* exitCode);
 
+// Prototype of the coreclr_create_delegate function from coreclr.dll
+typedef pal::hresult_t(STDMETHODCALLTYPE *coreclr_create_delegate_fn)(
+    coreclr::host_handle_t hostHandle,
+    unsigned int domainId,
+    const char* entryPointAssemblyName,
+    const char* entryPointTypeName,
+    const char* entryPointMethodName,
+    void** delegate);
+
 static coreclr_shutdown_fn coreclr_shutdown = nullptr;
 static coreclr_initialize_fn coreclr_initialize = nullptr;
 static coreclr_execute_assembly_fn coreclr_execute_assembly = nullptr;
+static coreclr_create_delegate_fn coreclr_create_delegate = nullptr;
 
 bool coreclr::bind(const pal::string_t& libcoreclr_path)
 {
@@ -52,6 +62,7 @@ bool coreclr::bind(const pal::string_t& libcoreclr_path)
     coreclr_initialize = (coreclr_initialize_fn)pal::get_symbol(g_coreclr, "coreclr_initialize");
     coreclr_shutdown = (coreclr_shutdown_fn)pal::get_symbol(g_coreclr, "coreclr_shutdown_2");
     coreclr_execute_assembly = (coreclr_execute_assembly_fn)pal::get_symbol(g_coreclr, "coreclr_execute_assembly");
+    coreclr_create_delegate = (coreclr_create_delegate_fn)pal::get_symbol(g_coreclr, "coreclr_create_delegate");
 
     return true;
 }
@@ -108,4 +119,23 @@ pal::hresult_t coreclr::execute_assembly(
         argv,
         managed_assembly_path,
         exit_code);
+}
+
+pal::hresult_t coreclr::create_delegate(
+    host_handle_t host_handle,
+    domain_id_t domain_id,
+    const char* entry_point_assembly_name,
+    const char* entry_point_type_name,
+    const char* entry_point_method_name,
+    void** delegate)
+{
+    assert(g_coreclr != nullptr && coreclr_create_delegate != nullptr);
+
+    return coreclr_create_delegate(
+        host_handle,
+        domain_id,
+        entry_point_assembly_name,
+        entry_point_type_name,
+        entry_point_method_name,
+        delegate);
 }
