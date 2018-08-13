@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.Host.Build
             string nugetFeedUrl = EnvVars.EnsureVariable("NUGET_FEED_URL");
             string apiKey = EnvVars.EnsureVariable("NUGET_API_KEY");
 
-            NuGetUtil.PushPackages(Dirs.PackagesNoRID, nugetFeedUrl, apiKey, IncludeSymbolPackages);
+            NuGetUtil.PushPackages(Dirs.DownloadedPackagesForFinalPublish, nugetFeedUrl, apiKey, IncludeSymbolPackages);
 
             return c.Success();
         }
@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.Host.Build
             string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
             VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
 
-            repoUpdater.UpdatePublishedVersions(Dirs.PackagesNoRID, $"build-info/dotnet/core-setup/{Channel}/Latest").Wait();
+            repoUpdater.UpdatePublishedVersions(Dirs.DownloadedPackagesForFinalPublish, $"build-info/dotnet/core-setup/{Channel}/Latest").Wait();
 
             return c.Success();
         }
