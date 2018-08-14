@@ -261,6 +261,33 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
         return StatusCode::CoreClrInitFailure;
     }
 
+    pal::string_t startup_hooks_var;
+    if (pal::getenv(_X("DOTNET_STARTUP_HOOKS"), &startup_hooks_var))
+    {
+        void (*managed_host_initialize_fn)(const char*);
+        hr = coreclr::create_delegate(
+            host_handle,
+            domain_id,
+            "System.Private.CoreLib",
+            "System.StartupHookProvider",
+            "ProcessStartupHooks",
+            (void**)&managed_host_initialize_fn);
+
+        if (!SUCCEEDED(hr))
+        {
+            trace::error(_X("Failed to create delegate for startup hook provider, HRESULT: 0x%X"), hr);
+            return StatusCode::CoreClrCreateDelegateFailure;
+        }
+
+        std::vector<char> startup_hooks_var_cstr;
+        pal::pal_utf8string(startup_hooks_var, &startup_hooks_var_cstr);
+
+        trace::info(_X("Invoking startup hooks [%s]"), startup_hooks_var.c_str());
+        trace::flush();
+
+        managed_host_initialize_fn(startup_hooks_var_cstr.data());
+    }
+
     // Initialize clr strings for arguments
     std::vector<std::vector<char>> argv_strs(args.app_argc);
     std::vector<const char*> argv(args.app_argc);
