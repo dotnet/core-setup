@@ -152,6 +152,11 @@ public:
         return m_fx_definitions;
     }
 
+    const pal::string_t& get_coreclr_library_version() const
+    {
+        return m_coreclr_library_version;
+    }
+
 private:
 
     static pal::string_t get_fx_deps(const pal::string_t& fx_dir, const pal::string_t& fx_name)
@@ -202,6 +207,9 @@ private:
 
     // Special entry for coreclr path
     pal::string_t m_coreclr_path;
+
+    // Special entry for coreclr library version
+    pal::string_t m_coreclr_library_version;
 
     // Special entry for JIT path
     pal::string_t m_clrjit_path;

@@ -101,6 +101,7 @@ struct arguments_t
     std::vector<pal::string_t> env_shared_store;
     int app_argc;
     const pal::char_t** app_argv;
+    host_mode_t host_mode;
 
     arguments_t();
 
@@ -108,8 +109,8 @@ struct arguments_t
     {
         if (trace::is_enabled())
         {
-            trace::verbose(_X("-- arguments_t: host_path='%s' app_root='%s' deps='%s' core_svc='%s' mgd_app='%s'"),
-                host_path.c_str(), app_root.c_str(), deps_path.c_str(), core_servicing.c_str(), managed_application.c_str());
+            trace::verbose(_X("-- arguments_t: host_path='%s' app_root='%s' deps='%s' core_svc='%s' mgd_app='%s' host_mode='%d'"),
+                host_path.c_str(), app_root.c_str(), deps_path.c_str(), core_servicing.c_str(), managed_application.c_str(), host_mode);
             for (const auto& probe : probe_paths)
             {
                 trace::verbose(_X("-- arguments_t: probe dir: '%s'"), probe.c_str());

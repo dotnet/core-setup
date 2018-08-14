@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 namespace SharedFxLookupPortableApp
 {
@@ -9,8 +10,19 @@ namespace SharedFxLookupPortableApp
             Console.WriteLine("Hello World!");
             Console.WriteLine(string.Join(Environment.NewLine, args));
 
-            // A small operation involving NewtonSoft.Json to ensure the assembly is loaded properly
+            Console.WriteLine($"Framework Version:{GetFrameworkVersionFromAppDomain()}");
+			
+			// A small operation involving NewtonSoft.Json to ensure the assembly is loaded properly
             var t = typeof(Newtonsoft.Json.JsonReader);
         }
+		
+        public static string GetFrameworkVersionFromAppDomain()
+        {
+            Type appDomainType = typeof(object).GetTypeInfo().Assembly.GetType("System.AppDomain");
+            object currentDomain = appDomainType.GetProperty("CurrentDomain").GetValue(null);
+            object fxVersion = appDomainType.GetMethod("GetData").Invoke(currentDomain, new[] {"FX_PRODUCT_VERSION"});
+
+            return fxVersion as string;
+        }		
     }
 }
