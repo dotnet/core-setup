@@ -453,6 +453,9 @@
     },
     "PB_InternalBuild": {
       "value": "false"
+    },
+    "PB_OverridePackageSource": {
+      "value": "/p:OverridePackageSource=$(PB_SourcesDirectory)/AzureCoreFxDownload/Release"
     }
   },
   "demands": [
