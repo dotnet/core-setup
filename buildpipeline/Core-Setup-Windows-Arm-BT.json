@@ -215,7 +215,7 @@
       "inputs": {
         "scriptType": "filePath",
         "scriptName": "DotNet-Core-Release-Tools/msbuildrun.ps1",
-        "arguments": "-RepositoryRoot $(Build.SourcesDirectory)\\DotNet-Core-Release-Tools -Target AddSourceToNuGetConfig -Properties NuGetConfigFile=$(PB_SourcesDirectory)\\NuGet.config,SourceName=LocalDownload2,SourcePath=$(Build.SourcesDirectory)\\AzureCoreFxDownload\\Release\\pkg",
+        "arguments": "-RepositoryRoot $(Build.SourcesDirectory)\\DotNet-Core-Release-Tools -Target AddSourceToNuGetConfig -Properties NuGetConfigFile=$(PB_SourcesDirectory)\\NuGet.config,SourceName=LocalDownload2,SourcePath=$(PB_SourcesDirectory)\\AzureCoreFxDownload\\Release\\pkg",
         "inlineScript": "",
         "workingFolder": "",
         "failOnStandardError": "true"
@@ -252,7 +252,7 @@
       },
       "inputs": {
         "filename": "$(PB_SourcesDirectory)\\build.cmd",
-        "arguments": "-- $(PB_CommonMSBuildArgs) /t:BuildTraversalBuildDependencies /flp:v=diag",
+        "arguments": "-- $(PB_CommonMSBuildArgs) $(PB_OverridePackageSource) /t:BuildTraversalBuildDependencies /flp:v=diag",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
@@ -270,7 +270,7 @@
       },
       "inputs": {
         "filename": "$(PB_SourcesDirectory)\\build.cmd",
-        "arguments": "-src-builds -- $(PB_CommonMSBuildArgs)",
+        "arguments": "-src-builds -- $(PB_CommonMSBuildArgs) $(PB_OverridePackageSource)",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
