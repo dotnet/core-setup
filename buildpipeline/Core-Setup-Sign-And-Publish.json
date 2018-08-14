@@ -273,13 +273,6 @@
     }
   ],
   "variables": {
-    "AzureContainerPackageDirectory": {
-      "value": "$(Pipeline.SourcesDirectory)\\pkg\\packages\\AzureTransfer\\",
-      "allowOverride": true
-    },
-    "AzureContainerPackageGlob": {
-      "value": "pkg\\*.nupkg",
-    },
     "BuildConfiguration": {
       "value": "Release",
       "allowOverride": true
