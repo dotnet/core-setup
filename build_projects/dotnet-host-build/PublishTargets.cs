@@ -50,10 +50,17 @@ namespace Microsoft.DotNet.Host.Build
 
         [Target(nameof(PrepareTargets.Init),
         nameof(PublishTargets.InitPublish),
-        nameof(PublishTargets.PublishArtifacts),
-        nameof(PublishTargets.FinalizeBuild))]
+        nameof(PublishTargets.PublishArtifacts))]
         [Environment("PUBLISH_TO_AZURE_BLOB", "1", "true")] // This is set by CI systems
         public static BuildTargetResult Publish(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
+        [Target(nameof(PrepareTargets.Init),
+        nameof(PublishTargets.InitPublish),
+        nameof(PublishTargets.FinalizeBuild))]
+        public static BuildTargetResult FinalSignAndPublish(BuildTargetContext c)
         {
             return c.Success();
         }
@@ -201,37 +208,24 @@ namespace Microsoft.DotNet.Host.Build
             }
         }
 
-        [Target]
-        public static BuildTargetResult DownloadCoreHostPackagesToBuildDirectory(BuildTargetContext c)
-        {
-            var hostBlob = $"{Channel}/Binaries/{SharedFrameworkNugetVersion}";
-
-            Directory.CreateDirectory(Dirs.PackagesNoRID);
-            AzurePublisherTool.DownloadFilesWithExtension(hostBlob, ".nupkg", Dirs.PackagesNoRID);
-
-            return c.Success();
-        }
-
-        [Target(nameof(PublishTargets.DownloadCoreHostPackagesToBuildDirectory))]
         [Environment("NUGET_FEED_URL")]
         public static BuildTargetResult PublishCoreHostPackagesToFeed(BuildTargetContext c)
         {
             string nugetFeedUrl = EnvVars.EnsureVariable("NUGET_FEED_URL");
             string apiKey = EnvVars.EnsureVariable("NUGET_API_KEY");
 
-            NuGetUtil.PushPackages(Dirs.PackagesNoRID, nugetFeedUrl, apiKey, IncludeSymbolPackages);
+            NuGetUtil.PushPackages(Dirs.DownloadedPackagesForFinalPublish, nugetFeedUrl, apiKey, IncludeSymbolPackages);
 
             return c.Success();
         }
 
-        [Target(nameof(PublishTargets.DownloadCoreHostPackagesToBuildDirectory))]
         [Environment("GITHUB_PASSWORD")]
         public static BuildTargetResult PublishCoreHostPackageVersionsToVersionsRepo(BuildTargetContext c)
         {
             string githubAuthToken = EnvVars.EnsureVariable("GITHUB_PASSWORD");
             VersionRepoUpdater repoUpdater = new VersionRepoUpdater(githubAuthToken);
 
-            repoUpdater.UpdatePublishedVersions(Dirs.PackagesNoRID, $"build-info/dotnet/core-setup/{Channel}/Latest").Wait();
+            repoUpdater.UpdatePublishedVersions(Dirs.DownloadedPackagesForFinalPublish, $"build-info/dotnet/core-setup/{Channel}/Latest").Wait();
 
             return c.Success();
         }
