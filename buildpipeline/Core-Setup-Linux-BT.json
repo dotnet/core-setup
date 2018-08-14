@@ -281,7 +281,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(OverridePackageSource)",
+        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(PB_OverridePackageSource)",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }

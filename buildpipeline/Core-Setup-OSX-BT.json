@@ -225,7 +225,7 @@
       },
       "inputs": {
         "filename": "$(PB_SourcesDirectory)/build.sh",
-        "arguments": "-OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments)",
+        "arguments": "-OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(PB_OverridePackageSource)",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
