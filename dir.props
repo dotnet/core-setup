@@ -31,6 +31,10 @@
 
   <Import Project="$(MSBuildThisFileDirectory)RepoDirectories.props" />
 
+  <PropertyGroup Condition="'$(InternalBuild)' == 'true'">
+    <OverridePackageSource>$(MSBuildThisFileDirectory)AzureCoreFxDownload/$(ConfigurationGroup)/</OverridePackageSource>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(DotNetBuildOffline)' != 'true'">
     <!-- list of nuget package sources passed to NuGet -->
     <RestoreSources>
