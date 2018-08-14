@@ -252,7 +252,7 @@
       },
       "inputs": {
         "filename": "$(PB_SourcesDirectory)\\build.cmd",
-        "arguments": "-- $(PB_CommonMSBuildArgs) $(PB_OverridePackageSource) /t:BuildTraversalBuildDependencies /flp:v=diag",
+        "arguments": "-- $(PB_CommonMSBuildArgs) /p:InternalBuild=$(PB_InternalBuild) /t:BuildTraversalBuildDependencies /flp:v=diag",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
@@ -270,7 +270,7 @@
       },
       "inputs": {
         "filename": "$(PB_SourcesDirectory)\\build.cmd",
-        "arguments": "-src-builds -- $(PB_CommonMSBuildArgs) $(PB_OverridePackageSource)",
+        "arguments": "-src-builds -- $(PB_CommonMSBuildArgs) /p:InternalBuild=$(PB_InternalBuild)",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
