@@ -281,7 +281,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(PB_AdditionalMSBuildArguments) $(PB_OverridePackageSource)",
+        "arguments": "run --rm $(PB_CrossBuildArgs)$(DockerCommonRunArgs) $(PB_GitDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(PB_AdditionalMSBuildArguments) $(PB_OverrideDockerPackageSource)",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
@@ -610,9 +610,6 @@
     },
     "PB_InternalBuild": {
       "value": "false"
-    },
-    "PB_OverridePackageSource": {
-      "value": "/p:OverridePackageSource=$(PB_SourcesDirectory)/AzureCoreFxDownload/Release"
     }
   },
   "demands": [

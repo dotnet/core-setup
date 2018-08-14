@@ -132,6 +132,28 @@
       }
     },
     {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Set PB_OverridePackageSource variable",
+      "condition": "eq(variables.PB_InternalBuild, 'true')",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "scriptType": "inlineScript",
+        "scriptName": "",
+        "arguments": "-SourceDir $(PB_SourcesDirectory)",
+        "workingFolder": "",
+        "inlineScript": "param($SourceDir)\n\nWrite-Host (\"##vso[task.setvariable variable=PB_OverridePackageSource;]/p:OverridePackageSource=$SourceDir/AzureCoreFxDownload/Release\")",
+        "failOnStandardError": "true"
+      }
+    },
+    {
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
@@ -453,9 +475,6 @@
     },
     "PB_InternalBuild": {
       "value": "false"
-    },
-    "PB_OverridePackageSource": {
-      "value": "/p:OverridePackageSource=$(PB_SourcesDirectory)/AzureCoreFxDownload/Release"
     }
   },
   "demands": [
