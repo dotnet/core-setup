@@ -339,7 +339,8 @@
       "isSecret": true
     },
     "CONNECTION_STRING": {
-      "value": "ENV_VAR_EMPTY_WORKAROUND"
+      "value": "ENV_VAR_EMPTY_WORKAROUND",
+      "isSecret": true
     },
     "NUGET_FEED_URL": {
       "value": "ENV_VAR_EMPTY_WORKAROUND"
