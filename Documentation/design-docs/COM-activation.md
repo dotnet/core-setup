@@ -2,15 +2,17 @@
 
 ## Purpose
 
-In order to more fully support the vast number of existing .NET Framework in their transition to .NET Core, support of the COM Activation scenario in .NET Core is required. Without this support it is not possible for many .NET Framework consumers to even consider transitioning to .NET Core. The intent of this document is to describe aspects of the activation of a .NET class written for .NET Core within a COM environment. This support includes but is not limited to activation via the [`CoCreateInstance()`](https://docs.microsoft.com/en-us/windows/desktop/api/combaseapi/nf-combaseapi-cocreateinstance)API in C/C++ or from a [Windows Script Host](https://docs.microsoft.com/en-us/windows/desktop/com/using-com-objects-in-windows-script-host).
+In order to more fully support the vast number of existing .NET Framework users in their transition to .NET Core, support of the COM Activation scenario in .NET Core is required. Without this support it is not possible for many .NET Framework consumers to even consider transitioning to .NET Core. The intent of this document is to describe aspects of the activation of a .NET class written for .NET Core within a COM environment. This support includes but is not limited to activation via the [`CoCreateInstance()`](https://docs.microsoft.com/en-us/windows/desktop/api/combaseapi/nf-combaseapi-cocreateinstance)API in C/C++ or from a [Windows Script Host](https://docs.microsoft.com/en-us/windows/desktop/com/using-com-objects-in-windows-script-host).
+
+This document is limited to the in-proc COM Activation scenario. The out-of-proc COM Activation scenario is deferred.
 
 ### Requirements
 
 * Discover all installed versions of .NET Core.
 * Load the appropriate version of .NET Core for the class.
 * Instantiate an instance of the class and return a pointer to an [`IUnknown`](https://docs.microsoft.com/en-us/windows/desktop/api/unknwn/nn-unknwn-iunknown) that represents the newly constructed class.
-* Ensure that if an existing CLR instance of the correct version is already present in process, that existing one is used.
-* Support the discrimation of concurrently loaded CLR versions.
+* Check if the activation host has already created a CLR instance of the correct version or create an appropriate instance.
+* Support the discrimination of concurrently loaded CLR versions.
 
 ### Environment Matrix
 
