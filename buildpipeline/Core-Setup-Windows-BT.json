@@ -321,7 +321,7 @@
         "msbuildLocation": "",
         "platform": "$(PB_TargetArchitecture)",
         "configuration": "$(BuildConfiguration)",
-        "msbuildArguments": "$(PB_CommonMSBuildArgs) /p:BuildFullPlatformManifest=$(PB_BuildFullPlatformManifest) /flp:v=detailed;LogFile=$(PB_SourcesDirectory)\\packages.log",
+        "msbuildArguments": "$(PB_CommonMSBuildArgs) /p:BuildFullPlatformManifest=$(PB_BuildFullPlatformManifest) /p:InternalBuild=$(PB_InternalBuild) /flp:v=detailed;LogFile=$(PB_SourcesDirectory)\\packages.log",
         "clean": "false",
         "maximumCpuCount": "false",
         "restoreNugetPackages": "false",
