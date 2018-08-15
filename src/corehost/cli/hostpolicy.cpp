@@ -136,7 +136,7 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
 
     pal::pal_clrstring(resolver.get_lookup_probe_directories(), &probe_directories);
 
-    if (args.host_mode == host_mode_t::muxer)
+    if (resolver.is_framework_dependent())
     {
         pal::pal_clrstring(get_root_framework(resolver.get_fx_definitions()).get_found_version() , &clr_library_version);
     }

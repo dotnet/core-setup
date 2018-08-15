@@ -157,6 +157,11 @@ public:
         return m_coreclr_library_version;
     }
 
+    bool is_framework_dependent() const
+    {
+        return m_is_framework_dependent;
+    }
+
 private:
 
     static pal::string_t get_fx_deps(const pal::string_t& fx_dir, const pal::string_t& fx_name)

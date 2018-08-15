@@ -63,7 +63,6 @@ bool parse_arguments(
     arguments_t& args = *arg_out;
 
     args.host_path = init.host_info.host_path;
-    args.host_mode = init.host_mode;
 
     if (init.host_mode != host_mode_t::apphost)
     {
