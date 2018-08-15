@@ -2,14 +2,14 @@
 
 ## Purpose
 
-In order to more fully support the vast number of existing .NET Framework in their transition to .NET Core, support of the COM Activation scenario in .NET Core is required. Without this support it is not possible for many .NET Framework consumers to even consider transitioning to .NET Core. The intent of this document is to describe aspects of the activation of a .NET class written for .NET Core within a COM environment. This support includes but is not limited to activation via the [`CoCreateInstance()`](https://docs.microsoft.com/en-us/windows/desktop/api/combaseapi/nf-combaseapi-cocreateinstance)API in C/C++, from a [Windows Script Host](https://docs.microsoft.com/en-us/windows/desktop/com/using-com-objects-in-windows-script-host), or as a [Office VSTO Add-In](https://docs.microsoft.com/en-us/visualstudio/vsto/create-vsto-add-ins-for-office-by-using-visual-studio).
+In order to more fully support the vast number of existing .NET Framework in their transition to .NET Core, support of the COM Activation scenario in .NET Core is required. Without this support it is not possible for many .NET Framework consumers to even consider transitioning to .NET Core. The intent of this document is to describe aspects of the activation of a .NET class written for .NET Core within a COM environment. This support includes but is not limited to activation via the [`CoCreateInstance()`](https://docs.microsoft.com/en-us/windows/desktop/api/combaseapi/nf-combaseapi-cocreateinstance)API in C/C++ or from a [Windows Script Host](https://docs.microsoft.com/en-us/windows/desktop/com/using-com-objects-in-windows-script-host).
 
 ### Requirements
 
 * Discover all installed versions of .NET Core.
 * Load the appropriate version of .NET Core for the class.
 * Instantiate an instance of the class and return a pointer to an [`IUnknown`](https://docs.microsoft.com/en-us/windows/desktop/api/unknwn/nn-unknwn-iunknown) that represents the newly constructed class.
-* Ensure that if an existing CLR is loaded in process, the exising one is used.
+* Ensure that if an existing CLR instance of the correct version is already present in process, that existing one is used.
 * Support the discrimation of concurrently loaded CLR versions.
 
 ### Environment Matrix
@@ -60,12 +60,25 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
     * **The location and mechanics of accessing this registration information is still TBD**
     * `Assembly` (**required**) - the [Fully-Qualified Name](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names) of the assembly.
     * `Class` (**required**) - the full type name (e.g. `MyCompany.MyProduct.MyClass`).
+    * `Codebase` (**required**) - an absolute path to the assembly to load. If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the assembly that file will be used to describe runtime configuration details.
     * `RuntimeVersion` (optional) - if not supplied the latest CLR found will be used.
-    * `Codebase` (optional) - an absolute path to the assembly to load. If not supplied, the default [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-2.1) will be used to attempt to find the assembly. If provided, a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file adjacent to the assembly can be used to describe runtime configuration details.
 1) Using the existing `hostfxr` library, attempt to discover the desired CLR.
     * A current running CLR will be preferred, otherwise a new CLR instance will be created.
-1) A request to the CLR via [`Activator.CreateInstance()`](https://docs.microsoft.com/en-us/dotnet/api/system.activator.createinstance?view=netcore-2.1) will be used to instantiate an instance of the type in the assembly.
-    * The ability to call this function from `hostfxr` will need to be exposed.
+1) A request to the CLR will be made via a new method for class activation within a COM environment.
+    * The ability to load the assembly and then create a class instance will require a function be exposed that can be called from `hostfxr`.
+    * Example of API in `System.Private.CoreLib` on the `Activator` class:
+        ``` csharp
+        public static class Activator
+        {
+            ...
+            #if WINDOWS
+            public static ObjectHandle CreateInstanceForCom(string assemblyName, string typeName);
+            #endif
+            ...
+        }
+        ```
+        Note this API would not be exposed outside of `System.Private.CoreLib`.
+    * The loading of the assembly will take place in a new [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-2.1) for dependency isolation.
 1) The class instance will be returned to the caller of `DllGetClassObject()`.
 
 In order to properly support `DllCanUnloadNow()`, .NET Core will be required to expose an API that permits the querying of how many COM activated classes are currently outstanding.
