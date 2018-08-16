@@ -83,7 +83,7 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
     * The loading of the assembly will take place in a new [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-2.1) for dependency isolation.
 1) The class instance will be returned to the caller of `DllGetClassObject()`.
 
-In order to properly support `DllCanUnloadNow()`, .NET Core will be required to expose an API that permits the querying of how many COM activated classes are currently outstanding.
+The `DllCanUnloadNow()` function will always return `S_FALSE` indicating the shim is never able to be unloaded. This matches .NET Framework semantics and can be adjusted in the future if needed.
 
 #### Class Registration
 
