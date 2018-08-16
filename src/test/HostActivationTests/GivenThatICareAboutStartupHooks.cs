@@ -89,6 +89,31 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdOutContaining("Hello World");
         }
 
+        // Run the app with a startup hook that has a ! in the assembly path
+        [Fact]
+        public void Muxer_activation_of_StartupHook_With_Exclamation_Mark_Succeeds()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppProjectFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            var startupHookFixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookWithExclamationMarkProjectFixture.Copy();
+            var startupHookDll = startupHookFixture.TestProject.AppDll;
+            Assert.Contains("!", startupHookDll);
+
+            // Exclamation mark in assembly path
+            var startupHookVar = startupHookDll + "!StartupHook.StartupHookWithExclamationMark";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello from startup hook with exclamation mark!");
+        }
+
         // Run the app with a startup hook assembly that depends on assemblies not on the TPA list
         [Fact]
         public void Muxer_activation_of_StartupHook_With_Missing_Dependencies_Fails()
@@ -441,6 +466,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
             public TestProjectFixture PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture { get; set; }
 
             public TestProjectFixture PreviouslyPublishedAndRestoredStartupHookProjectFixture { get; set; }
+            public TestProjectFixture PreviouslyPublishedAndRestoredStartupHookWithExclamationMarkProjectFixture { get; set; }
             public TestProjectFixture PreviouslyPublishedAndRestoredStartupHookWithDependencyProjectFixture { get; set; }
 
             public RepoDirectoriesProvider RepoDirectories { get; set; }
@@ -461,6 +487,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
+                PreviouslyPublishedAndRestoredStartupHookWithExclamationMarkProjectFixture = new TestProjectFixture("StartupHook!WithExclamationMark", RepoDirectories)
+                    .EnsureRestored(RepoDirectories.CorehostPackages)
+                    .PublishProject();
+
                 PreviouslyPublishedAndRestoredStartupHookWithDependencyProjectFixture = new TestProjectFixture("StartupHookWithDependency", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
@@ -472,6 +502,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture.Dispose();
 
                 PreviouslyPublishedAndRestoredStartupHookProjectFixture.Dispose();
+                PreviouslyPublishedAndRestoredStartupHookWithExclamationMarkProjectFixture.Dispose();
                 PreviouslyPublishedAndRestoredStartupHookWithDependencyProjectFixture.Dispose();
             }
         }
