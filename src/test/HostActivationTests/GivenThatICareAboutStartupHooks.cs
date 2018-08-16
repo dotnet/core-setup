@@ -78,6 +78,30 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .And
                 .HaveStdErrContaining(expectedError);
 
+            // Missing entries in the hook
+            startupHookVar = "Assembly.dll!TypeName" + Path.PathSeparator + Path.PathSeparator + "Assembly2.dll!TypeName";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(expectedError);
+
+            // Trailing separator
+            startupHookVar = "Assembly.dll!TypeName" + Path.PathSeparator + "Assembly2.dll!TypeName" + Path.PathSeparator;
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(expectedError);
+
             // Syntax errors are caught before any hooks run
             startupHookVar = startupHookDll + "!StartupHook.StartupHook" + Path.PathSeparator + "!";
             dotnet.Exec(appDll)
