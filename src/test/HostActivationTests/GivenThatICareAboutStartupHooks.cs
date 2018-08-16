@@ -55,6 +55,23 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdOutContaining("Hello from startup hook with overload! Input: 123")
                 .And
                 .HaveStdOutContaining("Hello World");
+
+            // Ensure startup hook tracing works
+            startupHookVar = startupHookDll + "!StartupHook.StartupHook";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdErrContaining("Invoking startup hooks [" + startupHookVar + "]")
+                .And
+                .HaveStdOutContaining("Hello from startup hook!")
+                .And
+                .HaveStdOutContaining("Hello World");
         }
 
         // Run the app with multiple startup hooks
@@ -281,7 +298,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining(expectedError)
                 .And
                 .NotHaveStdOutContaining("Hello from startup hook!");
-
         }
 
         // Run the app with missing startup hook assembly
