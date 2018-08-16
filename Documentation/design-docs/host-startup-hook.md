@@ -28,9 +28,10 @@ specified, before the `Main` entry point:
 DOTNET_STARTUP_HOOKS=/path/to/StartupHook1.dll!StartupHookNamespace.StartupHookType1;/path/to/StartupHook2.dll!StartupHookNamespace.StartupHookType2
 ```
 
-The list is a semicolon-delimited list of assembly paths (absolute, or
-relative to the working directory), each with a type name following an
-exclamation mark.
+This variable is a list of absolute assembly paths, each with a type
+name following an exclamation mark. The list is delimited by the
+platform-specific path separator (`;` on Windows and `:` on Unix). It
+may not contain any empty entries or a trailing path separator.
 
 Setting this environment variable will cause each of the specified
 types' `public static void Initialize()` methods to be called in
@@ -40,9 +41,9 @@ default. It is up to the `StartupHook.dll`s and user code to decide
 what to do about this - `StartupHook.dll` may clear them to prevent
 this behavior globally, if desired.
 
-Specifically, hostpolicy starts up coreclr and sets up a new AppDomain
-with each `StartupHook.dll` on the TPA list. It then invokes a private
-method in `System.Private.CoreLib`, which will call each
+Specifically, hostpolicy starts up coreclr and sets up a new
+AppDomain. It then invokes a private method in
+`System.Private.CoreLib`, which will call each
 `StartupHookType.Initialize()` in turn synchronously. This gives
 `StartupHookType` a chance to set up new `AssemblyLoadContext`s, or
 register other callbacks. After all of the `Initialize()` methods
