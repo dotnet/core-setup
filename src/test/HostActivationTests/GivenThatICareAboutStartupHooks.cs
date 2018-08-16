@@ -149,10 +149,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
             var startupHookFixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookProjectFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
+            var fakeAssembly = Path.GetFullPath("Assembly.dll");
+            var fakeAssembly2 = Path.GetFullPath("Assembly2.dll");
+
             var expectedError = "System.ArgumentException: The syntax of the startup hook variable was invalid.";
 
             // Incorrect syntax in type name
-            var startupHookVar = "Assembly.dll!Type!Type" + Path.PathSeparator + "Assembly.dll";
+            var startupHookVar = fakeAssembly + "!Type!Type" + Path.PathSeparator + fakeAssembly;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -164,7 +167,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining(expectedError);
 
             // Incorrect syntax with empty type
-            startupHookVar = "Assembly.dll!" + Path.PathSeparator + startupHookDll + "!StartupHook.StartupHook";
+            startupHookVar = fakeAssembly + "!" + Path.PathSeparator + startupHookDll + "!StartupHook.StartupHook";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -188,7 +191,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining(expectedError);
 
             // No assembly path and type separator
-            startupHookVar = "Assembly.dll" + Path.PathSeparator + "Assembly2.dll";
+            startupHookVar = fakeAssembly + Path.PathSeparator + fakeAssembly2;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -200,7 +203,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining(expectedError);
 
             // Missing entries in the hook
-            startupHookVar = "Assembly.dll!TypeName" + Path.PathSeparator + Path.PathSeparator + "Assembly2.dll!TypeName";
+            startupHookVar = fakeAssembly + "!TypeName" + Path.PathSeparator + Path.PathSeparator + fakeAssembly2 + "!TypeName";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -212,7 +215,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining(expectedError);
 
             // Trailing separator
-            startupHookVar = "Assembly.dll!TypeName" + Path.PathSeparator + "Assembly2.dll!TypeName" + Path.PathSeparator;
+            startupHookVar = fakeAssembly + "!TypeName" + Path.PathSeparator + fakeAssembly2 + "!TypeName" + Path.PathSeparator;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -236,6 +239,49 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining(expectedError)
                 .And
                 .NotHaveStdOutContaining("Hello from startup hook!");
+        }
+
+        // Run the app with a relative path to the startup hook assembly
+        [Fact]
+        public void Muxer_activation_of_StartupHook_With_Relative_Path_Fails()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppProjectFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            var startupHookFixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookProjectFixture.Copy();
+            var startupHookDll = startupHookFixture.TestProject.AppDll;
+
+            var relativeAssemblyPath = "Assembly.dll";
+
+            var expectedError = "System.ArgumentException: Absolute path information is required.";
+
+            // Relative path
+            var startupHookVar = relativeAssemblyPath + "!TypeName";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(expectedError);
+
+            // Relative path error is caught before any hooks run
+            startupHookVar = startupHookDll + "!StartupHook.StartupHook" + Path.PathSeparator + "Assembly.dll!TypeName";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(expectedError)
+                .And
+                .NotHaveStdOutContaining("Hello from startup hook!");
+
         }
 
         // Run the app with missing startup hook assembly
