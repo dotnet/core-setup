@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
             var startupHook2Fixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookWithDependencyProjectFixture.Copy();
             var startupHook2Dll = startupHook2Fixture.TestProject.AppDll;
 
-            // Mulitiple startup hooks
+            // Multiple startup hooks
             var startupHookVar = startupHookDll + "!StartupHook.StartupHook" + Path.PathSeparator +
                 startupHook2Dll + "!StartupHook.StartupHookWithDependency";
             dotnet.Exec(appDll)
@@ -250,7 +250,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
             var startupHookDll = startupHookFixture.TestProject.AppDll;
             var startupHookMissingDll = Path.Combine(Path.GetDirectoryName(startupHookDll), "StartupHookMissing.dll");
 
-            var expectedError = "System.IO.FileNotFoundException: Could not resolve assembly '{0}";
+            var expectedError = "System.IO.FileNotFoundException: Could not load file or assembly '{0}'.";
 
             // Missing dll is detected with appropriate error
             var startupHookVar = startupHookMissingDll + "!StartupHook.StartupHook";
@@ -264,7 +264,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .And
                 .HaveStdErrContaining(String.Format(expectedError, Path.GetFullPath(startupHookMissingDll)));
 
-            // Missing dll is detected before any hooks run
+            // Missing dll is detected after previous hooks run
             startupHookVar = startupHookDll + "!StartupHook.StartupHook" + Path.PathSeparator + startupHookMissingDll + "!StartupHook.StartupHook";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
@@ -274,9 +274,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(String.Format(expectedError, Path.GetFullPath((startupHookMissingDll))))
+                .HaveStdOutContaining("Hello from startup hook!")
                 .And
-                .NotHaveStdOutContaining("Hello from startup hook!");
+                .HaveStdErrContaining(String.Format(expectedError, Path.GetFullPath((startupHookMissingDll))));
         }
 
         // Run the app with an invalid startup hook assembly
