@@ -11,14 +11,14 @@ This document is limited to the in-proc COM Activation scenario. The out-of-proc
 * Discover all installed versions of .NET Core.
 * Load the appropriate version of .NET Core for the class.
 * Instantiate an instance of the class and return a pointer to an [`IUnknown`](https://docs.microsoft.com/en-us/windows/desktop/api/unknwn/nn-unknwn-iunknown) that represents the newly constructed class.
-* Check if the activation host has already created a CLR instance of the correct version or create an appropriate instance.
+* Determine the required CLR version for activation or validate a currently existing CLR instance can satisfy the CLR version requirement.
 * Support the discrimination of concurrently loaded CLR versions.
 
 ### Environment Matrix
 
 The following list represents an exhaustive activation matrix.
 
-|Server | Client | Current Support |
+| Server | Client | Current Support |
 | --- | --- | :---: |
 | COM* | .NET Core | Yes |
 | .NET Core | COM* | No |
@@ -65,7 +65,8 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
     * `Codebase` (**required**) - an absolute path to the assembly to load. If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the assembly that file will be used to describe runtime configuration details.
     * `RuntimeVersion` (optional) - if not supplied the latest CLR found will be used.
 1) Using the existing `hostfxr` library, attempt to discover the desired CLR.
-    * A current running CLR will be preferred, otherwise a new CLR instance will be created.
+    * If a CLR is present, the requested `RuntimeVersion` will be validated against that CLR. If version satisfiability fails, activation will fail.
+    * If a CLR is **not** present, an attempt will be made to create a satisfying CLR instance. Failure to create an instance will result in an activation failure.
 1) A request to the CLR will be made via a new method for class activation within a COM environment.
     * The ability to load the assembly and then create a class instance will require a function be exposed that can be called from `hostfxr`.
     * Example of API in `System.Private.CoreLib` on the `Activator` class:
@@ -92,9 +93,34 @@ Registration will depend on the [.NET Core deployment scenario](https://docs.mic
 * [Framework-dependent deployments (FDD)](https://docs.microsoft.com/en-us/dotnet/core/deploying/#framework-dependent-deployments-fdd) - This is most similar to the .NET Framework scenario and registration will be done using the shared framework. 
 * [Self-contained deployments (SCD)](https://docs.microsoft.com/en-us/dotnet/core/deploying/#self-contained-deployments-scd) - Registration will be done using the contained framework.
 
+##### Registry
+
 The details of class registration in the registry in .NET Core is still in active investigation, but does not limit the current plan. At a minimum, registration scripts could be generated for the user via an extension to the [`dotnet.exe`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet?tabs=netcore21) tool, although this approach may be unsatisfactory as a final experience.
 
-[Registration-Free COM for .NET](https://docs.microsoft.com/en-us/dotnet/framework/interop/configure-net-framework-based-com-components-for-reg) is another style of registration that does not require accessing the registry. This approach is complicated by the use of [application manifests](https://docs.microsoft.com/en-us/windows/desktop/SbsCs/application-manifests), but does have benefits for limiting environment impact and simplifying deployment.
+##### Registration-Free
+
+[RegFree COM for .NET](https://docs.microsoft.com/en-us/dotnet/framework/interop/configure-net-framework-based-com-components-for-reg) is another style of registration that does not require accessing the registry. This approach is complicated by the use of [application manifests](https://docs.microsoft.com/en-us/windows/desktop/SbsCs/application-manifests), but does have benefits for limiting environment impact and simplifying deployment. However a limitation of this approach is that the current implementation of RegFree with respect to .NET Framework implies the use of `mscoree.dll`, making use of the current manifest format for .NET Core a broken scenario without a change in the Windows OS. 
+
+An example of a RegFree manifest for a .NET Framework class is below - note the absence of specifying a hosting server library (i.e. `mscoree.dll` is implied for the `clrClass` element).
+
+``` xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <assemblyIdentity
+        type="win32"
+        name="NetServer"
+        version="1.0.0.0">
+    </assemblyIdentity>
+    <clrClass
+        clsid="{3C58BBC9-3966-4B58-8EE2-398CBBC9FDC4}"
+        name="NetServer.Server"
+        threadingModel="Both"
+        runtimeVersion="v4.0.30319">
+    </clrClass>
+</assembly>
+```
+
+Due to the above issues with traditional RegFree manifests and .NET classes, an alternative system must be employed to enable a low-impact style of class registration for .NET Core.
 
 ## References
 
