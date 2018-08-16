@@ -356,7 +356,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining("System.TypeLoadException: Could not load type 'StartupHook.StartupHookMissingType' from assembly 'StartupHook");
         }
 
-        // Run the app with startup hook that has no public Initialize method
+
+        // Run the app with a startup hook that doesn't have any Initialize method
         [Fact]
         public void Muxer_activation_of_StartupHook_With_Missing_Method()
         {
@@ -367,22 +368,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
             var startupHookFixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookProjectFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var expectedError = "System.MissingMethodException: Method '{0}' not found.";
-
-            // Non-public Initialize method
-            var startupHookVar = startupHookDll + "!StartupHook.StartupHookWithNonPublicMethod";
-            dotnet.Exec(appDll)
-                .EnvironmentVariable(startupHookVarName, startupHookVar)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithNonPublicMethod.Initialize"));
+            var expectedError = "System.MissingMethodException: Method 'StartupHook.StartupHookWithoutInitializeMethod.Initialize' not found.";
 
             // No Initialize method
-            startupHookVar = startupHookDll + "!StartupHook.StartupHookWithoutInitializeMethod";
+            var startupHookVar = startupHookDll + "!StartupHook.StartupHookWithoutInitializeMethod";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -391,7 +380,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithoutInitializeMethod.Initialize"));
+                .HaveStdErrContaining(expectedError);
 
             // Missing Initialize method is caught after previous hooks have run
             startupHookVar = startupHookDll + "!StartupHook.StartupHook" + Path.PathSeparator + startupHookDll + "!StartupHook.StartupHookWithoutInitializeMethod";
@@ -405,12 +394,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .And
                 .HaveStdOutContaining("Hello from startup hook!")
                 .And
-                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithoutInitializeMethod.Initialize"));
+                .HaveStdErrContaining(expectedError);
         }
 
-        // Run the app with startup hook that has the wrong signature
+        // Run the app with startup hook that has no public static void Initialize() method
         [Fact]
-        public void Muxer_activation_of_StartupHook_With_Incorrect_Signature_Fails()
+        public void Muxer_activation_of_StartupHook_With_Incorrect_Method_Signature()
         {
             var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppProjectFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
@@ -421,8 +410,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
 
             var expectedError = "System.ArgumentException: The signature of the startup hook '{0}' was invalid. It must be 'public static void Initialize()'.";
 
-            // Initialize method that has parameters or returns non-void
-            var startupHookVar = startupHookDll + "!StartupHook.StartupHookWithIncorrectSignature";
+            // Non-public Initialize method
+            var startupHookVar = startupHookDll + "!StartupHook.StartupHookWithNonPublicMethod";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -431,7 +420,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithIncorrectSignature.Initialize"));
+                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithNonPublicMethod.Initialize"));
 
             // Initialize is an instance method
             startupHookVar = startupHookDll + "!StartupHook.StartupHookWithInstanceMethod";
@@ -445,8 +434,44 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .And
                 .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithInstanceMethod.Initialize"));
 
+            // Initialize method takes parameters
+            startupHookVar = startupHookDll + "!StartupHook.StartupHookWithParameter";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithParameter.Initialize"));
+
+            // Initialize method has non-void return type
+            startupHookVar = startupHookDll + "!StartupHook.StartupHookWithReturnType";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithReturnType.Initialize"));
+
+            // Initialize method that has multiple methods with an incorrect signature
+            startupHookVar = startupHookDll + "!StartupHook.StartupHookWithMultipleIncorrectSignatures";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithMultipleIncorrectSignatures.Initialize"));
+
             // Signature problem is caught after previous hooks have run
-            startupHookVar = startupHookDll + "!StartupHook.StartupHook" + Path.PathSeparator + startupHookDll + "!StartupHook.StartupHookWithIncorrectSignature";
+            startupHookVar = startupHookDll + "!StartupHook.StartupHook" + Path.PathSeparator + startupHookDll + "!StartupHook.StartupHookWithNonPublicMethod";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -457,7 +482,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .And
                 .HaveStdOutContaining("Hello from startup hook!")
                 .And
-                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithIncorrectSignature.Initialize"));
+                .HaveStdErrContaining(String.Format(expectedError, "StartupHook.StartupHookWithNonPublicMethod.Initialize"));
         }
 
         public class SharedTestState : IDisposable
