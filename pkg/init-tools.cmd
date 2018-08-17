@@ -8,25 +8,12 @@ set DOTNET_PATH=%TOOLRUNTIME_DIR%\dotnetcli\
 if [%DOTNET_CMD%]==[] set DOTNET_CMD=%DOTNET_PATH%dotnet.exe
 if [%BUILDTOOLS_SOURCE%]==[] set BUILDTOOLS_SOURCE=https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
 set /P BUILDTOOLS_VERSION=< "%~dp0BuildToolsVersion.txt"
-set /P SYNCTOOLS_VERSION=< "%~dp0SyncToolsVersion.txt"
 set BUILD_TOOLS_PATH=%PACKAGES_DIR%Microsoft.DotNet.BuildTools\%BUILDTOOLS_VERSION%\lib\
 
 set PROJECT_JSON_PATH=%TOOLRUNTIME_DIR%\%BUILDTOOLS_VERSION%
 set PROJECT_JSON_FILE=%PROJECT_JSON_PATH%\project.json
 set PROJECT_JSON_CONTENTS={ "dependencies": { "Microsoft.DotNet.BuildTools": "%BUILDTOOLS_VERSION%" }, "frameworks": { "netcoreapp1.0": { } } }
 
-set SYNC_JSON_PATH=%PACKAGES_DIR%
-set SYNC_JSON_FILE=%SYNC_JSON_PATH%\project.json
-set SYNC_JSON_CONTENTS={ "dependencies": { "Microsoft.DotNet.BuildTools": "%SYNCTOOLS_VERSION%" }, "frameworks": { "netcoreapp1.0": { } } }
-
-set MSBUILD_PROJECT_PATH=%PACKAGES_DIR%
-set MSBUILD_PROJECT_FILE=%MSBUILD_PROJECT_PATH%\SyncToolsVersion.props
-set MSBUILD_PROJECT_CONTENTS=^^^<?xml version=^"1.0^" encoding=^"utf-8^"?^^^> ^
- ^^^<Project ToolsVersion=^"12.0^" DefaultTargets=^"Build^" xmlns=^"http://schemas.microsoft.com/developer/msbuild/2003^"^^^> ^
-  ^^^<PropertyGroup^^^> ^
-    ^^^<SyncToolsVersion^^^>%SYNCTOOLS_VERSION%^^^</SyncToolsVersion^^^> ^
-  ^^^</PropertyGroup^^^> ^
- ^^^</Project^^^>
 set BUILD_TOOLS_SEMAPHORE=%PROJECT_JSON_PATH%\init-tools.completed
 
 :: if force option is specified then clean the tool runtime and build tools package directory to force it to get recreated
@@ -46,10 +33,6 @@ if exist "%TOOLRUNTIME_DIR%" rmdir /S /Q "%TOOLRUNTIME_DIR%"
 if NOT exist "%PROJECT_JSON_PATH%" mkdir "%PROJECT_JSON_PATH%"
 echo %PROJECT_JSON_CONTENTS% > "%PROJECT_JSON_FILE%"
 
-if NOT exist "%SYNC_JSON_PATH%" mkdir "%SYNC_JSON_PATH%"
-echo %SYNC_JSON_CONTENTS% > "%SYNC_JSON_FILE%"
-
-echo %MSBUILD_PROJECT_CONTENTS% > "%MSBUILD_PROJECT_FILE%"
 echo Running %0 > "%INIT_TOOLS_LOG%"
 
 if exist "%DOTNET_CMD%" goto :afterdotnetrestore
@@ -77,10 +60,6 @@ if NOT exist "%BUILD_TOOLS_PATH%init-tools.cmd" (
   echo ERROR: Could not restore build tools correctly. 1>&2
   goto :error
 )
-
-echo Restoring BuildTools version %SYNCTOOLS_VERSION%...
-echo Running: "%DOTNET_CMD%" restore "%SYNC_JSON_FILE%" --no-cache --packages %PACKAGES_DIR% --source "%BUILDTOOLS_SOURCE%" >> "%INIT_TOOLS_LOG%"
-call "%DOTNET_CMD%" restore "%SYNC_JSON_FILE%" --no-cache --packages %PACKAGES_DIR% --source "%BUILDTOOLS_SOURCE%" >> "%INIT_TOOLS_LOG%"
 
 :afterbuildtoolsrestore
 
