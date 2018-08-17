@@ -19,7 +19,6 @@
           DependsOnTargets="GetLatestCommitHash;GenerateVersionSourceFile">
     <PropertyGroup>
       <CMakeBuildDir>$(IntermediateOutputRootPath)corehost\cmake\</CMakeBuildDir>
-      <DotNetHostFxrPath>$(CMakeBuildDir)cli\fxr\$(DotnetHostFxrBaseName)</DotNetHostFxrPath>
     
       <BuildArgs>--arch $(TargetArchitecture) --apphostver $(AppHostVersion) --hostver $(HostVersion) --fxrver $(HostResolverVersion) --policyver $(HostPolicyVersion) --commithash $(LatestCommit)</BuildArgs>
       <BuildArgs Condition="'$(PortableBuild)' == 'true'">$(BuildArgs) -portable</BuildArgs>     
@@ -38,7 +37,7 @@
       <CMakeOutput Include="$(CMakeBuildDir)cli\exe\dotnet\dotnet" />
       <CMakeOutput Include="$(CMakeBuildDir)cli\exe\apphost\apphost" />
       <CMakeOutput Include="$(CMakeBuildDir)cli\dll\hostpolicy\$(HostPolicyBaseName)" />
-      <CMakeOutput Include="$(DotnetHostFxrPath)" />
+      <CMakeOutput Include="$(CMakeBuildDir)cli\fxr\$(DotnetHostFxrBaseName)" />
     </ItemGroup>
     <ItemGroup Condition="'$(StripSymbols)' == 'true'">
       <CMakeOutput Include="@(CmakeOutput -> '%(Identity)$(SymbolFileExtension)')" />
