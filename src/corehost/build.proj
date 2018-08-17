@@ -20,7 +20,6 @@
     <PropertyGroup>
       <CMakeBuildDir>$(IntermediateOutputRootPath)corehost\cmake\</CMakeBuildDir>
       <DotNetHostFxrPath>$(CMakeBuildDir)cli\fxr\$(DotnetHostFxrBaseName)</DotNetHostFxrPath>
-      <HostPolicyPath>$(CMakeBuildDir)cli\dll\$(HostPolicyBaseName)</HostPolicyPath>
     
       <BuildArgs>--arch $(TargetArchitecture) --apphostver $(AppHostVersion) --hostver $(HostVersion) --fxrver $(HostResolverVersion) --policyver $(HostPolicyVersion) --commithash $(LatestCommit)</BuildArgs>
       <BuildArgs Condition="'$(PortableBuild)' == 'true'">$(BuildArgs) -portable</BuildArgs>     
@@ -38,7 +37,7 @@
     <ItemGroup>
       <CMakeOutput Include="$(CMakeBuildDir)cli\exe\dotnet\dotnet" />
       <CMakeOutput Include="$(CMakeBuildDir)cli\exe\apphost\apphost" />
-      <CMakeOutput Include="$(HostPolicyPath)" />
+      <CMakeOutput Include="$(CMakeBuildDir)cli\dll\hostpolicy\$(HostPolicyBaseName)" />
       <CMakeOutput Include="$(DotnetHostFxrPath)" />
     </ItemGroup>
     <ItemGroup Condition="'$(StripSymbols)' == 'true'">
@@ -84,8 +83,8 @@
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\dotnet\$(ConfigurationGroup)\dotnet.pdb" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\apphost\$(ConfigurationGroup)\apphost.exe" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\apphost\$(ConfigurationGroup)\apphost.pdb" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dll\$(ConfigurationGroup)\$(HostPolicyBaseName)" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dll\$(ConfigurationGroup)\hostpolicy.pdb" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dll\hostpolicy\$(ConfigurationGroup)\$(HostPolicyBaseName)" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dll\hostpolicy\$(ConfigurationGroup)\hostpolicy.pdb" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\fxr\$(ConfigurationGroup)\$(DotnetHostFxrBaseName)" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\fxr\$(ConfigurationGroup)\hostfxr.pdb" />      
     </ItemGroup>
