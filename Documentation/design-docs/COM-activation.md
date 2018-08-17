@@ -10,7 +10,7 @@ COM activation in this document is currently limited to in-proc scenarios. Scena
 
 * Discover all installed versions of .NET Core.
 * Load the appropriate version of .NET Core for the class if a .NET Core instance is not running, or validate the currently existing .NET Core instance can satisfy the class requirement.
-* Instantiate an instance of the class and return a pointer to an [`IUnknown`](https://docs.microsoft.com/en-us/windows/desktop/api/unknwn/nn-unknwn-iunknown) that represents the newly constructed class.
+* Return an [`IClassFactory`](https://docs.microsoft.com/en-us/windows/desktop/api/unknwnbase/nn-unknwnbase-iclassfactory) implementation that will construct an instance of the .NET class.
 * Support the discrimination of concurrently loaded CLR versions.
 
 ### Environment Matrix
@@ -67,21 +67,21 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
     * If a CLR is present, the requested `RuntimeVersion` will be validated against that CLR. If version satisfiability fails, activation will fail.
     * If a CLR is **not** present, an attempt will be made to create a satisfying CLR instance. Failure to create an instance will result in activation failure.
 1) A request to the CLR will be made via a new method for class activation within a COM environment.
-    * The ability to load the assembly and create a class instance will require an additional function be exposed that can be called from `hostfxr`.
+    * The ability to load the assembly and create an `IClassFactory` instance will require exposing a new function that can be called from `hostfxr`.
     * Example of a possible API in `System.Private.CoreLib` on the `Activator` class:
         ``` csharp
         public static class Activator
         {
             ...
             #if WINDOWS
-            public static ObjectHandle CreateInstanceForCom(string assemblyName, string typeName);
+            public static ObjectHandle CreateClassFactoryInstanceForType(string assemblyName, string typeName);
             #endif
             ...
         }
         ```
         Note this API would not be exposed outside of `System.Private.CoreLib`.
     * The loading of the assembly will take place in a new [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-2.1) for dependency isolation.
-1) The class instance will be returned to the caller of `DllGetClassObject()`.
+1) The `IClassFactory` instance will be returned to the caller of `DllGetClassObject()`.
 
 The `DllCanUnloadNow()` function will always return `S_FALSE` indicating the shim is never able to be unloaded. This matches .NET Framework semantics and can be adjusted in the future if needed.
 
@@ -120,6 +120,13 @@ An example of a RegFree manifest for a .NET Framework class is below - note the 
 ```
 
 Due to the above issues with traditional RegFree manifests and .NET classes, an alternative system must be employed to enable a low-impact style of class registration for .NET Core.
+
+## Compatibility Concerns
+
+* Side-by-side concerns with the registration of classes that are defined in both .NET Framework and .NET Core.
+    - i.e. Both classes have identical [`Guid`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.guidattribute?view=netcore-2.1) values.
+* RegFree COM will not work the same between .NET Framework and .NET Core.
+    - See details above.
 
 ## References
 
