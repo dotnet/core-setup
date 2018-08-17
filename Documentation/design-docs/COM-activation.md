@@ -2,16 +2,15 @@
 
 ## Purpose
 
-In order to more fully support the vast number of existing .NET Framework users in their transition to .NET Core, support of the COM Activation scenario in .NET Core is required. Without this support it is not possible for many .NET Framework consumers to even consider transitioning to .NET Core. The intent of this document is to describe aspects of the activation of a .NET class written for .NET Core within a COM environment. This support includes but is not limited to activation via the [`CoCreateInstance()`](https://docs.microsoft.com/en-us/windows/desktop/api/combaseapi/nf-combaseapi-cocreateinstance)API in C/C++ or from a [Windows Script Host](https://docs.microsoft.com/en-us/windows/desktop/com/using-com-objects-in-windows-script-host).
+In order to more fully support the vast number of existing .NET Framework users in their transition to .NET Core, support of the COM Activation scenario in .NET Core is required. Without this support it is not possible for many .NET Framework consumers to even consider transitioning to .NET Core. The intent of this document is to describe aspects of COM Activation for a .NET class written for .NET Core. This support includes but is not limited to activation scenarios such as the [`CoCreateInstance()`](https://docs.microsoft.com/en-us/windows/desktop/api/combaseapi/nf-combaseapi-cocreateinstance)API in C/C++ or from within a [Windows Script Host](https://docs.microsoft.com/en-us/windows/desktop/com/using-com-objects-in-windows-script-host) instance.
 
-This document is limited to the in-proc COM Activation scenario. The out-of-proc COM Activation scenario is deferred.
+COM Activation in this document is currently limited to in-proc scenarios. Scenarios involving out-of-proc COM Activation are deferred.
 
 ### Requirements
 
 * Discover all installed versions of .NET Core.
-* Load the appropriate version of .NET Core for the class.
+* Load the appropriate version of .NET Core for the class if a .NET Core instance is not running, or validate the currently existing .NET Core instance can satisfy the class version requirement.
 * Instantiate an instance of the class and return a pointer to an [`IUnknown`](https://docs.microsoft.com/en-us/windows/desktop/api/unknwn/nn-unknwn-iunknown) that represents the newly constructed class.
-* Determine the required CLR version for activation or validate a currently existing CLR instance can satisfy the CLR version requirement.
 * Support the discrimination of concurrently loaded CLR versions.
 
 ### Environment Matrix
@@ -30,13 +29,13 @@ The following list represents an exhaustive activation matrix.
 
 ## Design
 
-The basic issue with activation of a .NET class within a COM environment is the loading or discovery of a CLR instance. The .NET Framework addressed this issue through a shim library (described below). The .NET Core scenario has different requirements and limitations on system impact and as such an identical solution may not be optimal.
+One of the basic issues with the activation of a .NET class within a COM environment is the loading or discovery of an appropriate CLR instance. The .NET Framework addressed this issue through a shim library (described below). The .NET Core scenario has different requirements and limitations on system impact and as such an identical solution may not be optimal or tenable.
 
 ### .NET Framework Class COM Activation
 
-The .NET Framework uses a shim library (`mscoree.dll`) to facilitate the loading of the CLR into a process performing activation - one of the many uses of `mscoree.dll`. When .NET Framework 4.0 was released, `mscoreei.dll` was introduced to have a level of indirection between the system installed shim (`mscoree.dll`) and the specific framework shim and to enable side-by-side CLR scenarios. Having a system wide shim makes servicing difficult since any process using .NET Framework will have the shim loaded and thus may require a system reboot to update.
+The .NET Framework uses a shim library (`mscoree.dll`) to facilitate the loading of the CLR into a process performing activation - one of the many uses of `mscoree.dll`. When .NET Framework 4.0 was released, `mscoreei.dll` was introduced to provide a level of indirection between the system installed shim (`mscoree.dll`) and a specific framework shim as well as to enable side-by-side CLR scenarios. An important consideration of the system wide shim is that of servicing. Serviving `mscoree.dll` is difficult due to any process with a loaded .NET Framework instance will also have the shim loaded, thus requiring a system reboot to when the shim must be serviced.
 
-During .NET server registration, the shim was identified as the in-proc server that would be queried for the class to activate. Along with the shim being defined as the COM in-proc server, additional metadata was inserted into the registry to indicate to the shim what .NET assembly should be loaded and what type to activate. For example, in addition to the typical [in-proc server](https://docs.microsoft.com/en-us/windows/desktop/com/inprocserver32) registry values the following values are added to the registry for the `TypeLoadException` class.
+During .NET server registration, the shim is identified as the in-proc server to be queried for class activation. Along with the shim being defined as the COM in-proc server, additional metadata is inserted into the registry that indicates what .NET assembly to load and what type to activate. For example, in addition to the typical [in-proc server](https://docs.microsoft.com/en-us/windows/desktop/com/inprocserver32) registry values the following values are added to the registry for the `TypeLoadException` class.
 
 ```
 "Assembly"="mscorlib, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
@@ -48,9 +47,9 @@ The above registration is typically done with the [`RegAsm.exe`](https://docs.mi
 
 ### .NET Core Class COM Activation
 
-In .NET Core, our intent will be to avoid a system wide shim library. This may add additional cost for deployment scenarios, but will reduce servicing and engineering costs by making deployment more explicit and less magic.
+In .NET Core, our intent will be to avoid a system wide shim library. This decision may add additional cost for deployment scenarios, but will reduce servicing and engineering costs by making deployment more explicit and less magic.
 
-The current hosting solutions are defined at [Documentation/design-docs/host-components.md](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/host-components.md). Along with the existing hosts an additional COM activation host library will be added. This library will export the required functions for COM class activation.
+The current .NET Core hosting solutions are described in detail at [Documentation/design-docs/host-components.md](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/host-components.md). Along with the existing hosts an additional COM activation host library will be added. This library will export the required functions for COM class activation and act in a similar way to `mscoree.dll`.
 
 >[`HRESULT DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv);`](https://docs.microsoft.com/en-us/windows/desktop/api/combaseapi/nf-combaseapi-dllgetclassobject)
 
@@ -62,14 +61,14 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
     * **The location and mechanics of accessing this registration information is still TBD**
     * `Assembly` (**required**) - the [Fully-Qualified Name](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names) of the assembly.
     * `Class` (**required**) - the full type name (e.g. `MyCompany.MyProduct.MyClass`).
-    * `Codebase` (**required**) - an absolute path to the assembly to load. If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the assembly that file will be used to describe runtime configuration details.
+    * `Codebase` (**required**) - an absolute path to the assembly to load. If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the assembly that file will be preferred to describe runtime configuration details.
     * `RuntimeVersion` (optional) - if not supplied the latest CLR found will be used.
 1) Using the existing `hostfxr` library, attempt to discover the desired CLR.
     * If a CLR is present, the requested `RuntimeVersion` will be validated against that CLR. If version satisfiability fails, activation will fail.
-    * If a CLR is **not** present, an attempt will be made to create a satisfying CLR instance. Failure to create an instance will result in an activation failure.
+    * If a CLR is **not** present, an attempt will be made to create a satisfying CLR instance. Failure to create an instance will result in activation failure.
 1) A request to the CLR will be made via a new method for class activation within a COM environment.
-    * The ability to load the assembly and then create a class instance will require a function be exposed that can be called from `hostfxr`.
-    * Example of API in `System.Private.CoreLib` on the `Activator` class:
+    * The ability to load the assembly and create a class instance will require an additional function be exposed that can be called from `hostfxr`.
+    * Example of a possible API in `System.Private.CoreLib` on the `Activator` class:
         ``` csharp
         public static class Activator
         {
@@ -88,18 +87,18 @@ The `DllCanUnloadNow()` function will always return `S_FALSE` indicating the shi
 
 #### Class Registration
 
-Registration will depend on the [.NET Core deployment scenario](https://docs.microsoft.com/en-us/dotnet/core/deploying/).
+Registration will depend on the application's [deployment scenario](https://docs.microsoft.com/en-us/dotnet/core/deploying/).
 
 * [Framework-dependent deployments (FDD)](https://docs.microsoft.com/en-us/dotnet/core/deploying/#framework-dependent-deployments-fdd) - This is most similar to the .NET Framework scenario and registration will be done using the shared framework. 
 * [Self-contained deployments (SCD)](https://docs.microsoft.com/en-us/dotnet/core/deploying/#self-contained-deployments-scd) - Registration will be done using the contained framework.
 
 ##### Registry
 
-The details of class registration in the registry in .NET Core is still in active investigation, but does not limit the current plan. At a minimum, registration scripts could be generated for the user via an extension to the [`dotnet.exe`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet?tabs=netcore21) tool, although this approach may be unsatisfactory as a final experience.
+Details of class registration in the registry for .NET Core are under active investigation, but this fact does not limit the current plan. At a minimum, registration scripts could be generated for the user via an extension to the [`dotnet.exe`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet?tabs=netcore21) tool, although this approach may be unsatisfactory as a final experience.
 
 ##### Registration-Free
 
-[RegFree COM for .NET](https://docs.microsoft.com/en-us/dotnet/framework/interop/configure-net-framework-based-com-components-for-reg) is another style of registration that does not require accessing the registry. This approach is complicated by the use of [application manifests](https://docs.microsoft.com/en-us/windows/desktop/SbsCs/application-manifests), but does have benefits for limiting environment impact and simplifying deployment. However a limitation of this approach is that the current implementation of RegFree with respect to .NET Framework implies the use of `mscoree.dll`, making use of the current manifest format for .NET Core a broken scenario without a change in the Windows OS. 
+[RegFree COM for .NET](https://docs.microsoft.com/en-us/dotnet/framework/interop/configure-net-framework-based-com-components-for-reg) is another style of registration that does not require accessing the registry. This approach is complicated by the use of [application manifests](https://docs.microsoft.com/en-us/windows/desktop/SbsCs/application-manifests), but does have benefits for limiting environment impact and simplifying deployment. A severe limitation of this approach is that in order to use RegFree COM with .NET Framework, the Window OS assumes the use of `mscoree.dll`. This assumption makes use of the current manifest format for .NET Core a broken scenario without a change in the Windows OS. 
 
 An example of a RegFree manifest for a .NET Framework class is below - note the absence of specifying a hosting server library (i.e. `mscoree.dll` is implied for the `clrClass` element).
 
