@@ -35,9 +35,10 @@ may not contain any empty entries or a trailing path separator.
 
 Setting this environment variable will cause each of the specified
 types' `public static void Initialize()` methods to be called in
-order, synchronously, before the main assembly is loaded. The
-environment variable will be inherited by child processes by
-default. It is up to the `StartupHook.dll`s and user code to decide
+order, synchronously, before the main assembly is loaded. The hooks
+are all called on the same managed thread (the same thread that calls
+`Main`). The environment variable will be inherited by child processes
+by default. It is up to the `StartupHook.dll`s and user code to decide
 what to do about this - `StartupHook.dll` may clear them to prevent
 this behavior globally, if desired.
 
@@ -94,3 +95,118 @@ namespace SharedHostPolicy
     }
 }
 ```
+
+## Error handling details
+
+Problems with the startup hook should be fairly straightforward to
+diagnose. All of these exceptionts will contain the startup hook path
+(`System.StartupHookProvider.ProcessStartupHooks`) on the stack
+trace. They fall into the following categories:
+
+- Errors detected eagerly, with exceptions thrown before the execution
+  of any startup hook.
+
+-- Invalid syntax. This will throw an `ArgumentException` with "The
+  syntax of the startup hook variable was invalid.".
+
+-- Partially qualified path in the startup hook. This will throw an
+   `ArgumentException` with "Absolute path information is required.".
+
+- Exceptions thrown during the call to a given startup hook. Previous
+  hooks may have run successfully.
+
+-- Missing startup hook assembly. This will throw a
+   `FileNotFoundException` with "Could not load file or assembly
+   '<assemblyPath>'".
+
+-- Invalid startup hook assembly. This will throw a
+   `BadImageFormatException` with the startup hook path on the stack
+   trace.
+
+-- Missing startup hook type. This will throw a `TypeLoadException`
+   with "Could not load type '<specifiedType>' from assembly
+   '<assemblyName>'".
+
+-- Missing `Initialize` method in startup hook. This will throw a
+   `MissingMethodException` with "Method '<specifiedType>.Initialize'
+   not found.".
+
+-- Invalid `Initialize` method (with an incorrect signature - one that
+   takes parameters, has a non-void return type, is not public, or is
+   not static). This will throw an `ArgumentException` with "The
+   signature of the startup hook '<specifiedType>.Initialize was
+   invalid. It must be 'public static void Initialize()'.
+
+## Guidance and caveats
+
+This hook is meant as a low-level, powerful way to inject code into
+the process at runtime, for use by tool developers who truly have a
+need for this kind of power. It should only be used in situations
+where modifying application code is not an option and there is not an
+existing structured dependency injection framework in place. An
+example of such a use case is a hook that injects logging, telemetry,
+or profiling into an existing deployed application at run tim.e
+
+It is prone to ordering issues when multiple hooks are used, and does
+nothing to attempt to make dependencies of hooks easy to
+manage. Multiple hooks, if used, should be fairly independent of each
+other.
+
+### No built-in solution to ordering issues
+
+For example, if one hook sets global state that introduces logging in
+the process, the new behavior will affect all subsequent hooks in the
+process and the `Main` entry point. Subsequent hooks may attempt to
+modify logging behavior in a way that conflicts with the first hook,
+leading to unexpected results. This kind of problem exists for any
+framework that gives independently-owned components access to shared
+resources - often dependency injection frameworks will have a
+dependency manager that loads components in a specific order. If this
+kind of behavior is required, a proper dependency injection framework
+should be used instead of multpile startup hooks.
+
+## No dependency resolution for non-app assemblies
+
+Another example regarding hook dependencies: the startup hook dll must
+not depend on any assemblies outside of the app's TPA list. If a
+startup hook has a static dependency on an assembly like
+'Newtonsoft.Json' but the app does not, executing the hook will throw
+a `FileNotFoundException`. There is no extra resolution logic for
+startup hooks. Any startup hook that wants to modify load behavior
+will have to use framework APIs like AssemblyLoadContexts to do this
+manually.
+
+## No conflict resolution for dependencies shared by hooks or the app
+
+If a startup hook decides to do something dangerous like force the
+load of a particular assembly, any later hooks (or the entry point)
+that run in the same AssemblyLoadContext and depend on that assembly
+will use the version that was forcefully loaded, even if they were
+compiled against a different version.
+
+## Threading behavior
+
+Each startup hook with run on the same managed thread as the `Main`
+method, so thread state will persist between startup hooks. While it
+may make sense to set global behavior in startup hooks, it is not
+recommended to use the thread state as a communication mechanism
+between startup hooks. Any setup that requires multiple communicating
+hooks should consider using a plugin system instead.
+
+In order to use `ThreadStatic` storage, for example, the class
+containing the shared thread state needs to be a common dependency of
+the hooks that use it. Because hooks can not depend on assemblies
+outside of the app's TPA list, this requires the shared state class to
+be defined either in the app or within the first hook that uses it:
+
+- If defined in the app, the shared state used by startup hooks would
+  need to be compiled into the app. In that case, consider explicitly
+  activating the desired behavior by modifying the app code, instead
+  of using startup hooks.
+
+- If defined in the first startup hook, all subsequent hooks that
+  access the `ThreadStatic` need to be compiled with references to the
+  first. In a situation like this, consider making the components that
+  need to communicate with each other part of a common plugin
+  framework. If necessary, the plugin host could be injected into the
+  process with a single startup hook.
