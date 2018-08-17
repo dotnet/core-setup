@@ -72,7 +72,7 @@ assemblies that are on the TPA list from a different location. Future
 changes to `AssemblyLoadContext` could make this easier to use by
 making the default load context or TPA list modifiable.
 
-```
+```c#
 namespace SharedHostPolicy
 {
     class SharedHostInitializer
@@ -106,36 +106,26 @@ trace. They fall into the following categories:
 - Errors detected eagerly, with exceptions thrown before the execution
   of any startup hook.
 
--- Invalid syntax. This will throw an `ArgumentException` with "The
-  syntax of the startup hook variable was invalid.".
+  - Invalid syntax throws an `ArgumentException`.
 
--- Partially qualified path in the startup hook. This will throw an
-   `ArgumentException` with "Absolute path information is required.".
+  - Partially qualified paths in the startup hook throw an
+    `ArgumentException`.
 
 - Exceptions thrown during the call to a given startup hook. Previous
   hooks may have run successfully.
 
--- Missing startup hook assembly. This will throw a
-   `FileNotFoundException` with "Could not load file or assembly
-   '<assemblyPath>'".
+  - Missing startup hook assemblies throw a `FileNotFoundException`.
 
--- Invalid startup hook assembly. This will throw a
-   `BadImageFormatException` with the startup hook path on the stack
-   trace.
+  - Invalid startup hook assemblies throw a `BadImageFormatException`.
 
--- Missing startup hook type. This will throw a `TypeLoadException`
-   with "Could not load type '<specifiedType>' from assembly
-   '<assemblyName>'".
+  - Missing startup hook types throw a `TypeLoadException`.
 
--- Missing `Initialize` method in startup hook. This will throw a
-   `MissingMethodException` with "Method '<specifiedType>.Initialize'
-   not found.".
+  - Missing `Initialize` methods in startup hooks throw a
+    `MissingMethodException`.
 
--- Invalid `Initialize` method (with an incorrect signature - one that
-   takes parameters, has a non-void return type, is not public, or is
-   not static). This will throw an `ArgumentException` with "The
-   signature of the startup hook '<specifiedType>.Initialize was
-   invalid. It must be 'public static void Initialize()'.
+  - Invalid `Initialize` methods (with an incorrect signature - that
+    take parameters, have a non-void return type, are not public, or
+    are not static) throw an `ArgumentException`.
 
 ## Guidance and caveats
 
@@ -145,12 +135,11 @@ need for this kind of power. It should only be used in situations
 where modifying application code is not an option and there is not an
 existing structured dependency injection framework in place. An
 example of such a use case is a hook that injects logging, telemetry,
-or profiling into an existing deployed application at run tim.e
+or profiling into an existing deployed application at runtime.
 
 It is prone to ordering issues when multiple hooks are used, and does
 nothing to attempt to make dependencies of hooks easy to
-manage. Multiple hooks, if used, should be fairly independent of each
-other.
+manage. Multiple hooks should be independent of each other.
 
 ### No built-in solution to ordering issues
 
@@ -163,9 +152,9 @@ framework that gives independently-owned components access to shared
 resources - often dependency injection frameworks will have a
 dependency manager that loads components in a specific order. If this
 kind of behavior is required, a proper dependency injection framework
-should be used instead of multpile startup hooks.
+should be used instead of multiple startup hooks.
 
-## No dependency resolution for non-app assemblies
+### No dependency resolution for non-app assemblies
 
 Another example regarding hook dependencies: the startup hook dll must
 not depend on any assemblies outside of the app's TPA list. If a
@@ -176,7 +165,7 @@ startup hooks. Any startup hook that wants to modify load behavior
 will have to use framework APIs like AssemblyLoadContexts to do this
 manually.
 
-## No conflict resolution for dependencies shared by hooks or the app
+### No conflict resolution for dependencies shared by hooks or the app
 
 If a startup hook decides to do something dangerous like force the
 load of a particular assembly, any later hooks (or the entry point)
@@ -184,7 +173,7 @@ that run in the same AssemblyLoadContext and depend on that assembly
 will use the version that was forcefully loaded, even if they were
 compiled against a different version.
 
-## Threading behavior
+### Threading behavior
 
 Each startup hook with run on the same managed thread as the `Main`
 method, so thread state will persist between startup hooks. While it
