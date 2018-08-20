@@ -34,9 +34,9 @@
           WorkingDirectory="$(CMakeBuildDir)"/>
 
     <ItemGroup>
-      <CMakeOutput Include="$(CMakeBuildDir)cli\exe\dotnet\dotnet" />
-      <CMakeOutput Include="$(CMakeBuildDir)cli\exe\apphost\apphost" />
-      <CMakeOutput Include="$(CMakeBuildDir)cli\dll\hostpolicy\$(HostPolicyBaseName)" />
+      <CMakeOutput Include="$(CMakeBuildDir)cli\dotnet\dotnet" />
+      <CMakeOutput Include="$(CMakeBuildDir)cli\apphost\apphost" />
+      <CMakeOutput Include="$(CMakeBuildDir)cli\hostpolicy\$(HostPolicyBaseName)" />
       <CMakeOutput Include="$(CMakeBuildDir)cli\fxr\$(DotnetHostFxrBaseName)" />
     </ItemGroup>
     <ItemGroup Condition="'$(StripSymbols)' == 'true'">
@@ -78,12 +78,12 @@
     <Exec Command="$(MSBuildProjectDirectory)\build.cmd $(BuildArgs)$(CustomNativeToolsetDir)" />
 
     <ItemGroup>
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\dotnet\$(ConfigurationGroup)\dotnet.exe" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\dotnet\$(ConfigurationGroup)\dotnet.pdb" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\apphost\$(ConfigurationGroup)\apphost.exe" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\exe\apphost\$(ConfigurationGroup)\apphost.pdb" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dll\hostpolicy\$(ConfigurationGroup)\$(HostPolicyBaseName)" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dll\hostpolicy\$(ConfigurationGroup)\hostpolicy.pdb" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dotnet\$(ConfigurationGroup)\dotnet.exe" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dotnet\$(ConfigurationGroup)\dotnet.pdb" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\apphost\$(ConfigurationGroup)\apphost.exe" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\apphost\$(ConfigurationGroup)\apphost.pdb" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\hostpolicy\$(ConfigurationGroup)\$(HostPolicyBaseName)" />
+      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\hostpolicy\$(ConfigurationGroup)\hostpolicy.pdb" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\fxr\$(ConfigurationGroup)\$(DotnetHostFxrBaseName)" />
       <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\fxr\$(ConfigurationGroup)\hostfxr.pdb" />      
     </ItemGroup>
