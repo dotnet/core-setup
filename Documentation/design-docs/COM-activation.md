@@ -61,10 +61,9 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
     * **The location and mechanics of accessing this registration information is still TBD**
     * `Assembly` (**required**) - the [Fully-Qualified Name](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names) of the assembly.
     * `Class` (**required**) - the full type name (e.g. `MyCompany.MyProduct.MyClass`).
-    * `Codebase` (**required**) - an absolute path to the assembly to load. If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the assembly that file will be preferred to describe CLR configuration details.
-    * `RuntimeVersion` (optional) - CLR version requirement.
+    * `Codebase` (**required**) - an absolute path to the assembly to load. If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the assembly, that file will be used to describe CLR configuration details. Refer to documentation for the `runtimeconfig.json` format when the file is [optional](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md#what-produces-the-files-and-where-are-they).
 1) Using the existing `hostfxr` library, attempt to discover the desired CLR and target [framework](https://docs.microsoft.com/en-us/dotnet/core/packages#frameworks).
-    * If a CLR is present, the requested `RuntimeVersion` will be validated against that CLR. If version satisfiability fails, activation will fail.
+    * If a CLR is present, the requested CLR version will be validated against that CLR. If version satisfiability fails, activation will fail.
     * If a CLR is **not** present, an attempt will be made to create a satisfying CLR instance. Failure to create an instance will result in activation failure.
 1) A request to the CLR will be made via a new method for class activation within a COM environment.
     * The ability to load the assembly and create an `IClassFactory` instance will require exposing a new function that can be called from `hostfxr`.
