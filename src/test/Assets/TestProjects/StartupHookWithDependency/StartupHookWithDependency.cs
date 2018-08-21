@@ -1,15 +1,12 @@
 using System;
 
-namespace StartupHook
+internal class StartupHook
 {
-    public class StartupHookWithDependency
+    public static void Initialize()
     {
-        public static void Initialize()
-        {
-            Console.WriteLine("Hello from startup hook with dependency!");
+        Console.WriteLine("Hello from startup hook with dependency!");
 
-            // A small operation involving NewtonSoft.Json to ensure the assembly is loaded properly
-            var t = typeof(Newtonsoft.Json.JsonReader);
-        }
+        // A small operation involving NewtonSoft.Json to ensure the assembly is loaded properly
+        var t = typeof(Newtonsoft.Json.JsonReader);
     }
 }

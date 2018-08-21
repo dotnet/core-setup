@@ -1,8 +1,8 @@
 using System;
 
-internal class StartupHook
+internal class StartupHookWrongType
 {
-    public static void Initialize()
+    public static void Init()
     {
         Console.WriteLine("Hello from startup hook!");
     }

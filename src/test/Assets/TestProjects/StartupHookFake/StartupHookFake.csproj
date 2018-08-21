@@ -5,4 +5,8 @@
     <RuntimeFrameworkVersion>$(MNAVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="StartupHookInvalidAssembly.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
