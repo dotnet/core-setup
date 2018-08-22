@@ -20,33 +20,41 @@ point, so that user code doesn't need to be modified.
 ## Proposed behavior
 
 The `DOTNET_STARTUP_HOOKS` environment variable can be used to specify
-a list of managed assemblies and type names that contain `public
-static void Initialize()` methods, which will be called in the order
-specified, before the `Main` entry point:
+a list of managed assemblies that contain a `StartupHook` type with a
+`public static void Initialize()` method, each of which will be called
+in the order specified, before the `Main` entry point
 
+Unix:
 ```
-DOTNET_STARTUP_HOOKS=/path/to/StartupHook1.dll!StartupHookNamespace.StartupHookType1;/path/to/StartupHook2.dll!StartupHookNamespace.StartupHookType2
+DOTNET_STARTUP_HOOKS=/path/to/StartupHook1.dll:/path/to/StartupHook2.dll
 ```
 
-This variable is a list of absolute assembly paths, each with a type
-name following an exclamation mark. The list is delimited by the
+Windows:
+```
+DOTNET_STARTUP_HOOKS=D:\path\to\StartupHook1.dll;D:\path\to\StartupHook2.dll
+```
+
+This variable is a list of absolute assembly paths, delimited by the
 platform-specific path separator (`;` on Windows and `:` on Unix). It
-may not contain any empty entries or a trailing path separator.
+may not contain any empty entries or a trailing path separator. The
+type must be named `StartupHook` without any namespace, and should be
+`internal`.
 
-Setting this environment variable will cause each of the specified
-types' `public static void Initialize()` methods to be called in
-order, synchronously, before the main assembly is loaded. The hooks
-are all called on the same managed thread (the same thread that calls
-`Main`). The environment variable will be inherited by child processes
-by default. It is up to the `StartupHook.dll`s and user code to decide
-what to do about this - `StartupHook.dll` may clear them to prevent
-this behavior globally, if desired.
+Setting this environment variable will cause the `public static void
+Initialize()` method of the `StartupHook` type in each of the
+specified assemblies to be called in order, synchronously, before the
+main assembly is loaded. The hooks are all called on the same managed
+thread (the same thread that calls `Main`). The environment variable
+will be inherited by child processes by default. It is up to the
+`StartupHook.dll`s and user code to decide what to do about this -
+`StartupHook.dll` may clear them to prevent this behavior globally, if
+desired.
 
 Specifically, hostpolicy starts up coreclr and sets up a new
 AppDomain. It then invokes a private method in
 `System.Private.CoreLib`, which will call each
-`StartupHookType.Initialize()` in turn synchronously. This gives
-`StartupHookType` a chance to set up new `AssemblyLoadContext`s, or
+`StartupHook.Initialize()` in turn synchronously. This gives
+`StartupHook` a chance to set up new `AssemblyLoadContext`s, or
 register other callbacks. After all of the `Initialize()` methods
 return, control returns to hostpolicy, which then calls the main entry
 point of the app like usual.
@@ -72,17 +80,21 @@ assemblies that are on the TPA list from a different location. Future
 changes to `AssemblyLoadContext` could make this easier to use by
 making the default load context or TPA list modifiable.
 
+Note that the `StartupHook` type is internal and in the global
+namespace, and the signature of the `Initialize` method is `public
+static void Initialize()`.
+
 ```c#
+internal class StartupHook
+{
+    public static void Initialize()
+    {
+        AssemblyLoadContext.Default.Resolving += SharedHostPolicy.SharedAssemblyResolver.LoadAssemblyFromSharedLocation;
+    }
+}
+
 namespace SharedHostPolicy
 {
-    class SharedHostInitializer
-    {
-        public static void Initialize()
-        {
-            AssemblyLoadContext.Default.Resolving += SharedAssemblyResolver.LoadAssemblyFromSharedLocation;
-        }
-    }
-
     class SharedAssemblyResolver
     {
         public static Assembly LoadAssemblyFromSharedLocation(AssemblyLoadContext context, AssemblyName assemblyName)
@@ -99,7 +111,7 @@ namespace SharedHostPolicy
 ## Error handling details
 
 Problems with the startup hook should be fairly straightforward to
-diagnose. All of these exceptionts will contain the startup hook path
+diagnose. All of these exceptions will contain the startup hook path
 (`System.StartupHookProvider.ProcessStartupHooks`) on the stack
 trace. They fall into the following categories:
 
@@ -126,6 +138,11 @@ trace. They fall into the following categories:
   - Invalid `Initialize` methods (with an incorrect signature - that
     take parameters, have a non-void return type, are not public, or
     are not static) throw an `ArgumentException`.
+
+  - Unhandled exceptions thrown from a startup hook will have the same
+    exception behavior as any other managed exception thrown from
+    `Main` - by default, they will terminate the process and show a
+    stack trace.
 
 ## Guidance and caveats
 
@@ -175,7 +192,7 @@ compiled against a different version.
 
 ### Threading behavior
 
-Each startup hook with run on the same managed thread as the `Main`
+Each startup hook will run on the same managed thread as the `Main`
 method, so thread state will persist between startup hooks. While it
 may make sense to set global behavior in startup hooks, it is not
 recommended to use the thread state as a communication mechanism
@@ -199,3 +216,9 @@ be defined either in the app or within the first hook that uses it:
   need to communicate with each other part of a common plugin
   framework. If necessary, the plugin host could be injected into the
   process with a single startup hook.
+
+### Visibility of `StartupHook` type
+
+The type should be made `internal` to prevent exposing it as API
+surface to any managed code that happens to have access to the startup
+hook dll. However, the feature will also work if the type is `public`.
