@@ -155,7 +155,7 @@
 
   <Target Name="PublishCoreHostPackagesToFeed"
           DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackagesFromAzure;SignPackages;PushSignedCoreHostPackagesToAzure;PushSignedCoreHostPackagesToFeed"
-          Condition="'@(_MissingBlobNames)' == '' AND '$(NuGetFeedUrl)' != ''"/>
+          Condition="'@(_MissingBlobNames)' == ''"/>
 
   <Target Name="DownloadCoreHostPackagesFromAzure">
     <Error Condition="'$(NuGetApiKey)' == ''" Text="Missing required property NuGetApiKey" />
@@ -225,7 +225,8 @@
                    Overwrite="true" />
   </Target>
 
-  <Target Name="PushSignedCoreHostPackagesToFeed">
+  <Target Name="PushSignedCoreHostPackagesToFeed"
+          Condition="'$(NuGetFeedUrl)' != ''"/>
     <Message Text="Pushing CoreHost packages to $(NuGetFeedUrl)" />
     <PropertyGroup>
       <NuGetPushCommand>$(DotnetToolCommand) nuget push --source $(NuGetFeedUrl) --api-key $(NuGetApiKey) --timeout $(NuGetPushTimeoutSeconds)</NuGetPushCommand>
