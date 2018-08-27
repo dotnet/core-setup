@@ -51,13 +51,14 @@ will be inherited by child processes by default. It is up to the
 desired.
 
 Specifically, hostpolicy starts up coreclr and sets up a new
-AppDomain. It then invokes a private method in
-`System.Private.CoreLib`, which will call each
+AppDomain, passing in the startup hook variable if it was
+set. Hostpolicy then asks the runtime to execute the main method.
+Just before the main method is called, the runtime will call a private
+method in `System.Private.CoreLib`, which will call each
 `StartupHook.Initialize()` in turn synchronously. This gives
 `StartupHook` a chance to set up new `AssemblyLoadContext`s, or
 register other callbacks. After all of the `Initialize()` methods
-return, control returns to hostpolicy, which then calls the main entry
-point of the app like usual.
+return, the runtime calls the main entry point of the app like usual.
 
 Rather than forcing all configuration to be done through a single
 predefined API, this creates a place where such configuration could be
@@ -193,9 +194,14 @@ compiled against a different version.
 ### Threading behavior
 
 Each startup hook will run on the same managed thread as the `Main`
-method, so thread state will persist between startup hooks. While it
-may make sense to set global behavior in startup hooks, it is not
-recommended to use the thread state as a communication mechanism
+method, so thread state will persist between startup hooks. The
+threading apartment state will be set based on any attributes present
+in the `Main` method of the app, before startup hooks execute. As a
+result, attemps to explicitly set the thread apartment state in a
+startup hook will likely fail.
+
+While it may make sense to set global behavior in startup hooks, it is
+not recommended to use the thread state as a communication mechanism
 between startup hooks. Any setup that requires multiple communicating
 hooks should consider using a plugin system instead.
 
