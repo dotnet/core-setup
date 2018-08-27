@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .Should()
                 .Pass()
                 .And
-                .HaveStdErrContaining("Invoking startup hooks [" + startupHookDll + "]")
+                .HaveStdErrContaining("Property STARTUP_HOOKS = " + startupHookDll)
                 .And
                 .HaveStdOutContaining("Hello from startup hook!")
                 .And

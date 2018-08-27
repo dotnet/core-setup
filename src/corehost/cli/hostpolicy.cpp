@@ -108,7 +108,7 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
     };
 
     // Note: these variables' lifetime should be longer than coreclr_initialize.
-    std::vector<char> tpa_paths_cstr, app_base_cstr, native_dirs_cstr, resources_dirs_cstr, fx_deps, deps, clrjit_path_cstr, probe_directories, clr_library_version;
+    std::vector<char> tpa_paths_cstr, app_base_cstr, native_dirs_cstr, resources_dirs_cstr, fx_deps, deps, clrjit_path_cstr, probe_directories, clr_library_version, startup_hooks_cstr;
     pal::pal_clrstring(probe_paths.tpa, &tpa_paths_cstr);
     pal::pal_clrstring(args.app_root, &app_base_cstr);
     pal::pal_clrstring(probe_paths.native, &native_dirs_cstr);
@@ -197,6 +197,15 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
         property_values.push_back(app_base_cstr.data());
     }
 
+    // Startup hooks
+    pal::string_t startup_hooks;
+    if (pal::getenv(_X("DOTNET_STARTUP_HOOKS"), &startup_hooks))
+    {
+        pal::pal_clrstring(startup_hooks, &startup_hooks_cstr);
+        property_keys.push_back("STARTUP_HOOKS");
+        property_values.push_back(startup_hooks_cstr.data());
+    }
+
     size_t property_size = property_keys.size();
     assert(property_keys.size() == property_values.size());
 
@@ -259,33 +268,6 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
     {
         trace::error(_X("Failed to initialize CoreCLR, HRESULT: 0x%X"), hr);
         return StatusCode::CoreClrInitFailure;
-    }
-
-    pal::string_t startup_hooks_var;
-    if (pal::getenv(_X("DOTNET_STARTUP_HOOKS"), &startup_hooks_var))
-    {
-        void (*managed_host_initialize_fn)(const char*);
-        hr = coreclr::create_delegate(
-            host_handle,
-            domain_id,
-            "System.Private.CoreLib",
-            "System.StartupHookProvider",
-            "ProcessStartupHooks",
-            (void**)&managed_host_initialize_fn);
-
-        if (!SUCCEEDED(hr))
-        {
-            trace::error(_X("Failed to create delegate for startup hook provider, HRESULT: 0x%X"), hr);
-            return StatusCode::CoreClrCreateDelegateFailure;
-        }
-
-        std::vector<char> startup_hooks_var_cstr;
-        pal::pal_utf8string(startup_hooks_var, &startup_hooks_var_cstr);
-
-        trace::info(_X("Invoking startup hooks [%s]"), startup_hooks_var.c_str());
-        trace::flush();
-
-        managed_host_initialize_fn(startup_hooks_var_cstr.data());
     }
 
     // Initialize clr strings for arguments
