@@ -51,10 +51,12 @@ will be inherited by child processes by default. It is up to the
 desired.
 
 Specifically, hostpolicy starts up coreclr and sets up a new
-AppDomain, passing in the startup hook variable if it was
-set. Hostpolicy then asks the runtime to execute the main method.
-Just before the main method is called, the runtime will call a private
-method in `System.Private.CoreLib`, which will call each
+AppDomain, passing in the startup hook variable as the property
+`STARTUP_HOOKS` if it was set. This variable can be retrieved using
+`AppContext.GetData("STARTUP_HOOKS")`. Hostpolicy then asks the
+runtime to execute the main method.  Just before the main method is
+called, the runtime will call a private method in
+`System.Private.CoreLib`, which will call each
 `StartupHook.Initialize()` in turn synchronously. This gives
 `StartupHook` a chance to set up new `AssemblyLoadContext`s, or
 register other callbacks. After all of the `Initialize()` methods
