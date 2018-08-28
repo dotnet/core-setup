@@ -198,7 +198,8 @@ method, so thread state will persist between startup hooks. The
 threading apartment state will be set based on any attributes present
 in the `Main` method of the app, before startup hooks execute. As a
 result, attemps to explicitly set the thread apartment state in a
-startup hook will likely fail.
+startup hook will fail if the requested state is incompatible with the
+app's threading state.
 
 While it may make sense to set global behavior in startup hooks, it is
 not recommended to use the thread state as a communication mechanism
