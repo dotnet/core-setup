@@ -4,6 +4,10 @@ internal class StartupHook
 {
     public static void Initialize()
     {
+        // Success case with a startup hook that contains multiple
+        // Initialize methods. This is used to check that the startup
+        // hook provider doesn't get confused by the presence of an
+        // extra Initialize method with an incorrect signature.
         Initialize(123);
     }
 
