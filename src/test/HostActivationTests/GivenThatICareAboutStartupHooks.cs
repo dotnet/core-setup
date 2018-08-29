@@ -28,6 +28,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
             var startupHookFixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookProjectFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
+            var startupHookWithNonPublicMethodFixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookWithNonPublicMethodProjectFixture.Copy();
+            var startupHookWithNonPublicMethodDll = startupHookWithNonPublicMethodFixture.TestProject.AppDll;
+
             // Simple startup hook
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookDll)
@@ -40,6 +43,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdOutContaining("Hello from startup hook!")
                 .And
                 .HaveStdOutContaining("Hello World");
+
+            // Non-public Initialize method
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookWithNonPublicMethodDll)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello from startup hook with non-public method");
 
             // Ensure startup hook tracing works
             dotnet.Exec(appDll)
@@ -420,7 +434,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining(expectedError);
         }
 
-        // Run the app with startup hook that has no public static void Initialize() method
+        // Run the app with startup hook that has no static void Initialize() method
         [Fact]
         public void Muxer_activation_of_StartupHook_With_Incorrect_Method_Signature()
         {
@@ -432,19 +446,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
             var expectedError = "System.ArgumentException: The signature of the startup hook 'StartupHook.Initialize' in assembly '{0}' was invalid. It must be 'public static void Initialize()'.";
-
-            // Non-public Initialize method
-            var startupHookWithNonPublicMethodFixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookWithNonPublicMethodProjectFixture.Copy();
-            var startupHookWithNonPublicMethodDll = startupHookWithNonPublicMethodFixture.TestProject.AppDll;
-            dotnet.Exec(appDll)
-                .EnvironmentVariable(startupHookVarName, startupHookWithNonPublicMethodDll)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining(String.Format(expectedError, startupHookWithNonPublicMethodDll));
 
             // Initialize is an instance method
             var startupHookWithInstanceMethodFixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookWithInstanceMethodProjectFixture.Copy();
@@ -499,7 +500,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining(String.Format(expectedError, startupHookWithMultipleIncorrectSignaturesDll));
 
             // Signature problem is caught after previous hooks have run
-            var startupHookVar = startupHookDll + Path.PathSeparator + startupHookWithNonPublicMethodDll;
+            var startupHookVar = startupHookDll + Path.PathSeparator + startupHookWithMultipleIncorrectSignaturesDll;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -510,7 +511,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .And
                 .HaveStdOutContaining("Hello from startup hook!")
                 .And
-                .HaveStdErrContaining(String.Format(expectedError, startupHookWithNonPublicMethodDll));
+                .HaveStdErrContaining(String.Format(expectedError, startupHookWithMultipleIncorrectSignaturesDll));
         }
 
         public class SharedTestState : IDisposable
