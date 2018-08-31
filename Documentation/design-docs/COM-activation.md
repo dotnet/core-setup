@@ -101,7 +101,7 @@ Registration will depend on the application's [deployment scenario](https://docs
 
 ##### Registry
 
-Details of class registration in the registry for .NET Core are under active investigation, but this fact does not limit the current plan. At a minimum, registration scripts could be generated for the user via an extension to the [`dotnet.exe`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet?tabs=netcore21) tool, although this approach may be unsatisfactory as a final experience.
+Details of class registration in the registry for .NET Core are under active investigation, but this fact does not limit the current plan. At a minimum, registration scripts could be generated for the user via an extension to the [`dotnet.exe`][dotnet_link] tool, although this approach may be unsatisfactory as a final experience.
 
 ##### Registration-Free
 
@@ -188,7 +188,9 @@ The proposed alternative for RegFree is as follows:
     </assembly>
     ```
 1) When the native application starts up, its manifest will be read and dependency assemblies discovered. Exported COM class will also be registered in the process.
-1) At runtime, during a class activation call, COM will consult the SxS registration and discover the shim library should be used to load the class. Since the Activation Context can be queried, all assemblies that are registered can be determined and it is with this information that the shim can search for a managed assembly that can provide the class.
+1) At runtime, during a class activation call, COM will consult the SxS registration and discover the shim library should be used to load the class. Since the Activation Context can be [queried](https://docs.microsoft.com/en-us/windows/desktop/api/winbase/nf-winbase-queryactctxw), all registered assemblies can be determined and with this information the shim can search for a managed assembly that can provide the class.
+
+Similar to the Registry based scenario, the [`dotnet.exe`][dotnet_link] tool could be made to generate these `.manifest` files.
 
 ## Compatibility Concerns
 
@@ -206,3 +208,6 @@ The proposed alternative for RegFree is as follows:
 [Using COM Types in Managed Code](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/3y76b69k%28v%3dvs.100%29)
 
 [Exposing .NET Framework Components to COM](https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/zsfww439(v%3dvs.100))
+
+<!-- Common links -->
+[dotnet_link]: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet?tabs=netcore21
