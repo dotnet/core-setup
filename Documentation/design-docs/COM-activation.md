@@ -67,24 +67,23 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
     * If a CLR is **not** active with the process, an attempt will be made to create a satisfying CLR instance. Failure to create an instance will result in activation failure.
 1) A request to the CLR will be made via a new method for class activation within a COM environment.
     * The ability to load the assembly and create an `IClassFactory` instance will require exposing a new function that can be called from `hostfxr`.
-    * Example of a possible API in `System.Private.CoreLib` on a new `ComActivator` class:
+    * Example of a possible API in `System.Private.CoreLib` on a new `ComActivator` class in the `System.Runtime.InteropServices` namespace:
         ``` csharp
-        namespace System.Runtime.InteropServices
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ComActivationContext
         {
-            [StructLayout(LayoutKind.Sequential)]
-            public struct ComActivationContext
-            {
-                public Guid ClassId;
-                public Guid InterfaceId;
-                public string[] ActivationAssemblyList;
-            }
+            public Guid ClassId;
+            public Guid InterfaceId;
+            public int AssemblyCount;
+            public IntPtr AssemblyList;
+            public IntPtr ClassFactoryDest;
+        }
 
-            public static class ComActivator
-            {
-                ...
-                public static object GetClassFactoryForType(ComActivationContext context);
-                ...
-            }
+        public static class ComActivator
+        {
+            ...
+            public static int GetClassFactoryForTypeInternal(ref ComActivationContextInternal context);
+            ...
         }
         ```
         Note this API would not be exposed outside of `System.Private.CoreLib`.
@@ -128,6 +127,68 @@ An example of a RegFree manifest for a .NET Framework class is below - note the 
 ```
 
 Due to the above issues with traditional RegFree manifests and .NET classes, an alternative system must be employed to enable a low-impact style of class registration for .NET Core.
+
+The proposed alternative for RegFree is as follows:
+
+1) The native application will define an application manifest, but instead of defining a `clrClass` node, the application will define at least 2 dependent assemblies. The first will be the host shim library (e.g. `CoreShim.dll`) that takes the place of `mscoree.dll` in .NET Framework. The second and any subsequent assemblies will be those managed assemblies that contain the managed class(s) to activate.
+    ``` xml
+    <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+    <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+        <assemblyIdentity
+            type="win32"
+            name="COMClientPrimitives"
+            version="1.0.0.0"/>
+
+        <dependency>
+            <dependentAssembly>
+            <!-- RegFree COM - CoreCLR Shim -->
+            <assemblyIdentity
+                type="win32"
+                name="CoreShim.X"
+                version="1.0.0.0"/>
+            </dependentAssembly>
+        </dependency>
+
+        <dependency>
+            <dependentAssembly>
+            <!-- RegFree COM - Managed assembly -->
+            <assemblyIdentity
+                type="win32"
+                name="NETServer"
+                version="1.0.0.0"/>
+            </dependentAssembly>
+        </dependency>
+    </assembly>
+    ```
+1) The user would then also define a manifest for the shim. Both the manifest _and_ the shim library will need to be app-local for the scenario to work. Note that the application developer is responsible for defining the shim's manifest. An example shim manifest is defined below and with it the [SxS](https://docs.microsoft.com/en-us/windows/desktop/sbscs/about-side-by-side-assemblies-) logic would naturally know to query the shim for the desired class. Note that multiple `comClass` tags can be added.
+    ``` xml
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+        <assemblyIdentity
+            type="win32"
+            name="CoreShim.X"
+            version="1.0.0.0" />
+
+        <file name="CoreShim.dll">
+            <!-- NetServer.Server -->
+            <comClass
+                clsid="{3C58BBC9-3966-4B58-8EE2-398CBBC9FDC4}"
+                threadingModel="Both"/>
+        </file>
+    </assembly>
+    ```
+1) The user would also define a manifest for the managed assembly. This manifest is to ensure the managed assembly is added to the [Activation Context](https://docs.microsoft.com/en-us/windows/desktop/sbscs/activation-contexts) for the native application.
+    ``` xml
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+        <assemblyIdentity
+            type="win32"
+            name="NETServer"
+            version="1.0.0.0" />
+    </assembly>
+    ```
+1) When the native application starts up, its manifest will be read and dependency assemblies discovered. Exported COM class will also be registered in the process.
+1) At runtime, during a class activation call, COM will consult the SxS registration and discover the shim library should be used to load the class. Since the Activation Context can be queried, all assemblies that are registered can be determined and it is with this information that the shim can search for a managed assembly that can provide the class.
 
 ## Compatibility Concerns
 
