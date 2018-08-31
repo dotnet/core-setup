@@ -50,14 +50,6 @@
   <Import Project="dependencies.props" />
 
   <PropertyGroup Condition="'$(DotNetBuildOffline)' != 'true'">
-    <!-- temporarily include the 2.1.1 blob feed into the restore sources to address
-         https://github.com/dotnet/core-setup/issues/4322, until we can get another
-         build that updates us past this issue.
-    -->
-    <RestoreSources>
-        https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180605-09/final/index.json;
-        $(RestoreSources);
-    </RestoreSources>
     <!-- list of nuget package sources passed to NuGet -->
     <RestoreSources>
       $(OverridePackageSource);
@@ -456,7 +448,7 @@
    <RuntimeDepsRpmPackageVersion>$(RuntimeDepsRpmVersion)</RuntimeDepsRpmPackageVersion>
    <RuntimeDepsRpmPackageRelease>1</RuntimeDepsRpmPackageRelease>
   </PropertyGroup>
-
+  
   <PropertyGroup Condition="'$(InstallerExtension)' == '.deb' or '$(InstallerExtension)' == '.rpm' ">
 
     <PackageNameSuffix>$(MajorVersion).$(MinorVersion)</PackageNameSuffix>
