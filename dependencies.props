@@ -12,7 +12,7 @@
     <CoreFxCurrentRef>0f01a6494623fe38647f86980fb6f4023bc4ccb7</CoreFxCurrentRef>
     <CoreClrCurrentRef>0f01a6494623fe38647f86980fb6f4023bc4ccb7</CoreClrCurrentRef>
     <StandardCurrentRef>eff554f39ee29c9f2b470bf7755b83ceaaf2b1a1</StandardCurrentRef>
-    <BuildToolsCurrentRef>0f01a6494623fe38647f86980fb6f4023bc4ccb7</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>53a2b3995f485fa398f527566fa3ae0bfa408efc</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -44,7 +44,7 @@
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
-    <FeedTasksPackageVersion>2.2.0-preview1-03127-03</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>2.2.0-preview1-03131-02</FeedTasksPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
