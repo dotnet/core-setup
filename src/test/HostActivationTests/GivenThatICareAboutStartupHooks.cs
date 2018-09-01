@@ -3,7 +3,9 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
+using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
 {
@@ -436,7 +438,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
 
         // Run the app with startup hook that has no static void Initialize() method
         [Fact]
-        public void Muxer_activation_of_StartupHook_With_Incorrect_Method_Signature()
+        public void Muxer_activation_of_StartupHook_With_Incorrect_Method_Signature_Fails()
         {
             var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppProjectFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
@@ -514,11 +516,86 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 .HaveStdErrContaining(String.Format(expectedError, startupHookWithMultipleIncorrectSignaturesDll));
         }
 
+        private static void RemoveLibraryFromDepsJson(string depsJsonPath, string libraryName)
+        {
+            DependencyContext context;
+            using (FileStream fileStream = File.Open(depsJsonPath, FileMode.Open))
+            {
+                using (DependencyContextJsonReader reader = new DependencyContextJsonReader())
+                {
+                    context = reader.Read(fileStream);
+                }
+            }
+
+            context = new DependencyContext(context.Target,
+                context.CompilationOptions,
+                context.CompileLibraries,
+                context.RuntimeLibraries.Select(lib => new RuntimeLibrary(
+                    lib.Type,
+                    lib.Name,
+                    lib.Version,
+                    lib.Hash,
+                    lib.RuntimeAssemblyGroups.Select(assemblyGroup => new RuntimeAssetGroup(
+                        assemblyGroup.Runtime,
+                        assemblyGroup.RuntimeFiles.Where(f => !f.Path.EndsWith("SharedLibrary.dll")))).ToList().AsReadOnly(),
+                    lib.NativeLibraryGroups,
+                    lib.ResourceAssemblies,
+                    lib.Dependencies,
+                    lib.Serviceable,
+                    lib.Path,
+                    lib.HashPath,
+                    lib.RuntimeStoreManifestName)),
+                context.RuntimeGraph);
+
+            using (FileStream fileStream = File.Open(depsJsonPath, FileMode.Truncate, FileAccess.Write))
+            {
+                DependencyContextWriter writer = new DependencyContextWriter();
+                writer.Write(context, fileStream);
+            }
+        }
+
+        // Run startup hook that adds an assembly resolver
+        [Fact]
+        public void Muxer_activation_of_StartupHook_With_Assembly_Resolver()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppWithMissingRefProjectFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+            var appDepsJson = Path.Combine(Path.GetDirectoryName(appDll), Path.GetFileNameWithoutExtension(appDll) + ".deps.json");
+            RemoveLibraryFromDepsJson(appDepsJson, "SharedLibrary.dll");
+
+            var startupHookFixture = sharedTestState.PreviouslyPublishedAndRestoredStartupHookWithAssemblyResolver.Copy();
+            var startupHookDll = startupHookFixture.TestProject.AppDll;
+
+            // No startup hook results in failure due to missing app dependency
+            dotnet.Exec(appDll)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining("FileNotFoundException: Could not load file or assembly 'SharedLibrary");
+
+            // Startup hook with assembly resolver results in use of injected dependency (which has value 2)
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookDll)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .ExitWith(2);
+        }
+
         public class SharedTestState : IDisposable
         {
             // Entry point projects
             public TestProjectFixture PreviouslyPublishedAndRestoredPortableAppProjectFixture { get; set; }
             public TestProjectFixture PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture { get; set; }
+            // Entry point with missing reference assembly
+            public TestProjectFixture PreviouslyPublishedAndRestoredPortableAppWithMissingRefProjectFixture { get; set; }
 
             // Correct startup hooks
             public TestProjectFixture PreviouslyPublishedAndRestoredStartupHookProjectFixture { get; set; }
@@ -538,6 +615,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
             // Valid startup hooks with incorrect behavior
             public TestProjectFixture PreviouslyPublishedAndRestoredStartupHookWithDependencyProjectFixture { get; set; }
 
+            // Startup hook with an assembly resolver
+            public TestProjectFixture PreviouslyPublishedAndRestoredStartupHookWithAssemblyResolver { get; set; }
+
             public RepoDirectoriesProvider RepoDirectories { get; set; }
 
             public SharedTestState()
@@ -550,6 +630,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                     .PublishProject();
 
                 PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture = new TestProjectFixture("PortableAppWithException", RepoDirectories)
+                    .EnsureRestored(RepoDirectories.CorehostPackages)
+                    .PublishProject();
+                // Entry point with missing reference assembly
+                PreviouslyPublishedAndRestoredPortableAppWithMissingRefProjectFixture = new TestProjectFixture("PortableAppWithMissingRef", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
@@ -590,6 +674,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                     .PublishProject();
                 // Valid startup hooks with incorrect behavior
                 PreviouslyPublishedAndRestoredStartupHookWithDependencyProjectFixture = new TestProjectFixture("StartupHookWithDependency", RepoDirectories)
+                    .EnsureRestored(RepoDirectories.CorehostPackages)
+                    .PublishProject();
+                // Startup hook with an assembly resolver
+                PreviouslyPublishedAndRestoredStartupHookWithAssemblyResolver = new TestProjectFixture("StartupHookWithAssemblyResolver", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
             }
