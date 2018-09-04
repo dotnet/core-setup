@@ -9,17 +9,17 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>62966620ef413f6d5f72178c077ea0f7a0dd3f37</CoreFxCurrentRef>
-    <CoreClrCurrentRef>62966620ef413f6d5f72178c077ea0f7a0dd3f37</CoreClrCurrentRef>
+    <CoreFxCurrentRef>a3c18a92a40eb738b9fe2075a2ef7fd47b49120f</CoreFxCurrentRef>
+    <CoreClrCurrentRef>a3c18a92a40eb738b9fe2075a2ef7fd47b49120f</CoreClrCurrentRef>
     <StandardCurrentRef>eff554f39ee29c9f2b470bf7755b83ceaaf2b1a1</StandardCurrentRef>
-    <BuildToolsCurrentRef>62966620ef413f6d5f72178c077ea0f7a0dd3f37</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>a3c18a92a40eb738b9fe2075a2ef7fd47b49120f</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftNETCorePlatformsPackageVersion>2.1.1-servicing-26830-03</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>2.1.1-servicing-26902-02</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>2.0.0</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-servicing-26830-03</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.5-servicing-26830-02</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-servicing-26902-02</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.5-servicing-26902-03</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <NETStandardLibraryPackageVersion>2.0.3</NETStandardLibraryPackageVersion>
     <MicrosoftDiaSymReaderNativePackageVersion>1.7.0</MicrosoftDiaSymReaderNativePackageVersion>
   </PropertyGroup>
@@ -44,7 +44,7 @@
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
-    <FeedTasksPackageVersion>2.1.0-rc1-03130-05</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>2.1.0-rc1-03131-06</FeedTasksPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
