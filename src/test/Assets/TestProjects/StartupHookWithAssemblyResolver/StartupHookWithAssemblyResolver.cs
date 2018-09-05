@@ -21,13 +21,9 @@ namespace SharedHostPolicy
             {
                 string startupHookDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 string sharedLibrary = Path.GetFullPath(Path.Combine(startupHookDirectory, "SharedLibrary.dll"));
-                Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(sharedLibrary);
-                if (assembly == null) {
-                    throw new Exception("Unable to load SharedLibrary from startup hook");
-                }
-                return assembly;
+                return AssemblyLoadContext.Default.LoadFromAssemblyPath(sharedLibrary);
             }
-            throw new Exception("Resolve method called in startup hook for unexpected assembly " + assemblyName.Name);
+            return null;
         }
     }
 }

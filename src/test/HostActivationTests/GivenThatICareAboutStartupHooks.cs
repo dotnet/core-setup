@@ -676,6 +676,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 PreviouslyPublishedAndRestoredStartupHookWithDependencyProjectFixture = new TestProjectFixture("StartupHookWithDependency", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
+
                 // Startup hook with an assembly resolver
                 PreviouslyPublishedAndRestoredStartupHookWithAssemblyResolver = new TestProjectFixture("StartupHookWithAssemblyResolver", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
@@ -687,6 +688,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 // Entry point projects
                 PreviouslyPublishedAndRestoredPortableAppProjectFixture.Dispose();
                 PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture.Dispose();
+                // Entry point with missing reference assembly
+                PreviouslyPublishedAndRestoredPortableAppWithMissingRefProjectFixture.Dispose();
 
                 // Correct startup hooks
                 PreviouslyPublishedAndRestoredStartupHookProjectFixture.Dispose();
@@ -705,6 +708,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StartupHooks
                 PreviouslyPublishedAndRestoredStartupHookWithMultipleIncorrectSignaturesProjectFixture.Dispose();
                 // Valid startup hooks with incorrect behavior
                 PreviouslyPublishedAndRestoredStartupHookWithDependencyProjectFixture.Dispose();
+
+                // Startup hook with an assembly resolver
+                PreviouslyPublishedAndRestoredStartupHookWithAssemblyResolver.Dispose();
             }
         }
     }
