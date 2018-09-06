@@ -114,15 +114,15 @@ private:
         const pal::string_t& oldest_requested_version,
         const pal::string_t& dotnet_dir);
     static void muxer_usage(bool is_sdk_present);
-    static int do_soft_roll_forward(
+    static int soft_roll_forward_helper(
         const fx_reference_t& newer,
         const fx_reference_t& older,
-        bool older_is_hard,
+        bool older_is_hard_roll_forward,
         fx_name_to_fx_reference_map_t& newest_references,
         fx_name_to_fx_reference_map_t& oldest_references);
     static int soft_roll_forward(
         const fx_reference_t existing_ref,
-        bool current_is_hard,
+        bool current_is_hard_roll_forward,
         fx_name_to_fx_reference_map_t& newest_references,
         fx_name_to_fx_reference_map_t& oldest_references);
     static void display_missing_framework_error(

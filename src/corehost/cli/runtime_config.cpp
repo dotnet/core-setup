@@ -107,7 +107,7 @@ bool runtime_config_t::parse_opts(const json_value& opts)
         m_tfm = tfm->second.as_string();
     }
 
-    // Step #2: read the "framework" and "frameworks" section
+    // Step #3: read the "framework" and "frameworks" section
     bool rc = true;
     auto framework =  opts_obj.find(_X("framework"));
     if (framework != opts_obj.end())

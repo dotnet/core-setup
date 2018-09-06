@@ -855,10 +855,10 @@ int read_config(
     return 0;
 }
 
-int fx_muxer_t::do_soft_roll_forward(
+int fx_muxer_t::soft_roll_forward_helper(
     const fx_reference_t& newer,
     const fx_reference_t& older,
-    bool older_is_hard,
+    bool older_is_hard_roll_forward,
     fx_name_to_fx_reference_map_t& newest_references,
     fx_name_to_fx_reference_map_t& oldest_references)
 {
@@ -872,7 +872,7 @@ int fx_muxer_t::do_soft_roll_forward(
         return 0;
     }
 
-    if (older.is_forward_compatible(newer.get_fx_version_number()))
+    if (older.is_roll_forward_compatible(newer.get_fx_version_number()))
     {
         updated_newest.merge_roll_forward_settings_from(older);
         newest_references[fx_name] = updated_newest;
@@ -883,7 +883,7 @@ int fx_muxer_t::do_soft_roll_forward(
             oldest_references[fx_name] = older;
         }
 
-        if (older_is_hard)
+        if (older_is_hard_roll_forward)
         {
             display_retry_framework_trace(older, newer);
             return FrameworkCompatRetry;
@@ -898,22 +898,25 @@ int fx_muxer_t::do_soft_roll_forward(
     return FrameworkCompatFailure;
 }
 
+// Peform a "soft" roll-forward meaning we don't read any physical framework folders
+// and just check if the older reference is compatible with the newer reference
+// with respect to roll-forward\applypatches.
 int fx_muxer_t::soft_roll_forward(
-    fx_reference_t fx_ref, //byval to avoid side-effects with mutable newest_references and oldest_references
-    bool current_is_hard,
+    const fx_reference_t fx_ref, //byval to avoid side-effects with mutable newest_references and oldest_references
+    bool current_is_hard_roll_forward, // true if reference was obtained from a "real" roll-forward meaning it probed the disk to find the most compatible version
     fx_name_to_fx_reference_map_t& newest_references,
     fx_name_to_fx_reference_map_t& oldest_references)
 {
     /*byval*/ fx_reference_t current_ref = newest_references[fx_ref.get_fx_name()];
 
-    // Perform "in-memory" roll-forwards
+    // Perform soft "in-memory" roll-forwards
     if (fx_ref.get_fx_version_number() >= current_ref.get_fx_version_number())
     {
-        return do_soft_roll_forward(fx_ref, current_ref, current_is_hard, newest_references, oldest_references);
+        return soft_roll_forward_helper(fx_ref, current_ref, current_is_hard_roll_forward, newest_references, oldest_references);
     }
 
     assert(fx_ref.get_fx_version_number() < current_ref.get_fx_version_number());
-    return do_soft_roll_forward(current_ref, fx_ref, false, newest_references, oldest_references);
+    return soft_roll_forward_helper(current_ref, fx_ref, false, newest_references, oldest_references);
 }
 
 int fx_muxer_t::read_framework(
@@ -924,7 +927,7 @@ int fx_muxer_t::read_framework(
     fx_name_to_fx_reference_map_t& oldest_references,
     fx_definition_vector_t& fx_definitions)
 {
-    // Loop through each reference and update the list of newest reference before we resolve_fx.
+    // Loop through each reference and update the list of newest references before we resolve_fx.
     // This reconciles duplicate references to minimize the number of resolve retries.
     for (const fx_reference_t& fx_ref : config.get_frameworks())
     {

@@ -27,7 +27,7 @@ public:
     {
         return fx_name;
     }
-    void set_fx_name(pal::string_t value)
+    void set_fx_name(const pal::string_t& value)
     {
         fx_name = value;
     }
@@ -36,7 +36,7 @@ public:
     {
         return fx_version;
     }
-    void set_fx_version(pal::string_t value)
+    void set_fx_version(const pal::string_t& value)
     {
         fx_version = value;
 
@@ -78,11 +78,11 @@ public:
     }
 
     // Is the current version compatible with another instance with roll-forward semantics.
-    bool is_forward_compatible(const fx_ver_t& other) const;
-    
+    bool is_roll_forward_compatible(const fx_ver_t& other) const;
+
     // Copy over any non-null values
     void apply_settings_from(const fx_reference_t& from);
-    
+
     // Apply the most restrictive settings
     void merge_roll_forward_settings_from(const fx_reference_t& from);
 
