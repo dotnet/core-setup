@@ -6,10 +6,10 @@
   },
   "dependencies": {
     "NETStandard.Library": "1.6.1",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.9",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.10",
     "Microsoft.NETCore.Platforms": "1.1.1",
     "Microsoft.NETCore.Targets": "1.1.3", 
-    "System.Net.Http": "4.3.3",
+    "System.Net.Http": "4.3.4",
     "runtime.native.System.Security.Cryptography.OpenSsl": "4.3.3",
     "runtime.native.System.Net.Http": "4.3.1",
     "Microsoft.CSharp": "4.3.0",
