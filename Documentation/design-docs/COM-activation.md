@@ -58,10 +58,12 @@ The current .NET Core hosting solutions are described in detail at [Documentatio
 When `DllGetClassObject()` is called in an activation scenario, the following will occur:
 
 1) Determine additional registration information needed for activation.
-    * **The location and mechanics of accessing this registration information is still TBD**
-    * `Assembly` (**required**) - the [Fully-Qualified Name](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names) of the assembly.
-    * `Class` (**required**) - the full type name (e.g. `MyCompany.MyProduct.MyClass`).
-    * `Codebase` (**required**) - an absolute path to the assembly to load. If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the assembly, that file will be used to describe CLR configuration details. The documentation for the `runtimeconfig.json` format defines under what circumstances this file is [optional](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md#what-produces-the-files-and-where-are-they).
+    * Registry
+        * `Assembly` (**required**) - the [Fully-Qualified Name](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names) of the assembly.
+        * `Class` (**required**) - the full type name (e.g. `MyCompany.MyProduct.MyClass`).
+        * `Codebase` (**required**) - an absolute path to the assembly to load. If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the assembly, that file will be used to describe CLR configuration details. The documentation for the `runtimeconfig.json` format defines under what circumstances this file is [optional](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md#what-produces-the-files-and-where-are-they).
+    * RegFree
+        * Query the COM [Activation Context][com_activation_context] for candidate assemblies - see proposal below.
 1) Using the existing `hostfxr` library, attempt to discover the desired CLR and target [framework](https://docs.microsoft.com/en-us/dotnet/core/packages#frameworks).
     * If a CLR is active with the process, the requested CLR version will be validated against that CLR. If version satisfiability fails, activation will fail.
     * If a CLR is **not** active with the process, an attempt will be made to create a satisfying CLR instance. Failure to create an instance will result in activation failure.
@@ -88,6 +90,7 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
         ```
         Note this API would not be exposed outside of `System.Private.CoreLib`.
     * The loading of the assembly will take place in a new [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-2.1) for dependency isolation.
+    * **Complete details on ALC semantics as they relate to class activation and lifetime are TBD**
 1) The `IClassFactory` instance will be returned to the caller of `DllGetClassObject()`.
 
 The `DllCanUnloadNow()` function will always return `S_FALSE` indicating the shim is never able to be unloaded. This matches .NET Framework semantics and can be adjusted in the future if needed.
@@ -114,12 +117,12 @@ An example of a RegFree manifest for a .NET Framework class is below - note the 
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
     <assemblyIdentity
         type="win32"
-        name="NetServer"
+        name="NetComServer"
         version="1.0.0.0">
     </assemblyIdentity>
     <clrClass
         clsid="{3C58BBC9-3966-4B58-8EE2-398CBBC9FDC4}"
-        name="NetServer.Server"
+        name="NetComServer.Server"
         threadingModel="Both"
         runtimeVersion="v4.0.30319">
     </clrClass>
@@ -154,7 +157,7 @@ The proposed alternative for RegFree is as follows:
             <!-- RegFree COM - Managed assembly -->
             <assemblyIdentity
                 type="win32"
-                name="NETServer"
+                name="NetComServer"
                 version="1.0.0.0"/>
             </dependentAssembly>
         </dependency>
@@ -170,25 +173,25 @@ The proposed alternative for RegFree is as follows:
             version="1.0.0.0" />
 
         <file name="CoreShim.dll">
-            <!-- NetServer.Server -->
+            <!-- NetComServer.Server -->
             <comClass
                 clsid="{3C58BBC9-3966-4B58-8EE2-398CBBC9FDC4}"
                 threadingModel="Both"/>
         </file>
     </assembly>
     ```
-1) The user would also define a manifest for the managed assembly. This manifest is to ensure the managed assembly is added to the [Activation Context](https://docs.microsoft.com/en-us/windows/desktop/sbscs/activation-contexts) for the native application.
+1) The user would also define a manifest for the managed assembly. This manifest is to ensure the managed assembly is added to the [Activation Context][com_activation_context] for the native application.
     ``` xml
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
         <assemblyIdentity
             type="win32"
-            name="NETServer"
+            name="NetComServer"
             version="1.0.0.0" />
     </assembly>
     ```
-1) When the native application starts up, its manifest will be read and dependency assemblies discovered. Exported COM class will also be registered in the process.
-1) At runtime, during a class activation call, COM will consult the SxS registration and discover the shim library should be used to load the class. Since the Activation Context can be [queried](https://docs.microsoft.com/en-us/windows/desktop/api/winbase/nf-winbase-queryactctxw), all registered assemblies can be determined and with this information the shim can search for a managed assembly that can provide the class.
+1) When the native application starts up, its manifest will be read and dependency assemblies discovered. Exported COM classes will also be registered in the process.
+1) At runtime, during a class activation call, COM will consult the SxS registration and discover the shim library should be used to load the class. Since the Activation Context can be [queried](https://docs.microsoft.com/en-us/windows/desktop/api/winbase/nf-winbase-queryactctxw), all registered assemblies can be determined and with this information the shim can search for a managed assembly that provides the class.
 
 Similar to the Registry based scenario, the [`dotnet.exe`][dotnet_link] tool could be made to generate these `.manifest` files.
 
@@ -198,6 +201,7 @@ Similar to the Registry based scenario, the [`dotnet.exe`][dotnet_link] tool cou
     - i.e. Both classes have identical [`Guid`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.guidattribute?view=netcore-2.1) values.
 * RegFree COM will not work the same between .NET Framework and .NET Core.
     - See details above.
+* Global machine registration mechanisms are anathema to the .NET Core principals of how application deployment should impact the machine. This implies the traditional registration of .NET classes via the [`Regasm.exe`](https://docs.microsoft.com/en-us/dotnet/framework/tools/regasm-exe-assembly-registration-tool) tool may need to be reconsidered.
 
 ## References
 
@@ -211,3 +215,4 @@ Similar to the Registry based scenario, the [`dotnet.exe`][dotnet_link] tool cou
 
 <!-- Common links -->
 [dotnet_link]: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet?tabs=netcore21
+[com_activation_context]: https://docs.microsoft.com/en-us/windows/desktop/sbscs/activation-contexts
