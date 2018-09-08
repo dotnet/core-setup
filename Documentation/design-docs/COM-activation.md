@@ -29,7 +29,7 @@ The following list represents an exhaustive activation matrix.
 
 ## Design
 
-One of the basic issues with the activation of a .NET class within a COM environment is the loading or discovery of an appropriate CLR instance. The .NET Framework addressed this issue through a shim library (described below). The .NET Core scenario has different requirements and limitations on system impact and as such an identical solution may not be optimal or tenable.
+One of the basic issues with the activation of a .NET class within a COM environment is the loading or discovery of an appropriate CLR instance. The .NET Framework addressed this issue through a system wide shim library (described below). The .NET Core scenario has different requirements and limitations on system impact and as such an identical solution may not be optimal or tenable.
 
 ### .NET Framework Class COM Activation
 
@@ -49,21 +49,23 @@ The above registration is typically done with the [`RegAsm.exe`](https://docs.mi
 
 In .NET Core, our intent will be to avoid a system wide shim library. This decision may add additional cost for deployment scenarios, but will reduce servicing and engineering costs by making deployment more explicit and less magic.
 
-The current .NET Core hosting solutions are described in detail at [Documentation/design-docs/host-components.md](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/host-components.md). Along with the existing hosts an additional COM activation host library will be added. This library will export the required functions for COM class activation and act in a way similar to `mscoree.dll`.
+The current .NET Core hosting solutions are described in detail at [Documentation/design-docs/host-components.md](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/host-components.md). Along with the existing hosts an additional activation host library will be added. This library (henceforth identified as 'shim') will export the required functions for COM class activation and registration and act in a way similar to `mscoree.dll`.
 
 >[`HRESULT DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv);`](https://docs.microsoft.com/en-us/windows/desktop/api/combaseapi/nf-combaseapi-dllgetclassobject)
 
 >[`HRESULT DllCanUnloadNow();`](https://docs.microsoft.com/en-us/windows/desktop/api/combaseapi/nf-combaseapi-dllcanunloadnow)
 
-When `DllGetClassObject()` is called in an activation scenario, the following will occur:
+>[`HRESULT DllRegisterServer();`](https://msdn.microsoft.com/en-us/library/windows/desktop/ms682162(v=vs.85).aspx)
+
+>[`HRESULT DllUnregisterServer();`](https://msdn.microsoft.com/en-us/library/windows/desktop/ms691457(v=vs.85).aspx)
+
+When `DllGetClassObject()` is called in a COM activation scenario, the following will occur:
 
 1) Determine additional registration information needed for activation.
-    * Registry
-        * `Assembly` (**required**) - the [Fully-Qualified Name](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names) of the assembly.
-        * `Class` (**required**) - the full type name (e.g. `MyCompany.MyProduct.MyClass`).
-        * `Codebase` (**required**) - an absolute path to the assembly to load. If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the assembly, that file will be used to describe CLR configuration details. The documentation for the `runtimeconfig.json` format defines under what circumstances this file is [optional](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md#what-produces-the-files-and-where-are-they).
-    * RegFree
-        * Query the COM [Activation Context][com_activation_context] for candidate assemblies - see proposal below.
+    * The shim will check for an embedded manifest. If the shim does not contain an embedded manifest, the shim will check if a file with the `<host_library_name>.clsidmap` naming format exists adjacent to it.
+    * The manifest will contain a mapping from [`CLSID`](https://docs.microsoft.com/en-us/windows/desktop/com/com-class-objects-and-clsids) to managed assembly name and the [Fully-Qualified Name](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names) for the type. The exact format of this manifest is an implementation detail, but will be identical whether it is embedded or a loose file.
+    * The manifest will define an exhaustive list of .NET classes it is permitted to provide.
+    * If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the managed assembly, that file will be used to describe CLR configuration details. The documentation for the `runtimeconfig.json` format defines under what circumstances this file is optional.
 1) Using the existing `hostfxr` library, attempt to discover the desired CLR and target [framework](https://docs.microsoft.com/en-us/dotnet/core/packages#frameworks).
     * If a CLR is active with the process, the requested CLR version will be validated against that CLR. If version satisfiability fails, activation will fail.
     * If a CLR is **not** active with the process, an attempt will be made to create a satisfying CLR instance. Failure to create an instance will result in activation failure.
@@ -76,8 +78,8 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
         {
             public Guid ClassId;
             public Guid InterfaceId;
-            public int AssemblyCount;
-            public IntPtr AssemblyList;
+            public string TypeName;
+            public string AssemblyName;
             public IntPtr ClassFactoryDest;
         }
 
@@ -95,20 +97,19 @@ When `DllGetClassObject()` is called in an activation scenario, the following wi
 
 The `DllCanUnloadNow()` function will always return `S_FALSE` indicating the shim is never able to be unloaded. This matches .NET Framework semantics and can be adjusted in the future if needed.
 
+The `DllRegisterServer()` and `DllUnregisterServer()` functions will adhere to the [COM registration contract](https://docs.microsoft.com/en-us/windows/desktop/com/classes-and-servers) and enable registration and unregistration of the classes defined in the `.clsidmap` manifest.
+
 #### Class Registration
 
-Registration will depend on the application's [deployment scenario](https://docs.microsoft.com/en-us/dotnet/core/deploying/).
-
-* [Framework-dependent deployments (FDD)](https://docs.microsoft.com/en-us/dotnet/core/deploying/#framework-dependent-deployments-fdd) - This is most similar to the .NET Framework scenario and registration will be done using the shared framework. 
-* [Self-contained deployments (SCD)](https://docs.microsoft.com/en-us/dotnet/core/deploying/#self-contained-deployments-scd) - Registration will be done using the contained framework.
+Two options exist for registration and are a function of the intent of the class's author. The .NET Core platform will impose the deployment of a shim instance with a `.clsidmap` manifest. In order to address potential security concerns, the .NET Core tool chain will also permit the creation of a customized shim instance with an embedded `.clsidmap`. This customized shim will allow for the implicit signing of the `.clsidmap` manifest.
 
 ##### Registry
 
-Details of class registration in the registry for .NET Core are under active investigation, but this fact does not limit the current plan. At a minimum, registration scripts could be generated for the user via an extension to the [`dotnet.exe`][dotnet_link] tool, although this approach may be unsatisfactory as a final experience.
+Class registration in the registry for .NET Core classes is greatly simplified and is now identical to that of a non-managed COM class. This is possible due to the pressence of the aforementioned `.clsidmap` manifest. The application developer will be able to use the traditional [`regsvr32.exe`](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/regsvr32) tool for class registration.
 
 ##### Registration-Free
 
-[RegFree COM for .NET](https://docs.microsoft.com/en-us/dotnet/framework/interop/configure-net-framework-based-com-components-for-reg) is another style of registration that does not require accessing the registry. This approach is complicated by the use of [application manifests](https://docs.microsoft.com/en-us/windows/desktop/SbsCs/application-manifests), but does have benefits for limiting environment impact and simplifying deployment. A severe limitation of this approach is that in order to use RegFree COM with a .NET class, the Window OS assumes the use of `mscoree.dll` for the in-proc server. Without a change in the Windows OS, this assumption in the RegFree .NET scenario makes usage of the current manifest approach a broken scenario for .NET Core.
+[RegFree COM for .NET](https://docs.microsoft.com/en-us/dotnet/framework/interop/configure-net-framework-based-com-components-for-reg) is another style of registration, but does not require registry access. This approach is complicated by the use of [application manifests](https://docs.microsoft.com/en-us/windows/desktop/SbsCs/application-manifests), but does have benefits for limiting environment impact and simplifying deployment. A severe limitation of this approach is that in order to use RegFree COM with a .NET class, the Window OS assumes the use of `mscoree.dll` for the in-proc server. Without a change in the Windows OS, this assumption in the RegFree .NET scenario makes the existing manifest approach a broken scenario for .NET Core.
 
 An example of a RegFree manifest for a .NET Framework class is below - note the absence of specifying a hosting server library (i.e. `mscoree.dll` is implied for the `clrClass` element).
 
@@ -118,8 +119,8 @@ An example of a RegFree manifest for a .NET Framework class is below - note the 
     <assemblyIdentity
         type="win32"
         name="NetComServer"
-        version="1.0.0.0">
-    </assemblyIdentity>
+        version="1.0.0.0" />
+
     <clrClass
         clsid="{3C58BBC9-3966-4B58-8EE2-398CBBC9FDC4}"
         name="NetComServer.Server"
@@ -133,37 +134,27 @@ Due to the above issues with traditional RegFree manifests and .NET classes, an 
 
 The proposed alternative for RegFree is as follows:
 
-1) The native application will define an application manifest, but instead of defining a `clrClass` node, the application will define at least 2 dependent assemblies. The first will be the host shim library (e.g. `CoreShim.dll`) that takes the place of `mscoree.dll` in .NET Framework. The second and any subsequent assemblies will be those managed assemblies that contain the managed class(s) to activate.
+1) The native application will still define an application manifest, but instead of specifying the managed assembly as a dependency the application will define the shim as a dependent assembly.
     ``` xml
     <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
     <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
         <assemblyIdentity
             type="win32"
             name="COMClientPrimitives"
-            version="1.0.0.0"/>
+            version="1.0.0.0" />
 
         <dependency>
             <dependentAssembly>
-            <!-- RegFree COM - CoreCLR Shim -->
-            <assemblyIdentity
-                type="win32"
-                name="CoreShim.X"
-                version="1.0.0.0"/>
-            </dependentAssembly>
-        </dependency>
-
-        <dependency>
-            <dependentAssembly>
-            <!-- RegFree COM - Managed assembly -->
-            <assemblyIdentity
-                type="win32"
-                name="NetComServer"
-                version="1.0.0.0"/>
+                <!-- RegFree COM - CoreCLR Shim -->
+                <assemblyIdentity
+                    type="win32"
+                    name="CoreShim.X"
+                    version="1.0.0.0" />
             </dependentAssembly>
         </dependency>
     </assembly>
     ```
-1) The user would then also define a manifest for the shim. Both the manifest _and_ the shim library will need to be app-local for the scenario to work. Note that the application developer is responsible for defining the shim's manifest. An example shim manifest is defined below and with it the [SxS](https://docs.microsoft.com/en-us/windows/desktop/sbscs/about-side-by-side-assemblies-) logic would naturally know to query the shim for the desired class. Note that multiple `comClass` tags can be added.
+1) The user would then also define a [SxS](https://docs.microsoft.com/en-us/windows/desktop/sbscs/about-side-by-side-assemblies-) manifest for the shim. Both the SxS manifest _and_ the shim library will need to be app-local for the scenario to work. Note that the application developer is responsible for defining the shim's manifest. An example shim manifest is defined below and with it the SxS logic would naturally know to query the shim for the desired class. Note that multiple `comClass` tags can be added.
     ``` xml
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
@@ -176,24 +167,14 @@ The proposed alternative for RegFree is as follows:
             <!-- NetComServer.Server -->
             <comClass
                 clsid="{3C58BBC9-3966-4B58-8EE2-398CBBC9FDC4}"
-                threadingModel="Both"/>
+                threadingModel="Both" />
         </file>
     </assembly>
     ```
-1) The user would also define a manifest for the managed assembly. This manifest is to ensure the managed assembly is added to the [Activation Context][com_activation_context] for the native application.
-    ``` xml
-    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-        <assemblyIdentity
-            type="win32"
-            name="NetComServer"
-            version="1.0.0.0" />
-    </assembly>
-    ```
-1) When the native application starts up, its manifest will be read and dependency assemblies discovered. Exported COM classes will also be registered in the process.
-1) At runtime, during a class activation call, COM will consult the SxS registration and discover the shim library should be used to load the class. Since the Activation Context can be [queried](https://docs.microsoft.com/en-us/windows/desktop/api/winbase/nf-winbase-queryactctxw), all registered assemblies can be determined and with this information the shim can search for a managed assembly that provides the class.
+1) When the native application starts up, its SxS manifest will be read and dependency assemblies discovered. Exported COM classes will also be registered in the process.
+1) At runtime, during a class activation call, COM will consult the SxS registration and discover the shim library should be used to load the class. The shim will then consult the `.clsidmap` manifest - first checking if the manifest is embedded - and attempt to map the `CLSID` to a managed assembly type tuple.
 
-Similar to the Registry based scenario, the [`dotnet.exe`][dotnet_link] tool could be made to generate these `.manifest` files.
+The [`dotnet.exe`][dotnet_link] tool could be made to generate the SxS `.manifest` files.
 
 ## Compatibility Concerns
 
@@ -201,7 +182,6 @@ Similar to the Registry based scenario, the [`dotnet.exe`][dotnet_link] tool cou
     - i.e. Both classes have identical [`Guid`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.guidattribute?view=netcore-2.1) values.
 * RegFree COM will not work the same between .NET Framework and .NET Core.
     - See details above.
-* Global machine registration mechanisms are anathema to the .NET Core principals of how application deployment should impact the machine. This implies the traditional registration of .NET classes via the [`Regasm.exe`](https://docs.microsoft.com/en-us/dotnet/framework/tools/regasm-exe-assembly-registration-tool) tool may need to be reconsidered.
 
 ## References
 
