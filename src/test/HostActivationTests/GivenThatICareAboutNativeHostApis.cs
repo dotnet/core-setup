@@ -35,6 +35,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
         public void Muxer_activation_of_Publish_Output_Portable_DLL_hostfxr_get_native_search_directories_Succeeds()
         {
             var fixture = PreviouslyPublishedAndRestoredPortableTestProjectFixture.Copy();
+            SetupPInvokeToHostfxrOnNonWindows(fixture);
+
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
