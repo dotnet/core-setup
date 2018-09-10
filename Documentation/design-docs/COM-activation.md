@@ -78,8 +78,8 @@ When `DllGetClassObject()` is called in a COM activation scenario, the following
         {
             public Guid ClassId;
             public Guid InterfaceId;
-            public string TypeName;
-            public string AssemblyName;
+            public IntPtr AssemblyNameBuffer;
+            public IntPtr TypeNameBuffer;
             public IntPtr ClassFactoryDest;
         }
 
