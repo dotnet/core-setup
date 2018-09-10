@@ -577,10 +577,22 @@
     <StablePackage Include="runtime.debian.8-x64.Microsoft.NETCore.DotNetHostPolicy">
       <Version>1.1.10</Version>
     </StablePackage>
+    <StablePackage Include="runtime.debian.9-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.1.10</Version>
+    </StablePackage>
     <StablePackage Include="runtime.fedora.24-x64.Microsoft.NETCore.DotNetHostPolicy">
       <Version>1.1.10</Version>
     </StablePackage>
+    <StablePackage Include="runtime.fedora.27-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.1.10</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.fedora.28-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.1.10</Version>
+    </StablePackage>
     <StablePackage Include="runtime.opensuse.42.1-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.1.10</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.opensuse.42.3-x64.Microsoft.NETCore.DotNetHostPolicy">
       <Version>1.1.10</Version>
     </StablePackage>
     <StablePackage Include="runtime.osx.10.10-x64.Microsoft.NETCore.DotNetHostPolicy">
@@ -593,6 +605,9 @@
       <Version>1.1.10</Version>
     </StablePackage>
     <StablePackage Include="runtime.ubuntu.16.04-x64.Microsoft.NETCore.DotNetHostPolicy">
+      <Version>1.1.10</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.ubuntu.18.04-x64.Microsoft.NETCore.DotNetHostPolicy">
       <Version>1.1.10</Version>
     </StablePackage>
     <StablePackage Include="runtime.win10-arm64.Microsoft.NETCore.DotNetHostPolicy">
