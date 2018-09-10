@@ -62,10 +62,10 @@ The current .NET Core hosting solutions are described in detail at [Documentatio
 When `DllGetClassObject()` is called in a COM activation scenario, the following will occur:
 
 1) Determine additional registration information needed for activation.
-    * The shim will check for an embedded manifest. If the shim does not contain an embedded manifest, the shim will check if a file with the `<host_library_name>.clsidmap` naming format exists adjacent to it.
+    * The shim will check for an embedded manifest. If the shim does not contain an embedded manifest, the shim will check if a file with the `<shim_name>.clsidmap` naming format exists adjacent to it. Build tooling will be expected to handle shim customization, including renaming the shim to be based on the managed assembly's name (e.g. `NetComServer.dll` could have a custom shim called `NetComServer.shim.dll`).
     * The manifest will contain a mapping from [`CLSID`](https://docs.microsoft.com/en-us/windows/desktop/com/com-class-objects-and-clsids) to managed assembly name and the [Fully-Qualified Name](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names) for the type. The exact format of this manifest is an implementation detail, but will be identical whether it is embedded or a loose file.
     * The manifest will define an exhaustive list of .NET classes it is permitted to provide.
-    * If a [`runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the managed assembly, that file will be used to describe CLR configuration details. The documentation for the `runtimeconfig.json` format defines under what circumstances this file is optional.
+    * If a [`.runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the shim assembly (`<shim_name>.runtimeconfig.json`), that file will be used to describe CLR configuration details. The documentation for the `.runtimeconfig.json` format defines under what circumstances this file may be optional.
 1) Using the existing `hostfxr` library, attempt to discover the desired CLR and target [framework](https://docs.microsoft.com/en-us/dotnet/core/packages#frameworks).
     * If a CLR is active with the process, the requested CLR version will be validated against that CLR. If version satisfiability fails, activation will fail.
     * If a CLR is **not** active with the process, an attempt will be made to create a satisfying CLR instance. Failure to create an instance will result in activation failure.
@@ -182,6 +182,7 @@ The [`dotnet.exe`][dotnet_link] tool could be made to generate the SxS `.manifes
     - i.e. Both classes have identical [`Guid`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.guidattribute?view=netcore-2.1) values.
 * RegFree COM will not work the same between .NET Framework and .NET Core.
     - See details above.
+* Servicing of the .NET Framework shim (`mscoree.dll`) was done at the system level. In the .NET Core scenario the onus is on the application developer to have a servicing process in place for the shim.
 
 ## References
 
