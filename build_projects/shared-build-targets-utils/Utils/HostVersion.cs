@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Build
         // Full versions and package information.
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
-        public static bool EnsureStableVersion => false;
+        public static bool EnsureStableVersion => true;
 
         // Comment below lines when stabilizing 1.1.X and we are going to update one (or more) of the host packages.
         //
@@ -80,20 +80,20 @@ namespace Microsoft.DotNet.Cli.Build
         // public VerInfo LatestHostVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
         public VerInfo LatestHostVersion =>
             (HostVersion.EnsureStableVersion ?
-            new VerInfo(1, 1, 9, "", "", "", CommitCountString) :
-            new VerInfo(1, 1, 9, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
+            new VerInfo(1, 1, 10, "", "", "", CommitCountString) :
+            new VerInfo(1, 1, 10, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
             );
         // public VerInfo LatestHostFxrVersion => new VerInfo(1, 1, 0, "", "", "", CommitCountString);
         public VerInfo LatestHostFxrVersion =>
             (HostVersion.EnsureStableVersion ?
-            new VerInfo(1, 1, 9, "", "", "", CommitCountString) :
-            new VerInfo(1, 1, 9, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
+            new VerInfo(1, 1, 10, "", "", "", CommitCountString) :
+            new VerInfo(1, 1, 10, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
             );
 
         public VerInfo LatestHostPolicyVersion =>
             (HostVersion.EnsureStableVersion ?
-            new VerInfo(1, 1, 9, "", "", "", CommitCountString) :
-            new VerInfo(1, 1, 9, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
+            new VerInfo(1, 1, 10, "", "", "", CommitCountString) :
+            new VerInfo(1, 1, 10, ReleaseSuffix, LatestHostBuildMajor, LatestHostBuildMinor, CommitCountString)
             );
 
         // If you are producing host packages use this to validate them.
@@ -127,13 +127,15 @@ namespace Microsoft.DotNet.Cli.Build
 
         // This method returns the locked hostfxr version based on the flag fExplicitHostFXRMSIVersion and the current platform.
         // For MSI (Windows) generation we specify a newer version for handling issue #1574 and for non-Windows platform we return the LockedHostFxrVersion.
+        // We are currently locked at 1.1.9 because we updated the HostFXR Platform Installer with new RIDs during the 1.1.9 release. At such a time when we 
+        // update the installer again, we will again have to bump the installer version.
         public VerInfo GetLockedHostFXRPlatformInstallerVersion()
         {
             VerInfo version = LockedHostFxrVersion;
 
             if (fExplicitHostFXRMSIVersion && CurrentPlatform.Current == BuildPlatform.Windows)
             {
-                version = new VerInfo(1, 1, 2, "", "", "", CommitCountString);
+                version = new VerInfo(1, 1, 9, "", "", "", CommitCountString);
             }
 
             return version;

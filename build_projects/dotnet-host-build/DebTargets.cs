@@ -131,6 +131,9 @@ namespace Microsoft.DotNet.Host.Build
             var debFile = c.BuildContext.Get<string>("SharedFrameworkInstallerFile");
             var debianConfigFile = Path.Combine(Dirs.DebPackagingConfig, "dotnet-sharedframework-debian_config.json");
 
+            bool isDebian9 = c.BuildContext.Get<string>("TargetRID") == "debian.9-x64";
+            var libSslPackageName = isDebian9 ? "libssl1.0.2" : "libssl1.0.0";
+
             var debianConfigVariables = new Dictionary<string, string>()
             {
                 { "SHARED_HOST_DEBIAN_VERSION", sharedHostVersion },
@@ -139,7 +142,8 @@ namespace Microsoft.DotNet.Host.Build
                 { "SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME", packageName },
                 { "SHARED_FRAMEWORK_NUGET_NAME", Monikers.SharedFrameworkName },
                 { "SHARED_FRAMEWORK_NUGET_VERSION",  c.BuildContext.Get<string>("SharedFrameworkNugetVersion")},
-                { "SHARED_FRAMEWORK_BRAND_NAME", Monikers.SharedFxBrandName }
+                { "SHARED_FRAMEWORK_BRAND_NAME", Monikers.SharedFxBrandName },
+                { "LIBSSL_PACKAGE_NAME", libSslPackageName }
             };
 
             var debCreator = new DebPackageCreator(
