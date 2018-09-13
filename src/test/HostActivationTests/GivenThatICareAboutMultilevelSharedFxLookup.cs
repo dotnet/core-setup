@@ -9,6 +9,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
 {
     public partial class GivenThatICareAboutMultilevelSharedFxLookup : IDisposable
     {
+        private const string SystemCollectionsImmutableFileVersion = "88.2.3.4";
+        private const string SystemCollectionsImmutableAssemblyVersion = "88.0.1.2";
+
         private RepoDirectoriesProvider RepoDirectories;
         private TestProjectFixture PreviouslyBuiltAndRestoredPortableTestProjectFixture;
 
@@ -100,6 +103,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
             _sharedFxVersion = (new DirectoryInfo(greatestVersionSharedFxPath)).Name;
             _builtSharedFxDir = Path.Combine(_builtDotnet, "shared", "Microsoft.NETCore.App", _sharedFxVersion);
             _builtSharedUberFxDir = Path.Combine(_builtDotnet, "shared", "Microsoft.UberFramework", _sharedFxVersion);
+            SharedFramework.CreateUberFrameworkArtifacts(_builtSharedFxDir, _builtSharedUberFxDir, SystemCollectionsImmutableAssemblyVersion, SystemCollectionsImmutableFileVersion);
 
             // Trace messages used to identify from which folder the framework was picked
             _hostPolicyDllName = Path.GetFileName(fixture.TestProject.HostPolicyDll);
