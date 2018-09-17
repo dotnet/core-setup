@@ -110,6 +110,7 @@ namespace pal
     // typedef std::basic_ifstream<pal::char_t> ifstream_t.
     typedef std::basic_ifstream<char> ifstream_t;
     typedef std::istreambuf_iterator<ifstream_t::char_type> istreambuf_iterator_t;
+    typedef std::basic_istream<char> istream_t;
     typedef HRESULT hresult_t;
     typedef HMODULE dll_t;
     typedef FARPROC proc_t;
@@ -157,6 +158,7 @@ namespace pal
     typedef std::stringstream stringstream_t;
     typedef std::basic_ifstream<char> ifstream_t;
     typedef std::istreambuf_iterator<ifstream_t::char_type> istreambuf_iterator_t;
+    typedef std::basic_istream<char> istream_t;
     typedef int hresult_t;
     typedef void* dll_t;
     typedef void* proc_t;

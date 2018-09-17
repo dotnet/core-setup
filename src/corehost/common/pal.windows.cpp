@@ -25,6 +25,7 @@ bool GetModuleFileNameWrapper(HMODULE hModule, pal::string_t* recv)
 
     if (dwModuleFileName != 0)
     {
+        path.resize(dwModuleFileName);
         *recv = path;
         return true;
     }
