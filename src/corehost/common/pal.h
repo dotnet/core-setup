@@ -92,7 +92,7 @@
 namespace pal
 {
 #if defined(_WIN32)
-    #ifdef COREHOST_MAKE_DLL
+    #ifdef EXPORT_SHARED_API
         #define SHARED_API extern "C" __declspec(dllexport)
     #else
         #define SHARED_API
@@ -136,7 +136,7 @@ namespace pal
     bool clr_palstring(const char* cstr, pal::string_t* out);
 
 #else
-    #ifdef COREHOST_MAKE_DLL
+    #ifdef EXPORT_SHARED_API
         #define SHARED_API extern "C" __attribute__((__visibility__("default")))
     #else
         #define SHARED_API
