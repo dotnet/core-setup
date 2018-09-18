@@ -7,7 +7,7 @@ Currently (as of .NET Core 2.1) the host tracing is only written to the `stderr`
 
 ## Proposed changes
 For .NET Core 3 the proposal is to keep the existing behavior as described above and add two additional ways to capture the tracing:
-* Redirect the trace to a file instead - this would be done by setting `COREHOST_TRACE=1` and also `COREHOST_TRACEFILE=<path>` in the environment for the process.
+* Redirect the trace to append a file instead - this would be done by setting `COREHOST_TRACE=1` and also `COREHOST_TRACEFILE=<path>` in the environment for the process.
 * For custom host support a way to capture the trace output in code. This will be done by adding `*_set_trace_listener` functions to `hostfxr` and `hostpolicy` which would let the custom host intercept all tracing.
 
 This is directly related to #4455.
@@ -26,7 +26,7 @@ Currently (as of .NET Core 2.1) all these components include the same code for t
 ## New trace routing
 The host components implement two routes for tracing:
 * Tracing to `stderr` (this is the .NET Core 2.1 behavior). This default route is activated by setting the `COREHOST_TRACE=1` environment variable.
-* Tracing to a file (new in .NET Core 3). This route is activated by setting the `COREHOST_TRACE=1` and also providing the full path to the trace file in `COREHOST_TRACEFILE=<path>` environment variable. This overrides the `stderr` route, so if the file tracing is enabled, traces will not be written to `stderr`.
+* Tracing to a file (new in .NET Core 3). This route is activated by setting the `COREHOST_TRACE=1` and also providing the full path to the trace file in `COREHOST_TRACEFILE=<path>` environment variable. This overrides the `stderr` route, so if the file tracing is enabled, traces will not be written to `stderr`.  Instead traces will be appended to the specified file.
 
 Custom host can enable a third route which passes tracing into a registered trace listener. The custom host does this by implementating `host_trace_listener` interface and registering it through:
 ``` C++
