@@ -3,8 +3,8 @@
 # Each line is expected to be in the format "[Name]=[Value]".
 MAJOR_VERSION=1
 MINOR_VERSION=1
-PATCH_VERSION=10
-RELEASE_SUFFIX=
+PATCH_VERSION=11
+RELEASE_SUFFIX=servicing
 CHANNEL=release/1.1.0
 BRANCH_NAME=release/1.1.0
 CONTAINER_NAME=dotnet
