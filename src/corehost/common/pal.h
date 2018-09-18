@@ -116,17 +116,11 @@ namespace pal
 
     inline string_t exe_suffix() { return _X(".exe"); }
 
-    pal::string_t to_string(int value);
-
-    bool getcwd(pal::string_t* recv);
-
     inline int cstrcasecmp(const char* str1, const char* str2) { return ::_stricmp(str1, str2); }
     inline int strcmp(const char_t* str1, const char_t* str2) { return ::wcscmp(str1, str2); }
     inline int strcasecmp(const char_t* str1, const char_t* str2) { return ::_wcsicmp(str1, str2); }
     inline int strncmp(const char_t* str1, const char_t* str2, int len) { return ::wcsncmp(str1, str2, len); }
     inline int strncasecmp(const char_t* str1, const char_t* str2, int len) { return ::_wcsnicmp(str1, str2, len); }
-
-    pal::string_t to_lower(const pal::string_t& in);
 
     inline size_t strlen(const char_t* str) { return ::wcslen(str); }
     inline FILE * file_open(const pal::string_t& path, const char_t* mode) { return ::_wfopen(path.c_str(), mode); }
@@ -168,17 +162,11 @@ namespace pal
 
     inline string_t exe_suffix() { return _X(""); }
 
-    pal::string_t to_string(int value);
-
-    bool getcwd(pal::string_t* recv);
-
     inline int cstrcasecmp(const char* str1, const char* str2) { return ::strcasecmp(str1, str2); }
     inline int strcmp(const char_t* str1, const char_t* str2) { return ::strcmp(str1, str2); }
     inline int strcasecmp(const char_t* str1, const char_t* str2) { return ::strcasecmp(str1, str2); }
     inline int strncmp(const char_t* str1, const char_t* str2, int len) { return ::strncmp(str1, str2, len); }
     inline int strncasecmp(const char_t* str1, const char_t* str2, int len) { return ::strncasecmp(str1, str2, len); }
-
-    pal::string_t to_lower(const pal::string_t& in);
 
     inline size_t strlen(const char_t* str) { return ::strlen(str); }
     inline FILE * file_open(const pal::string_t& path, const char_t* mode) { return fopen(path.c_str(), mode); }
@@ -191,6 +179,13 @@ namespace pal
     inline bool clr_palstring(const char* cstr, pal::string_t* out) { out->assign(cstr); return true; }
 
 #endif
+
+    pal::string_t to_string(int value);
+    pal::string_t get_timestamp();
+
+    bool getcwd(pal::string_t* recv);
+    pal::string_t to_lower(const pal::string_t& in);
+
 
     inline void file_flush(FILE *f) { std::fflush(f); }
     inline void err_flush() { std::fflush(stderr); }

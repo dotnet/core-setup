@@ -3,11 +3,8 @@
 
 #include "trace.h"
 
-namespace trace
-{
-    bool g_enabled = false;
-    FILE * g_trace_file;
-};
+static bool g_enabled = false;
+static FILE * g_trace_file = stderr;
 
 //
 // Turn on tracing for the corehost based on "COREHOST_TRACE" & "COREHOST_TRACEFILE" env.
@@ -25,7 +22,8 @@ void trace::setup()
     if (trace_val > 0)
     {
         trace::enable();
-        trace::info(_X("Tracing enabled"));
+        auto ts = pal::get_timestamp();
+        trace::info(_X("Tracing enabled @ %s"), ts.c_str());
     }
 }
 
