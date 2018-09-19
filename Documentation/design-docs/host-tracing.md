@@ -7,7 +7,7 @@ Currently (as of .NET Core 2.1) the host tracing is only written to the `stderr`
 
 ## Proposed changes
 For .NET Core 3 the proposal is to keep the existing behavior as described above and add two additional ways to capture the tracing:
-* Redirect the trace to append a file instead - this would be done by setting `COREHOST_TRACE=1` and also `COREHOST_TRACEFILE=<path>` in the environment for the process.
+* Redirect the trace to a file (always appends) - this would be done by setting `COREHOST_TRACE=1` and also `COREHOST_TRACEFILE=<path>` in the environment for the process.
 * For custom host support a way to capture the trace output in code. This will be done by adding `*_set_trace_listener` functions to `hostfxr` and `hostpolicy` which would let the custom host intercept all tracing.
 
 This is directly related to #4455.
