@@ -4,7 +4,7 @@
 #include "trace.h"
 #include <mutex>
 
-static bool g_enabled = false;
+static int g_trace_verbosity = 0;
 static FILE * g_trace_file = stderr;
 static std::mutex g_trace_mutex;
 
@@ -38,7 +38,7 @@ bool trace::enable()
     bool file_open_error = false;
     pal::string_t tracefile_str;
 
-    if (g_enabled)
+    if (g_trace_verbosity)
     {
         return false;
     }
@@ -58,7 +58,16 @@ bool trace::enable()
                 file_open_error = true;
             }
         }
-        g_enabled = true;
+
+        pal::string_t trace_str;
+        if (!pal::getenv(_X("COREHOST_TRACE_VERBOSITY"), &trace_str))
+        {
+            g_trace_verbosity = 4;  // Verbose trace by default
+        }
+        else
+        {
+            g_trace_verbosity = pal::xtoi(trace_str.c_str());
+        }
     }
 
     if(file_open_error)
@@ -70,12 +79,12 @@ bool trace::enable()
 
 bool trace::is_enabled()
 {
-    return g_enabled;
+    return g_trace_verbosity;
 }
 
 void trace::verbose(const pal::char_t* format, ...)
 {
-    if (g_enabled)
+    if (g_trace_verbosity > 3)
     {
         std::lock_guard<std::mutex> lock(g_trace_mutex);
 
@@ -88,7 +97,7 @@ void trace::verbose(const pal::char_t* format, ...)
 
 void trace::info(const pal::char_t* format, ...)
 {
-    if (g_enabled)
+    if (g_trace_verbosity > 2)
     {
         std::lock_guard<std::mutex> lock(g_trace_mutex);
 
@@ -107,7 +116,7 @@ void trace::error(const pal::char_t* format, ...)
     va_list args;
     va_start(args, format);
     pal::err_vprintf(format, args);
-    if (g_enabled && (g_trace_file != stderr))
+    if (g_trace_verbosity && (g_trace_file != stderr))
     {
         pal::file_vprintf(g_trace_file, format, args);
     }
@@ -131,7 +140,7 @@ void trace::println()
 
 void trace::warning(const pal::char_t* format, ...)
 {
-    if (g_enabled)
+    if (g_trace_verbosity > 1)
     {
         std::lock_guard<std::mutex> lock(g_trace_mutex);
 
