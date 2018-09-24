@@ -4,6 +4,13 @@
 #include "trace.h"
 #include <mutex>
 
+// g_trace_verbosity is used to encode COREHOST_TRACE and COREHOST_TRACE_VERBOSITY to selectively control output of
+//    trace::warn(), trace::info(), and trace::verbose()
+//  COREHOST_TRACE=0 COREHOST_TRACE_VERBOSITY=N/A        implies g_trace_verbosity = 0.  // Trace "disabled". error() messages will be produced.
+//  COREHOST_TRACE=1 COREHOST_TRACE_VERBOSITY=4 or unset implies g_trace_verbosity = 4.  // Trace "enabled".  verbose(), info(), warn() and error() messages will be produced
+//  COREHOST_TRACE=1 COREHOST_TRACE_VERBOSITY=3          implies g_trace_verbosity = 3.  // Trace "enabled".  info(), warn() and error() messages will be produced
+//  COREHOST_TRACE=1 COREHOST_TRACE_VERBOSITY=2          implies g_trace_verbosity = 2.  // Trace "enabled".  warn() and error() messages will be produced
+//  COREHOST_TRACE=1 COREHOST_TRACE_VERBOSITY=1          implies g_trace_verbosity = 1.  // Trace "enabled".  error() messages will be produced
 static int g_trace_verbosity = 0;
 static FILE * g_trace_file = stderr;
 static std::mutex g_trace_mutex;
