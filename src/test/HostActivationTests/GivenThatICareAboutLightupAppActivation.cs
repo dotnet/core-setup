@@ -16,8 +16,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.LightupApp
 {
     public class GivenThatICareAboutLightupAppActivation
     {
-        private const string SystemCollectionsImmutableFileVersion = "1.2.3.4";
-        private const string SystemCollectionsImmutableAssemblyVersion = "1.0.1.2";
+        private const string SystemCollectionsImmutableFileVersion = "88.2.3.4";
+        private const string SystemCollectionsImmutableAssemblyVersion = "88.0.1.2";
 
         private static TestProjectFixture PreviouslyBuiltAndRestoredLightupLibTestProjectFixture { get; set; }
         private static TestProjectFixture PreviouslyPublishedAndRestoredLightupLibTestProjectFixture { get; set; }
@@ -484,9 +484,16 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.LightupApp
                 .And
                 .HaveStdErrContaining($"Adding tpa entry: {uberAssembly}")
                 .And
-                .NotHaveStdErrContaining($"Adding tpa entry: {appAssembly}")
+                .HaveStdErrContaining($"Adding tpa entry: {appAssembly}")
                 .And
-                .NotHaveStdErrContaining($"Replacing deps entry");
+                .HaveStdErrContaining($"Replacing deps entry [{appAssembly}")
+                .And
+                .HaveStdErrContaining($"with [{uberAssembly}, AssemblyVersion:{SystemCollectionsImmutableAssemblyVersion}, FileVersion:{SystemCollectionsImmutableFileVersion}]")
+                .And
+                // Verify final selection in TRUSTED_PLATFORM_ASSEMBLIES
+                .HaveStdErrContaining($"{uberAssembly}{Path.PathSeparator}")
+                .And
+                .NotHaveStdErrContaining($"{appAssembly}{Path.PathSeparator}");
 
             SharedFramework.DeleteAvailableSharedFxVersions(_fxBaseDir, "9999.0.0", "additionalDeps");
             SharedFramework.DeleteAvailableSharedFxVersions(_uberFxBaseDir, "7777.0.0");
@@ -545,11 +552,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.LightupApp
                 .And
                 .HaveStdErrContaining($"Using specified additional deps.json: '{additionalDepsPath}'")
                 .And
-                .HaveStdErrContaining($"Adding tpa entry: {uberAssembly}")
+                .HaveStdErrContaining($"Adding tpa entry: {appAssembly}, AssemblyVersion: 99.9.9.9, FileVersion: 98.9.9.9")
                 .And
-                .HaveStdErrContaining($"Adding tpa entry: {appAssembly}")
+                // Verify final selection in TRUSTED_PLATFORM_ASSEMBLIES
+                .HaveStdErrContaining($"{appAssembly}{Path.PathSeparator}")
                 .And
-                .HaveStdErrContaining($"Replacing deps entry [{uberAssembly}, AssemblyVersion:{SystemCollectionsImmutableAssemblyVersion}, FileVersion:{SystemCollectionsImmutableFileVersion}] with [{appAssembly}, AssemblyVersion:99.9.9.9, FileVersion:98.9.9.9]");
+                .NotHaveStdErrContaining($"{uberAssembly}{Path.PathSeparator}");
 
             SharedFramework.DeleteAvailableSharedFxVersions(_fxBaseDir, "9999.0.0", "additionalDeps");
             SharedFramework.DeleteAvailableSharedFxVersions(_uberFxBaseDir, "7777.0.0");
