@@ -16,6 +16,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.Tracing
         // Trace messages currently expected for a passing app (somewhat randomly selected)
         private const String ExpectedVerboseMessage = "--- Begin breadcrumb write";
         private const String ExpectedInfoMessage = "Deps file:";
+        private const String ExpectedBadPathMessage = "Unable to open COREHOST_TRACEFILE=";
 
         public GivenThatICareAboutTracing(GivenThatICareAboutTracing.SharedTestState fixture)
         {
@@ -134,6 +135,60 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.Tracing
                 .NotHaveStdErrContaining(ExpectedInfoMessage)
                 .And
                 .NotHaveStdErrContaining(ExpectedVerboseMessage);
+        }
+
+        [Fact]
+        public void TracingOnToFileDefault()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppProjectFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            // Ensure startup hook tracing works
+            dotnet.Exec(appDll)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .EnvironmentVariable("COREHOST_TRACEFILE", "TracingOnToFileDefault.log")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World")
+                .And
+                .NotHaveStdErrContaining(ExpectedInfoMessage)
+                .And
+                .NotHaveStdErrContaining(ExpectedVerboseMessage)
+                .And
+                .FileExists("TracingOnToFileDefault.log")
+                .And
+                .FileContains("TracingOnToFileDefault.log", ExpectedVerboseMessage);
+        }
+
+        [Fact]
+        public void TracingOnToFileBadPathDefault()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppProjectFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            // Ensure startup hook tracing works
+            dotnet.Exec(appDll)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .EnvironmentVariable("COREHOST_TRACEFILE", "badpath/TracingOnToFileBadPathDefault.log")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World")
+                .And
+                .HaveStdErrContaining(ExpectedInfoMessage)
+                .And
+                .HaveStdErrContaining(ExpectedVerboseMessage)
+                .And
+                .HaveStdErrContaining(ExpectedBadPathMessage);
         }
 
         public class SharedTestState : IDisposable
