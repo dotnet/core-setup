@@ -40,8 +40,6 @@ void trace::setup()
 
 bool trace::enable()
 {
-    std::lock_guard<std::mutex> lock(g_trace_mutex);
-
     bool file_open_error = false;
     pal::string_t tracefile_str;
 
@@ -51,6 +49,8 @@ bool trace::enable()
     }
     else
     {
+        std::lock_guard<std::mutex> lock(g_trace_mutex);
+
         g_trace_file = stderr;
         if (pal::getenv(_X("COREHOST_TRACEFILE"), &tracefile_str))
         {
