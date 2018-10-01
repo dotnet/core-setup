@@ -67,7 +67,8 @@
     </ItemGroup>
 
     <PropertyGroup>
-      <_crossDir Condition="'$(TargetArchitecture)' == 'arm'">/x86_arm</_crossDir>
+      <_obsoleteCrossDir Condition="'$(TargetArchitecture)' == 'arm'">/x86_arm</_obsoleteCrossDir>
+      <_crossDir Condition="'$(TargetArchitecture)' == 'arm'">/x64_arm</_crossDir>
       <_crossDir Condition="'$(TargetArchitecture)' == 'arm64'">/x64_arm64</_crossDir>
     </PropertyGroup>
 
@@ -77,6 +78,7 @@
       <_runtimePackagePath>$(PackagesDir)/$(_runtimePackageId.ToLowerInvariant())/$(_runtimePackageVersion)</_runtimePackagePath>
 
       <_crossGenPath>$(_runtimePackagePath)/tools$(_crossDir)/crossgen$(ApplicationFileExtension)</_crossGenPath>
+      <_crossGenPath Condition="'$(TargetArchitecture)' == 'arm' AND '$(OS)' == 'Windows_NT'">$(_runtimePackagePath)/tools$(_obsoleteCrossDir)/crossgen$(ApplicationFileExtension)</_crossGenPath>
       <_runtimeDirectory>%(_runtimeCLR.RootDir)%(_runtimeCLR.Directory)</_runtimeDirectory>
     </PropertyGroup>
 
@@ -90,6 +92,7 @@
       <_jitPackagePath>$(PackagesDir)/$(_jitPackageId.ToLowerInvariant())/$(_jitPackageVersion)</_jitPackagePath>
       <_jitPath>%(_runtimeJIT.FullPath)</_jitPath>
       <_jitPath Condition="'$(_crossDir)' != ''">$(_jitPackagePath)/runtimes$(_crossDir)/native/$(LibraryFilePrefix)clrjit$(LibraryFileExtension)</_jitPath>
+      <_jitPath Condition="'$(TargetArchitecture)' == 'arm' AND '$(OS)' == 'Windows_NT'">$(_jitPackagePath)/runtimes$(_obsoleteCrossDir)/native/$(LibraryFilePrefix)clrjit$(LibraryFileExtension)</_jitPath>
     </PropertyGroup>
 
     <PropertyGroup Condition="'@(_fxSystemRuntime)' != ''">
