@@ -167,6 +167,10 @@
         <TargetPath>runtimes$(_crossDir)/native</TargetPath>
         <IsNative>true</IsNative>
       </FilesToPackage>
+      <FilesToPackage Condition="'$(TargetArchitecture)' == 'arm'" Include="$(_jitPackagePath)/runtimes$(_obsoleteCrossDir)/native/*.*">
+        <TargetPath>runtimes$(_obsoleteCrossDir)/native</TargetPath>
+        <IsNative>true</IsNative>
+      </FilesToPackage>
     </ItemGroup>
 
     <ItemGroup Condition="'$(NuGetRuntimeIdentifier)' == ''">
