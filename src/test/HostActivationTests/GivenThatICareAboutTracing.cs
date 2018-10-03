@@ -49,7 +49,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.Tracing
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            // Ensure startup hook tracing works
             dotnet.Exec(appDll)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .CaptureStdOut()
@@ -72,7 +71,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.Tracing
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            // Ensure startup hook tracing works
             dotnet.Exec(appDll)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .EnvironmentVariable("COREHOST_TRACE_VERBOSITY", "4")
@@ -96,7 +94,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.Tracing
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            // Ensure startup hook tracing works
             dotnet.Exec(appDll)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .EnvironmentVariable("COREHOST_TRACE_VERBOSITY", "3")
@@ -120,7 +117,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.Tracing
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            // Ensure startup hook tracing works
             dotnet.Exec(appDll)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .EnvironmentVariable("COREHOST_TRACE_VERBOSITY", "2")
@@ -144,7 +140,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.Tracing
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            // Ensure startup hook tracing works
             dotnet.Exec(appDll)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .EnvironmentVariable("COREHOST_TRACEFILE", "TracingOnToFileDefault.log")
@@ -172,7 +167,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.Tracing
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            // Ensure startup hook tracing works
             dotnet.Exec(appDll)
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .EnvironmentVariable("COREHOST_TRACEFILE", "badpath/TracingOnToFileBadPathDefault.log")

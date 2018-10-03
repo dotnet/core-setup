@@ -30,7 +30,7 @@ void trace::setup()
     auto trace_val = pal::xtoi(trace_str.c_str());
     if (trace_val > 0)
     {
-        if(trace::enable())
+        if (trace::enable())
         {
             auto ts = pal::get_timestamp();
             trace::info(_X("Tracing enabled @ %s"), ts.c_str());
@@ -77,7 +77,7 @@ bool trace::enable()
         }
     }
 
-    if(file_open_error)
+    if (file_open_error)
     {
         trace::error(_X("Unable to open COREHOST_TRACEFILE=%s for writing"), tracefile_str.c_str());
     }
