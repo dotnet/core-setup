@@ -13,6 +13,7 @@ namespace HostApiInvokerApp
        public const CharSet OSCharSet = CharSet.Ansi; // actually UTF8 on Unix
 #endif
 
+#if WINDOWS
         internal static class kernel32
         {
             [DllImport(nameof(kernel32), CharSet = CharSet.Auto, BestFitMapping = false, SetLastError = true)]
@@ -21,9 +22,11 @@ namespace HostApiInvokerApp
             [DllImport(nameof(kernel32), CharSet = CharSet.Auto)]
             internal static extern uint GetModuleFileName(IntPtr hModule, StringBuilder fileName, int size);
         }
+#endif
 
         public static void LogModulePath(string moduleName)
         {
+#if WINDOWS
             IntPtr hModule = kernel32.GetModuleHandle(moduleName);
             if (hModule == IntPtr.Zero)
             {
@@ -39,6 +42,7 @@ namespace HostApiInvokerApp
             }
 
             Console.WriteLine($"{moduleName}: {buffer.ToString()}");
+#endif
         }
     }
 }
