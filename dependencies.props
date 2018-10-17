@@ -12,7 +12,7 @@
     <CoreFxCurrentRef>4ed998d15b5a034747acea14c3a64eefe0cc5257</CoreFxCurrentRef>
     <CoreClrCurrentRef>1f0b9ddcfa577a02574a2eeac3e9ecd2c210a567</CoreClrCurrentRef>
     <StandardCurrentRef>9beae4222a58a355e2107e99bdbcb8902c232c18</StandardCurrentRef>
-    <BuildToolsCurrentRef>1f0b9ddcfa577a02574a2eeac3e9ecd2c210a567</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>c505a5c5aad93497b26e24cd87af9bf1a3b19b36</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -52,7 +52,7 @@
   <!-- Publish symbol build task package -->
   <PropertyGroup>
     <PublishSymbolsPackage>Microsoft.SymbolUploader.Build.Task</PublishSymbolsPackage>
-    <PublishSymbolsPackageVersion>1.0.0-beta-62806-01</PublishSymbolsPackageVersion>
+    <PublishSymbolsPackageVersion>1.0.0-beta-63412-03</PublishSymbolsPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
