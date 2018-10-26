@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>$(NETCoreAppFramework)</TargetFramework>
+    <RuntimeIdentifier>$(TestTargetRid)</RuntimeIdentifier>
     <OutputType>Exe</OutputType>
     <RuntimeFrameworkVersion>$(MNAVersion)</RuntimeFrameworkVersion>
     <DefineConstants Condition="'$(OS)' == 'Windows_NT'">WINDOWS;$(DefineConstants)</DefineConstants>
