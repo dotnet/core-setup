@@ -12,7 +12,7 @@
     <CoreFxCurrentRef>88f95e93d6989a010ec865cb005d17c0e7af95da</CoreFxCurrentRef>
     <CoreClrCurrentRef>70fa60f2e24ce3ab1a2d452602d05b3cdbb2b5b5</CoreClrCurrentRef>
     <StandardCurrentRef>9beae4222a58a355e2107e99bdbcb8902c232c18</StandardCurrentRef>
-    <BuildToolsCurrentRef>70fa60f2e24ce3ab1a2d452602d05b3cdbb2b5b5</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>0127267214e2782f299b0af54b552d2c7c5631dd</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <PropertyGroup>
