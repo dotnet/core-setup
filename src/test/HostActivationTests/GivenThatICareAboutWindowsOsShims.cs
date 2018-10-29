@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.WindowsOsShims
 
             public void Dispose()
             {
-                //PortableTestWindowsOsShimsAppFixture.Dispose();
+                PortableTestWindowsOsShimsAppFixture.Dispose();
             }
         }
     }
