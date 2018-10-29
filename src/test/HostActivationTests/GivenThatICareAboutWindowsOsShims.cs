@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.WindowsOsShims
@@ -15,6 +16,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.WindowsOsShims
         [Fact]
         public void MuxerRunsPortableAppWithoutWindowsOsShims()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Manifests are only supported on Windows OSes.
+                return;
+            }
+
             TestProjectFixture portableAppFixture = sharedTestState.PortableTestWindowsOsShimsAppFixture.Copy();
 
             portableAppFixture.BuiltDotnet.Exec(portableAppFixture.TestProject.AppDll)
