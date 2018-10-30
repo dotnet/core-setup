@@ -9,16 +9,16 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>88f95e93d6989a010ec865cb005d17c0e7af95da</CoreFxCurrentRef>
+    <CoreFxCurrentRef>99a97c464ccdf80749a0e23f6f0ad2ebde77e135</CoreFxCurrentRef>
     <CoreClrCurrentRef>70fa60f2e24ce3ab1a2d452602d05b3cdbb2b5b5</CoreClrCurrentRef>
     <StandardCurrentRef>9beae4222a58a355e2107e99bdbcb8902c232c18</StandardCurrentRef>
-    <BuildToolsCurrentRef>0127267214e2782f299b0af54b552d2c7c5631dd</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>99a97c464ccdf80749a0e23f6f0ad2ebde77e135</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-alphautf8string-27017-12</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-alphautf8string.18530.6</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>2.0.0</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-alphautf8string-27017-12</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-alphautf8string.18530.6</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-alphautf8string-27029-04</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <NETStandardLibraryPackageVersion>2.0.3</NETStandardLibraryPackageVersion>
     <MicrosoftDiaSymReaderNativePackageVersion>1.7.0</MicrosoftDiaSymReaderNativePackageVersion>
@@ -46,7 +46,7 @@
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
-    <FeedTasksPackageVersion>3.0.0-preview1-03326-01</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>3.0.0-preview1-03330-01</FeedTasksPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
