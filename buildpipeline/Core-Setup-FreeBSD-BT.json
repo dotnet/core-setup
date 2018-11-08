@@ -4,31 +4,9 @@
       "environment": {},
       "enabled": true,
       "continueOnError": true,
-      "displayName": "run begin.sh",
-      "timeoutInMinutes": 0,
-      "alwaysRun": true,
-      "task": {
-        "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
-        "versionSpec": "0.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "type": "InlineScript",
-        "scriptPath": "",
-        "args": "",
-        "cwd": "",
-        "failOnStandardError": "false",
-        "script": "if [ -f \"$AGENTTOOLSPATH/begin.sh\" ]; then echo \"$AGENTTOOLSPATH/begin.sh script found. Executing...\"; $AGENTTOOLSPATH/begin.sh ; else echo \"$AGENTTOOLSPATH/begin.sh script does not exist. Moving on.\" ; fi"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": true,
       "alwaysRun": false,
       "displayName": "Cleanup previous build",
       "timeoutInMinutes": 0,
-      "refName": "Task1",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -48,7 +26,6 @@
       "alwaysRun": false,
       "displayName": "Clone repo",
       "timeoutInMinutes": 0,
-      "refName": "Task2",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -68,7 +45,6 @@
       "alwaysRun": false,
       "displayName": "git checkout",
       "timeoutInMinutes": 0,
-      "refName": "Task3",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -88,15 +64,14 @@
       "alwaysRun": false,
       "displayName": "Build",
       "timeoutInMinutes": 0,
-      "refName": "Task4",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "DotNetBootstrapCliTarPath=/dotnet-sdk-freebsd-x64.tar $(PB_SourcesDirectory)/build.sh",
-        "arguments": "-OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(PB_AdditionalMSBuildArguments)",
+        "filename": "bash",
+        "arguments": "-c \"export DotNetBootstrapCliTarPath=/dotnet-sdk-freebsd-x64.tar && $(PB_SourcesDirectory)/build.sh -OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) -- $(PB_AdditionalMSBuildArguments) \"",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
       }
@@ -108,39 +83,16 @@
       "alwaysRun": false,
       "displayName": "Publish",
       "timeoutInMinutes": 0,
-      "refName": "Task5",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "DotNetBootstrapCliTarPath=/dotnet-sdk-freebsd-x64.tar $(PB_SourcesDirectory)/Tools/msbuild.sh",
-        "arguments": "$(PB_SourcesDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) /p:AzureAccountName=$(PB_AzureAccountName) /p:ContainerName=$(PB_ContainerName) /p:AzureAccessToken=$(PB_AzureAccessToken) /p:ChecksumAzureAccountName=$(PB_ChecksumAzureAccountName) /p:ChecksumContainerName=$(PB_ChecksumContainerName) /p:ChecksumAzureAccessToken=$(PB_ChecksumAzureAccessToken) /p:TargetArchitecture=$(PB_TargetArchitecture) /p:ConfigurationGroup=$(BuildConfiguration) /p:PortableBuild=$(PB_PortableBuild) /p:OSGroup=FreeBSD $(PB_AdditionalMSBuildArguments)",
+        "filename": "bash",
+        "arguments": "-c \"export DotNetBootstrapCliTarPath=/dotnet-sdk-freebsd-x64.tar && $(PB_SourcesDirectory)/Tools/msbuild.sh $(PB_SourcesDirectory)/publish/publish.proj /p:PublishType=$(PB_PublishType) /p:AzureAccountName=$(PB_AzureAccountName) /p:ContainerName=$(PB_ContainerName) /p:AzureAccessToken=$(PB_AzureAccessToken) /p:ChecksumAzureAccountName=$(PB_ChecksumAzureAccountName) /p:ChecksumContainerName=$(PB_ChecksumContainerName) /p:ChecksumAzureAccessToken=$(PB_ChecksumAzureAccessToken) /p:TargetArchitecture=$(PB_TargetArchitecture) /p:ConfigurationGroup=$(BuildConfiguration) /p:PortableBuild=$(PB_PortableBuild) /p:OSGroup=FreeBSD $(PB_AdditionalMSBuildArguments) \"",
         "workingFolder": "$(PB_SourcesDirectory)",
         "failOnStandardError": "false"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": true,
-      "displayName": "run end.sh",
-      "timeoutInMinutes": 0,
-      "condition": "always()",
-      "alwaysRun": true,
-      "task": {
-        "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
-        "versionSpec": "0.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "type": "InlineScript",
-        "scriptPath": "",
-        "args": "",
-        "cwd": "",
-        "failOnStandardError": "false",
-        "script": "if [ -f \"$AGENTTOOLSPATH/end.sh\" ]; then echo \"$AGENTTOOLSPATH/end.sh script found. Executing...\"; $AGENTTOOLSPATH/end.sh ; else echo \"$AGENTTOOLSPATH/end.sh script does not exist. Moving on.\" ; fi"
       }
     }
   ],
