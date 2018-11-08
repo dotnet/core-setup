@@ -477,7 +477,7 @@ SHARED_API int corehost_resolve_component_dependencies(
         }
     }
 
-    // TODO Review: Probably need to redirect error writing (trace::error even with tracing disabled)
+    // TODO: Need to redirect error writing (trace::error even with tracing disabled)
     // to some local buffer and return the buffer to the caller as detailed error message.
     // Like this the error is written to the stderr of the process which is pretty bad.
     // It makes sense for startup code path as there's no other way to report it to the user.
@@ -518,7 +518,7 @@ SHARED_API int corehost_resolve_component_dependencies(
     // Initialize the "app" framework definition.
     auto app = new fx_definition_t();
 
-    // TODO Review: No .runtimeconfig.json for components?
+    // For now intentionally don't process .runtimeconfig.json since we don't perform framework resolution.
 
     // Call parse_runtime_config since it initializes the defaults for various settings
     // but we don't have any .runtimeconfig.json for the component, so pass in empty paths.
@@ -555,8 +555,8 @@ SHARED_API int corehost_resolve_component_dependencies(
         return StatusCode::ResolverInitFailure;
     }
 
-    // TODO Review: Do we need to process breadcrumbs?
-    // For now we disable them on API calls (non-execute) since they "may be re-entry"?
+    // Don't write breadcrumbs since we're not executing the app, just resolving dependencies
+    // doesn't guarantee that they will actually execute.
 
     probe_paths_t probe_paths;
     if (!resolver.resolve_probe_paths(&probe_paths, nullptr))

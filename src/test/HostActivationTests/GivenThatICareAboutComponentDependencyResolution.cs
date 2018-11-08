@@ -320,6 +320,30 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
                     $"{componentFixture.TestProject.OutputDirectory}{Path.DirectorySeparatorChar}{Path.PathSeparator}]");
         }
 
+        [Fact]
+        public void AdditionalDepsDontAffectComponentDependencyResolution()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableApiTestProjectFixture.Copy();
+            var componentFixture = sharedTestState.PreviouslyPublishedAndRestoredComponentWithNoDependenciesFixture.Copy();
+
+            string additionalDepsPath = Path.Combine(Path.GetDirectoryName(fixture.TestProject.DepsJson), "__duplicate.deps.json");
+            File.Copy(fixture.TestProject.DepsJson, additionalDepsPath);
+
+            string[] args =
+            {
+                corehost_resolve_component_dependencies,
+                componentFixture.TestProject.AppDll
+            };
+            fixture.BuiltDotnet.Exec(fixture.TestProject.AppDll, args)
+                .CaptureStdOut().CaptureStdErr().EnvironmentVariable("COREHOST_TRACE", "1").EnvironmentVariable("DOTNET_ADDITIONAL_DEPS", additionalDepsPath)
+                .Execute()
+                .StdErrAfter("corehost_resolve_component_dependencies = {")
+                .Should().Pass()
+                .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
+                .And.HaveStdOutContaining($"corehost_resolve_component_dependencies assemblies:[{componentFixture.TestProject.AppDll}{Path.PathSeparator}]");
+        }
+
+
         public class SharedTestState : IDisposable
         {
             public TestProjectFixture PreviouslyPublishedAndRestoredPortableApiTestProjectFixture { get; set; }
