@@ -100,10 +100,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             "win"
         };
 
-        private string GetExpectedLibuvRid(TestProjectFixture fixture)
+        private string GetExpectedLibuvRid()
         {
             // Simplified version of the RID fallback for libuv
-            string currentRid = fixture.CurrentRid;
+            string currentRid = PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
             string[] parts = currentRid.Split('-');
             string osName = parts[0];
             string architecture = parts[1];
@@ -127,10 +127,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableApiTestProjectFixture.Copy();
             var componentFixture = sharedTestState.PreviouslyPublishedAndRestoredComponentWithDependenciesFixture.Copy();
 
-            string libuvRid = GetExpectedLibuvRid(componentFixture);
+            string libuvRid = GetExpectedLibuvRid();
             if (libuvRid == null)
             {
-                output.WriteLine($"RID {componentFixture.CurrentRid} is not supported by libuv and thus we can't run this test on it.");
+                output.WriteLine($"RID {PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier()} is not supported by libuv and thus we can't run this test on it.");
                 return;
             }
 
@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
                     $"{Path.Combine(componentFixture.TestProject.OutputDirectory, "Newtonsoft.Json.dll")}{Path.PathSeparator}]")
                 .And.HaveStdOutContaining(
                     $"corehost_resolve_component_dependencies native_search_paths:[" +
-                    $"{Path.Combine(componentFixture.TestProject.OutputDirectory, "runtimes", libuvRid, "native")}{Path.DirectorySeparatorChar}{Path.PathSeparator}]");
+                    $"{ExpectedProbingPaths(Path.Combine(componentFixture.TestProject.OutputDirectory, "runtimes", libuvRid, "native"))}]");
         }
 
         [Fact]
@@ -317,7 +317,36 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
                 .And.HaveStdOutContaining($"corehost_resolve_component_dependencies resource_search_paths:[" +
-                    $"{componentFixture.TestProject.OutputDirectory}{Path.DirectorySeparatorChar}{Path.PathSeparator}]");
+                    $"{ExpectedProbingPaths(componentFixture.TestProject.OutputDirectory)}]");
+        }
+
+        private string ExpectedProbingPaths(params string[] paths)
+        {
+            string result = string.Empty;
+            foreach (string path in paths)
+            {
+                string expectedPath = path;
+                if (expectedPath.EndsWith(Path.DirectorySeparatorChar))
+                {
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        // On non-windows the paths are normalized to not end with a /
+                        expectedPath = expectedPath.Substring(0, expectedPath.Length - 1);
+                    }
+                }
+                else
+                {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        // On windows all paths are normalized to end with a \
+                        expectedPath = expectedPath + Path.DirectorySeparatorChar;
+                    }
+                }
+
+                result += expectedPath + Path.PathSeparator;
+            }
+
+            return result;
         }
 
         [Fact]
