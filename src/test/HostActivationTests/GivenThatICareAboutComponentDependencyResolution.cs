@@ -100,13 +100,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             "win"
         };
 
-        private string GetExpectedLibuvRid()
+        private string GetExpectedLibuvRid(TestProjectFixture fixture)
         {
             // Simplified version of the RID fallback for libuv
+            // Note that we have to take the architecture from the fixture (since this test may run on x64 but the fixture on x86)
+            // but we can't use the OS part from the fixture RID as that may be too generic (like linux-x64).
             string currentRid = PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
-            string[] parts = currentRid.Split('-');
-            string osName = parts[0];
-            string architecture = parts[1];
+            string fixtureRid = fixture.CurrentRid;
+            string osName = currentRid.Split('-')[0];
+            string architecture = fixtureRid.Split('-')[1];
 
             string supportedOsName = SupportedOsList.FirstOrDefault(a => osName.StartsWith(a));
             if (supportedOsName == null)
@@ -117,6 +119,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             osName = supportedOsName;
             if (osName == "ubuntu") { osName = "debian"; }
             if (osName == "win") { osName = "win7"; }
+            if (osName == "osx") { return osName; }
 
             return osName + "-" + architecture;
         }
@@ -127,7 +130,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableApiTestProjectFixture.Copy();
             var componentFixture = sharedTestState.PreviouslyPublishedAndRestoredComponentWithDependenciesFixture.Copy();
 
-            string libuvRid = GetExpectedLibuvRid();
+            string libuvRid = GetExpectedLibuvRid(fixture);
             if (libuvRid == null)
             {
                 output.WriteLine($"RID {PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier()} is not supported by libuv and thus we can't run this test on it.");
