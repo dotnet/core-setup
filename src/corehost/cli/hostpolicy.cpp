@@ -107,7 +107,7 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
     };
 
     // Note: these variables' lifetime should be longer than coreclr_initialize.
-    std::vector<char> tpa_paths_cstr, app_base_cstr, native_dirs_cstr, resources_dirs_cstr, fx_deps, deps, clrjit_path_cstr, probe_directories;
+    std::vector<char> tpa_paths_cstr, app_base_cstr, native_dirs_cstr, resources_dirs_cstr, fx_deps, deps, clrjit_path_cstr, probe_directories, startup_hooks_cstr;
     pal::pal_clrstring(probe_paths.tpa, &tpa_paths_cstr);
     pal::pal_clrstring(args.app_root, &app_base_cstr);
     pal::pal_clrstring(probe_paths.native, &native_dirs_cstr);
@@ -185,6 +185,15 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
         property_values.push_back(app_base_cstr.data());
     }
 
+    // Startup hooks
+    pal::string_t startup_hooks;
+    if (pal::getenv(_X("DOTNET_STARTUP_HOOKS"), &startup_hooks))
+    {
+        pal::pal_clrstring(startup_hooks, &startup_hooks_cstr);
+        property_keys.push_back("STARTUP_HOOKS");
+        property_values.push_back(startup_hooks_cstr.data());
+    }
+
     size_t property_size = property_keys.size();
     assert(property_keys.size() == property_values.size());
 
@@ -209,7 +218,7 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
         return exit_code;
     }
 
-   // Bind CoreCLR
+    // Bind CoreCLR
     trace::verbose(_X("CoreCLR path = '%s', CoreCLR dir = '%s'"), clr_path.c_str(), clr_dir.c_str());
     if (!coreclr::bind(clr_dir))
     {
@@ -275,12 +284,9 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
     std::vector<char> managed_app;
     pal::pal_clrstring(args.managed_application, &managed_app);
 
-    breadcrumb_writer_t writer(&breadcrumbs);
-    if (breadcrumbs_enabled)
-    {
-        // Leave breadcrumbs for servicing.
-        writer.begin_write();
-    }
+    // Leave breadcrumbs for servicing.
+    breadcrumb_writer_t writer(breadcrumbs_enabled, &breadcrumbs);
+    writer.begin_write();
 
     // Previous hostpolicy trace messages must be printed before executing assembly
     trace::flush();
@@ -309,13 +315,9 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
 
     coreclr::unload();
 
-    if (breadcrumbs_enabled)
-    {
-        // Finish breadcrumb writing
-        writer.end_write();
-    }
-
     return exit_code;
+
+    // The breadcrumb destructor will join to the background thread to finish writing
 }
 
 SHARED_API int corehost_load(host_interface_t* init)

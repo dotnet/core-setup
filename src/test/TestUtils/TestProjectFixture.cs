@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
      * setup of the TestProject, copying test projects for perf on build/restore,
      * and building/publishing/restoring test projects where necessary.
      */
-    public class TestProjectFixture
+    public class TestProjectFixture : IDisposable
     {
         private static readonly string s_testArtifactDirectoryEnvironmentVariable = "TEST_ARTIFACTS";
 
@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
         private string _testArtifactDirectory;
         private string _currentRid;
         private string _framework;
+        private string _assemblyName;
 
         private RepoDirectoriesProvider _repoDirectoriesProvider;
 
@@ -31,6 +32,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
 
         private TestProject _sourceTestProject;
         private TestProject _testProject;
+        private List<TestProject> _copiedTestProjects = new List<TestProject>();
 
         public DotNetCli SdkDotnet => _sdkDotnet;
         public DotNetCli BuiltDotnet => _builtDotnet;
@@ -41,23 +43,25 @@ namespace Microsoft.DotNet.CoreSetup.Test
         public string SharedLibraryExtension => _sharedLibraryExtension;
         public string SharedLibraryPrefix => _sharedLibraryPrefix;
         public string Framework => _framework;
-        public RepoDirectoriesProvider RepoDirProvider  => _repoDirectoriesProvider;
+        public RepoDirectoriesProvider RepoDirProvider => _repoDirectoriesProvider;
         public TestProjectFixture(
             string testProjectName,
             RepoDirectoriesProvider repoDirectoriesProvider,
             string exeExtension = null,
             string sharedLibraryExtension = null,
-            string sharedLibraryPrefix= null,
+            string sharedLibraryPrefix = null,
             string testProjectSourceDirectory = null,
             string testArtifactDirectory = null,
             string dotnetInstallPath = null,
             string currentRid = null,
             string builtDotnetOutputPath = null,
-            string framework = "netcoreapp2.1")
+            string framework = null,
+            string assemblyName = null)
         {
             ValidateRequiredDirectories(repoDirectoriesProvider);
 
             _testProjectName = testProjectName;
+            _framework = framework ?? Environment.GetEnvironmentVariable("MNA_TFM");
 
             _exeExtension = exeExtension ?? RuntimeInformationExtensions.GetExeExtensionForCurrentOSPlatform();
             _sharedLibraryExtension = sharedLibraryExtension
@@ -77,14 +81,17 @@ namespace Microsoft.DotNet.CoreSetup.Test
             _currentRid = currentRid ?? repoDirectoriesProvider.TargetRID;
 
             _builtDotnet = new DotNetCli(repoDirectoriesProvider.BuiltDotnet);
-            _framework = framework;
+
+            _assemblyName = assemblyName;
+
             InitializeTestProject(
                 _testProjectName,
                 _testProjectSourceDirectory,
                 _testArtifactDirectory,
                 _exeExtension,
                 _sharedLibraryExtension,
-                _sharedLibraryPrefix);
+                _sharedLibraryPrefix,
+                _assemblyName);
         }
 
         public TestProjectFixture(TestProjectFixture fixtureToCopy)
@@ -101,13 +108,33 @@ namespace Microsoft.DotNet.CoreSetup.Test
             _builtDotnet = fixtureToCopy._builtDotnet;
             _sourceTestProject = fixtureToCopy._sourceTestProject;
             _framework = fixtureToCopy._framework;
+            _assemblyName = fixtureToCopy._assemblyName;
 
             _testProject = CopyTestProject(
                 fixtureToCopy.TestProject,
                 _testArtifactDirectory,
                 _exeExtension,
                 _sharedLibraryExtension,
-                _sharedLibraryPrefix);
+                _sharedLibraryPrefix,
+                _assemblyName);
+
+            fixtureToCopy._copiedTestProjects.Add(_testProject);
+        }
+
+        public void Dispose()
+        {
+            if (_testProject != null)
+            {
+                _testProject.Dispose();
+                _testProject = null;
+            }
+
+            foreach (var project in _copiedTestProjects)
+            {
+                project.Dispose();
+            }
+
+            _copiedTestProjects.Clear();
         }
 
         private void InitializeTestProject(
@@ -116,21 +143,24 @@ namespace Microsoft.DotNet.CoreSetup.Test
             string testArtifactDirectory,
             string exeExtension,
             string sharedLibraryExtension,
-            string sharedLibraryPrefix)
+            string sharedLibraryPrefix,
+            string assemblyName)
         {
             var sourceTestProjectPath = Path.Combine(testProjectSourceDirectory, testProjectName);
             _sourceTestProject = new TestProject(
                 sourceTestProjectPath,
                 exeExtension,
                 sharedLibraryExtension,
-                sharedLibraryPrefix);
+                sharedLibraryPrefix,
+                assemblyName: assemblyName);
 
             _testProject = CopyTestProject(
                 _sourceTestProject,
                 testArtifactDirectory,
                 exeExtension,
                 sharedLibraryExtension,
-                sharedLibraryPrefix);
+                sharedLibraryPrefix,
+                assemblyName);
         }
 
         private TestProject CopyTestProject(
@@ -138,7 +168,8 @@ namespace Microsoft.DotNet.CoreSetup.Test
             string testArtifactDirectory,
             string exeExtension,
             string sharedLibraryExtension,
-            string sharedLibraryPrefix)
+            string sharedLibraryPrefix,
+            string assemblyName)
         {
             string copiedTestProjectDirectory = CalculateTestProjectDirectory(
                 sourceTestProject.ProjectName,
@@ -147,11 +178,13 @@ namespace Microsoft.DotNet.CoreSetup.Test
             EnsureDirectoryBuildProps(testArtifactDirectory);
 
             sourceTestProject.CopyProjectFiles(copiedTestProjectDirectory);
+
             return new TestProject(
                 copiedTestProjectDirectory,
                 exeExtension,
                 sharedLibraryExtension,
-                sharedLibraryPrefix);
+                sharedLibraryPrefix,
+                assemblyName: assemblyName);
         }
 
         private void EnsureDirectoryBuildProps(string testArtifactDirectory)
@@ -159,7 +192,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
             string directoryBuildPropsPath = Path.Combine(testArtifactDirectory, "Directory.Build.props");
             Directory.CreateDirectory(testArtifactDirectory);
 
-            for(int i = 0; i < 3 && !File.Exists(directoryBuildPropsPath); i++)
+            for (int i = 0; i < 3 && !File.Exists(directoryBuildPropsPath); i++)
             {
                 try
                 {
@@ -174,7 +207,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
                     File.WriteAllText(directoryBuildPropsPath, propsFile.ToString());
                 }
                 catch (IOException)
-                {}
+                { }
             }
         }
 
@@ -193,12 +226,12 @@ namespace Microsoft.DotNet.CoreSetup.Test
 
         private void ValidateRequiredDirectories(RepoDirectoriesProvider repoDirectoriesProvider)
         {
-            if ( ! Directory.Exists(repoDirectoriesProvider.BuiltDotnet))
+            if (!Directory.Exists(repoDirectoriesProvider.BuiltDotnet))
             {
                 throw new Exception($"Unable to find built host and sharedfx, please ensure the build has been run: {repoDirectoriesProvider.BuiltDotnet}");
             }
 
-            if ( ! Directory.Exists(repoDirectoriesProvider.CorehostPackages))
+            if (!Directory.Exists(repoDirectoriesProvider.CorehostPackages))
             {
                 throw new Exception($"Unable to find host packages directory, please ensure the build has been run: {repoDirectoriesProvider.CorehostPackages}");
             }
@@ -273,7 +306,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
             }
             else
             {
-               storeArgs.Add(CurrentRid);
+                storeArgs.Add(CurrentRid);
             }
 
             if (framework != null)
@@ -282,14 +315,14 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 storeArgs.Add(framework);
             }
 
-                storeArgs.Add("--manifest");
+            storeArgs.Add("--manifest");
             if (manifest != null)
             {
                 storeArgs.Add(manifest);
             }
             else
             {
-                 storeArgs.Add(_sourceTestProject.ProjectFile);
+                storeArgs.Add(_sourceTestProject.ProjectFile);
             }
 
             if (outputDirectory != null)
@@ -299,6 +332,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
             }
 
             storeArgs.Add($"/p:MNAVersion={_repoDirectoriesProvider.MicrosoftNETCoreAppVersion}");
+            storeArgs.Add($"/p:NETCoreAppFramework={_framework}");
 
             // Ensure the project's OutputType isn't 'Exe', since that causes issues with 'dotnet store'
             storeArgs.Add("/p:OutputType=Library");
@@ -341,6 +375,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
             {
                 publishArgs.Add("--framework");
                 publishArgs.Add(framework);
+                publishArgs.Add($"/p:NETCoreAppFramework={framework}");
             }
 
             if (outputDirectory != null)
@@ -375,6 +410,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
             restoreArgs.Add("--disable-parallel");
 
             restoreArgs.Add($"/p:MNAVersion={_repoDirectoriesProvider.MicrosoftNETCoreAppVersion}");
+            restoreArgs.Add($"/p:NETCoreAppFramework={_framework}");
 
             if (extraMSBuildProperties != null)
             {
@@ -394,7 +430,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
 
         public TestProjectFixture EnsureRestored(params string[] fallbackSources)
         {
-            if ( ! _testProject.IsRestored())
+            if (!_testProject.IsRestored())
             {
                 RestoreProject(fallbackSources);
             }
@@ -404,7 +440,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
 
         public TestProjectFixture EnsureRestoredForRid(string rid, params string[] fallbackSources)
         {
-            if ( ! _testProject.IsRestored())
+            if (!_testProject.IsRestored())
             {
                 string extraMSBuildProperties = $"/p:TestTargetRid={rid}";
                 RestoreProject(fallbackSources, extraMSBuildProperties);

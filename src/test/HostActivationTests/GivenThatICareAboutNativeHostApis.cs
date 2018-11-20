@@ -12,31 +12,19 @@ using Microsoft.DotNet.Cli.Build;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
 {
-    public class GivenThatICareAboutNativeHostApis
+    public class GivenThatICareAboutNativeHostApis : IClassFixture<GivenThatICareAboutNativeHostApis.SharedTestState>
     {
-        private static TestProjectFixture PreviouslyBuiltAndRestoredPortableTestProjectFixture { get; set; }
-        private static TestProjectFixture PreviouslyPublishedAndRestoredPortableTestProjectFixture { get; set; }
-        private static RepoDirectoriesProvider RepoDirectories { get; set; }
+        private SharedTestState sharedTestState;
 
-        static GivenThatICareAboutNativeHostApis()
+        public GivenThatICareAboutNativeHostApis(GivenThatICareAboutNativeHostApis.SharedTestState fixture)
         {
-            RepoDirectories = new RepoDirectoriesProvider();
-
-            PreviouslyBuiltAndRestoredPortableTestProjectFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
-                .EnsureRestored(RepoDirectories.CorehostPackages)
-                .BuildProject();
-
-            PreviouslyPublishedAndRestoredPortableTestProjectFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
-                .EnsureRestored(RepoDirectories.CorehostPackages)
-                .PublishProject();
+            sharedTestState = fixture;
         }
 
         [Fact]
         public void Muxer_activation_of_Publish_Output_Portable_DLL_hostfxr_get_native_search_directories_Succeeds()
         {
-            var fixture = PreviouslyPublishedAndRestoredPortableTestProjectFixture.Copy();
-            SetupPInvokeToHostfxrOnNonWindows(fixture);
-
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableApiTestProjectFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -60,6 +48,51 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
                 .HaveStdOutContaining("hostfxr_get_native_search_directories buffer:[" + dotnet.GreatestVersionSharedFxPath);
         }
 
+        [Fact]
+        public void Breadcrumb_thread_finishes_when_app_closes_normally()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppProjectFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            dotnet.Exec(appDll)
+                .EnvironmentVariable("CORE_BREADCRUMBS", sharedTestState.BreadcrumbLocation)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World")
+                .And
+                .HaveStdErrContaining("Waiting for breadcrumb thread to exit...");
+        }
+
+        [Fact]
+        public void Breadcrumb_thread_does_not_finish_when_app_has_unhandled_exception()
+        {
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            dotnet.Exec(appDll)
+                .EnvironmentVariable("CORE_BREADCRUMBS", sharedTestState.BreadcrumbLocation)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining("Unhandled Exception: System.Exception: Goodbye World")
+                .And
+                // The breadcrumb thread does not wait since destructors are not called when an exception is thrown.
+                // However, destructors will be called when the caller (such as a custom host) is compiled with SEH Exceptions (/EHa) and has a try\catch.
+                // Todo: add a native host test app so we can verify this behavior.
+                .NotHaveStdErrContaining("Waiting for breadcrumb thread to exit...");
+        }
+
         private class SdkResolutionFixture
         {
             private readonly TestProjectFixture _fixture;
@@ -75,10 +108,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             public string[] GlobalSdks = new[] { "4.5.6", "1.2.3", "2.3.4-preview" };
             public string[] LocalSdks = new[] { "0.1.2", "5.6.7-preview", "1.2.3" };
 
-            public SdkResolutionFixture()
+            public SdkResolutionFixture(SharedTestState state)
             {
-                _fixture =  PreviouslyPublishedAndRestoredPortableTestProjectFixture.Copy();
-                SetupPInvokeToHostfxrOnNonWindows(_fixture);
+                _fixture = state.PreviouslyPublishedAndRestoredPortableApiTestProjectFixture.Copy();
 
                 Directory.CreateDirectory(WorkingDir);
 
@@ -107,7 +139,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
                 return;
             }
             
-            var f = new SdkResolutionFixture();
+            var f = new SdkResolutionFixture(sharedTestState);
 
             // With multi-level lookup (windows onnly): get local and global sdks sorted by ascending version,
             // with global sdk coming before local sdk when versions are equal
@@ -139,7 +171,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
         {
             // Without multi-level lookup: get only sdks sorted by ascending version
 
-            var f = new SdkResolutionFixture();
+            var f = new SdkResolutionFixture(sharedTestState);
 
             string expectedList = string.Join(';', new[]
             {
@@ -165,7 +197,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
         {
             // with no global.json and no flags, pick latest SDK
 
-            var f = new SdkResolutionFixture();
+            var f = new SdkResolutionFixture(sharedTestState);
 
             string expectedData = string.Join(';', new[]
             {
@@ -189,7 +221,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
         {
             // Without global.json and disallowing previews, pick latest non-preview
 
-            var f = new SdkResolutionFixture();
+            var f = new SdkResolutionFixture(sharedTestState);
 
             string expectedData = string.Join(';', new[]
             {
@@ -215,7 +247,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
             // since flag has no impact if global.json specifies a preview.
             // Also check that global.json that impacted resolution is reported.
 
-            var f = new SdkResolutionFixture();
+            var f = new SdkResolutionFixture(sharedTestState);
 
             File.WriteAllText(f.GlobalJson, "{ \"sdk\": { \"version\": \"5.6.6-preview\" } }");
             string expectedData = string.Join(';', new[]
@@ -236,18 +268,56 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHostApis
                 .HaveStdOutContaining($"hostfxr_resolve_sdk2 data:[{expectedData}]");
         }
 
-        private static void SetupPInvokeToHostfxrOnNonWindows(TestProjectFixture fixture)
+        public class SharedTestState : IDisposable
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // On non-Windows, we can't just P/Invoke to already loaded hostfxr, so copy it next to the app dll.
-                var hostfxr = Path.Combine(
-                    fixture.BuiltDotnet.GreatestVersionHostFxrPath, 
-                    $"{fixture.SharedLibraryPrefix}hostfxr{fixture.SharedLibraryExtension}");
+            public TestProjectFixture PreviouslyPublishedAndRestoredPortableApiTestProjectFixture { get; set; }
+            public TestProjectFixture PreviouslyPublishedAndRestoredPortableAppProjectFixture { get; set; }
+            public TestProjectFixture PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture { get; set; }
+            public RepoDirectoriesProvider RepoDirectories { get; set; }
 
-                File.Copy(
-                    hostfxr, 
-                    Path.GetDirectoryName(fixture.TestProject.AppDll));
+            public string BreadcrumbLocation { get; set; }
+
+            public SharedTestState()
+            {
+                RepoDirectories = new RepoDirectoriesProvider();
+
+                PreviouslyPublishedAndRestoredPortableApiTestProjectFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
+                    .EnsureRestored(RepoDirectories.CorehostPackages)
+                    .BuildProject();
+
+                PreviouslyPublishedAndRestoredPortableAppProjectFixture = new TestProjectFixture("PortableApp", RepoDirectories)
+                    .EnsureRestored(RepoDirectories.CorehostPackages)
+                    .PublishProject();
+
+                PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture = new TestProjectFixture("PortableAppWithException", RepoDirectories)
+                    .EnsureRestored(RepoDirectories.CorehostPackages)
+                    .PublishProject();
+
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    BreadcrumbLocation = Path.Combine(
+                        PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture.TestProject.OutputDirectory,
+                        "opt",
+                        "corebreadcrumbs");
+                    Directory.CreateDirectory(BreadcrumbLocation);
+
+                    // On non-Windows, we can't just P/Invoke to already loaded hostfxr, so copy it next to the app dll.
+                    var fixture = PreviouslyPublishedAndRestoredPortableApiTestProjectFixture;
+                    var hostfxr = Path.Combine(
+                        fixture.BuiltDotnet.GreatestVersionHostFxrPath, 
+                        $"{fixture.SharedLibraryPrefix}hostfxr{fixture.SharedLibraryExtension}");
+
+                    File.Copy(
+                        hostfxr, 
+                        Path.GetDirectoryName(fixture.TestProject.AppDll));
+                }
+            }
+
+            public void Dispose()
+            {
+                PreviouslyPublishedAndRestoredPortableApiTestProjectFixture.Dispose();
+                PreviouslyPublishedAndRestoredPortableAppProjectFixture.Dispose();
+                PreviouslyPublishedAndRestoredPortableAppWithExceptionProjectFixture.Dispose();
             }
         }
     }
