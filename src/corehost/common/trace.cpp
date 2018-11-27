@@ -14,6 +14,7 @@
 static int g_trace_verbosity = 0;
 static FILE * g_trace_file = stderr;
 static std::mutex g_trace_mutex;
+thread_local static trace::error_writer_fn g_error_writer = nullptr;
 
 //
 // Turn on tracing for the corehost based on "COREHOST_TRACE" & "COREHOST_TRACEFILE" env.
@@ -122,7 +123,18 @@ void trace::error(const pal::char_t* format, ...)
     // Always print errors
     va_list args;
     va_start(args, format);
-    pal::err_vprintf(format, args);
+
+    if (g_error_writer == nullptr)
+    {
+        pal::err_vprintf(format, args);
+    }
+    else
+    {
+        pal::char_t buffer[1024];
+        pal::str_vprintf(buffer, 1024, format, args);
+        g_error_writer(buffer);
+    }
+
     if (g_trace_verbosity && (g_trace_file != stderr))
     {
         pal::file_vprintf(g_trace_file, format, args);
@@ -165,4 +177,20 @@ void trace::flush()
     pal::file_flush(g_trace_file);
     pal::err_flush();
     pal::out_flush();
+}
+
+trace::error_writer_fn trace::set_error_writer(trace::error_writer_fn error_writer)
+{
+    std::lock_guard<std::mutex> lock(g_trace_mutex);
+
+    error_writer_fn previous_writer = g_error_writer;
+    g_error_writer = error_writer;
+    return previous_writer;
+}
+
+trace::error_writer_fn trace::get_error_writer()
+{
+    std::lock_guard<std::mutex> lock(g_trace_mutex);
+
+    return g_error_writer;
 }
