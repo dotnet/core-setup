@@ -477,13 +477,6 @@ SHARED_API int corehost_resolve_component_dependencies(
         }
     }
 
-    // TODO: Need to redirect error writing (trace::error even with tracing disabled)
-    // to some local buffer and return the buffer to the caller as detailed error message.
-    // Like this the error is written to the stderr of the process which is pretty bad.
-    // It makes sense for startup code path as there's no other way to report it to the user.
-    // But with API call from managed code, the error should be invisible outside of exception.
-    // Tracing should still contain the error just like now.
-
     // IMPORTANT: g_init is static/global and thus potentially accessed from multiple threads
     // We must only use it as read-only here (unlike the run scenarios which own it).
     // For example the frameworks in g_init.fx_definitions can't be used "as-is" by the resolver
