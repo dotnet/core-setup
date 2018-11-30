@@ -130,9 +130,10 @@ void trace::error(const pal::char_t* format, ...)
     }
     else
     {
-        pal::char_t buffer[1024];
-        pal::str_vprintf(buffer, 1024, format, args);
-        g_error_writer(buffer);
+        int count = pal::str_vcprintf(format, args);
+        std::vector<pal::char_t> buffer(count + 1);
+        pal::str_vprintf(&buffer[0], count, format, args);
+        g_error_writer(buffer.data());
     }
 
     if (g_trace_verbosity && (g_trace_file != stderr))
@@ -181,8 +182,7 @@ void trace::flush()
 
 trace::error_writer_fn trace::set_error_writer(trace::error_writer_fn error_writer)
 {
-    std::lock_guard<std::mutex> lock(g_trace_mutex);
-
+    // No need for locking since g_error_writer is thread local.
     error_writer_fn previous_writer = g_error_writer;
     g_error_writer = error_writer;
     return previous_writer;
@@ -190,7 +190,6 @@ trace::error_writer_fn trace::set_error_writer(trace::error_writer_fn error_writ
 
 trace::error_writer_fn trace::get_error_writer()
 {
-    std::lock_guard<std::mutex> lock(g_trace_mutex);
-
+    // No need for locking since g_error_writer is thread local.
     return g_error_writer;
 }
