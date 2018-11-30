@@ -175,7 +175,7 @@ namespace pal
     inline void file_vprintf(FILE* f, const char_t* format, va_list vl) { ::vfprintf(f, format, vl); ::fputc('\n', f); }
     inline void err_vprintf(const char_t* format, va_list vl) { ::vfprintf(stderr, format, vl); ::fputc('\n', stderr); }
     inline void out_vprintf(const char_t* format, va_list vl) { ::vfprintf(stdout, format, vl); ::fputc('\n', stdout); }
-    inline int std_vcprintf(const char_t* format, va_list vl) { ::vsnprintf(NULL, 0, format, vl); }
+    inline int str_vcprintf(const char_t* format, va_list vl) { return ::vsnprintf(NULL, 0, format, vl); }
     inline void str_vprintf(char_t* str, size_t size, const char_t* format, va_list vl) { ::vsnprintf(str, size, format, vl); }
 
     inline bool pal_utf8string(const pal::string_t& str, std::vector<char>* out) { out->assign(str.begin(), str.end()); out->push_back('\0'); return true; }

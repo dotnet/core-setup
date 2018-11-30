@@ -130,8 +130,8 @@ void trace::error(const pal::char_t* format, ...)
     }
     else
     {
-        int count = pal::str_vcprintf(format, args);
-        std::vector<pal::char_t> buffer(count + 1);
+        int count = pal::str_vcprintf(format, args) + 1;
+        std::vector<pal::char_t> buffer(count);
         pal::str_vprintf(&buffer[0], count, format, args);
         g_error_writer(buffer.data());
     }
