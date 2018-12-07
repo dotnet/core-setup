@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Xunit;
 using FluentAssertions;
@@ -10,6 +11,9 @@ using Microsoft.DotNet.CoreSetup.Test;
 using Microsoft.DotNet.Cli.Build.Framework;
 using System.Security.Cryptography;
 using System.Text;
+using System.Diagnostics;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
 {
@@ -254,7 +258,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
         }
 
         [Fact]
-        public void AppHost_with_GUI_Reports_Errors_In_Window()
+        public void Running_AppHost_with_GUI_Reports_Errors_In_Window()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -267,20 +271,105 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
 
             string appExe = fixture.TestProject.AppExe;
 
+            // Mark the apphost as GUI, but don't bind it to anything - this will cause it to fail
             UseBuiltAppHost(appExe);
             MarkAppHostAsGUI(appExe);
 
-            Command.Create(appExe)
+            Command command = Command.Create(appExe)
                 .CaptureStdErr()
                 .CaptureStdOut()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                .Start();
+
+            IntPtr windowHandle = WaitForPopupFromProcess(command.Process);
+            Assert.NotEqual(IntPtr.Zero, windowHandle);
+
+            // In theory we should close the window - but it's just easier to kill the process.
+            // The popup should be the last thing the process does anyway.
+            command.Process.Kill();
+
+            CommandResult result = command.WaitForExit(true);
+
+            // There should be no output written by the process.
+            Assert.Equal(string.Empty, result.StdOut);
+            Assert.Equal(string.Empty, result.StdErr);
+
+            result.Should().Fail();
         }
+
+        [Fact]
+        public void Running_AppHost_with_GUI_Reports_Errors_In_Window_and_Traces()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // GUI app host is only supported on Windows.
+                return;
+            }
+
+            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+                .Copy();
+
+            string appExe = fixture.TestProject.AppExe;
+
+            // Mark the apphost as GUI, but don't bind it to anything - this will cause it to fail
+            UseBuiltAppHost(appExe);
+            MarkAppHostAsGUI(appExe);
+
+            string traceFilePath = Path.Combine(Path.GetDirectoryName(appExe), "trace.log");
+
+            Command command = Command.Create(appExe)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .EnvironmentVariable("COREHOST_TRACEFILE", traceFilePath)
+                .Start();
+
+            IntPtr windowHandle = WaitForPopupFromProcess(command.Process);
+            Assert.NotEqual(IntPtr.Zero, windowHandle);
+
+            // In theory we should close the window - but it's just easier to kill the process.
+            // The popup should be the last thing the process does anyway.
+            command.Process.Kill();
+
+            CommandResult result = command.WaitForExit(true);
+
+            result.Should().Fail()
+                .And.FileExists(traceFilePath)
+                .And.FileContains(traceFilePath, "This executable is not bound to a managed DLL to execute.");
+        }
+
+#if WINDOWS
+        private delegate bool EnumThreadWindowsDelegate(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumThreadWindows(int dwThreadId, EnumThreadWindowsDelegate plfn, IntPtr lParam);
+
+        private IntPtr WaitForPopupFromProcess(Process process, int timeout = 5000)
+        {
+            IntPtr windowHandle = IntPtr.Zero;
+            while (timeout > 0)
+            {
+                foreach (ProcessThread thread in process.Threads)
+                {
+                    // Note we take the last window we find - there really should only be one at most anyway.
+                    EnumThreadWindows(thread.Id,
+                        (hWnd, lParam) => { windowHandle = hWnd; return true; }, IntPtr.Zero);
+                }
+
+                if (windowHandle != IntPtr.Zero)
+                {
+                    break;
+                }
+
+                Thread.Sleep(100);
+                timeout -= 100;
+            }
+
+            return windowHandle;
+        }
+#else
+        private IntPtr WaitForPopupFromProcess(Process process, int timeout = 5000)
+        {
+            throw new PlatformNotSupportedException();
+        }
+#endif
 
         private void UseBuiltAppHost(string appExe)
         {
