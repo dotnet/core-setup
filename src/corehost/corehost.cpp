@@ -17,6 +17,8 @@
 
 typedef int(*hostfxr_main_fn) (const int argc, const pal::char_t* argv[]);
 typedef int(*hostfxr_main_startupinfo_fn) (const int argc, const pal::char_t* argv[], const pal::char_t* host_path, const pal::char_t* dotnet_root, const pal::char_t* app_path);
+typedef void(*hostfxr_error_writer_fn) (const pal::char_t* message);
+typedef hostfxr_error_writer_fn(*hostfxr_set_error_writer_fn) (hostfxr_error_writer_fn error_writer);
 
 #if FEATURE_APPHOST
 
@@ -282,8 +284,12 @@ int run(const int argc, const pal::char_t* argv[])
         trace::info(_X("Dotnet path: [%s]"), dotnet_root.c_str());
         trace::info(_X("App path: [%s]"), app_path.c_str());
 
+		hostfxr_set_error_writer_fn set_error_writer_fn = (hostfxr_set_error_writer_fn)pal::get_symbol(fxr, "hostfxr_set_error_writer");
+
         // Previous corehost trace messages must be printed before calling trace::setup in hostfxr
         trace::flush();
+
+		propagate_error_writer_t propagate_error_writer_to_hostfxr(set_error_writer_fn);
 
         rc = main_fn_v2(argc, argv, host_path_cstr, dotnet_root_cstr, app_path_cstr);
     }
@@ -320,6 +326,15 @@ int run(const int argc, const pal::char_t* argv[])
     return rc;
 }
 
+#if defined(_WIN32) && defined(FEATURE_APPHOST)
+pal::string_t g_buffered_errors;
+
+void buffering_trace_writer(const pal::char_t* message)
+{
+	g_buffered_errors.append(message).append(_X("\n"));
+}
+#endif
+
 #if defined(_WIN32)
 int __cdecl wmain(const int argc, const pal::char_t* argv[])
 #else
@@ -338,5 +353,35 @@ int main(const int argc, const pal::char_t* argv[])
         trace::info(_X("}"));
     }
 
-    return run(argc, argv);
+#if defined(_WIN32) && defined(FEATURE_APPHOST)
+	// Detect if the process has console
+	// Note that this will fail even if a GUI process has STDOUT redirected. So this pretty effectively detects
+	// if the process is a GUI process without a console window.
+	HANDLE con_out = ::CreateFileW(L"CONOUT$", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+	if (con_out == INVALID_HANDLE_VALUE)
+	{
+		// If there's no console, buffer errors to display them later. Without this any errors are effectively lost
+		// unless the caller explicitly redirects stderr. This leads to bad experience of running the GUI app and nothing happening.
+		trace::set_error_writer(buffering_trace_writer);
+	}
+#endif
+
+    int exit_code = run(argc, argv);
+
+#if defined(_WIN32) && defined(FEATURE_APPHOST)
+	// No need to unregister the error writer since we're exiting anyway.
+	if (!g_buffered_errors.empty())
+	{
+		// If there are errors buffered, display them as a dialog. We only buffer if there's no console attached.
+		pal::string_t executable_name;
+		if (pal::get_own_executable_path(&executable_name))
+		{
+			executable_name = get_filename(executable_name);
+		}
+
+		::MessageBoxW(NULL, g_buffered_errors.c_str(), executable_name.c_str(), MB_OK);
+	}
+#endif
+
+	return exit_code;
 }
