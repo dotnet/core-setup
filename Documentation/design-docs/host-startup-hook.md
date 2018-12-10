@@ -102,9 +102,9 @@ namespace SharedHostPolicy
     {
         public static Assembly LoadAssemblyFromSharedLocation(AssemblyLoadContext context, AssemblyName assemblyName)
         {
-            string sharedAssemblyPath = // find assemblyName in shared location...
+            string sharedAssemblyPath = ""; // find assemblyName in shared location...
             if (sharedAssemblyPath != null)
-                return AssemblyLoadContext.Default.LoadFromAssemblyPath(sharedAssemblyPath)
+                return AssemblyLoadContext.Default.LoadFromAssemblyPath(sharedAssemblyPath);
             return null;
         }
     }
