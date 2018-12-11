@@ -210,6 +210,12 @@ bool is_executable(const pal::string_t& file_path)
      return true;
 }
 
+bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
+{
+    // No support for SDK self registered directories in Unix.
+    return false;
+}
+
 pal::string_t trim_quotes(pal::string_t stringToCleanup)
 {
     pal::char_t quote_array[2] = {'\"', '\''};

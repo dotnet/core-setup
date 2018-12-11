@@ -199,35 +199,82 @@ bool pal::get_default_servicing_directory(string_t* recv)
 
 bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* dirs)
 {
-    pal::string_t dir;
-    if (!get_default_installation_dir(&dir))
-    {
-        return false;
-    }
-
-    dirs->push_back(dir);
-    return true;
+	pal::string_t dir;
+	bool gdir_found = false;
+	if (get_sdk_self_registered_dir(&dir))
+	{
+		dirs->push_back(dir);
+		gdir_found = true;
+	}
+	if (get_default_installation_dir(&dir))
+	{
+		// TODO: do not push a dir that is already on the stack
+		dirs->push_back(dir);
+		gdir_found = true;
+	}
+	return gdir_found;
 }
 
 bool pal::get_default_installation_dir(pal::string_t* recv)
 {
-    pal::char_t* program_files_dir;
-    if (pal::is_running_in_wow64())
-    {
-        program_files_dir = _X("ProgramFiles(x86)");
-    }
-    else
-    {
-        program_files_dir = _X("ProgramFiles");
-    }
+	pal::char_t* program_files_dir;
+	if (pal::is_running_in_wow64())
+	{
+		program_files_dir = _X("ProgramFiles(x86)");
+	}
+	else
+	{
+		program_files_dir = _X("ProgramFiles");
+	}
 
-    if (!get_file_path_from_env(program_files_dir, recv))
-    {
-        return false;
-    }
+	if (!get_file_path_from_env(program_files_dir, recv))
+	{
+		return false;
+	}
 
-    append_path(recv, _X("dotnet"));
-    return true;
+	append_path(recv, _X("dotnet"));
+
+	return true;
+}
+
+bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
+{
+	//TODO: catch exceptions?
+	DWORD size = 0;
+	const HKEY hkey = HKEY_LOCAL_MACHINE;
+	const DWORD flags = RRF_RT_REG_SZ | RRF_SUBKEY_WOW6432KEY;
+
+	//TODO Use the get_arch() method here; would include arm & arm64
+#if defined(_TARGET_AMD64_)
+	const pal::char_t* sub_key = _X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\x64\\sdk");
+#else
+	const pal::char_t* sub_key = _X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\x86\\sdk");
+#endif
+
+	pal::char_t* value = _X("InstallLocation");
+
+	// Determine the size of the buffer
+	LONG result = ::RegGetValueW(hkey, sub_key, value, flags, nullptr, nullptr, &size);
+	if (result != ERROR_SUCCESS || size == 0)
+	{
+		return false;
+	}
+
+	// Get the key's value
+	//TODO: Is there a better 'pal' vector method
+	std::vector<wchar_t> buffer(size/sizeof(wchar_t));
+	result = ::RegGetValueW( hkey, sub_key, value, flags, nullptr, &buffer[0], &size);
+	if (result != ERROR_SUCCESS)
+	{
+		return false;
+	}
+
+	//TODO: Cleaner string handling here?
+	pal::char_t* text(buffer.data());
+	recv->clear();
+	recv->assign(text);
+
+	return true;
 }
 
 // To determine the OS version, we are going to use RtlGetVersion API
