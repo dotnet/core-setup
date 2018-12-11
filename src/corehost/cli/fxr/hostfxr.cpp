@@ -535,8 +535,6 @@ SHARED_API int32_t hostfxr_get_native_search_directories(const int argc, const p
     return rc;
 }
 
-
-
 typedef void(*hostfxr_error_writer_fn)(const pal::char_t* message);
 
 //
@@ -565,4 +563,12 @@ typedef void(*hostfxr_error_writer_fn)(const pal::char_t* message);
 SHARED_API hostfxr_error_writer_fn hostfxr_set_error_writer(hostfxr_error_writer_fn error_writer)
 {
     return trace::set_error_writer(error_writer);
+}
+
+SHARED_API int32_t hostfxr_com_activation_delegate(
+    const pal::char_t* host_path,
+    const pal::char_t* dotnet_root,
+    void **delegate)
+{
+    return StatusCode::HostApiFailed;
 }
