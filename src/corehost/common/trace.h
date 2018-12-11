@@ -9,7 +9,7 @@
 namespace trace
 {
     void setup();
-    bool enable();
+    void enable();
     bool is_enabled();
     void verbose(const pal::char_t* format, ...);
     void info(const pal::char_t* format, ...);
