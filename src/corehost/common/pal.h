@@ -215,6 +215,7 @@ namespace pal
     void readdir_onlydirectories(const string_t& path, std::vector<pal::string_t>* list);
 
     bool get_own_executable_path(string_t* recv);
+    bool get_own_module_path(string_t* recv);
     bool getenv(const char_t* name, string_t* recv);
     bool get_default_servicing_directory(string_t* recv);
     
