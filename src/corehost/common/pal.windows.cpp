@@ -199,18 +199,22 @@ bool pal::get_default_servicing_directory(string_t* recv)
 
 bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* dirs)
 {
-	pal::string_t dir;
+	pal::string_t default_dir;
+	pal::string_t custom_dir;
 	bool gdir_found = false;
-	if (get_sdk_self_registered_dir(&dir))
+	if (get_sdk_self_registered_dir(&custom_dir))
 	{
-		dirs->push_back(dir);
+		dirs->push_back(custom_dir);
 		gdir_found = true;
 	}
-	if (get_default_installation_dir(&dir))
+	if (get_default_installation_dir(&default_dir))
 	{
-		// TODO: do not push a dir that is already on the stack
-		dirs->push_back(dir);
-		gdir_found = true;
+		// Avoid duplicate global dirs.
+        if (!gdir_found || !pal::are_paths_equal_with_normalized_casing(custom_dir, default_dir))
+		{
+			dirs->push_back(default_dir);
+			gdir_found = true;
+		}
 	}
 	return gdir_found;
 }
