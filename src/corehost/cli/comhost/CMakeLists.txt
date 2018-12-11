@@ -9,15 +9,18 @@ include(../setup.cmake)
 # Include directories
 include_directories(./)
 include_directories(../)
+include_directories(../fxr)
 include_directories(../../)
 include_directories(../../common)
 include_directories(../json/casablanca/include)
 
 set(SOURCES
+    ../../corehost.cpp
     exports.cpp
     clsidmap.cpp
     ../../common/trace.cpp
     ../../common/utils.cpp
+    ../fxr/fx_ver.cpp
     ../json/casablanca/src/json/json.cpp
     ../json/casablanca/src/json/json_parsing.cpp
     ../json/casablanca/src/json/json_serialization.cpp
@@ -35,7 +38,15 @@ else()
         ${VERSION_FILE_PATH})
 endif()
 
-add_definitions(-DCOREHOST_MAKE_DLL=1)
+# Move to setup.cmake if COMHOST is ever built on non-Windows
+if("${CLI_CMAKE_COMHOST_VER}" STREQUAL "")
+    message(FATAL_ERROR "comhost version is not specified")
+else()
+    add_definitions(-DLIBHOST_PKG_VER="${CLI_CMAKE_COMHOST_VER}")
+endif()
+
+add_definitions(-DEXPORT_SHARED_API=1)
+add_definitions(-DFEATURE_LIBHOST=1)
 
 add_library(comhost SHARED ${SOURCES})
 install_library_and_symbols (comhost)

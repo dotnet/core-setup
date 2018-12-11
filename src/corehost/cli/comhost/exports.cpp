@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "comhost.h"
+#include <corehost.h>
+#include <error_codes.h>
 #include <trace.h>
 #include <type_traits>
 
@@ -26,21 +28,37 @@ COM_API HRESULT STDMETHODCALLTYPE DllGetClassObject(
     _In_ REFIID riid,
     _Outptr_ LPVOID FAR* ppv)
 {
-    // Step 1: Check if the CLSID map contains a mapping
+    // Check if the CLSID map contains a mapping
     clsid_map map;
-    RETURN_OOM_IF_BADALLOC(map = comhost::get_clsid_map());
+    RETURN_HRESULT_IF_EXCEPT(map = comhost::get_clsid_map());
 
     clsid_map::const_iterator iter = map.find(rclsid);
     if (iter == std::end(map))
         return CLASS_E_CLASSNOTAVAILABLE;
 
-    // Step 2a: Determine if hostfxr is already loaded
+    com_activation_fn act;
+    int ec = get_coreclr_delegate(coreclr_delegate_type::com_activation, (void**)&act);
+    if (ec != StatusCode::Success)
+        return __HRESULT_FROM_WIN32(ec);
 
-    // Step 2b: If hostfxr isn't loaded find it and load CLR
+    // Query the CLR for the type
+    HRESULT hr;
 
-    // Step 3: Query the CLR for the type
+    IUnknown *classFactory = nullptr;
+    com_activation_context cxt
+    {
+        rclsid,
+        riid,
+        iter->second.assembly.c_str(),
+        iter->second.type.c_str(),
+        (void**)&classFactory
+    };
+    RETURN_IF_FAILED(act(&cxt));
+    assert(classFactory != nullptr);
 
-    return CLASS_E_CLASSNOTAVAILABLE;
+    hr = classFactory->QueryInterface(riid, ppv);
+    classFactory->Release();
+    return hr;
 }
 
 COM_API HRESULT STDMETHODCALLTYPE DllCanUnloadNow(void)
@@ -50,15 +68,13 @@ COM_API HRESULT STDMETHODCALLTYPE DllCanUnloadNow(void)
 
 #if defined(_WIN32)
 
-bool GetModuleFileNameWrapper(HMODULE hModule, pal::string_t* recv);
-
 namespace
 {
     const WCHAR EntryKeyFmt[] = L"SOFTWARE\\Classes\\CLSID\\%s";
 
     struct OleStr : public std::unique_ptr<std::remove_pointer<LPOLESTR>::type, decltype(&::CoTaskMemFree)>
     {
-        OleStr(_In_ LPOLESTR raw)
+        OleStr(_In_z_ LPOLESTR raw)
             : std::unique_ptr<std::remove_pointer<LPOLESTR>::type, decltype(&::CoTaskMemFree)>(raw, ::CoTaskMemFree)
         { }
     };
@@ -142,7 +158,7 @@ namespace
 
         RegKey regKey{ regKeyRaw };
 
-        WCHAR regKeyServerPath[1024];
+        WCHAR regKeyServerPath[ARRAYSIZE(regKeyClsidPath) * 2];
         ::swprintf_s(regKeyServerPath, L"%s\\InProcServer32", regKeyClsidPath);
 
         HKEY regServerKeyRaw;
@@ -171,7 +187,7 @@ namespace
         }
 
         pal::string_t modPath;
-        if (!GetModuleFileNameWrapper(mod, &modPath))
+        if (!pal::get_own_module_path(&modPath))
             return E_UNEXPECTED;
 
         // The default value for the key is the path to the DLL
@@ -207,7 +223,7 @@ COM_API HRESULT STDMETHODCALLTYPE DllRegisterServer(void)
 {
     // Step 1: Get CLSID mapping
     clsid_map map;
-    RETURN_OOM_IF_BADALLOC(map = comhost::get_clsid_map());
+    RETURN_HRESULT_IF_EXCEPT(map = comhost::get_clsid_map());
 
     // Step 2: Register each CLSID
     HRESULT hr;
@@ -221,7 +237,7 @@ COM_API HRESULT STDMETHODCALLTYPE DllUnregisterServer(void)
 {
     // Step 1: Get CLSID mapping
     clsid_map map;
-    RETURN_OOM_IF_BADALLOC(map = comhost::get_clsid_map());
+    RETURN_HRESULT_IF_EXCEPT(map = comhost::get_clsid_map());
 
     // Step 2: Unregister each CLSID
     HRESULT hr;

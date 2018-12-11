@@ -3,6 +3,8 @@
 
 #include "comhost.h"
 #include <trace.h>
+#include <utils.h>
+#include <error_codes.h>
 
 #include <cpprest/json.h>
 using namespace web;
@@ -10,47 +12,22 @@ using namespace web;
 using comhost::clsid_map_entry;
 using comhost::clsid_map;
 
-#ifdef _WIN32
-bool GetModuleFileNameWrapper(HMODULE hModule, pal::string_t* recv);
-#endif
+bool GetModuleHandleFromAddress(void *addr, HMODULE *hModule);
 
 namespace
 {
     pal::dll_t get_current_module()
     {
-#ifdef _WIN32
         HMODULE hmod = nullptr;
-        BOOL res = ::GetModuleHandleExW(
-            GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-            reinterpret_cast<LPCWSTR>(&get_current_module),
-            &hmod);
-        assert(res != FALSE);
-        return hmod;
+        bool res = GetModuleHandleFromAddress(&get_current_module, &hmod);
+        assert(res);
+        (void)res;
 
-#else
-        return nullptr;
-
-#endif
-    }
-
-    pal::string_t get_current_module_name()
-    {
-#ifdef _WIN32
-        HMODULE hmod = (HMODULE)get_current_module();
-        if (hmod != nullptr)
-        {
-            pal::string_t name;
-            if (GetModuleFileNameWrapper(hmod, &name))
-                return name;
-        }
-#endif
-
-        return {};
+        return (pal::dll_t)hmod;
     }
 
     HRESULT string_to_clsid(_In_ const pal::string_t &str, _Out_ CLSID &clsid)
     {
-#ifdef _WIN32
         // If the first character of the GUID is not '{' then COM will
         // attempt to look up the string in the CLSID table.
         if (str[0] == _X('{'))
@@ -58,17 +35,26 @@ namespace
             if (SUCCEEDED(::CLSIDFromString(str.data(), &clsid)))
                 return S_OK;
         }
-#endif
 
         return __HRESULT_FROM_WIN32(ERROR_INVALID_DATA);
     }
 
-    clsid_map parse_stream(_In_ pal::istream_t &json_map_raw)
+    clsid_map parse_stream(_Inout_ pal::istream_t &json_map_raw)
     {
-        // [TODO] handle BOM
+        skip_utf8_bom(&json_map_raw);
 
         // Parse JSON
-        json::value json_map = json::value::parse(json_map_raw);
+        json::value json_map;
+        try
+        {
+            json_map = json::value::parse(json_map_raw);
+        }
+        catch (const json::json_exception&)
+        {
+            trace::error(_X("Embedded .clsidmap format is invalid"));
+            throw HResultException{ StatusCode::InvalidConfigFile };
+        }
+
         json::object &json_obj = json_map.as_object();
 
         // Process JSON and construct a map
@@ -108,37 +94,32 @@ namespace
 
     clsid_map get_json_map_from_resource()
     {
-#ifdef _WIN32
         HMODULE hmod = (HMODULE)get_current_module();
-        if (hmod != nullptr)
-        {
-            // [TODO] Load resource properly
-            HRSRC resHandle = ::FindResourceW(hmod, MAKEINTRESOURCEW(27), MAKEINTRESOURCEW(72));
-            if (resHandle == nullptr)
-                return {};
+        if (hmod == nullptr)
+            return{};
 
-            DWORD size = ::SizeofResource(hmod, resHandle);
-            HGLOBAL resData = ::LoadResource(hmod, resHandle);
-            if (resData == nullptr || size == 0)
-                return {}; // [TODO] Throw error
+        HRSRC resHandle = ::FindResourceW(hmod, MAKEINTRESOURCEW(RESOURCEID_CLSIDMAP), MAKEINTRESOURCEW(RESOURCETYPE_CLSIDMAP));
+        if (resHandle == nullptr)
+            return {};
 
-            LPVOID data = ::LockResource(resData);
-            if (data == nullptr)
-                return {}; // [TODO] Throw error
+        DWORD size = ::SizeofResource(hmod, resHandle);
+        HGLOBAL resData = ::LoadResource(hmod, resHandle);
+        if (resData == nullptr || size == 0)
+            throw HResultException{ HRESULT_FROM_WIN32(::GetLastError()) };
 
-            memory_buffer resourceBuffer{ size, data };
-            pal::istream_t stream{ &resourceBuffer };
-            return parse_stream(stream);
-        }
-#endif
+        LPVOID data = ::LockResource(resData);
+        if (data == nullptr)
+            throw HResultException{ E_UNEXPECTED }; // This should never happen in Windows 7+
 
-        return{};
+        memory_buffer resourceBuffer{ size, data };
+        pal::istream_t stream{ &resourceBuffer };
+        return parse_stream(stream);
     }
 
     clsid_map get_json_map_from_file()
     {
-        pal::string_t map_file_name = get_current_module_name();
-        if (map_file_name.size() > 0)
+        pal::string_t map_file_name;
+        if (pal::get_own_module_path(&map_file_name))
         {
             map_file_name += _X(".clsidmap");
             if (pal::file_exists(map_file_name))

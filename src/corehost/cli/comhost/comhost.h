@@ -9,14 +9,24 @@
 #include <cassert>
 
 #define RETURN_IF_FAILED(exp) { hr = (exp); if (FAILED(hr)) { assert(false && #exp); return hr; } }
-#define RETURN_OOM_IF_BADALLOC(exp) try { exp; } catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
+
+struct HResultException
+{
+    HRESULT hr;
+};
+
+#define RETURN_HRESULT_IF_EXCEPT(exp) try { exp; } catch (const HResultException &e) { return e.hr; } catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
+
+// [TODO] Properly define this convention
+#define RESOURCEID_CLSIDMAP 64
+#define RESOURCETYPE_CLSIDMAP 1024
 
 namespace std
 {
     template<>
     struct less<CLSID>
     {
-        constexpr bool operator()(const CLSID& l, const CLSID& r) const
+        bool operator()(const CLSID& l, const CLSID& r) const
         {
             return ::memcmp(&l, &r, sizeof(CLSID)) < 0;
         }
