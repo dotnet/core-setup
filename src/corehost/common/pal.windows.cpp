@@ -5,7 +5,7 @@
 #include "trace.h"
 #include "utils.h"
 #include "longfile.h"
-
+#include <winreg.h>
 #include <cassert>
 #include <locale>
 #include <codecvt>
