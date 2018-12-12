@@ -246,7 +246,7 @@ bool pal::get_default_installation_dir(pal::string_t* recv)
 
 bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
 {
-	recv->clear();
+    recv->clear();
 
     DWORD size = 0;
     const HKEY hkey = HKEY_LOCAL_MACHINE;
@@ -277,8 +277,7 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
         return false;
     }
 
-    pal::char_t* text(buffer.data());
-    recv->assign(text);
+    recv->assign(buffer.data());
 
     return true;
 }
