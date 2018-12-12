@@ -204,22 +204,22 @@ bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* dirs)
 {
     pal::string_t default_dir;
     pal::string_t custom_dir;
-    bool gdir_found = false;
+    bool dir_found = false;
     if (get_sdk_self_registered_dir(&custom_dir))
     {
         dirs->push_back(custom_dir);
-        gdir_found = true;
+        dir_found = true;
     }
     if (get_default_installation_dir(&default_dir))
     {
         // Avoid duplicate global dirs.
-        if (!gdir_found || !pal::are_paths_equal_with_normalized_casing(custom_dir, default_dir))
+        if (!dir_found || !pal::are_paths_equal_with_normalized_casing(custom_dir, default_dir))
         {
             dirs->push_back(default_dir);
-            gdir_found = true;
+            dir_found = true;
         }
     }
-    return gdir_found;
+    return dir_found;
 }
 
 bool pal::get_default_installation_dir(pal::string_t* recv)
@@ -246,9 +246,11 @@ bool pal::get_default_installation_dir(pal::string_t* recv)
 
 bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
 {
+	recv->clear();
+
     DWORD size = 0;
     const HKEY hkey = HKEY_LOCAL_MACHINE;
-	// The registry search occurs in the 32-bit registry in all cases.
+    // The registry search occurs in the 32-bit registry in all cases.
     const DWORD flags = RRF_RT_REG_SZ | RRF_SUBKEY_WOW6432KEY;
 
     //TODO: Use the get_arch() method here; includes arm & arm64
@@ -269,14 +271,13 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
 
     // Get the key's value
     std::vector<wchar_t> buffer(size/sizeof(wchar_t));
-    result = ::RegGetValueW( hkey, sub_key, value, flags, nullptr, &buffer[0], &size);
+    result = ::RegGetValueW(hkey, sub_key, value, flags, nullptr, &buffer[0], &size);
     if (result != ERROR_SUCCESS)
     {
         return false;
     }
 
     pal::char_t* text(buffer.data());
-    recv->clear();
     recv->assign(text);
 
     return true;
