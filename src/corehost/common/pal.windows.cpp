@@ -5,7 +5,7 @@
 #include "trace.h"
 #include "utils.h"
 #include "longfile.h"
-#include <winreg.h>
+
 #include <cassert>
 #include <locale>
 #include <codecvt>
@@ -245,6 +245,10 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
 {
     DWORD size = 0;
     const HKEY hkey = HKEY_LOCAL_MACHINE;
+	// The registry search occurs in the 32-bit registry in all cases.
+#if not defined(RRF_SUBKEY_WOW6432KEY)
+    #define RRF_SUBKEY_WOW6432KEY  0x00020000
+#endif
     const DWORD flags = RRF_RT_REG_SZ | RRF_SUBKEY_WOW6432KEY;
 
     //TODO: Use the get_arch() method here; includes arm & arm64
