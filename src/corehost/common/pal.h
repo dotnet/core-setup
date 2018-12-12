@@ -221,7 +221,7 @@ namespace pal
     bool get_global_dotnet_dirs(std::vector<pal::string_t>* recv);
 
     bool get_default_installation_dir(pal::string_t* recv);
-	bool get_sdk_self_registered_dir(pal::string_t* recv);
+    bool get_sdk_self_registered_dir(pal::string_t* recv);
     bool get_default_breadcrumb_store(string_t* recv);
     bool is_path_rooted(const string_t& path);
 
