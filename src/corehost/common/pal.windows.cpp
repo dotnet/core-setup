@@ -246,6 +246,11 @@ bool pal::get_default_installation_dir(pal::string_t* recv)
 
 bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
 {
+#if _TARGET_ARM_
+    //  Self-registered SDK installation directory is not supported for win-arm
+    return false;
+#else
+
     recv->clear();
 
     DWORD size = 0;
@@ -253,11 +258,15 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
     // The registry search occurs in the 32-bit registry in all cases.
     const DWORD flags = RRF_RT_REG_SZ | RRF_SUBKEY_WOW6432KEY;
 
-    //TODO: Use the get_arch() method here; includes arm & arm64
-#if defined(_TARGET_AMD64_)
+    //TODO: Use the get_arch() method here
+#if _TARGET_AMD64_
     const pal::char_t* sub_key = _X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\x64\\sdk");
-#else
+#elif _TARGET_X86_
     const pal::char_t* sub_key = _X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\x86\\sdk");
+#elif _TARGET_ARM64_
+    const pal::char_t* sub_key = _X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\arm64\\sdk");
+#else
+#error "Unknown target"
 #endif
 
     pal::char_t* value = _X("InstallLocation");
@@ -280,6 +289,7 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
     recv->assign(buffer.data());
 
     return true;
+#endif
 }
 
 // To determine the OS version, we are going to use RtlGetVersion API
