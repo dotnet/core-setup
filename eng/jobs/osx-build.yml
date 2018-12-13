@@ -1,0 +1,50 @@
+parameters:
+  pool: {}
+  variables: {}
+jobs:
+- job: OSX
+  pool: ${{ parameters.pool }}
+  strategy: ${{ parameters.strategy }}
+  variables: 
+    SourcesDirectory: '$(Build.SourcesDirectory)'
+  steps:
+
+  - script: $(SourcesDirectory)/build.sh
+      -OfficialBuildId=$(OfficialBuildId) 
+      -ConfigurationGroup=$(_BuildConfiguration) 
+      $(_AdditionalBuildArguments)
+      -- $(_AdditionalMSBuildArguments) 
+    displayName: Build 
+    condition: succeeded()
+
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - script: $(SourcesDirectory)/Tools/msbuild.sh
+        $(SourcesDirectory)/publish/publish.proj
+        $(_CommonPublishArgs)
+        /p:PublishType=$(PublishType)
+        /p:TargetArchitecture=$(_TargetArchitecture) 
+        /p:ConfigurationGroup=$(_BuildConfiguration) 
+        /p:PortableBuild=$(_PortableBuild) 
+        /p:OSGroup=OSX 
+        $(_AdditionalMSBuildArguments)  
+      displayName: Publish 
+      condition: and(succeeded(), eq(variables._BuildConfiguration, 'Release'))
+
+  - task: CopyFiles@2
+    displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: |
+        *.log
+        *.binlog
+      TargetFolder: '$(Build.StagingDirectory)\BuildLogs'
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact BuildLogs
+    inputs:
+      PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
+      ArtifactName: $(Agent.Os)_$(Agent.JobName)
+    continueOnError: true
+    condition: succeededOrFailed()
+  

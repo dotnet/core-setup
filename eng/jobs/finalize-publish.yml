@@ -1,0 +1,94 @@
+parameters:
+  Jobs: []
+jobs:
+- ${{ each job in parameters.Jobs }}: 
+  - job: ${{ job.displayName }}
+    displayName: ${{ job.displayName }}
+    # Run only if all build legs succeeded
+    condition: and(succeeded('Linux_x64_glibc'),
+                  succeeded('Linux_Arm64'),
+                  succeeded('Linux_Arm'),
+                  succeeded('Linux_x64_Alpine36'),
+                  succeeded('Linux_x64_Rhel6'),
+                  succeeded('Windows_x64'),
+                  succeeded('Windows_x86'),
+                  succeeded('Windows_Arm'),
+                  succeeded('Windows_Arm64'),
+                  notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest'))
+    # Run after all dependent legs are executed
+    dependsOn: ${{ job.dependsOn }}
+    pool: ${{ job.pool }}
+    variables: 
+      ${{ insert }}: ${{ job.variables }}
+    steps:
+
+    # Initialize tooling
+    - script: build.cmd
+        -- /t:BuildTraversalBuildDependencies
+      displayName: Initialize tooling
+      condition: succeeded()
+
+    - task: MicroBuildSigningPlugin@2
+      displayName: Install MicroBuild plugin for Signing
+      inputs:
+        signType: $(SignType)
+        zipSources: false
+        feedSource: https://dnceng.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json
+      continueOnError: false
+      condition: and(succeeded(), in(variables['SignType'], 'real', 'test'))
+
+    - task: MSBuild@1
+      displayName: Publish (no PublishType)
+      inputs: 
+        solution: $(Build.SourcesDirectory)\publish\publish.proj
+        platform: $(_TargetArchitecture)
+        configuration: $(_BuildConfiguration)
+        msbuildVersion: 15.0
+        msbuildArchitecture: $(_TargetArchitecture)
+        msbuildArguments: '/p:Finalize=true 
+        /p:OfficialPublish=true 
+        /p:PublishType=$(PublishType) 
+        /p:SignType=$(SignType) 
+        /p:StabilizePackageVersion=$(IsStable) 
+        /p:TargetArchitecture=$(_TargetArchitecture) 
+        $(_BlobFeedArgs) 
+        $(_CommonPublishArgs) 
+        $(_NugetFeedArgs) 
+        $(_SymbolServerArgs) 
+        /flp:v=diag;LogFile=$(Build.SourcesDirectory)\\finalizepublish.log'
+      condition: and(succeeded(), eq(variables.PublishType, 'nopublishtype'), eq(variables._BuildConfiguration, 'Release'))
+
+    - task: CopyFiles@2
+      displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: |
+          *.log
+          *.binlog
+        TargetFolder: '$(Build.StagingDirectory)\BuildLogs'
+      continueOnError: true
+      condition: succeededOrFailed()
+
+    - task: CopyFiles@2
+      displayName: Copy Manifest file
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)/artifacts/log/AssetManifest'
+        TargetFolder: '$(Build.StagingDirectory)/AssetManifests'
+      continueOnError: true
+      condition: succeededOrFailed()
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Artifact BuildLogs
+      inputs:
+        PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
+        ArtifactName: ${{ job.displayName }}
+      condition: succeededOrFailed()
+
+    - task: PublishBuildArtifacts@1
+      displayName: Push Asset Manifests
+      inputs:
+        PathtoPublish: '$(Build.StagingDirectory)/AssetManifests'
+        PublishLocation: Container
+        ArtifactName: AssetManifests
+      continueOnError: true
+      condition: succeededOrFailed()

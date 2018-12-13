@@ -1,0 +1,46 @@
+parameters:
+  pool: {}
+  dependsOn: {}
+jobs:
+- job: Signing_Validation
+  # Run only if all build legs succeeded
+  condition: and(succeeded('Linux_x64_glibc'),
+                succeeded('Linux_Arm64'),
+                succeeded('Linux_Arm'),
+                succeeded('Linux_x64_Alpine36'),
+                succeeded('Linux_x64_Rhel6'),
+                succeeded('Windows_x64'),
+                succeeded('Windows_x86'),
+                succeeded('Windows_Arm'),
+                succeeded('Windows_Arm64'),
+                notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest'))
+  # Run after all dependent legs are executed
+  dependsOn: ${{ parameters.dependsOn }}
+  pool: ${{ parameters.pool }}
+  steps:
+
+  - script: build.cmd
+      -signing-validation 
+      -- '$(_CommonPublishArgs)
+      /p:OfficialBuildId=$(OfficialBuildId)
+      /flp:v=detailed
+      /p:SignType=$(SignType)
+      /p:StabilizePackageVersion=$(IsStable)'
+  
+  - task: CopyFiles@2
+    displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: |
+        *.log
+        Bin\SigningValidation\Logs\**
+      TargetFolder: '$(Build.StagingDirectory)\BuildLogs'
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact BuildLogs
+    inputs:
+      PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
+      ArtifactName: $(Agent.JobName)
+    continueOnError: true
+    condition: succeededOrFailed()
