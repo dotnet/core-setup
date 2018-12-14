@@ -72,7 +72,7 @@ The producer of `StartupHook.dll` needs to ensure that
 main application's deps.json, since those dependencies are put on the 
 Trusted Platform Assemblies (TPA) list during the runtime startup, 
 before `StartupHook.dll` is loaded. This means that `StartupHook.dll` 
-needs to built against the same or lower version of .NET Core than the app.
+needs to be built against the same or lower version of .NET Core than the app.
 
 ## Example
 
