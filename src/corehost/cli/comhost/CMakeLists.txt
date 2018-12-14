@@ -49,4 +49,10 @@ add_definitions(-DEXPORT_SHARED_API=1)
 add_definitions(-DFEATURE_LIBHOST=1)
 
 add_library(comhost SHARED ${SOURCES})
+
+# Specify non-default Windows libs to be used for Arm/Arm64 builds
+if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))
+    target_link_libraries(comhost Advapi32.lib Ole32.lib)
+endif()
+
 install_library_and_symbols (comhost)
