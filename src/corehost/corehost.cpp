@@ -377,8 +377,8 @@ int exe_start(const int argc, const pal::char_t* argv[])
         return StatusCode::InvalidArgFailure;
     }
 
-    app_root.assign(get_directory(host_path));
-    app_path.assign(app_root);
+    app_root.assign(host_path);
+    app_path.assign(get_directory(app_root));
     append_path(&app_path, own_name.c_str());
     app_path.append(_X(".dll"));
 #endif
