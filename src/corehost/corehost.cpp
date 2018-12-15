@@ -7,6 +7,10 @@
 #include "trace.h"
 #include "utils.h"
 
+#if defined(_WIN32)
+#include "psapi.h"
+#endif
+
 #if FEATURE_APPHOST
 #define CURHOST_TYPE    _X("apphost")
 #define CUREXE_PKG_VER APPHOST_PKG_VER
@@ -333,6 +337,51 @@ void buffering_trace_writer(const pal::char_t* message)
 {
     g_buffered_errors.append(message).append(_X("\n"));
 }
+
+// Determines if the current module (should be the apphost.exe) is marked as Windows GUI application
+// in case it's not a GUI application (so should be CUI) or in case of any error the function returns false.
+bool get_windows_graphical_user_interface_bit()
+{
+    // The first two bytes of a PE file are a constant signature.
+    const UINT16 PEFileSignature = 0x5A4D;
+
+    // The offset of the PE header pointer in the DOS header.
+    const int PEHeaderPointerOffset = 0x3C;
+
+    // The offset of the Subsystem field in the PE header.
+    const int SubsystemOffset = 0x5C;
+
+    // The value of the sybsystem field which indicates Windows GUI (Graphical UI)
+    const UINT16 WindowsGUISubsystem = 0x2;
+
+    HMODULE module = ::GetModuleHandleW(NULL);
+    MODULEINFO module_info;
+    if (!::GetModuleInformation(::GetCurrentProcess(), module, &module_info, sizeof(module_info)))
+    {
+        return false;
+    }
+
+    BYTE *bytes = static_cast<BYTE *>(module_info.lpBaseOfDll);
+    UINT32 size = module_info.SizeOfImage;
+
+    // https://en.wikipedia.org/wiki/Portable_Executable
+    // Validate that we're looking at Windows PE file
+    if (((UINT16*)bytes)[0] != PEFileSignature || size < PEHeaderPointerOffset + sizeof(UINT32))
+    {
+        return false;
+    }
+
+    UINT32 pe_header_offset = *((UINT32*)(bytes + PEHeaderPointerOffset));
+    if (size < pe_header_offset + SubsystemOffset + sizeof(UINT16))
+    {
+        return false;
+    }
+
+    UINT16* subsystem = ((UINT16*)(bytes + pe_header_offset + SubsystemOffset));
+
+    return subsystem[0] == WindowsGUISubsystem;
+}
+
 #endif
 
 #if defined(_WIN32)
@@ -354,13 +403,9 @@ int main(const int argc, const pal::char_t* argv[])
     }
 
 #if defined(_WIN32) && defined(FEATURE_APPHOST)
-    // Detect if the process has console
-    // Note that this will fail even if a GUI process has STDOUT redirected. So this pretty effectively detects
-    // if the process is a GUI process without a console window.
-    HANDLE con_out = ::CreateFileW(L"CONOUT$", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
-    if (con_out == INVALID_HANDLE_VALUE)
+    if (get_windows_graphical_user_interface_bit())
     {
-        // If there's no console, buffer errors to display them later. Without this any errors are effectively lost
+        // If this is a GUI application, buffer errors to display them later. Without this any errors are effectively lost
         // unless the caller explicitly redirects stderr. This leads to bad experience of running the GUI app and nothing happening.
         trace::set_error_writer(buffering_trace_writer);
     }
