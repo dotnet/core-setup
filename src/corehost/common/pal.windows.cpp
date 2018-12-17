@@ -267,7 +267,7 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
     }
 
     // Get the key's value
-    std::vector<wchar_t> buffer(size/sizeof(wchar_t));
+    std::vector<pal::char_t> buffer(size/sizeof(pal::char_t));
     result = ::RegGetValueW(hkey, sub_key.c_str(), value, flags, nullptr, &buffer[0], &size);
     if (result != ERROR_SUCCESS)
     {
