@@ -4,4 +4,12 @@
     <VersionPrefix>1.0.0</VersionPrefix>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
   </PropertyGroup>
+  <!--Package versions-->
+  <PropertyGroup>
+    <NETStandardLibraryPackageVersion>2.1.0-prerelease.18617.1</NETStandardLibraryPackageVersion>
+  </PropertyGroup>
+  <!--Package names-->
+  <PropertyGroup>
+    <NETStandardLibraryPackage>NETStandard.Library</NETStandardLibraryPackage>
+  </PropertyGroup>
 </Project>

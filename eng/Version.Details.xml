@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <ProductDependencies></ProductDependencies>
+  <ProductDependencies>
+    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.18617.1">
+      <Uri>https://github.com/dotnet/standard</Uri>
+      <Sha>5402fbf8671fd92364d5d6e4178b392ca9b2f96f</Sha>
+    </Dependency>
+  </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.18616.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
