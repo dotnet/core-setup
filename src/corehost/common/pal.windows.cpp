@@ -250,29 +250,17 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
     //  Self-registered SDK installation directory is not supported for win-arm
     return false;
 #else
-
     recv->clear();
 
     DWORD size = 0;
     const HKEY hkey = HKEY_LOCAL_MACHINE;
     // The registry search occurs in the 32-bit registry in all cases.
     const DWORD flags = RRF_RT_REG_SZ | RRF_SUBKEY_WOW6432KEY;
-
-    //TODO: Use the get_arch() method here
-#if _TARGET_AMD64_
-    const pal::char_t* sub_key = _X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\x64\\sdk");
-#elif _TARGET_X86_
-    const pal::char_t* sub_key = _X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\x86\\sdk");
-#elif _TARGET_ARM64_
-    const pal::char_t* sub_key = _X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\arm64\\sdk");
-#else
-#error "Unknown target"
-#endif
-
+	pal::string_t sub_key = pal::string_t(_X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\")) + get_arch() + pal::string_t(_X("\\sdk"));
     pal::char_t* value = _X("InstallLocation");
 
     // Determine the size of the buffer
-    LONG result = ::RegGetValueW(hkey, sub_key, value, flags, nullptr, nullptr, &size);
+    LONG result = ::RegGetValueW(hkey, sub_key.c_str(), value, flags, nullptr, nullptr, &size);
     if (result != ERROR_SUCCESS || size == 0)
     {
         return false;
@@ -280,7 +268,7 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
 
     // Get the key's value
     std::vector<wchar_t> buffer(size/sizeof(wchar_t));
-    result = ::RegGetValueW(hkey, sub_key, value, flags, nullptr, &buffer[0], &size);
+    result = ::RegGetValueW(hkey, sub_key.c_str(), value, flags, nullptr, &buffer[0], &size);
     if (result != ERROR_SUCCESS)
     {
         return false;
