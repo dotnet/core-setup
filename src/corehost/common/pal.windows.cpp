@@ -256,7 +256,7 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
     const HKEY hkey = HKEY_LOCAL_MACHINE;
     // The registry search occurs in the 32-bit registry in all cases.
     const DWORD flags = RRF_RT_REG_SZ | RRF_SUBKEY_WOW6432KEY;
-	pal::string_t sub_key = pal::string_t(_X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\")) + get_arch() + pal::string_t(_X("\\sdk"));
+    pal::string_t sub_key = pal::string_t(_X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\")) + get_arch() + pal::string_t(_X("\\sdk"));
     pal::char_t* value = _X("InstallLocation");
 
     // Determine the size of the buffer
