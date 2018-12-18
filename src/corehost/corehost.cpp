@@ -330,7 +330,7 @@ int run(const int argc, const pal::char_t* argv[])
     return rc;
 }
 
-#if defined(_WIN32) && defined(FEATURE_APPHOST)
+#if defined(_WIN32)// && defined(FEATURE_APPHOST)
 pal::string_t g_buffered_errors;
 
 void buffering_trace_writer(const pal::char_t* message)
@@ -342,18 +342,6 @@ void buffering_trace_writer(const pal::char_t* message)
 // in case it's not a GUI application (so should be CUI) or in case of any error the function returns false.
 bool get_windows_graphical_user_interface_bit()
 {
-    // The first two bytes of a PE file are a constant signature.
-    const UINT16 PEFileSignature = 0x5A4D;
-
-    // The offset of the PE header pointer in the DOS header.
-    const int PEHeaderPointerOffset = 0x3C;
-
-    // The offset of the Subsystem field in the PE header.
-    const int SubsystemOffset = 0x5C;
-
-    // The value of the sybsystem field which indicates Windows GUI (Graphical UI)
-    const UINT16 WindowsGUISubsystem = 0x2;
-
     HMODULE module = ::GetModuleHandleW(NULL);
     MODULEINFO module_info;
     if (!::GetModuleInformation(::GetCurrentProcess(), module, &module_info, sizeof(module_info)))
@@ -366,20 +354,20 @@ bool get_windows_graphical_user_interface_bit()
 
     // https://en.wikipedia.org/wiki/Portable_Executable
     // Validate that we're looking at Windows PE file
-    if (((UINT16*)bytes)[0] != PEFileSignature || size < PEHeaderPointerOffset + sizeof(UINT32))
+    if (((UINT16*)bytes)[0] != IMAGE_DOS_SIGNATURE || size < IMAGE_DOS_SIGNATURE + sizeof(UINT32))
     {
         return false;
     }
 
-    UINT32 pe_header_offset = *((UINT32*)(bytes + PEHeaderPointerOffset));
-    if (size < pe_header_offset + SubsystemOffset + sizeof(UINT16))
+    UINT32 pe_header_offset = ((IMAGE_DOS_HEADER *)bytes)->e_lfanew;
+    if (size < pe_header_offset + sizeof(IMAGE_NT_HEADERS))
     {
         return false;
     }
 
-    UINT16* subsystem = ((UINT16*)(bytes + pe_header_offset + SubsystemOffset));
+    UINT16 subsystem = ((IMAGE_NT_HEADERS *)(bytes + pe_header_offset))->OptionalHeader.Subsystem;
 
-    return subsystem[0] == WindowsGUISubsystem;
+    return subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI;
 }
 
 #endif
