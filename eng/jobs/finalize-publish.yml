@@ -1,25 +1,43 @@
 parameters:
-  Jobs: []
+  _PublishType: {}
 jobs:
-- ${{ each job in parameters.Jobs }}: 
-  - job: ${{ job.displayName }}
-    displayName: ${{ job.displayName }}
+  - job: Finalize_Publish
+    displayName: Finalize_Publish
     # Run only if all build legs succeeded
-    condition: and(succeeded('Linux_x64_glibc'),
-                  succeeded('Linux_Arm64'),
-                  succeeded('Linux_Arm'),
-                  succeeded('Linux_x64_Alpine36'),
-                  succeeded('Linux_x64_Rhel6'),
-                  succeeded('Windows_x64'),
-                  succeeded('Windows_x86'),
-                  succeeded('Windows_Arm'),
-                  succeeded('Windows_Arm64'),
-                  notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest'))
+    condition: and(succeeded('Build_Linux_x64_glibc'),
+                  succeeded('Build_Linux_Arm64'),
+                  succeeded('Build_Linux_Arm'),
+                  succeeded('Build_Linux_x64_Alpine36'),
+                  succeeded('Build_Linux_x64_Rhel6'),
+                  succeeded('Build_OSX'),
+                  succeeded('Build_Windows_x64'),
+                  succeeded('Build_Windows_x86'),
+                  succeeded('Build_Windows_Arm'),
+                  succeeded('Build_Windows_Arm64'),
+                  ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'))
     # Run after all dependent legs are executed
-    dependsOn: ${{ job.dependsOn }}
-    pool: ${{ job.pool }}
-    variables: 
-      ${{ insert }}: ${{ job.variables }}
+    dependsOn: 
+      - Build_Linux_x64_glibc
+      - Build_Linux_Arm64
+      - Build_Linux_Arm
+      - Build_Linux_x64_Alpine36
+      # - Build_Linux_x64_FreeBSD
+      - Build_Linux_x64_Rhel6
+      - Build_Windows_x64
+      - Build_Windows_x86
+      - Build_Windows_Arm
+      - Build_Windows_Arm64
+      - Build_OSX
+    pool:
+      # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
+      # Will eventually change this to two BYOC pools.
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        name: NetCorePublic-Int-Pool
+        queue: Windows.10.Amd64.Open
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        name: dotnet-internal-temp
+    variables:
+      _PublishType: ${{ parameters._PublishType}}
     steps:
 
     # Initialize tooling
@@ -41,22 +59,22 @@ jobs:
       displayName: Publish (no PublishType)
       inputs: 
         solution: $(Build.SourcesDirectory)\publish\publish.proj
-        platform: $(_TargetArchitecture)
-        configuration: $(_BuildConfiguration)
+        platform: x64
+        configuration: Release
         msbuildVersion: 15.0
-        msbuildArchitecture: $(_TargetArchitecture)
+        msbuildArchitecture: x64
         msbuildArguments: '/p:Finalize=true 
         /p:OfficialPublish=true 
-        /p:PublishType=$(PublishType) 
+        /p:PublishType=nopublishtype 
         /p:SignType=$(SignType) 
         /p:StabilizePackageVersion=$(IsStable) 
-        /p:TargetArchitecture=$(_TargetArchitecture) 
+        /p:TargetArchitecture=x64
         $(_BlobFeedArgs) 
         $(_CommonPublishArgs) 
         $(_NugetFeedArgs) 
         $(_SymbolServerArgs) 
-        /flp:v=diag;LogFile=$(Build.SourcesDirectory)\\finalizepublish.log'
-      condition: and(succeeded(), eq(variables.PublishType, 'nopublishtype'), eq(variables._BuildConfiguration, 'Release'))
+        /bl:$(Build.SourcesDirectory)\finalizepublish.binlog'
+      condition: and(succeeded(), eq(variables._PublishType, 'nopublishtype'))
 
     - task: CopyFiles@2
       displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
@@ -81,7 +99,7 @@ jobs:
       displayName: Publish Artifact BuildLogs
       inputs:
         PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
-        ArtifactName: ${{ job.displayName }}
+        ArtifactName: Finalize_Publish
       condition: succeededOrFailed()
 
     - task: PublishBuildArtifacts@1

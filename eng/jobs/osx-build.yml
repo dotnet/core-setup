@@ -1,34 +1,41 @@
-parameters:
-  pool: {}
-  variables: {}
 jobs:
-- job: OSX
-  pool: ${{ parameters.pool }}
-  strategy: ${{ parameters.strategy }}
-  variables: 
-    SourcesDirectory: '$(Build.SourcesDirectory)'
+- job: Build_OSX
+  pool:
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: Hosted macOS
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: Hosted Mac internal
+  strategy:
+    matrix: 
+      debug:
+        _BuildConfig: Debug
+        _PublishType: none
+      release:
+        _BuildConfig: Release
+        _PublishType: blob
   steps:
-
-  - script: $(SourcesDirectory)/build.sh
-      -OfficialBuildId=$(OfficialBuildId) 
-      -ConfigurationGroup=$(_BuildConfiguration) 
-      $(_AdditionalBuildArguments)
-      -- $(_AdditionalMSBuildArguments) 
+  - script: $(Build.SourcesDirectory)/build.sh
+      -OfficialBuildId=$(OfficialBuildId)
+      -ConfigurationGroup=$(_BuildConfig)
+      -PortableBuild=true
+      -strip-symbols
+      -SkipTests=$(SkipTests)
+      -- /p:StabilizePackageVersion=$(IsStable)
     displayName: Build 
     condition: succeeded()
 
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    - script: $(SourcesDirectory)/Tools/msbuild.sh
-        $(SourcesDirectory)/publish/publish.proj
+    - script: $(Build.SourcesDirectory)/Tools/msbuild.sh
+        $(Build.SourcesDirectory)/publish/publish.proj
         $(_CommonPublishArgs)
-        /p:PublishType=$(PublishType)
-        /p:TargetArchitecture=$(_TargetArchitecture) 
-        /p:ConfigurationGroup=$(_BuildConfiguration) 
-        /p:PortableBuild=$(_PortableBuild) 
-        /p:OSGroup=OSX 
-        $(_AdditionalMSBuildArguments)  
+        /p:PublishType=$(_PublishType)
+        /p:TargetArchitecture=x64
+        /p:ConfigurationGroup=$(_BuildConfig)
+        /p:PortableBuild=true
+        /p:OSGroup=OSX
+        /p:StabilizePackageVersion=$(IsStable)
       displayName: Publish 
-      condition: and(succeeded(), eq(variables._BuildConfiguration, 'Release'))
+      condition: and(succeeded(), eq(variables._BuildConfig, 'Release'))
 
   - task: CopyFiles@2
     displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs

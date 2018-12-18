@@ -1,29 +1,73 @@
 parameters:
-  Jobs: []
-
+  additionalMSBuildArgs: ''
+  additionalRunArgs: ''
+  crossBuild: false 
+  displayName: null
+  dockerImage: null
+  osGroup: Linux
+  packageDistroListDeb: null
+  packageDistroListRpm: null
+  skipTests: $(SkipTests)
+  strategy:
+    matrix: 
+      debug:
+        _BuildConfig: Debug
+        _PublishType: none
+      release:
+        _BuildConfig: Release
+        _PublishType: blob
+  targetArchitecture: x64
 jobs:
-- ${{ each job in parameters.Jobs }}: 
-  - job: ${{ job.displayName }}
-    displayName: ${{ job.displayName }}
-    pool: ${{ job.pool }}
-    strategy: ${{ job.strategy }}
-    variables: 
-      ${{ insert }}: ${{ job.variables }}
+  - job: ${{ parameters.displayName }}
+    displayName: ${{ parameters.displayName }}
+    pool:
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        name: dnceng-linux-external-temp
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        name: dnceng-linux-internal-temp
+    strategy: ${{ parameters.strategy }}
+    variables:
 
-      CommonMSBuildArgs: /flp:v=diag /clp:v=detailed 
-        /p:TargetArchitecture=x64
-        /p:PortableBuild=false
-        /p:ConfigurationGroup=$(_BuildConfiguration)
-        /p:OSGroup=Linux
-        /p:OfficialBuildId=$(OfficialBuildId)
+      ${{ if ne(parameters.displayName,'Build_Linux_x64_FreeBSD')}}:
+          RunArguments: docker run --privileged --rm
+            -v "$(Build.SourcesDirectory):/root/coresetup"
+            -w="/root/coresetup"
+            ${{ parameters.additionalRunArgs }}
+            ${{ parameters.dockerImage }}
+      
+      ${{ if eq(parameters.displayName,'Build_Linux_x64_FreeBSD')}}:
+          RunArguments: export DotNetBootstrapCliTarPath=/dotnet-sdk-freebsd-x64.tar &&
+
+      BuildArguments: -OfficialBuildId=$(OfficialBuildId)
+        -ConfigurationGroup=$(_BuildConfig)
+        -CrossBuild=${{ parameters.crossBuild }}
+        -PortableBuild=${{ parameters.portableBuild }}
+        -strip-symbols
+        -SkipTests=${{ parameters.skipTests }}
+        -TargetArchitecture=${{ parameters.targetArchitecture }}
+        -- /p:StabilizePackageVersion=$(IsStable)
+        ${{ parameters.additionalMSBuildArgs }}
+      
+      PublishArguments: /p:PublishType=$(_PublishType)
+        /p:ConfigurationGroup=$(_BuildConfig)
+        /p:OSGroup=${{ parameters.osGroup }}
+        /p:PortableBuild=${{ parameters.portableBuild }}
         /p:StabilizePackageVersion=$(IsStable)
+        /p:TargetArchitecture=${{ parameters.targetArchitecture }}
+         ${{ parameters.additionalMSBuildArgs }}
 
-      SourcesDirectory: '$(Build.SourcesDirectory)'
+      CommonMSBuildArgs: /bl
+        /p:ConfigurationGroup=$(_BuildConfig)
+        /p:OfficialBuildId=$(OfficialBuildId)
+        /p:OSGroup=${{ parameters.osGroup }}
+        /p:PortableBuild=false
+        /p:StabilizePackageVersion=$(IsStable)
+        /p:TargetArchitecture=${{ parameters.targetArchitecture }}
 
       # Packaging related variables
       # Debian
-      CommonDebianRunCommand: run --rm --name centos-7-d485f41-20173404063424ubuntu-14.04-debpkg-e5cf912-20175003025046 
-        -v $(SourcesDirectory):/root/coresetup
+      CommonDebianRunCommand: run 
+        -v $(Build.SourcesDirectory):/root/coresetup
         -v $(Build.StagingDirectory)/sharedFrameworkPublish/:/root/sharedFrameworkPublish/
         -w=/root/coresetup
         microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-debpkg-e5cf912-20175003025046
@@ -35,8 +79,8 @@ jobs:
         $(CommonMSBuildArgs)
 
       # RPM
-      CommonRpmRunCommand: run --rm --name centos-7-d485f41-20173404063424rhel-7-rpmpkg-c982313-20174116044113
-        -v $(SourcesDirectory):/root/coresetup
+      CommonRpmRunCommand: run
+        -v $(Build.SourcesDirectory):/root/coresetup
         -v $(Build.StagingDirectory)/sharedFrameworkPublish/:/root/sharedFrameworkPublish/
         -w=/root/coresetup
         microsoft/dotnet-buildtools-prereqs:rhel-7-rpmpkg-c982313-20174116044113
@@ -53,7 +97,7 @@ jobs:
         ./build.sh
         $(BuildArguments)
       displayName: Build
-      workingDirectory: '$(SourcesDirectory)'
+      workingDirectory: '$(Build.SourcesDirectory)'
 
     # Publish only if internal and not PR 
     - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
@@ -63,15 +107,15 @@ jobs:
           $(PublishArguments)
           $(_CommonPublishArgs)
         displayName: Publish
-        workingDirectory: '$(SourcesDirectory)'
-        condition: and(succeeded(), eq(variables._BuildConfiguration, 'Release'))
+        workingDirectory: '$(Build.SourcesDirectory)'
+        condition: and(succeeded(), eq(variables._BuildConfig, 'Release'))
 
     # Only for glibc leg, here we produce RPMs and Debs
-    - ${{ if eq(job.displayName,'Linux_x64_glibc')}}:
+    - ${{ if eq(parameters.displayName,'Build_Linux_x64_glibc')}}:
       - task: CopyFiles@2
         displayName: 'Copy built Portable linux-x64 binaries to staging directory'
         inputs:
-          SourceFolder: '$(SourcesDirectory)/bin/obj/linux-x64.$(_BuildConfiguration)/sharedFrameworkPublish'
+          SourceFolder: '$(Build.SourcesDirectory)/bin/obj/linux-x64.$(_BuildConfig)/sharedFrameworkPublish'
           TargetFolder: '$(Build.StagingDirectory)/sharedFrameworkPublish'
       - script: docker 
           $(CommonDebianRunCommand)
@@ -79,44 +123,44 @@ jobs:
           /t:BuildTraversalBuildDependencies
           $(CommonMSBuildArgs)
         displayName: Build traversal build dependencies - Ubuntu 14.04
-        workingDirectory: '$(SourcesDirectory)'
+        workingDirectory: '$(Build.SourcesDirectory)'
 
       # Debian packaging
       - script: docker 
           $(DebianPackagingCommand)
         displayName: 'Package Runtime packages and Runtime Dep - Ubuntu 14.04'
-        workingDirectory: '$(SourcesDirectory)'
+        workingDirectory: '$(Build.SourcesDirectory)'
 
       - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
         - script: docker
             $(CommonDebianRunCommand)
             /root/coresetup/publish/publish.proj
-            /p:PublishType=$(PublishType)
+            /p:PublishType=$(_PublishType)
             /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/
             $(CommonMSBuildArgs) 
             $(_CommonPublishArgs)
           displayName: 'Publish Runtime and Runtime Dep - Ubuntu 14.04'
-          workingDirectory: '$(SourcesDirectory)'
-          condition: and(succeeded(), eq(variables._BuildConfiguration, 'Release'))
+          workingDirectory: '$(Build.SourcesDirectory)'
+          condition: and(succeeded(), eq(variables._BuildConfig, 'Release'))
 
       # Package and publish for each debian distros
-      - ${{ each debdistrorid in job.packageDistroListDeb }}:
+      - ${{ each debdistrorid in parameters.packageDistroListDeb }}:
         - script: docker
             $(DebianPackagingCommand) /p:BuildRuntimeDebs=false
-            /p:OutputRid=${{ debdistrorid }}-$(_TargetArchitecture)
+            /p:OutputRid=${{ debdistrorid }}-${{ parameters.targetArchitecture }}
           displayName: 'Package Runtime Dep - ${{ debdistrorid }}'
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           - script: docker
               $(CommonDebianRunCommand)
               /root/coresetup/publish/publish.proj
-              /p:PublishType=$(PublishType)
+              /p:PublishType=$(_PublishType)
               /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/ 
               $(CommonMSBuildArgs)
               $(_CommonPublishArgs)
-              /p:OutputRid=${{ debdistrorid }}-$(_TargetArchitecture)
+              /p:OutputRid=${{ debdistrorid }}-${{ parameters.targetArchitecture }}
             displayName: 'Publish Runtime Dep - ${{ debdistrorid }}'
-            workingDirectory: '$(SourcesDirectory)'
-            condition: and(succeeded(), eq(variables._BuildConfiguration, 'Release'))
+            workingDirectory: '$(Build.SourcesDirectory)'
+            condition: and(succeeded(), eq(variables._BuildConfig, 'Release'))
 
       # RPM Packaging
       - script: docker
@@ -125,7 +169,7 @@ jobs:
           /t:BuildTraversalBuildDependencies
           $(CommonMSBuildArgs) 
         displayName: Build traversal build dependencies - Rhel7
-        workingDirectory: '$(SourcesDirectory)'
+        workingDirectory: '$(Build.SourcesDirectory)'
       - script: docker 
           $(RpmPackagingCommand)
         displayName: Package Runtime Dep - Rhel7
@@ -133,32 +177,32 @@ jobs:
         - script: docker 
             $(CommonRpmRunCommand) 
             /root/coresetup/publish/publish.proj
-            /p:PublishType=$(PublishType)
+            /p:PublishType=$(_PublishType)
             /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/
             $(CommonMSBuildArgs)
             $(_CommonPublishArgs)
           displayName: Publish Runtime Dep - Rhel7
-          workingDirectory: '$(SourcesDirectory)'
-          condition: and(succeeded(), eq(variables._BuildConfiguration, 'Release'))
+          workingDirectory: '$(Build.SourcesDirectory)'
+          condition: and(succeeded(), eq(variables._BuildConfig, 'Release'))
 
       # Package and publish for each rpm distros
-      - ${{ each rpmdistrorid in job.packageDistroListRpm }}: 
+      - ${{ each rpmdistrorid in parameters.packageDistroListRpm }}: 
         - script: docker 
             $(RpmPackagingCommand) /p:BuildRuntimeRpms=false
-            /p:OutputRid=${{ rpmdistrorid }}-$(_TargetArchitecture)
+            /p:OutputRid=${{ rpmdistrorid }}-${{ parameters.targetArchitecture }}
           displayName: 'Package Runtime Dep - ${{ rpmdistrorid }}'
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           - script: docker
               $(CommonRpmRunCommand)
               /root/coresetup/publish/publish.proj
-              /p:PublishType=$(PublishType)
+              /p:PublishType=$(_PublishType)
               /p:SharedFrameworkPublishDir=/root/sharedFrameworkPublish/
               $(CommonMSBuildArgs)
               $(_CommonPublishArgs)
-              /p:OutputRid=${{ rpmdistrorid }}-$(_TargetArchitecture)
+              /p:OutputRid=${{ rpmdistrorid }}-${{ parameters.targetArchitecture }}
             displayName: 'Publish Runtime Dep -${{ rpmdistrorid }}'
-            workingDirectory: '$(SourcesDirectory)'
-            condition: and(succeeded(), eq(variables._BuildConfiguration, 'Release'))
+            workingDirectory: '$(Build.SourcesDirectory)'
+            condition: and(succeeded(), eq(variables._BuildConfig, 'Release'))
     - task: CopyFiles@2
       displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
       inputs:
@@ -173,6 +217,11 @@ jobs:
       displayName: Publish Artifact BuildLogs
       inputs:
         PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
-        ArtifactName: ${{ job.displayName }}-$(_BuildConfiguration)
+        ArtifactName: ${{ parameters.displayName }}-$(_BuildConfig)
       continueOnError: true
+      condition: succeededOrFailed()
+
+    # Force clean up machine in case any docker images are left behind
+    - script: docker system prune -f
+      displayName: Run Docker clean up
       condition: succeededOrFailed()
