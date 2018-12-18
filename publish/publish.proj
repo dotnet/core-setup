@@ -305,7 +305,7 @@
     <ItemsToPush Include="@(_DownloadedAssets)"
                  Exclude="@(_DownloadedPackages)" />
     <ItemsToPush>
-        <RelativeBlobPath>assets/core-setup/$(InstallersRelativePath)/%(Filename)%(Extension)</RelativeBlobPath>
+        <RelativeBlobPath>assets/core-setup/$(InstallersRelativePath)%(Filename)%(Extension)</RelativeBlobPath>
     </ItemsToPush>
   </ItemGroup>
   <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"

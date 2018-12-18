@@ -6,7 +6,7 @@ variables:
     value: dotnet-core-acquisition
   # Skip Running CI tests
   - name: SkipTests
-    value: true
+    value: false
   # Set build as stable to remove build number from package names, used for milestone builds
   - name: IsStable
     value: false

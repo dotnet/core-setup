@@ -21,6 +21,7 @@ jobs:
       -strip-symbols
       -SkipTests=$(SkipTests)
       -- /p:StabilizePackageVersion=$(IsStable)
+      /bl:$(Build.SourcesDirectory)\build.binlog
     displayName: Build 
     condition: succeeded()
 
@@ -34,6 +35,7 @@ jobs:
         /p:PortableBuild=true
         /p:OSGroup=OSX
         /p:StabilizePackageVersion=$(IsStable)
+        /bl:$(Build.SourcesDirectory)\publish.binlog
       displayName: Publish 
       condition: and(succeeded(), eq(variables._BuildConfig, 'Release'))
 
