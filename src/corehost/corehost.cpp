@@ -7,10 +7,6 @@
 #include "trace.h"
 #include "utils.h"
 
-#if defined(_WIN32)
-#include "psapi.h"
-#endif
-
 #if FEATURE_APPHOST
 #define CURHOST_TYPE    _X("apphost")
 #define CUREXE_PKG_VER APPHOST_PKG_VER
@@ -330,7 +326,7 @@ int run(const int argc, const pal::char_t* argv[])
     return rc;
 }
 
-#if defined(_WIN32)// && defined(FEATURE_APPHOST)
+#if defined(_WIN32) && defined(FEATURE_APPHOST)
 pal::string_t g_buffered_errors;
 
 void buffering_trace_writer(const pal::char_t* message)
@@ -343,28 +339,10 @@ void buffering_trace_writer(const pal::char_t* message)
 bool get_windows_graphical_user_interface_bit()
 {
     HMODULE module = ::GetModuleHandleW(NULL);
-    MODULEINFO module_info;
-    if (!::GetModuleInformation(::GetCurrentProcess(), module, &module_info, sizeof(module_info)))
-    {
-        return false;
-    }
-
-    BYTE *bytes = static_cast<BYTE *>(module_info.lpBaseOfDll);
-    UINT32 size = module_info.SizeOfImage;
+    BYTE *bytes = (BYTE *)module;
 
     // https://en.wikipedia.org/wiki/Portable_Executable
-    // Validate that we're looking at Windows PE file
-    if (((UINT16*)bytes)[0] != IMAGE_DOS_SIGNATURE || size < IMAGE_DOS_SIGNATURE + sizeof(UINT32))
-    {
-        return false;
-    }
-
     UINT32 pe_header_offset = ((IMAGE_DOS_HEADER *)bytes)->e_lfanew;
-    if (size < pe_header_offset + sizeof(IMAGE_NT_HEADERS))
-    {
-        return false;
-    }
-
     UINT16 subsystem = ((IMAGE_NT_HEADERS *)(bytes + pe_header_offset))->OptionalHeader.Subsystem;
 
     return subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI;
