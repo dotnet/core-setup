@@ -710,7 +710,7 @@ std::vector<host_option> fx_muxer_t::get_known_opts(bool exec_mode, host_mode_t 
         // If mode=host_mode_t::apphost, these are only used when the app is framework-dependent.
         known_opts.push_back({ _X("--fx-version"), _X("<version>"), _X("Version of the installed Shared Framework to use to run the application.")});
         known_opts.push_back({ _X("--roll-forward-on-no-candidate-fx"), _X("<n>"), _X("Set roll forward on no candidate shared framework behavior.")});
-        known_opts.push_back({ _X("--additional-deps"), _X("<path>"), _X("Path to additonal deps.json file.")});
+        known_opts.push_back({ _X("--additional-deps"), _X("<path>"), _X("Path to additional deps.json file.")});
     }
 
     return known_opts;
