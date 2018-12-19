@@ -15,8 +15,7 @@ jobs:
   # Run after all dependent legs are executed
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCorePublic-Int-Pool
-      queue: Windows.10.Amd64.Open
+      name: Hosted VS2017
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
       name: dotnet-internal-temp
   dependsOn: 
