@@ -34,14 +34,15 @@ jobs:
       MsbuildSigningArguments: /p:CertificateId=400 /v:detailed /p:SignType=$(SignType)
     steps:
 
-    - task: MicroBuildSigningPlugin@2
-      displayName: Install MicroBuild plugin for Signing
-      inputs:
-        signType: $(SignType)
-        zipSources: false
-        feedSource: https://dnceng.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json
-      continueOnError: false
-      condition: and(succeeded(), in(variables['SignType'], 'real', 'test'))
+    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      - task: MicroBuildSigningPlugin@2
+        displayName: Install MicroBuild plugin for Signing
+        inputs:
+          signType: $(SignType)
+          zipSources: false
+          feedSource: https://dnceng.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json
+        continueOnError: false
+        condition: and(succeeded(), in(variables['SignType'], 'real', 'test'))
 
     # Initialize building
     - script: $(Build.SourcesDirectory)\build.cmd
