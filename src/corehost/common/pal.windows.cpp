@@ -252,6 +252,13 @@ bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
 #else
     recv->clear();
 
+    pal::string_t dir;
+    if (pal::getenv(_X("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR"), &dir))
+    {
+        recv->assign(dir);
+        return true;
+    }
+
     DWORD size = 0;
     const HKEY hkey = HKEY_LOCAL_MACHINE;
     // The registry search occurs in the 32-bit registry in all cases.
