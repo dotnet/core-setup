@@ -246,18 +246,20 @@ bool pal::get_default_installation_dir(pal::string_t* recv)
 
 bool pal::get_sdk_self_registered_dir(pal::string_t* recv)
 {
-#if _TARGET_ARM_
-    //  Self-registered SDK installation directory is not supported for win-arm
+#if !defined(_TARGET_AMD64_) && !defined(_TARGET_X86_)
+    //  Self-registered SDK installation directory is only supported for x64 and x86 architectures.
     return false;
 #else
     recv->clear();
 
+    //  ***Used only for testing***
     pal::string_t dir;
     if (pal::getenv(_X("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR"), &dir))
     {
         recv->assign(dir);
         return true;
     }
+    //  ***************************
 
     DWORD size = 0;
     const HKEY hkey = HKEY_LOCAL_MACHINE;
