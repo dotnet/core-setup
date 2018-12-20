@@ -569,11 +569,11 @@
   "quality": "definition",
   "drafts": [],
   "queue": {
-    "id": 36,
-    "name": "DotNet-Build",
+    "id": 330,
+    "name": "DotNetCore-build",
     "pool": {
-      "id": 39,
-      "name": "DotNet-Build"
+      "id": 97,
+      "name": "DotNetCore-build"
     }
   },
   "id": 4371,
