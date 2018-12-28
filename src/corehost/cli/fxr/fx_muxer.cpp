@@ -638,10 +638,10 @@ void fx_muxer_t::muxer_usage(bool is_sdk_present)
 
     for (const auto& arg : known_opts)
     {
-        trace::println(_X("  %-38s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
+        trace::println(_X("  %-37s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
     }
-    trace::println(_X("  --list-runtimes                         Display the installed runtimes"));
-    trace::println(_X("  --list-sdks                             Display the installed SDKs"));
+    trace::println(_X("  --list-runtimes                        Display the installed runtimes"));
+    trace::println(_X("  --list-sdks                            Display the installed SDKs"));
 
     if (!is_sdk_present)
     {
@@ -709,7 +709,7 @@ std::vector<host_option> fx_muxer_t::get_known_opts(bool exec_mode, host_mode_t 
     {
         // If mode=host_mode_t::apphost, these are only used when the app is framework-dependent.
         known_opts.push_back({ _X("--fx-version"), _X("<version>"), _X("Version of the installed Shared Framework to use to run the application.")});
-        known_opts.push_back({ _X("--roll-forward-on-no-candidate-fx"), _X("<n>"), _X("Set roll forward on no candidate shared framework behavior.")});
+        known_opts.push_back({ _X("--roll-forward-on-no-candidate-fx"), _X("<n>"), _X("Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major & minor).")});
         known_opts.push_back({ _X("--additional-deps"), _X("<path>"), _X("Path to additional deps.json file.")});
     }
 
@@ -737,7 +737,7 @@ int fx_muxer_t::parse_args(
         trace::error(_X("Failed to parse supported options or their values:"));
         for (const auto& arg : known_opts)
         {
-            trace::error(_X("  %-38s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
+            trace::error(_X("  %-37s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
         }
         return InvalidArgFailure;
     }
