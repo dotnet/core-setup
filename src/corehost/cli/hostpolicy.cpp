@@ -234,14 +234,6 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
         return exit_code;
     }
 
-    // Bind CoreCLR
-    trace::verbose(_X("CoreCLR path = '%s', CoreCLR dir = '%s'"), clr_path.c_str(), clr_dir.c_str());
-    if (!coreclr::bind(clr_dir))
-    {
-        trace::error(_X("Failed to bind to CoreCLR at '%s'"), clr_path.c_str());
-        return StatusCode::CoreClrBindFailure;
-    }
-
     // Verbose logging
     if (trace::is_enabled())
     {
@@ -257,20 +249,21 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
     std::vector<char> host_path;
     pal::pal_clrstring(args.host_path, &host_path);
 
-    // Initialize CoreCLR
-    coreclr::host_handle_t host_handle;
-    coreclr::domain_id_t domain_id;
-    auto hr = coreclr::initialize(
+    // Create a CoreCLR instance
+    trace::verbose(_X("CoreCLR path = '%s', CoreCLR dir = '%s'"), clr_path.c_str(), clr_dir.c_str());
+    std::unique_ptr<coreclr> coreclr;
+    auto hr = coreclr::create(
+        clr_dir,
         host_path.data(),
         "clrhost",
+        property_size,
         property_keys.data(),
         property_values.data(),
-        property_size,
-        &host_handle,
-        &domain_id);
+        coreclr);
+
     if (!SUCCEEDED(hr))
     {
-        trace::error(_X("Failed to initialize CoreCLR, HRESULT: 0x%X"), hr);
+        trace::error(_X("Failed to create CoreCLR, HRESULT: 0x%X"), hr);
         return StatusCode::CoreClrInitFailure;
     }
 
@@ -308,9 +301,7 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
     trace::flush();
 
     // Execute the application
-    hr = coreclr::execute_assembly(
-        host_handle,
-        domain_id,
+    hr = coreclr->execute_assembly(
         argv.size(),
         argv.data(),
         managed_app.data(),
@@ -323,13 +314,11 @@ int run(const arguments_t& args, pal::string_t* out_host_command_result = nullpt
     }
 
     // Shut down the CoreCLR
-    hr = coreclr::shutdown(host_handle, domain_id, (int*)&exit_code);
+    hr = coreclr->shutdown((int*)&exit_code);
     if (!SUCCEEDED(hr))
     {
         trace::warning(_X("Failed to shut down CoreCLR, HRESULT: 0x%X"), hr);
     }
-
-    coreclr::unload();
 
     return exit_code;
 
