@@ -20,6 +20,146 @@
 #include "trace.h"
 #include "utils.h"
 
+using corehost_load_fn = int(*) (const host_interface_t* init);
+using corehost_main_fn = int(*) (const int argc, const pal::char_t* argv[]);
+using corehost_main_with_output_buffer_fn = int(*) (const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size);
+using corehost_unload_fn = int(*) ();
+using corehost_error_writer_fn = void(*) (const pal::char_t* message);
+using corehost_set_error_writer_fn = corehost_error_writer_fn(*) (corehost_error_writer_fn error_writer);
+
+struct hostpolicy_contract
+{
+    corehost_load_fn load;
+    corehost_unload_fn unload;
+    corehost_set_error_writer_fn set_error_writer;
+};
+
+int load_hostpolicy_common(
+    const pal::string_t& lib_dir,
+    pal::string_t& host_path,
+    pal::dll_t* h_host,
+    hostpolicy_contract &host_contract)
+{
+    if (!library_exists_in_dir(lib_dir, LIBHOSTPOLICY_NAME, &host_path))
+    {
+        return StatusCode::CoreHostLibMissingFailure;
+    }
+
+    // Load library
+    if (!pal::load_library(&host_path, h_host))
+    {
+        trace::info(_X("Load library of %s failed"), host_path.c_str());
+        return StatusCode::CoreHostLibLoadFailure;
+    }
+
+    // Obtain entrypoint symbols
+    host_contract.load = (corehost_load_fn)pal::get_symbol(*h_host, "corehost_load");
+    host_contract.unload = (corehost_unload_fn)pal::get_symbol(*h_host, "corehost_unload");
+    if ((host_contract.load == nullptr) || (host_contract.unload == nullptr))
+        return StatusCode::CoreHostEntryPointFailure;
+
+    host_contract.set_error_writer = (corehost_set_error_writer_fn)pal::get_symbol(*h_host, "corehost_set_error_writer");
+
+    // It's possible to not have corehost_set_error_writer, since this was only introduced in 3.0
+    // so 2.0 hostpolicy would not have the export. In this case we will not propagate the error writer
+    // and errors will still be reported to stderr.
+
+    return StatusCode::Success;
+}
+
+template<typename T>
+int load_hostpolicy(
+    const pal::string_t& lib_dir,
+    pal::dll_t* h_host,
+    hostpolicy_contract &host_contract,
+    const char *main_entry_symbol,
+    T* main_fn)
+{
+    pal::string_t host_path;
+    int rc = load_hostpolicy_common(lib_dir, host_path, h_host, host_contract);
+    if (rc != StatusCode::Success)
+    {
+        trace::error(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, lib_dir.c_str());
+        return rc;
+    }
+
+    // Obtain entrypoint symbol
+    *main_fn = (T)pal::get_symbol(*h_host, main_entry_symbol);
+
+    return (*main_fn != nullptr)
+        ? StatusCode::Success
+        : StatusCode::CoreHostEntryPointFailure;
+}
+
+static int execute_app(
+    const pal::string_t& impl_dll_dir,
+    corehost_init_t* init,
+    const int argc,
+    const pal::char_t* argv[])
+{
+    pal::dll_t corehost;
+    hostpolicy_contract host_contract{};
+    corehost_main_fn host_main = nullptr;
+
+    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_main", &host_main);
+    if (code != StatusCode::Success)
+        return code;
+
+    // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
+    trace::flush();
+
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+
+        const host_interface_t& intf = init->get_host_init_data();
+        if ((code = host_contract.load(&intf)) == 0)
+        {
+            code = host_main(argc, argv);
+            (void)host_contract.unload();
+        }
+    }
+
+    pal::unload_library(corehost);
+
+    return code;
+}
+
+static int execute_host_command(
+    const pal::string_t& impl_dll_dir,
+    corehost_init_t* init,
+    const int argc,
+    const pal::char_t* argv[],
+    pal::char_t result_buffer[],
+    int32_t buffer_size,
+    int32_t* required_buffer_size)
+{
+    pal::dll_t corehost;
+    hostpolicy_contract host_contract{};
+    corehost_main_with_output_buffer_fn host_main = nullptr;
+
+    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_main_with_output_buffer", &host_main);
+    if (code != StatusCode::Success)
+        return code;
+
+    // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
+    trace::flush();
+
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+
+        const host_interface_t& intf = init->get_host_init_data();
+        if ((code = host_contract.load(&intf)) == 0)
+        {
+            code = host_main(argc, argv, result_buffer, buffer_size, required_buffer_size);
+            (void)host_contract.unload();
+        }
+    }
+
+    pal::unload_library(corehost);
+
+    return code;
+}
+
 /**
 * When the framework is not found, display detailed error message
 *   about available frameworks and installation of new framework.
@@ -1233,6 +1373,33 @@ int fx_muxer_t::execute(
     }
 
     return result;
+}
+
+int fx_muxer_t::get_com_activation_delegate(
+    const pal::char_t* comhost_path,
+    const pal::char_t* dotnet_root,
+    void **delegate)
+{
+    pal::string_t app_candidate{ comhost_path };
+
+    // Strip the comhost suffix to get the 'app'
+    size_t idx = app_candidate.rfind(_X("comhost.dll"));
+    assert(idx != pal::string_t::npos);
+    app_candidate.replace(app_candidate.begin() + idx, app_candidate.end(), _X(".dll"));
+
+    pal::string_t runtime_config = _X("");
+    fx_reference_t override_settings;
+
+    // Read config
+    fx_definition_vector_t fx_definitions;
+    auto app = new fx_definition_t();
+    fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
+
+    int rc = read_config(*app, app_candidate, runtime_config, override_settings);
+    if (rc != StatusCode::Success)
+        return rc;
+
+    return StatusCode::HostApiFailed;
 }
 
 int fx_muxer_t::handle_exec(

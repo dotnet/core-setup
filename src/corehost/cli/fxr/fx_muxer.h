@@ -11,21 +11,6 @@ struct host_startup_info_t;
 
 const int Max_Framework_Resolve_Retries = 100;
 
-int execute_app(
-    const pal::string_t& impl_dll_dir,
-    corehost_init_t* init,
-    const int argc,
-    const pal::char_t* argv[]);
-
-int execute_host_command(
-    const pal::string_t& impl_dll_dir,
-    corehost_init_t* init,
-    const int argc,
-    const pal::char_t* argv[],
-    pal::char_t result_buffer[],
-    int32_t buffer_size,
-    int32_t* required_buffer_size);
-
 class fx_muxer_t
 {
 public:
@@ -37,6 +22,10 @@ public:
         pal::char_t result_buffer[],
         int32_t buffer_size,
         int32_t* required_buffer_size);
+    static int get_com_activation_delegate(
+        const pal::char_t* comhost_path,
+        const pal::char_t* dotnet_root,
+        void **delegate);
     static bool resolve_sdk_dotnet_path(const pal::string_t& dotnet_root, const pal::string_t& cwd, pal::string_t* cli_sdk);
 private:
     static int parse_args(
