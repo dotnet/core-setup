@@ -6,6 +6,8 @@
     <LibSuffix>.so</LibSuffix> 
     <LibSuffix Condition="'$(OSGroup)' == 'Windows_NT'">.dll</LibSuffix>
     <LibSuffix Condition="'$(OSGroup)' == 'OSX'">.dylib</LibSuffix>
+    <StaticLibSuffix>s.a</StaticLibSuffix>
+    <StaticLibSuffix Condition="'$(OSGroup)' == 'Windows_NT'">s.lib</StaticLibSuffix>
   </PropertyGroup>
 
   <PropertyGroup>
