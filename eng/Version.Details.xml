@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview.19054.5">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview.19055.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>9c736899cd63805d7bbf69095d9b32915b9e1858</Sha>
+      <Sha>8bccf50efcbd543ea820d3d5c9c32a457da6b9c2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview.19054.5">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview.19055.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>9c736899cd63805d7bbf69095d9b32915b9e1858</Sha>
+      <Sha>8bccf50efcbd543ea820d3d5c9c32a457da6b9c2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Targets" Version="3.0.0-preview.19054.5">
+    <Dependency Name="Microsoft.NETCore.Targets" Version="3.0.0-preview.19055.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>9c736899cd63805d7bbf69095d9b32915b9e1858</Sha>
+      <Sha>8bccf50efcbd543ea820d3d5c9c32a457da6b9c2</Sha>
     </Dependency>
     <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19054.1">
       <Uri>https://github.com/dotnet/standard</Uri>
