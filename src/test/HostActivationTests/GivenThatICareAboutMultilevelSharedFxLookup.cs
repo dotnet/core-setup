@@ -3,6 +3,7 @@ using Microsoft.DotNet.Cli.Build.Framework;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLookup
