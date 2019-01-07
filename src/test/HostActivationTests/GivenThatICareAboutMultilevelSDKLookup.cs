@@ -121,6 +121,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
         [Fact]
         public void SdkMultilevelLookup_Global_Json_Single_Digit_Patch_Rollup()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Multi-level lookup is only supported on Windows.
+                return;
+            }
+
             var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
                 .Copy();
 
@@ -317,6 +323,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
         [Fact]
         public void SdkMultilevelLookup_Global_Json_Two_Part_Patch_Rollup()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Multi-level lookup is only supported on Windows.
+                return;
+            }
+
             var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
                 .Copy();
 
@@ -522,6 +534,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
         [Fact]
         public void SdkMultilevelLookup_Precedential_Order()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Multi-level lookup is only supported on Windows.
+                return;
+            }
+
             var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
                 .Copy();
 
@@ -577,6 +595,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
         [Fact]
         public void SdkMultilevelLookup_Must_Pick_The_Highest_Semantic_Version()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Multi-level lookup is only supported on Windows.
+                return;
+            }
+
             var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
                 .Copy();
 
