@@ -33,6 +33,8 @@
 
   <PropertyGroup>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
+    <NETCoreAppFrameworkMoniker>.NETCoreApp,Version=v$(MajorVersion).$(MinorVersion)</NETCoreAppFrameworkMoniker>
+    <NETCoreAppFramework>netcoreapp$(MajorVersion).$(MinorVersion)</NETCoreAppFramework>
   </PropertyGroup>
 
   <!--
@@ -220,10 +222,6 @@
 
   <PropertyGroup>
     <ExeSuffix Condition="'$(OSGroup)'=='Windows_NT'">.exe</ExeSuffix>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <Framework>netcoreapp2.1</Framework>
   </PropertyGroup>
 
   <Import Project="$(HostMachineInfoProps)"
@@ -452,6 +450,7 @@
   <PropertyGroup Condition="'$(InstallerExtension)' == '.deb' or '$(InstallerExtension)' == '.rpm' ">
 
     <PackageNameSuffix>$(MajorVersion).$(MinorVersion)</PackageNameSuffix>
+
 
     <SharedHostInstallerFile Condition="'$(InstallerExtension)' == '.deb' or '$(InstallerExtension)' == '.rpm' ">$(SharedHostInstallerStart)$(SharedFrameworkNugetVersion)-$(TargetArchitecture)$(InstallerExtension)</SharedHostInstallerFile>
     <HostFxrInstallerFile Condition="'$(InstallerExtension)' == '.deb' or '$(InstallerExtension)' == '.rpm'">$(HostFxrInstallerStart)$(HostResolverVersion)-$(TargetArchitecture)$(InstallerExtension)</HostFxrInstallerFile>
