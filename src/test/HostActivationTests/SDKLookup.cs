@@ -475,13 +475,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var dotnet = fixture.BuiltDotnet;
 
             // Add SDK versions
-            AddAvailableSdkVersions(_exeSdkBaseDir, "9999.0.0", "9999.0.3-dummy");
+            AddAvailableSdkVersions(_exeSdkBaseDir, "9999.0.0", "9999.0.3-dummy.9", "9999.0.3-dummy.10");
 
             // Specified SDK version: none
             // Cwd: empty
             // User: empty
-            // Exe: 9999.0.0, 9999.0.3-dummy
-            // Expected: 9999.0.3-dummy from exe dir
+            // Exe: 9999.0.0, 9999.0.3-dummy.9, 9999.0.3-dummy.10
+            // Expected: 9999.0.3-dummy.10 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
@@ -491,7 +491,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .Execute()
                 .Should().Pass()
-                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.3-dummy", _dotnetSdkDllMessageTerminator));
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.3-dummy.10", _dotnetSdkDllMessageTerminator));
 
             // Add SDK versions
             AddAvailableSdkVersions(_exeSdkBaseDir, "9999.0.3");
@@ -499,7 +499,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             // Specified SDK version: none
             // Cwd: empty
             // User: empty
-            // Exe: 9999.0.0, 9999.0.3-dummy, 9999.0.3
+            // Exe: 9999.0.0, 9999.0.3-dummy.9, 9999.0.3-dummy.10, 9999.0.3
             // Expected: 9999.0.3 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
@@ -520,7 +520,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             // Specified SDK version: none
             // Cwd: 10000.0.0                 --> should not be picked
             // User: 9999.0.200               --> should not be picked
-            // Exe: 9999.0.0, 9999.0.3-dummy, 9999.0.3, 9999.0.100
+            // Exe: 9999.0.0, 9999.0.3-dummy.9, 9999.0.3-dummy.10, 9999.0.3, 9999.0.100
             // Expected: 9999.0.100 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
@@ -539,7 +539,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             // Specified SDK version: none
             // Cwd: 10000.0.0                 --> should not be picked
             // User: 9999.0.200               --> should not be picked
-            // Exe: 9999.0.0, 9999.0.3-dummy, 9999.0.3, 9999.0.100, 9999.0.80
+            // Exe: 9999.0.0, 9999.0.3-dummy.9, 9999.0.3-dummy.10, 9999.0.3, 9999.0.100, 9999.0.80
             // Expected: 9999.0.100 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
@@ -558,7 +558,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             // Specified SDK version: none
             // Cwd: 10000.0.0                 --> should not be picked
             // User: 9999.0.200               --> should not be picked
-            // Exe: 9999.0.0, 9999.0.3-dummy, 9999.0.3, 9999.0.100, 9999.0.80, 9999.0.5500000
+            // Exe: 9999.0.0, 9999.0.3-dummy.9, 9999.0.3-dummy.10, 9999.0.3, 9999.0.100, 9999.0.80, 9999.0.5500000
             // Expected: 9999.0.5500000 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
@@ -577,7 +577,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             // Specified SDK version: none
             // Cwd: 10000.0.0                 --> should not be picked
             // User: 9999.0.200               --> should not be picked
-            // Exe: 9999.0.0, 9999.0.3-dummy, 9999.0.3, 9999.0.100, 9999.0.80, 9999.0.5500000, 9999.0.52000000
+            // Exe: 9999.0.0, 9999.0.3-dummy.9, 9999.0.3-dummy.10, 9999.0.3, 9999.0.100, 9999.0.80, 9999.0.5500000, 9999.0.52000000
             // Expected: 9999.0.52000000 from exe dir
             dotnet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
@@ -600,7 +600,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("9999.0.0")
-                .And.HaveStdOutContaining("9999.0.3-dummy")
+                .And.HaveStdOutContaining("9999.0.3-dummy.9")
+                .And.HaveStdOutContaining("9999.0.3-dummy.10")
                 .And.HaveStdOutContaining("9999.0.3")
                 .And.HaveStdOutContaining("9999.0.100")
                 .And.HaveStdOutContaining("9999.0.80")
