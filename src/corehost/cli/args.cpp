@@ -62,7 +62,19 @@ bool parse_arguments(
     arguments_t& args)
 {
     pal::string_t managed_application_path;
-    if (init.host_mode != host_mode_t::apphost)
+    if (init.host_mode == host_mode_t::apphost)
+    {
+        // Find the managed app in the same directory
+        managed_application_path = init.host_info.app_path;
+
+        args.app_argv = &argv[1];
+        args.app_argc = argc - 1;
+    }
+    else if (init.host_mode == host_mode_t::libhost)
+    {
+        assert(argc == 0 && argv == nullptr);
+    }
+    else
     {
         // First argument is managed app
         if (argc < 2)
@@ -74,14 +86,6 @@ bool parse_arguments(
 
         args.app_argc = argc - 2;
         args.app_argv = &argv[2];
-    }
-    else
-    {
-        // Find the managed app in the same directory
-        managed_application_path = init.host_info.app_path;
-
-        args.app_argv = &argv[1];
-        args.app_argc = argc - 1;
     }
 
     return init_arguments(
