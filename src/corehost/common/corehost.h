@@ -4,6 +4,15 @@
 #ifndef _COREHOST_COMMON_COREHOST_H_
 #define _COREHOST_COMMON_COREHOST_H_
 
+//
+// Type of delegate to retrieve from coreclr instance
+//
+enum coreclr_delegate_type
+{
+    // Delegate used to activate a managed COM server
+    com_activation
+};
+
 #if FEATURE_LIBHOST
 
 struct com_activation_context
@@ -16,11 +25,6 @@ struct com_activation_context
 };
 
 using com_activation_fn = int(*)(com_activation_context*);
-
-enum class coreclr_delegate_type
-{
-    com_activation
-};
 
 int get_coreclr_delegate(
     coreclr_delegate_type type,

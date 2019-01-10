@@ -9,6 +9,7 @@
 #include "fx_muxer.h"
 #include "error_codes.h"
 #include "libhost.h"
+#include "corehost.h"
 #include "runtime_config.h"
 #include "sdk_info.h"
 #include "sdk_resolver.h"
@@ -395,14 +396,37 @@ SHARED_API hostfxr_error_writer_fn hostfxr_set_error_writer(hostfxr_error_writer
     return trace::set_error_writer(error_writer);
 }
 
-SHARED_API int32_t hostfxr_com_activation_delegate(
-    const pal::char_t* comhost_path,
+//
+// Gets a typed delegate to perform an action on the currently loaded CoreCLR or on a newly created one.
+//
+// Parameters:
+//     libhost_path
+//          Absolute path of the entry hosting library
+//     dotnet_root
+//     type
+//          The requested delegate type
+//     delegate
+//          Requested delegate.
+// Return value:
+//     The error code result.
+//
+// A new CoreCLR instance will be created or reused if the existing instance can satisfy the configuration
+// requirements supplied by the runtimeconfig.json file.
+//
+SHARED_API int32_t hostfxr_get_coreclr_delegate(
+    const pal::char_t* libhost_path,
     const pal::char_t* dotnet_root,
+    coreclr_delegate_type type,
     void **delegate)
 {
+    if (libhost_path == nullptr || dotnet_root == nullptr || delegate == nullptr)
+        return StatusCode::InvalidArgFailure;
+
     trace::setup();
 
-    trace::info(_X("--- Invoked hostfxr COM class activation [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+    trace::info(_X("--- Invoked hostfxr libhost (type: %d) [commit hash: %s]"), type, _STRINGIFY(REPO_COMMIT_HASH));
 
-    return fx_muxer_t::get_com_activation_delegate(comhost_path, dotnet_root, delegate);
+    host_startup_info_t startup_info{ libhost_path, dotnet_root, libhost_path };
+
+    return fx_muxer_t::get_coreclr_delegate(startup_info, type, delegate);
 }

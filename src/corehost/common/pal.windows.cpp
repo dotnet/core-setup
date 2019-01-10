@@ -153,7 +153,7 @@ pal::proc_t pal::get_symbol(dll_t library, const char* name)
     auto result = ::GetProcAddress(library, name);
     if (result == nullptr)
     {
-        trace::info(_X("Probed for and did not resolve library symbol %s"), name);
+        trace::info(_X("Probed for and did not resolve library symbol %S"), name);
     }
 
     return result;

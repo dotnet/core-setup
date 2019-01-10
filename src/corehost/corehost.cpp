@@ -16,9 +16,10 @@ using hostfxr_main_startupinfo_fn = int(*)(
     const pal::char_t* host_path,
     const pal::char_t* dotnet_root,
     const pal::char_t* app_path);
-using hostfxr_com_activation_delegate_fn = int(*)(
+using hostfxr_get_coreclr_delegate_fn = int(*)(
     const pal::char_t* host_path,
     const pal::char_t* dotnet_root,
+    coreclr_delegate_type type,
     void **delegate);
 
 bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path);
@@ -296,16 +297,11 @@ int get_coreclr_delegate(
 
     // Leak fxr
 
-    switch (type)
-    {
-    case coreclr_delegate_type::com_activation:
-    {
-        auto com_act_del = (hostfxr_com_activation_delegate_fn)pal::get_symbol(fxr, "hostfxr_com_activation_delegate");
-        return com_act_del(host_path.c_str(), dotnet_root.c_str(), delegate);
-    }
-    default:
+    auto entry_del = (hostfxr_get_coreclr_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_coreclr_delegate");
+    if (entry_del == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
-    }
+
+    return entry_del(host_path.c_str(), dotnet_root.c_str(), type, delegate);
 }
 
 #elif defined(CURHOST_EXE)

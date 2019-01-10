@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <cassert>
+#include <mutex>
 #include "args.h"
 #include "cpprest/json.h"
 #include "deps_format.h"
@@ -21,7 +22,9 @@
 #include "utils.h"
 
 using corehost_load_fn = int(*) (const host_interface_t* init);
+using corehost_ensure_load_fn = int(*) (const host_interface_t* init);
 using corehost_main_fn = int(*) (const int argc, const pal::char_t* argv[]);
+using corehost_get_coreclr_delegate_fn = int(*) (coreclr_delegate_type type, void **delegate);
 using corehost_main_with_output_buffer_fn = int(*) (const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size);
 using corehost_unload_fn = int(*) ();
 using corehost_error_writer_fn = void(*) (const pal::char_t* message);
@@ -29,10 +32,21 @@ using corehost_set_error_writer_fn = corehost_error_writer_fn(*) (corehost_error
 
 struct hostpolicy_contract
 {
+    // Required API contracts
     corehost_load_fn load;
     corehost_unload_fn unload;
+
+    // 3.0+ contracts
     corehost_set_error_writer_fn set_error_writer;
+    corehost_ensure_load_fn ensure_load;
 };
+
+namespace
+{
+    std::mutex g_hostpolicy_lock;
+    pal::dll_t g_hostpolicy;
+    hostpolicy_contract g_hostpolicy_contract;
+}
 
 int load_hostpolicy_common(
     const pal::string_t& lib_dir,
@@ -40,29 +54,38 @@ int load_hostpolicy_common(
     pal::dll_t* h_host,
     hostpolicy_contract &host_contract)
 {
-    if (!library_exists_in_dir(lib_dir, LIBHOSTPOLICY_NAME, &host_path))
+    std::lock_guard<std::mutex> lock{ g_hostpolicy_lock };
+    if (g_hostpolicy == nullptr)
     {
-        return StatusCode::CoreHostLibMissingFailure;
+        if (!library_exists_in_dir(lib_dir, LIBHOSTPOLICY_NAME, &host_path))
+        {
+            return StatusCode::CoreHostLibMissingFailure;
+        }
+
+        // Load library
+        if (!pal::load_library(&host_path, &g_hostpolicy))
+        {
+            trace::info(_X("Load library of %s failed"), host_path.c_str());
+            return StatusCode::CoreHostLibLoadFailure;
+        }
+
+        // Obtain entrypoint symbols
+        g_hostpolicy_contract.load = (corehost_load_fn)pal::get_symbol(g_hostpolicy, "corehost_load");
+        g_hostpolicy_contract.unload = (corehost_unload_fn)pal::get_symbol(g_hostpolicy, "corehost_unload");
+        if ((g_hostpolicy_contract.load == nullptr) || (g_hostpolicy_contract.unload == nullptr))
+            return StatusCode::CoreHostEntryPointFailure;
+
+        g_hostpolicy_contract.set_error_writer = (corehost_set_error_writer_fn)pal::get_symbol(g_hostpolicy, "corehost_set_error_writer");
+        g_hostpolicy_contract.ensure_load = (corehost_ensure_load_fn)pal::get_symbol(g_hostpolicy, "corehost_ensure_load");
+
+        // It's possible to not have corehost_set_error_writer, since this was only introduced in 3.0
+        // so 2.0 hostpolicy would not have the export. In this case we will not propagate the error writer
+        // and errors will still be reported to stderr.
     }
 
-    // Load library
-    if (!pal::load_library(&host_path, h_host))
-    {
-        trace::info(_X("Load library of %s failed"), host_path.c_str());
-        return StatusCode::CoreHostLibLoadFailure;
-    }
-
-    // Obtain entrypoint symbols
-    host_contract.load = (corehost_load_fn)pal::get_symbol(*h_host, "corehost_load");
-    host_contract.unload = (corehost_unload_fn)pal::get_symbol(*h_host, "corehost_unload");
-    if ((host_contract.load == nullptr) || (host_contract.unload == nullptr))
-        return StatusCode::CoreHostEntryPointFailure;
-
-    host_contract.set_error_writer = (corehost_set_error_writer_fn)pal::get_symbol(*h_host, "corehost_set_error_writer");
-
-    // It's possible to not have corehost_set_error_writer, since this was only introduced in 3.0
-    // so 2.0 hostpolicy would not have the export. In this case we will not propagate the error writer
-    // and errors will still be reported to stderr.
+    // Return global values
+    *h_host = g_hostpolicy;
+    host_contract = g_hostpolicy_contract;
 
     return StatusCode::Success;
 }
@@ -75,6 +98,8 @@ int load_hostpolicy(
     const char *main_entry_symbol,
     T* main_fn)
 {
+    assert(main_entry_symbol != nullptr && main_fn != nullptr);
+
     pal::string_t host_path;
     int rc = load_hostpolicy_common(lib_dir, host_path, h_host, host_contract);
     if (rc != StatusCode::Success)
@@ -85,10 +110,10 @@ int load_hostpolicy(
 
     // Obtain entrypoint symbol
     *main_fn = (T)pal::get_symbol(*h_host, main_entry_symbol);
+    if (*main_fn == nullptr)
+        return StatusCode::CoreHostEntryPointFailure;
 
-    return (*main_fn != nullptr)
-        ? StatusCode::Success
-        : StatusCode::CoreHostEntryPointFailure;
+    return StatusCode::Success;
 }
 
 static int execute_app(
@@ -112,7 +137,7 @@ static int execute_app(
         propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
 
         const host_interface_t& intf = init->get_host_init_data();
-        if ((code = host_contract.load(&intf)) == 0)
+        if ((code = host_contract.load(&intf)) == StatusCode::Success)
         {
             code = host_main(argc, argv);
             (void)host_contract.unload();
@@ -148,7 +173,7 @@ static int execute_host_command(
         propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
 
         const host_interface_t& intf = init->get_host_init_data();
-        if ((code = host_contract.load(&intf)) == 0)
+        if ((code = host_contract.load(&intf)) == StatusCode::Success)
         {
             code = host_main(argc, argv, result_buffer, buffer_size, required_buffer_size);
             (void)host_contract.unload();
@@ -156,6 +181,36 @@ static int execute_host_command(
     }
 
     pal::unload_library(corehost);
+
+    return code;
+}
+
+static int get_coreclr_delegate_internal(
+    const pal::string_t& impl_dll_dir,
+    corehost_init_t* init,
+    coreclr_delegate_type type,
+    void **delegate)
+{
+    pal::dll_t corehost;
+    hostpolicy_contract host_contract{};
+    corehost_get_coreclr_delegate_fn host_entry = nullptr;
+
+    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_coreclr_delegate", &host_entry);
+    if (code != StatusCode::Success)
+        return code;
+
+    // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
+    trace::flush();
+
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+
+        const host_interface_t& intf = init->get_host_init_data();
+        if ((code = host_contract.ensure_load(&intf)) == StatusCode::Success)
+        {
+            code = host_entry(type, delegate);
+        }
+    }
 
     return code;
 }
@@ -880,7 +935,7 @@ int fx_muxer_t::parse_args(
         {
             trace::error(_X("  %-37s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
         }
-        return InvalidArgFailure;
+        return StatusCode::InvalidArgFailure;
     }
 
     app_candidate = host_info.app_path;
@@ -908,7 +963,7 @@ int fx_muxer_t::parse_args(
             if (!exec_mode)
             {
                 // Route to CLI.
-                return AppArgNotRunnable;
+                return StatusCode::AppArgNotRunnable;
             }
         }
 
@@ -919,7 +974,7 @@ int fx_muxer_t::parse_args(
             if (!exec_mode)
             {
                 // Route to CLI.
-                return AppArgNotRunnable;
+                return StatusCode::AppArgNotRunnable;
             }
         }
 
@@ -927,7 +982,7 @@ int fx_muxer_t::parse_args(
         {
             assert(exec_mode == true);
             trace::error(_X("dotnet exec needs a managed .dll or .exe extension. The application specified was '%s'"), app_candidate.c_str());
-            return InvalidArgFailure;
+            return StatusCode::InvalidArgFailure;
         }
     }
 
@@ -935,10 +990,10 @@ int fx_muxer_t::parse_args(
     if (!doesAppExist)
     {
         trace::error(_X("The application to execute does not exist: '%s'"), app_candidate.c_str());
-        return InvalidArgFailure;
+        return StatusCode::InvalidArgFailure;
     }
 
-    return 0;
+    return StatusCode::Success;
 }
 
 int read_config(
@@ -974,7 +1029,7 @@ int read_config(
         return StatusCode::InvalidConfigFile;
     }
 
-    return 0;
+    return StatusCode::Success;
 }
 
 int fx_muxer_t::soft_roll_forward_helper(
@@ -1195,7 +1250,7 @@ int fx_muxer_t::read_config_and_execute(
         return rc;
     }
 
-    auto app_config = app->get_runtime_config();
+    runtime_config_t app_config = app->get_runtime_config();
     bool is_framework_dependent = app_config.get_is_framework_dependent();
 
     // Apply the --fx-version option to the first framework
@@ -1375,17 +1430,28 @@ int fx_muxer_t::execute(
     return result;
 }
 
-int fx_muxer_t::get_com_activation_delegate(
-    const pal::char_t* comhost_path,
-    const pal::char_t* dotnet_root,
+int fx_muxer_t::get_coreclr_delegate(
+    const host_startup_info_t &host_info,
+    coreclr_delegate_type type,
     void **delegate)
 {
-    pal::string_t app_candidate{ comhost_path };
+    assert(host_info.is_valid());
 
-    // Strip the comhost suffix to get the 'app'
-    size_t idx = app_candidate.rfind(_X("comhost.dll"));
-    assert(idx != pal::string_t::npos);
-    app_candidate.replace(app_candidate.begin() + idx, app_candidate.end(), _X(".dll"));
+    const host_mode_t mode = host_mode_t::libhost;
+    pal::string_t app_candidate{ host_info.host_path };
+
+    switch (type)
+    {
+    case coreclr_delegate_type::com_activation:
+    {
+        // Strip the comhost suffix to get the 'app'
+        size_t idx = app_candidate.rfind(_X("comhost.dll"));
+        assert(idx != pal::string_t::npos);
+        app_candidate.replace(app_candidate.begin() + idx, app_candidate.end(), _X(".dll"));
+    }
+    default:
+        return StatusCode::LibHostInvalidArgs;
+    }
 
     pal::string_t runtime_config = _X("");
     fx_reference_t override_settings;
@@ -1399,7 +1465,40 @@ int fx_muxer_t::get_com_activation_delegate(
     if (rc != StatusCode::Success)
         return rc;
 
-    return StatusCode::HostApiFailed;
+    runtime_config_t app_config = app->get_runtime_config();
+    bool is_framework_dependent = app_config.get_is_framework_dependent();
+
+    // Append specified probe paths first and then config file probe paths into realpaths.
+    std::vector<pal::string_t> probe_realpaths;
+
+    // The tfm is taken from the app.
+    pal::string_t tfm = get_app(fx_definitions).get_runtime_config().get_tfm();
+
+    // Each framework can add probe paths
+    for (const auto& fx : fx_definitions)
+    {
+        for (const auto& path : fx->get_runtime_config().get_probe_paths())
+        {
+            append_probe_realpath(path, &probe_realpaths, tfm);
+        }
+    }
+
+    trace::verbose(_X("Libhost loading occurring as a %s app as per config file [%s]"),
+        (is_framework_dependent ? _X("framework-dependent") : _X("self-contained")), app_config.get_path().c_str());
+
+    pal::string_t deps_file;
+    pal::string_t impl_dir;
+    if (!resolve_hostpolicy_dir(mode, host_info.dotnet_root, fx_definitions, app_candidate, deps_file, probe_realpaths, &impl_dir))
+    {
+        return CoreHostLibMissingFailure;
+    }
+
+    pal::string_t additional_deps_serialized;
+    corehost_init_t init(pal::string_t{}, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions);
+
+    rc = get_coreclr_delegate_internal(impl_dir, &init, type, delegate);
+
+    return rc;
 }
 
 int fx_muxer_t::handle_exec(

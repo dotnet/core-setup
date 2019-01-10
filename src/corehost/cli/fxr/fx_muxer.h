@@ -7,6 +7,7 @@ class fx_definition_t;
 struct fx_ver_t;
 struct host_startup_info_t;
 
+#include <corehost.h>
 #include "libhost.h"
 
 const int Max_Framework_Resolve_Retries = 100;
@@ -22,11 +23,10 @@ public:
         pal::char_t result_buffer[],
         int32_t buffer_size,
         int32_t* required_buffer_size);
-    static int get_com_activation_delegate(
-        const pal::char_t* comhost_path,
-        const pal::char_t* dotnet_root,
+    static int get_coreclr_delegate(
+        const host_startup_info_t &host_info,
+        coreclr_delegate_type type,
         void **delegate);
-    static bool resolve_sdk_dotnet_path(const pal::string_t& dotnet_root, const pal::string_t& cwd, pal::string_t* cli_sdk);
 private:
     static int parse_args(
         const host_startup_info_t& host_info,
