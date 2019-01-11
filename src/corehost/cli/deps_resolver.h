@@ -174,6 +174,11 @@ public:
         return m_is_framework_dependent;
     }
 
+    const pal::string_t &get_app_dir() const
+    {
+        return m_app_dir;
+    }
+
 private:
 
     static pal::string_t get_fx_deps(const pal::string_t& fx_dir, const pal::string_t& fx_name)

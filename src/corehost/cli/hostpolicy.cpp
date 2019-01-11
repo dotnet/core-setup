@@ -24,6 +24,210 @@ namespace
 
     std::shared_ptr<coreclr_t> g_coreclr;
     std::weak_ptr<coreclr_t> g_lib_coreclr;
+
+    class prepare_to_run_t
+    {
+    public:
+        prepare_to_run_t(
+            hostpolicy_init_t &hostpolicy_init,
+            const arguments_t& args,
+            bool breadcrumbs_enabled)
+            : _hostpolicy_init{ hostpolicy_init }
+            , _resolver
+                {
+                    args,
+                    hostpolicy_init.fx_definitions,
+                    /* root_framework_rid_fallback_graph */ nullptr, // This means that the fx_definitions contains the root framework
+                    hostpolicy_init.is_framework_dependent
+                }
+            , _breadcrumbs_enabled{ breadcrumbs_enabled }
+        { }
+
+        int build_coreclr_properties(
+            coreclr_property_bag_t &properties,
+            pal::string_t &clr_path,
+            pal::string_t &clr_dir)
+        {
+            pal::string_t resolver_errors;
+            if (!_resolver.valid(&resolver_errors))
+            {
+                trace::error(_X("Error initializing the dependency resolver: %s"), resolver_errors.c_str());
+                return StatusCode::ResolverInitFailure;
+            }
+
+            probe_paths_t probe_paths;
+
+            // Setup breadcrumbs.
+            if (_breadcrumbs_enabled)
+            {
+                pal::string_t policy_name = _STRINGIFY(HOST_POLICY_PKG_NAME);
+                pal::string_t policy_version = _STRINGIFY(HOST_POLICY_PKG_VER);
+
+                // Always insert the hostpolicy that the code is running on.
+                _breadcrumbs.insert(policy_name);
+                _breadcrumbs.insert(policy_name + _X(",") + policy_version);
+
+                if (!_resolver.resolve_probe_paths(&probe_paths, &_breadcrumbs))
+                {
+                    return StatusCode::ResolverResolveFailure;
+                }
+            }
+            else
+            {
+                if (!_resolver.resolve_probe_paths(&probe_paths, nullptr))
+                {
+                    return StatusCode::ResolverResolveFailure;
+                }
+            }
+
+            clr_path = probe_paths.coreclr;
+            if (clr_path.empty() || !pal::realpath(&clr_path))
+            {
+                trace::error(_X("Could not resolve CoreCLR path. For more details, enable tracing by setting COREHOST_TRACE environment variable to 1"));;
+                return StatusCode::CoreClrResolveFailure;
+            }
+
+            // Get path in which CoreCLR is present.
+            clr_dir = get_directory(clr_path);
+
+            // System.Private.CoreLib.dll is expected to be next to CoreCLR.dll - add its path to the TPA list.
+            pal::string_t corelib_path = clr_dir;
+            append_path(&corelib_path, CORELIB_NAME);
+
+            // Append CoreLib path
+            if (probe_paths.tpa.back() != PATH_SEPARATOR)
+            {
+                probe_paths.tpa.push_back(PATH_SEPARATOR);
+            }
+
+            probe_paths.tpa.append(corelib_path);
+            probe_paths.tpa.push_back(PATH_SEPARATOR);
+
+            pal::string_t clrjit_path = probe_paths.clrjit;
+            if (clrjit_path.empty())
+            {
+                trace::warning(_X("Could not resolve CLRJit path"));
+            }
+            else if (pal::realpath(&clrjit_path))
+            {
+                trace::verbose(_X("The resolved JIT path is '%s'"), clrjit_path.c_str());
+            }
+            else
+            {
+                clrjit_path.clear();
+                trace::warning(_X("Could not resolve symlink to CLRJit path '%s'"), probe_paths.clrjit.c_str());
+            }
+
+            pal::pal_clrstring(probe_paths.tpa, &_tpa_paths_cstr);
+            pal::pal_clrstring(_resolver.get_app_dir(), &_app_base_cstr);
+            pal::pal_clrstring(probe_paths.native, &_native_dirs_cstr);
+            pal::pal_clrstring(probe_paths.resources, &_resources_dirs_cstr);
+
+            pal::string_t fx_deps_str;
+            if (_resolver.get_fx_definitions().size() >= 2)
+            {
+                // Use the root fx to define FX_DEPS_FILE
+                fx_deps_str = get_root_framework(_resolver.get_fx_definitions()).get_deps_file();
+            }
+            pal::pal_clrstring(fx_deps_str, &_fx_deps);
+
+            // Get all deps files
+            pal::string_t allDeps;
+            for (int i = 0; i < _resolver.get_fx_definitions().size(); ++i)
+            {
+                allDeps += _resolver.get_fx_definitions()[i]->get_deps_file();
+                if (i < _resolver.get_fx_definitions().size() - 1)
+                {
+                    allDeps += _X(";");
+                }
+            }
+
+            pal::pal_clrstring(allDeps, &_deps);
+            pal::pal_clrstring(_resolver.get_lookup_probe_directories(), &_probe_directories);
+
+            if (_resolver.is_framework_dependent())
+            {
+                pal::pal_clrstring(get_root_framework(_resolver.get_fx_definitions()).get_found_version(), &_clr_library_version);
+            }
+            else
+            {
+                pal::pal_clrstring(_resolver.get_coreclr_library_version(), &_clr_library_version);
+            }
+
+            properties.add(common_property::TrustedPlatformAssemblies, _tpa_paths_cstr.data());
+            properties.add(common_property::NativeDllSearchDirectories, _native_dirs_cstr.data());
+            properties.add(common_property::PlatformResourceRoots, _resources_dirs_cstr.data());
+            properties.add(common_property::AppDomainCompatSwitch, "UseLatestBehaviorWhenTFMNotSpecified");
+
+            // Workaround: mscorlib does not resolve symlinks for AppContext.BaseDirectory dotnet/coreclr/issues/2128
+            properties.add(common_property::AppContextBaseDirectory, _app_base_cstr.data());
+            properties.add(common_property::AppContextDepsFiles, _deps.data());
+            properties.add(common_property::FxDepsFile, _fx_deps.data());
+            properties.add(common_property::ProbingDirectories, _probe_directories.data());
+            properties.add(common_property::FxProductVersion, _clr_library_version.data());
+
+            if (!clrjit_path.empty())
+            {
+                pal::pal_clrstring(clrjit_path, &_clrjit_path_cstr);
+                properties.add("JIT_PATH", _clrjit_path_cstr.data());
+            }
+
+            bool set_app_paths = false;
+
+            // Runtime options config properties.
+            for (int i = 0; i < g_init.cfg_keys.size(); ++i)
+            {
+                // Provide opt-in compatible behavior by using the switch to set APP_PATHS
+                if (pal::cstrcasecmp(g_init.cfg_keys[i].data(), "Microsoft.NETCore.DotNetHostPolicy.SetAppPaths") == 0)
+                {
+                    set_app_paths = (pal::cstrcasecmp(g_init.cfg_values[i].data(), "true") == 0);
+                }
+
+                properties.add(g_init.cfg_keys[i].data(), g_init.cfg_values[i].data());
+            }
+
+            // App paths and App NI paths
+            if (set_app_paths)
+            {
+                properties.add("APP_PATHS", _app_base_cstr.data());
+                properties.add("APP_NI_PATHS", _app_base_cstr.data());
+            }
+
+            // Startup hooks
+            pal::string_t startup_hooks;
+            if (pal::getenv(_X("DOTNET_STARTUP_HOOKS"), &startup_hooks))
+            {
+                pal::pal_clrstring(startup_hooks, &_startup_hooks_cstr);
+                properties.add("STARTUP_HOOKS", _startup_hooks_cstr.data());
+            }
+
+            return StatusCode::Success;
+        }
+
+        const std::unordered_set<pal::string_t>& breadcrumbs() const
+        {
+            return _breadcrumbs;
+        }
+
+    private:
+        hostpolicy_init_t &_hostpolicy_init;
+
+        deps_resolver_t _resolver;
+        const bool _breadcrumbs_enabled;
+        std::unordered_set<pal::string_t> _breadcrumbs;
+
+        // Note: these variables' lifetime should be longer than a call to coreclr_initialize.
+        std::vector<char> _tpa_paths_cstr;
+        std::vector<char> _app_base_cstr;
+        std::vector<char> _native_dirs_cstr;
+        std::vector<char> _resources_dirs_cstr;
+        std::vector<char> _fx_deps;
+        std::vector<char> _deps;
+        std::vector<char> _clrjit_path_cstr;
+        std::vector<char> _probe_directories;
+        std::vector<char> _clr_library_version;
+        std::vector<char> _startup_hooks_cstr;
+    };
 }
 
 int run_as_lib(const arguments_t& args, std::shared_ptr<coreclr_t> &coreclr)
@@ -44,172 +248,18 @@ int run_as_lib(const arguments_t& args, std::shared_ptr<coreclr_t> &coreclr)
 
 int run_as_app(const arguments_t& args, pal::string_t* out_host_command_result = nullptr)
 {
-    // Load the deps resolver
-    deps_resolver_t resolver(
-        args,
-        g_init.fx_definitions,
-        /* root_framework_rid_fallback_graph */ nullptr, // This means that the fx_definitions contains the root framework
-        g_init.is_framework_dependent);
-
-    pal::string_t resolver_errors;
-    if (!resolver.valid(&resolver_errors))
-    {
-        trace::error(_X("Error initializing the dependency resolver: %s"), resolver_errors.c_str());
-        return StatusCode::ResolverInitFailure;
-    }
-
-    // Setup breadcrumbs. Breadcrumbs are not enabled for API calls because they do not execute
+    // Breadcrumbs are not enabled for API calls because they do not execute
     // the app and may be re-entry
-    probe_paths_t probe_paths;
-    std::unordered_set<pal::string_t> breadcrumbs;
     bool breadcrumbs_enabled = (out_host_command_result == nullptr);
-    if (breadcrumbs_enabled)
-    {
-        pal::string_t policy_name = _STRINGIFY(HOST_POLICY_PKG_NAME);
-        pal::string_t policy_version = _STRINGIFY(HOST_POLICY_PKG_VER);
+    prepare_to_run_t prep{ g_init, args, breadcrumbs_enabled };
 
-        // Always insert the hostpolicy that the code is running on.
-        breadcrumbs.insert(policy_name);
-        breadcrumbs.insert(policy_name + _X(",") + policy_version);
-
-        if (!resolver.resolve_probe_paths(&probe_paths, &breadcrumbs))
-        {
-            return StatusCode::ResolverResolveFailure;
-        }
-    }
-    else
-    {
-        if (!resolver.resolve_probe_paths(&probe_paths, nullptr))
-        {
-            return StatusCode::ResolverResolveFailure;
-        }
-    }
-
-    pal::string_t clr_path = probe_paths.coreclr;
-    if (clr_path.empty() || !pal::realpath(&clr_path))
-    {
-        trace::error(_X("Could not resolve CoreCLR path. For more details, enable tracing by setting COREHOST_TRACE environment variable to 1"));;
-        return StatusCode::CoreClrResolveFailure;
-    }
-
-    // Get path in which CoreCLR is present.
-    pal::string_t clr_dir = get_directory(clr_path);
-
-    // System.Private.CoreLib.dll is expected to be next to CoreCLR.dll - add its path to the TPA list.
-    pal::string_t corelib_path = clr_dir;
-    append_path(&corelib_path, CORELIB_NAME);
-
-    // Append CoreLib path
-    if (probe_paths.tpa.back() != PATH_SEPARATOR)
-    {
-        probe_paths.tpa.push_back(PATH_SEPARATOR);
-    }
-
-    probe_paths.tpa.append(corelib_path);
-    probe_paths.tpa.push_back(PATH_SEPARATOR);
-
-    pal::string_t clrjit_path = probe_paths.clrjit;
-    if (clrjit_path.empty())
-    {
-        trace::warning(_X("Could not resolve CLRJit path"));
-    }
-    else if (pal::realpath(&clrjit_path))
-    {
-        trace::verbose(_X("The resolved JIT path is '%s'"), clrjit_path.c_str());
-    }
-    else
-    {
-        clrjit_path.clear();
-        trace::warning(_X("Could not resolve symlink to CLRJit path '%s'"), probe_paths.clrjit.c_str());
-    }
-
-    // Note: these variables' lifetime should be longer than coreclr_initialize.
-    std::vector<char> tpa_paths_cstr, app_base_cstr, native_dirs_cstr, resources_dirs_cstr, fx_deps, deps, clrjit_path_cstr, probe_directories, clr_library_version, startup_hooks_cstr;
-    pal::pal_clrstring(probe_paths.tpa, &tpa_paths_cstr);
-    pal::pal_clrstring(args.app_root, &app_base_cstr);
-    pal::pal_clrstring(probe_paths.native, &native_dirs_cstr);
-    pal::pal_clrstring(probe_paths.resources, &resources_dirs_cstr);
-
-    pal::string_t fx_deps_str;
-    if (resolver.get_fx_definitions().size() >= 2)
-    {
-        // Use the root fx to define FX_DEPS_FILE
-        fx_deps_str = get_root_framework(resolver.get_fx_definitions()).get_deps_file();
-    }
-    pal::pal_clrstring(fx_deps_str, &fx_deps);
-
-    // Get all deps files
-    pal::string_t allDeps;
-    for (int i = 0; i < resolver.get_fx_definitions().size(); ++i)
-    {
-        allDeps += resolver.get_fx_definitions()[i]->get_deps_file();
-        if (i < resolver.get_fx_definitions().size() - 1)
-        {
-            allDeps += _X(";");
-        }
-    }
-    pal::pal_clrstring(allDeps, &deps);
-
-    pal::pal_clrstring(resolver.get_lookup_probe_directories(), &probe_directories);
-
-    if (resolver.is_framework_dependent())
-    {
-        pal::pal_clrstring(get_root_framework(resolver.get_fx_definitions()).get_found_version() , &clr_library_version);
-    }
-    else
-    {
-        pal::pal_clrstring(resolver.get_coreclr_library_version(), &clr_library_version);
-    }
-
-    // Create CoreCLR property bag
+    // Build variables for CoreCLR instantiation
     coreclr_property_bag_t properties;
-
-    properties.add(common_property::TrustedPlatformAssemblies, tpa_paths_cstr.data());
-    properties.add(common_property::NativeDllSearchDirectories, native_dirs_cstr.data());
-    properties.add(common_property::PlatformResourceRoots, resources_dirs_cstr.data());
-    properties.add(common_property::AppDomainCompatSwitch, "UseLatestBehaviorWhenTFMNotSpecified");
-
-    // Workaround: mscorlib does not resolve symlinks for AppContext.BaseDirectory dotnet/coreclr/issues/2128
-    properties.add(common_property::AppContextBaseDirectory, app_base_cstr.data());
-    properties.add(common_property::AppContextDepsFiles, deps.data());
-    properties.add(common_property::FxDepsFile, fx_deps.data());
-    properties.add(common_property::ProbingDirectories, probe_directories.data());
-    properties.add(common_property::FxProductVersion, clr_library_version.data());
-
-    if (!clrjit_path.empty())
-    {
-        pal::pal_clrstring(clrjit_path, &clrjit_path_cstr);
-        properties.add("JIT_PATH", clrjit_path_cstr.data());
-    }
-
-    bool set_app_paths = false;
-
-    // Runtime options config properties.
-    for (int i = 0; i < g_init.cfg_keys.size(); ++i)
-    {
-        // Provide opt-in compatible behavior by using the switch to set APP_PATHS
-        if (pal::cstrcasecmp(g_init.cfg_keys[i].data(), "Microsoft.NETCore.DotNetHostPolicy.SetAppPaths") == 0)
-        {
-            set_app_paths = (pal::cstrcasecmp(g_init.cfg_values[i].data(), "true") == 0);
-        }
-
-        properties.add(g_init.cfg_keys[i].data(), g_init.cfg_values[i].data());
-    }
-
-    // App paths and App NI paths
-    if (set_app_paths)
-    {
-        properties.add("APP_PATHS", app_base_cstr.data());
-        properties.add("APP_NI_PATHS", app_base_cstr.data());
-    }
-
-    // Startup hooks
-    pal::string_t startup_hooks;
-    if (pal::getenv(_X("DOTNET_STARTUP_HOOKS"), &startup_hooks))
-    {
-        pal::pal_clrstring(startup_hooks, &startup_hooks_cstr);
-        properties.add("STARTUP_HOOKS", startup_hooks_cstr.data());
-    }
+    pal::string_t clr_path;
+    pal::string_t clr_dir;
+    int rc = prep.build_coreclr_properties(properties, clr_path, clr_dir);
+    if (rc != StatusCode::Success)
+        return rc;
 
     // Check for host command(s)
     if (pal::strcasecmp(g_init.host_command.c_str(), _X("get-native-search-directories")) == 0)
@@ -281,7 +331,7 @@ int run_as_app(const arguments_t& args, pal::string_t* out_host_command_result =
     pal::pal_clrstring(args.managed_application, &managed_app);
 
     // Leave breadcrumbs for servicing.
-    breadcrumb_writer_t writer(breadcrumbs_enabled, &breadcrumbs);
+    breadcrumb_writer_t writer(breadcrumbs_enabled, prep.breadcrumbs());
     writer.begin_write();
 
     // Previous hostpolicy trace messages must be printed before executing assembly
