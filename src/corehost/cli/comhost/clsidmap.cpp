@@ -92,8 +92,9 @@ namespace
         }
     };
 
-    clsid_map get_json_map_from_resource()
+    clsid_map get_json_map_from_resource(bool &found_resource)
     {
+        found_resource = false;
         HMODULE hmod = (HMODULE)get_current_module();
         if (hmod == nullptr)
             return{};
@@ -102,6 +103,7 @@ namespace
         if (resHandle == nullptr)
             return {};
 
+        found_resource = true;
         DWORD size = ::SizeofResource(hmod, resHandle);
         HGLOBAL resData = ::LoadResource(hmod, resHandle);
         if (resData == nullptr || size == 0)
@@ -144,9 +146,13 @@ clsid_map comhost::get_clsid_map()
     //      ...
     // }
 
+    // If a mapping as a resource was found, we don't
+    // want to fall back to looking on disk.
+    bool found_resource;
+
     // Find the JSON data that describes the CLSID mapping
-    clsid_map mapping = get_json_map_from_resource();
-    if (mapping.empty())
+    clsid_map mapping = get_json_map_from_resource(found_resource);
+    if (!found_resource && mapping.empty())
     {
         trace::verbose(_X("JSON map resource stream not found"));
 
