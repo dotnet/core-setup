@@ -113,15 +113,14 @@ The `DllRegisterServer()` and `DllUnregisterServer()` functions adhere to the [C
 
 #####  CLSID map format
 
-The `CLSID` mapping manifest is a JSON format (`.clsidmap` extension when on disk) that defines a mapping from `CLSID` to an assembly name and type name tuple.
+The `CLSID` mapping manifest is a JSON format (`.clsidmap` extension when on disk) that defines a mapping from `CLSID` to an assembly name and type name tuple. Each `CLSID` mapping is a key in the outer JSON object.
 
 ``` json
 {
     "<clsid>": {
-        "assembly": <assembly_name>,
-        "type": <type_name>
-    },
-    ...
+        "assembly": "<assembly_name>",
+        "type": "<type_name>"
+    }
 }
 ```
 
