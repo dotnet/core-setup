@@ -198,7 +198,7 @@ namespace
         "FX_PRODUCT_VERSION"
     };
 
-    static_assert(ARRAYSIZE(PropertyNameMapping) == static_cast<size_t>(common_property::Last), "Invalid property count");
+    static_assert((sizeof(PropertyNameMapping) / sizeof(*PropertyNameMapping)) == static_cast<size_t>(common_property::Last), "Invalid property count");
 }
 
 coreclr_property_bag_t::coreclr_property_bag_t()
