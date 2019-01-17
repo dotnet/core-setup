@@ -99,13 +99,10 @@
     <HostVersion Condition="'$(UseShippedHostPackage)' != 'true'">$(ProductVersion)</HostVersion>
     <HostVersion Condition="'$(UseShippedHostPackage)' == 'true'">2.0.0</HostVersion>
 
+    <!-- The AppHostVersion is used for all hosts that aren't dotnet.exe -->
     <UseShippedAppHostPackage>false</UseShippedAppHostPackage>
     <AppHostVersion Condition="'$(UseShippedAppHostPackage)' != 'true'">$(ProductVersion)</AppHostVersion>
     <AppHostVersion Condition="'$(UseShippedAppHostPackage)' == 'true'">2.0.0</AppHostVersion>
-
-    <UseShippedComHostPackage>false</UseShippedComHostPackage>
-    <ComHostVersion Condition="'$(UseShippedComHostPackage)' != 'true'">$(ProductVersion)</ComHostVersion>
-    <ComHostVersion Condition="'$(UseShippedComHostPackage)' == 'true'">2.0.0</ComHostVersion>
 
     <!--
         The FXR Resolver package version is only updated whenever there is a change in it.
