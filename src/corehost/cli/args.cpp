@@ -72,6 +72,9 @@ bool parse_arguments(
     }
     else if (init.host_mode == host_mode_t::libhost)
     {
+        // Find the managed assembly in the same directory
+        managed_application_path = init.host_info.app_path;
+
         assert(argc == 0 && argv == nullptr);
     }
     else

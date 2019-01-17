@@ -23,6 +23,8 @@ namespace
     hostpolicy_init_t g_init;
 
     std::shared_ptr<coreclr_t> g_coreclr;
+
+    std::mutex g_lib_lock;
     std::weak_ptr<coreclr_t> g_lib_coreclr;
 
     class prepare_to_run_t
@@ -235,15 +237,63 @@ int run_as_lib(const arguments_t& args, std::shared_ptr<coreclr_t> &coreclr)
     coreclr = g_lib_coreclr.lock();
     if (coreclr != nullptr)
     {
+        // [TODO] Validate the current CLR instance is acceptable for this request
+
         trace::info(_X("Using existing CoreClr instance"));
         return StatusCode::Success;
     }
 
-    assert(false && "Implement coreclr instance creation");
+    {
+        std::lock_guard<std::mutex> lock{ g_lib_lock };
+        coreclr = g_lib_coreclr.lock();
+        if (coreclr != nullptr)
+        {
+            trace::info(_X("Using existing CoreClr instance"));
+            return StatusCode::Success;
+        }
 
-    // Record validated supported coreclr
-    g_lib_coreclr = g_coreclr;
-    return StatusCode::HostApiFailed;
+        prepare_to_run_t prep{ g_init, args, false /* breadcrumbs_enabled */ };
+
+        // Build variables for CoreCLR instantiation
+        coreclr_property_bag_t properties;
+        pal::string_t clr_path;
+        pal::string_t clr_dir;
+        int rc = prep.build_coreclr_properties(properties, clr_path, clr_dir);
+        if (rc != StatusCode::Success)
+            return rc;
+
+        // Verbose logging
+        if (trace::is_enabled())
+        {
+            properties.log_properties();
+        }
+
+        std::vector<char> host_path;
+        pal::pal_clrstring(args.host_path, &host_path);
+
+        // Create a CoreCLR instance
+        trace::verbose(_X("CoreCLR path = '%s', CoreCLR dir = '%s'"), clr_path.c_str(), clr_dir.c_str());
+        std::unique_ptr<coreclr_t> coreclr_local;
+        auto hr = coreclr_t::create(
+            clr_dir,
+            host_path.data(),
+            "clr_libhost",
+            properties,
+            coreclr_local);
+
+        if (!SUCCEEDED(hr))
+        {
+            trace::error(_X("Failed to create CoreCLR, HRESULT: 0x%X"), hr);
+            return StatusCode::CoreClrInitFailure;
+        }
+
+        assert(g_coreclr == nullptr);
+        g_coreclr = std::move(coreclr_local);
+        g_lib_coreclr = g_coreclr;
+    }
+
+    coreclr = g_coreclr;
+    return StatusCode::Success;
 }
 
 int run_as_app(const arguments_t& args, pal::string_t* out_host_command_result = nullptr)
@@ -303,6 +353,11 @@ int run_as_app(const arguments_t& args, pal::string_t* out_host_command_result =
 
     assert(g_coreclr == nullptr);
     g_coreclr = std::move(coreclr);
+
+    {
+        std::lock_guard<std::mutex> lock{ g_lib_lock };
+        g_lib_coreclr = g_coreclr;
+    }
 
     // Initialize clr strings for arguments
     std::vector<std::vector<char>> argv_strs(args.app_argc);

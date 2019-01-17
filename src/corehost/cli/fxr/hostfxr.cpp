@@ -426,7 +426,23 @@ SHARED_API int32_t hostfxr_get_coreclr_delegate(
 
     trace::info(_X("--- Invoked hostfxr libhost (type: %d) [commit hash: %s]"), type, _STRINGIFY(REPO_COMMIT_HASH));
 
-    host_startup_info_t startup_info{ libhost_path, dotnet_root, libhost_path };
+    pal::string_t app_candidate{ libhost_path };
+
+    switch (type)
+    {
+    case coreclr_delegate_type::com_activation:
+    {
+        // Strip the comhost suffix to get the 'app'
+        size_t idx = app_candidate.rfind(_X(".comhost.dll"));
+        assert(idx != pal::string_t::npos);
+        app_candidate.replace(app_candidate.begin() + idx, app_candidate.end(), _X(".dll"));
+        break;
+    }
+    default:
+        return StatusCode::LibHostInvalidArgs;
+    }
+
+    host_startup_info_t startup_info{ libhost_path, dotnet_root, app_candidate.c_str() };
 
     return fx_muxer_t::get_coreclr_delegate(startup_info, type, delegate);
 }

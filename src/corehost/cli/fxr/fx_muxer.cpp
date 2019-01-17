@@ -488,9 +488,17 @@ bool fx_muxer_t::resolve_hostpolicy_dir(
         //    app dir.
         // 2. When activated with native exe, the standalone host, check own directory.
         assert(mode != host_mode_t::invalid);
-        expected = (mode == host_mode_t::apphost)
-            ? dotnet_root
-            : get_directory(specified_deps_file.empty() ? app_candidate : specified_deps_file);
+        switch (mode)
+        {
+        case host_mode_t::apphost:
+        case host_mode_t::libhost:
+            expected = dotnet_root;
+            break;
+
+        default:
+            expected = get_directory(specified_deps_file.empty() ? app_candidate : specified_deps_file);
+            break;
+        }
     }
 
     // Check if hostpolicy exists in "expected" directory.
@@ -1046,7 +1054,7 @@ int fx_muxer_t::soft_roll_forward_helper(
     {
         updated_newest.merge_roll_forward_settings_from(older);
         newest_references[fx_name] = updated_newest;
-        return 0;
+        return StatusCode::Success;
     }
 
     if (older.is_roll_forward_compatible(newer.get_fx_version_number()))
@@ -1063,16 +1071,16 @@ int fx_muxer_t::soft_roll_forward_helper(
         if (older_is_hard_roll_forward)
         {
             display_retry_framework_trace(older, newer);
-            return FrameworkCompatRetry;
+            return StatusCode::FrameworkCompatRetry;
         }
 
         display_compatible_framework_trace(newer.get_fx_version(), older);
-        return 0;
+        return StatusCode::Success;
     }
 
     // Error condition - not compatible with the other reference
     display_incompatible_framework_error(newer.get_fx_version(), older);
-    return FrameworkCompatFailure;
+    return StatusCode::FrameworkCompatFailure;
 }
 
 // Peform a "soft" roll-forward meaning we don't read any physical framework folders
@@ -1117,7 +1125,7 @@ int fx_muxer_t::read_framework(
         }
     }
 
-    int rc = 0;
+    int rc = StatusCode::Success;
 
     // Loop through each reference and resolve the framework
     for (const fx_reference_t& fx_ref : config.get_frameworks())
@@ -1288,13 +1296,13 @@ int fx_muxer_t::read_config_and_execute(
             fx_name_to_fx_reference_map_t oldest_references;
 
             // Read the shared frameworks; retry is necessary when a framework is already resolved, but then a newer compatible version is processed.
-            int rc = 0;
+            int rc = StatusCode::Success;
             int retry_count = 0;
             do
             {
                 fx_definitions.resize(1); // Erase any existing frameworks for re-try
                 rc = read_framework(host_info, override_settings, app_config, newest_references, oldest_references, fx_definitions);
-            } while (rc == FrameworkCompatRetry && retry_count++ < Max_Framework_Resolve_Retries);
+            } while (rc == StatusCode::FrameworkCompatRetry && retry_count++ < Max_Framework_Resolve_Retries);
 
             assert(retry_count < Max_Framework_Resolve_Retries);
 
@@ -1438,35 +1446,43 @@ int fx_muxer_t::get_coreclr_delegate(
     assert(host_info.is_valid());
 
     const host_mode_t mode = host_mode_t::libhost;
-    pal::string_t app_candidate{ host_info.host_path };
-
-    switch (type)
-    {
-    case coreclr_delegate_type::com_activation:
-    {
-        // Strip the comhost suffix to get the 'app'
-        size_t idx = app_candidate.rfind(_X("comhost.dll"));
-        assert(idx != pal::string_t::npos);
-        app_candidate.replace(app_candidate.begin() + idx, app_candidate.end(), _X(".dll"));
-    }
-    default:
-        return StatusCode::LibHostInvalidArgs;
-    }
-
-    pal::string_t runtime_config = _X("");
-    fx_reference_t override_settings;
 
     // Read config
     fx_definition_vector_t fx_definitions;
     auto app = new fx_definition_t();
     fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
 
-    int rc = read_config(*app, app_candidate, runtime_config, override_settings);
+    pal::string_t runtime_config = _X("");
+    fx_reference_t override_settings;
+    int rc = read_config(*app, host_info.app_path, runtime_config, override_settings);
     if (rc != StatusCode::Success)
         return rc;
 
     runtime_config_t app_config = app->get_runtime_config();
     bool is_framework_dependent = app_config.get_is_framework_dependent();
+    if (is_framework_dependent)
+    {
+        fx_name_to_fx_reference_map_t newest_references;
+        fx_name_to_fx_reference_map_t oldest_references;
+
+        // Read the shared frameworks; retry is necessary when a framework is already resolved, but then a newer compatible version is processed.
+        rc = StatusCode::Success;
+        int retry_count = 0;
+        do
+        {
+            fx_definitions.resize(1); // Erase any existing frameworks for re-try
+            rc = read_framework(host_info, override_settings, app_config, newest_references, oldest_references, fx_definitions);
+        } while (rc == StatusCode::FrameworkCompatRetry && retry_count++ < Max_Framework_Resolve_Retries);
+
+        assert(retry_count < Max_Framework_Resolve_Retries);
+
+        if (rc != StatusCode::Success)
+        {
+            return rc;
+        }
+
+        display_summary_of_frameworks(fx_definitions, newest_references);
+    }
 
     // Append specified probe paths first and then config file probe paths into realpaths.
     std::vector<pal::string_t> probe_realpaths;
@@ -1488,9 +1504,9 @@ int fx_muxer_t::get_coreclr_delegate(
 
     pal::string_t deps_file;
     pal::string_t impl_dir;
-    if (!resolve_hostpolicy_dir(mode, host_info.dotnet_root, fx_definitions, app_candidate, deps_file, probe_realpaths, &impl_dir))
+    if (!resolve_hostpolicy_dir(mode, host_info.dotnet_root, fx_definitions, host_info.app_path, deps_file, probe_realpaths, &impl_dir))
     {
-        return CoreHostLibMissingFailure;
+        return StatusCode::CoreHostLibMissingFailure;
     }
 
     pal::string_t additional_deps_serialized;
