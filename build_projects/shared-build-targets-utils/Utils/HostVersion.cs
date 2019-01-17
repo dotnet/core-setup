@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Build
         // Full versions and package information.
         public string LatestHostBuildMajor => CommitCountString;
         public string LatestHostBuildMinor => "00";
-        public static bool EnsureStableVersion => false;
+        public static bool EnsureStableVersion => true;
 
         // Comment below lines when stabilizing 1.1.X and we are going to update one (or more) of the host packages.
         //
