@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             try
             {
-                return ReadCore(drained.Array);
+                return ReadCore(drained.AsSpan(0, drained.Count), drained.Array);
             }
             catch
             {
@@ -101,9 +101,9 @@ namespace Microsoft.Extensions.DependencyModel
             }
         }
 
-        private DependencyContext ReadCore(byte[] buffer)
+        private DependencyContext ReadCore(ReadOnlySpan<byte> jsonData, byte[] rentedBuffer)
         {
-            var jsonReader = new Utf8JsonReader(buffer, isFinalBlock: true, state: default);
+            var jsonReader = new Utf8JsonReader(jsonData, isFinalBlock: true, state: default);
 
             jsonReader.ReadStartObject();
 
@@ -183,6 +183,10 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 throw new FormatException("No runtime target found");
             }
+
+            // Holds document content, clear it before returning it.
+            rentedBuffer.AsSpan().Clear();
+            ArrayPool<byte>.Shared.Return(rentedBuffer);
 
             return new DependencyContext(
                 new TargetInfo(framework, runtime, runtimeSignature, isPortable),
