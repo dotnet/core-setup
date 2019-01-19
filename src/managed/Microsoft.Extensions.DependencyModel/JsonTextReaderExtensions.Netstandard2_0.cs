@@ -57,7 +57,7 @@ namespace Microsoft.Extensions.DependencyModel
             CheckStartObject(ref reader);
         }
 
-        internal static void CheckStartObject(this ref Utf8JsonReader reader)
+        internal static void CheckStartObject(ref Utf8JsonReader reader)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
             {
@@ -96,7 +96,7 @@ namespace Microsoft.Extensions.DependencyModel
             return items.ToArray();
         }
 
-        internal static string ReadAsString(this Utf8JsonReader reader)
+        internal static string ReadAsString(this ref Utf8JsonReader reader)
         {
             reader.Read();
             if (reader.TokenType != JsonTokenType.String)
@@ -106,17 +106,17 @@ namespace Microsoft.Extensions.DependencyModel
             return reader.GetStringValue();
         }
 
-        internal static bool ReadAsBoolean(this Utf8JsonReader reader)
+        internal static bool ReadAsBoolean(this ref Utf8JsonReader reader)
         {
             reader.Read();
             if (reader.TokenType != JsonTokenType.True && reader.TokenType != JsonTokenType.False)
             {
-                throw CreateUnexpectedException(ref reader, "a JSON string token");
+                throw CreateUnexpectedException(ref reader, "a JSON true or false literal token");
             }
             return reader.GetBooleanValue();
         }
 
-        internal static bool ReadAsNullableBoolean(this Utf8JsonReader reader, bool defaultValue)
+        internal static bool ReadAsNullableBoolean(this ref Utf8JsonReader reader, bool defaultValue)
         {
             reader.Read();
             if (reader.TokenType != JsonTokenType.True && reader.TokenType != JsonTokenType.False)
@@ -125,7 +125,7 @@ namespace Microsoft.Extensions.DependencyModel
                 {
                     return defaultValue;
                 }
-                throw CreateUnexpectedException(ref reader, "a JSON string token");
+                throw CreateUnexpectedException(ref reader, "a JSON true or false literal token");
             }
             return reader.GetBooleanValue();
         }

@@ -24,20 +24,23 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Bcl.Json.Sources" Version="4.6.0-preview.19068.3" />
+    <PackageReference Include="Microsoft.Bcl.Json.Sources" Version="4.6.0-preview.19068.3">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="System.Memory" Version="4.5.2" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
-    <Compile Remove="DependencyContextJsonReader.Netstandard2_0.cs"/>
-    <Compile Remove="DependencyContextWriter.Netstandard2_0.cs"/>
-    <Compile Remove="JsonTextReaderExtensions.Netstandard2_0.cs"/>
+    <Compile Remove="DependencyContextJsonReader.Netstandard2_0.cs" />
+    <Compile Remove="DependencyContextWriter.Netstandard2_0.cs" />
+    <Compile Remove="JsonTextReaderExtensions.Netstandard2_0.cs" />
+    <Compile Remove="StreamBufferWriter.Netstandard2_0.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <Compile Remove="DependencyContextJsonReader.cs"/>
-    <Compile Remove="DependencyContextWriter.cs"/>
-    <Compile Remove="JsonTextReaderExtensions.cs"/>
+    <Compile Remove="DependencyContextJsonReader.cs" />
+    <Compile Remove="DependencyContextWriter.cs" />
+    <Compile Remove="JsonTextReaderExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'netstandard1.6' ">
