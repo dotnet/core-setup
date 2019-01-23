@@ -13,11 +13,13 @@ namespace Microsoft.Extensions.DependencyModel
         Stream _stream;
         byte[] _rentedBuffer;
 
-        public StreamBufferWriter(Stream stream, int bufferSize = 256)
+        private const int MinimumBufferSize = 256;
+
+        public StreamBufferWriter(Stream stream, int bufferSize = MinimumBufferSize)
         {
             if (bufferSize <= 0)
             {
-                throw new ArgumentNullException(nameof(bufferSize));
+                throw new ArgumentException(nameof(bufferSize));
             }
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
 
@@ -42,15 +44,21 @@ namespace Microsoft.Extensions.DependencyModel
 
         public Memory<byte> GetMemory(int sizeHint = 0)
         {
-            if (sizeHint > _rentedBuffer.Length)
+            if (sizeHint < 0)
+                throw new ArgumentException(nameof(sizeHint));
+
+            if (sizeHint == 0)
             {
-                var newSize = _rentedBuffer.Length * 2;
-                if (sizeHint != 0)
-                {
-                    newSize = sizeHint;
-                }
-                var temp = _rentedBuffer;
+                int newSize = _rentedBuffer.Length == 0 ? MinimumBufferSize : checked (_rentedBuffer.Length * 2);
+                byte[] temp = _rentedBuffer;
                 _rentedBuffer = ArrayPool<byte>.Shared.Rent(newSize);
+                temp.AsSpan().Clear();
+                ArrayPool<byte>.Shared.Return(temp);
+            }
+            else if (sizeHint > _rentedBuffer.Length)
+            {
+                var temp = _rentedBuffer;
+                _rentedBuffer = ArrayPool<byte>.Shared.Rent(sizeHint);
                 temp.AsSpan().Clear();
                 ArrayPool<byte>.Shared.Return(temp);
             }
@@ -60,15 +68,21 @@ namespace Microsoft.Extensions.DependencyModel
 
         public Span<byte> GetSpan(int sizeHint = 0)
         {
-            if (sizeHint > _rentedBuffer.Length)
+            if (sizeHint < 0)
+                throw new ArgumentException(nameof(sizeHint));
+
+            if (sizeHint == 0)
             {
-                var newSize = _rentedBuffer.Length * 2;
-                if (sizeHint != 0)
-                {
-                    newSize = sizeHint;
-                }
-                var temp = _rentedBuffer;
+                int newSize = _rentedBuffer.Length == 0 ? MinimumBufferSize : checked(_rentedBuffer.Length * 2);
+                byte[] temp = _rentedBuffer;
                 _rentedBuffer = ArrayPool<byte>.Shared.Rent(newSize);
+                temp.AsSpan().Clear();
+                ArrayPool<byte>.Shared.Return(temp);
+            }
+            else if (sizeHint > _rentedBuffer.Length)
+            {
+                var temp = _rentedBuffer;
+                _rentedBuffer = ArrayPool<byte>.Shared.Rent(sizeHint);
                 temp.AsSpan().Clear();
                 ArrayPool<byte>.Shared.Return(temp);
             }

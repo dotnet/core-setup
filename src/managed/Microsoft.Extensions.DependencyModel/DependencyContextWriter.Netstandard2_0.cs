@@ -57,7 +57,7 @@ namespace Microsoft.Extensions.DependencyModel
             else
             {
                 jsonWriter.WriteString(DependencyContextStrings.RuntimeTargetNamePropertyName,
-                    context.Target.Framework + DependencyContextStrings.VersionSeperator + context.Target.Runtime, escape: false);
+                    context.Target.Framework + DependencyContextStrings.VersionSeparator + context.Target.Runtime, escape: false);
             }
             jsonWriter.WriteString(DependencyContextStrings.RuntimeTargetSignaturePropertyName,
                 context.Target.RuntimeSignature, escape: false);
@@ -115,7 +115,7 @@ namespace Microsoft.Extensions.DependencyModel
 
         private void AddBooleanPropertyIfNotNull(string name, bool? value, ref Utf8JsonWriter jsonWriter)
         {
-            if (value != null && value.HasValue)
+            if (value.HasValue)
             {
                 jsonWriter.WriteBoolean(name, value.Value, escape: true);
             }
@@ -131,7 +131,7 @@ namespace Microsoft.Extensions.DependencyModel
             else
             {
                 WriteTarget(context.Target.Framework, context.CompileLibraries, ref jsonWriter);
-                WriteTarget(context.Target.Framework + DependencyContextStrings.VersionSeperator + context.Target.Runtime,
+                WriteTarget(context.Target.Framework + DependencyContextStrings.VersionSeparator + context.Target.Runtime,
                     context.RuntimeLibraries, ref jsonWriter);
             }
             jsonWriter.WriteEndObject();
@@ -140,9 +140,11 @@ namespace Microsoft.Extensions.DependencyModel
         private void WriteTarget(string key, IReadOnlyList<Library> libraries, ref Utf8JsonWriter jsonWriter)
         {
             jsonWriter.WriteStartObject(key);
-            foreach (Library library in libraries)
+            int count = libraries.Count;
+            for (int i = 0; i < count; i++)
             {
-                WriteTargetLibrary(library.Name + DependencyContextStrings.VersionSeperator + library.Version, library, ref jsonWriter);
+                Library library = libraries[i];
+                WriteTargetLibrary(library.Name + DependencyContextStrings.VersionSeparator + library.Version, library, ref jsonWriter);
             }
             jsonWriter.WriteEndObject();
         }
@@ -173,7 +175,7 @@ namespace Microsoft.Extensions.DependencyModel
 
                 Library library = (Library)compilationLibrary ?? (Library)runtimeLibrary;
 
-                WritePortableTargetLibrary(library.Name + DependencyContextStrings.VersionSeperator + library.Version,
+                WritePortableTargetLibrary(library.Name + DependencyContextStrings.VersionSeparator + library.Version,
                     runtimeLibrary, compilationLibrary, ref jsonWriter);
             }
             jsonWriter.WriteEndObject();
@@ -401,7 +403,7 @@ namespace Microsoft.Extensions.DependencyModel
         {
             IEnumerable<IGrouping<string, Library>> allLibraries =
                 context.RuntimeLibraries.Cast<Library>().Concat(context.CompileLibraries)
-                    .GroupBy(library => library.Name + DependencyContextStrings.VersionSeperator + library.Version);
+                    .GroupBy(library => library.Name + DependencyContextStrings.VersionSeparator + library.Version);
 
             jsonWriter.WriteStartObject(DependencyContextStrings.LibrariesPropertyName, escape: false);
             foreach (IGrouping<string, Library> libraryGroup in allLibraries)

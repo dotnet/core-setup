@@ -43,9 +43,9 @@ namespace Microsoft.Extensions.DependencyModel
 
         private DependencyContext Read(JsonTextReader reader)
         {
-            var runtime = string.Empty;
-            var framework = string.Empty;
-            var isPortable = true;
+            string runtime = string.Empty;
+            string framework = string.Empty;
+            bool isPortable = true;
             string runtimeTargetName = null;
             string runtimeSignature = null;
 
@@ -91,11 +91,11 @@ namespace Microsoft.Extensions.DependencyModel
 
             if (runtimeTargetName != null)
             {
-                var seperatorIndex = runtimeTargetName.IndexOf(DependencyContextStrings.VersionSeperator);
-                if (seperatorIndex > -1 && seperatorIndex < runtimeTargetName.Length)
+                var separatorIndex = runtimeTargetName.IndexOf(DependencyContextStrings.VersionSeparator);
+                if (separatorIndex > -1 && separatorIndex < runtimeTargetName.Length)
                 {
-                    runtime = runtimeTargetName.Substring(seperatorIndex + 1);
-                    framework = runtimeTargetName.Substring(0, seperatorIndex);
+                    runtime = runtimeTargetName.Substring(separatorIndex + 1);
+                    framework = runtimeTargetName.Substring(0, separatorIndex);
                     isPortable = false;
                 }
                 else
@@ -157,7 +157,7 @@ namespace Microsoft.Extensions.DependencyModel
 
         private bool IsRuntimeTarget(string name)
         {
-            return name.Contains(DependencyContextStrings.VersionSeperator);
+            return name.Contains(DependencyContextStrings.VersionSeparator);
         }
 
         private void ReadRuntimeTarget(JsonTextReader reader, out string runtimeTargetName, out string runtimeSignature)
@@ -629,10 +629,10 @@ namespace Microsoft.Extensions.DependencyModel
                 throw new InvalidOperationException($"Cannot find library information for {nameWithVersion}");
             }
 
-            var seperatorPosition = nameWithVersion.IndexOf(DependencyContextStrings.VersionSeperator);
+            var separatorPosition = nameWithVersion.IndexOf(DependencyContextStrings.VersionSeparator);
 
-            var name = Pool(nameWithVersion.Substring(0, seperatorPosition));
-            var version = Pool(nameWithVersion.Substring(seperatorPosition + 1));
+            var name = Pool(nameWithVersion.Substring(0, separatorPosition));
+            var version = Pool(nameWithVersion.Substring(separatorPosition + 1));
 
             if (runtime)
             {

@@ -53,7 +53,7 @@ namespace Microsoft.Extensions.DependencyModel
                 new JProperty(DependencyContextStrings.RuntimeTargetNamePropertyName,
                     context.Target.IsPortable ?
                     context.Target.Framework :
-                    context.Target.Framework + DependencyContextStrings.VersionSeperator + context.Target.Runtime
+                    context.Target.Framework + DependencyContextStrings.VersionSeparator + context.Target.Runtime
                 ),
                 new JProperty(DependencyContextStrings.RuntimeTargetSignaturePropertyName,
                     context.Target.RuntimeSignature
@@ -108,7 +108,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             return new JObject(
                 new JProperty(context.Target.Framework, WriteTarget(context.CompileLibraries)),
-                new JProperty(context.Target.Framework + DependencyContextStrings.VersionSeperator + context.Target.Runtime,
+                new JProperty(context.Target.Framework + DependencyContextStrings.VersionSeparator + context.Target.Runtime,
                     WriteTarget(context.RuntimeLibraries))
                 );
         }
@@ -117,7 +117,7 @@ namespace Microsoft.Extensions.DependencyModel
         {
             return new JObject(
                 libraries.Select(library =>
-                    new JProperty(library.Name + DependencyContextStrings.VersionSeperator + library.Version, WriteTargetLibrary(library))));
+                    new JProperty(library.Name + DependencyContextStrings.VersionSeparator + library.Version, WriteTargetLibrary(library))));
         }
 
         private JObject WritePortableTarget(IReadOnlyList<RuntimeLibrary> runtimeLibraries, IReadOnlyList<CompilationLibrary> compilationLibraries)
@@ -148,7 +148,7 @@ namespace Microsoft.Extensions.DependencyModel
 
                 var library = (Library)compilationLibrary ?? (Library)runtimeLibrary;
                 targetObject.Add(
-                    new JProperty(library.Name + DependencyContextStrings.VersionSeperator + library.Version,
+                    new JProperty(library.Name + DependencyContextStrings.VersionSeparator + library.Version,
                         WritePortableTargetLibrary(runtimeLibrary, compilationLibrary)
                         )
                     );
@@ -349,7 +349,7 @@ namespace Microsoft.Extensions.DependencyModel
         {
             var allLibraries =
                 context.RuntimeLibraries.Cast<Library>().Concat(context.CompileLibraries)
-                    .GroupBy(library => library.Name + DependencyContextStrings.VersionSeperator + library.Version);
+                    .GroupBy(library => library.Name + DependencyContextStrings.VersionSeparator + library.Version);
 
             return new JObject(allLibraries.Select(libraries => new JProperty(libraries.Key, WriteLibrary(libraries.First()))));
         }

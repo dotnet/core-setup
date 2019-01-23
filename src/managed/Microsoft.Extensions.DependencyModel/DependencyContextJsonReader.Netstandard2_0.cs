@@ -23,17 +23,25 @@ namespace Microsoft.Extensions.DependencyModel
 
             ArraySegment<byte> drained = ReadToEnd(stream);
 
+            DependencyContext dependencyContext;
             try
             {
-                return ReadCore(drained.AsSpan(0, drained.Count), drained.Array);
+                dependencyContext = ReadCore(drained.AsSpan(0, drained.Count));
             }
             catch
             {
                 // Holds document content, clear it before returning it.
-                drained.AsSpan().Clear();
+                drained.AsSpan(0, drained.Count).Clear();
                 ArrayPool<byte>.Shared.Return(drained.Array);
                 throw;
             }
+            finally
+            {
+                // Holds document content, clear it before returning it.
+                drained.AsSpan(0, drained.Count).Clear();
+                ArrayPool<byte>.Shared.Return(drained.Array);
+            }
+            return dependencyContext;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -101,15 +109,15 @@ namespace Microsoft.Extensions.DependencyModel
             }
         }
 
-        private DependencyContext ReadCore(ReadOnlySpan<byte> jsonData, byte[] rentedBuffer)
+        private DependencyContext ReadCore(ReadOnlySpan<byte> jsonData)
         {
             var jsonReader = new Utf8JsonReader(jsonData, isFinalBlock: true, state: default);
 
             jsonReader.ReadStartObject();
 
-            var runtime = string.Empty;
-            var framework = string.Empty;
-            var isPortable = true;
+            string runtime = string.Empty;
+            string framework = string.Empty;
+            bool isPortable = true;
             string runtimeTargetName = null;
             string runtimeSignature = null;
 
@@ -153,11 +161,11 @@ namespace Microsoft.Extensions.DependencyModel
 
             if (runtimeTargetName != null)
             {
-                var seperatorIndex = runtimeTargetName.IndexOf(DependencyContextStrings.VersionSeperator);
-                if (seperatorIndex > -1 && seperatorIndex < runtimeTargetName.Length)
+                var separatorIndex = runtimeTargetName.IndexOf(DependencyContextStrings.VersionSeparator);
+                if (separatorIndex > -1 && separatorIndex < runtimeTargetName.Length)
                 {
-                    runtime = runtimeTargetName.Substring(seperatorIndex + 1);
-                    framework = runtimeTargetName.Substring(0, seperatorIndex);
+                    runtime = runtimeTargetName.Substring(separatorIndex + 1);
+                    framework = runtimeTargetName.Substring(0, separatorIndex);
                     isPortable = false;
                 }
                 else
@@ -183,10 +191,6 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 throw new FormatException("No runtime target found");
             }
-
-            // Holds document content, clear it before returning it.
-            rentedBuffer.AsSpan().Clear();
-            ArrayPool<byte>.Shared.Return(rentedBuffer);
 
             return new DependencyContext(
                 new TargetInfo(framework, runtime, runtimeSignature, isPortable),
@@ -223,7 +227,7 @@ namespace Microsoft.Extensions.DependencyModel
 
         private bool IsRuntimeTarget(string name)
         {
-            return name.Contains(DependencyContextStrings.VersionSeperator);
+            return name.Contains(DependencyContextStrings.VersionSeparator);
         }
 
         private void ReadRuntimeTarget(ref Utf8JsonReader reader, out string runtimeTargetName, out string runtimeSignature)
@@ -683,10 +687,10 @@ namespace Microsoft.Extensions.DependencyModel
                 throw new InvalidOperationException($"Cannot find library information for {nameWithVersion}");
             }
 
-            var seperatorPosition = nameWithVersion.IndexOf(DependencyContextStrings.VersionSeperator);
+            var separatorPosition = nameWithVersion.IndexOf(DependencyContextStrings.VersionSeparator);
 
-            var name = Pool(nameWithVersion.Substring(0, seperatorPosition));
-            var version = Pool(nameWithVersion.Substring(seperatorPosition + 1));
+            var name = Pool(nameWithVersion.Substring(0, separatorPosition));
+            var version = Pool(nameWithVersion.Substring(separatorPosition + 1));
 
             if (runtime)
             {
