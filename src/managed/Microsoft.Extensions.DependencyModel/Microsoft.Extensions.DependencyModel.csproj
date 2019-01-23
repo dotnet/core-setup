@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Bcl.Json.Sources" Version="4.6.0-preview.19068.3">
+    <PackageReference Include="Microsoft.Bcl.Json.Sources" Version="4.6.0-preview.19072.2">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="System.Memory" Version="4.5.2" />

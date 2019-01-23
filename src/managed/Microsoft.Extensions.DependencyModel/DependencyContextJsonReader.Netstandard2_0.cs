@@ -120,7 +120,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (jsonReader.Read() && jsonReader.TokenType == JsonTokenType.PropertyName)
             {
-                switch (jsonReader.GetStringValue())
+                switch (jsonReader.GetString())
                 {
                     case DependencyContextStrings.RuntimeTargetPropertyName:
                         ReadRuntimeTarget(ref jsonReader, out runtimeTargetName, out runtimeSignature);
@@ -268,7 +268,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                switch (reader.GetStringValue())
+                switch (reader.GetString())
                 {
                     case DependencyContextStrings.DefinesPropertyName:
                         defines = reader.ReadStringArray();
@@ -337,7 +337,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                targets.Add(ReadTarget(ref reader, reader.GetStringValue()));
+                targets.Add(ReadTarget(ref reader, reader.GetString()));
             }
 
             reader.CheckEndObject();
@@ -353,7 +353,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                libraries.Add(ReadTargetLibrary(ref reader, reader.GetStringValue()));
+                libraries.Add(ReadTargetLibrary(ref reader, reader.GetString()));
             }
 
             reader.CheckEndObject();
@@ -379,7 +379,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                switch (reader.GetStringValue())
+                switch (reader.GetString())
                 {
                     case DependencyContextStrings.DependenciesPropertyName:
                         dependencies = ReadTargetLibraryDependencies(ref reader);
@@ -447,7 +447,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                string libraryName = reader.GetStringValue();
+                string libraryName = reader.GetString();
                 reader.Skip();
 
                 runtimes.Add(libraryName);
@@ -469,7 +469,7 @@ namespace Microsoft.Extensions.DependencyModel
                 string assemblyVersion = null;
                 string fileVersion = null;
 
-                string path = reader.GetStringValue();
+                string path = reader.GetString();
 
                 reader.ReadStartObject();
 
@@ -506,7 +506,7 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 var runtimeTarget = new RuntimeTargetEntryStub
                 {
-                    Path = reader.GetStringValue()
+                    Path = reader.GetString()
                 };
 
                 reader.ReadStartObject();
@@ -548,7 +548,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                string path = reader.GetStringValue();
+                string path = reader.GetString();
                 string locale = null;
 
                 reader.ReadStartObject();
@@ -582,7 +582,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                string libraryName = reader.GetStringValue();
+                string libraryName = reader.GetString();
 
                 libraries.Add(Pool(libraryName), ReadOneLibrary(ref reader));
             }
@@ -605,7 +605,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                switch (reader.GetStringValue())
+                switch (reader.GetString())
                 {
                     case DependencyContextStrings.Sha512PropertyName:
                         hash = reader.ReadAsString();
@@ -652,7 +652,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                string runtime = reader.GetStringValue();
+                string runtime = reader.GetString();
                 var fallbacks = reader.ReadStringArray();
 
                 runtimeFallbacks.Add(new RuntimeFallbacks(runtime, fallbacks));

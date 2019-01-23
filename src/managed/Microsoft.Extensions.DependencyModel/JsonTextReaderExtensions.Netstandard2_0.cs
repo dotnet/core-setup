@@ -15,13 +15,13 @@ namespace Microsoft.Extensions.DependencyModel
             value = null;
             if (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                name = reader.GetStringValue();
+                name = reader.GetString();
                 
                 if (reader.Read())
                 {
                     if (reader.TokenType == JsonTokenType.String)
                     {
-                        value = reader.GetStringValue();
+                        value = reader.GetString();
                     }
                     else
                     {
@@ -85,7 +85,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonTokenType.String)
             {
-                items.Add(reader.GetStringValue());
+                items.Add(reader.GetString());
             }
 
             if (reader.TokenType != JsonTokenType.EndArray)
@@ -107,7 +107,7 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 throw CreateUnexpectedException(ref reader, "a JSON string token");
             }
-            return reader.GetStringValue();
+            return reader.GetString();
         }
 
         internal static bool ReadAsBoolean(this ref Utf8JsonReader reader)
@@ -117,7 +117,7 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 throw CreateUnexpectedException(ref reader, "a JSON true or false literal token");
             }
-            return reader.GetBooleanValue();
+            return reader.GetBoolean();
         }
 
         internal static bool ReadAsNullableBoolean(this ref Utf8JsonReader reader, bool defaultValue)
@@ -131,7 +131,7 @@ namespace Microsoft.Extensions.DependencyModel
                 }
                 throw CreateUnexpectedException(ref reader, "a JSON true or false literal token");
             }
-            return reader.GetBooleanValue();
+            return reader.GetBoolean();
         }
 
         internal static Exception CreateUnexpectedException(ref Utf8JsonReader reader, string expected)
