@@ -10,17 +10,16 @@ namespace Microsoft.Extensions.DependencyModel
 {
     internal struct StreamBufferWriter : IBufferWriter<byte>, IDisposable
     {
-        Stream _stream;
-        byte[] _rentedBuffer;
+        private Stream _stream;
+        private byte[] _rentedBuffer;
 
         private const int MinimumBufferSize = 256;
 
         public StreamBufferWriter(Stream stream, int bufferSize = MinimumBufferSize)
         {
             if (bufferSize <= 0)
-            {
                 throw new ArgumentException(nameof(bufferSize));
-            }
+
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
 
             _rentedBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
@@ -49,7 +48,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             if (sizeHint == 0)
             {
-                int newSize = _rentedBuffer.Length == 0 ? MinimumBufferSize : checked (_rentedBuffer.Length * 2);
+                int newSize = _rentedBuffer.Length == 0 ? MinimumBufferSize : checked(_rentedBuffer.Length * 2);
                 byte[] temp = _rentedBuffer;
                 _rentedBuffer = ArrayPool<byte>.Shared.Rent(newSize);
                 temp.AsSpan().Clear();
