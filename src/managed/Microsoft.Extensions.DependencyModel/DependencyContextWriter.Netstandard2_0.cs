@@ -42,6 +42,7 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 WriteRuntimeGraph(context, ref jsonWriter);
             }
+            jsonWriter.WriteEndObject();
             jsonWriter.Flush();
         }
 
