@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <Compile Remove="DependencyContextJsonReader.cs" />
+    <Compile Remove="DependencyContextJsonReader.Newtonsoft.cs" />
     <Compile Remove="DependencyContextWriter.cs" />
     <Compile Remove="JsonTextReaderExtensions.cs" />
   </ItemGroup>

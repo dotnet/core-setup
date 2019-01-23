@@ -10,10 +10,8 @@ using System.Text.Json;
 
 namespace Microsoft.Extensions.DependencyModel
 {
-    public class DependencyContextJsonReader : IDependencyContextReader
+    public partial class DependencyContextJsonReader : IDependencyContextReader
     {
-        private readonly IDictionary<string, string> _stringPool = new Dictionary<string, string>();
-
         public DependencyContext Read(Stream stream)
         {
             if (stream == null)
@@ -42,71 +40,6 @@ namespace Microsoft.Extensions.DependencyModel
                 ArrayPool<byte>.Shared.Return(drained.Array);
             }
             return dependencyContext;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _stringPool.Clear();
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        private const int UnseekableStreamInitialRentSize = 4096;
-
-        private static ArraySegment<byte> ReadToEnd(Stream stream)
-        {
-            int written = 0;
-            byte[] rented = null;
-
-            try
-            {
-                long expectedLength = 0;
-
-                if (stream.CanSeek)
-                {
-                    expectedLength = Math.Max(1L, stream.Length - stream.Position);
-                    rented = ArrayPool<byte>.Shared.Rent(checked((int)expectedLength));
-                }
-                else
-                {
-                    rented = ArrayPool<byte>.Shared.Rent(UnseekableStreamInitialRentSize);
-                }
-
-                int lastRead;
-
-                do
-                {
-                    if (expectedLength == 0 && rented.Length == written)
-                    {
-                        byte[] toReturn = rented;
-                        rented = ArrayPool<byte>.Shared.Rent(checked(toReturn.Length * 2));
-                        Buffer.BlockCopy(toReturn, 0, rented, 0, toReturn.Length);
-                        // Holds document content, clear it.
-                        ArrayPool<byte>.Shared.Return(toReturn, clearArray: true);
-                    }
-
-                    lastRead = stream.Read(rented, written, rented.Length - written);
-                    written += lastRead;
-                } while (lastRead > 0);
-
-                return new ArraySegment<byte>(rented, 0, written);
-            }
-            catch
-            {
-                if (rented != null)
-                {
-                    // Holds document content, clear it before returning it.
-                    rented.AsSpan(0, written).Clear();
-                    ArrayPool<byte>.Shared.Return(rented);
-                }
-                throw;
-            }
         }
 
         private DependencyContext ReadCore(ReadOnlySpan<byte> jsonData)
@@ -198,36 +131,6 @@ namespace Microsoft.Extensions.DependencyModel
                 CreateLibraries(compileTarget?.Libraries, false, libraryStubs).Cast<CompilationLibrary>().ToArray(),
                 CreateLibraries(runtimeTarget.Libraries, true, libraryStubs).Cast<RuntimeLibrary>().ToArray(),
                 runtimeFallbacks ?? Enumerable.Empty<RuntimeFallbacks>());
-        }
-
-        private Target SelectRuntimeTarget(List<Target> targets, string runtimeTargetName)
-        {
-            Target target;
-
-            if (targets == null || targets.Count == 0)
-            {
-                throw new FormatException("Dependency file does not have 'targets' section");
-            }
-
-            if (!string.IsNullOrEmpty(runtimeTargetName))
-            {
-                target = targets.FirstOrDefault(t => t.Name == runtimeTargetName);
-                if (target == null)
-                {
-                    throw new FormatException($"Target with name {runtimeTargetName} not found");
-                }
-            }
-            else
-            {
-                target = targets.FirstOrDefault(t => IsRuntimeTarget(t.Name));
-            }
-
-            return target;
-        }
-
-        private bool IsRuntimeTarget(string name)
-        {
-            return name.Contains(DependencyContextStrings.VersionSeparator);
         }
 
         private void ReadRuntimeTarget(ref Utf8JsonReader reader, out string runtimeTargetName, out string runtimeSignature)
@@ -667,179 +570,56 @@ namespace Microsoft.Extensions.DependencyModel
             return runtimeFallbacks;
         }
 
-        private IEnumerable<Library> CreateLibraries(IEnumerable<TargetLibrary> libraries, bool runtime, Dictionary<string, LibraryStub> libraryStubs)
+        private static ArraySegment<byte> ReadToEnd(Stream stream)
         {
-            if (libraries == null)
+            int written = 0;
+            byte[] rented = null;
+
+            try
             {
-                return Enumerable.Empty<Library>();
-            }
-            return libraries
-                .Select(property => CreateLibrary(property, runtime, libraryStubs))
-                .Where(library => library != null);
-        }
+                long expectedLength = 0;
 
-        private Library CreateLibrary(TargetLibrary targetLibrary, bool runtime, Dictionary<string, LibraryStub> libraryStubs)
-        {
-            var nameWithVersion = targetLibrary.Name;
-
-            if (libraryStubs == null || !libraryStubs.TryGetValue(nameWithVersion, out LibraryStub stub))
-            {
-                throw new InvalidOperationException($"Cannot find library information for {nameWithVersion}");
-            }
-
-            var separatorPosition = nameWithVersion.IndexOf(DependencyContextStrings.VersionSeparator);
-
-            var name = Pool(nameWithVersion.Substring(0, separatorPosition));
-            var version = Pool(nameWithVersion.Substring(separatorPosition + 1));
-
-            if (runtime)
-            {
-                // Runtime section of this library was trimmed by type:platform
-                var isCompilationOnly = targetLibrary.CompileOnly;
-                if (isCompilationOnly == true)
+                if (stream.CanSeek)
                 {
-                    return null;
+                    expectedLength = Math.Max(1L, stream.Length - stream.Position);
+                    rented = ArrayPool<byte>.Shared.Rent(checked((int)expectedLength));
+                }
+                else
+                {
+                    rented = ArrayPool<byte>.Shared.Rent(UnseekableStreamInitialRentSize);
                 }
 
-                var runtimeAssemblyGroups = new List<RuntimeAssetGroup>();
-                var nativeLibraryGroups = new List<RuntimeAssetGroup>();
-                if (targetLibrary.RuntimeTargets != null)
+                int lastRead;
+
+                do
                 {
-                    foreach (var ridGroup in targetLibrary.RuntimeTargets.GroupBy(e => e.Rid))
+                    if (expectedLength == 0 && rented.Length == written)
                     {
-                        var groupRuntimeAssemblies = ridGroup
-                            .Where(e => e.Type == DependencyContextStrings.RuntimeAssetType)
-                            .Select(e => new RuntimeFile(e.Path, e.AssemblyVersion, e.FileVersion))
-                            .ToArray();
-
-                        if (groupRuntimeAssemblies.Any())
-                        {
-                            runtimeAssemblyGroups.Add(new RuntimeAssetGroup(
-                                ridGroup.Key,
-                                groupRuntimeAssemblies.Where(a => Path.GetFileName(a.Path) != "_._")));
-                        }
-
-                        var groupNativeLibraries = ridGroup
-                            .Where(e => e.Type == DependencyContextStrings.NativeAssetType)
-                            .Select(e => new RuntimeFile(e.Path, e.AssemblyVersion, e.FileVersion))
-                            .ToArray();
-
-                        if (groupNativeLibraries.Any())
-                        {
-                            nativeLibraryGroups.Add(new RuntimeAssetGroup(
-                                ridGroup.Key,
-                                groupNativeLibraries.Where(a => Path.GetFileName(a.Path) != "_._")));
-                        }
+                        byte[] toReturn = rented;
+                        rented = ArrayPool<byte>.Shared.Rent(checked(toReturn.Length * 2));
+                        Buffer.BlockCopy(toReturn, 0, rented, 0, toReturn.Length);
+                        // Holds document content, clear it.
+                        ArrayPool<byte>.Shared.Return(toReturn, clearArray: true);
                     }
-                }
 
-                if (targetLibrary.Runtimes != null && targetLibrary.Runtimes.Count > 0)
+                    lastRead = stream.Read(rented, written, rented.Length - written);
+                    written += lastRead;
+                } while (lastRead > 0);
+
+                return new ArraySegment<byte>(rented, 0, written);
+            }
+            catch
+            {
+                if (rented != null)
                 {
-                    runtimeAssemblyGroups.Add(new RuntimeAssetGroup(string.Empty, targetLibrary.Runtimes));
+                    // Holds document content, clear it before returning it.
+                    rented.AsSpan(0, written).Clear();
+                    ArrayPool<byte>.Shared.Return(rented);
                 }
-
-                if (targetLibrary.Natives != null && targetLibrary.Natives.Count > 0)
-                {
-                    nativeLibraryGroups.Add(new RuntimeAssetGroup(string.Empty, targetLibrary.Natives));
-                }
-
-                return new RuntimeLibrary(
-                    type: stub.Type,
-                    name: name,
-                    version: version,
-                    hash: stub.Hash,
-                    runtimeAssemblyGroups: runtimeAssemblyGroups,
-                    nativeLibraryGroups: nativeLibraryGroups,
-                    resourceAssemblies: targetLibrary.Resources ?? Enumerable.Empty<ResourceAssembly>(),
-                    dependencies: targetLibrary.Dependencies,
-                    serviceable: stub.Serviceable,
-                    path: stub.Path,
-                    hashPath: stub.HashPath,
-                    runtimeStoreManifestName: stub.RuntimeStoreManifestName);
-            }
-            else
-            {
-                var assemblies = targetLibrary.Compilations ?? Enumerable.Empty<string>();
-                return new CompilationLibrary(
-                    stub.Type,
-                    name,
-                    version,
-                    stub.Hash,
-                    assemblies,
-                    targetLibrary.Dependencies,
-                    stub.Serviceable,
-                    stub.Path,
-                    stub.HashPath);
+                throw;
             }
         }
 
-        private string Pool(string s)
-        {
-            if (s == null)
-            {
-                return null;
-            }
-
-            if (!_stringPool.TryGetValue(s, out string result))
-            {
-                _stringPool[s] = s;
-                result = s;
-            }
-            return result;
-        }
-
-        private class Target
-        {
-            public string Name;
-
-            public IEnumerable<TargetLibrary> Libraries;
-        }
-
-        private struct TargetLibrary
-        {
-            public string Name;
-
-            public IEnumerable<Dependency> Dependencies;
-
-            public List<RuntimeFile> Runtimes;
-
-            public List<RuntimeFile> Natives;
-
-            public List<string> Compilations;
-
-            public List<RuntimeTargetEntryStub> RuntimeTargets;
-
-            public List<ResourceAssembly> Resources;
-
-            public bool? CompileOnly;
-        }
-
-        private struct RuntimeTargetEntryStub
-        {
-            public string Type;
-
-            public string Path;
-
-            public string Rid;
-
-            public string AssemblyVersion;
-
-            public string FileVersion;
-        }
-
-        private struct LibraryStub
-        {
-            public string Hash;
-
-            public string Type;
-
-            public bool Serviceable;
-
-            public string Path;
-
-            public string HashPath;
-
-            public string RuntimeStoreManifestName;
-        }
+        private const int UnseekableStreamInitialRentSize = 4096;
     }
 }

@@ -9,10 +9,8 @@ using Newtonsoft.Json;
 
 namespace Microsoft.Extensions.DependencyModel
 {
-    public class DependencyContextJsonReader : IDependencyContextReader
+    public partial class DependencyContextJsonReader : IDependencyContextReader
     {
-        private readonly IDictionary<string, string> _stringPool = new Dictionary<string, string>();
-
         public DependencyContext Read(Stream stream)
         {
             if (stream == null)
@@ -24,32 +22,20 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 using (var reader = new JsonTextReader(streamReader))
                 {
-                    return Read(reader);
+                    return ReadCore(reader);
                 }
             }
         }
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _stringPool.Clear();
-            }
-        }
 
-        public void Dispose()
+        private DependencyContext ReadCore(JsonTextReader reader)
         {
-            Dispose(true);
-        }
+            reader.ReadStartObject();
 
-        private DependencyContext Read(JsonTextReader reader)
-        {
             string runtime = string.Empty;
             string framework = string.Empty;
             bool isPortable = true;
             string runtimeTargetName = null;
             string runtimeSignature = null;
-
-            reader.ReadStartObject();
 
             CompilationOptions compilationOptions = null;
             List<Target> targets = null;
@@ -130,46 +116,13 @@ namespace Microsoft.Extensions.DependencyModel
                 runtimeFallbacks ?? Enumerable.Empty<RuntimeFallbacks>());
         }
 
-        private Target SelectRuntimeTarget(List<Target> targets, string runtimeTargetName)
-        {
-            Target target;
-
-            if (targets == null || targets.Count == 0)
-            {
-                throw new FormatException("Dependency file does not have 'targets' section");
-            }
-
-            if (!string.IsNullOrEmpty(runtimeTargetName))
-            {
-                target = targets.FirstOrDefault(t => t.Name == runtimeTargetName);
-                if (target == null)
-                {
-                    throw new FormatException($"Target with name {runtimeTargetName} not found");
-                }
-            }
-            else
-            {
-                target = targets.FirstOrDefault(t => IsRuntimeTarget(t.Name));
-            }
-
-            return target;
-        }
-
-        private bool IsRuntimeTarget(string name)
-        {
-            return name.Contains(DependencyContextStrings.VersionSeparator);
-        }
-
         private void ReadRuntimeTarget(JsonTextReader reader, out string runtimeTargetName, out string runtimeSignature)
         {
             runtimeTargetName = null;
             runtimeSignature = null;
 
             reader.ReadStartObject();
-
-            string propertyName;
-            string propertyValue;
-            while (reader.TryReadStringProperty(out propertyName, out propertyValue))
+            while (reader.TryReadStringProperty(out string propertyName, out string propertyValue))
             {
                 switch (propertyName)
                 {
@@ -359,17 +312,13 @@ namespace Microsoft.Extensions.DependencyModel
             };
         }
 
-
-
-        public IEnumerable<Dependency> ReadTargetLibraryDependencies(JsonTextReader reader)
+        private IEnumerable<Dependency> ReadTargetLibraryDependencies(JsonTextReader reader)
         {
             var dependencies = new List<Dependency>();
-            string name;
-            string version;
 
             reader.ReadStartObject();
 
-            while (reader.TryReadStringProperty(out name, out version))
+            while (reader.TryReadStringProperty(out string name, out string version))
             {
                 dependencies.Add(new Dependency(Pool(name), Pool(version)));
             }
@@ -413,9 +362,7 @@ namespace Microsoft.Extensions.DependencyModel
 
                 reader.ReadStartObject();
 
-                string propertyName;
-                string propertyValue;
-                while (reader.TryReadStringProperty(out propertyName, out propertyValue))
+                while (reader.TryReadStringProperty(out string propertyName, out string propertyValue))
                 {
                     switch (propertyName)
                     {
@@ -446,14 +393,14 @@ namespace Microsoft.Extensions.DependencyModel
 
             while (reader.Read() && reader.TokenType == JsonToken.PropertyName)
             {
-                var runtimeTarget = new RuntimeTargetEntryStub();
-                runtimeTarget.Path = (string)reader.Value;
+                var runtimeTarget = new RuntimeTargetEntryStub
+                {
+                    Path = (string)reader.Value
+                };
 
                 reader.ReadStartObject();
 
-                string propertyName;
-                string propertyValue;
-                while (reader.TryReadStringProperty(out propertyName, out propertyValue))
+                while (reader.TryReadStringProperty(out string propertyName, out string propertyValue))
                 {
                     switch (propertyName)
                     {
@@ -495,10 +442,7 @@ namespace Microsoft.Extensions.DependencyModel
 
                 reader.ReadStartObject();
 
-                string propertyName;
-                string propertyValue;
-
-                while (reader.TryReadStringProperty(out propertyName, out propertyValue))
+                while (reader.TryReadStringProperty(out string propertyName, out string propertyValue))
                 {
                     if (propertyName == DependencyContextStrings.LocalePropertyName)
                     {
@@ -606,183 +550,6 @@ namespace Microsoft.Extensions.DependencyModel
             reader.CheckEndObject();
 
             return runtimeFallbacks;
-        }
-
-        private IEnumerable<Library> CreateLibraries(IEnumerable<TargetLibrary> libraries, bool runtime, Dictionary<string, LibraryStub> libraryStubs)
-        {
-            if (libraries == null)
-            {
-                return Enumerable.Empty<Library>();
-            }
-            return libraries
-                .Select(property => CreateLibrary(property, runtime, libraryStubs))
-                .Where(library => library != null);
-        }
-
-        private Library CreateLibrary(TargetLibrary targetLibrary, bool runtime, Dictionary<string, LibraryStub> libraryStubs)
-        {
-            var nameWithVersion = targetLibrary.Name;
-            LibraryStub stub;
-
-            if (libraryStubs == null || !libraryStubs.TryGetValue(nameWithVersion, out stub))
-            {
-                throw new InvalidOperationException($"Cannot find library information for {nameWithVersion}");
-            }
-
-            var separatorPosition = nameWithVersion.IndexOf(DependencyContextStrings.VersionSeparator);
-
-            var name = Pool(nameWithVersion.Substring(0, separatorPosition));
-            var version = Pool(nameWithVersion.Substring(separatorPosition + 1));
-
-            if (runtime)
-            {
-                // Runtime section of this library was trimmed by type:platform
-                var isCompilationOnly = targetLibrary.CompileOnly;
-                if (isCompilationOnly == true)
-                {
-                    return null;
-                }
-
-                var runtimeAssemblyGroups = new List<RuntimeAssetGroup>();
-                var nativeLibraryGroups = new List<RuntimeAssetGroup>();
-                if (targetLibrary.RuntimeTargets != null)
-                {
-                    foreach (var ridGroup in targetLibrary.RuntimeTargets.GroupBy(e => e.Rid))
-                    {
-                        var groupRuntimeAssemblies = ridGroup
-                            .Where(e => e.Type == DependencyContextStrings.RuntimeAssetType)
-                            .Select(e => new RuntimeFile(e.Path, e.AssemblyVersion, e.FileVersion))
-                            .ToArray();
-
-                        if (groupRuntimeAssemblies.Any())
-                        {
-                            runtimeAssemblyGroups.Add(new RuntimeAssetGroup(
-                                ridGroup.Key,
-                                groupRuntimeAssemblies.Where(a => Path.GetFileName(a.Path) != "_._")));
-                        }
-
-                        var groupNativeLibraries = ridGroup
-                            .Where(e => e.Type == DependencyContextStrings.NativeAssetType)
-                            .Select(e => new RuntimeFile(e.Path, e.AssemblyVersion, e.FileVersion))
-                            .ToArray();
-
-                        if (groupNativeLibraries.Any())
-                        {
-                            nativeLibraryGroups.Add(new RuntimeAssetGroup(
-                                ridGroup.Key,
-                                groupNativeLibraries.Where(a => Path.GetFileName(a.Path) != "_._")));
-                        }
-                    }
-                }
-
-                if (targetLibrary.Runtimes != null && targetLibrary.Runtimes.Count > 0)
-                {
-                    runtimeAssemblyGroups.Add(new RuntimeAssetGroup(string.Empty, targetLibrary.Runtimes));
-                }
-
-                if (targetLibrary.Natives != null && targetLibrary.Natives.Count > 0)
-                {
-                    nativeLibraryGroups.Add(new RuntimeAssetGroup(string.Empty, targetLibrary.Natives));
-                }
-
-                return new RuntimeLibrary(
-                    type: stub.Type,
-                    name: name,
-                    version: version,
-                    hash: stub.Hash,
-                    runtimeAssemblyGroups: runtimeAssemblyGroups,
-                    nativeLibraryGroups: nativeLibraryGroups,
-                    resourceAssemblies: targetLibrary.Resources ?? Enumerable.Empty<ResourceAssembly>(),
-                    dependencies: targetLibrary.Dependencies,
-                    serviceable: stub.Serviceable,
-                    path: stub.Path,
-                    hashPath: stub.HashPath,
-                    runtimeStoreManifestName : stub.RuntimeStoreManifestName);
-            }
-            else
-            {
-                var assemblies = (targetLibrary.Compilations != null) ? targetLibrary.Compilations : Enumerable.Empty<string>();
-                return new CompilationLibrary(
-                    stub.Type,
-                    name,
-                    version,
-                    stub.Hash,
-                    assemblies,
-                    targetLibrary.Dependencies,
-                    stub.Serviceable,
-                    stub.Path,
-                    stub.HashPath);
-            }
-        }
-
-        private string Pool(string s)
-        {
-            if (s == null)
-            {
-                return null;
-            }
-
-            string result;
-            if (!_stringPool.TryGetValue(s, out result))
-            {
-                _stringPool[s] = s;
-                result = s;
-            }
-            return result;
-        }
-
-        private class Target
-        {
-            public string Name;
-
-            public IEnumerable<TargetLibrary> Libraries;
-        }
-
-        private struct TargetLibrary
-        {
-            public string Name;
-
-            public IEnumerable<Dependency> Dependencies;
-
-            public List<RuntimeFile> Runtimes;
-
-            public List<RuntimeFile> Natives;
-
-            public List<string> Compilations;
-
-            public List<RuntimeTargetEntryStub> RuntimeTargets;
-
-            public List<ResourceAssembly> Resources;
-
-            public bool? CompileOnly;
-        }
-
-        private struct RuntimeTargetEntryStub
-        {
-            public string Type;
-
-            public string Path;
-
-            public string Rid;
-
-            public string AssemblyVersion;
-
-            public string FileVersion;
-        }
-
-        private struct LibraryStub
-        {
-            public string Hash;
-
-            public string Type;
-
-            public bool Serviceable;
-
-            public string Path;
-
-            public string HashPath;
-
-            public string RuntimeStoreManifestName;
         }
     }
 }

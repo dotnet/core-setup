@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyModel
             if (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
                 name = reader.GetString();
-                
+
                 if (reader.Read())
                 {
                     if (reader.TokenType == JsonTokenType.String)
@@ -78,7 +78,7 @@ namespace Microsoft.Extensions.DependencyModel
             reader.Read();
             if (reader.TokenType != JsonTokenType.StartArray)
             {
-                throw CreateUnexpectedException(ref reader,"[");
+                throw CreateUnexpectedException(ref reader, "[");
             }
 
             var items = new List<string>();
