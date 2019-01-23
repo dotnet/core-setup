@@ -570,7 +570,7 @@ SHARED_API int corehost_main_with_output_buffer(const int argc, const pal::char_
     return rc;
 }
 
-int corehost_delegate_init(const pal::string_t& location, arguments_t& args)
+int corehost_libhost_init(const pal::string_t& location, arguments_t& args)
 {
     if (trace::is_enabled())
     {
@@ -596,11 +596,11 @@ int corehost_delegate_init(const pal::string_t& location, arguments_t& args)
     return StatusCode::Success;
 }
 
-SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void **delegate)
+SHARED_API int corehost_get_com_activation_delegate(void **delegate)
 {
     arguments_t args;
 
-    int rc = corehost_delegate_init(_X("corehost_get_coreclr_delegate"), args);
+    int rc = corehost_libhost_init(_X("corehost_get_com_activation_delegate"), args);
     if (rc != StatusCode::Success)
         return rc;
 
@@ -609,18 +609,11 @@ SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void **
     if (rc != StatusCode::Success)
         return rc;
 
-    switch (type)
-    {
-    case coreclr_delegate_type::com_activation:
-        return coreclr->create_delegate(
-            "System.Private.CoreLib",
-            "System.Runtime.InteropServices.ComActivator",
-            "GetClassFactoryForTypeInternal",
-            delegate);
-
-    default:
-        return StatusCode::HostApiFailed;
-    }
+    return coreclr->create_delegate(
+        "System.Private.CoreLib",
+        "System.Runtime.InteropServices.ComActivator",
+        "GetClassFactoryForTypeInternal",
+        delegate);
 }
 
 SHARED_API int corehost_unload()

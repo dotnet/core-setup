@@ -37,7 +37,7 @@ COM_API HRESULT STDMETHODCALLTYPE DllGetClassObject(
         return CLASS_E_CLASSNOTAVAILABLE;
 
     com_activation_fn act;
-    int ec = get_coreclr_delegate(coreclr_delegate_type::com_activation, (void**)&act);
+    int ec = get_com_activation_delegate(&act);
     if (ec != StatusCode::Success)
         return __HRESULT_FROM_WIN32(ec);
 

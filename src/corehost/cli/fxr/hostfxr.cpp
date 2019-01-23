@@ -403,20 +403,19 @@ SHARED_API hostfxr_error_writer_fn hostfxr_set_error_writer(hostfxr_error_writer
 //     libhost_path
 //          Absolute path of the entry hosting library
 //     dotnet_root
-//     type
-//          The requested delegate type
+//     app_path
 //     delegate
-//          Requested delegate.
+//          COM activation delegate.
 // Return value:
 //     The error code result.
 //
 // A new CoreCLR instance will be created or reused if the existing instance can satisfy the configuration
 // requirements supplied by the runtimeconfig.json file.
 //
-SHARED_API int32_t hostfxr_get_coreclr_delegate(
+SHARED_API int32_t hostfxr_get_com_activation_delegate(
     const pal::char_t* libhost_path,
     const pal::char_t* dotnet_root,
-    coreclr_delegate_type type,
+    const pal::char_t* app_path,
     void **delegate)
 {
     if (libhost_path == nullptr || dotnet_root == nullptr || delegate == nullptr)
@@ -424,25 +423,9 @@ SHARED_API int32_t hostfxr_get_coreclr_delegate(
 
     trace::setup();
 
-    trace::info(_X("--- Invoked hostfxr libhost (type: %d) [commit hash: %s]"), type, _STRINGIFY(REPO_COMMIT_HASH));
+    trace::info(_X("--- Invoked hostfxr comhost [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
-    pal::string_t app_candidate{ libhost_path };
+    host_startup_info_t startup_info{ libhost_path, dotnet_root, app_path };
 
-    switch (type)
-    {
-    case coreclr_delegate_type::com_activation:
-    {
-        // Strip the comhost suffix to get the 'app'
-        size_t idx = app_candidate.rfind(_X(".comhost.dll"));
-        assert(idx != pal::string_t::npos);
-        app_candidate.replace(app_candidate.begin() + idx, app_candidate.end(), _X(".dll"));
-        break;
-    }
-    default:
-        return StatusCode::LibHostInvalidArgs;
-    }
-
-    host_startup_info_t startup_info{ libhost_path, dotnet_root, app_candidate.c_str() };
-
-    return fx_muxer_t::get_coreclr_delegate(startup_info, type, delegate);
+    return fx_muxer_t::get_com_activation_delegate(startup_info, delegate);
 }

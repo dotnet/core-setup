@@ -16,10 +16,10 @@ using hostfxr_main_startupinfo_fn = int(*)(
     const pal::char_t* host_path,
     const pal::char_t* dotnet_root,
     const pal::char_t* app_path);
-using hostfxr_get_coreclr_delegate_fn = int(*)(
+using hostfxr_get_com_activation_delegate_fn = int(*)(
     const pal::char_t* host_path,
     const pal::char_t* dotnet_root,
-    coreclr_delegate_type type,
+    const pal::char_t* app_path,
     void **delegate);
 
 bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path);
@@ -267,9 +267,7 @@ bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path)
 
 #if defined(CURHOST_LIB)
 
-int get_coreclr_delegate(
-    _In_ coreclr_delegate_type type,
-    _Out_ void **delegate)
+int get_com_activation_delegate(com_activation_fn *delegate)
 {
     pal::string_t host_path;
     if (!pal::get_own_module_path(&host_path) || !pal::realpath(&host_path))
@@ -297,11 +295,18 @@ int get_coreclr_delegate(
 
     // Leak fxr
 
-    auto entry_del = (hostfxr_get_coreclr_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_coreclr_delegate");
+    auto entry_del = (hostfxr_get_com_activation_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_com_activation_delegate");
     if (entry_del == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
 
-    return entry_del(host_path.c_str(), dotnet_root.c_str(), type, delegate);
+    pal::string_t app_path{ host_path };
+
+    // Strip the comhost suffix to get the 'app'
+    size_t idx = app_path.rfind(_X(".comhost.dll"));
+    assert(idx != pal::string_t::npos);
+    app_path.replace(app_path.begin() + idx, app_path.end(), _X(".dll"));
+
+    return entry_del(host_path.c_str(), dotnet_root.c_str(), app_path.c_str(), (void**)delegate);
 }
 
 #elif defined(CURHOST_EXE)

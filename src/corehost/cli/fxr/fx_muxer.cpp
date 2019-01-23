@@ -24,7 +24,7 @@
 using corehost_load_fn = int(*) (const host_interface_t* init);
 using corehost_ensure_load_fn = int(*) (const host_interface_t* init);
 using corehost_main_fn = int(*) (const int argc, const pal::char_t* argv[]);
-using corehost_get_coreclr_delegate_fn = int(*) (coreclr_delegate_type type, void **delegate);
+using corehost_get_com_activation_delegate_fn = int(*) (void **delegate);
 using corehost_main_with_output_buffer_fn = int(*) (const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size);
 using corehost_unload_fn = int(*) ();
 using corehost_error_writer_fn = void(*) (const pal::char_t* message);
@@ -185,17 +185,16 @@ static int execute_host_command(
     return code;
 }
 
-static int get_coreclr_delegate_internal(
+static int get_com_activation_delegate_internal(
     const pal::string_t& impl_dll_dir,
     corehost_init_t* init,
-    coreclr_delegate_type type,
     void **delegate)
 {
     pal::dll_t corehost;
     hostpolicy_contract host_contract{};
-    corehost_get_coreclr_delegate_fn host_entry = nullptr;
+    corehost_get_com_activation_delegate_fn host_entry = nullptr;
 
-    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_coreclr_delegate", &host_entry);
+    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_com_activation_delegate", &host_entry);
     if (code != StatusCode::Success)
         return code;
 
@@ -208,7 +207,7 @@ static int get_coreclr_delegate_internal(
         const host_interface_t& intf = init->get_host_init_data();
         if ((code = host_contract.ensure_load(&intf)) == StatusCode::Success)
         {
-            code = host_entry(type, delegate);
+            code = host_entry(delegate);
         }
     }
 
@@ -1438,9 +1437,8 @@ int fx_muxer_t::execute(
     return result;
 }
 
-int fx_muxer_t::get_coreclr_delegate(
+int fx_muxer_t::get_com_activation_delegate(
     const host_startup_info_t &host_info,
-    coreclr_delegate_type type,
     void **delegate)
 {
     assert(host_info.is_valid());
@@ -1512,7 +1510,7 @@ int fx_muxer_t::get_coreclr_delegate(
     pal::string_t additional_deps_serialized;
     corehost_init_t init(pal::string_t{}, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions);
 
-    rc = get_coreclr_delegate_internal(impl_dir, &init, type, delegate);
+    rc = get_com_activation_delegate_internal(impl_dir, &init, delegate);
 
     return rc;
 }

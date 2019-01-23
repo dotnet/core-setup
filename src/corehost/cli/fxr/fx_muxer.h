@@ -23,9 +23,8 @@ public:
         pal::char_t result_buffer[],
         int32_t buffer_size,
         int32_t* required_buffer_size);
-    static int get_coreclr_delegate(
+    static int get_com_activation_delegate(
         const host_startup_info_t &host_info,
-        coreclr_delegate_type type,
         void **delegate);
 private:
     static int parse_args(
