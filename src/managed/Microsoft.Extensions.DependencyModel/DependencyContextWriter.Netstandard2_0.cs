@@ -89,6 +89,7 @@ namespace Microsoft.Extensions.DependencyModel
                 {
                     jsonWriter.WriteStringValue(define);
                 }
+                jsonWriter.WriteEndArray();
             }
             AddStringPropertyIfNotNull(DependencyContextStrings.LanguageVersionPropertyName, compilationOptions.LanguageVersion, ref jsonWriter);
             AddStringPropertyIfNotNull(DependencyContextStrings.PlatformPropertyName, compilationOptions.Platform, ref jsonWriter);
