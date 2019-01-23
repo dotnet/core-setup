@@ -42,11 +42,14 @@ namespace Microsoft.Extensions.DependencyModel
             return dependencyContext;
         }
 
+        private static bool IsTokenTypeProperty(JsonTokenType tokenType)
+            => tokenType == JsonTokenType.PropertyName;
+
         private DependencyContext ReadCore(ReadOnlySpan<byte> jsonData)
         {
-            var jsonReader = new Utf8JsonReader(jsonData, isFinalBlock: true, state: default);
+            var reader = new Utf8JsonReader(jsonData, isFinalBlock: true, state: default);
 
-            jsonReader.ReadStartObject();
+            reader.ReadStartObject();
 
             string runtime = string.Empty;
             string framework = string.Empty;
@@ -59,27 +62,27 @@ namespace Microsoft.Extensions.DependencyModel
             Dictionary<string, LibraryStub> libraryStubs = null;
             List<RuntimeFallbacks> runtimeFallbacks = null;
 
-            while (jsonReader.Read() && jsonReader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
-                switch (jsonReader.GetString())
+                switch (reader.GetString())
                 {
                     case DependencyContextStrings.RuntimeTargetPropertyName:
-                        ReadRuntimeTarget(ref jsonReader, out runtimeTargetName, out runtimeSignature);
+                        ReadRuntimeTarget(ref reader, out runtimeTargetName, out runtimeSignature);
                         break;
                     case DependencyContextStrings.CompilationOptionsPropertName:
-                        compilationOptions = ReadCompilationOptions(ref jsonReader);
+                        compilationOptions = ReadCompilationOptions(ref reader);
                         break;
                     case DependencyContextStrings.TargetsPropertyName:
-                        targets = ReadTargets(ref jsonReader);
+                        targets = ReadTargets(ref reader);
                         break;
                     case DependencyContextStrings.LibrariesPropertyName:
-                        libraryStubs = ReadLibraries(ref jsonReader);
+                        libraryStubs = ReadLibraries(ref reader);
                         break;
                     case DependencyContextStrings.RuntimesPropertyName:
-                        runtimeFallbacks = ReadRuntimes(ref jsonReader);
+                        runtimeFallbacks = ReadRuntimes(ref reader);
                         break;
                     default:
-                        jsonReader.Skip();
+                        reader.Skip();
                         break;
                 }
             }
@@ -173,7 +176,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             reader.ReadStartObject();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 switch (reader.GetString())
                 {
@@ -242,7 +245,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             var targets = new List<Target>();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 targets.Add(ReadTarget(ref reader, reader.GetString()));
             }
@@ -258,7 +261,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             var libraries = new List<TargetLibrary>();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 libraries.Add(ReadTargetLibrary(ref reader, reader.GetString()));
             }
@@ -284,7 +287,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             reader.ReadStartObject();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 switch (reader.GetString())
                 {
@@ -352,7 +355,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             reader.ReadStartObject();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 string libraryName = reader.GetString();
                 reader.Skip();
@@ -371,7 +374,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             reader.ReadStartObject();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 string assemblyVersion = null;
                 string fileVersion = null;
@@ -409,7 +412,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             reader.ReadStartObject();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 var runtimeTarget = new RuntimeTargetEntryStub
                 {
@@ -453,7 +456,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             reader.ReadStartObject();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 string path = reader.GetString();
                 string locale = null;
@@ -487,7 +490,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             reader.ReadStartObject();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 string libraryName = reader.GetString();
 
@@ -510,7 +513,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             reader.ReadStartObject();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 switch (reader.GetString())
                 {
@@ -557,7 +560,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             reader.ReadStartObject();
 
-            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 string runtime = reader.GetString();
                 var fallbacks = reader.ReadStringArray();
