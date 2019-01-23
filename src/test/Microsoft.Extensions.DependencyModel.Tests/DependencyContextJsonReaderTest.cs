@@ -505,7 +505,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
     },
     ""libraries"":{
         ""MyApp/1.0.1"": {
-            ""type"": ""project"",
+            ""type"": ""project""
         },
         ""System.Banana/1.0.0"": {
             ""type"": ""package"",

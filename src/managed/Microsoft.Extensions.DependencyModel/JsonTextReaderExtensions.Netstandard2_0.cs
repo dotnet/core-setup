@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyModel
             if (jsonReader.TokenType == JsonTokenType.StartObject || jsonReader.TokenType == JsonTokenType.StartArray)
             {
                 int depth = jsonReader.CurrentDepth;
-                while (jsonReader.Read() && depth < jsonReader.CurrentDepth)
+                while (jsonReader.Read() && depth <= jsonReader.CurrentDepth)
                 {
                 }
             }
@@ -99,6 +99,10 @@ namespace Microsoft.Extensions.DependencyModel
         internal static string ReadAsString(this ref Utf8JsonReader reader)
         {
             reader.Read();
+            if (reader.TokenType == JsonTokenType.Null)
+            {
+                return null;
+            }
             if (reader.TokenType != JsonTokenType.String)
             {
                 throw CreateUnexpectedException(ref reader, "a JSON string token");
