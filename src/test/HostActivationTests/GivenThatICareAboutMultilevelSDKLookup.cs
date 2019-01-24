@@ -632,13 +632,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSDKLookup
             // but we should not corrupt anything by adding a special subkey even if it's left behind.
             //
             // Note: If you want to inspect the values written by the test and/or modify them manually
-            //   normal regedit.exe will not show these anywhere, as it's running as 64bit process
-            //   and there's no SysWOW6432 symbolic link for the Interface key (unlike the one for Software).
-            //   You can however run C:\Windows\SysWOW64\regedt32.exe which will launch a 32bit regedit
-            //   which will see these keys.
+            //   you have to navigate to HKCU\Software\Classes\Wow6432Node\Interface on a 64bit OS.
 
             RegistryKey hkcu = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32);
-            RegistryKey interfaceKey = hkcu.OpenSubKey(@"Software\Classes\Interface", writable: true);
+            RegistryKey interfaceKey = hkcu.CreateSubKey(@"Software\Classes\Interface");
             string testKeyName = "_DOTNET_Test" + System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
             RegistryKey testKey = interfaceKey.CreateSubKey(testKeyName);
             try
