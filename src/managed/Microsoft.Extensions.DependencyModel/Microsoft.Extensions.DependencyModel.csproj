@@ -34,7 +34,7 @@
     <Compile Remove="DependencyContextJsonReader.Netstandard2_0.cs" />
     <Compile Remove="DependencyContextWriter.Netstandard2_0.cs" />
     <Compile Remove="JsonTextReaderExtensions.Netstandard2_0.cs" />
-    <Compile Remove="StreamBufferWriter.Netstandard2_0.cs" />
+    <Compile Remove="ArrayBufferWriter.Netstandard2_0.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

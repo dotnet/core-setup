@@ -22,13 +22,14 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 throw new ArgumentNullException(nameof(stream));
             }
-            using (var bufferWriter = new StreamBufferWriter(stream))
+            using (var bufferWriter = new ArrayBufferWriter())
             {
                 Write(context, bufferWriter);
+                bufferWriter.CopyTo(stream);
             }
         }
 
-        private void Write(DependencyContext context, StreamBufferWriter bufferWriter)
+        private void Write(DependencyContext context, ArrayBufferWriter bufferWriter)
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = true });
             var jsonWriter = new Utf8JsonWriter(bufferWriter, state);
