@@ -55,8 +55,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
     }
 }"));
 
-            Assert.Equal("Unexpected character encountered, excepted '}' at line 7 position 0", exception.Message);
-
+            Assert.True(exception.Message.StartsWith("Unexpected character encountered, excepted '}' at line 7 position "));
         }
 
         [Fact]
