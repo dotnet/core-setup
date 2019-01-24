@@ -573,6 +573,7 @@ namespace Microsoft.Extensions.DependencyModel
             return runtimeFallbacks;
         }
 
+        // Borrowed from https://github.com/dotnet/corefx/blob/ef23e3317ca6e83f1e959ab265a8e59fb8a6dcd9/src/System.Text.Json/src/System/Text/Json/Document/JsonDocument.Parse.cs#L176-L225
         private static ArraySegment<byte> ReadToEnd(Stream stream)
         {
             int written = 0;
@@ -619,6 +620,7 @@ namespace Microsoft.Extensions.DependencyModel
                     rented.AsSpan(0, written).Clear();
                     ArrayPool<byte>.Shared.Return(rented);
                 }
+
                 throw;
             }
         }

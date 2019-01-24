@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace Microsoft.Extensions.DependencyModel
@@ -98,6 +99,7 @@ namespace Microsoft.Extensions.DependencyModel
 
         internal static string ReadAsString(this ref Utf8JsonReader reader)
         {
+            Debug.Assert(reader.TokenType == JsonTokenType.PropertyName);
             reader.Read();
             if (reader.TokenType == JsonTokenType.Null)
             {
@@ -107,11 +109,13 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 throw CreateUnexpectedException(ref reader, "a JSON string token");
             }
+            Debug.Assert(reader.TokenType != JsonTokenType.PropertyName);
             return reader.GetString();
         }
 
         internal static bool ReadAsBoolean(this ref Utf8JsonReader reader)
         {
+            Debug.Assert(reader.TokenType == JsonTokenType.PropertyName);
             reader.Read();
             if (reader.TokenType != JsonTokenType.True && reader.TokenType != JsonTokenType.False)
             {
@@ -122,13 +126,14 @@ namespace Microsoft.Extensions.DependencyModel
 
         internal static bool ReadAsNullableBoolean(this ref Utf8JsonReader reader, bool defaultValue)
         {
+            Debug.Assert(reader.TokenType == JsonTokenType.PropertyName);
             reader.Read();
+            if (reader.TokenType == JsonTokenType.Null)
+            {
+                return defaultValue;
+            }
             if (reader.TokenType != JsonTokenType.True && reader.TokenType != JsonTokenType.False)
             {
-                if (reader.TokenType == JsonTokenType.Null)
-                {
-                    return defaultValue;
-                }
                 throw CreateUnexpectedException(ref reader, "a JSON true or false literal token");
             }
             return reader.GetBoolean();
