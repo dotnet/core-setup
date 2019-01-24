@@ -40,7 +40,7 @@ namespace Microsoft.Extensions.DependencyModel
                     }
                     else
                     {
-                        _reader.Skip();
+                        Skip();
                     }
                 }
 

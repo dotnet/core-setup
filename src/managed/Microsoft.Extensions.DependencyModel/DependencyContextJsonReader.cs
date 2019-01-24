@@ -12,17 +12,17 @@ namespace Microsoft.Extensions.DependencyModel
     {
         private readonly IDictionary<string, string> _stringPool = new Dictionary<string, string>();
 
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
                 _stringPool.Clear();
             }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
         }
 
         private DependencyContext ReadCore(UnifiedJsonReader reader)
@@ -112,6 +112,36 @@ namespace Microsoft.Extensions.DependencyModel
                 CreateLibraries(compileTarget?.Libraries, false, libraryStubs).Cast<CompilationLibrary>().ToArray(),
                 CreateLibraries(runtimeTarget.Libraries, true, libraryStubs).Cast<RuntimeLibrary>().ToArray(),
                 runtimeFallbacks ?? Enumerable.Empty<RuntimeFallbacks>());
+        }
+
+        private static Target SelectRuntimeTarget(List<Target> targets, string runtimeTargetName)
+        {
+            Target target;
+
+            if (targets == null || targets.Count == 0)
+            {
+                throw new FormatException("Dependency file does not have 'targets' section");
+            }
+
+            if (!string.IsNullOrEmpty(runtimeTargetName))
+            {
+                target = targets.FirstOrDefault(t => t.Name == runtimeTargetName);
+                if (target == null)
+                {
+                    throw new FormatException($"Target with name {runtimeTargetName} not found");
+                }
+            }
+            else
+            {
+                target = targets.FirstOrDefault(t => IsRuntimeTarget(t.Name));
+            }
+
+            return target;
+        }
+
+        private static bool IsRuntimeTarget(string name)
+        {
+            return name.Contains(DependencyContextStrings.VersionSeparator);
         }
 
         private static void ReadRuntimeTarget(ref UnifiedJsonReader reader, out string runtimeTargetName, out string runtimeSignature)
@@ -549,36 +579,6 @@ namespace Microsoft.Extensions.DependencyModel
             reader.CheckEndObject();
 
             return runtimeFallbacks;
-        }
-
-        private static Target SelectRuntimeTarget(List<Target> targets, string runtimeTargetName)
-        {
-            Target target;
-
-            if (targets == null || targets.Count == 0)
-            {
-                throw new FormatException("Dependency file does not have 'targets' section");
-            }
-
-            if (!string.IsNullOrEmpty(runtimeTargetName))
-            {
-                target = targets.FirstOrDefault(t => t.Name == runtimeTargetName);
-                if (target == null)
-                {
-                    throw new FormatException($"Target with name {runtimeTargetName} not found");
-                }
-            }
-            else
-            {
-                target = targets.FirstOrDefault(t => IsRuntimeTarget(t.Name));
-            }
-
-            return target;
-        }
-
-        private static bool IsRuntimeTarget(string name)
-        {
-            return name.Contains(DependencyContextStrings.VersionSeparator);
         }
 
         private IEnumerable<Library> CreateLibraries(IEnumerable<TargetLibrary> libraries, bool runtime, Dictionary<string, LibraryStub> libraryStubs)
