@@ -20,7 +20,8 @@ namespace Microsoft.Extensions.DependencyModel
             ArraySegment<byte> drained = ReadToEnd(stream);
             try
             {
-                return Read(new Utf8JsonReader(drained, isFinalBlock: true, state: default));
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
+                return Read(new Utf8JsonReader(drained, isFinalBlock: true, state));
             }
             finally
             {

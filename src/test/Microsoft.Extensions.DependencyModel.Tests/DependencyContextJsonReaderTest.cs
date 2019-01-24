@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
-using System.Diagnostics;
 
 namespace Microsoft.Extensions.DependencyModel.Tests
 {
@@ -30,7 +28,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         ""signature"":""target-signature""
     },
     ""targets"": {
+        // Ignore comments
         "".NETCoreApp,Version=v1.0/osx.10.10-x64"": {}
+        /*
+         * Ignore multi-line comments
+        */
     }
 }");
             context.Target.IsPortable.Should().BeFalse();
@@ -652,7 +654,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
     }
 }");
             context.CompilationOptions.AllowUnsafe.Should().Be(true);
-            context.CompilationOptions.Defines.Should().BeEquivalentTo(new [] {"MY", "DEFINES"});
+            context.CompilationOptions.Defines.Should().BeEquivalentTo(new[] { "MY", "DEFINES" });
             context.CompilationOptions.DelaySign.Should().Be(true);
             context.CompilationOptions.EmitEntryPoint.Should().Be(true);
             context.CompilationOptions.GenerateXmlDocumentation.Should().Be(true);
