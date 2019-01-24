@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Build.Tasks
 
             while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
             {
-                string propertyName = reader.GetStringValue().ToLower();
+                string propertyName = reader.GetString().ToLower();
                 if (propertyName == Maintainer_Name_String)
                 {
                     configJson.Maintainer_Name = ReadAsString(ref reader);
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Build.Tasks
 
                     while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
                     {
-                        string propertyNameInner = reader.GetStringValue().ToLower();
+                        string propertyNameInner = reader.GetString().ToLower();
                         if (propertyNameInner == Package_Version_String)
                         {
                             release.Package_Version = ReadAsString(ref reader);
@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.Build.Tasks
 
                     while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
                     {
-                        string propertyNameInner = reader.GetStringValue().ToLower();
+                        string propertyNameInner = reader.GetString().ToLower();
                         if (propertyNameInner == Priority_String)
                         {
                             control.Priority = ReadAsString(ref reader);
@@ -186,7 +186,7 @@ namespace Microsoft.DotNet.Build.Tasks
 
                     while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
                     {
-                        string propertyNameInner = reader.GetStringValue().ToLower();
+                        string propertyNameInner = reader.GetString().ToLower();
                         if (propertyNameInner == Type_String)
                         {
                             license.Type = ReadAsString(ref reader);
@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.Build.Tasks
                         ReadStartObject(ref reader);
                         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
                         {
-                            string propertyNameInner = reader.GetStringValue().ToLower();
+                            string propertyNameInner = reader.GetString().ToLower();
                             if (propertyNameInner == RpmDependency_Package_Name_String)
                             {
                                 rpmDependency.Package_Name = ReadAsString(ref reader);
@@ -282,7 +282,7 @@ namespace Microsoft.DotNet.Build.Tasks
             {
                 throw CreateUnexpectedException(ref reader, "a JSON string token");
             }
-            return reader.GetStringValue();
+            return reader.GetString();
         }
 
         internal static Exception CreateUnexpectedException(ref Utf8JsonReader reader, string expected)

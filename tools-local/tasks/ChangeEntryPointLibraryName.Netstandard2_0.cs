@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Build.Tasks
                 switch (reader.TokenType)
                 {
                     case JsonTokenType.PropertyName:
-                        ReadWritePropertyName(reader.GetStringValue(), ref reader, ref writer);
+                        ReadWritePropertyName(reader.GetString(), ref reader, ref writer);
                         break;
                     case JsonTokenType.EndObject:
                         writer.WriteEndObject();
@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Build.Tasks
 
         private void ReadWritePropertyNameTargets(ref Utf8JsonReader reader, ref Utf8JsonWriter writer)
         {
-            Debug.Assert(reader.GetStringValue() == "targets");
+            Debug.Assert(reader.GetString() == "targets");
 
             reader.Read();
             Debug.Assert(reader.TokenType == JsonTokenType.StartObject);
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Build.Tasks
             reader.Read();
             if (reader.TokenType == JsonTokenType.PropertyName)
             {
-                string propertyName = reader.GetStringValue();
+                string propertyName = reader.GetString();
                 reader.Read();
                 Debug.Assert(reader.TokenType == JsonTokenType.StartObject);
                 writer.WriteStartObject(propertyName);
@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Build.Tasks
                 reader.Read();
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    string targetLibrary = reader.GetStringValue();
+                    string targetLibrary = reader.GetString();
                     _version = targetLibrary.Substring(targetLibrary.IndexOf('/') + 1);
                     if (!string.IsNullOrEmpty(NewName))
                     {
@@ -179,7 +179,7 @@ namespace Microsoft.DotNet.Build.Tasks
 
         private void ReadWritePropertyNameLibraries(ref Utf8JsonReader reader, ref Utf8JsonWriter writer)
         {
-            Debug.Assert(reader.GetStringValue() == "libraries");
+            Debug.Assert(reader.GetString() == "libraries");
             Debug.Assert(!string.IsNullOrEmpty(_version));
 
             reader.Read();
