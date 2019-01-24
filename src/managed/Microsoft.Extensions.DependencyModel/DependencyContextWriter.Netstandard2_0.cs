@@ -156,7 +156,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             jsonWriter.WriteStartObject(key);
 
-            foreach (var packageName in runtimeLookup.Keys.Concat(compileLookup.Keys).Distinct())
+            foreach (string packageName in runtimeLookup.Keys.Concat(compileLookup.Keys).Distinct())
             {
                 runtimeLookup.TryGetValue(packageName, out RuntimeLibrary runtimeLibrary);
 
@@ -438,7 +438,7 @@ namespace Microsoft.Extensions.DependencyModel
             jsonWriter.WriteEndObject();
         }
 
-        private string NormalizePath(string path)
+        private static string NormalizePath(string path)
         {
             return path.Replace('\\', '/');
         }

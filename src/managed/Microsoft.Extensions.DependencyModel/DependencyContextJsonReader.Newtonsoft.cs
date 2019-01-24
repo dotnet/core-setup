@@ -80,7 +80,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             if (runtimeTargetName != null)
             {
-                var separatorIndex = runtimeTargetName.IndexOf(DependencyContextStrings.VersionSeparator);
+                int separatorIndex = runtimeTargetName.IndexOf(DependencyContextStrings.VersionSeparator);
                 if (separatorIndex > -1 && separatorIndex < runtimeTargetName.Length)
                 {
                     runtime = runtimeTargetName.Substring(separatorIndex + 1);
@@ -95,7 +95,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             Target compileTarget = null;
 
-            var ridlessTarget = targets.FirstOrDefault(t => !IsRuntimeTarget(t.Name));
+            Target ridlessTarget = targets.FirstOrDefault(t => !IsRuntimeTarget(t.Name));
             if (ridlessTarget != null)
             {
                 compileTarget = ridlessTarget;
@@ -546,7 +546,7 @@ namespace Microsoft.Extensions.DependencyModel
             while (reader.Read() && IsTokenTypeProperty(reader.TokenType))
             {
                 var runtime = (string)reader.Value;
-                var fallbacks = reader.ReadStringArray();
+                string[] fallbacks = reader.ReadStringArray();
 
                 runtimeFallbacks.Add(new RuntimeFallbacks(runtime, fallbacks));
             }

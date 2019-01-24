@@ -68,22 +68,22 @@ namespace Microsoft.Extensions.DependencyModel
 
         private Library CreateLibrary(TargetLibrary targetLibrary, bool runtime, Dictionary<string, LibraryStub> libraryStubs)
         {
-            var nameWithVersion = targetLibrary.Name;
+            string nameWithVersion = targetLibrary.Name;
 
             if (libraryStubs == null || !libraryStubs.TryGetValue(nameWithVersion, out LibraryStub stub))
             {
                 throw new InvalidOperationException($"Cannot find library information for {nameWithVersion}");
             }
 
-            var separatorPosition = nameWithVersion.IndexOf(DependencyContextStrings.VersionSeparator);
+            int separatorPosition = nameWithVersion.IndexOf(DependencyContextStrings.VersionSeparator);
 
-            var name = Pool(nameWithVersion.Substring(0, separatorPosition));
-            var version = Pool(nameWithVersion.Substring(separatorPosition + 1));
+            string name = Pool(nameWithVersion.Substring(0, separatorPosition));
+            string version = Pool(nameWithVersion.Substring(separatorPosition + 1));
 
             if (runtime)
             {
                 // Runtime section of this library was trimmed by type:platform
-                var isCompilationOnly = targetLibrary.CompileOnly;
+                bool? isCompilationOnly = targetLibrary.CompileOnly;
                 if (isCompilationOnly == true)
                 {
                     return null;
@@ -93,9 +93,9 @@ namespace Microsoft.Extensions.DependencyModel
                 var nativeLibraryGroups = new List<RuntimeAssetGroup>();
                 if (targetLibrary.RuntimeTargets != null)
                 {
-                    foreach (var ridGroup in targetLibrary.RuntimeTargets.GroupBy(e => e.Rid))
+                    foreach (IGrouping<string, RuntimeTargetEntryStub> ridGroup in targetLibrary.RuntimeTargets.GroupBy(e => e.Rid))
                     {
-                        var groupRuntimeAssemblies = ridGroup
+                        RuntimeFile[] groupRuntimeAssemblies = ridGroup
                             .Where(e => e.Type == DependencyContextStrings.RuntimeAssetType)
                             .Select(e => new RuntimeFile(e.Path, e.AssemblyVersion, e.FileVersion))
                             .ToArray();
@@ -107,7 +107,7 @@ namespace Microsoft.Extensions.DependencyModel
                                 groupRuntimeAssemblies.Where(a => Path.GetFileName(a.Path) != "_._")));
                         }
 
-                        var groupNativeLibraries = ridGroup
+                        RuntimeFile[] groupNativeLibraries = ridGroup
                             .Where(e => e.Type == DependencyContextStrings.NativeAssetType)
                             .Select(e => new RuntimeFile(e.Path, e.AssemblyVersion, e.FileVersion))
                             .ToArray();
@@ -147,7 +147,7 @@ namespace Microsoft.Extensions.DependencyModel
             }
             else
             {
-                var assemblies = targetLibrary.Compilations ?? Enumerable.Empty<string>();
+                IEnumerable<string> assemblies = targetLibrary.Compilations ?? Enumerable.Empty<string>();
                 return new CompilationLibrary(
                     stub.Type,
                     name,

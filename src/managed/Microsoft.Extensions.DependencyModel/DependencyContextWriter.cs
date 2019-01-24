@@ -122,18 +122,16 @@ namespace Microsoft.Extensions.DependencyModel
 
         private JObject WritePortableTarget(IReadOnlyList<RuntimeLibrary> runtimeLibraries, IReadOnlyList<CompilationLibrary> compilationLibraries)
         {
-            var runtimeLookup = runtimeLibraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
-            var compileLookup = compilationLibraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, RuntimeLibrary> runtimeLookup = runtimeLibraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, CompilationLibrary> compileLookup = compilationLibraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
 
             var targetObject = new JObject();
 
-            foreach (var packageName in runtimeLookup.Keys.Concat(compileLookup.Keys).Distinct())
+            foreach (string packageName in runtimeLookup.Keys.Concat(compileLookup.Keys).Distinct())
             {
-                RuntimeLibrary runtimeLibrary;
-                runtimeLookup.TryGetValue(packageName, out runtimeLibrary);
+                runtimeLookup.TryGetValue(packageName, out RuntimeLibrary runtimeLibrary);
 
-                CompilationLibrary compilationLibrary;
-                compileLookup.TryGetValue(packageName, out compilationLibrary);
+                compileLookup.TryGetValue(packageName, out CompilationLibrary compilationLibrary);
 
                 if (compilationLibrary != null && runtimeLibrary != null)
                 {
@@ -207,8 +205,7 @@ namespace Microsoft.Extensions.DependencyModel
 
         private JObject WriteTargetLibrary(Library library)
         {
-            var runtimeLibrary = library as RuntimeLibrary;
-            if (runtimeLibrary != null)
+            if (library is RuntimeLibrary runtimeLibrary)
             {
                 var libraryObject = new JObject();
                 AddDependencies(libraryObject, runtimeLibrary.Dependencies);
@@ -220,9 +217,7 @@ namespace Microsoft.Extensions.DependencyModel
 
                 return libraryObject;
             }
-
-            var compilationLibrary = library as CompilationLibrary;
-            if (compilationLibrary != null)
+            else if (library is CompilationLibrary compilationLibrary)
             {
                 var libraryObject = new JObject();
                 AddDependencies(libraryObject, compilationLibrary.Dependencies);
@@ -273,7 +268,7 @@ namespace Microsoft.Extensions.DependencyModel
 
         private void AddRuntimeSpecificAssetGroups(JObject runtimeTargets, string assetType, IEnumerable<RuntimeAssetGroup> assetGroups)
         {
-            foreach (var group in assetGroups.Where(g => !string.IsNullOrEmpty(g.Runtime)))
+            foreach (RuntimeAssetGroup group in assetGroups.Where(g => !string.IsNullOrEmpty(g.Runtime)))
             {
                 if (group.RuntimeFiles.Any())
                 {
@@ -296,7 +291,7 @@ namespace Microsoft.Extensions.DependencyModel
 
         private void AddRuntimeSpecificAssets(JObject target, IEnumerable<RuntimeFile> assets, string runtime, string assetType)
         {
-            foreach (var asset in assets)
+            foreach (RuntimeFile asset in assets)
             {
                 var asset_props = new JObject(
                         new JProperty(DependencyContextStrings.RidPropertyName, runtime),
@@ -325,7 +320,7 @@ namespace Microsoft.Extensions.DependencyModel
         private JObject WriteAssetList(IEnumerable<RuntimeFile> runtimeFiles)
         {
             var target = new JObject();
-            foreach (var runtimeFile in runtimeFiles)
+            foreach (RuntimeFile runtimeFile in runtimeFiles)
             {
                 var fileJson = new JObject();
 
@@ -347,7 +342,7 @@ namespace Microsoft.Extensions.DependencyModel
 
         private JObject WriteLibraries(DependencyContext context)
         {
-            var allLibraries =
+            IEnumerable<IGrouping<string, Library>> allLibraries =
                 context.RuntimeLibraries.Cast<Library>().Concat(context.CompileLibraries)
                     .GroupBy(library => library.Name + DependencyContextStrings.VersionSeparator + library.Version);
 
@@ -379,7 +374,7 @@ namespace Microsoft.Extensions.DependencyModel
             return libraryJson;
         }
 
-        private string NormalizePath(string path)
+        private static string NormalizePath(string path)
         {
             return path.Replace('\\', '/');
         }
