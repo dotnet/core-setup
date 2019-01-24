@@ -571,11 +571,11 @@ namespace Microsoft.Extensions.DependencyModel
 
             try
             {
-                long expectedLength = 0;
-
                 if (stream.CanSeek)
                 {
-                    expectedLength = Math.Max(1L, stream.Length - stream.Position);
+                    // Ask for 1 more than the length to avoid resizing later,
+                    // which is unnecessary in the common case where the stream length doesn't change.
+                    long expectedLength = Math.Max(0, stream.Length - stream.Position) + 1;
                     rented = ArrayPool<byte>.Shared.Rent(checked((int)expectedLength));
                 }
                 else
@@ -587,7 +587,7 @@ namespace Microsoft.Extensions.DependencyModel
 
                 do
                 {
-                    if (expectedLength == 0 && rented.Length == written)
+                    if (rented.Length == written)
                     {
                         byte[] toReturn = rented;
                         rented = ArrayPool<byte>.Shared.Rent(checked(toReturn.Length * 2));
