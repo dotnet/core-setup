@@ -38,13 +38,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
-    <Compile Remove="BuildFPMToolPreReqs.Netstandard2_0.cs" />
     <Compile Remove="ChangeEntryPointLibraryName.Netstandard2_0.cs" />
     <Compile Remove="StreamBufferWriter.Netstandard2_0.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <Compile Remove="BuildFPMToolPreReqs.cs" />
     <Compile Remove="ChangeEntryPointLibraryName.cs" />
   </ItemGroup>
   

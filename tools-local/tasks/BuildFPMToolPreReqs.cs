@@ -34,16 +34,13 @@ namespace Microsoft.DotNet.Build.Tasks
         {
             try
             {
-                if (!File.Exists(ConfigJsonFile))
-                {
-                    throw new FileNotFoundException($"Expected file {ConfigJsonFile} was not found.");
-                }
-
                 // Open the Config Json and read the values into the model
-                TextReader projectFileReader = File.OpenText(ConfigJsonFile);
-                if (projectFileReader != null)
+                using (TextReader projectFileReader = File.OpenText(ConfigJsonFile))
                 {
                     string jsonFileText = projectFileReader.ReadToEnd();
+
+                    // TODO: Replace the use of the Utf8JsonReader with the Deserializer once it is available.
+                    // https://github.com/dotnet/corefx/issues/34372
                     ConfigJson configJson = JsonConvert.DeserializeObject<ConfigJson>(jsonFileText);
 
                     // Update the Changelog and Copyright files by replacing tokens with values from config json
@@ -53,10 +50,6 @@ namespace Microsoft.DotNet.Build.Tasks
                     // Build the full list of parameters 
                     FPMParameters = BuildCmdParameters(configJson, PackageVersion);
                     Log.LogMessage(MessageImportance.Normal, "Generated RPM paramters:  " + FPMParameters);
-                }
-                else
-                {
-                    throw new IOException($"Could not open the file {ConfigJsonFile} for reading.");
                 }
             }
             catch (Exception e)
