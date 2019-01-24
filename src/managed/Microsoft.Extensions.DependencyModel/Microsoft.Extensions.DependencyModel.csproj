@@ -5,6 +5,7 @@
     <Description>Abstractions for reading `.deps` files.</Description>
     <TargetFrameworks>net451;netstandard1.3;netstandard1.6;netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.3;netstandard1.6;netstandard2.0</TargetFrameworks>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   
   <!--These properties are necessary to build the source package-->
@@ -35,12 +36,14 @@
     <Compile Remove="DependencyContextWriter.Netstandard2_0.cs" />
     <Compile Remove="JsonTextReaderExtensions.Netstandard2_0.cs" />
     <Compile Remove="ArrayBufferWriter.Netstandard2_0.cs" />
+    <Compile Remove="UnifiedJsonReader.Netstandard2_0.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <Compile Remove="DependencyContextJsonReader.Newtonsoft.cs" />
     <Compile Remove="DependencyContextWriter.cs" />
     <Compile Remove="JsonTextReaderExtensions.cs" />
+    <Compile Remove="UnifiedJsonReader.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'netstandard1.6' ">
