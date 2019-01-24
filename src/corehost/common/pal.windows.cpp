@@ -240,10 +240,25 @@ bool get_sdk_self_registered_dir(pal::string_t* recv)
     //  ***************************
 
     DWORD size = 0;
-    const HKEY hkey = HKEY_LOCAL_MACHINE;
+    HKEY hkey = HKEY_LOCAL_MACHINE;
     // The registry search occurs in the 32-bit registry in all cases.
     const DWORD flags = RRF_RT_REG_SZ | RRF_SUBKEY_WOW6432KEY;
-    pal::string_t sub_key = pal::string_t(_X("SOFTWARE\\dotnet\\Setup\\InstalledVersions\\")) + get_arch() + pal::string_t(_X("\\sdk"));
+    pal::string_t dotnet_key_path = pal::string_t(_X("SOFTWARE\\dotnet"));
+
+    pal::string_t environmentRegistryPathOverride;
+    if (pal::getenv(_X("_DOTNET_TEST_SDK_REGISTRY_PATH"), &environmentRegistryPathOverride))
+    {
+        pal::string_t hkcuPrefix = _X("HKEY_CURRENT_USER\\");
+        if (environmentRegistryPathOverride.substr(0, hkcuPrefix.length()) == hkcuPrefix)
+        {
+            hkey = HKEY_CURRENT_USER;
+            environmentRegistryPathOverride = environmentRegistryPathOverride.substr(hkcuPrefix.length());
+        }
+
+        dotnet_key_path = environmentRegistryPathOverride;
+    }
+
+    pal::string_t sub_key = dotnet_key_path + pal::string_t(_X("\\Setup\\InstalledVersions\\")) + get_arch() + pal::string_t(_X("\\sdk"));
     pal::char_t* value = _X("InstallLocation");
 
     // Determine the size of the buffer
