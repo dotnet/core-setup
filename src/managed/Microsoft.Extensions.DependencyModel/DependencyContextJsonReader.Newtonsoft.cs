@@ -119,7 +119,7 @@ namespace Microsoft.Extensions.DependencyModel
                 runtimeFallbacks ?? Enumerable.Empty<RuntimeFallbacks>());
         }
 
-        private void ReadRuntimeTarget(JsonTextReader reader, out string runtimeTargetName, out string runtimeSignature)
+        private static void ReadRuntimeTarget(JsonTextReader reader, out string runtimeTargetName, out string runtimeSignature)
         {
             runtimeTargetName = null;
             runtimeSignature = null;
@@ -142,7 +142,7 @@ namespace Microsoft.Extensions.DependencyModel
             reader.CheckEndObject();
         }
 
-        private CompilationOptions ReadCompilationOptions(JsonTextReader reader)
+        private static CompilationOptions ReadCompilationOptions(JsonTextReader reader)
         {
             IEnumerable<string> defines = null;
             string languageVersion = null;
@@ -332,7 +332,7 @@ namespace Microsoft.Extensions.DependencyModel
             return dependencies;
         }
 
-        private List<string> ReadPropertyNames(JsonTextReader reader)
+        private static List<string> ReadPropertyNames(JsonTextReader reader)
         {
             var runtimes = new List<string>();
 
@@ -351,7 +351,7 @@ namespace Microsoft.Extensions.DependencyModel
             return runtimes;
         }
 
-        private List<RuntimeFile> ReadRuntimeFiles(JsonTextReader reader)
+        private static List<RuntimeFile> ReadRuntimeFiles(JsonTextReader reader)
         {
             var runtimeFiles = new List<RuntimeFile>();
 
@@ -537,7 +537,7 @@ namespace Microsoft.Extensions.DependencyModel
             };
         }
 
-        private List<RuntimeFallbacks> ReadRuntimes(JsonTextReader reader)
+        private static List<RuntimeFallbacks> ReadRuntimes(JsonTextReader reader)
         {
             var runtimeFallbacks = new List<RuntimeFallbacks>();
 

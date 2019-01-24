@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyModel
             Dispose(true);
         }
 
-        private Target SelectRuntimeTarget(List<Target> targets, string runtimeTargetName)
+        private static Target SelectRuntimeTarget(List<Target> targets, string runtimeTargetName)
         {
             Target target;
 
@@ -50,7 +50,7 @@ namespace Microsoft.Extensions.DependencyModel
             return target;
         }
 
-        private bool IsRuntimeTarget(string name)
+        private static bool IsRuntimeTarget(string name)
         {
             return name.Contains(DependencyContextStrings.VersionSeparator);
         }
