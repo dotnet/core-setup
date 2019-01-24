@@ -20,26 +20,16 @@ namespace Microsoft.Extensions.DependencyModel
             }
 
             ArraySegment<byte> drained = ReadToEnd(stream);
-
-            DependencyContext dependencyContext;
             try
             {
-                dependencyContext = ReadCore(drained.AsSpan(0, drained.Count));
-            }
-            catch
-            {
-                // Holds document content, clear it before returning it.
-                drained.AsSpan(0, drained.Count).Clear();
-                ArrayPool<byte>.Shared.Return(drained.Array);
-                throw;
+                return ReadCore(drained);
             }
             finally
             {
                 // Holds document content, clear it before returning it.
-                drained.AsSpan(0, drained.Count).Clear();
+                drained.AsSpan().Clear();
                 ArrayPool<byte>.Shared.Return(drained.Array);
             }
-            return dependencyContext;
         }
 
         private static bool IsTokenTypeProperty(JsonTokenType tokenType)
