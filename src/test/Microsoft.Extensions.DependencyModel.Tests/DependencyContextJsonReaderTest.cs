@@ -28,17 +28,35 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         ""signature"":""target-signature""
     },
     ""targets"": {
-        // Ignore comments
         "".NETCoreApp,Version=v1.0/osx.10.10-x64"": {}
-        /*
-         * Ignore multi-line comments
-        */
     }
 }");
             context.Target.IsPortable.Should().BeFalse();
             context.Target.Framework.Should().Be(".NETCoreApp,Version=v1.0");
             context.Target.Runtime.Should().Be("osx.10.10-x64");
             context.Target.RuntimeSignature.Should().Be("target-signature");
+        }
+
+        [Fact]
+        public void ReadsRuntimeTargetInfoWithCommentsIsInvalid()
+        {
+            var exception = Assert.Throws<FormatException>(() => Read(
+@"{
+    ""runtimeTarget"": {
+        ""name"":"".NETCoreApp,Version=v1.0/osx.10.10-x64"",
+        ""signature"":""target-signature""
+    },
+    ""targets"": {
+        // Ignore comments
+        "".NETCoreApp,Version=v1.0/osx.10.10-x64"": {}
+        /*
+         * Ignore multi-line comments
+        */
+    }
+}"));
+
+            Assert.Equal("Unexpected character encountered, excepted '}' at line 7 position 0", exception.Message);
+
         }
 
         [Fact]
