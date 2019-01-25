@@ -30,7 +30,7 @@
     },
     
     "rpm_dependencies":[{
-        "package_name": "compat-openssl10",
+        "package_name": "openssl",
         "package_version": ""
     },
     {
