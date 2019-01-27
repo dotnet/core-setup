@@ -239,12 +239,12 @@ Default installation location. In certain cases when a framework-dependent appho
 
 Using the specified version from the `--fx-version` argument or from the runtimeconfig.json file, the search is conducted as follows:
 
-	1.	Use the first of following locations to determine the most appropriate version:
+1.	Use the first of following locations to determine the most appropriate version:
  - If the muxer (e.g. dotnet.exe) use the directory of the muxer that is being executed.
  - For 2.1+, if the apphost (e.g. myapp.exe) use the environment variable %DOTNET_ROOT% (empty by default)
  - For 2.1+, if the apphost and %DOTNET_ROOT% is empty, use the `Default installation location`.
 
-	2.	Obtain the most appropriate version from the `Global .NET location` and compare it agaist the most appropriate version from the first step. Select the most appropriate version from the two locations. If a compatible framework cannot be found, then an error will be displayed.
+2.	Obtain the most appropriate version from the `Global .NET location` and compare it agaist the most appropriate version from the first step. Select the most appropriate version from the two locations. If a compatible framework cannot be found, then an error will be displayed.
 
 Determine the most appropriate version varies for release (production) and pre-release versions.
 - For releases:
