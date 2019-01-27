@@ -222,9 +222,9 @@ In addition to searching the executable directory, the global .NET location is a
 
 Global .NET location:
 
-	Windows 32-bit: %SystemDrive%\Program Files\dotnet
-	Windows 64-bit (32-bit application): %SystemDrive%\Program Files (x86)\dotnet
-	Windows 64-bit (64-bit application): %SystemDrive%\Program Files\dotnet
+	Windows 32-bit: %ProgramFiles%\dotnet
+	Windows 64-bit (32-bit application): %ProgramFiles(x86)%\dotnet
+	Windows 64-bit (64-bit application): %ProgramFiles%\dotnet
 	Unix: none
 	OSX: none
 
