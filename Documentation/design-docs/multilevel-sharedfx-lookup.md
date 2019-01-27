@@ -123,9 +123,9 @@ The runtimeconfig.json will have a new `frameworks` array section that allows mo
 			},
 			{
 					"name": "Microsoft.Forms",
-					"version": "3.0.0"
-					"rollForwardOnNoCandidateFx" : 1
-					"applyPatches" : true
+					"version": "3.0.0",
+					"rollForwardOnNoCandidateFx": 1,
+					"applyPatches": true
 			}
 	]
 }
