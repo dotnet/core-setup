@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.DependencyModel
 {
     public partial class DependencyContextWriter
     {
-        private void Write(DependencyContext context, UnifiedJsonWriter jsonWriter)
+        private void WriteCore(DependencyContext context, UnifiedJsonWriter jsonWriter)
         {
             jsonWriter.WriteStartObject();
             WriteRuntimeTargetInfo(context, ref jsonWriter);

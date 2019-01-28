@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 using (var jsonWriter = new JsonTextWriter(writer) { Formatting = Formatting.Indented })
                 {
-                    Write(context, new UnifiedJsonWriter(jsonWriter));
+                    WriteCore(context, new UnifiedJsonWriter(jsonWriter));
                 }
             }
         }

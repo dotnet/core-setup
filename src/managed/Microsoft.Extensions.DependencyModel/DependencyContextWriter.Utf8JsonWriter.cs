@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyModel
             {
                 var state = new JsonWriterState(options: new JsonWriterOptions { Indented = true });
                 var jsonWriter = new Utf8JsonWriter(bufferWriter, state);
-                Write(context, new UnifiedJsonWriter(jsonWriter));
+                WriteCore(context, new UnifiedJsonWriter(jsonWriter));
                 bufferWriter.CopyTo(stream);
             }
         }
