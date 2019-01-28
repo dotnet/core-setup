@@ -96,15 +96,11 @@ namespace HostApiInvokerApp
             });
             try
             {
-                for (int i = 0; i < 2; i++)
+                rc = hostfxr.hostfxr_get_native_search_directories(argv.Length, argv, buffer, buffer.Length, ref required_buffer_size);
+                if (rc == hostfxr.HostApiBufferTooSmall)
                 {
-                    rc = hostfxr.hostfxr_get_native_search_directories(argv.Length, argv, buffer, buffer.Length, ref required_buffer_size);
-                    if (rc != hostfxr.HostApiBufferTooSmall)
-                    {
-                        break;
-                    }
-
                     buffer = new char[required_buffer_size];
+                    rc = hostfxr.hostfxr_get_native_search_directories(argv.Length, argv, buffer, buffer.Length, ref required_buffer_size);
                 }
             }
             finally
