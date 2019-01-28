@@ -1068,14 +1068,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .Children().Children().OfType<JProperty>().Where(p => p.Name.Contains("runtime") && p.Name.Contains("Microsoft.NETCore.App"))
                 .Values()["native"].Children().OfType<JProperty>();
 
-            // Change the coreclr.dll asset to not specify only "coreclr.dll" as the relative path (no directories).
+            // Change the coreclr.dll asset to specify only "coreclr.dll" as the relative path (no directories).
             string coreClrLibraryName = $"{fixture.SharedLibraryPrefix}coreclr{fixture.SharedLibraryExtension}";
             JProperty coreClrProperty = netCoreAppNativeAssets.First(p => p.Name.Contains(coreClrLibraryName));
             JProperty newCoreClrProperty = new JProperty(coreClrProperty.Name.Substring(coreClrProperty.Name.LastIndexOf('/') + 1), coreClrProperty.Value);
             coreClrProperty.Parent.Add(newCoreClrProperty);
             coreClrProperty.Remove();
 
-            // Change the clrjit.dll asset to not specify only "clrjit.dll" as the relative path (no directories).
+            // Change the clrjit.dll asset to specify only "clrjit.dll" as the relative path (no directories).
             string clrJitLibraryName = $"{fixture.SharedLibraryPrefix}clrjit{fixture.SharedLibraryExtension}";
             JProperty clrJitProperty = netCoreAppNativeAssets.First(p => p.Name.Contains(clrJitLibraryName));
             JProperty newClrJitProperty = new JProperty(clrJitProperty.Name.Substring(clrJitProperty.Name.LastIndexOf('/') + 1), clrJitProperty.Value);
