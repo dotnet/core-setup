@@ -380,10 +380,8 @@ struct hostpolicy_init_t
             }
         }
 
-        if (input->version_lo >= offsetof(host_interface_t, host_command) + sizeof(input->host_command))
-        {
-            init->host_command = input->host_command;
-        }
+        // Initialize the host command
+        init_host_command(input, init);
 
         if (input->version_lo >= offsetof(host_interface_t, host_info_host_path) + sizeof(input->host_info_host_path))
         {
@@ -394,6 +392,14 @@ struct hostpolicy_init_t
         }
 
         return true;
+    }
+
+    static void init_host_command(host_interface_t* input, hostpolicy_init_t* init)
+    {
+        if (input->version_lo >= offsetof(host_interface_t, host_command) + sizeof(input->host_command))
+        {
+            init->host_command = input->host_command;
+        }
     }
 
 private:

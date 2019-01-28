@@ -177,15 +177,15 @@ namespace
             bool set_app_paths = false;
 
             // Runtime options config properties.
-            for (int i = 0; i < g_init.cfg_keys.size(); ++i)
+            for (int i = 0; i < _hostpolicy_init.cfg_keys.size(); ++i)
             {
                 // Provide opt-in compatible behavior by using the switch to set APP_PATHS
-                if (pal::cstrcasecmp(g_init.cfg_keys[i].data(), "Microsoft.NETCore.DotNetHostPolicy.SetAppPaths") == 0)
+                if (pal::cstrcasecmp(_hostpolicy_init.cfg_keys[i].data(), "Microsoft.NETCore.DotNetHostPolicy.SetAppPaths") == 0)
                 {
-                    set_app_paths = (pal::cstrcasecmp(g_init.cfg_values[i].data(), "true") == 0);
+                    set_app_paths = (pal::cstrcasecmp(_hostpolicy_init.cfg_values[i].data(), "true") == 0);
                 }
 
-                properties.add(g_init.cfg_keys[i].data(), g_init.cfg_values[i].data());
+                properties.add(_hostpolicy_init.cfg_keys[i].data(), _hostpolicy_init.cfg_values[i].data());
             }
 
             // App paths and App NI paths
@@ -232,7 +232,10 @@ namespace
     };
 }
 
-int run_as_lib(const arguments_t& args, std::shared_ptr<coreclr_t> &coreclr)
+int run_as_lib(
+    hostpolicy_init_t &hostpolicy_init,
+    const arguments_t &args,
+    std::shared_ptr<coreclr_t> &coreclr)
 {
     coreclr = g_lib_coreclr.lock();
     if (coreclr != nullptr)
@@ -252,7 +255,7 @@ int run_as_lib(const arguments_t& args, std::shared_ptr<coreclr_t> &coreclr)
             return StatusCode::Success;
         }
 
-        prepare_to_run_t prep{ g_init, args, false /* breadcrumbs_enabled */ };
+        prepare_to_run_t prep{ hostpolicy_init, args, false /* breadcrumbs_enabled */ };
 
         // Build variables for CoreCLR instantiation
         coreclr_property_bag_t properties;
@@ -296,12 +299,15 @@ int run_as_lib(const arguments_t& args, std::shared_ptr<coreclr_t> &coreclr)
     return StatusCode::Success;
 }
 
-int run_as_app(const arguments_t& args, pal::string_t* out_host_command_result = nullptr)
+int run_as_app(
+    hostpolicy_init_t &hostpolicy_init,
+    const arguments_t &args,
+    pal::string_t* out_host_command_result = nullptr)
 {
     // Breadcrumbs are not enabled for API calls because they do not execute
     // the app and may be re-entry
     bool breadcrumbs_enabled = (out_host_command_result == nullptr);
-    prepare_to_run_t prep{ g_init, args, breadcrumbs_enabled };
+    prepare_to_run_t prep{ hostpolicy_init, args, breadcrumbs_enabled };
 
     // Build variables for CoreCLR instantiation
     coreclr_property_bag_t properties;
@@ -312,7 +318,7 @@ int run_as_app(const arguments_t& args, pal::string_t* out_host_command_result =
         return rc;
 
     // Check for host command(s)
-    if (pal::strcasecmp(g_init.host_command.c_str(), _X("get-native-search-directories")) == 0)
+    if (pal::strcasecmp(hostpolicy_init.host_command.c_str(), _X("get-native-search-directories")) == 0)
     {
         const char *value;
         if (!properties.try_get(common_property::NativeDllSearchDirectories, &value))
@@ -434,8 +440,8 @@ void trace_hostpolicy_entrypoint_invocation(const pal::string_t& entryPointName)
 //
 // Loads and initilizes the hostpolicy.
 //
-// The hostpolicy will be reinitialized with the current
-// host_interface_t argument.
+// If hostpolicy is already initalized, the library will not be
+// reinitialized.
 //
 SHARED_API int corehost_load(host_interface_t* init)
 {
@@ -443,11 +449,16 @@ SHARED_API int corehost_load(host_interface_t* init)
     std::lock_guard<std::mutex> lock{ g_init_lock };
 
     if (g_init_done)
+    {
+        // Since the host command is set during load _and_
+        // load is considered re-entrant due to how testing is
+        // done, permit the re-initialization of the host command.
+        hostpolicy_init_t::init_host_command(init, &g_init);
         return StatusCode::Success;
+    }
 
     trace::setup();
 
-    // Re-initialize global state in case of re-entry
     g_init = hostpolicy_init_t{};
 
     if (!hostpolicy_init_t::init(init, &g_init))
@@ -460,7 +471,12 @@ SHARED_API int corehost_load(host_interface_t* init)
     return StatusCode::Success;
 }
 
-int corehost_main_init(const int argc, const pal::char_t* argv[], const pal::string_t& location, arguments_t& args)
+int corehost_main_init(
+    hostpolicy_init_t &hostpolicy_init,
+    const int argc,
+    const pal::char_t* argv[],
+    const pal::string_t& location,
+    arguments_t& args)
 {
     if (trace::is_enabled())
     {
@@ -472,21 +488,21 @@ int corehost_main_init(const int argc, const pal::char_t* argv[], const pal::str
         }
         trace::info(_X("}"));
 
-        trace::info(_X("Deps file: %s"), g_init.deps_file.c_str());
-        for (const auto& probe : g_init.probe_paths)
+        trace::info(_X("Deps file: %s"), hostpolicy_init.deps_file.c_str());
+        for (const auto& probe : hostpolicy_init.probe_paths)
         {
             trace::info(_X("Additional probe dir: %s"), probe.c_str());
         }
     }
 
     // Take care of arguments
-    if (!g_init.host_info.is_valid())
+    if (!hostpolicy_init.host_info.is_valid())
     {
         // For backwards compat (older hostfxr), default the host_info
-        g_init.host_info.parse(argc, argv);
+        hostpolicy_init.host_info.parse(argc, argv);
     }
 
-    if (!parse_arguments(g_init, argc, argv, args))
+    if (!parse_arguments(hostpolicy_init, argc, argv, args))
     {
         return StatusCode::LibHostInvalidArgs;
     }
@@ -498,10 +514,10 @@ int corehost_main_init(const int argc, const pal::char_t* argv[], const pal::str
 SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
 {
     arguments_t args;
-    int rc = corehost_main_init(argc, argv, _X("corehost_main"), args);
+    int rc = corehost_main_init(g_init, argc, argv, _X("corehost_main"), args);
     if (!rc)
     {
-        rc = run_as_app(args);
+        rc = run_as_app(g_init, args);
     }
 
     return rc;
@@ -510,14 +526,13 @@ SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
 SHARED_API int corehost_main_with_output_buffer(const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size)
 {
     arguments_t args;
-
-    int rc = corehost_main_init(argc, argv, _X("corehost_main_with_output_buffer"), args);
+    int rc = corehost_main_init(g_init, argc, argv, _X("corehost_main_with_output_buffer"), args);
     if (!rc)
     {
         if (g_init.host_command == _X("get-native-search-directories"))
         {
             pal::string_t output_string;
-            rc = run_as_app(args, &output_string);
+            rc = run_as_app(g_init, args, &output_string);
             if (!rc)
             {
                 // Get length in character count not including null terminator
@@ -548,24 +563,24 @@ SHARED_API int corehost_main_with_output_buffer(const int argc, const pal::char_
     return rc;
 }
 
-int corehost_libhost_init(const pal::string_t& location, arguments_t& args)
+int corehost_libhost_init(hostpolicy_init_t &hostpolicy_init, const pal::string_t& location, arguments_t& args)
 {
     if (trace::is_enabled())
     {
         trace_hostpolicy_entrypoint_invocation(location);
         trace::info(_X("}"));
 
-        trace::info(_X("Deps file: %s"), g_init.deps_file.c_str());
-        for (const auto& probe : g_init.probe_paths)
+        trace::info(_X("Deps file: %s"), hostpolicy_init.deps_file.c_str());
+        for (const auto& probe : hostpolicy_init.probe_paths)
         {
             trace::info(_X("Additional probe dir: %s"), probe.c_str());
         }
     }
 
     // Host info should always be valid in the delegate scenario
-    assert(g_init.host_info.is_valid());
+    assert(hostpolicy_init.host_info.is_valid());
 
-    if (!parse_arguments(g_init, 0, nullptr, args))
+    if (!parse_arguments(hostpolicy_init, 0, nullptr, args))
     {
         return StatusCode::LibHostInvalidArgs;
     }
@@ -578,12 +593,12 @@ SHARED_API int corehost_get_com_activation_delegate(void **delegate)
 {
     arguments_t args;
 
-    int rc = corehost_libhost_init(_X("corehost_get_com_activation_delegate"), args);
+    int rc = corehost_libhost_init(g_init, _X("corehost_get_com_activation_delegate"), args);
     if (rc != StatusCode::Success)
         return rc;
 
     std::shared_ptr<coreclr_t> coreclr;
-    rc = run_as_lib(args, coreclr);
+    rc = run_as_lib(g_init, args, coreclr);
     if (rc != StatusCode::Success)
         return rc;
 
