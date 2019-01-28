@@ -22,7 +22,6 @@
 #include "utils.h"
 
 using corehost_load_fn = int(*) (const host_interface_t* init);
-using corehost_ensure_load_fn = int(*) (const host_interface_t* init);
 using corehost_main_fn = int(*) (const int argc, const pal::char_t* argv[]);
 using corehost_get_com_activation_delegate_fn = int(*) (void **delegate);
 using corehost_main_with_output_buffer_fn = int(*) (const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size);
@@ -38,7 +37,6 @@ struct hostpolicy_contract
 
     // 3.0+ contracts
     corehost_set_error_writer_fn set_error_writer;
-    corehost_ensure_load_fn ensure_load;
 };
 
 namespace
@@ -76,7 +74,6 @@ int load_hostpolicy_common(
             return StatusCode::CoreHostEntryPointFailure;
 
         g_hostpolicy_contract.set_error_writer = (corehost_set_error_writer_fn)pal::get_symbol(g_hostpolicy, "corehost_set_error_writer");
-        g_hostpolicy_contract.ensure_load = (corehost_ensure_load_fn)pal::get_symbol(g_hostpolicy, "corehost_ensure_load");
 
         // It's possible to not have corehost_set_error_writer, since this was only introduced in 3.0
         // so 2.0 hostpolicy would not have the export. In this case we will not propagate the error writer
@@ -144,8 +141,6 @@ static int execute_app(
         }
     }
 
-    pal::unload_library(corehost);
-
     return code;
 }
 
@@ -180,8 +175,6 @@ static int execute_host_command(
         }
     }
 
-    pal::unload_library(corehost);
-
     return code;
 }
 
@@ -205,7 +198,7 @@ static int get_com_activation_delegate_internal(
         propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
 
         const host_interface_t& intf = init->get_host_init_data();
-        if ((code = host_contract.ensure_load(&intf)) == StatusCode::Success)
+        if ((code = host_contract.load(&intf)) == StatusCode::Success)
         {
             code = host_entry(delegate);
         }

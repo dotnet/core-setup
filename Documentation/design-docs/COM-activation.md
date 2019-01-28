@@ -76,8 +76,8 @@ When `DllGetClassObject()` is called in a COM activation scenario, the following
     * If a `hostpolicy` instance is already loaded, the one presently loaded is re-used.
     * **Prior to 3.0 GA** No validation is done to determine if the loaded `hostpolicy` can satisfy the current assembly's `.runtimeconfig.json`.
     * **At 3.0 GA** If a CLR is active within the process, the requested CLR version will be validated against that CLR. If version satisfiability fails, activation will fail.
-1) The `corehost_ensure_load()` export is called to initialize `hostpolicy` only if it hasn't already been initialized.
-    - In normal application activation, the `corehost_load()` export is called which will always initialize `hostpolicy` regardless if initialization has already been performed.
+1) The `corehost_load()` export is called to initialize `hostpolicy`.
+    - Prior to .NET Core 3.0, during application activation the `corehost_load()` export would always initialize `hostpolicy` regardless if initialization had already been performed. For .NET Core 3.0, calling the function again will not re-initialize `hostpolicy`, but simply return.
 1) The `corehost_get_coreclr_delegate()` export from `hostpolicy` is called.
 1) The `corehost_get_coreclr_delegate()` export determines if the associated `coreclr` library has been loaded and if so, uses the existing activated CLR instance. If a CLR instance is not available, `hostpolicy` will load `coreclr` and activate a new CLR instance.
     * **Prior to 3.0 GA** No validation is done to determine if the current running coreclr instance can satisfy the current assembly's `.runtimeconfig.json`.

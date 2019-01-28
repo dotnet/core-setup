@@ -78,7 +78,8 @@ namespace
     {
         assert(g_coreclr != nullptr && coreclr_initialize != nullptr);
 
-        pal::unload_library(g_coreclr);
+        // [TODO] Unloading coreclr is not presently supported
+        // pal::unload_library(g_coreclr);
     }
 }
 

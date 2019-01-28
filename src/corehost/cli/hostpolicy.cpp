@@ -431,37 +431,6 @@ void trace_hostpolicy_entrypoint_invocation(const pal::string_t& entryPointName)
         entryPointName.c_str());
 }
 
-namespace
-{
-    int corehost_load_internal(host_interface_t* init, bool reinit)
-    {
-        assert(init != nullptr);
-        std::lock_guard<std::mutex> lock{ g_init_lock };
-
-        // If initialization was already done and reinitialization is requested,
-        // then return immediately.
-        //
-        // [TODO] Instead of checking for reinitialization, verify the existing
-        // supports the currently requested policy.
-        if (g_init_done && !reinit)
-            return StatusCode::Success;
-
-        trace::setup();
-
-        // Re-initialize global state in case of re-entry
-        g_init = hostpolicy_init_t{};
-
-        if (!hostpolicy_init_t::init(init, &g_init))
-        {
-            g_init_done = false;
-            return StatusCode::LibHostInitFailure;
-        }
-
-        g_init_done = true;
-        return StatusCode::Success;
-    }
-}
-
 //
 // Loads and initilizes the hostpolicy.
 //
@@ -470,16 +439,25 @@ namespace
 //
 SHARED_API int corehost_load(host_interface_t* init)
 {
-    return corehost_load_internal(init, true /* reinit */);
-}
+    assert(init != nullptr);
+    std::lock_guard<std::mutex> lock{ g_init_lock };
 
-//
-// Loads and initilizes the hostpolicy, only if the hostpolicy
-// hasn't already been initialized.
-//
-SHARED_API int corehost_ensure_load(host_interface_t* init)
-{
-    return corehost_load_internal(init, false /* reinit */);
+    if (g_init_done)
+        return StatusCode::Success;
+
+    trace::setup();
+
+    // Re-initialize global state in case of re-entry
+    g_init = hostpolicy_init_t{};
+
+    if (!hostpolicy_init_t::init(init, &g_init))
+    {
+        g_init_done = false;
+        return StatusCode::LibHostInitFailure;
+    }
+
+    g_init_done = true;
+    return StatusCode::Success;
 }
 
 int corehost_main_init(const int argc, const pal::char_t* argv[], const pal::string_t& location, arguments_t& args)
