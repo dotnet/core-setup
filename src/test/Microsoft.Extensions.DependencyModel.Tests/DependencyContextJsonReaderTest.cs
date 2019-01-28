@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using FluentAssertions;
 using Xunit;
 
@@ -40,7 +41,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         [Fact]
         public void ReadsRuntimeTargetInfoWithCommentsIsInvalid()
         {
-            var exception = Assert.Throws<FormatException>(() => Read(
+            var exception = Assert.Throws<JsonReaderException>(() => Read(
 @"{
     ""runtimeTarget"": {
         ""name"":"".NETCoreApp,Version=v1.0/osx.10.10-x64"",
@@ -55,7 +56,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
     }
 }"));
 
-            Assert.True(exception.Message.StartsWith("Unexpected character encountered, excepted '}' at line 7 position "));
+            Assert.Equal("'/' is invalid after a value. Expected either ',', '}', or ']'. LineNumber: 6 | BytePositionInLine: 8.", exception.Message);
         }
 
         [Fact]

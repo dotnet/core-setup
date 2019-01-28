@@ -20,8 +20,7 @@ namespace Microsoft.Extensions.DependencyModel
             ArraySegment<byte> buffer = ReadToEnd(stream);
             try
             {
-                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
-                return Read(new Utf8JsonReader(buffer, isFinalBlock: true, state));
+                return Read(new Utf8JsonReader(buffer, isFinalBlock: true, state: default));
             }
             finally
             {
