@@ -5,11 +5,10 @@ using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DependencyModel
 {
+    // TODO: Remove once we have https://github.com/dotnet/corefx/issues/34894
     internal class ArrayBufferWriter : IBufferWriter<byte>, IDisposable
     {
         private byte[] _rentedBuffer;
@@ -26,21 +25,7 @@ namespace Microsoft.Extensions.DependencyModel
             _written = 0;
         }
 
-        public async Task CopyToAsync(Stream stream, CancellationToken cancellationToken = default)
-        {
-            if (_rentedBuffer == null)
-                throw new ObjectDisposedException(nameof(ArrayBufferWriter));
-
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-
-            await stream.WriteAsync(_rentedBuffer, 0, _written, cancellationToken).ConfigureAwait(false);
-
-            _rentedBuffer.AsSpan(0, _written).Clear();
-            _written = 0;
-        }
-
-        internal void CopyTo(Stream stream)
+        public void CopyTo(Stream stream)
         {
             if (_rentedBuffer == null)
                 throw new ObjectDisposedException(nameof(ArrayBufferWriter));
@@ -78,6 +63,7 @@ namespace Microsoft.Extensions.DependencyModel
 
             ArrayPool<byte>.Shared.Return(_rentedBuffer, clearArray: true);
             _rentedBuffer = null;
+            _written = 0;
         }
 
         public Memory<byte> GetMemory(int sizeHint = 0)
@@ -110,15 +96,20 @@ namespace Microsoft.Extensions.DependencyModel
 
             if (sizeHint == 0)
             {
-                sizeHint = _rentedBuffer.Length == 0 ? MinimumBufferSize : checked(_rentedBuffer.Length * 2);
-
-                Debug.Assert(sizeHint > _rentedBuffer.Length);
+                sizeHint = MinimumBufferSize;
             }
 
-            if (sizeHint > _rentedBuffer.Length)
+            int availableSpace = _rentedBuffer.Length - _written;
+
+            if (sizeHint > availableSpace)
             {
+                int growBy = sizeHint > _rentedBuffer.Length ? sizeHint : _rentedBuffer.Length;
+
+                int newSize = checked(_rentedBuffer.Length + growBy);
+
                 byte[] oldBuffer = _rentedBuffer;
-                _rentedBuffer = ArrayPool<byte>.Shared.Rent(sizeHint);
+
+                _rentedBuffer = ArrayPool<byte>.Shared.Rent(newSize);
 
                 Debug.Assert(oldBuffer.Length >= _written);
                 Debug.Assert(_rentedBuffer.Length >= _written);
@@ -127,7 +118,8 @@ namespace Microsoft.Extensions.DependencyModel
                 ArrayPool<byte>.Shared.Return(oldBuffer, clearArray: true);
             }
 
-            Debug.Assert(_rentedBuffer.Length > 0);
+            Debug.Assert(_rentedBuffer.Length - _written > 0);
+            Debug.Assert(_rentedBuffer.Length - _written >= sizeHint);
         }
     }
 }

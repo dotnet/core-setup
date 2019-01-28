@@ -17,17 +17,17 @@ namespace Microsoft.Extensions.DependencyModel
                 throw new ArgumentNullException(nameof(stream));
             }
 
-            ArraySegment<byte> drained = ReadToEnd(stream);
+            ArraySegment<byte> buffer = ReadToEnd(stream);
             try
             {
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
-                return Read(new Utf8JsonReader(drained, isFinalBlock: true, state));
+                return Read(new Utf8JsonReader(buffer, isFinalBlock: true, state));
             }
             finally
             {
                 // Holds document content, clear it before returning it.
-                drained.AsSpan().Clear();
-                ArrayPool<byte>.Shared.Return(drained.Array);
+                buffer.AsSpan().Clear();
+                ArrayPool<byte>.Shared.Return(buffer.Array);
             }
         }
 
