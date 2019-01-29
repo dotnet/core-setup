@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview.19067.6">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview.19073.11">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>d8c200414ccf65e0be94358937e9c711c0fd532d</Sha>
+      <Sha>351ca391579740ae8af8a5405cffa16d152ad6b2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview.19067.6">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview.19073.11">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>d8c200414ccf65e0be94358937e9c711c0fd532d</Sha>
+      <Sha>351ca391579740ae8af8a5405cffa16d152ad6b2</Sha>
     </Dependency>
     <PinnedDependency Name="Microsoft.NETCore.Targets" Version="2.0.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -15,15 +15,15 @@
     <PinnedDependency Name="NETStandard.Library" Version="2.0.3">
       <Uri>https://github.com/dotnet/standard</Uri>
     </PinnedDependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview-27318-76">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview-27322-72">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>b2c6dd4eb427caf7cb852998076b0b1543447a28</Sha>
+      <Sha>b9e88989458e24fa9764e045917b141e3338eae7</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19067.6">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19073.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>bed438c56afcd799b4de747291cf68815ae2f53b</Sha>
+      <Sha>af8ab7d7ca13d5f129c31cfa7aeda19f6d168e6e</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

@@ -32,7 +32,7 @@
 
   <Target Name="PublishFinalOutput"
           Condition="'$(Finalize)' == 'true'"
-          DependsOnTargets="PublishCoreHostPackages;SetupPublishSymbols;PublishSymbols;FinalizeBuildInAzure;UpdateVersionsRepo" />
+          DependsOnTargets="PublishCoreHostPackages;SetupPublishSymbols;PublishSymbols;FinalizeBuildInAzure" />
     
   <Target Name="GetPackagesToSign" DependsOnTargets="GatherShippingPackages">
     <ItemGroup>
@@ -189,7 +189,7 @@
   </Target>
 
   <Target Name="PublishCoreHostPackages"
-          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackages;SignPackages;DoPushCoreHostPackagesToFeed;DoPushCoreHostPackagesToAzure"
+          DependsOnTargets="CheckIfAllBuildsHavePublished;DownloadCoreHostPackages;SignPackages;DoPushCoreHostPackagesToAzure"
           Condition="'@(_MissingBlobNames)' == '' AND '$(NuGetFeedUrl)' != ''">
     <Error Condition="'$(NuGetFeedUrl)' ==''" Text="Missing required property NuGetFeedUrl" />
     <Error Condition="'$(NuGetApiKey)' == ''" Text="Missing required property NuGetApiKey" />
@@ -231,6 +231,11 @@
       <_DownloadedStandardPackages Include="@(_DownloadedPackages)"
                                   Exclude="@(_DownloadedSymbolsPackages)"
                                   Condition="$([System.String]::new('%(_DownloadedPackages.Identity)').EndsWith('.nupkg'))" />
+
+      <!-- Exclude SVG files from BAR manifest: https://github.com/dotnet/arcade/issues/1842. -->
+      <_DownloadedAssets Condition="$([System.String]::new('%(_DownloadedAssets.Identity)').EndsWith('.svg'))">
+        <ExcludeFromManifest>true</ExcludeFromManifest>
+      </_DownloadedAssets>
     </ItemGroup>
   </Target>
 
