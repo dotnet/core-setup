@@ -14,7 +14,7 @@ namespace HostApiInvokerApp
                 int argc, 
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
                 string[] argv,
-                [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
+                [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3), Out]
                 char[] buffer,
                 int bufferSize,
                 ref int required_buffer_size);
