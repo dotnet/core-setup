@@ -247,3 +247,33 @@ if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))
 	      message("Using Windows SDK version ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
       endif()
 endif ()
+
+if (WIN32)
+    if(CLR_CMAKE_HOST_ARCH STREQUAL arm)
+      # Explicitly specify the assembler to be used for Arm32 compile
+      if($ENV{__VSVersion} STREQUAL "14 2015")
+        file(TO_CMAKE_PATH "$ENV{VCINSTALLDIR}\\bin\\x86_arm\\armasm.exe" CMAKE_ASM_COMPILER)
+      else()
+        file(TO_CMAKE_PATH "$ENV{VCToolsInstallDir}\\bin\\HostX86\\arm\\armasm.exe" CMAKE_ASM_COMPILER)
+      endif()
+
+      set(CMAKE_ASM_MASM_COMPILER ${CMAKE_ASM_COMPILER})
+      message("CMAKE_ASM_MASM_COMPILER explicitly set to: ${CMAKE_ASM_MASM_COMPILER}")
+
+      # Enable generic assembly compilation to avoid CMake generate VS proj files that explicitly
+      # use ml[64].exe as the assembler.
+      enable_language(ASM)
+    elseif(CLR_CMAKE_HOST_ARCH STREQUAL arm64)
+      # Explicitly specify the assembler to be used for Arm64 compile
+      file(TO_CMAKE_PATH "$ENV{VCToolsInstallDir}\\bin\\HostX86\\arm64\\armasm64.exe" CMAKE_ASM_COMPILER)
+
+      set(CMAKE_ASM_MASM_COMPILER ${CMAKE_ASM_COMPILER})
+      message("CMAKE_ASM_MASM_COMPILER explicitly set to: ${CMAKE_ASM_MASM_COMPILER}")
+
+      # Enable generic assembly compilation to avoid CMake generate VS proj files that explicitly
+      # use ml[64].exe as the assembler.
+      enable_language(ASM)
+    else()
+      enable_language(ASM_MASM)
+    endif()
+endif()
