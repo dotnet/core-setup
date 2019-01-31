@@ -11,6 +11,7 @@
     <Serviceable>true</Serviceable>
     <PackageLicenseUrl>https://github.com/dotnet/core-setup/blob/master/LICENSE.TXT</PackageLicenseUrl>
     <PackageProjectUrl>https://dot.net</PackageProjectUrl>
+    <Authors>Microsoft</Authors>
     <PackageLicenseFile>$(RepoRoot)LICENSE.TXT</PackageLicenseFile>
     <PackageThirdPartyNoticesFile>$(RepoRoot)THIRD-PARTY-NOTICES.TXT</PackageThirdPartyNoticesFile>
   </PropertyGroup>
