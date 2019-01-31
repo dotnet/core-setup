@@ -4,7 +4,7 @@
 #include "ijwhost.h"
 #include "IJWBootstrapThunkCPU.h"
 #include "corhdr.h"
-#include "executableheap.h"
+#include <heapapi.h>
 #include <new>
 #include <mutex>
 
@@ -18,8 +18,11 @@
 
 extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_t cookie);
 
-std::mutex g_thunkChunkLock;
-VTableBootstrapThunkChunk* g_pVtableBootstrapThunkChunkList;
+namespace
+{
+    std::mutex g_thunkChunkLock{};
+    VTableBootstrapThunkChunk* g_pVtableBootstrapThunkChunkList = nullptr;
+}
 
 bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
 {
@@ -46,7 +49,7 @@ bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
 
     size_t chunkSize = sizeof(VTableBootstrapThunkChunk) + VTableBootstrapThunk::GetThunkObjectSize() * numThunks;
 
-    void* pbChunk = AllocateExecutable(chunkSize);
+    void* pbChunk = HeapAlloc(g_heapHandle, 0, chunkSize);
 
     if (pbChunk == nullptr)
     {
@@ -110,8 +113,7 @@ bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
 extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_t cookie)
 {
     VTableBootstrapThunk *pThunk = VTableBootstrapThunk::GetThunkFromCookie(cookie);
-    pal::hresult_t hr = StartRuntimeIfNotStarted(pThunk->GetDLLHandle());
-    std::uintptr_t thunkAddress;
+    pal::hresult_t hr = LoadDllIntoRuntime(pThunk->GetDLLHandle());
 
     if (FAILED(hr))
     {
@@ -125,7 +127,7 @@ extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_
 #pragma warning (pop)
     }
     
-    thunkAddress = *(pThunk->GetSlotAddr());
+    std::uintptr_t thunkAddress = *(pThunk->GetSlotAddr());
 
     return thunkAddress;
 }
@@ -146,7 +148,7 @@ void BootstrapThunkDLLDetach(PEDecoder& pe)
             {
                 VTableBootstrapThunkChunk *pDel = *ppCurChunk;
                 *ppCurChunk = (*ppCurChunk)->GetNext();
-                DeallocateExecutable(pDel);
+                HeapFree(g_heapHandle, 0, pDel);
                 break;
             }
         }

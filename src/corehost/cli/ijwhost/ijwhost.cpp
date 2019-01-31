@@ -4,7 +4,7 @@
 #include "pal.h"
 #include "ijwhost.h"
 
-pal::hresult_t StartRuntimeIfNotStarted(pal::dll_t hInstance)
+pal::hresult_t LoadDllIntoRuntime(pal::dll_t hInstance, DWORD dwReason, LPVOID lpReserved, bool fromThunk)
 {
     return E_FAIL;
 }

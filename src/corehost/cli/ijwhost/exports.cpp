@@ -8,7 +8,6 @@
 
 SHARED_API std::int32_t _CorExeMain()
 {
-    // Start runtime, execute user assembly
     return 0;
 }
 
@@ -67,4 +66,21 @@ SHARED_API BOOL _CorDllMain(HINSTANCE hInst,
 	}
 
 	return res;
+}
+
+BOOL STDMETHODCALLTYPE DllMain(HINSTANCE hInst,
+	DWORD  dwReason,
+	LPVOID lpReserved
+)
+{
+	switch (dwReason)
+	{
+	case DLL_PROCESS_ATTACH:
+		g_heapHandle = HeapCreate(HEAP_CREATE_ENABLE_EXECUTE, 0, 0);
+		break;
+	case DLL_PROCESS_DETACH:
+		HeapDestroy(g_heapHandle);
+		break;
+	}
+	return TRUE;
 }

@@ -9,4 +9,7 @@ using DllMain_t = BOOL(HINSTANCE hInst, DWORD dwReason, LPVOID lpReserved);
 bool PatchVTableEntriesForDLLAttach(PEDecoder& decoder);
 void BootstrapThunkDLLDetach(PEDecoder& decoder);
 
-pal::hresult_t StartRuntimeIfNotStarted(pal::dll_t hInstance);
+pal::hresult_t LoadDllIntoRuntime(pal::dll_t hInstance);
+
+
+HANDLE g_heapHandle;
