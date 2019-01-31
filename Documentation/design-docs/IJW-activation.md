@@ -105,6 +105,7 @@ When the runtime loads the assembly, it needs to know if each element in the vtf
 
 Options 1 and 2 both would make the layout of the stub structure a contract between the shim and the runtime. This is compilcated further by the fact that the stubs are architecture-specific since they contain the raw assembly for the jump stubs. Option 3 will work the cleanest if the runtime can call back into managed code at the point of assembly loading that it needs the information (to execute possibly multiple registered callbacks from multiple IJW hosts). If it cannot call back into managed code at that time, we may need to ensure that there is only one IJW shim loaded for an application. If there is only one, we can easily just store a function pointer and execute the callbacks without having to worry about executing managed code.
 
+Additionally, if we want to load dependencies, we probably need to change the signature of `LoadInMemoryAssembly` since it does not have a way currently to resolve the *.deps.json* file for the image. However, we need to work with the build tooling teams in both .NET and VC++ to determine exactly what work we're doing here for this scenario.
 
 ### Open Questions
 
