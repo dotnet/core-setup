@@ -54,7 +54,7 @@ When `_CorExeMain()` is called, the following will occur:
    ```csharp
    public static class InMemoryAssemblyLoader
    {
-       public static unsafe int LoadAndExecuteInMemoryAssembly(byte* imageBase, long imageSize, string[] args);
+       public static int LoadAndExecuteInMemoryAssembly(IntPtr handle, string[] args);
    }
    ```
 
@@ -76,7 +76,7 @@ When `_CorDllMain()` is called when the DLL, the following will occur:
 
 The .NET Framework implementation uses the runtime's `PEDecoder` class to validate that the PE is a .NET assembly, bail out early if it is IL only, get the native entry point if it exists, get the vtfixup table, and read RVAs from the module. Our options here are to either port over the `PEDecoder` class to core-setup, move the shim to coreclr and copy a chunk of code from core-setup to coreclr along with it to enable the shim to activate the runtime through hostfxr, or some other code-sharing model. The `PEDecoder` class heavily uses the CoreCLR `CONTRACT` and `CHECK` APIs, so porting it over to core-setup is not a simple task. A subset has been ported to be able to test behavior. However, the implementation of the image validation brings in nearly all of the `PEDecoder` class.
 
-Additionally, the .NET Framework implementation of the allocation uses the CLR's Executable Heap from the CLR's `utilicode` library. We can use the Windows Heap API directly to create our own executable heap.
+Additionally, the .NET Framework implementation of the allocation uses the CLR's Executable Heap from the CLR's `utilcode` library. We can use the Windows Heap API directly to create our own executable heap.
 
 #### Loading the Assembly Into the Runtime
 
@@ -85,7 +85,7 @@ When a delayed-activation thunk is called, it will be outside of the loader lock
     ```csharp
     public static class InMemoryAssemblyLoader
     {
-        public static unsafe void LoadInMemoryAssembly(byte* imageBase, long imageSize);
+        public static void LoadInMemoryAssembly(IntPtr handle);
     }
     ```
     Note this API would not be exposed outside of `System.Private.CoreLib` unless we decide to do so.
@@ -97,15 +97,14 @@ When the runtime loads the assembly, it needs to know if each element in the vtf
 
 .NET Core has a few options for how to implement equivalent behavior:
 
-1) Assume that all IJW DLLs have stubs. We are not adding support for the legacy, deadlock-prone, behavior of activating the runtime without stubs, so any IJW DLL will have stubs instead of tokens in its vtfixup table.
-2) Track that an assembly is being loaded via the method above and if so, mark that is has stubs instead of tokens. This option has a few problems:
+1) Track that an assembly is being loaded via the method above and if so, mark that is has stubs instead of tokens. This option has a few problems:
    a) We would need to change the API to either take in a `bool` parameter that would specify if the image has stubs in the vtfixup table or change the API to be IJW-specific.
    b) We would need to associate the value of `imageBase` with the status of if it has stubs before we try to load the assembly. The ordering here is very important and easy to mess up.
-3) Implement another API in `System.Private.CoreLib` that registers the callbacks for the runtime to call into the shim.
+2) Implement another API in `System.Private.CoreLib` that registers the callbacks for the runtime to call into the shim.
 
-Options 1 and 2 both would make the layout of the stub structure a contract between the shim and the runtime. This is compilcated further by the fact that the stubs are architecture-specific since they contain the raw assembly for the jump stubs. Option 3 will work the cleanest if the runtime can call back into managed code at the point of assembly loading that it needs the information (to execute possibly multiple registered callbacks from multiple IJW hosts). If it cannot call back into managed code at that time, we may need to ensure that there is only one IJW shim loaded for an application. If there is only one, we can easily just store a function pointer and execute the callbacks without having to worry about executing managed code.
+Options 1 would make the layout of the stub structure a contract between the shim and the runtime. This is compilcated further by the fact that the stubs are architecture-specific since they contain the raw assembly for the jump stubs. Option 2 will work the cleanest if the runtime can call back into managed code at the point of assembly loading that it needs the information (to execute possibly multiple registered callbacks from multiple IJW hosts). If it cannot call back into managed code at that time, we may need to ensure that there is only one IJW shim loaded for an application. If there is only one, we can easily just store a function pointer and execute the callbacks without having to worry about executing managed code.
 
-Additionally, if we want to load dependencies, we probably need to change the signature of `LoadInMemoryAssembly` since it does not have a way currently to resolve the *.deps.json* file for the image. However, we need to work with the build tooling teams in both .NET and VC++ to determine exactly what work we're doing here for this scenario.
+We should be able to load a *.deps.json* file with the signature above since Win32 APIs give us the ability to recover the file path from the `HMODULE`.
 
 ### Open Questions
 
