@@ -20,7 +20,7 @@ bool GetModuleFileNameWrapper(HMODULE hModule, pal::string_t* recv)
     do
     {
         path.resize(dwModuleFileName * 2);
-        dwModuleFileName = GetModuleFileNameW(hModule, (LPWSTR)path.data(), path.size());
+        dwModuleFileName = GetModuleFileNameW(hModule, (LPWSTR)path.data(), static_cast<DWORD>(path.size()));
     } while (dwModuleFileName == path.size());
 
     if (dwModuleFileName == 0)

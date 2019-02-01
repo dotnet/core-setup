@@ -6,10 +6,16 @@
 
 #if FEATURE_LIBHOST
 
+#include <pal.h>
+
+//
+// See ComActivator class in System.Private.CoreLib
+//
 struct com_activation_context
 {
     GUID class_id;
     GUID interface_id;
+    const void *assembly_path;
     const void *assembly_name;
     const void *type_name;
     void **class_factory_dest;
@@ -18,6 +24,7 @@ struct com_activation_context
 using com_activation_fn = int(*)(com_activation_context*);
 
 int get_com_activation_delegate(
+    pal::string_t *app_path,
     com_activation_fn *delegate);
 
 #endif

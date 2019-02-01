@@ -36,8 +36,9 @@ COM_API HRESULT STDMETHODCALLTYPE DllGetClassObject(
     if (iter == std::end(map))
         return CLASS_E_CLASSNOTAVAILABLE;
 
+    pal::string_t app_path;
     com_activation_fn act;
-    int ec = get_com_activation_delegate(&act);
+    int ec = get_com_activation_delegate(&app_path, &act);
     if (ec != StatusCode::Success)
         return __HRESULT_FROM_WIN32(ec);
 
@@ -49,6 +50,7 @@ COM_API HRESULT STDMETHODCALLTYPE DllGetClassObject(
     {
         rclsid,
         riid,
+        app_path.c_str(),
         iter->second.assembly.c_str(),
         iter->second.type.c_str(),
         (void**)&classFactory

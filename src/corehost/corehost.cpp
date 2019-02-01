@@ -267,7 +267,7 @@ bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path)
 
 #if defined(CURHOST_LIB)
 
-int get_com_activation_delegate(com_activation_fn *delegate)
+int get_com_activation_delegate(pal::string_t *app_path, com_activation_fn *delegate)
 {
     pal::string_t host_path;
     if (!pal::get_own_module_path(&host_path) || !pal::realpath(&host_path))
@@ -299,14 +299,15 @@ int get_com_activation_delegate(com_activation_fn *delegate)
     if (entry_del == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
 
-    pal::string_t app_path{ host_path };
+    pal::string_t app_path_local{ host_path };
 
     // Strip the comhost suffix to get the 'app'
-    size_t idx = app_path.rfind(_X(".comhost.dll"));
+    size_t idx = app_path_local.rfind(_X(".comhost.dll"));
     assert(idx != pal::string_t::npos);
-    app_path.replace(app_path.begin() + idx, app_path.end(), _X(".dll"));
+    app_path_local.replace(app_path_local.begin() + idx, app_path_local.end(), _X(".dll"));
 
-    return entry_del(host_path.c_str(), dotnet_root.c_str(), app_path.c_str(), (void**)delegate);
+    *app_path = std::move(app_path_local);
+    return entry_del(host_path.c_str(), dotnet_root.c_str(), app_path->c_str(), (void**)delegate);
 }
 
 #elif defined(CURHOST_EXE)
