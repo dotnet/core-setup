@@ -125,31 +125,37 @@ namespace
             pal::pal_clrstring(probe_paths.native, &_native_dirs_cstr);
             pal::pal_clrstring(probe_paths.resources, &_resources_dirs_cstr);
 
+            const fx_definition_vector_t &fx_definitions = _resolver.get_fx_definitions();
+
             pal::string_t fx_deps_str;
-            if (_resolver.get_fx_definitions().size() >= 2)
+            if (_resolver.is_framework_dependent())
             {
                 // Use the root fx to define FX_DEPS_FILE
-                fx_deps_str = get_root_framework(_resolver.get_fx_definitions()).get_deps_file();
+                fx_deps_str = get_root_framework(fx_definitions).get_deps_file();
             }
             pal::pal_clrstring(fx_deps_str, &_fx_deps);
 
-            // Get all deps files
-            pal::string_t allDeps;
-            for (int i = 0; i < _resolver.get_fx_definitions().size(); ++i)
+            fx_definition_vector_t::iterator fx_begin;
+            fx_definition_vector_t::iterator fx_end;
+            _resolver.get_app_fx_definition_range(&fx_begin, &fx_end);
+
+            pal::string_t app_context_deps_str;
+            fx_definition_vector_t::iterator fx_curr = fx_begin;
+            while (fx_curr != fx_end)
             {
-                allDeps += _resolver.get_fx_definitions()[i]->get_deps_file();
-                if (i < _resolver.get_fx_definitions().size() - 1)
-                {
-                    allDeps += _X(";");
-                }
+                if (fx_curr != fx_begin)
+                    app_context_deps_str += _X(';');
+
+                app_context_deps_str += (*fx_curr)->get_deps_file();
+                ++fx_curr;
             }
 
-            pal::pal_clrstring(allDeps, &_deps);
+            pal::pal_clrstring(app_context_deps_str, &_app_context_deps);
             pal::pal_clrstring(_resolver.get_lookup_probe_directories(), &_probe_directories);
 
             if (_resolver.is_framework_dependent())
             {
-                pal::pal_clrstring(get_root_framework(_resolver.get_fx_definitions()).get_found_version(), &_clr_library_version);
+                pal::pal_clrstring(get_root_framework(fx_definitions).get_found_version(), &_clr_library_version);
             }
             else
             {
@@ -160,10 +166,8 @@ namespace
             properties.add(common_property::NativeDllSearchDirectories, _native_dirs_cstr.data());
             properties.add(common_property::PlatformResourceRoots, _resources_dirs_cstr.data());
             properties.add(common_property::AppDomainCompatSwitch, "UseLatestBehaviorWhenTFMNotSpecified");
-
-            // Workaround: mscorlib does not resolve symlinks for AppContext.BaseDirectory dotnet/coreclr/issues/2128
             properties.add(common_property::AppContextBaseDirectory, _app_base_cstr.data());
-            properties.add(common_property::AppContextDepsFiles, _deps.data());
+            properties.add(common_property::AppContextDepsFiles, _app_context_deps.data());
             properties.add(common_property::FxDepsFile, _fx_deps.data());
             properties.add(common_property::ProbingDirectories, _probe_directories.data());
             properties.add(common_property::FxProductVersion, _clr_library_version.data());
@@ -224,7 +228,7 @@ namespace
         std::vector<char> _native_dirs_cstr;
         std::vector<char> _resources_dirs_cstr;
         std::vector<char> _fx_deps;
-        std::vector<char> _deps;
+        std::vector<char> _app_context_deps;
         std::vector<char> _clrjit_path_cstr;
         std::vector<char> _probe_directories;
         std::vector<char> _clr_library_version;
@@ -650,14 +654,17 @@ SHARED_API int corehost_resolve_component_dependencies(
         return StatusCode::CoreHostLibLoadFailure;
     }
 
+    // If the current host mode is libhost, use apphost instead.
+    host_mode_t host_mode = g_init.host_mode == host_mode_t::libhost ? host_mode_t::apphost : g_init.host_mode;
+
     // Initialize arguments (basically the structure describing the input app/component to resolve)
     arguments_t args;
     if (!init_arguments(
             component_main_assembly_path,
             g_init.host_info,
             g_init.tfm,
-            g_init.host_mode,
-            /* additional_deps_serialized */ pal::string_t(), // Additiona deps - don't use those from the app, they're already in the app
+            host_mode,
+            /* additional_deps_serialized */ pal::string_t(), // Additional deps - don't use those from the app, they're already in the app
             /* deps_file */ pal::string_t(), // Avoid using any other deps file than the one next to the component
             g_init.probe_paths,
             args))

@@ -6,14 +6,15 @@
 #include "coreclr.h"
 #include "libhost.h"
 
-arguments_t::arguments_t() :
-    managed_application(_X("")),
-    host_path(_X("")),
-    app_root(_X("")),
-    app_argc(0),
-    app_argv(nullptr),
-    core_servicing(_X("")),
-    deps_path(_X(""))
+arguments_t::arguments_t()
+    : managed_application(_X(""))
+    , host_mode(host_mode_t::invalid)
+    , host_path(_X(""))
+    , app_root(_X(""))
+    , app_argc(0)
+    , app_argv(nullptr)
+    , core_servicing(_X(""))
+    , deps_path(_X(""))
 {
 }
 
@@ -112,6 +113,7 @@ bool init_arguments(
     const std::vector<pal::string_t>& probe_paths,
     arguments_t& args)
 {
+    args.host_mode = host_mode;
     args.host_path = host_info.host_path;
     args.additional_deps_serialized = additional_deps_serialized;
 
