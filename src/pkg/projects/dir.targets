@@ -107,7 +107,9 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="GetDependenciesToPackage" AfterTargets="ExpandProjectReferences">
+  <Target Name="GetDependenciesToPackage"
+          Condition="'$(PackProjectDependencies)' == 'true'"
+          AfterTargets="ExpandProjectReferences">
     <!-- allow projects to provide dependencies -->
     <MSBuild Targets="GetDependenciesToPackage"
              BuildInParallel="$(BuildInParallel)"
