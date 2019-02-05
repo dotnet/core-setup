@@ -8,6 +8,9 @@
     <OmitDependencies>true</OmitDependencies>
     <SkipValidatePackage>true</SkipValidatePackage>
 
+    <!-- Include the platform manifest in the data dir. -->
+    <PlatformManifestTargetPath>data/</PlatformManifestTargetPath>
+
     <!-- Exclude runtime.json from the package. -->
     <IncludeRuntimeJson>false</IncludeRuntimeJson>
     <IsLineupPackage>false</IsLineupPackage>
