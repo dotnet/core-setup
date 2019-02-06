@@ -15,9 +15,9 @@ struct com_activation_context
 {
     GUID class_id;
     GUID interface_id;
-    const void *assembly_path;
-    const void *assembly_name;
-    const void *type_name;
+    const pal::char_t *assembly_path;
+    const pal::char_t *assembly_name;
+    const pal::char_t *type_name;
     void **class_factory_dest;
 };
 
