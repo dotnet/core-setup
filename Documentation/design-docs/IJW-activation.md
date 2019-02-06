@@ -54,7 +54,7 @@ When `_CorExeMain()` is called, the following will occur:
    ```csharp
    public static class InMemoryAssemblyLoader
    {
-       public static int LoadAndExecuteInMemoryAssembly(IntPtr handle, string[] args);
+       public static int LoadAndExecuteInMemoryAssembly(IntPtr handle, int argc, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 1)] string[] argv); /* argc is required for marshalling to know how large to make the argv array */
    }
    ```
 
@@ -102,7 +102,7 @@ When the runtime loads the assembly, it needs to know if each element in the vtf
    b) We would need to associate the value of `imageBase` with the status of if it has stubs before we try to load the assembly. The ordering here is very important and easy to mess up.
 2) Implement another API in `System.Private.CoreLib` that registers the callbacks for the runtime to call into the shim.
 
-Options 1 would make the layout of the stub structure a contract between the shim and the runtime. This is compilcated further by the fact that the stubs are architecture-specific since they contain the raw assembly for the jump stubs. Option 2 will work the cleanest if the runtime can call back into managed code at the point of assembly loading that it needs the information (to execute possibly multiple registered callbacks from multiple IJW hosts). If it cannot call back into managed code at that time, we may need to ensure that there is only one IJW shim loaded for an application. If there is only one, we can easily just store a function pointer and execute the callbacks without having to worry about executing managed code.
+Options 1 would make the layout of the stub structure a contract between the shim and the runtime. This is compilcated further by the fact that the stubs are architecture-specific since they contain the raw assembly for the jump stubs. Option 2 will work the cleanest if the runtime can call back into managed code at the point of assembly loading that it needs the information (to execute possibly multiple registered callbacks from multiple IJW hosts). I did a small prototype, and we can call into managed code, but it requires a GC mode switch. I don't know if that would be too large of a perf hit. If it cannot call back into managed code at that time, we may need to ensure that there is only one IJW shim loaded for an application. If there is only one, we can easily just store a function pointer and execute the callbacks without having to worry about executing managed code. Otherwise, we can probably just do a list of function pointer callbacks to call.
 
 We should be able to load a *.deps.json* file with the signature above since Win32 APIs give us the ability to recover the file path from the `HMODULE`.
 
@@ -111,3 +111,5 @@ We should be able to load a *.deps.json* file with the signature above since Win
 1) What is the plan for copying the PEDecoder class or replacing the functionality provided by it?
 2) How does the runtime learn/know if the vtfixup table entries are tokens or stubs and resolve stubs back to tokens?
 3) Do we need to do anything special to load in managed symbols from the PDB files since the native image was already loaded into memory?
+4) Exe scenario only: Do we need to run the host as a libhost or as an executable host?
+5) Which ALC should we load IJW assemblies into? Default? Current? Isolated?
