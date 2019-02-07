@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <TestProjects Include="$(TestDir)/Bundle.Tests/BundleTests.csproj" />
     <TestProjects Include="$(TestDir)/HostActivationTests/HostActivationTests.csproj" />
     <TestProjects Include="$(TestDir)/Microsoft.Extensions.DependencyModel.Tests/Microsoft.Extensions.DependencyModel.Tests.csproj" />
   </ItemGroup>

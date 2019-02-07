@@ -3,25 +3,20 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
+
   <Target Name="Build"
           DependsOnTargets="GetLatestCommitHash">
     <MakeDir Condition="!Exists('$(pOutDir)')" Directories="$(pOutDir)" />
 
     <ItemGroup>
-      <Project Include="$(MSBuildThisFileDirectory)tools/dir.proj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageProjects Include="$(MSBuildThisFileDirectory)Microsoft.DotNet.PlatformAbstractions/Microsoft.DotNet.PlatformAbstractions.csproj" />
-      <PackageProjects Include="$(MSBuildThisFileDirectory)Microsoft.Extensions.DependencyModel/Microsoft.Extensions.DependencyModel.csproj" />
+      <Project Include="$(MSBuildThisFileDirectory)bundle/bundle.csproj" />
     </ItemGroup>
 
     <PropertyGroup>
       <BuildArgs>$(NoRestoreArg) $(MSBuildPassThroughPropertyList)</BuildArgs>
-      <PackageArgs>/p:BaseOutputPath=$(IntermediateOutputForPackaging)</PackageArgs>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetToolCommand) build $(BuildArgs) $(PackageArgs) %(PackageProjects.Identity)" />
     <Exec Command="$(DotnetToolCommand) build $(BuildArgs) %(Project.Identity)" />
   </Target>
+
 </Project>
