@@ -8,17 +8,7 @@
 #include "pal.h"
 #include "corhdr.h"
 
-#define READYTORUN_SIGNATURE 0x00525452 // 'RTR'
-struct READYTORUN_HEADER
-{
-    DWORD                   Signature;      // READYTORUN_SIGNATURE
-    USHORT                  MajorVersion;   // READYTORUN_VERSION_XXX
-    USHORT                  MinorVersion;
-
-    DWORD                   Flags;          // READYTORUN_FLAG_XXX
-
-    DWORD                   NumberOfSections;
-};
+struct READYTORUN_HEADER;
 
 // A subsection of the PEDecoder from CoreCLR that has only the methods we need.
 class PEDecoder
@@ -36,7 +26,7 @@ public:
 
 	bool IsILOnly() const
     {
-        return((GetCorHeader()->Flags & (std::int32_t)(COMIMAGE_FLAGS_ILONLY)) != 0) || HasReadyToRunHeader();
+        return ((GetCorHeader()->Flags & COMIMAGE_FLAGS_ILONLY) != 0) || HasReadyToRunHeader();
     }
 
 	bool HasManagedEntryPoint() const;
@@ -68,28 +58,14 @@ private:
         return FindReadyToRunHeader() != nullptr;
     }
 
-    READYTORUN_HEADER * PEDecoder::FindReadyToRunHeader() const
-    {
-        IMAGE_DATA_DIRECTORY *pDir = &GetCorHeader()->ManagedNativeHeader;
-
-        if ((std::int32_t)(pDir->Size) >= sizeof(READYTORUN_HEADER) && CheckDirectory(pDir))
-        {
-            READYTORUN_HEADER* pHeader = (READYTORUN_HEADER*)((std::uintptr_t)GetDirectoryData(pDir));
-            if (pHeader->Signature == READYTORUN_SIGNATURE)
-            {
-                return pHeader;
-            }
-        }
-
-        return nullptr;
-    }
+    READYTORUN_HEADER * PEDecoder::FindReadyToRunHeader() const;
 
     bool CheckDirectory(IMAGE_DATA_DIRECTORY *pDir) const
     {
-        return CheckRva((std::int32_t)(pDir->VirtualAddress), (std::int32_t)(pDir->Size));
+        return CheckRva(pDir->VirtualAddress, pDir->Size);
     }
 
-    bool CheckRva(std::int32_t rva, std::size_t size) const;
+    bool CheckRva(std::uint32_t rva, std::uint32_t size) const;
 
     bool CheckBounds(std::int32_t rangeBase, std::size_t rangeSize, std::int32_t rva, std::int32_t size) const
     {
@@ -126,7 +102,7 @@ private:
         return reinterpret_cast<IMAGE_SECTION_HEADER*>(
             reinterpret_cast<std::uintptr_t>(pNTHeaders) +
             offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
-            (std::int16_t)(pNTHeaders->FileHeader.SizeOfOptionalHeader)
+            pNTHeaders->FileHeader.SizeOfOptionalHeader
         );
     }
 
@@ -138,25 +114,7 @@ private:
 
     bool HasDirectoryEntry(int entry) const
     {
-        if (Has32BitNTHeaders())
-            return (GetNTHeaders32()->OptionalHeader.DataDirectory[entry].VirtualAddress != 0);
-        else
-            return (GetNTHeaders64()->OptionalHeader.DataDirectory[entry].VirtualAddress != 0);
-    }
-
-    IMAGE_NT_HEADERS32* GetNTHeaders32() const
-    {
-        return reinterpret_cast<IMAGE_NT_HEADERS32*>(FindNTHeaders());
-    }
-
-    IMAGE_NT_HEADERS64* GetNTHeaders64() const
-    {
-        return reinterpret_cast<IMAGE_NT_HEADERS64*>(FindNTHeaders());
-    }
-
-    bool Has32BitNTHeaders() const
-    {
-        return FindNTHeaders()->OptionalHeader.Magic == (std::int16_t)IMAGE_NT_OPTIONAL_HDR32_MAGIC;
+        return FindNTHeaders()->OptionalHeader.DataDirectory[entry].VirtualAddress != 0;
     }
 
     IMAGE_NT_HEADERS* FindNTHeaders() const
@@ -176,16 +134,10 @@ private:
 
     IMAGE_DATA_DIRECTORY *GetDirectoryEntry(int entry) const
     {
-        if (Has32BitNTHeaders())
-            return reinterpret_cast<IMAGE_DATA_DIRECTORY*>(
-                reinterpret_cast<std::uintptr_t>(GetNTHeaders32()) +
-                offsetof(IMAGE_NT_HEADERS32, OptionalHeader.DataDirectory) +
-                entry * sizeof(IMAGE_DATA_DIRECTORY));
-        else
-            return reinterpret_cast<IMAGE_DATA_DIRECTORY*>(
-                reinterpret_cast<std::uintptr_t>(GetNTHeaders64()) +
-                offsetof(IMAGE_NT_HEADERS64, OptionalHeader.DataDirectory) +
-                entry * sizeof(IMAGE_DATA_DIRECTORY));
+        return reinterpret_cast<IMAGE_DATA_DIRECTORY*>(
+            reinterpret_cast<std::uintptr_t>(FindNTHeaders()) +
+            offsetof(IMAGE_NT_HEADERS, OptionalHeader.DataDirectory) +
+            entry * sizeof(IMAGE_DATA_DIRECTORY));
     }
 
     std::uintptr_t GetDirectoryEntryData(int entry, size_t* pSize = nullptr) const
@@ -203,9 +155,9 @@ private:
         return GetRvaData((std::int32_t)(pDir->VirtualAddress));
     }
 
-    ULONG PEDecoder::GetEntryPointToken() const
+    std::uint32_t PEDecoder::GetEntryPointToken() const
     {
-        return (std::int32_t)(GetCorHeader()->EntryPointToken);
+        return GetCorHeader()->EntryPointToken;
     }
 
     std::uintptr_t m_base;

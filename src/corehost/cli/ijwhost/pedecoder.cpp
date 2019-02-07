@@ -32,7 +32,7 @@ void *PEDecoder::GetNativeEntryPoint() const
     return ((void *) GetRvaData((std::int32_t)(GetCorHeader()->EntryPointToken)));
 }
 
-bool PEDecoder::CheckRva(std::int32_t rva, std::size_t size) const
+bool PEDecoder::CheckRva(std::uint32_t rva, std::uint32_t size) const
 {
     if (rva == 0)
     {
@@ -84,3 +84,30 @@ IMAGE_SECTION_HEADER* PEDecoder::RvaToSection(std::int32_t rva) const
     return nullptr;
 }
 
+#define READYTORUN_SIGNATURE 0x00525452 // 'RTR'
+struct READYTORUN_HEADER
+{
+    DWORD                   Signature;      // READYTORUN_SIGNATURE
+    USHORT                  MajorVersion;   // READYTORUN_VERSION_XXX
+    USHORT                  MinorVersion;
+
+    DWORD                   Flags;          // READYTORUN_FLAG_XXX
+
+    DWORD                   NumberOfSections;
+};
+
+READYTORUN_HEADER* PEDecoder::FindReadyToRunHeader() const
+{
+    IMAGE_DATA_DIRECTORY *pDir = &GetCorHeader()->ManagedNativeHeader;
+
+    if (pDir->Size >= sizeof(READYTORUN_HEADER) && CheckDirectory(pDir))
+    {
+        READYTORUN_HEADER* pHeader = (READYTORUN_HEADER*)((std::uintptr_t)GetDirectoryData(pDir));
+        if (pHeader->Signature == READYTORUN_SIGNATURE)
+        {
+            return pHeader;
+        }
+    }
+
+    return nullptr;
+}
