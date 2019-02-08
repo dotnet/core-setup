@@ -47,6 +47,10 @@
         <Output TaskParameter="GeneratedGui" PropertyName="HostFxrUpgradeCode" />
       </GenerateGuidFromName>
 
+      <GenerateGuidFromName Name="$(TargetingPackInstallerFile)">
+        <Output TaskParameter="GeneratedGui" PropertyName="TargetingPackUpgradeCode" />
+      </GenerateGuidFromName>
+
       <ItemGroup>
         <WixOutputs Include="$(WixObjRoot)host">
             <InputDir>$(SharedHostPublishRoot)</InputDir>
@@ -59,6 +63,12 @@
             <BrandName>$(HostFxrBrandName)</BrandName>
             <InstallerName>$(HostFxrInstallerFile)</InstallerName>
             <UpgradeCode>$(HostFxrUpgradeCode)</UpgradeCode>
+        </WixOutputs>
+        <WixOutputs Include="$(WixObjRoot)targetingpack">
+            <InputDir>$(TargetingPackPublishRoot)</InputDir>
+            <BrandName>$(TargetingPackBrandName)</BrandName>
+            <InstallerName>$(TargetingPackInstallerFile)</InstallerName>
+            <UpgradeCode>$(TargetingPackUpgradeCode)</UpgradeCode>
         </WixOutputs>
         <!-- shared framework has extra arguments so it needs to be in a separate group -->
         <WixOutputs2 Include="$(WixObjRoot)sharedframework">
