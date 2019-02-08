@@ -196,7 +196,9 @@ namespace
         "APP_CONTEXT_DEPS_FILES",
         "FX_DEPS_FILE",
         "PROBING_DIRECTORIES",
-        "FX_PRODUCT_VERSION"
+        "FX_PRODUCT_VERSION",
+        "JIT_PATH",
+        "STARTUP_HOOKS"
     };
 
     static_assert((sizeof(PropertyNameMapping) / sizeof(*PropertyNameMapping)) == static_cast<size_t>(common_property::Last), "Invalid property count");

@@ -68,37 +68,39 @@ When `DllGetClassObject()` is called in a COM activation scenario, the following
     * If a [`.runtimeconfig.json`](https://github.com/dotnet/cli/blob/master/Documentation/specs/runtime-configuration-file.md) file exists adjacent to the target managed assembly (`<assembly>.runtimeconfig.json`), that file is used to describe the target framework and CLR configuration. The documentation for the `.runtimeconfig.json` format defines under what circumstances this file may be optional.
 1) The `DllGetClassObject()` function verifies the `CLSID` mapping has a mapping for the `CLSID`.
     * If the `CLSID` is unknown in the mapping the traditional `CLASS_E_CLASSNOTAVAILABLE` is returned.
-1) The shim attempts to load the latest version of the `hostfxr` library and retrieves the `hostfxr_get_coreclr_delegate()` export. 
-1) The `hostfxr_get_coreclr_delegate()` export is called.
+1) The shim attempts to load the latest version of the `hostfxr` library and retrieves the `hostfxr_get_com_activation_delegate()` export.
 1) The target assembly name is computed by stripping off the `.comhost.dll` prefix and replacing it with `.dll`. Using the name of the target assembly, the path to the `.runtimeconfig.json` file is then computed.
-1) Based on the `.runtimeconfig.json` the [framework](https://docs.microsoft.com/dotnet/core/packages#frameworks) to use can be determined and the appropriate `hostpolicy` lirbary path is computed.
+1) The `hostfxr_get_com_activation_delegate()` export is called.
+1) Based on the `.runtimeconfig.json` the [framework](https://docs.microsoft.com/dotnet/core/packages#frameworks) to use can be determined and the appropriate `hostpolicy` library path is computed.
 1) The `hostpolicy` library is loaded and various exports are retrieved.
     * If a `hostpolicy` instance is already loaded, the one presently loaded is re-used.
     * **Prior to 3.0 GA** No validation is done to determine if the loaded `hostpolicy` can satisfy the current assembly's `.runtimeconfig.json`.
     * **At 3.0 GA** If a CLR is active within the process, the requested CLR version will be validated against that CLR. If version satisfiability fails, activation will fail.
 1) The `corehost_load()` export is called to initialize `hostpolicy`.
     - Prior to .NET Core 3.0, during application activation the `corehost_load()` export would always initialize `hostpolicy` regardless if initialization had already been performed. For .NET Core 3.0, calling the function again will not re-initialize `hostpolicy`, but simply return.
-1) The `corehost_get_coreclr_delegate()` export from `hostpolicy` is called.
-1) The `corehost_get_coreclr_delegate()` export determines if the associated `coreclr` library has been loaded and if so, uses the existing activated CLR instance. If a CLR instance is not available, `hostpolicy` will load `coreclr` and activate a new CLR instance.
+1) The `corehost_get_com_activation_delegate()` export from `hostpolicy` is called.
+1) The `corehost_get_com_activation_delegate()` export determines if the associated `coreclr` library has been loaded and if so, uses the existing activated CLR instance. If a CLR instance is not available, `hostpolicy` will load `coreclr` and activate a new CLR instance.
     * **Prior to 3.0 GA** No validation is done to determine if the current running coreclr instance can satisfy the current assembly's `.runtimeconfig.json`.
     * **At 3.0 GA** If a CLR is active within the process, the requested CLR version will be validated against that CLR. If version satisfiability fails, activation will fail.
 1) A request to the CLR is made to create a managed delegate to a static "activation" method. The delegate is returned to the shim to attempt activation of the requested class.
-    * The details of the activation API are implementation defined, but presently reside in `System.Private.CoreLib` on the `System.Runtime.InteropServices.ComActivator` class:
+    * The details of the activation API are implementation defined, but presently reside in `System.Private.CoreLib` on the `Internal.Runtime.InteropServices.ComActivator` class:
         ``` csharp
         [StructLayout(LayoutKind.Sequential)]
-        public struct ComActivationContextInternal
+        [CLSCompliant(false)]
+        public unsafe struct ComActivationContextInternal
         {
             public Guid ClassId;
             public Guid InterfaceId;
-            public IntPtr AssemblyPathBuffer;
-            public IntPtr AssemblyNameBuffer;
-            public IntPtr TypeNameBuffer;
+            public char* AssemblyPathBuffer;
+            public char* AssemblyNameBuffer;
+            public char* TypeNameBuffer;
             public IntPtr ClassFactoryDest;
         }
 
         public static class ComActivator
         {
             ...
+            [CLSCompliant(false)]
             public static int GetClassFactoryForTypeInternal(ref ComActivationContextInternal context);
             ...
         }

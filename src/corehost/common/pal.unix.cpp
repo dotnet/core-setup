@@ -512,6 +512,11 @@ bool pal::get_own_module_path(string_t* recv)
     return false;
 }
 
+bool pal::get_current_module(dll_t *mod)
+{
+    return false;
+}
+
 // Returns true only if an env variable can be read successfully to be non-empty.
 bool pal::getenv(const pal::char_t* name, pal::string_t* recv)
 {

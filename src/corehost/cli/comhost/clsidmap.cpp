@@ -12,20 +12,8 @@ using namespace web;
 using comhost::clsid_map_entry;
 using comhost::clsid_map;
 
-bool GetModuleHandleFromAddress(void *addr, HMODULE *hModule);
-
 namespace
 {
-    pal::dll_t get_current_module()
-    {
-        HMODULE hmod = nullptr;
-        bool res = GetModuleHandleFromAddress(&get_current_module, &hmod);
-        assert(res);
-        (void)res;
-
-        return (pal::dll_t)hmod;
-    }
-
     HRESULT string_to_clsid(_In_ const pal::string_t &str, _Out_ CLSID &clsid)
     {
         // If the first character of the GUID is not '{' then COM will
@@ -95,17 +83,17 @@ namespace
     clsid_map get_json_map_from_resource(bool &found_resource)
     {
         found_resource = false;
-        HMODULE hmod = (HMODULE)get_current_module();
-        if (hmod == nullptr)
+        HMODULE hMod;
+        if (!pal::get_current_module((pal::dll_t*)&hMod))
             return{};
 
-        HRSRC resHandle = ::FindResourceW(hmod, MAKEINTRESOURCEW(RESOURCEID_CLSIDMAP), MAKEINTRESOURCEW(RESOURCETYPE_CLSIDMAP));
+        HRSRC resHandle = ::FindResourceW(hMod, MAKEINTRESOURCEW(RESOURCEID_CLSIDMAP), MAKEINTRESOURCEW(RESOURCETYPE_CLSIDMAP));
         if (resHandle == nullptr)
             return {};
 
         found_resource = true;
-        DWORD size = ::SizeofResource(hmod, resHandle);
-        HGLOBAL resData = ::LoadResource(hmod, resHandle);
+        DWORD size = ::SizeofResource(hMod, resHandle);
+        HGLOBAL resData = ::LoadResource(hMod, resHandle);
         if (resData == nullptr || size == 0)
             throw HResultException{ HRESULT_FROM_WIN32(::GetLastError()) };
 

@@ -61,6 +61,8 @@ enum class common_property
     FxDepsFile,
     ProbingDirectories,
     FxProductVersion,
+    JitPath,
+    StartUpHooks,
 
     // Sentinel value - new values should be defined above
     Last

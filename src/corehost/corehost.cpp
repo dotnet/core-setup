@@ -267,6 +267,14 @@ bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path)
 
 #if defined(CURHOST_LIB)
 
+namespace
+{
+    void libhost_default_error_writer(const pal::char_t*)
+    {
+        // nop
+    }
+}
+
 int get_com_activation_delegate(pal::string_t *app_path, com_activation_fn *delegate)
 {
     pal::string_t host_path;
@@ -295,9 +303,19 @@ int get_com_activation_delegate(pal::string_t *app_path, com_activation_fn *dele
 
     // Leak fxr
 
-    auto entry_del = (hostfxr_get_com_activation_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_com_activation_delegate");
-    if (entry_del == nullptr)
+    auto get_com_delegate = (hostfxr_get_com_activation_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_com_activation_delegate");
+    if (get_com_delegate == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
+
+    auto set_error_writer = (hostfxr_set_error_writer_fn)pal::get_symbol(fxr, "hostfxr_set_error_writer");
+    if (set_error_writer != nullptr)
+    {
+        // Set the error writer during COM activation to the default.
+        // If the previous value is non-null, then set it to the defined value.
+        hostfxr_error_writer_fn prev = set_error_writer(libhost_default_error_writer);
+        if (prev != nullptr)
+            (void)set_error_writer(prev);
+    }
 
     pal::string_t app_path_local{ host_path };
 
@@ -307,7 +325,7 @@ int get_com_activation_delegate(pal::string_t *app_path, com_activation_fn *dele
     app_path_local.replace(app_path_local.begin() + idx, app_path_local.end(), _X(".dll"));
 
     *app_path = std::move(app_path_local);
-    return entry_del(host_path.c_str(), dotnet_root.c_str(), app_path->c_str(), (void**)delegate);
+    return get_com_delegate(host_path.c_str(), dotnet_root.c_str(), app_path->c_str(), (void**)delegate);
 }
 
 #elif defined(CURHOST_EXE)

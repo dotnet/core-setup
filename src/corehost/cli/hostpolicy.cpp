@@ -175,7 +175,7 @@ namespace
             if (!clrjit_path.empty())
             {
                 pal::pal_clrstring(clrjit_path, &_clrjit_path_cstr);
-                properties.add("JIT_PATH", _clrjit_path_cstr.data());
+                properties.add(common_property::JitPath, _clrjit_path_cstr.data());
             }
 
             bool set_app_paths = false;
@@ -192,7 +192,9 @@ namespace
                 properties.add(_hostpolicy_init.cfg_keys[i].data(), _hostpolicy_init.cfg_values[i].data());
             }
 
-            // App paths and App NI paths
+            // App paths and App NI paths.
+            // Note: Keep this check outside of the loop above since the _last_ key wins
+            // and that could indicate the app paths shouldn't be set.
             if (set_app_paths)
             {
                 properties.add("APP_PATHS", _app_base_cstr.data());
@@ -204,7 +206,7 @@ namespace
             if (pal::getenv(_X("DOTNET_STARTUP_HOOKS"), &startup_hooks))
             {
                 pal::pal_clrstring(startup_hooks, &_startup_hooks_cstr);
-                properties.add("STARTUP_HOOKS", _startup_hooks_cstr.data());
+                properties.add(common_property::StartUpHooks, _startup_hooks_cstr.data());
             }
 
             return StatusCode::Success;
@@ -608,7 +610,7 @@ SHARED_API int corehost_get_com_activation_delegate(void **delegate)
 
     return coreclr->create_delegate(
         "System.Private.CoreLib",
-        "System.Runtime.InteropServices.ComActivator",
+        "Internal.Runtime.InteropServices.ComActivator",
         "GetClassFactoryForTypeInternal",
         delegate);
 }

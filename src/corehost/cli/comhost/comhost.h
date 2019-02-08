@@ -17,7 +17,7 @@ struct HResultException
 
 #define RETURN_HRESULT_IF_EXCEPT(exp) try { exp; } catch (const HResultException &e) { return e.hr; } catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
 
-// [TODO] Properly define this convention
+// Should be shared with core-sdk for tooling support
 #define RESOURCEID_CLSIDMAP 64
 #define RESOURCETYPE_CLSIDMAP 1024
 
