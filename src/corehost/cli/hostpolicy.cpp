@@ -197,8 +197,8 @@ namespace
             // and that could indicate the app paths shouldn't be set.
             if (set_app_paths)
             {
-                properties.add("APP_PATHS", _app_base_cstr.data());
-                properties.add("APP_NI_PATHS", _app_base_cstr.data());
+                properties.add(common_property::AppPaths, _app_base_cstr.data());
+                properties.add(common_property::AppNIPaths, _app_base_cstr.data());
             }
 
             // Startup hooks

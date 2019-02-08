@@ -63,6 +63,8 @@ enum class common_property
     FxProductVersion,
     JitPath,
     StartUpHooks,
+    AppPaths,
+    AppNIPaths,
 
     // Sentinel value - new values should be defined above
     Last

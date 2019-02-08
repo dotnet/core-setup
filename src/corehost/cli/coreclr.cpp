@@ -198,7 +198,9 @@ namespace
         "PROBING_DIRECTORIES",
         "FX_PRODUCT_VERSION",
         "JIT_PATH",
-        "STARTUP_HOOKS"
+        "STARTUP_HOOKS",
+        "APP_PATHS",
+        "APP_NI_PATHS"
     };
 
     static_assert((sizeof(PropertyNameMapping) / sizeof(*PropertyNameMapping)) == static_cast<size_t>(common_property::Last), "Invalid property count");
