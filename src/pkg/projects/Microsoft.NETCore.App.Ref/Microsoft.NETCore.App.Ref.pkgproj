@@ -68,7 +68,7 @@
 
     <ZipFileExtractToDirectory
       SourceArchive="$(TargetingPackNupkgFile)"
-      DestinationDirectory="$(DataLayoutDir)ref/$(Id)/$(Version)/"
+      DestinationDirectory="$(DataLayoutDir)packs/$(Id)/$(Version)/"
       OverwriteDestination="true"
       Include="@(TargetingPackDataEntries)" />
   </Target>
