@@ -30,7 +30,7 @@
     <ProductBrandSuffix Condition="'$(ReleaseBrandSuffix)'!=''">$(ProductionVersion) $(ReleaseBrandSuffix)</ProductBrandSuffix>
     <SharedHostBrandName>$(ProductBrandPrefix) Host - $(ProductBrandSuffix)</SharedHostBrandName>
     <HostFxrBrandName>$(ProductBrandPrefix) Host FX Resolver - $(ProductBrandSuffix)</HostFxrBrandName>
-    <TargetingPackBrandName>$(ProductBrandPrefix) App Targeting Pack - $(ProductBrandSuffix)</TargetingPackBrandName>
+    <TargetingPackBrandName>$(ProductBrandPrefix) Targeting Pack - $(ProductBrandSuffix)</TargetingPackBrandName>
     <SharedFrameworkBrandName>$(ProductBrandPrefix) Runtime - $(ProductBrandSuffix)</SharedFrameworkBrandName>
   </PropertyGroup>
 </Project>
