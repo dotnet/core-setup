@@ -285,7 +285,7 @@
     <DotnetHostString>dotnet-host-</DotnetHostString>
     <DotnetHostFxrString>dotnet-hostfxr-</DotnetHostFxrString>
     <DotnetRuntimeString>dotnet-runtime-</DotnetRuntimeString>
-    <DotnetTargetingPackString>dotnet-netcoreapp-targeting-pack-</DotnetTargetingPackString>
+    <DotnetTargetingPackString>dotnet-targeting-pack-</DotnetTargetingPackString>
     <DotnetRuntimeDependenciesPackageString>dotnet-runtime-deps-</DotnetRuntimeDependenciesPackageString>
 
     <CombinedInstallerStart>$(AssetOutputPath)$(DotnetRuntimeString)</CombinedInstallerStart>
