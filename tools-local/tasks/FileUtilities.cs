@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Microsoft.DotNet.Build.Tasks
 {
-    static partial class FileUtilities
+    internal static partial class FileUtilities
     {
         public static Version GetFileVersion(string sourcePath)
         {
@@ -25,20 +25,21 @@ namespace Microsoft.DotNet.Build.Tasks
         }
 
         static readonly HashSet<string> s_assemblyExtensions = new HashSet<string>(new[] { ".dll", ".exe", ".winmd" }, StringComparer.OrdinalIgnoreCase);
-        public static Version TryGetAssemblyVersion(string sourcePath)
-        {
-            var extension = Path.GetExtension(sourcePath);
 
-            return s_assemblyExtensions.Contains(extension) ? GetAssemblyVersion(sourcePath) : null;
-        }
-        private static Version GetAssemblyVersion(string sourcePath)
+        public static AssemblyName GetAssemblyName(string path)
         {
+            if (!s_assemblyExtensions.Contains(Path.GetExtension(path)))
+            {
+                return null;
+            }
+
             try
             {
-                return AssemblyName.GetAssemblyName(sourcePath)?.Version;
+                return AssemblyName.GetAssemblyName(path);
             }
             catch (BadImageFormatException)
             {
+                // Not a valid assembly.
                 return null;
             }
         }

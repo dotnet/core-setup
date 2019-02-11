@@ -10,6 +10,7 @@
 
     <!-- Include the platform manifest in the data dir. -->
     <PlatformManifestTargetPath>data/</PlatformManifestTargetPath>
+    <FrameworkListTargetPath>$(PlatformManifestTargetPath)</FrameworkListTargetPath>
 
     <!-- Exclude runtime.json from the package. -->
     <IncludeRuntimeJson>false</IncludeRuntimeJson>
