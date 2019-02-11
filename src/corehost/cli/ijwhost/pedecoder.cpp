@@ -3,10 +3,32 @@
 
 #include "pedecoder.h"
 
+namespace
+{
+    std::uint32_t AlignUp(std::uint32_t value, std::uint32_t alignment)
+    {
+        return (value+alignment-1)&~(alignment-1);
+    }
+
+    bool CheckBounds(std::uint32_t rangeBase, std::uint32_t rangeSize, std::uint32_t rva, std::uint32_t size)
+    {
+        return CheckOverflow(rangeBase, rangeSize)
+            && CheckOverflow(rva, size)
+            && rva >= rangeBase
+            && rva + size <= rangeBase + rangeSize;
+    }
+
+    bool CheckOverflow(std::uint32_t val1, std::uint32_t val2)
+    {
+        return val1 + val2 >= val1;
+    } 
+}
+
+
 bool PEDecoder::HasManagedEntryPoint() const
 {
     ULONG flags = GetCorHeader()->Flags;
-    return (!(flags & (std::int32_t)(COMIMAGE_FLAGS_NATIVE_ENTRYPOINT)) &&
+    return (!(flags & (std::uint32_t)(COMIMAGE_FLAGS_NATIVE_ENTRYPOINT)) &&
             (!IsNilToken(GetEntryPointToken())));
 }
 
@@ -23,13 +45,13 @@ IMAGE_COR_VTABLEFIXUP *PEDecoder::GetVTableFixups(std::size_t *pCount) const
 bool PEDecoder::HasNativeEntryPoint() const
 {
     DWORD flags = GetCorHeader()->Flags;
-    return ((flags & (std::int32_t)(COMIMAGE_FLAGS_NATIVE_ENTRYPOINT)) &&
-            (GetCorHeader()->EntryPointToken != (std::int32_t)(0)));
+    return ((flags & COMIMAGE_FLAGS_NATIVE_ENTRYPOINT) &&
+            (GetCorHeader()->EntryPointToken != 0));
 }
 
 void *PEDecoder::GetNativeEntryPoint() const
 {
-    return ((void *) GetRvaData((std::int32_t)(GetCorHeader()->EntryPointToken)));
+    return ((void *) GetRvaData(GetCorHeader()->EntryPointToken));
 }
 
 bool PEDecoder::CheckRva(std::uint32_t rva, std::uint32_t size) const
@@ -47,30 +69,30 @@ bool PEDecoder::CheckRva(std::uint32_t rva, std::uint32_t size) const
             return false;
         }
 
-        if (!CheckBounds((std::int32_t)section->VirtualAddress,
-                        (std::uint32_t)section->Misc.VirtualSize,
+        if (!CheckBounds(section->VirtualAddress,
+                        section->Misc.VirtualSize,
                         rva, size))
         {
             return false;    
         }
 
-        return CheckBounds((std::int32_t)section->VirtualAddress, (std::int32_t)section->SizeOfRawData, rva, size);
+        return CheckBounds(section->VirtualAddress, section->SizeOfRawData, rva, size);
     }
     
     return true;
 }
 
-IMAGE_SECTION_HEADER* PEDecoder::RvaToSection(std::int32_t rva) const
+IMAGE_SECTION_HEADER* PEDecoder::RvaToSection(std::uint32_t rva) const
 {
-    IMAGE_SECTION_HEADER* section = reinterpret_cast<IMAGE_SECTION_HEADER*>(FindFirstSection(FindNTHeaders()));
-    IMAGE_SECTION_HEADER* sectionEnd = section + (std::int16_t)FindNTHeaders()->FileHeader.NumberOfSections;
+    IMAGE_SECTION_HEADER* section = FindFirstSection(FindNTHeaders());
+    IMAGE_SECTION_HEADER* sectionEnd = section + FindNTHeaders()->FileHeader.NumberOfSections;
 
     while (section < sectionEnd)
     {
-        if (rva < ((std::int32_t)section->VirtualAddress
-                + AlignUp((std::uint32_t)section->Misc.VirtualSize, (std::uint32_t)FindNTHeaders()->OptionalHeader.SectionAlignment)))
+        if (rva < (section->VirtualAddress
+                + AlignUp(section->Misc.VirtualSize, FindNTHeaders()->OptionalHeader.SectionAlignment)))
         {
-            if (rva < (std::int32_t)section->VirtualAddress)
+            if (rva < section->VirtualAddress)
                 return nullptr;
             else
             {
@@ -102,7 +124,7 @@ READYTORUN_HEADER* PEDecoder::FindReadyToRunHeader() const
 
     if (pDir->Size >= sizeof(READYTORUN_HEADER) && CheckDirectory(pDir))
     {
-        READYTORUN_HEADER* pHeader = (READYTORUN_HEADER*)((std::uintptr_t)GetDirectoryData(pDir));
+        READYTORUN_HEADER* pHeader = reinterpret_cast<READYTORUN_HEADER*>(GetDirectoryData(pDir));
         if (pHeader->Signature == READYTORUN_SIGNATURE)
         {
             return pHeader;

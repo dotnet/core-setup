@@ -4,6 +4,8 @@
 #include "ijwhost.h"
 #include "IJWBootstrapThunkCPU.h"
 #include "corhdr.h"
+#include "error_codes.h"
+#include "trace.h"
 #include <heapapi.h>
 #include <new>
 #include <mutex>
@@ -78,8 +80,7 @@ bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
             DWORD oldProtect;
             if(!VirtualProtect(pointers, (sizeof(BYTE*) * pFixupTable[i].Count), PAGE_READWRITE, &oldProtect))
             {
-                // TODO: Make this log instead of assert
-                _ASSERTE(!"PatchVTableEntriesForDLLAttach(): VirtualProtect() changing IJW thunk vtable to R/W failed.\n");
+                trace::error(_X("Failed to change the vtfixup table from RO to R/W failed.\n"));
                 return false;
             }
 #endif
@@ -100,8 +101,7 @@ bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
             DWORD _;
             if(!VirtualProtect(pointers, (sizeof(BYTE*) * pFixupTable[i].Count), oldProtect, &_))
             {
-                // TODO: Make this log instead of assert
-                _ASSERTE(!"PatchVTableEntriesForDLLAttach(): VirtualProtect() changing IJW thunk vtable back to RO failed.\n");
+                trace::warning(_X("Failed to change the vtfixup table from R/W back to RO failed.\n"));
             }
 #endif
         }
@@ -113,25 +113,31 @@ bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
 extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_t cookie)
 {
     VTableBootstrapThunk *pThunk = VTableBootstrapThunk::GetThunkFromCookie(cookie);
-    pal::hresult_t hr = LoadDllIntoRuntime(pThunk->GetDLLHandle());
 
-    if (FAILED(hr))
+    load_in_memory_assembly_fn loadInMemoryAssembly;
+    pal::hresult_t status = get_load_in_memory_assembly_delegate(&loadInMemoryAssembly);
+
+    if (status != StatusCode::Success)
     {
         // If we ignore the failure to patch bootstrap thunks we will come to this same
         // function again, causing an infinite loop of "Failed to start the .NET Core runtime" errors.
         // As we were taken here via an entry point with arbitrary signature,
         // there's no way of returning the error code so we just throw it.
+
+        trace::error(_X("Failed to start the .NET Core runtime. Error code %d"), status);
+
 #pragma warning (push)
 #pragma warning (disable: 4297)
-        throw hr;
+        throw status;
 #pragma warning (pop)
     }
-    
+
+    loadInMemoryAssembly(pThunk->GetDLLHandle());
+
     std::uintptr_t thunkAddress = *(pThunk->GetSlotAddr());
 
     return thunkAddress;
 }
-
 
 void BootstrapThunkDLLDetach(PEDecoder& pe)
 {

@@ -39,14 +39,14 @@ public:
         return (HINSTANCE)m_base;
     }
     
-    std::uintptr_t GetRvaData(std::int32_t rva) const
+    std::uintptr_t GetRvaData(std::uint32_t rva) const
     {
         if (rva == 0)
         {
             return (std::uintptr_t)nullptr;
         }
 
-        std::int32_t offset = RvaToOffset(rva);
+        std::uint32_t offset = RvaToOffset(rva);
 
         return m_base + offset;
     }
@@ -58,7 +58,7 @@ private:
         return FindReadyToRunHeader() != nullptr;
     }
 
-    READYTORUN_HEADER * PEDecoder::FindReadyToRunHeader() const;
+    READYTORUN_HEADER * FindReadyToRunHeader() const;
 
     bool CheckDirectory(IMAGE_DATA_DIRECTORY *pDir) const
     {
@@ -67,20 +67,7 @@ private:
 
     bool CheckRva(std::uint32_t rva, std::uint32_t size) const;
 
-    bool CheckBounds(std::int32_t rangeBase, std::size_t rangeSize, std::int32_t rva, std::int32_t size) const
-    {
-        return CheckOverflow(rangeBase, rangeSize)
-            && CheckOverflow(rva, size)
-            && rva >= rangeBase
-            && rva + size <= rangeBase + rangeSize;
-    }
-
-    bool CheckOverflow(std::int32_t val1, std::size_t val2) const
-    {
-        return val1 + val2 >= val1;
-    }
-
-    std::size_t RvaToOffset(std::int32_t rva) const
+    std::uint32_t RvaToOffset(std::uint32_t rva) const
     {
         if (rva > 0)
         {
@@ -90,7 +77,7 @@ private:
                 return rva;
             }
 
-            return rva - (std::int32_t)section->VirtualAddress + (std::int32_t)(section->PointerToRawData);
+            return rva - section->VirtualAddress + section->PointerToRawData;
         }
         return 0;
     }
@@ -105,12 +92,6 @@ private:
             pNTHeaders->FileHeader.SizeOfOptionalHeader
         );
     }
-
-    static std::uint32_t AlignUp(std::uint32_t value, std::uint32_t alignment)
-    {
-        return (value+alignment-1)&~(alignment-1);
-    }
-
 
     bool HasDirectoryEntry(int entry) const
     {
@@ -152,7 +133,7 @@ private:
 
     std::uintptr_t PEDecoder::GetDirectoryData(IMAGE_DATA_DIRECTORY *pDir) const
     {
-        return GetRvaData((std::int32_t)(pDir->VirtualAddress));
+        return GetRvaData(pDir->VirtualAddress);
     }
 
     std::uint32_t PEDecoder::GetEntryPointToken() const

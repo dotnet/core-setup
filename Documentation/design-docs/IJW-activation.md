@@ -49,7 +49,7 @@ When `_CorExeMain()` is called, the following will occur:
    * If a CLR is **not** active with the process, an attempt will be made to create a satisfying CLR instance.
    * Failure to create an instance will result in activation failure.
 3) A request to the CLR will be made to load the assembly from memory and get the entry-point.
-   * The ability to load an assembly from memory will require exposing a new function that can be called from `hostfxr`, as well as a new API in `System.Private.CoreLib` on a new class in `System.Runtime.InteropServices`:
+   * The ability to load an assembly from memory will require exposing a new function that can be called from `hostfxr`, as well as a new API in `System.Private.CoreLib` on a new class in `Internal.Runtime.InteropServices`:
 
    ```csharp
    public static class InMemoryAssemblyLoader
@@ -74,13 +74,13 @@ When `_CorDllMain()` is called when the DLL, the following will occur:
 3) If `_CorDllMain` was called because the DLL is being unloaded from the process:
    1) Deallocate the thunks allocated for the calling DLL.
 
-The .NET Framework implementation uses the runtime's `PEDecoder` class to validate that the PE is a .NET assembly, bail out early if it is IL only, get the native entry point if it exists, get the vtfixup table, and read RVAs from the module. Our options here are to either port over the `PEDecoder` class to core-setup, move the shim to coreclr and copy a chunk of code from core-setup to coreclr along with it to enable the shim to activate the runtime through hostfxr, or some other code-sharing model. The `PEDecoder` class heavily uses the CoreCLR `CONTRACT` and `CHECK` APIs, so porting it over to core-setup is not a simple task. A subset has been ported to be able to test behavior. However, the implementation of the image validation brings in nearly all of the `PEDecoder` class.
+The .NET Framework implementation uses the runtime's `PEDecoder` class to validate that the PE is a .NET assembly, bail out early if it is IL only, get the native entry point if it exists, get the vtfixup table, and read RVAs from the module. Our options here are to either port over the `PEDecoder` class to core-setup, move the shim to coreclr and copy a chunk of code from core-setup to coreclr along with it to enable the shim to activate the runtime through hostfxr, or some other code-sharing model. The `PEDecoder` class heavily uses the CoreCLR `CONTRACT` and `CHECK` APIs, so porting it over to core-setup is not a simple task. A subset has been ported to be able to test behavior. Since the OS will validate the image when loading it, we can avoid having to port over all of the validation code and just add a check for the NT header that .NET uses to specify that it is a .NET assembly.
 
 Additionally, the .NET Framework implementation of the allocation uses the CLR's Executable Heap from the CLR's `utilcode` library. We can use the Windows Heap API directly to create our own executable heap.
 
 #### Loading the Assembly Into the Runtime
 
-When a delayed-activation thunk is called, it will be outside of the loader lock. So, we can load the runtime. We can now follow steps 1 and 2 from the section on [IJW Executables](#IJW-Executables). Finally, we will need another new function on `hostfxr` and a new API in `System.Private.CoreLib` in `System.Runtime.InteropServices`:
+When a delayed-activation thunk is called, it will be outside of the loader lock. So, we can load the runtime. We can now follow steps 1 and 2 from the section on [IJW Executables](#IJW-Executables). Finally, we will need another new function on `hostfxr` and a new API in `System.Private.CoreLib` in `Internal.Runtime.InteropServices`:
 
     ```csharp
     public static class InMemoryAssemblyLoader
@@ -90,7 +90,7 @@ When a delayed-activation thunk is called, it will be outside of the loader lock
     ```
 
   Note this API would not be exposed outside of `System.Private.CoreLib` unless we decide to do so.
-  * The loading of this assembly will take place in a new `AssemblyLoadContext`.
+  * The loading of this assembly will take place in an isolated `AssemblyLoadContext`.
 
 The naming of these APIs is designed to be useful for non-IJW scenarios as well, such as possibly Single-Exe.
 
@@ -109,12 +109,4 @@ We should be able to load a *.deps.json* file with the signature above since Win
 
 ### Open Questions
 
-1) What is the plan for copying the PEDecoder class or replacing the functionality provided by it?
-   * Create a C-style interface for PEDecoder, create a static lib and package, propagate to core-host.
-2) How does the runtime learn/know if the vtfixup table entries are tokens or stubs and resolve stubs back to tokens?
-3) Do we need to do anything special to load in managed symbols from the PDB files since the native image was already loaded into memory?
-   * Nothing special required.
-4) Exe scenario only: Do we need to run the host as a libhost or as an executable host?
-   * Run as executable host
-5) Which ALC should we load IJW assemblies into? Default? Current? Isolated?
-   * Isolated for now.
+1) How does the runtime learn/know if the vtfixup table entries are tokens or stubs and resolve stubs back to tokens?

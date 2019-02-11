@@ -4,11 +4,28 @@
 #include "pal.h"
 #include "pedecoder.h"
 #include "ijwhost.h"
+#include "error_codes.h"
+#include "trace.h"
 #include <cassert>
 
 SHARED_API std::int32_t _CorExeMain()
 {
-    return 0;
+	load_and_execute_in_memory_assembly_fn loadAndExecute;
+	std::int32_t status = get_load_and_execute_in_memory_assembly_delegate(&loadAndExecute);
+	if (status != StatusCode::Success)
+	{
+		trace::error(_X("Unable to load .NET Core runtime and get entry-point."));
+		return status;
+	}
+
+	int argc;
+	pal::char_t** argv = CommandLineToArgvW(GetCommandLine(), &argc);
+
+	status = loadAndExecute(GetModuleHandle(nullptr), argc, argv);
+
+	LocalFree(argv);
+
+	return argc;
 }
 
 SHARED_API BOOL _CorDllMain(HINSTANCE hInst,
@@ -18,12 +35,7 @@ SHARED_API BOOL _CorDllMain(HINSTANCE hInst,
 {
 	BOOL res = TRUE;
 
-	PEDecoder pe;
-
-	if (!SUCCEEDED(pe.Init(hInst)))
-	{
-		return FALSE;
-	}
+	PEDecoder pe(hInst);
 
 	// In the following code, want to make sure that we do our own initialization before
 	// we call into managed or unmanaged initialization code, and that we perform
@@ -31,8 +43,8 @@ SHARED_API BOOL _CorDllMain(HINSTANCE hInst,
 	// Thus, we do DLL_PROCESS_ATTACH work first, and DLL_PROCESS_DETACH work last.
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
-		// If this is an invalid COR module, shouldn't be calling _CorDllMain
-		if (!pe.CheckCORFormat())
+		// If this is not a .NET module (has a CorHeader), shouldn't be calling _CorDllMain
+		if (!pe.HasCorHeader())
 		{
 			return FALSE;
 		}
@@ -77,7 +89,7 @@ BOOL STDMETHODCALLTYPE DllMain(HINSTANCE hInst,
 	{
 	case DLL_PROCESS_ATTACH:
 		g_heapHandle = HeapCreate(HEAP_CREATE_ENABLE_EXECUTE, 0, 0);
-		break;
+		return g_heapHandle != NULL ? TRUE : FALSE;
 	case DLL_PROCESS_DETACH:
 		HeapDestroy(g_heapHandle);
 		break;
