@@ -396,7 +396,7 @@ SHARED_API hostfxr_error_writer_fn hostfxr_set_error_writer(hostfxr_error_writer
 }
 
 //
-// Gets a typed delegate to perform an action on the currently loaded CoreCLR or on a newly created one.
+// Gets a typed delegate to perform a COM activation on the currently loaded CoreCLR or on a newly created one.
 //
 // Parameters:
 //     libhost_path
@@ -427,4 +427,74 @@ SHARED_API int32_t hostfxr_get_com_activation_delegate(
     host_startup_info_t startup_info{ libhost_path, dotnet_root, app_path };
 
     return fx_muxer_t::get_com_activation_delegate(startup_info, delegate);
+}
+
+//
+// Gets a typed delegate to load and execute an already-loaded native DLL as a managed assembly
+// in the currently loaded CoreCLR or in a newly created one.
+//
+// Parameters:
+//     libhost_path
+//          Absolute path of the entry hosting library
+//     dotnet_root
+//     app_path
+//     delegate
+//         The delegate that will load and execute the assembly.
+// Return value:
+//     The error code result.
+//
+// A new CoreCLR instance will be created or reused if the existing instance can satisfy the configuration
+// requirements supplied by the runtimeconfig.json file.
+//
+SHARED_API int32_t hostfxr_get_load_and_execute_in_memory_assembly_delegate(
+    const pal::char_t* libhost_path,
+    const pal::char_t* dotnet_root,
+    const pal::char_t* app_path,
+    void **delegate)
+{
+    if (libhost_path == nullptr || dotnet_root == nullptr || delegate == nullptr)
+        return StatusCode::InvalidArgFailure;
+
+    trace::setup();
+
+    trace::info(_X("--- Invoked hostfxr ijwhost exe [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    host_startup_info_t startup_info{ libhost_path, dotnet_root, app_path };
+
+    return fx_muxer_t::get_load_and_execute_in_memory_assembly_delegate(startup_info, delegate);
+}
+
+//
+// Gets a typed delegate to load an already-loaded native DLL as a managed assembly
+// into the currently loaded CoreCLR or into a newly created one.
+//
+// Parameters:
+//     libhost_path
+//          Absolute path of the entry hosting library
+//     dotnet_root
+//     app_path
+//     delegate
+//          The delegate that will load the assembly
+// Return value:
+//     The error code result.
+//
+// A new CoreCLR instance will be created or reused if the existing instance can satisfy the configuration
+// requirements supplied by the runtimeconfig.json file.
+//
+SHARED_API int32_t hostfxr_get_load_in_memory_assembly_delegate(
+    const pal::char_t* libhost_path,
+    const pal::char_t* dotnet_root,
+    const pal::char_t* app_path,
+    void **delegate)
+{
+    if (libhost_path == nullptr || dotnet_root == nullptr || delegate == nullptr)
+        return StatusCode::InvalidArgFailure;
+
+    trace::setup();
+
+    trace::info(_X("--- Invoked hostfxr ijwhost dll [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    host_startup_info_t startup_info{ libhost_path, dotnet_root, app_path };
+
+    return fx_muxer_t::get_load_in_memory_assembly_delegate(startup_info, delegate);
 }

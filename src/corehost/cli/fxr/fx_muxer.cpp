@@ -175,66 +175,6 @@ static int execute_host_command(
     return code;
 }
 
-static int get_load_and_execute_in_memory_assembly_delegate_internal(
-        const pal::string_t& impl_dll_dir,
-        corehost_init_t* init,
-        void** delegate)
-{
-    pal::dll_t corehost;
-    hostpolicy_contract host_contract{};
-    corehost_get_delegate_fn host_entry = nullptr;
-
-    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_load_and_execute_in_memory_assembly_delegate", &host_entry);
-    if (code != StatusCode::Success)
-        return code;
-
-    // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
-    trace::flush();
-
-    {
-        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
-
-        const host_interface_t& intf = init->get_host_init_data();
-
-        if((code = host_contract.load(&intf)) == StatusCode::Success)
-        {
-            code = host_entry(delegate);
-        }
-    }
-
-    return code;
-}
-
-static int get_com_activation_delegate_internal(
-    const pal::string_t& impl_dll_dir,
-    corehost_init_t* init,
-    void **delegate)
-{
-    pal::dll_t corehost;
-    hostpolicy_contract host_contract{};
-    corehost_get_delegate_fn host_entry = nullptr;
-
-    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_com_activation_delegate", &host_entry);
-    if (code != StatusCode::Success)
-        return code;
-
-    // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
-    trace::flush();
-
-    {
-        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
-
-        const host_interface_t& intf = init->get_host_init_data();
-
-        if((code = host_contract.load(&intf)) == StatusCode::Success)
-        {
-            code = host_entry(delegate);
-        }
-    }
-
-    return code;
-}
-
 /**
 * When the framework is not found, display detailed error message
 *   about available frameworks and installation of new framework.
@@ -1348,16 +1288,17 @@ int fx_muxer_t::read_config_and_execute(
 
     corehost_init_t init(host_command, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions);
 
+    int status;
     if (host_command.size() == 0)
     {
-        rc = execute_app(impl_dir, &init, new_argc, new_argv);
+        status = execute_app(impl_dir, &init, new_argc, new_argv);
     }
     else
     {
-        rc = execute_host_command(impl_dir, &init, new_argc, new_argv, out_buffer, buffer_size, required_buffer_size);
+        status = execute_host_command(impl_dir, &init, new_argc, new_argv, out_buffer, buffer_size, required_buffer_size);
     }
 
-    return rc;
+    return status;
 }
 
 /**
@@ -1440,13 +1381,47 @@ int fx_muxer_t::execute(
     return result;
 }
 
-int fx_muxer_t::get_com_activation_delegate(
-    const host_startup_info_t &host_info,
-    void **delegate)
+
+static int get_delegate_from_runtime(
+    const pal::string_t& impl_dll_dir,
+    corehost_init_t* init,
+    const char* corehost_entrypoint,
+    void** delegate)
+{
+    pal::dll_t corehost;
+    hostpolicy_contract host_contract{};
+    corehost_get_delegate_fn host_entry = nullptr;
+
+    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, corehost_entrypoint, &host_entry);
+    if (code != StatusCode::Success)
+        return code;
+
+    // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
+    trace::flush();
+
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+
+        const host_interface_t& intf = init->get_host_init_data();
+
+        if ((code = host_contract.load(&intf)) == StatusCode::Success)
+        {
+            code = host_entry(delegate);
+        }
+    }
+
+    return code;
+}
+
+
+int fx_muxer_t::load_runtime_and_get_delegate(
+    const host_startup_info_t& host_info,
+    host_mode_t mode,
+    const char* corehost_entrypoint,
+    void** delegate
+)
 {
     assert(host_info.is_valid());
-
-    const host_mode_t mode = host_mode_t::libhost;
 
     // Read config
     fx_definition_vector_t fx_definitions;
@@ -1472,7 +1447,7 @@ int fx_muxer_t::get_com_activation_delegate(
         do
         {
             fx_definitions.resize(1); // Erase any existing frameworks for re-try
-            rc = read_framework(host_info, override_settings, app_config, newest_references, oldest_references, fx_definitions);
+            rc = fx_muxer_t::read_framework(host_info, override_settings, app_config, newest_references, oldest_references, fx_definitions);
         } while (rc == StatusCode::FrameworkCompatRetry && retry_count++ < Max_Framework_Resolve_Retries);
 
         assert(retry_count < Max_Framework_Resolve_Retries);
@@ -1513,9 +1488,41 @@ int fx_muxer_t::get_com_activation_delegate(
     pal::string_t additional_deps_serialized;
     corehost_init_t init(pal::string_t{}, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions);
 
-    rc = get_com_activation_delegate_internal(impl_dir, &init, delegate);
-
+    rc = get_delegate_from_runtime(impl_dir, &init, corehost_entrypoint, delegate);
     return rc;
+}
+
+int fx_muxer_t::get_com_activation_delegate(
+    const host_startup_info_t &host_info,
+    void **delegate)
+{
+    return load_runtime_and_get_delegate(
+        host_info,
+        host_mode_t::libhost,
+        "corehost_get_com_activation_delegate",
+        delegate);
+}
+
+int fx_muxer_t::get_load_and_execute_in_memory_assembly_delegate(
+    const host_startup_info_t &host_info,
+    void **delegate)
+{
+    return load_runtime_and_get_delegate(
+        host_info,
+        host_mode_t::apphost,
+        "corehost_get_load_and_execute_in_memory_assembly_delegate",
+        delegate);
+}
+
+int fx_muxer_t::get_load_in_memory_assembly_delegate(
+    const host_startup_info_t &host_info,
+    void **delegate)
+{
+    return load_runtime_and_get_delegate(
+        host_info,
+        host_mode_t::libhost,
+        "corehost_get_load_in_memory_assembly_delegate",
+        delegate);
 }
 
 int fx_muxer_t::handle_exec(
@@ -1660,33 +1667,4 @@ int fx_muxer_t::handle_cli(
     }
 
     return result;
-}
-
-
-static int get_load_and_execute_in_memory_assembly_delegate(
-    const pal::string_t& impl_dll_dir,
-    corehost_init_t* init,
-    void** delegate)
-{
-    pal::dll_t corehost;
-    hostpolicy_contract host_contract{};
-    corehost_get_delegate_fn host_entry = nullptr;
-
-    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_load_and_execute_in_memory_assembly_delegate", &host_entry);
-    if (code != StatusCode::Success)
-        return code;
-
-    trace::flush();
-
-    {
-        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
-
-        const host_interface_t& intf = init->get_host_init_data();
-        if ((code = host_contract.load(&intf)) == StatusCode::Success)
-        {
-            code = host_entry(delegate);
-        }
-    }
-
-    return code;
 }
