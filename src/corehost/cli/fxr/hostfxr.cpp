@@ -341,7 +341,7 @@ SHARED_API int32_t hostfxr_get_available_sdks(
 //
 // Return value:
 //   0 on success, otherwise failure
-//   0x800080980 - Buffer is too small (HostApiBufferTooSmall)
+//   0x80008098 - Buffer is too small (HostApiBufferTooSmall)
 //
 // String encoding:
 //   Windows     - UTF-16 (pal::char_t is 2 byte wchar_t)

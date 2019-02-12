@@ -23,6 +23,27 @@ using comhost::clsid_map;
 
 #endif // _WIN32
 
+namespace
+{
+    pal::stringstream_t & get_comhost_error_stream()
+    {
+        thread_local static pal::stringstream_t comhost_errors;
+
+        return comhost_errors;
+    }
+
+    void reset_comhost_error_stream()
+    {
+        pal::stringstream_t newstream;
+        get_comhost_error_stream().swap(newstream);
+    }
+
+    void comhost_error_writer(const pal::char_t* msg)
+    {
+        get_comhost_error_stream() << msg;
+    }
+}
+
 COM_API HRESULT STDMETHODCALLTYPE DllGetClassObject(
     _In_ REFCLSID rclsid,
     _In_ REFIID riid,
@@ -36,14 +57,43 @@ COM_API HRESULT STDMETHODCALLTYPE DllGetClassObject(
     if (iter == std::end(map))
         return CLASS_E_CLASSNOTAVAILABLE;
 
+    HRESULT hr;
     pal::string_t app_path;
     com_activation_fn act;
-    int ec = get_com_activation_delegate(&app_path, &act);
-    if (ec != StatusCode::Success)
-        return __HRESULT_FROM_WIN32(ec);
+    {
+        reset_comhost_error_stream();
+        trace::set_error_writer(comhost_error_writer);
+
+        int ec = get_com_activation_delegate(&app_path, &act);
+        if (ec != StatusCode::Success)
+        {
+            // Create an IErrorInfo instance with the failure data.
+            pal::string_t errs = get_comhost_error_stream().str();
+
+            ICreateErrorInfo *cei;
+            if (!errs.empty() && SUCCEEDED(::CreateErrorInfo(&cei)))
+            {
+                if (SUCCEEDED(cei->SetGUID(rclsid)))
+                {
+                    if (SUCCEEDED(cei->SetDescription((LPOLESTR)errs.c_str())))
+                    {
+                        IErrorInfo *ei;
+                        if (SUCCEEDED(cei->QueryInterface(__uuidof(ei), (void**)&ei)))
+                        {
+                            ::SetErrorInfo(0, ei);
+                            ei->Release();
+                        }
+                    }
+                }
+
+                cei->Release();
+            }
+
+            return __HRESULT_FROM_WIN32(ec);
+        }
+    }
 
     // Query the CLR for the type
-    HRESULT hr;
 
     IUnknown *classFactory = nullptr;
     com_activation_context cxt

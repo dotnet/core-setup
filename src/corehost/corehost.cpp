@@ -164,15 +164,26 @@ bool resolve_fxr_path(const pal::string_t& root_path, pal::string_t* out_dotnet_
         return true;
     }
 
+    // For framework-dependent apps, use DOTNET_ROOT
+
     pal::string_t default_install_location;
-    // Check default installation root as fallback
-    if (!pal::get_default_installation_dir(&default_install_location))
+    pal::string_t dotnet_root_env_var_name = get_dotnet_root_env_var_name();
+    if (get_file_path_from_env(dotnet_root_env_var_name.c_str(), out_dotnet_root))
     {
-        trace::error(_X("A fatal error occurred, the default install location cannot be obtained."));
-        return false;
+        trace::info(_X("Using environment variable %s=[%s] as runtime location."), dotnet_root_env_var_name.c_str(), out_dotnet_root->c_str());
     }
-    trace::info(_X("Using default installation location [%s] as runtime location."), default_install_location.c_str());
-    out_dotnet_root->assign(default_install_location);
+    else
+    {
+        pal::string_t default_install_location;
+        // Check default installation root as fallback
+        if (!pal::get_default_installation_dir(&default_install_location))
+        {
+            trace::error(_X("A fatal error occurred, the default install location cannot be obtained."));
+            return false;
+        }
+        trace::info(_X("Using default installation location [%s] as runtime location."), default_install_location.c_str());
+        out_dotnet_root->assign(default_install_location);
+    }
 
     pal::string_t fxr_dir = *out_dotnet_root;
     append_path(&fxr_dir, _X("host"));
@@ -267,14 +278,6 @@ bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path)
 
 #if defined(CURHOST_LIB)
 
-namespace
-{
-    void libhost_default_error_writer(const pal::char_t*)
-    {
-        // nop
-    }
-}
-
 int get_com_activation_delegate(pal::string_t *app_path, com_activation_fn *delegate)
 {
     pal::string_t host_path;
@@ -307,16 +310,6 @@ int get_com_activation_delegate(pal::string_t *app_path, com_activation_fn *dele
     if (get_com_delegate == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
 
-    auto set_error_writer = (hostfxr_set_error_writer_fn)pal::get_symbol(fxr, "hostfxr_set_error_writer");
-    if (set_error_writer != nullptr)
-    {
-        // Set the error writer during COM activation to the default.
-        // If the previous value is non-null, then set it to the defined value.
-        hostfxr_error_writer_fn prev = set_error_writer(libhost_default_error_writer);
-        if (prev != nullptr)
-            (void)set_error_writer(prev);
-    }
-
     pal::string_t app_path_local{ host_path };
 
     // Strip the comhost suffix to get the 'app'
@@ -325,6 +318,10 @@ int get_com_activation_delegate(pal::string_t *app_path, com_activation_fn *dele
     app_path_local.replace(app_path_local.begin() + idx, app_path_local.end(), _X(".dll"));
 
     *app_path = std::move(app_path_local);
+
+    auto set_error_writer_fn = (hostfxr_set_error_writer_fn)pal::get_symbol(fxr, "hostfxr_set_error_writer");
+    propagate_error_writer_t propagate_error_writer_to_hostfxr(set_error_writer_fn);
+
     return get_com_delegate(host_path.c_str(), dotnet_root.c_str(), app_path->c_str(), (void**)delegate);
 }
 
