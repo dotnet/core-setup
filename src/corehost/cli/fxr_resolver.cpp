@@ -8,9 +8,50 @@
 #include "trace.h"
 #include "utils.h"
 
+namespace
+{ 
+    bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path)
+    {
+        trace::info(_X("Reading fx resolver directory=[%s]"), fxr_root.c_str());
 
-// Declarations of hostfxr entry points
-bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path);
+        std::vector<pal::string_t> list;
+        pal::readdir_onlydirectories(fxr_root, &list);
+
+        fx_ver_t max_ver;
+        for (const auto& dir : list)
+        {
+            trace::info(_X("Considering fxr version=[%s]..."), dir.c_str());
+
+            pal::string_t ver = get_filename(dir);
+
+            fx_ver_t fx_ver;
+            if (fx_ver_t::parse(ver, &fx_ver, false))
+            {
+                max_ver = std::max(max_ver, fx_ver);
+            }
+        }
+
+        if (max_ver == fx_ver_t())
+        {
+            trace::error(_X("A fatal error occurred, the folder [%s] does not contain any version-numbered child folders"), fxr_root.c_str());
+            return false;
+        }
+
+        pal::string_t max_ver_str = max_ver.as_str();
+        append_path(&fxr_root, max_ver_str.c_str());
+        trace::info(_X("Detected latest fxr version=[%s]..."), fxr_root.c_str());
+
+        if (library_exists_in_dir(fxr_root, LIBFXR_NAME, out_fxr_path))
+        {
+            trace::info(_X("Resolved fxr [%s]..."), out_fxr_path->c_str());
+            return true;
+        }
+
+        trace::error(_X("A fatal error occurred, the required library %s could not be found in [%s]"), LIBFXR_NAME, fxr_root.c_str());
+
+        return false;
+    }
+}
 
 #if FEATURE_APPHOST
 
@@ -148,45 +189,3 @@ bool resolve_fxr_path(const pal::string_t& host_path, pal::string_t* out_dotnet_
 }
 
 #endif // !FEATURE_APPHOST && !FEATURE_LIBHOST
-
-bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path)
-{
-    trace::info(_X("Reading fx resolver directory=[%s]"), fxr_root.c_str());
-
-    std::vector<pal::string_t> list;
-    pal::readdir_onlydirectories(fxr_root, &list);
-
-    fx_ver_t max_ver;
-    for (const auto& dir : list)
-    {
-        trace::info(_X("Considering fxr version=[%s]..."), dir.c_str());
-
-        pal::string_t ver = get_filename(dir);
-
-        fx_ver_t fx_ver;
-        if (fx_ver_t::parse(ver, &fx_ver, false))
-        {
-            max_ver = std::max(max_ver, fx_ver);
-        }
-    }
-
-    if (max_ver == fx_ver_t())
-    {
-        trace::error(_X("A fatal error occurred, the folder [%s] does not contain any version-numbered child folders"), fxr_root.c_str());
-        return false;
-    }
-
-    pal::string_t max_ver_str = max_ver.as_str();
-    append_path(&fxr_root, max_ver_str.c_str());
-    trace::info(_X("Detected latest fxr version=[%s]..."), fxr_root.c_str());
-
-    if (library_exists_in_dir(fxr_root, LIBFXR_NAME, out_fxr_path))
-    {
-        trace::info(_X("Resolved fxr [%s]..."), out_fxr_path->c_str());
-        return true;
-    }
-
-    trace::error(_X("A fatal error occurred, the required library %s could not be found in [%s]"), LIBFXR_NAME, fxr_root.c_str());
-
-    return false;
-}
