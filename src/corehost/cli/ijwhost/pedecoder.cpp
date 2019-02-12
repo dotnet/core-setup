@@ -10,6 +10,11 @@ namespace
         return (value+alignment-1)&~(alignment-1);
     }
 
+    bool CheckOverflow(std::uint32_t val1, std::uint32_t val2)
+    {
+        return val1 + val2 >= val1;
+    } 
+
     bool CheckBounds(std::uint32_t rangeBase, std::uint32_t rangeSize, std::uint32_t rva, std::uint32_t size)
     {
         return CheckOverflow(rangeBase, rangeSize)
@@ -17,11 +22,6 @@ namespace
             && rva >= rangeBase
             && rva + size <= rangeBase + rangeSize;
     }
-
-    bool CheckOverflow(std::uint32_t val1, std::uint32_t val2)
-    {
-        return val1 + val2 >= val1;
-    } 
 }
 
 

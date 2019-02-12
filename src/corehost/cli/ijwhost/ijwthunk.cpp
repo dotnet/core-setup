@@ -26,6 +26,8 @@ namespace
     VTableBootstrapThunkChunk* g_pVtableBootstrapThunkChunkList = nullptr;
 }
 
+HANDLE g_heapHandle;
+
 bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
 {
     if (pe.IsILOnly())
@@ -115,7 +117,8 @@ extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_
     VTableBootstrapThunk *pThunk = VTableBootstrapThunk::GetThunkFromCookie(cookie);
 
     load_in_memory_assembly_fn loadInMemoryAssembly;
-    pal::hresult_t status = get_load_in_memory_assembly_delegate(&loadInMemoryAssembly);
+    pal::dll_t moduleHandle = pThunk->GetDLLHandle();
+    pal::hresult_t status = get_load_in_memory_assembly_delegate(moduleHandle, &loadInMemoryAssembly);
 
     if (status != StatusCode::Success)
     {
@@ -132,7 +135,7 @@ extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_
 #pragma warning (pop)
     }
 
-    loadInMemoryAssembly(pThunk->GetDLLHandle());
+    loadInMemoryAssembly(moduleHandle);
 
     std::uintptr_t thunkAddress = *(pThunk->GetSlotAddr());
 

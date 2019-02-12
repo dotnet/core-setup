@@ -12,7 +12,6 @@ include_directories(../)
 include_directories(../fxr)
 include_directories(../../)
 include_directories(../../common)
-include_directories(../json/casablanca/include)
 
 set(SOURCES
     ijwthunk.cpp
@@ -22,11 +21,7 @@ set(SOURCES
     ../../common/trace.cpp
     ../../common/utils.cpp
     ../fxr/fx_ver.cpp
-)
-
-set (TEMPORARY_SOURCES
     pedecoder.cpp
-    executableheap.cpp
 )
 
 if(WIN32)
@@ -71,7 +66,7 @@ endif()
 add_definitions(-DEXPORT_SHARED_API=1)
 add_definitions(-DFEATURE_LIBHOST=1)
 
-add_library(ijwhost SHARED ${SOURCES} ${THUNK_STUB_SOURCES} ${TEMPORARY_SOURCES})
+add_library(ijwhost SHARED ${SOURCES} ${THUNK_STUB_SOURCES})
 
 # Specify non-default Windows libs to be used for Arm/Arm64 builds
 if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))

@@ -18,6 +18,7 @@ set(SOURCES
     ../../corehost.cpp
     exports.cpp
     clsidmap.cpp
+    comhost.cpp
     ../../common/trace.cpp
     ../../common/utils.cpp
     ../fxr/fx_ver.cpp

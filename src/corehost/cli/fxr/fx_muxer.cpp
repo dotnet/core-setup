@@ -23,7 +23,7 @@
 
 using corehost_load_fn = int(*) (const host_interface_t* init);
 using corehost_main_fn = int(*) (const int argc, const pal::char_t* argv[]);
-using corehost_get_com_activation_delegate_fn = int(*) (void **delegate);
+using corehost_get_delegate_fn = int(*)(void** delegate);
 using corehost_main_with_output_buffer_fn = int(*) (const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size);
 using corehost_unload_fn = int(*) ();
 using corehost_error_writer_fn = void(*) (const pal::char_t* message);
@@ -161,9 +161,6 @@ static int execute_host_command(
     if (code != StatusCode::Success)
         return code;
 
-    // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
-    trace::flush();
-
     {
         propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
 
@@ -178,6 +175,36 @@ static int execute_host_command(
     return code;
 }
 
+static int get_load_and_execute_in_memory_assembly_delegate_internal(
+        const pal::string_t& impl_dll_dir,
+        corehost_init_t* init,
+        void** delegate)
+{
+    pal::dll_t corehost;
+    hostpolicy_contract host_contract{};
+    corehost_get_delegate_fn host_entry = nullptr;
+
+    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_load_and_execute_in_memory_assembly_delegate", &host_entry);
+    if (code != StatusCode::Success)
+        return code;
+
+    // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
+    trace::flush();
+
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+
+        const host_interface_t& intf = init->get_host_init_data();
+
+        if((code = host_contract.load(&intf)) == StatusCode::Success)
+        {
+            code = host_entry(delegate);
+        }
+    }
+
+    return code;
+}
+
 static int get_com_activation_delegate_internal(
     const pal::string_t& impl_dll_dir,
     corehost_init_t* init,
@@ -185,7 +212,7 @@ static int get_com_activation_delegate_internal(
 {
     pal::dll_t corehost;
     hostpolicy_contract host_contract{};
-    corehost_get_com_activation_delegate_fn host_entry = nullptr;
+    corehost_get_delegate_fn host_entry = nullptr;
 
     int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_com_activation_delegate", &host_entry);
     if (code != StatusCode::Success)
@@ -198,7 +225,8 @@ static int get_com_activation_delegate_internal(
         propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
 
         const host_interface_t& intf = init->get_host_init_data();
-        if ((code = host_contract.load(&intf)) == StatusCode::Success)
+
+        if((code = host_contract.load(&intf)) == StatusCode::Success)
         {
             code = host_entry(delegate);
         }
@@ -1632,4 +1660,33 @@ int fx_muxer_t::handle_cli(
     }
 
     return result;
+}
+
+
+static int get_load_and_execute_in_memory_assembly_delegate(
+    const pal::string_t& impl_dll_dir,
+    corehost_init_t* init,
+    void** delegate)
+{
+    pal::dll_t corehost;
+    hostpolicy_contract host_contract{};
+    corehost_get_delegate_fn host_entry = nullptr;
+
+    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_load_and_execute_in_memory_assembly_delegate", &host_entry);
+    if (code != StatusCode::Success)
+        return code;
+
+    trace::flush();
+
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+
+        const host_interface_t& intf = init->get_host_init_data();
+        if ((code = host_contract.load(&intf)) == StatusCode::Success)
+        {
+            code = host_entry(delegate);
+        }
+    }
+
+    return code;
 }

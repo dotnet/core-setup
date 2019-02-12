@@ -19,7 +19,7 @@ SHARED_API std::int32_t _CorExeMain()
 	}
 
 	int argc;
-	pal::char_t** argv = CommandLineToArgvW(GetCommandLine(), &argc);
+	pal::char_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
 	status = loadAndExecute(GetModuleHandle(nullptr), argc, argv);
 

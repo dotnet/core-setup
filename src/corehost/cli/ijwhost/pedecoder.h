@@ -82,7 +82,7 @@ private:
         return 0;
     }
 
-    IMAGE_SECTION_HEADER* RvaToSection(std::int32_t rva) const;
+    IMAGE_SECTION_HEADER* RvaToSection(std::uint32_t rva) const;
 
     static IMAGE_SECTION_HEADER* FindFirstSection(IMAGE_NT_HEADERS* pNTHeaders)
     {

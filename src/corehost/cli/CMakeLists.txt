@@ -5,6 +5,5 @@ add_subdirectory(hostpolicy)
 
 if(WIN32)
     add_subdirectory(comhost)
-endif()
     add_subdirectory(ijwhost)
 endif()
