@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "comhost.h"
-#include <corehost.h>
+#include <fxr_resolver.h>
 #include <error_codes.h>
 #include <trace.h>
 #include <type_traits>

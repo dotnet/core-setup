@@ -17,7 +17,7 @@ set(SOURCES
     ijwthunk.cpp
     ijwhost.cpp
     exports.cpp
-    ../../corehost.cpp
+    ../fxr_resolver.cpp
     ../../common/trace.cpp
     ../../common/utils.cpp
     ../fxr/fx_ver.cpp

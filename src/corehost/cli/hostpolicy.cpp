@@ -9,7 +9,6 @@
 #include "fx_muxer.h"
 #include "utils.h"
 #include "coreclr.h"
-#include "corehost.h"
 #include "cpprest/json.h"
 #include "libhost.h"
 #include "error_codes.h"

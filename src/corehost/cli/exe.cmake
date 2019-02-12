@@ -24,6 +24,7 @@ include_directories(../fxr)
 
 # CMake does not recommend using globbing since it messes with the freshness checks
 list(APPEND SOURCES
+    ../fxr_resolver.cpp
     ../../corehost.cpp
     ../../common/trace.cpp
     ../../common/utils.cpp)

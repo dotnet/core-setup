@@ -15,7 +15,7 @@ include_directories(../../common)
 include_directories(../json/casablanca/include)
 
 set(SOURCES
-    ../../corehost.cpp
+    ../fxr_resolver.cpp
     exports.cpp
     clsidmap.cpp
     comhost.cpp
