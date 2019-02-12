@@ -40,15 +40,15 @@
                                  OverwriteDestination="false" />
 
       <GenerateGuidFromName Name="$(SharedHostInstallerFile)">
-        <Output TaskParameter="GeneratedGui" PropertyName="SharedHostUpgradeCode" />
+        <Output TaskParameter="GeneratedGuid" PropertyName="SharedHostUpgradeCode" />
       </GenerateGuidFromName>
 
       <GenerateGuidFromName Name="$(HostFxrInstallerFile)">
-        <Output TaskParameter="GeneratedGui" PropertyName="HostFxrUpgradeCode" />
+        <Output TaskParameter="GeneratedGuid" PropertyName="HostFxrUpgradeCode" />
       </GenerateGuidFromName>
 
       <GenerateGuidFromName Name="$(TargetingPackInstallerFile)">
-        <Output TaskParameter="GeneratedGui" PropertyName="TargetingPackUpgradeCode" />
+        <Output TaskParameter="GeneratedGuid" PropertyName="TargetingPackUpgradeCode" />
       </GenerateGuidFromName>
 
       <ItemGroup>
@@ -82,7 +82,7 @@
       <MakeDir Directories="$(WixObjRoot);@(WixOutputs);@(WixOutputs2)" />
 
       <GenerateGuidFromName Name="$(SharedFrameworkInstallerFile)">
-        <Output TaskParameter="GeneratedGui" PropertyName="SharedFxUpgradeCode" />
+        <Output TaskParameter="GeneratedGuid" PropertyName="SharedFxUpgradeCode" />
       </GenerateGuidFromName>
 
       <PropertyGroup>
@@ -110,7 +110,7 @@
      </PropertyGroup>
 
      <GenerateGuidFromName Name="$(SharedBundle)">
-       <Output TaskParameter="GeneratedGui" PropertyName="SharedBundleCode" />
+       <Output TaskParameter="GeneratedGuid" PropertyName="SharedBundleCode" />
      </GenerateGuidFromName>
 
      <PropertyGroup>
