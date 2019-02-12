@@ -30,35 +30,35 @@ $InstallFilesWixobj = "$WixObjRoot\install-files.wixobj"
 
 function RunHeat
 {
-    $result = $true
+    $Result = $true
     pushd "$WixRoot"
 
     Write-Host Running heat.. to $InstallFileswsx
-    write-host "Root $TargetingPackPublishRoot"
+    Write-Host "Root $TargetingPackPublishRoot"
 
     .\heat.exe dir `"$TargetingPackPublishRoot`" `
-    -nologo `
-    -template fragment `
-    -sreg -gg `
-    -var var.TargetingPackSrc `
-    -cg InstallFiles `
-    -srd `
-    -dr DOTNETHOME `
-    -out $InstallFileswsx | Out-Host
+        -nologo `
+        -template fragment `
+        -sreg -gg `
+        -var var.TargetingPackSrc `
+        -cg InstallFiles `
+        -srd `
+        -dr DOTNETHOME `
+        -out $InstallFileswsx | Out-Host
 
     if($LastExitCode -ne 0)
     {
-        $result = $false
+        $Result = $false
         Write-Host "Heat failed with exit code $LastExitCode."
     }
 
     popd
-    return $result
+    return $Result
 }
 
 function RunCandle
 {
-    $result = $true
+    $Result = $true
     pushd "$WixRoot"
 
     Write-Host Running candle..
@@ -84,17 +84,17 @@ function RunCandle
 
     if($LastExitCode -ne 0)
     {
-        $result = $false
+        $Result = $false
         Write-Host "Candle failed with exit code $LastExitCode."
     }
 
     popd
-    return $result
+    return $Result
 }
 
 function RunLight
 {
-    $result = $true
+    $Result = $true
     pushd "$WixRoot"
 
     Write-Host Running light..
@@ -111,12 +111,12 @@ function RunLight
 
     if($LastExitCode -ne 0)
     {
-        $result = $false
+        $Result = $false
         Write-Host "Light failed with exit code $LastExitCode."
     }
 
     popd
-    return $result
+    return $Result
 }
 
 if(!(Test-Path $TargetingPackPublishRoot))
@@ -154,7 +154,6 @@ if(-Not (RunLight))
 if(!(Test-Path $TargetingPackMSIOutput))
 {
     throw "Unable to create the Targeting Pack MSI."
-    Exit -1
 }
 
 Write-Host -ForegroundColor Green "Successfully created Targeting Pack MSI - $TargetingPackMSIOutput"
