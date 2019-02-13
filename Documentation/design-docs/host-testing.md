@@ -20,12 +20,27 @@ Almost all tests then execute a test application using this test product install
 * Turning on host tracing and looking for certain text in the tracing output
 * Exit code of the app
 
+Pros:
+* True End-to-End tests which test real product binaries in the real-world conditions (mostly)
+* Tests are written in C# - so natural integration with test infra, VS UI and so on
+Cons:
+* All tests are out-of-proc which makes debugging product complicated
+* Tests perform large setup work and copy/write lot of files on disk - tests are slow for this reason.
+* Tests run the entire product, not just the host. This includes starting the runtime, JITing and so on. Vast majority of tests don't actually use that and effectively ignore the part of running an actual app code - makes the tests slow.
+
 Going forward we would keep these tests and add new ones to provide true End-to-End coverage.
 
 ### Native API tests
 Small portion of the tests actually call specific exports on `hostfxr` or `hostpolicy` directly to test these. All these tests are in the `HostActivation` project under the `GivenThatICareAboutNativeHostApi` test class.
 These tests use a special test application (managed) which invokes the selected exports through PInvokes and performs the testing. The `HostActivation` test only prepares this app and executes it, looking for pieces of its output to verify the outcome.
 Ideally we would migrate these over time to the proposed Component tests infra.
+
+Pros:
+* Testing real product binaries
+* Tests are written in C#, but in a separate project - no direct test infra integration or VS UI support. This is worked around by effectively having "wrappers" for these tests.
+* Direct calls to exports in a controlled environment without running the whole product (mostly)
+Cons:
+* Still runs out-of-proc making debugging harder
 
 ## Test proposal
 
