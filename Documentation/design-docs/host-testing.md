@@ -47,7 +47,7 @@ Cons:
 ## Test proposal
 
 ### Unit tests
-Add the ability to write true unit tests. So tests are written in C++ which can directly call methods/classes from the product. These tests would be compiled as native executables. For simplicity of the build system, they would live in the product source tree (`src` folder) and would be compiled during the product build. They would combine the test source files with product source files into one executable.
+Add the ability to write true unit tests. So tests are written in C++ which can directly call methods/classes from the product. These tests would be compiled as native executables. For simplicity of the build system, they would live in the product source tree (`src` folder) and would be compiled during the product build. They would combine the test source files with product source files into one executable. The intent is to keep them in a separate subdirectory with clear separation from the product, just the build would be used by both.
 For integration purposes there would be managed wrappers in the `HostActivation` test project which would just call the native executable and check the exit code. As this is the simplest way to integrate these tests into all our test infrastructure.
 
 Unit tests should be used to test self-contained bits of functionality. So for example helper classes and such.
