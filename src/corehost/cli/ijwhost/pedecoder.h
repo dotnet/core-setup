@@ -46,9 +46,7 @@ public:
             return (std::uintptr_t)nullptr;
         }
 
-        std::uint32_t offset = RvaToOffset(rva);
-
-        return m_base + offset;
+        return m_base + rva;
     }
 
 private:
@@ -66,21 +64,6 @@ private:
     }
 
     bool CheckRva(std::uint32_t rva, std::uint32_t size) const;
-
-    std::uint32_t RvaToOffset(std::uint32_t rva) const
-    {
-        if (rva > 0)
-        {
-            IMAGE_SECTION_HEADER* section = RvaToSection(rva);
-            if (section == nullptr)
-            {
-                return rva;
-            }
-
-            return rva - section->VirtualAddress + section->PointerToRawData;
-        }
-        return 0;
-    }
 
     IMAGE_SECTION_HEADER* RvaToSection(std::uint32_t rva) const;
 
