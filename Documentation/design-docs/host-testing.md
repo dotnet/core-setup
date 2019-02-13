@@ -57,11 +57,11 @@ First unit test is being introduced in this PR: [dotnet/core-setup#4953](https:/
 Pros:
 * Can test C++ code directly
 * Can create very isolated environment for the tested code
+* Debugging is relatively easy since the test run in a standalone native process
 
 Cons:
 * Test must be written in C++
 * Not testing shipping binaries
-* Debugging is trickier as it launches a separate process (this could be fixed)
 
 ### Component tests
 Testing larger functionality blocks is probably easier by testing entire components.
