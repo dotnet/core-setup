@@ -94,16 +94,7 @@ When a delayed-activation thunk is called, it will be outside of the loader lock
 
 The naming of these APIs is designed to be useful for non-IJW scenarios as well, such as possibly Single-Exe.
 
-When the runtime loads the assembly, it needs to know if each element in the vtfixup table is a token or a stub. In .NET Framework, this check is implemented by `mscoree.dll` passing callbacks to the runtime. When the runtime is traversing the vtfixup table and updating the entries to point to JIT stubs, it queries `mscoree.dll` if the module has stubs. If the module has stubs, it calls back into `mscoree.dll` to query the stub data structures for the metadata token. Otherwise, it grabs the token from the slot.
-
-.NET Core has a few options for how to implement equivalent behavior:
-
-1) Track that an assembly is being loaded via the method above and if so, mark that is has stubs instead of tokens. This option has a few problems:
-   1) We would need to change the API to either take in a `bool` parameter that would specify if the image has stubs in the vtfixup table or change the API to be IJW-specific.
-   2) We would need to associate the value of `imageBase` with the status of if it has stubs before we try to load the assembly. The ordering here is very important and easy to mess up.
-2) Implement another API in `System.Private.CoreLib` that registers the callbacks for the runtime to call into the shim.
-
-Options 1 would make the layout of the stub structure a contract between the shim and the runtime. This is compilcated further by the fact that the stubs are architecture-specific since they contain the raw assembly for the jump stubs. Option 2 will work the cleanest if the runtime can call back into managed code at the point of assembly loading that it needs the information (to execute possibly multiple registered callbacks from multiple IJW hosts). I did a small prototype, and we can call into managed code, but it requires a GC mode switch. I don't know if that would be too large of a perf hit. If it cannot call back into managed code at that time, we may need to ensure that there is only one IJW shim loaded for an application. If there is only one, we can easily just store a function pointer and execute the callbacks without having to worry about executing managed code. Otherwise, we can probably just do a list of function pointer callbacks to call.
+When the runtime loads the assembly, it needs to know if each element in the vtfixup table is a token or a stub. In .NET Framework, this check is implemented by the runtime querying `mscoree.dll` by looking up callbacks. When the runtime is traversing the vtfixup table and updating the entries to point to JIT stubs, it queries `mscoree.dll` if the module has stubs. If the module has stubs, it calls back into `mscoree.dll` to query the stub data structures for the metadata token. Otherwise, it grabs the token from the slot.
 
 We should be able to load a *.deps.json* file with the signature above since Win32 APIs give us the ability to recover the file path from the `HMODULE`.
 
