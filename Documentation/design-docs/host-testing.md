@@ -1,6 +1,6 @@
 # Testing of host components
 
-The hosting layer of .NET Core consists of several native libraries and executables (entirely written in C++). The full end to end features sometimes require code in the `coreclr` repo, but testing of that is outside of the code of this document. For description of the various hosting components, please see [host-components](host-components.md).
+The hosting layer of .NET Core consists of several native libraries and executables (entirely written in C++). The full end to end features sometimes require code in the `coreclr` repo, but testing of that is outside of the scope of this document. For description of the various hosting components, please see [host-components](host-components.md).
 
 Testing these comes with certain challenges which this document tries to address.
 
@@ -12,7 +12,7 @@ This is almost all tests in the `HostActivation` test project currently.
 The tests prepare folders on the disk which emulate the product installation by having
 * The muxer `dotnet` or `apphost`
 * The `hostfxr` in the right place
-* Shared frameworks (or for self contained apps in the app)
+* Shared frameworks (or for self contained apps in the app directory)
 
 For the most part all these are real components. The shared frameworks contain a real `Microsoft.NETCore.App` copy, only higher level frameworks are "mocked" by creating only the necessary files.
 Almost all tests then execute a test application using this test product installation and observe the behavior of the app. This is done by
@@ -23,6 +23,7 @@ Almost all tests then execute a test application using this test product install
 Pros:
 * True End-to-End tests which test real product binaries in the real-world conditions (mostly)
 * Tests are written in C# - so natural integration with test infra, VS UI and so on
+
 Cons:
 * All tests are out-of-proc which makes debugging product complicated
 * Tests perform large setup work and copy/write lot of files on disk - tests are slow for this reason.
@@ -39,18 +40,19 @@ Pros:
 * Testing real product binaries
 * Tests are written in C#, but in a separate project - no direct test infra integration or VS UI support. This is worked around by effectively having "wrappers" for these tests.
 * Direct calls to exports in a controlled environment without running the whole product (mostly)
+
 Cons:
 * Still runs out-of-proc making debugging harder
 
 ## Test proposal
 
 ### Unit tests
-Add the ability to write true unit tests. So tests written in C++ which can directly call methods/classes from the product. These tests would be compiled as native executables. For simplicity of the build system, they would live in the product source tree (`src` folder) and would be compiled during the product build. They would combine the test source files with product source files into one executable.
+Add the ability to write true unit tests. So tests are written in C++ which can directly call methods/classes from the product. These tests would be compiled as native executables. For simplicity of the build system, they would live in the product source tree (`src` folder) and would be compiled during the product build. They would combine the test source files with product source files into one executable.
 For integration purposes there would be managed wrappers in the `HostActivation` test project which would just call the native executable and check the exit code. As this is the simplest way to integrate these tests into all our test infrastructure.
 
 Unit tests should be used to test self-contained bits of functionality. So for example helper classes and such.
 
-First unit test is being introduced in this PR: dotnet/core-setup#4953.
+First unit test is being introduced in this PR: [dotnet/core-setup#4953](https://github.com/dotnet/core-setup/pull/4953).
 
 Pros:
 * Can test C++ code directly
@@ -87,7 +89,7 @@ There are two way to do this:
     * Product binaries always contain all test-related code (no conditional compilation)
 
 Pros:
-* Tests are written in C# this has several large advantages
+* Tests are written in C#. This has several large advantages:
   * Easier to write
   * Full integration with test infra
   * VS UI support for running selected tests
