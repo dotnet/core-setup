@@ -4,11 +4,12 @@
 #include "pal.h"
 #include "pedecoder.h"
 #include "ijwhost.h"
+#include "IJWBootstrapThunkCPU.h"
 #include "error_codes.h"
 #include "trace.h"
 #include <cassert>
 
-SHARED_API std::int32_t _CorExeMain()
+SHARED_API std::int32_t STDMETHODCALLTYPE _CorExeMain()
 {
     load_and_execute_in_memory_assembly_fn loadAndExecute;
     std::int32_t status = get_load_and_execute_in_memory_assembly_delegate(&loadAndExecute);
@@ -28,7 +29,7 @@ SHARED_API std::int32_t _CorExeMain()
     return argc;
 }
 
-SHARED_API BOOL _CorDllMain(HINSTANCE hInst,
+SHARED_API BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst,
     DWORD  dwReason,
     LPVOID lpReserved
 )
@@ -57,23 +58,19 @@ SHARED_API BOOL _CorDllMain(HINSTANCE hInst,
             DisableThreadLibraryCalls(hInst);
         }
 
-        // If coreclr.dll is already loaded, then we don't need thunks.
-        if (GetModuleHandleW(_X("coreclr.dll")) == nullptr)
+        // Install the bootstrap thunks
+        if (!PatchVTableEntriesForDLLAttach(pe))
         {
-            // Install the bootstrap thunks
-            if (!PatchVTableEntriesForDLLAttach(pe))
-            {
-                return FALSE;
-            }
+            return FALSE;
         }
     }
 
     // Now call the unmanaged entrypoint if it exists
     if (pe.HasNativeEntryPoint())
     {
-        DllMain_t *pUnmanagedDllMain = (DllMain_t *)pe.GetNativeEntryPoint();
+        DllMain_t pUnmanagedDllMain = (DllMain_t)pe.GetNativeEntryPoint();
         assert(pUnmanagedDllMain != nullptr);
-        res = (*pUnmanagedDllMain)(hInst, dwReason, lpReserved);
+        res = pUnmanagedDllMain(hInst, dwReason, lpReserved);
     }
 
     if (dwReason == DLL_PROCESS_DETACH)
@@ -99,4 +96,22 @@ BOOL STDMETHODCALLTYPE DllMain(HINSTANCE hInst,
         break;
     }
     return TRUE;
+}
+
+SHARED_API mdToken STDMETHODCALLTYPE GetTokenForVTableEntry(HMODULE hMod, void** ppVTEntry)
+{
+    mdToken tok = mdTokenNil;
+    if (AreThunksInstalledForModule(hMod))
+    {
+        VTableBootstrapThunk* pThunk =
+            VTableBootstrapThunk::GetThunkFromEntrypoint((std::uintptr_t) *ppVTEntry);
+        tok = (mdToken) pThunk->GetToken();
+    }
+    else
+    {
+        tok = (mdToken)(std::uintptr_t) *ppVTEntry;
+    }
+    assert(TypeFromToken(tok) == mdtMethodDef || TypeFromToken(tok) == mdtMemberRef);
+
+    return tok;
 }

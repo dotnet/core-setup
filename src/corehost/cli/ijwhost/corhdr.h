@@ -53,6 +53,8 @@ typedef enum CorTokenType
     mdtBaseType             = 0x72000000,       // Leave this on the high end value. This does not correspond to metadata table
 } CorTokenType;
 
+#define mdTokenNil                  ((mdToken)0)
+
 typedef enum ReplacesGeneralNumericDefines
 {
     IMAGE_DIRECTORY_ENTRY_COMHEADER     =14,

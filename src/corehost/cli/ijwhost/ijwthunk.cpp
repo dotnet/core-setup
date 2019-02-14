@@ -163,3 +163,20 @@ void BootstrapThunkDLLDetach(PEDecoder& pe)
         }
     }
 }
+
+
+bool AreThunksInstalledForModule(pal::dll_t instance)
+{
+    std::lock_guard<std::mutex> _{g_thunkChunkLock};
+
+    VTableBootstrapThunkChunk* currentChunk = g_pVtableBootstrapThunkChunkList;
+    while (currentChunk != nullptr)
+    {
+        if (currentChunk->GetDLLHandle() == instance)
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
