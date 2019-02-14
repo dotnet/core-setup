@@ -9,8 +9,8 @@
     <SkipValidatePackage>true</SkipValidatePackage>
 
     <!-- Include the platform manifest in the data dir. -->
-    <PlatformManifestTargetPath>data/</PlatformManifestTargetPath>
-    <FrameworkListTargetPath>$(PlatformManifestTargetPath)</FrameworkListTargetPath>
+    <PlatformManifestTargetPath>data/PlatformManifest.txt</PlatformManifestTargetPath>
+    <FrameworkListTargetPath>data/</FrameworkListTargetPath>
 
     <!-- Exclude runtime.json from the package. -->
     <IncludeRuntimeJson>false</IncludeRuntimeJson>
