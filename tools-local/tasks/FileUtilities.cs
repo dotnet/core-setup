@@ -12,6 +12,10 @@ namespace Microsoft.DotNet.Build.Tasks
 {
     internal static partial class FileUtilities
     {
+        private static readonly HashSet<string> s_assemblyExtensions = new HashSet<string>(
+            new[] { ".dll", ".exe", ".winmd" },
+            StringComparer.OrdinalIgnoreCase);
+
         public static Version GetFileVersion(string sourcePath)
         {
             var fvi = FileVersionInfo.GetVersionInfo(sourcePath);
@@ -23,8 +27,6 @@ namespace Microsoft.DotNet.Build.Tasks
 
             return null;
         }
-
-        static readonly HashSet<string> s_assemblyExtensions = new HashSet<string>(new[] { ".dll", ".exe", ".winmd" }, StringComparer.OrdinalIgnoreCase);
 
         public static AssemblyName GetAssemblyName(string path)
         {
