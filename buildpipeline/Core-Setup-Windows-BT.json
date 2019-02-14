@@ -261,7 +261,7 @@
         "maximumCpuCount": "false",
         "restoreNugetPackages": "false",
         "logProjectEvents": "false",
-        "createLogFile": "true"
+        "createLogFile": "false"
       }
     },
     {
