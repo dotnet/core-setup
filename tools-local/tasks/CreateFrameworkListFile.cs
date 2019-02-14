@@ -50,12 +50,25 @@ namespace Microsoft.DotNet.Build.Tasks
                 .Where(f => f.AssemblyName != null)
                 .OrderBy(f => f.Item.ItemSpec, StringComparer.OrdinalIgnoreCase))
             {
-                string publicKeyToken = ToLowercaseHexString(f.AssemblyName.GetPublicKeyToken());
+                byte[] publicKeyToken = f.AssemblyName.GetPublicKeyToken();
+                string publicKeyTokenHex;
+
+                if (publicKeyToken != null)
+                {
+                    publicKeyTokenHex = BitConverter.ToString(publicKeyToken)
+                        .ToLowerInvariant()
+                        .Replace("-", "");
+                }
+                else
+                {
+                    Log.LogError($"No public key token found for assembly {f.Item.ItemSpec}");
+                    publicKeyTokenHex = "";
+                }
 
                 frameworkManifest.Add(new XElement(
                     "File",
                     new XAttribute("AssemblyName", f.AssemblyName.Name),
-                    new XAttribute("PublicKeyToken", publicKeyToken),
+                    new XAttribute("PublicKeyToken", publicKeyTokenHex),
                     new XAttribute("AssemblyVersion", f.AssemblyName.Version),
                     new XAttribute("FileVersion", f.FileVersion)));
             }
@@ -64,18 +77,6 @@ namespace Microsoft.DotNet.Build.Tasks
             File.WriteAllText(TargetFile, frameworkManifest.ToString());
 
             return !Log.HasLoggedErrors;
-        }
-
-        private static string ToLowercaseHexString(byte[] bytes)
-        {
-            if (bytes == null)
-            {
-                return null;
-            }
-
-            return BitConverter.ToString(bytes)
-                .ToLowerInvariant()
-                .Replace("-", "");
         }
     }
 }
