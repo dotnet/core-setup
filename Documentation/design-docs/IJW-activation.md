@@ -85,7 +85,7 @@ When a delayed-activation thunk is called, it will be outside of the loader lock
     ```csharp
     public static class InMemoryAssemblyLoader
     {
-        public static void LoadInMemoryAssembly(IntPtr handle);
+        public static unsafe void LoadInMemoryAssembly(IntPtr handle, char* modulePath);
     }
     ```
 
@@ -96,8 +96,4 @@ The naming of these APIs is designed to be useful for non-IJW scenarios as well,
 
 When the runtime loads the assembly, it needs to know if each element in the vtfixup table is a token or a stub. In .NET Framework, this check is implemented by the runtime querying `mscoree.dll` by looking up callbacks. When the runtime is traversing the vtfixup table and updating the entries to point to JIT stubs, it queries `mscoree.dll` if the module has stubs. If the module has stubs, it calls back into `mscoree.dll` to query the stub data structures for the metadata token. Otherwise, it grabs the token from the slot.
 
-We should be able to load a *.deps.json* file with the signature above since Win32 APIs give us the ability to recover the file path from the `HMODULE`.
-
-### Open Questions
-
-1) How does the runtime learn/know if the vtfixup table entries are tokens or stubs and resolve stubs back to tokens?
+We will implement it similarly, by having CoreCLR call back into `ijwhost.dll` if it is present.
