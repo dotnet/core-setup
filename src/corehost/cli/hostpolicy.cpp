@@ -96,7 +96,7 @@ namespace
             append_path(&corelib_path, CORELIB_NAME);
 
             // Append CoreLib path
-            if (probe_paths.tpa.back() != PATH_SEPARATOR)
+            if (!probe_paths.tpa.empty() && probe_paths.tpa.back() != PATH_SEPARATOR)
             {
                 probe_paths.tpa.push_back(PATH_SEPARATOR);
             }
@@ -632,7 +632,7 @@ SHARED_API int corehost_get_load_and_execute_in_memory_assembly_delegate(void** 
 
     return coreclr->create_delegate(
         "System.Private.CoreLib",
-        "System.Runtime.InteropServices.InMemoryAssemblyLoader",
+        "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
         "LoadAndExecuteInMemoryAssembly",
         delegate
     );
@@ -656,7 +656,7 @@ SHARED_API int corehost_get_load_in_memory_assembly_delegate(void** delegate)
 
     return coreclr->create_delegate(
         "System.Private.CoreLib",
-        "System.Runtime.InteropServices.InMemoryAssemblyLoader",
+        "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
         "LoadInMemoryAssembly",
         delegate
     );

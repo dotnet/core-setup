@@ -23,7 +23,7 @@ namespace
 
         pal::string_t dotnet_root;
         pal::string_t fxr_path;
-        if (!resolve_fxr_path(host_path, &dotnet_root, &fxr_path))
+        if (!resolve_fxr_path(get_directory(host_path), &dotnet_root, &fxr_path))
         {
             return StatusCode::CoreHostLibMissingFailure;
         }

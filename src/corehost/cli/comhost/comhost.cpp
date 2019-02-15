@@ -19,7 +19,7 @@ int get_com_activation_delegate(pal::string_t *app_path, com_activation_fn *dele
 
     pal::string_t dotnet_root;
     pal::string_t fxr_path;
-    if (!resolve_fxr_path(host_path, &dotnet_root, &fxr_path))
+    if (!resolve_fxr_path(get_directory(host_path), &dotnet_root, &fxr_path))
     {
         return StatusCode::CoreHostLibMissingFailure;
     }

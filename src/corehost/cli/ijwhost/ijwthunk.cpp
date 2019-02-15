@@ -135,7 +135,16 @@ extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_
 #pragma warning (pop)
     }
 
-    loadInMemoryAssembly(moduleHandle);
+    pal::string_t app_path;
+    if (!pal::get_module_path(moduleHandle, &app_path))
+    {
+#pragma warning (push)
+#pragma warning (disable: 4297)
+        throw StatusCode::LibHostCurExeFindFailure;
+#pragma warning (pop)
+    }
+
+    loadInMemoryAssembly(moduleHandle, app_path.c_str());
 
     std::uintptr_t thunkAddress = *(pThunk->GetSlotAddr());
 
@@ -177,6 +186,6 @@ bool AreThunksInstalledForModule(pal::dll_t instance)
             return true;
         }
     }
-    
+
     return false;
 }
