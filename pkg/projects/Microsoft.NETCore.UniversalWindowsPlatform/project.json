@@ -2,7 +2,7 @@
   "dependencies": {
     "Microsoft.NETCore.Portable.Compatibility": "1.0.2",
     "Microsoft.NETCore.Runtime.CoreCLR": "1.0.3",
-    "Microsoft.NETCore.Targets": "1.0.6",
+    "Microsoft.NETCore.Targets": "1.0.7",
     "Microsoft.Win32.Primitives": "4.0.1",
     "System.Collections.NonGeneric": "4.0.1",
     "System.Collections.Specialized": "4.0.1",
