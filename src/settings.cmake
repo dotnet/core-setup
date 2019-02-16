@@ -249,7 +249,7 @@ if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))
 endif ()
 
 if (WIN32)
-    if(CLR_CMAKE_HOST_ARCH STREQUAL arm)
+    if(CLI_CMAKE_PLATFORM_ARCH_ARM)
       # Explicitly specify the assembler to be used for Arm32 compile
       if($ENV{__VSVersion} STREQUAL "14 2015")
         file(TO_CMAKE_PATH "$ENV{VCINSTALLDIR}\\bin\\x86_arm\\armasm.exe" CMAKE_ASM_COMPILER)
@@ -263,7 +263,7 @@ if (WIN32)
       # Enable generic assembly compilation to avoid CMake generate VS proj files that explicitly
       # use ml[64].exe as the assembler.
       enable_language(ASM)
-    elseif(CLR_CMAKE_HOST_ARCH STREQUAL arm64)
+    elseif(CLI_CMAKE_PLATFORM_ARCH_ARM64)
       # Explicitly specify the assembler to be used for Arm64 compile
       file(TO_CMAKE_PATH "$ENV{VCToolsInstallDir}\\bin\\HostX86\\arm64\\armasm64.exe" CMAKE_ASM_COMPILER)
 
