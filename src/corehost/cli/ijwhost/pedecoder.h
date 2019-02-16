@@ -19,19 +19,19 @@ public:
     {
     }
 
-	bool HasCorHeader() const
+    bool HasCorHeader() const
     {
         return HasDirectoryEntry(IMAGE_DIRECTORY_ENTRY_COMHEADER);
     }
 
-	bool IsILOnly() const
+    bool IsILOnly() const
     {
         return ((GetCorHeader()->Flags & COMIMAGE_FLAGS_ILONLY) != 0) || HasReadyToRunHeader();
     }
 
-	bool HasManagedEntryPoint() const;
-	bool HasNativeEntryPoint() const;
-	void* GetNativeEntryPoint() const;
+    bool HasManagedEntryPoint() const;
+    bool HasNativeEntryPoint() const;
+    void* GetNativeEntryPoint() const;
     IMAGE_COR_VTABLEFIXUP* GetVTableFixups(size_t* numFixupRecords) const;
 
     HINSTANCE GetBase() const

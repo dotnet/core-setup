@@ -604,7 +604,7 @@ SHARED_API int corehost_get_com_activation_delegate(void **delegate)
 
     std::shared_ptr<coreclr_t> coreclr;
     rc = run_as_lib(g_init, args, coreclr);
-        if (rc != StatusCode::Success)
+    if (rc != StatusCode::Success)
         return rc;
 
     return coreclr->create_delegate(

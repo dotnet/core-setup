@@ -482,16 +482,16 @@ Zero    SETS    "r0"
 ;
         MACRO
         DBGDSCR_READ $rd
-	ldr   $rd, =KiExtendedCP14
-	ldrb  $rd, [$rd]
-	cmp   $rd, #FALSE
-	beq   %F8
-	CP_READ $rd, CP14_CR0_DBGDSCR
-	b     %F9
+        ldr   $rd, =KiExtendedCP14
+        ldrb  $rd, [$rd]
+        cmp   $rd, #FALSE
+        beq   %F8
+        CP_READ $rd, CP14_CR0_DBGDSCR
+        b     %F9
 8
-	PCR_READ $rd
-	ldr   $rd, [$rd, #PcHalReserved]
-	ldr   $rd, [$rd, #MEMMAP_DBGDSCR_EXT_NUM * 4]
+        PCR_READ $rd
+        ldr   $rd, [$rd, #PcHalReserved]
+        ldr   $rd, [$rd, #MEMMAP_DBGDSCR_EXT_NUM * 4]
 9
         MEND
 
@@ -511,7 +511,7 @@ Zero    SETS    "r0"
 ;
         MACRO
         DBGDSCR_UPDATE $rd, $update
-	LCLS Update
+        LCLS Update
 Update SETS "$update"
 
         ldr   $rd, =KiExtendedCP14
@@ -667,7 +667,7 @@ Mode    SETS    "$ModeValue"
             ;
             ; This is a prefetch-abort. Check if it corresponds to a single-step event.
             ;
-    	    POST_SINGLESTEP_FIXUP
+                POST_SINGLESTEP_FIXUP
         ENDIF
 
         cpsid   if, #$Mode                              ; Switch to target mode, interrupts off
@@ -848,7 +848,7 @@ CheckSingleStep SETS "$CheckSS"
 
         IF CheckSingleStep == "Yes"
             PRE_SINGLESTEP_SETUP                        ; preserves flags
-	ENDIF
+        ENDIF
 
         ; do not add anything here (see PreSingleStepSetup for side-effects)
 
@@ -930,7 +930,7 @@ CheckSingleStep SETS "$CheckSS"
         ;     
         ; restore user-mode debug regs if required and [en/dis]able h/w debugging
         ;
-	RESTORE_DEBUG_REGISTERS
+        RESTORE_DEBUG_REGISTERS
 
         ldr     r0, [sp, #TrPc]                         ; read PC
         bic     r0, r0, #1                              ; clear the PC's low bit
