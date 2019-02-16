@@ -9,19 +9,6 @@ namespace
     {
         return (value+alignment-1)&~(alignment-1);
     }
-
-    bool CheckOverflow(std::uint32_t val1, std::uint32_t val2)
-    {
-        return val1 + val2 >= val1;
-    } 
-
-    bool CheckBounds(std::uint32_t rangeBase, std::uint32_t rangeSize, std::uint32_t rva, std::uint32_t size)
-    {
-        return CheckOverflow(rangeBase, rangeSize)
-            && CheckOverflow(rva, size)
-            && rva >= rangeBase
-            && rva + size <= rangeBase + rangeSize;
-    }
 }
 
 
@@ -52,34 +39,6 @@ bool PEDecoder::HasNativeEntryPoint() const
 void *PEDecoder::GetNativeEntryPoint() const
 {
     return ((void *) GetRvaData(GetCorHeader()->EntryPointToken));
-}
-
-bool PEDecoder::CheckRva(std::uint32_t rva, std::uint32_t size) const
-{
-    if (rva == 0)
-    {
-        return size == 0;
-    }
-    else
-    {
-        IMAGE_SECTION_HEADER *section = RvaToSection(rva);
-
-        if (section == nullptr)
-        {
-            return false;
-        }
-
-        if (!CheckBounds(section->VirtualAddress,
-                        section->Misc.VirtualSize,
-                        rva, size))
-        {
-            return false;    
-        }
-
-        return CheckBounds(section->VirtualAddress, section->SizeOfRawData, rva, size);
-    }
-    
-    return true;
 }
 
 IMAGE_SECTION_HEADER* PEDecoder::RvaToSection(std::uint32_t rva) const
@@ -122,7 +81,7 @@ READYTORUN_HEADER* PEDecoder::FindReadyToRunHeader() const
 {
     IMAGE_DATA_DIRECTORY *pDir = &GetCorHeader()->ManagedNativeHeader;
 
-    if (pDir->Size >= sizeof(READYTORUN_HEADER) && CheckDirectory(pDir))
+    if (pDir->Size >= sizeof(READYTORUN_HEADER))
     {
         READYTORUN_HEADER* pHeader = reinterpret_cast<READYTORUN_HEADER*>(GetDirectoryData(pDir));
         if (pHeader->Signature == READYTORUN_SIGNATURE)

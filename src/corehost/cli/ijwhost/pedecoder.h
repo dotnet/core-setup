@@ -58,13 +58,6 @@ private:
 
     READYTORUN_HEADER * FindReadyToRunHeader() const;
 
-    bool CheckDirectory(IMAGE_DATA_DIRECTORY *pDir) const
-    {
-        return CheckRva(pDir->VirtualAddress, pDir->Size);
-    }
-
-    bool CheckRva(std::uint32_t rva, std::uint32_t size) const;
-
     IMAGE_SECTION_HEADER* RvaToSection(std::uint32_t rva) const;
 
     static IMAGE_SECTION_HEADER* FindFirstSection(IMAGE_NT_HEADERS* pNTHeaders)
