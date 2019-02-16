@@ -58,17 +58,6 @@ private:
 
     READYTORUN_HEADER * FindReadyToRunHeader() const;
 
-    IMAGE_SECTION_HEADER* RvaToSection(std::uint32_t rva) const;
-
-    static IMAGE_SECTION_HEADER* FindFirstSection(IMAGE_NT_HEADERS* pNTHeaders)
-    {
-        return reinterpret_cast<IMAGE_SECTION_HEADER*>(
-            reinterpret_cast<std::uintptr_t>(pNTHeaders) +
-            offsetof(IMAGE_NT_HEADERS, OptionalHeader) +
-            pNTHeaders->FileHeader.SizeOfOptionalHeader
-        );
-    }
-
     bool HasDirectoryEntry(int entry) const
     {
         return FindNTHeaders()->OptionalHeader.DataDirectory[entry].VirtualAddress != 0;

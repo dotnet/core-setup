@@ -41,30 +41,6 @@ void *PEDecoder::GetNativeEntryPoint() const
     return ((void *) GetRvaData(GetCorHeader()->EntryPointToken));
 }
 
-IMAGE_SECTION_HEADER* PEDecoder::RvaToSection(std::uint32_t rva) const
-{
-    IMAGE_SECTION_HEADER* section = FindFirstSection(FindNTHeaders());
-    IMAGE_SECTION_HEADER* sectionEnd = section + FindNTHeaders()->FileHeader.NumberOfSections;
-
-    while (section < sectionEnd)
-    {
-        if (rva < (section->VirtualAddress
-                + AlignUp(section->Misc.VirtualSize, FindNTHeaders()->OptionalHeader.SectionAlignment)))
-        {
-            if (rva < section->VirtualAddress)
-                return nullptr;
-            else
-            {
-                return section;
-            }
-        }
-
-        section++;
-    }
-
-    return nullptr;
-}
-
 #define READYTORUN_SIGNATURE 0x00525452 // 'RTR'
 struct READYTORUN_HEADER
 {
