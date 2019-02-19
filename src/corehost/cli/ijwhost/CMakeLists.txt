@@ -24,6 +24,7 @@ set(SOURCES
     pedecoder.cpp
     bootstrap_thunk_chunk.cpp
     ${ARCH_SPECIFIC_FOLDER_NAME}/bootstrap_thunk.cpp
+    Exports.def
 )
 
 if(WIN32)
@@ -91,7 +92,7 @@ add_library(ijwhost SHARED ${SOURCES} ${ASM_HELPERS_SOURCES})
 
 if (WIN32 AND CLI_CMAKE_PLATFORM_ARCH_I386)
 set_source_files_properties(${ASM_HELPERS_SOURCES} PROPERTIES COMPILE_FLAGS "/safeseh")
-endif (CLR_CMAKE_PLATFORM_ARCH_I386)
+endif ()
 
 # Specify non-default Windows libs to be used for Arm/Arm64 builds
 if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))

@@ -10,6 +10,17 @@
 #include "utils.h"
 #include "bootstrap_thunk.h"
 
+
+#if defined(_WIN32)
+// IJW entry points are defined without the __declspec(dllexport) attribute.
+// The issue here is that the MSVC compiler links to the exact names _CorExeMain and _CorDllMain instead of their stdcall-managled names.
+// So we need to export their exact names, which __declspec(dllexport) doesn't do. The solution here is to the use a .def file on Windows.
+#define IJW_API extern "C"
+#else
+#define IJW_API SHARED_API
+#endif // _WIN32
+
+
 using load_and_execute_in_memory_assembly_fn = int(*)(pal::dll_t handle, int argc, pal::char_t** argv);
 using load_in_memory_assembly_fn = void(*)(pal::dll_t handle, const pal::char_t* path);
 
@@ -71,7 +82,7 @@ pal::hresult_t get_load_in_memory_assembly_delegate(pal::dll_t handle, load_in_m
 }
 
 
-SHARED_API std::int32_t STDMETHODCALLTYPE _CorExeMain()
+IJW_API std::int32_t STDMETHODCALLTYPE _CorExeMain()
 {
     load_and_execute_in_memory_assembly_fn loadAndExecute;
     std::int32_t status = get_load_and_execute_in_memory_assembly_delegate(&loadAndExecute);
@@ -91,7 +102,7 @@ SHARED_API std::int32_t STDMETHODCALLTYPE _CorExeMain()
     return argc;
 }
 
-SHARED_API BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst,
+IJW_API BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst,
     DWORD  dwReason,
     LPVOID lpReserved
 )

@@ -1,0 +1,4 @@
+EXPORTS
+    _CorExeMain            PRIVATE
+    _CorDllMain            PRIVATE
+    GetTokenForVTableEntry PRIVATE
