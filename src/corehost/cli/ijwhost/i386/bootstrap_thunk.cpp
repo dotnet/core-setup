@@ -9,7 +9,7 @@
 // Get thunk from the return address that the call instruction would have pushed
 bootstrap_thunk *bootstrap_thunk::get_thunk_from_cookie(std::uintptr_t cookie)
 {
-    return (bootstrap_thunk *)(cookie - offsetof(bootstrap_thunk, m_dll));
+    return (bootstrap_thunk *)(cookie - (offsetof(bootstrap_thunk, m_code) + sizeof(bootstrap_thunk::m_code)));
 }
 
 //=================================================================================
