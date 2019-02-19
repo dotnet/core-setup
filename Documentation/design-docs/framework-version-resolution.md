@@ -34,7 +34,7 @@ Each framework reference identifies the framework by its name.
 Framework names are case sensitive (since they're used as folder names even on Linux systems).
 
 #### Version
-Framework version must be a SemVer V2 valid version.
+Framework version must be a [SemVer V2](https://semver.org) valid version.
 Versions are compared based on SemVer V2 rules which also define ordering semantics.
 Each framework reference must specify a version number, which is used as the minimum version needed.
 Version of the first framework reference can be overridden by a command line option `--fx-version` in which case that version is used and its roll-forward is set to `Disable`.
@@ -105,13 +105,13 @@ Each dependent framework (for example FX1) is loaded with an effective roll-forw
 ## Pre-release versions
 Pre-release version is a version which has a pre-release part, for example `3.0.0-preview4-27415-15`. Everything after the `-` (dash) character is a pre-release identifier. Per [semantic versioning rules](https://semver.org/) pre-release versions are ordered before the same version without any pre-release part. So `3.0.0-preview4-27415-15` comes before `3.0.0`.
 
-### Old behavior
+### Behavior before 3.0
 Before .NET Core 3.0 (so 2.2 and older) the roll-forward behavior for pre-release versions ignored any of the roll-forward related settings, that is both `rollForwardOnNoCandidateFx` as well as `applyPatches`.
 The behavior was that:
 * Release version will never roll forward to pre-release version. So for example `2.1.0` will not roll forward to `3.0.0-preview4-27415-15` even if `Major` roll-forward is allowed (same for all the other settings of `rollForwardOnNoCandidateFx` as well as `applyPatches`).
 * Pre-release version will never roll forward to release version. So for example `3.0.0-preview4-27415-15` will not roll forward to `3.0.0`. Also pre-release will only roll forward to the same `major.minor.patch`. So for example `3.0.0-preview4-27415-15` will not roll forward to `3.0.1-preview1-29000-0`.
 
-### New behavior
+### Behavior in 3.0 and forward
 The newly proposed behavior is to treat pre-release versions no different from release versions. This would mean that pre-release can roll forward to release but also that release can roll forward to pre-release. For the most part this improves the previous behavior (except when `Disable` is active in which case no roll-forward will happen):
 * `3.0.0-preview4-27415-15` will roll forward to `3.0.0`.
 * `3.0.0-preview4-27415-15` will roll forward to `3.0.1-preview1-29000-0`.
@@ -122,12 +122,13 @@ But it also introduces cases which are somewhat controversial:
 
 Pros:
 * Consistent behavior across all versions
+* Allows relatively easy testing of future release versions with pre-release versions. That is installing `3.0.0-preview` and getting the same behavior as if `3.0.0` was installed (so testing the `3.0.0` release without create a true release package).
 
 Cons:
 * Installing a pre-release version affects apps using release versions
 * Works well only if pre-release versions have similar compatibility behavior as release versions - not many breaking changes. Also expects pre-release versions to generally work well.
 
-### Alternative to new behavior
+### Alternative for the 3.0 behavior
 When resolving framework reference with a pre-release version, treat all versions the same and include both release and pre-release versions in the set. This means pre-release can resolve to both release or pre-release.
 
 When resolving framework reference with a release version, prefer release versions. This means that if there's a release version on the machine which satisfies all the requirements it will be chosen, regardless of what pre-release versions are installed. Only if there's no suitable release version, then pre-release versions are also considered (and then they're treated all the same).
@@ -143,6 +144,7 @@ Pros:
 
 Cons:
 * Some special cases won't work
+* Testing behavior of new releases with pre-release versions is not fully possible.
 
 One special case which would not work:  
 Component A which asks for `2.0.0 LatestMajor` is loaded first on a machine which has `3.0.0` and also `3.1.0-preview` installed. Because it's the first in the process it will resolve the runtime according to the above rules - that is prefer release version - and thus will select `3.0.0`.  
