@@ -23,7 +23,7 @@
 
 using corehost_load_fn = int(*) (const host_interface_t* init);
 using corehost_main_fn = int(*) (const int argc, const pal::char_t* argv[]);
-using corehost_get_delegate_fn = int(*)(void** delegate);
+using corehost_get_delegate_fn = int(*)(coreclr_delegate_type type, void** delegate);
 using corehost_main_with_output_buffer_fn = int(*) (const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size);
 using corehost_unload_fn = int(*) ();
 using corehost_error_writer_fn = void(*) (const pal::char_t* message);
@@ -1388,14 +1388,14 @@ int fx_muxer_t::execute(
 static int get_delegate_from_runtime(
     const pal::string_t& impl_dll_dir,
     corehost_init_t* init,
-    const char* corehost_entrypoint,
+    coreclr_delegate_type type,
     void** delegate)
 {
     pal::dll_t corehost;
     hostpolicy_contract host_contract{};
-    corehost_get_delegate_fn corehost_entrypoint_function = nullptr;
+    corehost_get_delegate_fn coreclr_delegate = nullptr;
 
-    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, corehost_entrypoint, &corehost_entrypoint_function);
+    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_coreclr_delegate", &coreclr_delegate);
     if (code != StatusCode::Success)
         return code;
 
@@ -1409,7 +1409,7 @@ static int get_delegate_from_runtime(
 
         if ((code = host_contract.load(&intf)) == StatusCode::Success)
         {
-            code = corehost_entrypoint_function(delegate);
+            code = coreclr_delegate(type, delegate);
         }
     }
 
@@ -1420,7 +1420,7 @@ static int get_delegate_from_runtime(
 int fx_muxer_t::load_runtime_and_get_delegate(
     const host_startup_info_t& host_info,
     host_mode_t mode,
-    const char* corehost_entrypoint,
+    coreclr_delegate_type delegate_type,
     void** delegate
 )
 {
@@ -1491,7 +1491,7 @@ int fx_muxer_t::load_runtime_and_get_delegate(
     pal::string_t additional_deps_serialized;
     corehost_init_t init(pal::string_t{}, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions);
 
-    rc = get_delegate_from_runtime(impl_dir, &init, corehost_entrypoint, delegate);
+    rc = get_delegate_from_runtime(impl_dir, &init, delegate_type, delegate);
     return rc;
 }
 
@@ -1502,7 +1502,7 @@ int fx_muxer_t::get_com_activation_delegate(
     return load_runtime_and_get_delegate(
         host_info,
         host_mode_t::libhost,
-        "corehost_get_com_activation_delegate",
+        coreclr_delegate_type::com_activation,
         delegate);
 }
 
@@ -1513,7 +1513,7 @@ int fx_muxer_t::get_load_and_execute_in_memory_assembly_delegate(
     return load_runtime_and_get_delegate(
         host_info,
         host_mode_t::apphost,
-        "corehost_get_load_and_execute_in_memory_assembly_delegate",
+        coreclr_delegate_type::load_and_execute_in_memory_assembly,
         delegate);
 }
 
@@ -1524,7 +1524,7 @@ int fx_muxer_t::get_load_in_memory_assembly_delegate(
     return load_runtime_and_get_delegate(
         host_info,
         host_mode_t::libhost,
-        "corehost_get_load_in_memory_assembly_delegate",
+        coreclr_delegate_type::load_in_memory_assembly,
         delegate);
 }
 

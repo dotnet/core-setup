@@ -35,7 +35,7 @@ private:
     static int load_runtime_and_get_delegate(
         const host_startup_info_t& host_info,
         host_mode_t mode,
-        const char* corehost_entrypoint,
+        coreclr_delegate_type delegate_type,
         void** delegate
     );
     static int parse_args(

@@ -432,4 +432,11 @@ bool hostpolicy_exists_in_svc(pal::string_t* resolved_dir);
 void try_patch_roll_forward_in_dir(const pal::string_t& cur_dir, const fx_ver_t& start_ver, pal::string_t* max_str);
 void try_prerelease_roll_forward_in_dir(const pal::string_t& cur_dir, const fx_ver_t& start_ver, pal::string_t* max_str);
 
+enum class coreclr_delegate_type
+{
+    com_activation,
+    load_in_memory_assembly,
+    load_and_execute_in_memory_assembly
+};
+
 #endif // __LIBHOST_H__

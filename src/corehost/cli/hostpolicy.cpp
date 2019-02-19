@@ -594,11 +594,11 @@ int corehost_libhost_init(hostpolicy_init_t &hostpolicy_init, const pal::string_
     return StatusCode::Success;
 }
 
-SHARED_API int corehost_get_com_activation_delegate(void **delegate)
+SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void** delegate)
 {
     arguments_t args;
 
-    int rc = corehost_libhost_init(g_init, _X("corehost_get_com_activation_delegate"), args);
+    int rc = corehost_libhost_init(g_init, _X("corehost_get_coreclr_delegate"), args);
     if (rc != StatusCode::Success)
         return rc;
 
@@ -607,59 +607,30 @@ SHARED_API int corehost_get_com_activation_delegate(void **delegate)
     if (rc != StatusCode::Success)
         return rc;
 
-    return coreclr->create_delegate(
-        "System.Private.CoreLib",
-        "Internal.Runtime.InteropServices.ComActivator",
-        "GetClassFactoryForTypeInternal",
-        delegate);
-}
-
-SHARED_API int corehost_get_load_and_execute_in_memory_assembly_delegate(void** delegate)
-{
-    arguments_t args;
-
-    int rc = corehost_libhost_init(g_init, _X("corehost_get_load_and_execute_in_memory_assembly_delegate"), args);
-
-    if (rc != StatusCode::Success)
-        return rc;
+    switch (type)
+    {
+    case coreclr_delegate_type::com_activation:
+        return coreclr->create_delegate(
+            "System.Private.CoreLib",
+            "Internal.Runtime.InteropServices.ComActivator",
+            "GetClassFactoryForTypeInternal",
+            delegate);
+    case coreclr_delegate_type::load_in_memory_assembly:
+        return coreclr->create_delegate(
+            "System.Private.CoreLib",
+            "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
+            "LoadInMemoryAssembly",
+            delegate);
+    case coreclr_delegate_type::load_and_execute_in_memory_assembly:
+        return coreclr->create_delegate(
+            "System.Private.CoreLib",
+            "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
+            "LoadAndExecuteInMemoryAssembly",
+            delegate);
+    default:
+        return StatusCode::LibHostInvalidArgs;
+    }
     
-    std::shared_ptr<coreclr_t> coreclr;
-
-    rc = run_as_lib(g_init, args, coreclr);
-
-    if (rc != StatusCode::Success)
-        return rc;
-
-    return coreclr->create_delegate(
-        "System.Private.CoreLib",
-        "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
-        "LoadAndExecuteInMemoryAssembly",
-        delegate
-    );
-}
-
-SHARED_API int corehost_get_load_in_memory_assembly_delegate(void** delegate)
-{
-    arguments_t args;
-
-    int rc = corehost_libhost_init(g_init, _X("corehost_get_load_in_memory_assembly_delegate"), args);
-
-    if (rc != StatusCode::Success)
-        return rc;
-    
-    std::shared_ptr<coreclr_t> coreclr;
-
-    rc = run_as_lib(g_init, args, coreclr);
-
-    if (rc != StatusCode::Success)
-        return rc;
-
-    return coreclr->create_delegate(
-        "System.Private.CoreLib",
-        "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
-        "LoadInMemoryAssembly",
-        delegate
-    );
 }
 
 SHARED_API int corehost_unload()
