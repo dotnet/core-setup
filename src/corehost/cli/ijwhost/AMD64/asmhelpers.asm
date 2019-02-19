@@ -1,14 +1,11 @@
-; ==++==
-; 
-;   Copyright (c) Microsoft Corporation.  All rights reserved.
-; 
-; ==--==
+; Copyright (c) .NET Foundation and contributors. All rights reserved.
+; Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 include AsmMacros.inc
 
-extern  VTableBootstrapThunkInitHelper:proc
+extern  start_runtime_and_get_target_address:proc
 
-; Stack setup at time of call to VTableBootstrapThunkInitHelper
+; Stack setup at time of call to start_runtime_and_get_target_address
 ;   32-byte scratch space
 ;   xmm0 (saved incoming arg)
 ;   xmm1 (saved incoming arg)
@@ -39,7 +36,7 @@ OFFSETOF_PADDING                    equ OFFSETOF_FP_ARG_SPILL + SIZEOF_FP_ARG_SP
 OFFSETOF_RET_ADDR                   equ OFFSETOF_PADDING + SIZEOF_PADDING
 OFFSETOF_INCOMING_ARG_SPILL         equ OFFSETOF_RET_ADDR + SIZEOF_RET_ADDR
 
-NESTED_ENTRY VTableBootstrapThunkInitHelperStub, _TEXT
+NESTED_ENTRY start_runtime_thunk_stub, _TEXT
     ; Allocate the stack space
     alloc_stack     SIZEOF_ALLOC_STACK
 
@@ -61,7 +58,7 @@ NESTED_ENTRY VTableBootstrapThunkInitHelperStub, _TEXT
     mov             rcx,    r10
 
     ; Call helper func.
-    call            VTableBootstrapThunkInitHelper
+    call            start_runtime_and_get_target_address
 
     ; Restore the incoming floating point arguments
     movdqa          xmm0,   [rsp +  0h + OFFSETOF_FP_ARG_SPILL]
@@ -80,13 +77,13 @@ NESTED_ENTRY VTableBootstrapThunkInitHelperStub, _TEXT
 
     ; Jump to the target
     TAILJMP_RAX
-NESTED_END VTableBootstrapThunkInitHelperStub, _TEXT
+NESTED_END start_runtime_thunk_stub, _TEXT
 
-;LEAF_ENTRY VTableBootstrapThunkInitHelperStubSample, _TEXT
+;LEAF_ENTRY start_runtime_thunk_stubSample, _TEXT
 ;    mov             r10,    1234567812345678h
 ;    mov             r11,    1234123412341234h
 ;    jmp             r11
-;LEAF_END VTableBootstrapThunkInitHelperStubSample, _TEXT
+;LEAF_END start_runtime_thunk_stubSample, _TEXT
 
     end
 

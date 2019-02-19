@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pal.h"
+#include "hostfxr.h"
 #include "fxr_resolver.h"
 #include "error_codes.h"
 #include "fx_ver.h"

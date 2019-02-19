@@ -1,17 +1,14 @@
-; ==++==
-; 
-;  Copyright (c) Microsoft Corporation.  All rights reserved.
-; 
-; ==--== 
+; Copyright (c) .NET Foundation and contributors. All rights reserved.
+; Licensed under the MIT license. See LICENSE file in the project root for full license information.
 ;
 
 #include "ksarm.h"
 
     TEXTAREA
 
-    EXTERN VTableBootstrapThunkInitHelper
+    EXTERN start_runtime_and_get_target_address
 
-    ;; Common code called from a VTableBootstrapThunk to call VTableBootstrapThunkInitHelper and obtain the
+    ;; Common code called from a bootstrap_thunk to call start_runtime_and_get_target_address and obtain the
     ;; real target address to which to tail call.
     ;;
     ;; On entry:
@@ -22,14 +19,14 @@
     ;;  tail calls to the real target method
     ;;
     CFG_ALIGN
-    NESTED_ENTRY VTableBootstrapThunkInitHelperStub
+    NESTED_ENTRY start_runtime_thunk_stub
 
     PROLOG_PUSH     {r0-r3}     ; Save general argument registers
     PROLOG_PUSH     {r4,lr}     ; Save return address (r4 is saved simply to preserve stack alignment)
     PROLOG_VPUSH    {d0-d7}     ; Save floating point argument registers
 
-    mov             r0, r12     ; Only argument to VTableBootstrapThunkInitHelper is the hidden thunk parameter
-    bl              VTableBootstrapThunkInitHelper
+    mov             r0, r12     ; Only argument to start_runtime_and_get_target_address is the hidden thunk parameter
+    bl              start_runtime_and_get_target_address
 
     mov             r12, r0     ; Preserve result (real target address)
 

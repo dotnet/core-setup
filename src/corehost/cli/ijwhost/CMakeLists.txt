@@ -2,7 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required (VERSION 2.6)
-project(comhost)
+project(ijwhost)
 
 include(../setup.cmake)
 
@@ -12,6 +12,7 @@ include_directories(../)
 include_directories(../fxr)
 include_directories(../../)
 include_directories(../../common)
+include_directories(${ARCH_SPECIFIC_FOLDER_NAME})
 
 set(SOURCES
     ijwthunk.cpp
@@ -22,6 +23,8 @@ set(SOURCES
     ../../common/utils.cpp
     ../fxr/fx_ver.cpp
     pedecoder.cpp
+    bootstrap_thunk_chunk.cpp
+    ${ARCH_SPECIFIC_FOLDER_NAME}/bootstrap_thunk.cpp
 )
 
 if(WIN32)
@@ -40,10 +43,6 @@ if("${CLI_CMAKE_IJWHOST_VER}" STREQUAL "")
 else()
     add_definitions(-DLIBHOST_PKG_VER="${CLI_CMAKE_IJWHOST_VER}")
 endif()
-
-
-list(APPEND SOURCES
-    ${ARCH_SPECIFIC_FOLDER_NAME}/IJWBootstrapThunkCPU.cpp)
 
 set (ASM_HELPERS_SOURCES
     ${ARCH_SPECIFIC_FOLDER_NAME}/asmhelpers.asm)

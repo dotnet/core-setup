@@ -161,6 +161,9 @@ static int execute_host_command(
     if (code != StatusCode::Success)
         return code;
 
+    // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
+    trace::flush();
+
     {
         propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
 
@@ -1390,9 +1393,9 @@ static int get_delegate_from_runtime(
 {
     pal::dll_t corehost;
     hostpolicy_contract host_contract{};
-    corehost_get_delegate_fn host_entry = nullptr;
+    corehost_get_delegate_fn corehost_entrypoint_function = nullptr;
 
-    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, corehost_entrypoint, &host_entry);
+    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, corehost_entrypoint, &corehost_entrypoint_function);
     if (code != StatusCode::Success)
         return code;
 
@@ -1406,7 +1409,7 @@ static int get_delegate_from_runtime(
 
         if ((code = host_contract.load(&intf)) == StatusCode::Success)
         {
-            code = host_entry(delegate);
+            code = corehost_entrypoint_function(delegate);
         }
     }
 

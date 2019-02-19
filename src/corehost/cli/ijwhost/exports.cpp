@@ -4,7 +4,7 @@
 #include "pal.h"
 #include "pedecoder.h"
 #include "ijwhost.h"
-#include "IJWBootstrapThunkCPU.h"
+#include "bootstrap_thunk_chunk.h"
 #include "error_codes.h"
 #include "trace.h"
 #include <cassert>
@@ -59,7 +59,7 @@ SHARED_API BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst,
         }
 
         // Install the bootstrap thunks
-        if (!PatchVTableEntriesForDLLAttach(pe))
+        if (!patch_vtable_entries(pe))
         {
             return FALSE;
         }
@@ -75,7 +75,7 @@ SHARED_API BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst,
 
     if (dwReason == DLL_PROCESS_DETACH)
     {
-        BootstrapThunkDLLDetach(pe);
+        release_bootstrap_thunks(pe);
     }
 
     return res;
@@ -101,11 +101,11 @@ BOOL STDMETHODCALLTYPE DllMain(HINSTANCE hInst,
 SHARED_API mdToken STDMETHODCALLTYPE GetTokenForVTableEntry(HMODULE hMod, void** ppVTEntry)
 {
     mdToken tok = mdTokenNil;
-    if (AreThunksInstalledForModule(hMod))
+    if (are_thunks_installed_for_module(hMod))
     {
-        VTableBootstrapThunk* pThunk =
-            VTableBootstrapThunk::GetThunkFromEntrypoint((std::uintptr_t) *ppVTEntry);
-        tok = (mdToken) pThunk->GetToken();
+        bootstrap_thunk* pThunk =
+            bootstrap_thunk::get_thunk_from_entrypoint((std::uintptr_t) *ppVTEntry);
+        tok = (mdToken) pThunk->get_token();
     }
     else
     {

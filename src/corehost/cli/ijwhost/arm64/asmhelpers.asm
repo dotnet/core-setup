@@ -6,9 +6,9 @@
 
     TEXTAREA
 
-    EXTERN VTableBootstrapThunkInitHelper
+    EXTERN start_runtime_and_get_target_address
 
-    ;; Common code called from a VTableBootstrapThunk to call VTableBootstrapThunkInitHelper and obtain the
+    ;; Common code called from a bootstrap_thunk to call start_runtime_and_get_target_address and obtain the
     ;; real target address to which to tail call.
     ;;
     ;; On entry:
@@ -18,7 +18,7 @@
     ;; On exit:
     ;;  tail calls to the real target method
     ;;
-    NESTED_ENTRY VTableBootstrapThunkInitHelperStub
+    NESTED_ENTRY start_runtime_thunk_stub
     
     PROLOG_SAVE_REG_PAIR fp, lr, #-(8*8 + 8*16 + 16)!   ; save frame chain and allocate stack
     stp     x0, x1, [sp, #(16 + 0*8)]                   ; save parameter registers
@@ -30,8 +30,8 @@
     stp     q4, q5, [sp, #(16 + 8*8 + 4*16)]
     stp     q6, q7, [sp, #(16 + 8*8 + 6*16)]
 
-    mov     x0, x16     ; Only argument to VTableBootstrapThunkInitHelper is the hidden thunk parameter
-    bl      VTableBootstrapThunkInitHelper
+    mov     x0, x16     ; Only argument to start_runtime_and_get_target_address is the hidden thunk parameter
+    bl      start_runtime_and_get_target_address
 
     mov     x16, x0     ; Preserve result (real target address)
 

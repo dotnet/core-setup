@@ -10,19 +10,19 @@
         option  casemap:none
         .code
 
-EXTERN _VTableBootstrapThunkInitHelper@4:PROC
+EXTERN _start_runtime_and_get_target_address@4:PROC
 
 AlignCfgProc
-_VTableBootstrapThunkInitHelperStub@0 proc public
+_start_runtime_thunk_stub@0 proc public
     ; Stack on entry:
     ;      top->   vtfixup thunk return address
     ;              Unmanaged caller return address
 
     ; The idea here is similar to the prepad of the MethodDesc, in that we're
     ; using the return address of the call in the stub as a pointer to the
-    ; VTableBootstrapThunk struct.
+    ; bootstrap_thunk struct.
 
-    pop     eax                         ; VTableBootstrapThunk*
+    pop     eax                         ; bootstrap_thunk*
     
     push    ebp                         ; Set up EBP frame
     mov     ebp,esp
@@ -31,7 +31,7 @@ _VTableBootstrapThunkInitHelperStub@0 proc public
     push    edx
     
     push    eax                         ; Push the struct arg
-    call    _VTableBootstrapThunkInitHelper@4
+    call    _start_runtime_and_get_target_address@4
     
     pop     edx                         ; Restore the registers
     pop     ecx
@@ -39,6 +39,6 @@ _VTableBootstrapThunkInitHelperStub@0 proc public
     pop     ebp                         ; Tear down the EBP frame
     push    eax                         ; Instead of "jmp eax", do "push eax; ret"
     ret                                 ; This keeps the call-return count balanced
-_VTableBootstrapThunkInitHelperStub@0 endp
+_start_runtime_thunk_stub@0 endp
 
 end

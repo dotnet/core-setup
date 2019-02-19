@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "ijwhost.h"
-#include "IJWBootstrapThunkCPU.h"
+#include "bootstrap_thunk_chunk.h"
 #include "corhdr.h"
 #include "error_codes.h"
 #include "trace.h"
@@ -18,17 +18,17 @@
 #define COR_VTABLE_NOT_PTRSIZED COR_VTABLE_64BIT
 #endif
 
-extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_t cookie);
+extern "C" std::uintptr_t __stdcall start_runtime_and_get_target_address(std::uintptr_t cookie);
 
 namespace
 {
     std::mutex g_thunkChunkLock{};
-    VTableBootstrapThunkChunk* g_pVtableBootstrapThunkChunkList = nullptr;
+    bootstrap_thunk_chunk* g_pVtableBootstrapThunkChunkList = nullptr;
 }
 
 HANDLE g_heapHandle;
 
-bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
+bool patch_vtable_entries(PEDecoder& pe)
 {
     if (pe.IsILOnly())
     {
@@ -51,7 +51,7 @@ bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
         numThunks += pFixupTable[i].Count;
     }
 
-    size_t chunkSize = sizeof(VTableBootstrapThunkChunk) + VTableBootstrapThunk::GetThunkObjectSize() * numThunks;
+    size_t chunkSize = sizeof(bootstrap_thunk_chunk) + sizeof(bootstrap_thunk) * numThunks;
 
     void* pbChunk = HeapAlloc(g_heapHandle, 0, chunkSize);
 
@@ -60,7 +60,7 @@ bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
         return false;
     }
 
-    VTableBootstrapThunkChunk* chunk = new (pbChunk) VTableBootstrapThunkChunk(numThunks, (pal::dll_t)pe.GetBase());
+    bootstrap_thunk_chunk* chunk = new (pbChunk) bootstrap_thunk_chunk(numThunks, (pal::dll_t)pe.GetBase());
 
     {
         std::lock_guard<std::mutex> _(g_thunkChunkLock);
@@ -91,12 +91,12 @@ bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
             {
                 mdToken tok = (mdToken)(std::uintptr_t) pointers[method];
                 assert (TypeFromToken(tok) == mdtMethodDef || TypeFromToken(tok) == mdtMemberRef);
-                VTableBootstrapThunk* pThunk = chunk->GetThunk(currentThunk++);
-                pThunk->Initialize((std::uintptr_t)&VTableBootstrapThunkInitHelperStub,
+                bootstrap_thunk* pThunk = chunk->GetThunk(currentThunk++);
+                pThunk->initialize((std::uintptr_t)&start_runtime_thunk_stub,
                                     (pal::dll_t)pe.GetBase(),
                                     tok,
                                     (std::uintptr_t *)&pointers[method]);
-                pointers[method] = (BYTE*)pThunk->GetEntrypoint();
+                pointers[method] = (BYTE*)pThunk->get_entrypoint();
             }
 
 #ifdef _WIN64
@@ -112,12 +112,12 @@ bool PatchVTableEntriesForDLLAttach(PEDecoder& pe)
     return true;
 }
 
-extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_t cookie)
+extern "C" std::uintptr_t __stdcall start_runtime_and_get_target_address(std::uintptr_t cookie)
 {
-    VTableBootstrapThunk *pThunk = VTableBootstrapThunk::GetThunkFromCookie(cookie);
+    bootstrap_thunk *pThunk = bootstrap_thunk::get_thunk_from_cookie(cookie);
 
     load_in_memory_assembly_fn loadInMemoryAssembly;
-    pal::dll_t moduleHandle = pThunk->GetDLLHandle();
+    pal::dll_t moduleHandle = pThunk->get_dll_handle();
     pal::hresult_t status = get_load_in_memory_assembly_delegate(moduleHandle, &loadInMemoryAssembly);
 
     if (status != StatusCode::Success)
@@ -146,25 +146,25 @@ extern "C" std::uintptr_t __stdcall VTableBootstrapThunkInitHelper(std::uintptr_
 
     loadInMemoryAssembly(moduleHandle, app_path.c_str());
 
-    std::uintptr_t thunkAddress = *(pThunk->GetSlotAddr());
+    std::uintptr_t thunkAddress = *(pThunk->get_slot_address());
 
     return thunkAddress;
 }
 
-void BootstrapThunkDLLDetach(PEDecoder& pe)
+void release_bootstrap_thunks(PEDecoder& pe)
 {
     // Is this an IJW module
     if (!pe.IsILOnly())
     {
         std::lock_guard<std::mutex> _(g_thunkChunkLock);
         // Clean up the VTable thunks if they exist.
-        for (VTableBootstrapThunkChunk **ppCurChunk = &g_pVtableBootstrapThunkChunkList;
+        for (bootstrap_thunk_chunk **ppCurChunk = &g_pVtableBootstrapThunkChunkList;
              *ppCurChunk != NULL;
              ppCurChunk = (*ppCurChunk)->GetNextPtr())
         {
-            if ((*ppCurChunk)->GetDLLHandle() == (pal::dll_t) pe.GetBase())
+            if ((*ppCurChunk)->get_dll_handle() == (pal::dll_t) pe.GetBase())
             {
-                VTableBootstrapThunkChunk *pDel = *ppCurChunk;
+                bootstrap_thunk_chunk *pDel = *ppCurChunk;
                 *ppCurChunk = (*ppCurChunk)->GetNext();
                 HeapFree(g_heapHandle, 0, pDel);
                 break;
@@ -174,14 +174,14 @@ void BootstrapThunkDLLDetach(PEDecoder& pe)
 }
 
 
-bool AreThunksInstalledForModule(pal::dll_t instance)
+bool are_thunks_installed_for_module(pal::dll_t instance)
 {
     std::lock_guard<std::mutex> _{g_thunkChunkLock};
 
-    VTableBootstrapThunkChunk* currentChunk = g_pVtableBootstrapThunkChunkList;
+    bootstrap_thunk_chunk* currentChunk = g_pVtableBootstrapThunkChunkList;
     while (currentChunk != nullptr)
     {
-        if (currentChunk->GetDLLHandle() == instance)
+        if (currentChunk->get_dll_handle() == instance)
         {
             return true;
         }

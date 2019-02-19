@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "ijwhost.h"
+#include "hostfxr.h"
 #include "fxr_resolver.h"
 #include "pal.h"
 #include "trace.h"
