@@ -18,8 +18,6 @@
 #define COR_VTABLE_NOT_PTRSIZED COR_VTABLE_64BIT
 #endif
 
-extern "C" std::uintptr_t __stdcall start_runtime_and_get_target_address(std::uintptr_t cookie);
-
 namespace
 {
     std::mutex g_thunkChunkLock{};

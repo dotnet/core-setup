@@ -11,7 +11,7 @@
 #include "pal.h"
 #include "corhdr.h"
 
-extern "C" void start_runtime_thunk_stub();
+extern "C" void STDMETHODCALLTYPE start_runtime_thunk_stub();
 
 #include <pshpack1.h>
 //=================================================================================
