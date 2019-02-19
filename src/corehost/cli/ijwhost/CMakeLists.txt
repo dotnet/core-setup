@@ -17,7 +17,6 @@ include_directories(${ARCH_SPECIFIC_FOLDER_NAME})
 set(SOURCES
     ijwthunk.cpp
     ijwhost.cpp
-    exports.cpp
     ../fxr_resolver.cpp
     ../../common/trace.cpp
     ../../common/utils.cpp

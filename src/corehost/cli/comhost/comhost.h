@@ -47,24 +47,5 @@ namespace comhost
     clsid_map get_clsid_map();
 }
 
-//
-// See ComActivator class in System.Private.CoreLib
-//
-struct com_activation_context
-{
-    GUID class_id;
-    GUID interface_id;
-    const pal::char_t *assembly_path;
-    const pal::char_t *assembly_name;
-    const pal::char_t *type_name;
-    void **class_factory_dest;
-};
-
-using com_activation_fn = int(*)(com_activation_context*);
-
-int get_com_activation_delegate(
-    pal::string_t *app_path,
-    com_activation_fn *delegate);
-
 #endif /* _COREHOST_CLI_COMHOST_COMHOST_H_ */
 

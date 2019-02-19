@@ -16,7 +16,6 @@ include_directories(../json/casablanca/include)
 
 set(SOURCES
     ../fxr_resolver.cpp
-    exports.cpp
     clsidmap.cpp
     comhost.cpp
     ../../common/trace.cpp
