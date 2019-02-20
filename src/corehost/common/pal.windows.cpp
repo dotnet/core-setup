@@ -15,22 +15,30 @@
 bool GetModuleFileNameWrapper(HMODULE hModule, pal::string_t* recv)
 {
     pal::string_t path;
-    DWORD dwModuleFileName = MAX_PATH / 2;
+    size_t dwModuleFileName = MAX_PATH / 2;
 
     do
     {
         path.resize(dwModuleFileName * 2);
-        dwModuleFileName = GetModuleFileNameW(hModule, (LPWSTR)path.data(), path.size());
+        dwModuleFileName = GetModuleFileNameW(hModule, (LPWSTR)path.data(), static_cast<DWORD>(path.size()));
     } while (dwModuleFileName == path.size());
 
-    if (dwModuleFileName != 0)
-    {
-        *recv = path;
-        return true;
-    }
+    if (dwModuleFileName == 0)
+        return false;
 
-    return false;
+    path.resize(dwModuleFileName);
+    *recv = path;
+    return true;
+}
 
+bool GetModuleHandleFromAddress(void *addr, HMODULE *hModule)
+{
+    BOOL res = ::GetModuleHandleExW(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<LPCWSTR>(addr),
+        hModule);
+
+    return (res != FALSE);
 }
 
 pal::string_t pal::to_lower(const pal::string_t& in)
@@ -145,7 +153,7 @@ pal::proc_t pal::get_symbol(dll_t library, const char* name)
     auto result = ::GetProcAddress(library, name);
     if (result == nullptr)
     {
-        trace::info(_X("Probed for and did not resolve library symbol %s"), name);
+        trace::info(_X("Probed for and did not resolve library symbol %S"), name);
     }
 
     return result;
@@ -271,6 +279,7 @@ bool get_sdk_self_registered_dir(pal::string_t* recv)
     if (result != ERROR_SUCCESS || size == 0)
     {
         trace::verbose(_X("Can't get the size of the SDK location registry value or it's empty, result: 0x%X"), result);
+        ::RegCloseKey(hkey);
         return false;
     }
 
@@ -280,11 +289,12 @@ bool get_sdk_self_registered_dir(pal::string_t* recv)
     if (result != ERROR_SUCCESS)
     {
         trace::verbose(_X("Can't get the value of the SDK location registry value, result: 0x%X"), result);
+        ::RegCloseKey(hkey);
         return false;
     }
 
     recv->assign(buffer.data());
-
+    ::RegCloseKey(hkey);
     return true;
 #endif
 }
@@ -420,6 +430,25 @@ int pal::xtoi(const char_t* input)
 bool pal::get_own_executable_path(string_t* recv)
 {
     return GetModuleFileNameWrapper(NULL, recv);
+}
+
+bool pal::get_current_module(dll_t *mod)
+{
+    HMODULE hmod = nullptr;
+    if (!GetModuleHandleFromAddress(&get_current_module, &hmod))
+        return false;
+
+    *mod = (pal::dll_t)hmod;
+    return true;
+}
+
+bool pal::get_own_module_path(string_t* recv)
+{
+    HMODULE hmod;
+    if (!GetModuleHandleFromAddress(&get_own_module_path, &hmod))
+        return false;
+
+    return GetModuleFileNameWrapper(hmod, recv);
 }
 
 static bool wchar_convert_helper(DWORD code_page, const char* cstr, int len, pal::string_t* out)
