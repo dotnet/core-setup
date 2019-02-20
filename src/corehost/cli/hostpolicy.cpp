@@ -621,12 +621,6 @@ SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void** 
             "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
             "LoadInMemoryAssembly",
             delegate);
-    case coreclr_delegate_type::load_and_execute_in_memory_assembly:
-        return coreclr->create_delegate(
-            "System.Private.CoreLib",
-            "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
-            "LoadAndExecuteInMemoryAssembly",
-            delegate);
     default:
         return StatusCode::LibHostInvalidArgs;
     }

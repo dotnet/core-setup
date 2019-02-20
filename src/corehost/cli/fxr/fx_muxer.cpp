@@ -1506,17 +1506,6 @@ int fx_muxer_t::get_com_activation_delegate(
         delegate);
 }
 
-int fx_muxer_t::get_load_and_execute_in_memory_assembly_delegate(
-    const host_startup_info_t &host_info,
-    void **delegate)
-{
-    return load_runtime_and_get_delegate(
-        host_info,
-        host_mode_t::apphost,
-        coreclr_delegate_type::load_and_execute_in_memory_assembly,
-        delegate);
-}
-
 int fx_muxer_t::get_load_in_memory_assembly_delegate(
     const host_startup_info_t &host_info,
     void **delegate)

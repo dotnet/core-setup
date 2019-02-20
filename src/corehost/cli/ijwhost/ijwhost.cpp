@@ -20,8 +20,6 @@
 #define IJW_API SHARED_API
 #endif // _WIN32
 
-
-using load_and_execute_in_memory_assembly_fn = int(*)(pal::dll_t handle, int argc, pal::char_t** argv);
 using load_in_memory_assembly_fn = void(*)(pal::dll_t handle, const pal::char_t* path);
 
 namespace
@@ -71,35 +69,9 @@ namespace
     }
 }
 
-pal::hresult_t get_load_and_execute_in_memory_assembly_delegate(load_and_execute_in_memory_assembly_fn* delegate)
-{
-    return load_hostfxr_delegate(GetModuleHandle(nullptr), "hostfxr_get_load_and_execute_in_memory_assembly_delegate", (void**)delegate);
-}
-
 pal::hresult_t get_load_in_memory_assembly_delegate(pal::dll_t handle, load_in_memory_assembly_fn* delegate)
 {
     return load_hostfxr_delegate(handle, "hostfxr_get_load_in_memory_assembly_delegate", (void**)delegate);
-}
-
-
-IJW_API std::int32_t STDMETHODCALLTYPE _CorExeMain()
-{
-    load_and_execute_in_memory_assembly_fn loadAndExecute;
-    std::int32_t status = get_load_and_execute_in_memory_assembly_delegate(&loadAndExecute);
-    if (status != StatusCode::Success)
-    {
-        trace::error(_X("Unable to load .NET Core runtime and get entry-point."));
-        return status;
-    }
-
-    int argc;
-    pal::char_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-
-    status = loadAndExecute(GetModuleHandle(nullptr), argc, argv);
-
-    LocalFree(argv);
-
-    return argc;
 }
 
 IJW_API BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst,

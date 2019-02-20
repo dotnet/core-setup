@@ -435,8 +435,7 @@ void try_prerelease_roll_forward_in_dir(const pal::string_t& cur_dir, const fx_v
 enum class coreclr_delegate_type
 {
     com_activation,
-    load_in_memory_assembly,
-    load_and_execute_in_memory_assembly
+    load_in_memory_assembly
 };
 
 #endif // __LIBHOST_H__

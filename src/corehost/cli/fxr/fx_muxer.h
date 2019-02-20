@@ -25,9 +25,6 @@ public:
     static int get_com_activation_delegate(
         const host_startup_info_t &host_info,
         void **delegate);
-    static int get_load_and_execute_in_memory_assembly_delegate(
-        const host_startup_info_t &host_info,
-        void **delegate);
     static int get_load_in_memory_assembly_delegate(
         const host_startup_info_t &host_info,
         void **delegate);
