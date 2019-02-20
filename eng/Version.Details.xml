@@ -19,6 +19,10 @@
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>fc70d035c7a633a63bc783303df01e50ff8c755f</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="3.0.0-preview4-27419-14">
+      <Uri>https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted</Uri>
+      <Sha>d3e4345e1ce50630746de8b18b1eaa88c99bb299</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19113.1">

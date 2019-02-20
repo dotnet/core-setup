@@ -22,6 +22,11 @@
     <PackProjectDependencies>true</PackProjectDependencies>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' == 'true'">
+    <!-- WindowsDesktop packs currently depend on non-source-built App package. -->
+    <ProjectExclusions Include="windowsdesktop\**\*.*proj" />
+  </ItemGroup>
+
   <ItemGroup>
     <FrameworkListRootAttributes Include="Name" Value="$(NETCoreAppFrameworkBrandName)" />
     <FrameworkListRootAttributes Include="TargetFrameworkIdentifier" Value="$(NETCoreAppFrameworkIdentifier)" />
