@@ -78,7 +78,7 @@
     -->
     <BuildRuntimePackages>false</BuildRuntimePackages>
 
-    <PackageType>Data</PackageType>
+    <PackageType>DotnetPlatform</PackageType>
     <Version>$(SharedFrameworkNugetVersion)</Version>
 
     <!-- Include the platform manifest in the data dir. -->
