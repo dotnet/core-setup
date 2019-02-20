@@ -198,23 +198,13 @@
     <CreateFrameworkListFile
       Files="@(File)"
       TargetFile="$(FrameworkListFile)"
+      TargetFilePrefixes="ref/;runtimes/"
       RootAttributes="@(FrameworkListRootAttributes)" />
 
     <ItemGroup>
       <File Include="$(FrameworkListFile)">
         <TargetPath>$(FrameworkListTargetPath)</TargetPath>
       </File>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="MoveRefToData"
-          AfterTargets="ExpandProjectReferences"
-          Condition="'$(IsTargetingPack)' == 'true'">
-    <ItemGroup>
-      <!-- Move all refs into the data dir. Leave files like LICENSE.TXT in the root. -->
-      <File
-        Condition="$([System.String]::new('%(File.TargetPath)').StartsWith('ref'))"
-        TargetPath="data/" />
     </ItemGroup>
   </Target>
 
@@ -240,12 +230,15 @@
     <ItemGroup>
       <TargetingPackDataEntries
         Include="@(TargetingPackNupkgEntries)"
-        Condition="$([System.String]::new('%(TargetingPackNupkgEntries.Identity)').StartsWith('data/'))" />
+        Condition="
+          $([System.String]::new('%(TargetingPackNupkgEntries.Identity)').StartsWith('data/')) OR
+          $([System.String]::new('%(TargetingPackNupkgEntries.Identity)').StartsWith('ref/')) OR
+          $([System.String]::new('%(TargetingPackNupkgEntries.Identity)').StartsWith('runtimes/'))" />
     </ItemGroup>
 
     <ZipFileExtractToDirectory
       SourceArchive="$(TargetingPackNupkgFile)"
-      DestinationDirectory="$(DataLayoutDir)packs/$(Id)/$(Version)/"
+      DestinationDirectory="$(PackLayoutDir)packs/$(Id)/$(Version)/"
       OverwriteDestination="true"
       Include="@(TargetingPackDataEntries)" />
   </Target>

@@ -93,8 +93,8 @@
     <ExcludeLineupReference>true</ExcludeLineupReference>
     <PackProjectDependencies>false</PackProjectDependencies>
 
-    <!-- Location to lay out data/ dir. Used later to create installers. -->
-    <DataLayoutDir>$(IntermediateOutputPath)layout/</DataLayoutDir>
+    <!-- Location to lay out pack contents. Used later to create installers. -->
+    <PackLayoutDir>$(IntermediateOutputPath)layout/</PackLayoutDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.depproj'">
