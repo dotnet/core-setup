@@ -76,11 +76,16 @@
                        Overwrite="true"/>
   </Target>
 
+  <!--
+    Stub DetermineRuntimeDependencies target so that when GenerateRuntimeDependencies builds this
+    target on the depproj, the build doesn't fail. BuildTools gives pkgproj a default implementation
+    that depproj doesn't get.
+    remove when fixing https://github.com/dotnet/buildtools/issues/1273
+  -->
+  <Target Name="DetermineRuntimeDependencies" />
+
   <!-- Target overrides (can't be shared with pkgproj) -->
 
   <Target Name="Build" DependsOnTargets="GenerateHashVersionsFile;GetFilesToPackage" />
-
-  <!-- remove when fixing https://github.com/dotnet/buildtools/issues/1273 -->
-  <Target Name="DetermineRuntimeDependencies" />
 
 </Project>
