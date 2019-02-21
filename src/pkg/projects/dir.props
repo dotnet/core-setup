@@ -14,9 +14,6 @@
 
     <IsLineupPackage Condition="'$(PackageTargetRuntime)' == ''">true</IsLineupPackage>
 
-    <IncludeSourceFilesInPackage Condition="'$(DotNetBuildFromSource)' == 'true'">false</IncludeSourceFilesInPackage>
-    <IncludeSourceFilesInPackage Condition="'$(IncludeSourceFilesInPackage)' == ''">true</IncludeSourceFilesInPackage>
-
     <BuildRuntimePackages>true</BuildRuntimePackages>
 
     <PackProjectDependencies>true</PackProjectDependencies>
