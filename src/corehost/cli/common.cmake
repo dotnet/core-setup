@@ -12,33 +12,29 @@ else()
     add_compile_options(-fvisibility=hidden)
 endif()
 
-include(../setup.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/setup.cmake)
 
 # Include directories
 if(WIN32)
     include_directories("${CLI_CMAKE_RESOURCE_DIR}/${DOTNET_PROJECT_NAME}")
 endif()
-include_directories(./)
-include_directories(../)
-include_directories(../../)
-include_directories(../../common)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../common)
 
 if(WIN32)
     list(APPEND SOURCES 
-        ../../common/pal.windows.cpp
-        ../../common/longfile.windows.cpp)
+        ${CMAKE_CURRENT_LIST_DIR}/../common/pal.windows.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../common/longfile.windows.cpp)
 else()
     list(APPEND SOURCES
-        ../../common/pal.unix.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../common/pal.unix.cpp
         ${VERSION_FILE_PATH})
 endif()
 
 set(RESOURCES)
 if(WIN32 AND NOT SKIP_VERSIONING)
-    list(APPEND RESOURCES ../native.rc)
+    list(APPEND RESOURCES ${CMAKE_CURRENT_LIST_DIR}/native.rc)
 endif()
 
-# Specify the import library to link against for Arm32 build since the default set is minimal
-if (WIN32 AND CLI_CMAKE_PLATFORM_ARCH_ARM)
-    target_link_libraries(${DOTNET_PROJECT_NAME} shell32.lib)
-endif()
