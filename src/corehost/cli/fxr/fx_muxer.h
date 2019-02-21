@@ -22,19 +22,13 @@ public:
         pal::char_t result_buffer[],
         int32_t buffer_size,
         int32_t* required_buffer_size);
-    static int get_com_activation_delegate(
-        const host_startup_info_t &host_info,
-        void **delegate);
-    static int get_load_in_memory_assembly_delegate(
-        const host_startup_info_t &host_info,
-        void **delegate);
-private:
     static int load_runtime_and_get_delegate(
         const host_startup_info_t& host_info,
         host_mode_t mode,
         coreclr_delegate_type delegate_type,
         void** delegate
     );
+private:
     static int parse_args(
         const host_startup_info_t& host_info,
         int argoff,

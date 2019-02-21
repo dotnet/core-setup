@@ -49,7 +49,7 @@ pal::hresult_t get_load_in_memory_assembly_delegate(pal::dll_t handle, load_in_m
 
     // Leak fxr
 
-    auto get_delegate_from_hostfxr = (hostfxr_get_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_load_in_memory_assembly_delegate");
+    auto get_delegate_from_hostfxr = (hostfxr_get_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_runtime_delegate");
     if (get_delegate_from_hostfxr == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
 
@@ -61,7 +61,7 @@ pal::hresult_t get_load_in_memory_assembly_delegate(pal::dll_t handle, load_in_m
         return StatusCode::LibHostCurExeFindFailure;
     }
     
-    return get_delegate_from_hostfxr(host_path.c_str(), dotnet_root.c_str(), app_path.c_str(), (void**)delegate);
+    return get_delegate_from_hostfxr(host_path.c_str(), dotnet_root.c_str(), app_path.c_str(), hostfxr_delegate_type::load_in_memory_assembly, (void**)delegate);
 }
 
 IJW_API BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst,

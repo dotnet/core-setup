@@ -1495,28 +1495,6 @@ int fx_muxer_t::load_runtime_and_get_delegate(
     return rc;
 }
 
-int fx_muxer_t::get_com_activation_delegate(
-    const host_startup_info_t &host_info,
-    void **delegate)
-{
-    return load_runtime_and_get_delegate(
-        host_info,
-        host_mode_t::libhost,
-        coreclr_delegate_type::com_activation,
-        delegate);
-}
-
-int fx_muxer_t::get_load_in_memory_assembly_delegate(
-    const host_startup_info_t &host_info,
-    void **delegate)
-{
-    return load_runtime_and_get_delegate(
-        host_info,
-        host_mode_t::libhost,
-        coreclr_delegate_type::load_in_memory_assembly,
-        delegate);
-}
-
 int fx_muxer_t::handle_exec(
     const host_startup_info_t& host_info,
     const pal::string_t& app_candidate,
