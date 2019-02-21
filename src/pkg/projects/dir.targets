@@ -5,8 +5,8 @@
     Include common targets for specific project types. These files include BuildTools target
     overrides that shouldn't be applied to other projects.
   -->
-  <Import Project="depproj.targets" Condition="'$(MSBuildProjectExtension)' == '.depproj'"/>
-  <Import Project="framework.targets" Condition="'$(IsFrameworkPackage)' == 'true'"/>
+  <Import Project="framework.dependency.targets" Condition="'$(MSBuildProjectExtension)' == '.depproj'"/>
+  <Import Project="framework.packaging.targets" Condition="'$(IsFrameworkPackage)' == 'true'"/>
 
   <UsingTask TaskName="CreateFrameworkListFile" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
   <UsingTask TaskName="GenerateFileVersionProps" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
