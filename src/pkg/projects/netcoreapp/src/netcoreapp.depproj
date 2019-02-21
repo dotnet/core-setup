@@ -95,15 +95,25 @@
 
   <Target Name="GetDependencyVersionFiles" DependsOnTargets="GetPackagePaths;ResolveNuGetPackages">
     <ItemGroup>
-      <DependencyVersionFile
+      <_coreFxVersionFile
         Include="$(PackagesDir)$([System.String]::new('%(Reference.NuGetPackageId)').ToLowerInvariant())/%(Reference.NuGetPackageVersion)/version.txt"
         Condition="$([System.String]::new('%(Reference.Identity)').ToLowerInvariant().Contains('system.runtime.dll'))"
         Name="corefx" />
-      <DependencyVersionFile
+      <_coreClrVersionFile
         Include="$(_runtimePackagePath)/version.txt"
         Condition="'$(NuGetRuntimeIdentifier)' != ''"
         Name="coreclr" />
+
+      <DependencyVersionFile Include="@(_coreFxVersionFile);@(_coreClrVersionFile)" />
     </ItemGroup>
+
+    <Error
+      Condition="'@(_coreFxVersionFile)' == ''"
+      Text="Failed to locate corefx version.txt file." />
+
+    <Error
+      Condition="'@(_coreClrVersionFile)' == '' AND '$(NuGetRuntimeIdentifier)' != ''"
+      Text="Failed to locate coreclr version.txt file." />
   </Target>
 
   <!-- Fetches all the runtime items from the packages that we want to redist -->

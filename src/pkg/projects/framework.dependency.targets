@@ -60,6 +60,10 @@
 
   <!-- Creates the *.versions.txt file describing where data in this package came from. -->
   <Target Name="GenerateHashVersionsFile" DependsOnTargets="GetDependencyVersionFiles">
+    <Error
+      Condition="!Exists('%(DependencyVersionFile.Identity)')"
+      Text="'%(Name)' version file does not exist: %(Identity)" />
+
     <ItemGroup>
       <DependencyVersionFile Content="$([System.IO.File]::ReadAllText('%(Identity)').Trim())" />
 
