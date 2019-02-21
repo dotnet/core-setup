@@ -90,8 +90,8 @@ namespace
 
         // Leak fxr
 
-        auto get_com_delegate = (hostfxr_get_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_runtime_delegate");
-        if (get_com_delegate == nullptr)
+        auto get_runtime_delegate = (hostfxr_get_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_runtime_delegate");
+        if (get_runtime_delegate == nullptr)
             return StatusCode::CoreHostEntryPointFailure;
 
         pal::string_t app_path_local{ host_path };
@@ -106,7 +106,7 @@ namespace
         auto set_error_writer_fn = (hostfxr_set_error_writer_fn)pal::get_symbol(fxr, "hostfxr_set_error_writer");
         propagate_error_writer_t propagate_error_writer_to_hostfxr(set_error_writer_fn);
 
-        return get_com_delegate(host_path.c_str(), dotnet_root.c_str(), app_path->c_str(), hostfxr_delegate_type::com_activation, (void**)delegate);
+        return get_runtime_delegate(host_path.c_str(), dotnet_root.c_str(), app_path->c_str(), hostfxr_delegate_type::com_activation, (void**)delegate);
     }
 }
 

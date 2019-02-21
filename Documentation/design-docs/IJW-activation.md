@@ -97,3 +97,7 @@ The naming of these APIs is designed to be useful for non-IJW scenarios as well,
 When the runtime loads the assembly, it needs to know if each element in the vtfixup table is a token or a stub. In .NET Framework, this check is implemented by the runtime querying `mscoree.dll` by looking up callbacks. When the runtime is traversing the vtfixup table and updating the entries to point to JIT stubs, it queries `mscoree.dll` if the module has stubs. If the module has stubs, it calls back into `mscoree.dll` to query the stub data structures for the metadata token. Otherwise, it grabs the token from the slot.
 
 We will implement it similarly, by having CoreCLR call back into `ijwhost.dll` if it is present.
+
+#### Caveats
+
+Since native images can only be loaded into memory once on Windows, there is only one instance of the vtfixup table. As a result, the native code in an IJW assembly will always call into managed code from the first managed load of the assembly. As a result, if an IJW assembly is loaded into two different ALCs, then a call to managed code in an IJW assembly that calls into native code and back into managed within the IJW assembly may change ALCs within the stack if the call into the IJW assembly is in a different ALC than the IJW assembly was initially loaded into. We have a test that reproduces this behavior.
