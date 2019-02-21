@@ -25,7 +25,7 @@
     <PackageReference Include="NETStandard.Library">
       <Version>$(NETStandardLibraryPackageVersion)</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.TargetingPack.Private.WinRT">
+    <PackageReference Include="$(MicrosoftTargetingPackPrivateWinRTPackage)" ExcludeAssets="All">
       <Version>$(MicrosoftTargetingPackPrivateWinRTPackageVersion)</Version>
     </PackageReference>
   </ItemGroup>
@@ -46,7 +46,9 @@
       <_runtimeCoreLib Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.FileName)%(ReferenceCopyLocalPaths.Extension)' == 'System.Private.CoreLib.dll'" />
       <_runtimeJIT Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.FileName)%(ReferenceCopyLocalPaths.Extension)' == '$(LibraryFilePrefix)clrjit$(LibraryFileExtension)'" />
       <_fxSystemRuntime Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.FileName)%(ReferenceCopyLocalPaths.Extension)' == 'System.Runtime.dll'" />
-      <_windowsWinMD Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.FileName)%(ReferenceCopyLocalPaths.Extension)' == 'Windows.winmd'" />
+
+      <!-- Find Windows.winmd in package cache to allow ExcludeAssets=All. -->
+      <_windowsWinMD Include="$(PackagesDir)$(MicrosoftTargetingPackPrivateWinRTPackage.ToLowerInvariant())/$(MicrosoftTargetingPackPrivateWinRTPackageVersion)/**/Windows.winmd" />
     </ItemGroup>
 
     <PropertyGroup>

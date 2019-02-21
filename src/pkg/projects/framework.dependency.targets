@@ -6,8 +6,8 @@
   <!-- Fetches all the file items from the packages that we want to redist -->
   <Target Name="GetFilesFromPackages">
     <ItemGroup Condition="'$(NuGetRuntimeIdentifier)' != ''">
-      <!-- RID-specific: include all runtime files except files in Microsoft.TargetingPack.Private.WinRT -->
-      <FilesToPackage Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' != 'Microsoft.TargetingPack.Private.WinRT'">
+      <!-- RID-specific: include all runtime files. -->
+      <FilesToPackage Include="@(ReferenceCopyLocalPaths)">
         <!-- ResolveNugetPackageAssets doesn't preserve the asset type (native),
              calculate it by looking for native in the path -->
         <IsNative Condition="$([System.String]::new('%(Identity)').ToLowerInvariant().Replace('\', '/').Contains('/native/'))">true</IsNative>
@@ -19,8 +19,8 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(NuGetRuntimeIdentifier)' == ''">
-      <!-- Not RID-specific: include all reference files except files in Microsoft.TargetingPack.Private.WinRT -->
-      <FilesToPackage Include="@(Reference)" Condition="'%(Reference.NuGetPackageId)' != 'Microsoft.TargetingPack.Private.WinRT'">
+      <!-- Not RID-specific: include all reference files. -->
+      <FilesToPackage Include="@(Reference)">
         <TargetPath>ref/$(PackageTargetFramework)</TargetPath>
       </FilesToPackage>
 
