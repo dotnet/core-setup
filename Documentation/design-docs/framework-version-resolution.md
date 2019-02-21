@@ -105,19 +105,28 @@ Each dependent framework (for example FX1) is loaded with an effective roll-forw
 ## Pre-release versions
 Pre-release version is a version which has a pre-release part, for example `3.0.0-preview4-27415-15`. Everything after the `-` (dash) character is a pre-release identifier. Per [semantic versioning rules](https://semver.org/) pre-release versions are ordered before the same version without any pre-release part. So `3.0.0-preview4-27415-15` comes before `3.0.0`.
 
+TODO: Figure out the equality of pre-release and normal versions. That is, per SemVer rules, is it acceptable to resolve reference to `3.0.0` with a pre-release `3.0.0-preview`?
+
 ### Behavior before 3.0
 Before .NET Core 3.0 (so 2.2 and older) the roll-forward behavior for pre-release versions ignored any of the roll-forward related settings, that is both `rollForwardOnNoCandidateFx` as well as `applyPatches`.
 The behavior was that:
 * Release version will never roll forward to pre-release version. So for example `2.1.0` will not roll forward to `3.0.0-preview4-27415-15` even if `Major` roll-forward is allowed (same for all the other settings of `rollForwardOnNoCandidateFx` as well as `applyPatches`).
 * Pre-release version will never roll forward to release version. So for example `3.0.0-preview4-27415-15` will not roll forward to `3.0.0`. Also pre-release will only roll forward to the same `major.minor.patch`. So for example `3.0.0-preview4-27415-15` will not roll forward to `3.0.1-preview1-29000-0`.
 
+### Proposed behavior for 3.0 and forward
+When resolving framework reference with a pre-release version, treat all versions the same and include both release and pre-release versions in the set. This means pre-release can resolve to both release or pre-release.
+
+When resolving framework reference with a release version, prefer release versions. This means that if there's a release version on the machine which satisfies all the requirements it will be chosen, regardless of what pre-release versions are installed. Only if there's no suitable release version, then pre-release versions are also considered (and then they're treated all the same).
+
+
 ### Behavior in 3.0 and forward
 The newly proposed behavior is to treat pre-release versions no different from release versions. This would mean that pre-release can roll forward to release but also that release can roll forward to pre-release. For the most part this improves the previous behavior (except when `Disable` is active in which case no roll-forward will happen):
 * `3.0.0-preview4-27415-15` will roll forward to `3.0.0`.
 * `3.0.0-preview4-27415-15` will roll forward to `3.0.1-preview1-29000-0`.
+* `3.0.0` would roll forward to `3.0.1` even if there's a `3.0.1-preview1-29000-0` available on the machine (this is effectively patch roll forward which always picks the latest patch)
 
 But it also introduces cases which are somewhat controversial:
-* On `Minor` (the default) `3.0.0` would roll forward to `3.0.1-preview1-29000-0` even if `3.0.1` is available on the machine. This behavior is typically not expected.
+* On `Minor` (the default) `3.0.0` would roll forward to `3.0.1-preview1-29000-0` even if `3.1.0` is available on the machine. This behavior is typically not expected.
 * On `LatestMajor` `2.0.0` would roll forward to `3.0.1-preview1-29000-0` even when `3.0.0` is available on the machine.
 
 Pros:
