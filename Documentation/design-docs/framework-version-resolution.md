@@ -114,52 +114,50 @@ The behavior was that:
 * Pre-release version will never roll forward to release version. So for example `3.0.0-preview4-27415-15` will not roll forward to `3.0.0`. Also pre-release will only roll forward to the same `major.minor.patch`. So for example `3.0.0-preview4-27415-15` will not roll forward to `3.0.1-preview1-29000-0`.
 
 ### Proposed behavior for 3.0 and forward
-When resolving framework reference with a pre-release version, treat all versions the same and include both release and pre-release versions in the set. This means pre-release can resolve to both release or pre-release.
+*Assumption: It's desirable to have a behavior where installing a pre-release version on a machine doesn't modify behavior of any apps which use release versions.*
 
-When resolving framework reference with a release version, prefer release versions. This means that if there's a release version on the machine which satisfies all the requirements it will be chosen, regardless of what pre-release versions are installed. Only if there's no suitable release version, then pre-release versions are also considered (and then they're treated all the same).
+When resolving framework reference with a **pre-release** version, treat all versions the same and include both release and pre-release versions in the set. This means pre-release can resolve to both release or pre-release.
 
+When resolving framework reference with a **release** version, prefer release versions. This means that if there's a release version on the machine which satisfies all the requirements it will be chosen, regardless of what pre-release versions are installed. Only if there's no suitable release version, then pre-release versions are also considered (and then they're treated all the same).
 
-### Behavior in 3.0 and forward
-The newly proposed behavior is to treat pre-release versions no different from release versions. This would mean that pre-release can roll forward to release but also that release can roll forward to pre-release. For the most part this improves the previous behavior (except when `Disable` is active in which case no roll-forward will happen):
-* `3.0.0-preview4-27415-15` will roll forward to `3.0.0`.
-* `3.0.0-preview4-27415-15` will roll forward to `3.0.1-preview1-29000-0`.
-* `3.0.0` would roll forward to `3.0.1` even if there's a `3.0.1-preview1-29000-0` available on the machine (this is effectively patch roll forward which always picks the latest patch)
+Interesting examples:
+* `3.0.0 rollForward = Minor` would not-roll forward and choose `3.0.0` even if `3.0.1-preview` is also available on the machine. This means the automatic roll forward to latest patch doesn't work for pre-release versions.
+* `3.0.0 rollForward = Minor` would roll forward to `3.1.0` even if `3.0.1-preview` is also available on the machine (and technically is closer to the desired version).
+* `2.0.0 rollForward = LatestMajor` would roll forward to `3.0.0` even if `3.0.1-preview` is also available on the machine.
+* `3.0.0 rollForward = Minor` would roll forward to `3.0.1-preview` if that's the only version available on the machine.
 
-But it also introduces cases which are somewhat controversial:
-* On `Minor` (the default) `3.0.0` would roll forward to `3.0.1-preview1-29000-0` even if `3.1.0` is available on the machine. This behavior is typically not expected.
-* On `LatestMajor` `2.0.0` would roll forward to `3.0.1-preview1-29000-0` even when `3.0.0` is available on the machine.
-
-Pros:
-* Consistent behavior across all versions
-* Allows relatively easy testing of future release versions with pre-release versions. That is installing `3.0.0-preview` and getting the same behavior as if `3.0.0` was installed (so testing the `3.0.0` release without create a true release package).
-
-Cons:
-* Installing a pre-release version affects apps using release versions
-* Works well only if pre-release versions have similar compatibility behavior as release versions - not many breaking changes. Also expects pre-release versions to generally work well.
-
-### Alternative for the 3.0 behavior
-When resolving framework reference with a pre-release version, treat all versions the same and include both release and pre-release versions in the set. This means pre-release can resolve to both release or pre-release.
-
-When resolving framework reference with a release version, prefer release versions. This means that if there's a release version on the machine which satisfies all the requirements it will be chosen, regardless of what pre-release versions are installed. Only if there's no suitable release version, then pre-release versions are also considered (and then they're treated all the same).
-
-Given the above examples this would lead to this behavior:
-* On `Minor` (the default) `3.0.0` would roll forward to `3.0.1` even if `3.0.1-preview1-29000-0` is also available on the machine.
-* On `LatestMajor` `2.0.0` would roll forward to `3.0.0` even if `3.0.1-preview1-29000-0` is also available on the machine.
-
-Pros:
-* Installing pre-release version doesn't affect apps which use release version (unless it's needed to make the app work at all)
+Pros
+* Installing pre-release version doesn't affect apps which use release version (unless it's needed to make the app work).
 * Doesn't impose any implicit expectations on the quality of pre-release versions as typically pre-release would only be used when explicitly asked for.
-* Closer to what most users would expect
+* Seems to match most users' expectations.
 
-Cons:
-* Some special cases won't work
-* Testing behavior of new releases with pre-release versions is not fully possible.
-
+Cons
+* Testing behavior of new releases with pre-release versions is not fully possible (see below).
+* Some special cases don't work:
 One special case which would not work:  
-Component A which asks for `2.0.0 LatestMajor` is loaded first on a machine which has `3.0.0` and also `3.1.0-preview` installed. Because it's the first in the process it will resolve the runtime according to the above rules - that is prefer release version - and thus will select `3.0.0`.  
+*Component A which asks for `2.0.0 LatestMajor` is loaded first on a machine which has `3.0.0` and also `3.1.0-preview` installed. Because it's the first in the process it will resolve the runtime according to the above rules - that is prefer release version - and thus will select `3.0.0`.  
 Later on component B is loaded which asks for `3.1.0-preview LatestMajor` (for example the one in active development). This load will fail since `3.0.0` is not enough to run this component.  
-Loading the components in reverse order (B first and then A) will work since the `3.1.0-preview` runtime will be selected.  
-Currently there's no proposed setting (env. variable) which would make this scenario work.
+Loading the components in reverse order (B first and then A) will work since the `3.1.0-preview` runtime will be selected.*
+
+### Proposed new "pre-release" mode
+The above behavior makes sense for most users, but it makes it hard for us to test new versions of frameworks. Let's assume .NET Core 3.0 already shipped and there are apps which target `3.0.0 rollForward = Minor` (the default). The shipped framework is version `3.0.0`. Now the next patch release is being prepared and `3.0.1.preview` is produced. With the proposed (and current) behavior, there's no good way to make the apps use the new preview for testing purposes.
+
+The proposal is to add a new environment variable `DOTNET_ROLL_FORWARD_TO_PRERELEASE`. There would only be the environment variable (no command line or `.runtimeconfig.json` property). By default when it's not set or set to anything but `1` the behavior would be as described above.
+
+If the variable is set to `1` the algorithm would always treat pre-release versions the same as release versions. So in the case of a framework reference with a release version, all versions (even pre-release) would be considered always.
+
+This would mean that with `DOTNET_ROLL_FORWARD_TO_PRERELEASE=1`:
+* `3.0.0 rollForward = Minor` would roll forward to `3.0.1-preview` even if `3.0.0` is available on the machine. So automatic roll forward to latest patch is used even for pre-release versions.
+* `3.0.0 rollForward = Minor` would roll forward to `3.0.1-preview` even if `3.1.0` is also available on the machine. The pre-release version would be chosen because it's closer then the higher minor version.
+
+*With this behavior the special case described above with `LatestMajor` would also work in both orders.*
+
+Pros
+* Enables easy testing of future releases using pre-release versions.
+* Its name and behavior is intended to be used only when dealing with pre-release versions, so should not cause confusion.
+
+Cons
+* It's not the default behavior, so developers working with pre-release versions need to know about it and must use it.
 
 
 ## Interaction with existing settings
