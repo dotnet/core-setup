@@ -35,5 +35,5 @@
     <NetCoreProductBandSharedFrameworkName>.NET Core Bundle Installer $(ProductBandVersion) $(PackageTargetRid)</NetCoreProductBandSharedFrameworkName>
     <TargetingPackBrandName>$(ProductBrandPrefix) Targeting Pack - $(ProductBrandSuffix)</TargetingPackBrandName>
     <SharedFrameworkBrandName>$(ProductBrandPrefix) Runtime - $(ProductBrandSuffix)</SharedFrameworkBrandName>
-</PropertyGroup>
+  </PropertyGroup>
 </Project>
