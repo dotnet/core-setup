@@ -100,16 +100,17 @@
           DependsOnTargets="GetBundleDisplayVersion;GenerateMsiVersionString"
           Condition="'$(OSGroup)' == 'Windows_NT' and '$(GenerateMSI)' == 'true'">
      <PropertyGroup>
-        <SharedFxBundleScript>$(WindowsScriptRoot)sharedframework\generatebundle.ps1</SharedFxBundleScript>
-        <ShareFXMsi>$(SharedFrameworkInstallerFile)</ShareFXMsi>
-        <HostMsi>$(SharedHostInstallerFile)</HostMsi>
-        <HostFxrMsi>$(HostFxrInstallerFile)</HostFxrMsi>
-        <SharedBundle>$(CombinedInstallerFile)</SharedBundle>
-        <SharedBrandName>$(SharedFrameworkBrandName)</SharedBrandName>
-        <ArchParams>"$(MsiArch)" "$(TargetArchitecture)"</ArchParams>
+       <SharedFxBundleScript>$(WindowsScriptRoot)sharedframework\generatebundle.ps1</SharedFxBundleScript>
+       <ShareFXMsi>$(SharedFrameworkInstallerFile)</ShareFXMsi>
+       <HostMsi>$(SharedHostInstallerFile)</HostMsi>
+       <HostFxrMsi>$(HostFxrInstallerFile)</HostFxrMsi>
+       <SharedBundle>$(CombinedInstallerFile)</SharedBundle>
+       <CombinedInstallerOutputGuidString>$(NetCoreProductBandSharedFrameworkName)</CombinedInstallerOutputGuidString>
+       <SharedBrandName>$(SharedFrameworkBrandName)</SharedBrandName>
+       <ArchParams>"$(MsiArch)" "$(TargetArchitecture)"</ArchParams>
      </PropertyGroup>
 
-     <GenerateGuidFromName Name="$(SharedBundle)">
+     <GenerateGuidFromName Name="$(CombinedInstallerOutputGuidString)">
        <Output TaskParameter="GeneratedGuid" PropertyName="SharedBundleCode" />
      </GenerateGuidFromName>
 

@@ -16,6 +16,7 @@
     <Channel>master</Channel>
     <ContainerName>dotnet</ContainerName>
     <ChecksumContainerName>$(ContainerName)</ChecksumContainerName>
+    <ProductBandVersion>$(MajorVersion).$(MinorVersion)</ProductBandVersion>
     <NETCoreAppMaximumVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppMaximumVersion>
   </PropertyGroup>
 </Project>
