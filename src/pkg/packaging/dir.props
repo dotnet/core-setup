@@ -31,7 +31,7 @@
     <SharedHostBrandName>$(ProductBrandPrefix) Host - $(ProductBrandSuffix)</SharedHostBrandName>
     <HostFxrBrandName>$(ProductBrandPrefix) Host FX Resolver - $(ProductBrandSuffix)</HostFxrBrandName>
     <!-- Warning: changing the value "NetCoreProductBandSharedFrameworkName" can only occur on a product-band boundary, 
-               Changing "NetCoreProductBandSharedFrameworkName" mid-product-band will break the upgradablilty of the .NET Core bundle installer. -->
+               Changing "NetCoreProductBandSharedFrameworkName" mid-product-band will break the upgradability of the .NET Core bundle installer. -->
     <NetCoreProductBandSharedFrameworkName>.NET Core Bundle Installer $(ProductBandVersion) $(PackageTargetRid)</NetCoreProductBandSharedFrameworkName>
     <TargetingPackBrandName>$(ProductBrandPrefix) Targeting Pack - $(ProductBrandSuffix)</TargetingPackBrandName>
     <SharedFrameworkBrandName>$(ProductBrandPrefix) Runtime - $(ProductBrandSuffix)</SharedFrameworkBrandName>
