@@ -144,116 +144,126 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            // Set desired version = 9999.0.0
-            string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
-            SharedFramework.SetRuntimeConfigJson(runtimeConfig, "9999.0.0");
+            string testKeyName = "_DOTNET_Test" + System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
+            try
+            {
+                RegistryKey testKey = SetGlobalRegistryKey(testKeyName);
 
-            // Add version in the reg dir
-            SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _regSharedFxBaseDir, "9999.0.0");
+                // Set desired version = 9999.0.0
+                string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
+                SharedFramework.SetRuntimeConfigJson(runtimeConfig, "9999.0.0");
 
-            // Version: 9999.0.0
-            // Cwd: empty
-            // User: empty
-            // Exe: empty
-            // Reg: 9999.0.0
-            // Expected: 9999.0.0 from reg dir
-            dotnet.Exec(appDll)
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_regSelectedMessage, "9999.0.0"));
+                // Add version in the reg dir
+                SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _regSharedFxBaseDir, "9999.0.0");
 
-            // Add a dummy version in the user dir
-            SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _userSharedFxBaseDir, "9999.0.0");
+                // Version: 9999.0.0
+                // Cwd: empty
+                // User: empty
+                // Exe: empty
+                // Reg: 9999.0.0
+                // Expected: 9999.0.0 from reg dir
+                dotnet.Exec(appDll)
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdErrContaining(Path.Combine(_regSelectedMessage, "9999.0.0"));
 
-            // Version: 9999.0.0
-            // Cwd: empty
-            // User: 9999.0.0 --> should not be picked
-            // Exe: empty
-            // Reg: 9999.0.0
-            // Expected: 9999.0.0 from reg dir
-            dotnet.Exec(appDll)
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_regSelectedMessage, "9999.0.0"));
+                // Add a dummy version in the user dir
+                SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _userSharedFxBaseDir, "9999.0.0");
 
-            // Add a dummy version in the cwd dir
-            SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _cwdSharedFxBaseDir, "9999.0.0");
+                // Version: 9999.0.0
+                // Cwd: empty
+                // User: 9999.0.0 --> should not be picked
+                // Exe: empty
+                // Reg: 9999.0.0
+                // Expected: 9999.0.0 from reg dir
+                dotnet.Exec(appDll)
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdErrContaining(Path.Combine(_regSelectedMessage, "9999.0.0"));
 
-            // Version: 9999.0.0
-            // Cwd: 9999.0.0    --> should not be picked
-            // User: 9999.0.0   --> should not be picked
-            // Exe: empty
-            // Reg: 9999.0.0
-            // Expected: 9999.0.0 from reg dir
-            dotnet.Exec(appDll)
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_regSelectedMessage, "9999.0.0"));
+                // Add a dummy version in the cwd dir
+                SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _cwdSharedFxBaseDir, "9999.0.0");
 
-            // Add version in the exe dir
-            SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.0.0");
+                // Version: 9999.0.0
+                // Cwd: 9999.0.0    --> should not be picked
+                // User: 9999.0.0   --> should not be picked
+                // Exe: empty
+                // Reg: 9999.0.0
+                // Expected: 9999.0.0 from reg dir
+                dotnet.Exec(appDll)
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdErrContaining(Path.Combine(_regSelectedMessage, "9999.0.0"));
 
-            // Version: 9999.0.0
-            // Cwd: 9999.0.0    --> should not be picked
-            // User: 9999.0.0   --> should not be picked
-            // Exe: 9999.0.0
-            // Reg: 9999.0.0
-            // Expected: 9999.0.0 from exe dir
-            dotnet.Exec(appDll)
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0"));
+                // Add version in the exe dir
+                SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.0.0");
 
-            // Verify we have the expected runtime versions
-            dotnet.Exec("--list-runtimes")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0");
+                // Version: 9999.0.0
+                // Cwd: 9999.0.0    --> should not be picked
+                // User: 9999.0.0   --> should not be picked
+                // Exe: 9999.0.0
+                // Reg: 9999.0.0
+                // Expected: 9999.0.0 from exe dir
+                dotnet.Exec(appDll)
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0"));
+
+                // Verify we have the expected runtime versions
+                dotnet.Exec("--list-runtimes")
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0");
+            }
+            finally
+            {
+                interfaceKey.DeleteSubKeyTree(testKeyName);
+            }
         }
 
         [Fact]
@@ -271,112 +281,122 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            // Add some dummy versions
-            SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.0.0", "9999.0.1", "9999.0.0-dummy2", "9999.0.4");
-            SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _regSharedFxBaseDir, "9999.0.0", "9999.0.2", "9999.0.3", "9999.0.0-dummy3");
+            string testKeyName = "_DOTNET_Test" + System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
+            try
+            {
+                RegistryKey testKey = SetGlobalRegistryKey(testKeyName);
 
-            // Version: 9999.0.0 (through --fx-version arg)
-            // Cwd: empty
-            // User: empty
-            // Exe: 9999.0.0, 9999.0.1, 9999.0.4, 9999.0.0-dummy2
-            // Reg: 9999.0.0, 9999.0.2, 9999.0.3, 9999.0.0-dummy3
-            // Expected: 9999.0.1 from exe dir
-            dotnet.Exec("--fx-version", "9999.0.1", appDll)
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.1"));
+                // Add some dummy versions
+                SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.0.0", "9999.0.1", "9999.0.0-dummy2", "9999.0.4");
+                SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _regSharedFxBaseDir, "9999.0.0", "9999.0.2", "9999.0.3", "9999.0.0-dummy3");
 
-            // Version: 9999.0.0-dummy1 (through --fx-version arg)
-            // Cwd: empty
-            // User: empty
-            // Exe: 9999.0.0, 9999.0.1, 9999.0.4, 9999.0.0-dummy2
-            // Reg: 9999.0.0, 9999.0.2, 9999.0.3, 9999.0.0-dummy3
-            // Expected: no compatible version
-            dotnet.Exec("--fx-version", "9999.0.0-dummy1", appDll)
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("It was not possible to find any compatible framework version");
+                // Version: 9999.0.0 (through --fx-version arg)
+                // Cwd: empty
+                // User: empty
+                // Exe: 9999.0.0, 9999.0.1, 9999.0.4, 9999.0.0-dummy2
+                // Reg: 9999.0.0, 9999.0.2, 9999.0.3, 9999.0.0-dummy3
+                // Expected: 9999.0.1 from exe dir
+                dotnet.Exec("--fx-version", "9999.0.1", appDll)
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.1"));
 
-            // Version: 9999.0.0 (through --fx-version arg)
-            // Cwd: empty
-            // User: empty
-            // Exe: 9999.0.0, 9999.0.1, 9999.0.4, 9999.0.0-dummy2
-            // Reg: 9999.0.0, 9999.0.2, 9999.0.3, 9999.0.0-dummy3
-            // Expected: 9999.0.2 from reg dir
-            dotnet.Exec("--fx-version", "9999.0.2", appDll)
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_regSelectedMessage, "9999.0.2"));
+                // Version: 9999.0.0-dummy1 (through --fx-version arg)
+                // Cwd: empty
+                // User: empty
+                // Exe: 9999.0.0, 9999.0.1, 9999.0.4, 9999.0.0-dummy2
+                // Reg: 9999.0.0, 9999.0.2, 9999.0.3, 9999.0.0-dummy3
+                // Expected: no compatible version
+                dotnet.Exec("--fx-version", "9999.0.0-dummy1", appDll)
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute(fExpectedToFail: true)
+                    .Should()
+                    .Fail()
+                    .And
+                    .HaveStdErrContaining("It was not possible to find any compatible framework version");
 
-            // Version: 9999.0.0 (through --fx-version arg)
-            // Cwd: empty
-            // User: empty
-            // Exe: 9999.0.0, 9999.0.1, 9999.0.4, 9999.0.0-dummy2
-            // Reg: 9999.0.0, 9999.0.2, 9999.0.3, 9999.0.0-dummy3
-            // Expected: 9999.0.0 from exe dir
-            dotnet.Exec("--fx-version", "9999.0.0", appDll)
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0"));
+                // Version: 9999.0.0 (through --fx-version arg)
+                // Cwd: empty
+                // User: empty
+                // Exe: 9999.0.0, 9999.0.1, 9999.0.4, 9999.0.0-dummy2
+                // Reg: 9999.0.0, 9999.0.2, 9999.0.3, 9999.0.0-dummy3
+                // Expected: 9999.0.2 from reg dir
+                dotnet.Exec("--fx-version", "9999.0.2", appDll)
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdErrContaining(Path.Combine(_regSelectedMessage, "9999.0.2"));
 
-            // Verify we have the expected runtime versions
-            dotnet.Exec("--list-runtimes")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
-                .EnvironmentVariable("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR", _regDir)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy2")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.2")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.3")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy3");
+                // Version: 9999.0.0 (through --fx-version arg)
+                // Cwd: empty
+                // User: empty
+                // Exe: 9999.0.0, 9999.0.1, 9999.0.4, 9999.0.0-dummy2
+                // Reg: 9999.0.0, 9999.0.2, 9999.0.3, 9999.0.0-dummy3
+                // Expected: 9999.0.0 from exe dir
+                dotnet.Exec("--fx-version", "9999.0.0", appDll)
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0"));
+
+                // Verify we have the expected runtime versions
+                dotnet.Exec("--list-runtimes")
+                    .WorkingDirectory(_currentWorkingDir)
+                    .WithUserProfile(_userDir)
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_REGISTRY_PATH", testKey.Name)
+                    .CaptureStdOut()
+                    .CaptureStdErr()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
+                    .And
+                    .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy2")
+                    .And
+                    .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.2")
+                    .And
+                    .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.3")
+                    .And
+                    .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy3");
+            }
+            finally
+            {
+                interfaceKey.DeleteSubKeyTree(testKeyName);
+            }
         }
 
         static private JObject GetAdditionalFramework(string fxName, string fxVersion, bool? applyPatches, int? rollForwardOnNoCandidateFx)
@@ -412,6 +432,34 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.MultilevelSharedFxLooku
             testProjectFixture.StoreProject(outputDirectory: storeoutputDirectory);
 
             return storeoutputDirectory;
+        }
+
+        public RegistryKey SetGlobalRegistryKey(string testKeyName)
+        {
+            // To correctly test the product we need a registry key which is
+            // - writable without admin access (so that the tests don't require admin to run)
+            // - redirected in WOW64 - so that there are both 32bit and 64bit versions of the key
+            //   this is because the product stores the info in the 32bit version only and even 64bit
+            //   product must look into the 32bit version.
+            //   Without the redirection we would not be able to test that the product always looks
+            //   into 32bit only.
+            // Per this page https://docs.microsoft.com/en-us/windows/desktop/WinProg64/shared-registry-keys
+            // a user writable redirected key is for example HKCU\Software\Classes\Interface
+            // so we're going to use that one - it's not super clean as they key stored COM interfaces
+            // but we should not corrupt anything by adding a special subkey even if it's left behind.
+            //
+            // Note: If you want to inspect the values written by the test and/or modify them manually
+            //   you have to navigate to HKCU\Software\Classes\Wow6432Node\Interface on a 64bit OS.
+
+            RegistryKey hkcu = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32);
+            RegistryKey interfaceKey = hkcu.CreateSubKey(@"Software\Classes\Interface");
+            RegistryKey testKey = interfaceKey.CreateSubKey(testKeyName);
+
+            string architecture = fixture.CurrentRid.Split('-')[1];
+            RegistryKey dotnetLocationKey = testKey.CreateSubKey($@"Setup\InstalledVersions\{architecture}");
+            dotnetLocationKey.SetValue("InstallLocation", _regDir);
+
+            return dotnetLocationKey;
         }
     }
 }

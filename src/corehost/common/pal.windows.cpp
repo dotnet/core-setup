@@ -234,22 +234,13 @@ bool get_sdk_self_registered_dir(pal::string_t* recv)
 #else
     recv->clear();
 
-    //  ***Used only for testing***
-    pal::string_t environmentOverride;
-    if (pal::getenv(_X("_DOTNET_TEST_SDK_SELF_REGISTERED_DIR"), &environmentOverride))
-    {
-        recv->assign(environmentOverride);
-        return true;
-    }
-    //  ***************************
-
     DWORD size = 0;
     HKEY hkeyHive = HKEY_LOCAL_MACHINE;
     // The registry search occurs in the 32-bit registry in all cases.
     pal::string_t dotnet_key_path = pal::string_t(_X("SOFTWARE\\dotnet"));
 
     pal::string_t environmentRegistryPathOverride;
-    if (pal::getenv(_X("_DOTNET_TEST_SDK_REGISTRY_PATH"), &environmentRegistryPathOverride))
+    if (pal::getenv(_X("_DOTNET_TEST_REGISTRY_PATH"), &environmentRegistryPathOverride))
     {
         pal::string_t hkcuPrefix = _X("HKEY_CURRENT_USER\\");
         if (environmentRegistryPathOverride.substr(0, hkcuPrefix.length()) == hkcuPrefix)
