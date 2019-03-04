@@ -152,6 +152,10 @@ This would mean that with `DOTNET_ROLL_FORWARD_TO_PRERELEASE=1`:
 
 *With this behavior the special case described above with `LatestMajor` would also work in both orders.*
 
+It's important for this setting to work "on top" of the roll forward settings described above. We need to be able to test pre-release versions without otherwise changing the roll forward policy chosen by the app/environment and without changing the app's configuration assets (files, command line and so on). The other possibilities:
+* `.runtimeconfig.json` version of this setting - this would allow per-framework-reference setting. This may come useful when testing third party framework pre-release versions, but right now there's no such scenario yet. Even then the environment variable might be enough to support testing.
+* CLI version of this setting - this would allow per-process setting (unlike the env. variable which is inherited by all child processes). This is not needed for the testing scenario described above. Currently we're not aware of another scenario which would require such behavior.
+
 Pros
 * Enables easy testing of future releases using pre-release versions.
 * Its name and behavior is intended to be used only when dealing with pre-release versions, so should not cause confusion.
