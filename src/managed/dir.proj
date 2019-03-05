@@ -8,20 +8,15 @@
     <MakeDir Condition="!Exists('$(pOutDir)')" Directories="$(pOutDir)" />
 
     <ItemGroup>
-      <Project Include="$(MSBuildThisFileDirectory)tools/dir.proj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageProjects Include="$(MSBuildThisFileDirectory)Microsoft.DotNet.PlatformAbstractions/Microsoft.DotNet.PlatformAbstractions.csproj" />
       <PackageProjects Include="$(MSBuildThisFileDirectory)Microsoft.Extensions.DependencyModel/Microsoft.Extensions.DependencyModel.csproj" />
+      <PackageProjects Include="$(MSBuildThisFileDirectory)Microsoft.DotNet.Build.Bundle/Microsoft.DotNet.Build.Bundle.csproj" />
     </ItemGroup>
 
     <PropertyGroup>
-      <BuildArgs>$(NoRestoreArg) $(MSBuildPassThroughPropertyList)</BuildArgs>
-      <PackageArgs>/p:BaseOutputPath=$(IntermediateOutputForPackaging)</PackageArgs>
+      <BuildArgs>$(NoRestoreArg) $(MSBuildPassThroughPropertyList) /p:BaseOutputPath=$(IntermediateOutputForPackaging)</BuildArgs>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetToolCommand) build $(BuildArgs) $(PackageArgs) %(PackageProjects.Identity)" />
-    <Exec Command="$(DotnetToolCommand) build $(BuildArgs) %(Project.Identity)" />
+    <Exec Command="$(DotnetToolCommand) build $(BuildArgs) %(PackageProjects.Identity)" />
   </Target>
 </Project>

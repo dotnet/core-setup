@@ -42,9 +42,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
 
             string hostName = Path.GetFileName(fixture.TestProject.AppExe);
             string bundleDll = Path.Combine(sharedTestState.RepoDirectories.Artifacts,
-                                            "bundle",
+                                            "Microsoft.DotNet.Build.Bundle",
                                             "netcoreapp2.0",
-                                            "bundle.dll");
+                                            "Microsoft.DotNet.Build.Bundle.dll");
             string[] bundleArgs = { "-d", fixture.TestProject.OutputDirectory,
                                     "-a", hostName,
                                     "-o", singleFileDir };
