@@ -122,6 +122,17 @@ jobs:
 
 - template: /eng/jobs/bash-build.yml
   parameters:
+    additionalMSBuildArgs: /p:OutputRid=linux-musl-arm64
+    crossBuild: true
+    displayName: Build_Linux_Arm64_Alpine37
+    dockerImage: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-alpine10fcdcf-20190208200917
+    additionalRunArgs: -e ROOTFS_DIR=/crossrootfs/arm64
+    portableBuild: true
+    skipTests: true
+    targetArchitecture: arm64
+
+- template: /eng/jobs/bash-build.yml
+  parameters:
     additionalMSBuildArgs: /p:OutputRid=linux-musl-x64
     displayName: Build_Linux_x64_Alpine36
     dockerImage: microsoft/dotnet-buildtools-prereqs:alpine-3.6-3148f11-20171119021156
