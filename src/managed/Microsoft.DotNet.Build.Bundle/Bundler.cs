@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.Build.Bundle
     /// Bundler: Functionality to embed the managed app and its dependencies
     /// into the host native binary.
     /// </summary>
-
     public class Bundler
     {
         string HostName;
@@ -32,7 +31,7 @@ namespace Microsoft.DotNet.Build.Bundle
         /// </summary>
         const int AssemblyAlignment = 16;
 
-        public static string Version => (BundleManifest.MajorVersion + "." + BundleManifest.MinorVersion);
+        public static string Version => (Manifest.MajorVersion + "." + Manifest.MinorVersion);
 
         public Bundler(string hostName, string contentDir, string outputDir, bool embedPDBs)
         {
@@ -46,9 +45,13 @@ namespace Microsoft.DotNet.Build.Bundle
         {
             // Check required directories
             if (!Directory.Exists(ContentDir))
+            {
                 throw new BundleException("Dirctory not found: " + ContentDir);
+            }
             if (!Directory.Exists(OutputDir))
+            {
                 throw new BundleException("Dirctory not found: " + OutputDir);
+            }
 
             // Set default names
             string baseName = Path.GetFileNameWithoutExtension(HostName);
@@ -62,7 +65,9 @@ namespace Microsoft.DotNet.Build.Bundle
             {
                 string path = Path.Combine(ContentDir, name);
                 if (!File.Exists(path))
+                {
                     throw new BundleException("File not found: " + path);
+                }
             };
 
             checkFileExists(HostName);
@@ -75,7 +80,7 @@ namespace Microsoft.DotNet.Build.Bundle
         /// </summary>
         /// <returns>Returns the offset of the start 'file' within 'bundle'</returns>
 
-        long AddToBundle(Stream bundle, Stream file, FileType type = FileType.Other)
+        long AddToBundle(Stream bundle, Stream file, FileType type = FileType.Extract)
         {
             // Allign assemblies, since they are loaded directly from bundle
             if (type == FileType.Assembly)
@@ -91,36 +96,59 @@ namespace Microsoft.DotNet.Build.Bundle
             return startOffset;
         }
 
-        FileType InferType(string fileName, Stream file)
+        bool ShouldEmbed(string fileName)
         {
-            string extension = Path.GetExtension(fileName).ToLower();
-
-            if (extension.Equals(".pdb"))
-                return FileType.PDB;
-
-            if (fileName.Equals(DepsJson))
-                return FileType.DepsJson;
-
-            if (fileName.Equals(RuntimeConfigJson))
-                return FileType.RuntimeConfigJson;
+            if (fileName.Equals(HostName))
+            {
+                // The bundle starts with the host, so ignore it while embedding.
+                return false;
+            }
 
             if (fileName.Equals(RuntimeConfigDevJson))
-                return FileType.RuntimeConfigDevJson;
+            {
+                // Ignore the machine specific configuration file.
+                return false;
+            }
+
+            if (Path.GetExtension(fileName).ToLower().Equals(".pdb"))
+            {
+                return EmbedPDBs;
+            }
+
+            return true;
+        }
+
+        FileType InferType(string fileName, Stream file)
+        {
+            if (fileName.Equals(DepsJson))
+            {
+                return FileType.DepsJson;
+            }
+
+            if (fileName.Equals(RuntimeConfigJson))
+            {
+                return FileType.RuntimeConfigJson;
+            }
 
             if (fileName.Equals(Application))
+            {
                 return FileType.Application;
+            }
 
-            try {
+            try
+            {
                 PEReader peReader = new PEReader(file);
                 CorHeader corHeader = peReader.PEHeaders.CorHeader;
                 if ((corHeader != null) && ((corHeader.Flags & CorFlags.ILOnly) != 0))
+                {
                     return FileType.Assembly;
+                }
             }
             catch (BadImageFormatException)
             {
             }
 
-            return FileType.Other;
+            return FileType.Extract;
         }
 
         void GenerateBundle()
@@ -128,7 +156,9 @@ namespace Microsoft.DotNet.Build.Bundle
             string bundlePath = Path.Combine(OutputDir, HostName);
 
             if (File.Exists(bundlePath))
+            {
                 Program.Log($"Ovewriting existing File {bundlePath}");
+            }
 
             // Start with a copy of the host executable.
             // Copy the file to preserve its permissions.
@@ -137,30 +167,25 @@ namespace Microsoft.DotNet.Build.Bundle
             using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(bundlePath)))
             {
                 Stream bundle = writer.BaseStream;
-                BundleManifest manifest = new BundleManifest();
+                Manifest manifest = new Manifest();
 
                 bundle.Position = bundle.Length;
                 foreach (string filePath in Directory.GetFiles(ContentDir))
                 {
                     string fileName = Path.GetFileName(filePath);
 
-                    // Skip over the host, which is written first.
-                    if (fileName.Equals(HostName))
+                    if (!ShouldEmbed(fileName))
+                    {
+                        Program.Log($"Skip: {fileName}");
                         continue;
+                    }
 
                     using (FileStream file = File.OpenRead(filePath))
                     {
                         FileType type = InferType(fileName, file);
-
-                        // Should this be based on checking the file format, rather than the file name? 
-                        if (!EmbedPDBs && type == FileType.PDB)
-                        {
-                            Program.Log($"Skip [PDB] {fileName}");
-                            continue;
-                        }
-
                         long startOffset = AddToBundle(bundle, file, type);
-                        FileEntry entry = manifest.AddEntry(type, fileName, startOffset, file.Length);
+                        FileEntry entry = new FileEntry(type, fileName, startOffset, file.Length);
+                        manifest.Files.Add(entry);
                         Program.Log($"Embed: {entry}");
                     }
                 }

@@ -9,7 +9,6 @@ namespace Microsoft.DotNet.Build.Bundle
     /// This exception is thrown when a bundle/extraction
     /// operation fails due known user errors.
     /// </summary>
-    
     public class BundleException : Exception
     {
         public BundleException(string message) :

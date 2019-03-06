@@ -8,7 +8,6 @@ namespace Microsoft.DotNet.Build.Bundle
     /// <summary>
     ///  The main driver for Bundle and Extract operations.
     /// </summary>
-    
     public static class Program
     {
         enum RunMode
@@ -32,26 +31,20 @@ namespace Microsoft.DotNet.Build.Bundle
         // Extract options:
         static string BundleToExtract;
 
-        // Typical usages are:
-        // Bundle: bundle -d <publish-dir> -a <host-exe>
-        // Extract: bundle -e <single-exe>
         static void Usage()
         {
-            Console.WriteLine($".NET Core Bundler ({Bundler.Version})");
-            Console.WriteLine("bundle [<mode>] [<options>]");
-            Console.WriteLine("where <Mode> is one of:");
-            Console.WriteLine("  Embed mode (by default)");
-            Console.WriteLine("  Extract mode (triggered by -e)");
-            Console.WriteLine("Embed mode options:");
-            Console.WriteLine("  -d <path>  Directory containing the files to bundle");
-            Console.WriteLine("  -a <name>  Application host (within the content directory)");
-            Console.WriteLine(" [-pdb+]     Embed the PDB file");
-            Console.WriteLine("Extract mode options:");
-            Console.WriteLine("  -e <path>  Path to the bundle file to extract");
-            Console.WriteLine("Common options:");
-            Console.WriteLine(" [-o <path>] Output directory (default: current)");
-            Console.WriteLine(" [-v]        Generate verbose output");
-            Console.WriteLine(" [-?]        Display usage information");
+            Console.WriteLine($".NET Core Bundler (version {Bundler.Version})");
+            Console.WriteLine("Usage: bundle <options>");
+            Console.WriteLine("  -d <path> Directory containing the files to bundle (required for bundling)");
+            Console.WriteLine("  -a <name> Application host within the content directory (required for bundling)");
+            Console.WriteLine("  --pdb     Embed PDB files");
+            Console.WriteLine("  -e <path> Extract files from the specified bundle");
+            Console.WriteLine("  -o <path> Output directory (default: current)");
+            Console.WriteLine("  -v        Generate verbose output");
+            Console.WriteLine("  -?        Display usage information");
+            Console.WriteLine("Examples:");
+            Console.WriteLine("Bundle:  bundle -d <publish-dir> -a <host-exe> -o <output-dir>");
+            Console.WriteLine("Extract: bundle -e <bundle-exe> -o <output-dir>");
         }
 
         public static void Log(string fmt, params object[] args)
@@ -73,7 +66,9 @@ namespace Microsoft.DotNet.Build.Bundle
             Func<string, string> NextArg = (string option) =>
             {
                 if (++i >= args.Length)
+                {
                     throw new BundleException("Argument missing for" + option);
+                }
                 return args[i];
             };
 
@@ -117,14 +112,20 @@ namespace Microsoft.DotNet.Build.Bundle
             if (Mode == RunMode.Bundle)
             {
                 if (ContentDir == null)
+                {
                     throw new BundleException("Missing argument: -d");
+                }
 
                 if (HostName == null)
+                {
                     throw new BundleException("Missing argument: -a");
+                }
             }
 
             if (OutputDir == null)
+            {
                 OutputDir = Environment.CurrentDirectory;
+            }
         }
 
         static void Run()

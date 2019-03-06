@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 
 namespace Microsoft.DotNet.Build.Bundle
@@ -9,7 +10,6 @@ namespace Microsoft.DotNet.Build.Bundle
     /// Extractor: The functionality to extract the files embedded 
     /// within a bundle to sepearte files.
     /// </summary>
-
     public class Extractor
     {
         string OutputDir;
@@ -26,18 +26,20 @@ namespace Microsoft.DotNet.Build.Bundle
             try
             {
                 if (!File.Exists(BundlePath))
+                {
                     throw new BundleException("File not found: " + BundlePath);
+                }
 
                 using (BinaryReader reader = new BinaryReader(File.OpenRead(BundlePath)))
                 {
-                    BundleManifest manifest = new BundleManifest();
-                    manifest.Read(reader);
+                    Manifest manifest = Manifest.Read(reader);
 
                     foreach (FileEntry entry in manifest.Files)
                     {
                         Program.Log($"Spill: {entry}");
                         string filePath = Path.Combine(OutputDir, entry.Name);
                         reader.BaseStream.Position = entry.Offset;
+
                         using (BinaryWriter file = new BinaryWriter(File.Create(filePath)))
                         {
                             long size = entry.Size;
@@ -53,6 +55,11 @@ namespace Microsoft.DotNet.Build.Bundle
             }
             catch (IOException)
             {
+                throw new BundleException("Malformed Bundle");
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // Trying to set file-stream position to an invalid value
                 throw new BundleException("Malformed Bundle");
             }
         }

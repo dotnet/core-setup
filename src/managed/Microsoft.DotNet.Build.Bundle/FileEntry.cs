@@ -8,18 +8,15 @@ namespace Microsoft.DotNet.Build.Bundle
 {
     /// <summary>
     /// FileEntry: Records information about embedded files.
+    /// 
     /// The bundle manifest records the following meta-data for each 
     /// file embedded in the bundle:
-    /// * File Name Length (Int64)
-    /// * File Name (<Length> Bytes)
-    /// * File Offset (Int64)
-    /// * File Size (Int64)
-    /// 
-    /// The Bundle manifest does not encode FileType explicitly in each entry. 
-    /// This information is implicitly deduced based on the position of the 
-    /// FileEntry in the Manifest, and some additional information in the Manifest footer.
+    /// * Type       (1 byte)
+    /// * NameLength (7-bit extension encoding, typically 1 byte)
+    /// * Name       (<NameLength> Bytes)
+    /// * Offset     (Int64)
+    /// * Size       (Int64)
     /// </summary>
-
     public class FileEntry
     {
         public FileType Type;
@@ -37,17 +34,19 @@ namespace Microsoft.DotNet.Build.Bundle
 
         public void Write(BinaryWriter writer)
         {
+            writer.Write((byte) Type);
             writer.Write(Name);
             writer.Write(Offset);
             writer.Write(Size);
         }
 
-        public static FileEntry Read(BinaryReader reader, FileType fileType = FileType.Other)
+        public static FileEntry Read(BinaryReader reader)
         {
+            FileType type = (FileType)reader.ReadByte();
             string fileName = reader.ReadString();
             long offset = reader.ReadInt64();
             long size = reader.ReadInt64();
-            return new FileEntry(fileType, fileName, offset, size);
+            return new FileEntry(type, fileName, offset, size);
         }
 
         public override string ToString()

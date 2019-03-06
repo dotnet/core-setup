@@ -9,23 +9,21 @@ namespace Microsoft.DotNet.Build.Bundle
     /// The bundler differentiates a few kinds of files via the manifest,
     /// with respect to the way in which they'll be used by the runtime.
     ///
-    /// - Runtime Configuration files: processed directly from memory
-    /// - Assemblies: loaded directly from memory.
+    /// - Runtime Configuration files: Processed directly from memory
+    /// - Assemblies: Loaded directly from memory.
     ///               Currently, these are only pure-managed assemblies.
     ///               Future versions should include R2R assemblies here.
-    /// - Other files (simply called "Files" below): files that will be 
-    ///               extracted out to disk. These include native binaries.
+    /// - Other files: Files that will be extracted out to disk. 
+    ///                These include native binaries.
     /// </summary>
-
-    public enum FileType
+    public enum FileType : byte
     {
-        Application,          // Represents the main app, also an assembly
-        Assembly,             // IL Assemblies, which will be processed from bundle
-        DepsJson,             // Configuration file, processed from bundle
-        RuntimeConfigJson,    // Configuration file, processed from bundle
-        RuntimeConfigDevJson, // Configuration file, processed from bundle
-        PDB,                  // PDB file, not bundled by default
-        Other                 // Files spilled to disk by the host
+        Application,        // Represents the main app, also an assembly
+        Assembly,           // IL Assemblies, which will be processed from bundle
+        Ready2Run,          // R2R assemblies, currently unused, spilled to disk.
+        DepsJson,           // Configuration file, processed from bundle
+        RuntimeConfigJson,  // Configuration file, processed from bundle
+        Extract            // Files spilled to disk by the host
     };
 }
 
