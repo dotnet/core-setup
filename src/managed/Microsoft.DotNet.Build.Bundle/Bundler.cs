@@ -1,11 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.IO;
 using System.Reflection.PortableExecutable;
-using System.Linq;
 
 namespace Microsoft.DotNet.Build.Bundle
 {
+    /// <summary>
+    /// Bundler: Functionality to embed the managed app and its dependencies
+    /// into the host native binary.
+    /// </summary>
+
     public class Bundler
     {
         string HostName;
@@ -13,14 +19,17 @@ namespace Microsoft.DotNet.Build.Bundle
         string OutputDir;
         bool EmbedPDBs;
 
-        string TheApp;
+        string Application;
         string DepsJson;
         string RuntimeConfigJson;
+        string RuntimeConfigDevJson;
 
-        // Align embedded assemblies such that they can be loaded 
-        // directly from memory-mapped bundle.
-        // TBD: Set the correct value of alignment while working on 
-        // the runtime changes to load the embedded assemblies.
+        /// <summary>
+        /// Align embedded assemblies such that they can be loaded 
+        /// directly from memory-mapped bundle.
+        /// TBD: Set the correct value of alignment while working on 
+        /// the runtime changes to load the embedded assemblies.
+        /// </summary>
         const int AssemblyAlignment = 16;
 
         public static string Version => (BundleManifest.MajorVersion + "." + BundleManifest.MinorVersion);
@@ -43,9 +52,10 @@ namespace Microsoft.DotNet.Build.Bundle
 
             // Set default names
             string baseName = Path.GetFileNameWithoutExtension(HostName);
-            TheApp = baseName + ".dll";
+            Application = baseName + ".dll";
             DepsJson = baseName + ".deps.json";
             RuntimeConfigJson = baseName + ".runtimeconfig.json";
+            RuntimeConfigDevJson = baseName + ".runtimeconfig.dev.json";
 
             // Check that required files exist on disk.
             Action<string> checkFileExists = (string name) =>
@@ -56,24 +66,27 @@ namespace Microsoft.DotNet.Build.Bundle
             };
 
             checkFileExists(HostName);
-            checkFileExists(TheApp);
+            checkFileExists(Application);
             // The *.json files may or may not exist.
         }
 
-        // Embed 'file' into 'singleFile'
-        // Returns the offset of the start 'file' within 'singleFile'
-        long AddToBundle(Stream singleFile, Stream file, FileType type = FileType.Other)
+        /// <summary>
+        /// Embed 'file' into 'bundle'
+        /// </summary>
+        /// <returns>Returns the offset of the start 'file' within 'bundle'</returns>
+
+        long AddToBundle(Stream bundle, Stream file, FileType type = FileType.Other)
         {
             // Allign assemblies, since they are loaded directly from bundle
             if (type == FileType.Assembly)
             {
-                long padding = AssemblyAlignment - (singleFile.Position % AssemblyAlignment);
-                singleFile.Position += padding;
+                long padding = AssemblyAlignment - (bundle.Position % AssemblyAlignment);
+                bundle.Position += padding;
             }
 
             file.Position = 0;
-            long startOffset = singleFile.Position;
-            file.CopyTo(singleFile);
+            long startOffset = bundle.Position;
+            file.CopyTo(bundle);
 
             return startOffset;
         }
@@ -91,7 +104,10 @@ namespace Microsoft.DotNet.Build.Bundle
             if (fileName.Equals(RuntimeConfigJson))
                 return FileType.RuntimeConfigJson;
 
-            if (fileName.Equals(TheApp))
+            if (fileName.Equals(RuntimeConfigDevJson))
+                return FileType.RuntimeConfigDevJson;
+
+            if (fileName.Equals(Application))
                 return FileType.Application;
 
             try {
@@ -109,21 +125,21 @@ namespace Microsoft.DotNet.Build.Bundle
 
         void GenerateBundle()
         {
-            string singleFilePath = Path.Combine(OutputDir, HostName);
+            string bundlePath = Path.Combine(OutputDir, HostName);
 
-            if (File.Exists(singleFilePath))
-                UI.Log($"Ovewriting existing File {singleFilePath}");
+            if (File.Exists(bundlePath))
+                Program.Log($"Ovewriting existing File {bundlePath}");
 
             // Start with a copy of the host executable.
             // Copy the file to preserve its permissions.
-            File.Copy(Path.Combine(ContentDir, HostName), singleFilePath, overwrite: true);
+            File.Copy(Path.Combine(ContentDir, HostName), bundlePath, overwrite: true);
 
-            using (BinaryWriter oneFile = new BinaryWriter(File.OpenWrite(singleFilePath)))
+            using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(bundlePath)))
             {
-                Stream singleFile = oneFile.BaseStream;
+                Stream bundle = writer.BaseStream;
                 BundleManifest manifest = new BundleManifest();
 
-                singleFile.Position = singleFile.Length;
+                bundle.Position = bundle.Length;
                 foreach (string filePath in Directory.GetFiles(ContentDir))
                 {
                     string fileName = Path.GetFileName(filePath);
@@ -139,18 +155,18 @@ namespace Microsoft.DotNet.Build.Bundle
                         // Should this be based on checking the file format, rather than the file name? 
                         if (!EmbedPDBs && type == FileType.PDB)
                         {
-                            UI.Log($"Skip [PDB] {fileName}");
+                            Program.Log($"Skip [PDB] {fileName}");
                             continue;
                         }
 
-                        long startOffset = AddToBundle(singleFile, file, type);
+                        long startOffset = AddToBundle(bundle, file, type);
                         FileEntry entry = manifest.AddEntry(type, fileName, startOffset, file.Length);
-                        UI.Log($"Embed: {entry}");
+                        Program.Log($"Embed: {entry}");
                     }
                 }
 
-                manifest.Write(oneFile);
-                UI.Log($"SingleFile: Path={singleFilePath} Size={singleFile.Length}");
+                manifest.Write(writer);
+                Program.Log($"Bundle: Path={bundlePath} Size={bundle.Length}");
             }
         }
 

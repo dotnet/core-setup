@@ -1,19 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.IO;
-using System.Reflection.PortableExecutable;
-using System.Linq;
 
 namespace Microsoft.DotNet.Build.Bundle
 {
+    /// <summary>
+    /// Extractor: The functionality to extract the files embedded 
+    /// within a bundle to sepearte files.
+    /// </summary>
+
     public class Extractor
     {
         string OutputDir;
-        string SingleFilePath;
+        string BundlePath;
 
-        public Extractor(string singleFilePath, string outputDir)
+        public Extractor(string bundlePath, string outputDir)
         {
-            SingleFilePath = singleFilePath;
+            BundlePath = bundlePath;
             OutputDir = outputDir;
         }
 
@@ -21,26 +25,26 @@ namespace Microsoft.DotNet.Build.Bundle
         {
             try
             {
-                if (!File.Exists(SingleFilePath))
-                    throw new BundleException("File not found: " + SingleFilePath);
+                if (!File.Exists(BundlePath))
+                    throw new BundleException("File not found: " + BundlePath);
 
-                using (BinaryReader oneFile = new BinaryReader(File.OpenRead(SingleFilePath)))
+                using (BinaryReader reader = new BinaryReader(File.OpenRead(BundlePath)))
                 {
                     BundleManifest manifest = new BundleManifest();
-                    manifest.Read(oneFile);
+                    manifest.Read(reader);
 
                     foreach (FileEntry entry in manifest.Files)
                     {
-                        UI.Log($"Spill: {entry}");
+                        Program.Log($"Spill: {entry}");
                         string filePath = Path.Combine(OutputDir, entry.Name);
-                        oneFile.BaseStream.Position = entry.Offset;
+                        reader.BaseStream.Position = entry.Offset;
                         using (BinaryWriter file = new BinaryWriter(File.Create(filePath)))
                         {
                             long size = entry.Size;
                             do
                             {
                                 int copySize = (int)(size % int.MaxValue);
-                                file.Write(oneFile.ReadBytes(copySize));
+                                file.Write(reader.ReadBytes(copySize));
                                 size -= copySize;
                             } while (size > 0);
                         }

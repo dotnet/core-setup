@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection.PortableExecutable;
-using System.Linq;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 
 namespace Microsoft.DotNet.Build.Bundle
 {
-    public static class UI
+    /// <summary>
+    ///  The main driver for Bundle and Extract operations.
+    /// </summary>
+    
+    public static class Program
     {
-        public enum RunMode
+        enum RunMode
         {
             Help,
             Bundle,
@@ -124,7 +127,7 @@ namespace Microsoft.DotNet.Build.Bundle
                 OutputDir = Environment.CurrentDirectory;
         }
 
-        public static void Run()
+        static void Run()
         {
             switch (Mode)
             {

@@ -1,18 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.IO;
-using System.Reflection.PortableExecutable;
-using System.Linq;
 
 namespace Microsoft.DotNet.Build.Bundle
 {
-    // FileEntry: Records information about embedded files.
-    // A manifest of embedded files is recorded in the bundle meta-data.
-    // For each embedded file, the following information is written:
-    // * File Name Length (Int64)
-    // * File Name (<Length> Bytes)
-    // * File Offset (Int64)
-    // * File Size (Int64)
+    /// <summary>
+    /// FileEntry: Records information about embedded files.
+    /// The bundle manifest records the following meta-data for each 
+    /// file embedded in the bundle:
+    /// * File Name Length (Int64)
+    /// * File Name (<Length> Bytes)
+    /// * File Offset (Int64)
+    /// * File Size (Int64)
+    /// 
+    /// The Bundle manifest does not encode FileType explicitly in each entry. 
+    /// This information is implicitly deduced based on the position of the 
+    /// FileEntry in the Manifest, and some additional information in the Manifest footer.
+    /// </summary>
 
     public class FileEntry
     {
@@ -29,18 +35,18 @@ namespace Microsoft.DotNet.Build.Bundle
             Size = size;
         }
 
-        public void Write(BinaryWriter oneFile)
+        public void Write(BinaryWriter writer)
         {
-            oneFile.Write(Name);
-            oneFile.Write(Offset);
-            oneFile.Write(Size);
+            writer.Write(Name);
+            writer.Write(Offset);
+            writer.Write(Size);
         }
 
-        public static FileEntry Read(BinaryReader oneFile, FileType fileType = FileType.Other)
+        public static FileEntry Read(BinaryReader reader, FileType fileType = FileType.Other)
         {
-            string fileName = oneFile.ReadString();
-            long offset = oneFile.ReadInt64();
-            long size = oneFile.ReadInt64();
+            string fileName = reader.ReadString();
+            long offset = reader.ReadInt64();
+            long size = reader.ReadInt64();
             return new FileEntry(fileType, fileName, offset, size);
         }
 

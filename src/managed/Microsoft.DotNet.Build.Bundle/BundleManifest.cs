@@ -1,19 +1,77 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection.PortableExecutable;
 using System.Linq;
 
 namespace Microsoft.DotNet.Build.Bundle
 {
+    /// <summary>
+    ///  BundleManifest is a description of the contents of a bundle file.
+    ///  This class handles creation and consumption of bundle-manifests.
+    ///  
+    ///  Here is the description of the Bundle Layout:
+    ///  _______________________________________________
+    ///  AppHost 
+    ///
+    ///
+    /// ----------------------------------------------
+    /// The embedded files including the app, its
+    /// configuration files, dependencies, and 
+    /// possibly the runtime.
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    ///
+    /// -----------------------------------------------
+    /// Meta-data Directory (FileEntries)
+    ///   "app.deps.json"               (if any)
+    ///   "app.runtimeconfig.json"      (if any)
+    ///   "app.runtimeconfig.dev.json"  (if any)
+    ///   "app.dll"                 (The main app)
+    ///   "IL_1.dll"                (Assemblies, if any)
+    ///    ...
+    ///   "IL_n.dll"
+    ///   "File_1"                  (Other Files, if any)
+    ///    ...
+    ///   "File_n" 
+    /// - - - - - - - - - - - - - - - - - - - - - - - -
+    ///  Bundle Manifest (footer)
+    ///     MajorVersion
+    ///     MinorVersion
+    ///     FileEntryStart (offset)
+    ///     NumFiles
+    ///     NumAssemblies
+    ///     Flags
+    /// -----------------------------------------------
+    ///   Bundle Signature
+    /// _________________________________________________
+    /// 
+    /// The Bundle manifest does not encode FileType explicitly in each entry. 
+    /// The FileType for each embedded file is deduced based on:
+    ///  - FileEntry position: FileEntries are recorded in the order
+    ///     -- Configuration files
+    ///     -- The main assembly
+    ///     -- Other assemblies
+    ///     -- Other Files
+    ///  - Flags (to determine number of configuration files)
+    ///  - NumAssemblies 
+    /// </summary>
+
     public class BundleManifest
     {
         [Flags]
-        public enum BundleFlags
+        enum BundleFlags
         {
             None = 0,
             HasDepsJson = 1,
-            HasRuntimeConfigJson = 2
+            HasRuntimeConfigJson = 2,
+            HasRuntimeConfigDevJson = 4
         }
 
         public const string Signature = ".NetCoreBundle";
@@ -45,6 +103,10 @@ namespace Microsoft.DotNet.Build.Bundle
                 case FileType.RuntimeConfigJson:
                     flags |= BundleFlags.HasRuntimeConfigJson;
                     break;
+                case FileType.RuntimeConfigDevJson:
+                    flags |= BundleFlags.HasRuntimeConfigDevJson;
+                    break;
+
                 default:
                     break;
             }
@@ -54,26 +116,32 @@ namespace Microsoft.DotNet.Build.Bundle
             return entry;
         }
 
-        void WriteDirs(BinaryWriter oneFile)
+        void WriteFileEntries(BinaryWriter writer)
         {
             Action<FileType> writeEntry = (FileType type) =>
-              (from entry in Files where entry.Type == type select entry).Single().Write(oneFile);
+                Files
+                .Where(entry => entry.Type == type)
+                .Single()
+                .Write(writer);
 
             Func<FileType, int> writeEntries = (FileType type) =>
             {
-                IEnumerable<FileEntry> entries = from file in Files where file.Type == type select file;
+                IEnumerable<FileEntry> entries = Files.Where(entry => entry.Type == type);
                 foreach (FileEntry entry in entries)
-                    entry.Write(oneFile);
+                    entry.Write(writer);
                 return entries.Count();
             };
 
-            FileEntryStart = oneFile.BaseStream.Position;
+            FileEntryStart = writer.BaseStream.Position;
 
             if (flags.HasFlag(BundleFlags.HasDepsJson))
                 writeEntry(FileType.DepsJson);
 
             if (flags.HasFlag(BundleFlags.HasRuntimeConfigJson))
                 writeEntry(FileType.RuntimeConfigJson);
+
+            if (flags.HasFlag(BundleFlags.HasRuntimeConfigDevJson))
+                writeEntry(FileType.RuntimeConfigDevJson);
 
             writeEntry(FileType.Application);
 
@@ -82,58 +150,58 @@ namespace Microsoft.DotNet.Build.Bundle
             writeEntries(FileType.Other);
         }
 
-        public void Write(BinaryWriter oneFile)
+        public void Write(BinaryWriter writer)
         {
-            long startOffset = oneFile.BaseStream.Position;
-            WriteDirs(oneFile);
+            long startOffset = writer.BaseStream.Position;
+            WriteFileEntries(writer);
 
-            oneFile.Write(MajorVersion);
-            oneFile.Write(MinorVersion);
+            writer.Write(MajorVersion);
+            writer.Write(MinorVersion);
 
-            oneFile.Write(FileEntryStart);
-            oneFile.Write(Files.Count());
-            oneFile.Write(AssemblyCount);
-            oneFile.Write((int)flags);
+            writer.Write(FileEntryStart);
+            writer.Write(Files.Count());
+            writer.Write(AssemblyCount);
+            writer.Write((int)flags);
 
-            oneFile.Write(Signature);
+            writer.Write(Signature);
 
-            long size = oneFile.BaseStream.Position - startOffset;
-            UI.Log($"Manifest: Offset={startOffset}, Size={size}");
+            long size = writer.BaseStream.Position - startOffset;
+            Program.Log($"Manifest: Offset={startOffset}, Size={size}");
         }
 
-        void ReadDirs(BinaryReader oneFile, long fileCount)
+        void ReadFileEntries(BinaryReader reader, long fileCount)
         {
             // This extractor doesn't actually care about the type of file.
             // It just extracts out all files. 
-            oneFile.BaseStream.Position = FileEntryStart;
+            reader.BaseStream.Position = FileEntryStart;
             for (long i = 0; i < fileCount; i++)
-                Files.Add(FileEntry.Read(oneFile));
+                Files.Add(FileEntry.Read(reader));
         }
 
-        public void Read(BinaryReader oneFile)
+        public void Read(BinaryReader reader)
         {
-            if(oneFile.BaseStream.Length < FooterLength)
+            if(reader.BaseStream.Length < FooterLength)
                 throw new BundleException("Invalid Bundle");
 
-            oneFile.BaseStream.Position = oneFile.BaseStream.Length - SignatureLength;
-            string signature = oneFile.ReadString();
+            reader.BaseStream.Position = reader.BaseStream.Length - SignatureLength;
+            string signature = reader.ReadString();
 
             if (!signature.Equals(Signature))
                 throw new BundleException("Invalid Bundle");
 
-            oneFile.BaseStream.Position = oneFile.BaseStream.Length - FooterLength;
+            reader.BaseStream.Position = reader.BaseStream.Length - FooterLength;
 
-            uint majorVersion = oneFile.ReadUInt32();
-            uint minorVersion = oneFile.ReadUInt32();
+            uint majorVersion = reader.ReadUInt32();
+            uint minorVersion = reader.ReadUInt32();
 
             if (majorVersion != MajorVersion || minorVersion != MinorVersion)
                 throw new BundleException("Extraction failed: Invalid Version");
 
-            FileEntryStart = oneFile.ReadInt64();
-            int fileCount = oneFile.ReadInt32();
-            AssemblyCount = oneFile.ReadInt32();
-            flags = (BundleFlags)oneFile.ReadInt32();
-            ReadDirs(oneFile, fileCount);
+            FileEntryStart = reader.ReadInt64();
+            int fileCount = reader.ReadInt32();
+            AssemblyCount = reader.ReadInt32();
+            flags = (BundleFlags)reader.ReadInt32();
+            ReadFileEntries(reader, fileCount);
         }
     }
 }
