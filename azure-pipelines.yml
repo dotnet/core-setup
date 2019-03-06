@@ -201,6 +201,18 @@ jobs:
   ################################################################################
   - template: /eng/jobs/finalize-publish.yml
     parameters:
+      DependsOn:
+      - Build_Linux_Arm
+      - Build_Linux_Arm64
+      - Build_Linux_Arm64_Alpine37
+      - Build_Linux_x64_Alpine36
+      - Build_Linux_x64_glibc
+      - Build_Linux_x64_Rhel6
+      - Build_OSX
+      - Build_Windows_Arm
+      - Build_Windows_Arm64
+      - Build_Windows_x64
+      - Build_Windows_x86
       _PublishType: nopublishtype
 
   ################################################################################
