@@ -22,10 +22,10 @@ namespace
     bool g_init_done;
     hostpolicy_init_t g_init;
 
-    std::shared_ptr<coreclr_t> g_coreclr;
+    std::unique_ptr<coreclr_t> g_coreclr;
 
     std::mutex g_lib_lock;
-    std::weak_ptr<coreclr_t> g_lib_coreclr;
+    coreclr_t *g_lib_coreclr;
 
     class prepare_to_run_t
     {
@@ -241,10 +241,10 @@ namespace
 int run_as_lib(
     hostpolicy_init_t &hostpolicy_init,
     const arguments_t &args,
-    std::shared_ptr<coreclr_t> &coreclr)
+    coreclr_t **coreclr)
 {
-    coreclr = g_lib_coreclr.lock();
-    if (coreclr != nullptr)
+    *coreclr = g_lib_coreclr;
+    if (*coreclr != nullptr)
     {
         // [TODO] Validate the current CLR instance is acceptable for this request
 
@@ -254,8 +254,8 @@ int run_as_lib(
 
     {
         std::lock_guard<std::mutex> lock{ g_lib_lock };
-        coreclr = g_lib_coreclr.lock();
-        if (coreclr != nullptr)
+        *coreclr = g_lib_coreclr;
+        if (*coreclr != nullptr)
         {
             trace::info(_X("Using existing CoreClr instance"));
             return StatusCode::Success;
@@ -298,10 +298,10 @@ int run_as_lib(
 
         assert(g_coreclr == nullptr);
         g_coreclr = std::move(coreclr_local);
-        g_lib_coreclr = g_coreclr;
+        g_lib_coreclr = g_coreclr.get();
     }
 
-    coreclr = g_coreclr;
+    *coreclr = g_lib_coreclr;
     return StatusCode::Success;
 }
 
@@ -368,7 +368,7 @@ int run_as_app(
 
     {
         std::lock_guard<std::mutex> lock{ g_lib_lock };
-        g_lib_coreclr = g_coreclr;
+        g_lib_coreclr = g_coreclr.get();
     }
 
     // Initialize clr strings for arguments
@@ -603,8 +603,8 @@ SHARED_API int corehost_get_com_activation_delegate(void **delegate)
     if (rc != StatusCode::Success)
         return rc;
 
-    std::shared_ptr<coreclr_t> coreclr;
-    rc = run_as_lib(g_init, args, coreclr);
+    coreclr_t *coreclr;
+    rc = run_as_lib(g_init, args, &coreclr);
     if (rc != StatusCode::Success)
         return rc;
 
