@@ -6,6 +6,7 @@
 
 #include "pal.h"
 #include "trace.h"
+#include <mutex>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -44,6 +45,7 @@ public:
     pal::hresult_t shutdown(int* latchedExitCode);
 
 private:
+    std::mutex _shutdown_lock;
     bool _is_shutdown;
     host_handle_t _host_handle;
     domain_id_t _domain_id;

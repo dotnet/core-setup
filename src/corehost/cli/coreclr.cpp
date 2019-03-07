@@ -169,6 +169,8 @@ pal::hresult_t coreclr_t::shutdown(int* latchedExitCode)
 {
     assert(g_coreclr != nullptr && coreclr_shutdown != nullptr);
 
+    std::lock_guard<std::mutex> lock{ _shutdown_lock };
+
     // If already shut down return success since the result
     // has already been reported to a previous caller.
     if (_is_shutdown)
