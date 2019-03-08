@@ -14,4 +14,5 @@ endif()
 
 include(../exe.cmake)
 
-install_library_and_symbols (dotnet)
+install(TARGETS dotnet DESTINATION .)
+install_symbols(dotnet .)

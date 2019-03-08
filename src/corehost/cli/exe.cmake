@@ -20,6 +20,7 @@ if(NOT WIN32)
     disable_pax_mprotect(${DOTNET_PROJECT_NAME})
 endif()
 
-install(TARGETS ${DOTNET_PROJECT_NAME} DESTINATION bin)
+install(TARGETS ${DOTNET_PROJECT_NAME} DESTINATION .)
+install_symbols(${DOTNET_PROJECT_NAME} .)
 
 set_common_libs("exe")

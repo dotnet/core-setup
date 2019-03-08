@@ -129,7 +129,7 @@ popd
 
 :CheckForProj
 :: Check that the project created by Cmake exists
-if exist "%__IntermediatesDir%\ALL_BUILD.vcxproj" goto BuildNativeProj
+if exist "%__IntermediatesDir%\INSTALL.vcxproj" goto BuildNativeProj
 goto :Failure
 
 :BuildNativeProj
@@ -141,8 +141,8 @@ cd %__rootDir%
 SET __NativeBuildArgs=/t:rebuild
 if /i "%__IncrementalNativeBuild%" == "1" SET __NativeBuildArgs=
 
-echo msbuild "%__IntermediatesDir%\ALL_BUILD.vcxproj" %__NativeBuildArgs% /m /p:Configuration=%CMAKE_BUILD_TYPE% %__msbuildArgs%
-call msbuild "%__IntermediatesDir%\ALL_BUILD.vcxproj" %__NativeBuildArgs% /m /p:Configuration=%CMAKE_BUILD_TYPE% %__msbuildArgs%
+echo msbuild "%__IntermediatesDir%\INSTALL.vcxproj" %__NativeBuildArgs% /m /p:Configuration=%CMAKE_BUILD_TYPE% %__msbuildArgs%
+call msbuild "%__IntermediatesDir%\INSTALL.vcxproj" %__NativeBuildArgs% /m /p:Configuration=%CMAKE_BUILD_TYPE% %__msbuildArgs%
 IF ERRORLEVEL 1 (
     goto :Failure
 )

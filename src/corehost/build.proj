@@ -32,19 +32,6 @@
     <Message Text="$(MSBuildProjectDirectory)\build.sh $(BuildArgs)" Importance="High"/>
     <Exec Command="$(MSBuildProjectDirectory)\build.sh $(BuildArgs)"
           WorkingDirectory="$(CMakeBuildDir)"/>
-
-    <ItemGroup>
-      <CMakeOutput Include="$(CMakeBuildDir)cli\dotnet\dotnet" />
-      <CMakeOutput Include="$(CMakeBuildDir)cli\apphost\apphost" />
-      <CMakeOutput Include="$(CMakeBuildDir)cli\hostpolicy\$(HostPolicyBaseName)" />
-      <CMakeOutput Include="$(CMakeBuildDir)cli\fxr\$(DotnetHostFxrBaseName)" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(StripSymbols)' == 'true'">
-      <CMakeOutput Include="@(CmakeOutput -> '%(Identity)$(SymbolFileExtension)')" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(CMakeOutput)"
-          DestinationFolder="$(CoreHostOutputDir)"/>
   </Target>
 
   <Target Name="BuildCoreHostWindows"
@@ -80,21 +67,5 @@
     <!-- Run script that invokes Cmake to create VS files, and then calls msbuild to compile them -->
     <Message Text="$(MSBuildProjectDirectory)\build.cmd $(BuildArgs)" Importance="High"/>
     <Exec Command="$(MSBuildProjectDirectory)\build.cmd $(BuildArgs)" />
-
-    <ItemGroup>
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dotnet\$(ConfigurationGroup)\dotnet.exe" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\dotnet\$(ConfigurationGroup)\dotnet.pdb" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\apphost\$(ConfigurationGroup)\apphost.exe" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\apphost\$(ConfigurationGroup)\apphost.pdb" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\comhost\$(ConfigurationGroup)\comhost.dll" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\comhost\$(ConfigurationGroup)\comhost.pdb" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\hostpolicy\$(ConfigurationGroup)\$(HostPolicyBaseName)" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\hostpolicy\$(ConfigurationGroup)\hostpolicy.pdb" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\fxr\$(ConfigurationGroup)\$(DotnetHostFxrBaseName)" />
-      <CMakeOutput Include="$(IntermediateOutputRootPath)corehost\cli\fxr\$(ConfigurationGroup)\hostfxr.pdb" />
-    </ItemGroup>
-    
-    <Copy SourceFiles="@(CMakeOutput)"
-          DestinationFolder="$(CoreHostOutputDir)"/>
   </Target>
 </Project>
