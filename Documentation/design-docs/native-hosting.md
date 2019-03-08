@@ -52,6 +52,11 @@ At the same time add the ability to pass additional runtime properties when star
 This new ability would be added to both `hostfxr` and to the `nethost`.
 
 
+*Technical note: All strings in the proposed APIs are using the `char_t` in this document for simplicity. In real implementation they are of the type `pal::char_t`. In particular:*
+* *On Windows - they are `WCHAR *` using `UTF16` encoding*
+* *On Linux/macOS - they are `char *` using `UTF8` encoding*
+
+
 ## New host binary for component hosting
 Add new library `nethost` which will act as the easy to use host for loading managed components.
 The library would be a dynamically loaded library (`.dll`, `.so`, `.dylib`). For ease of use there would be a header file for C++ apps as well as `.lib`/`.a` for easy linking.
@@ -62,9 +67,9 @@ This library would expose two APIs
 ### Load managed component and get a function pointer
 ``` C++
 int nethost_load_assembly_method(
-        const char * assembly_path,
-        const char * type_name,
-        const char * method_name,
+        const char_t * assembly_path,
+        const char_t * type_name,
+        const char_t * method_name,
         const void * reserved,
         void ** delegate);
 )
@@ -81,7 +86,7 @@ This API will
   * Find the requested `type_name` and `method_name`
   * Return a native callable function pointer to the requested method
 
-The `reserved` argument is currently not used and must be set to `nullptr`.
+The `reserved` argument is currently not used and must be set to `nullptr`. It is present to make this API extensible. In a future version we may need to add more parameters to this call in which case this parameter would be a pointer to a `struct` with the additional fields.
 
 If the runtime is initialized by this function, it will only be populated with framework assemblies (its TPA), none of the component's assemblies will be loaded into the default context.
 
@@ -89,43 +94,43 @@ If the runtime is initialized by this function, it will only be populated with f
 
 ### Locate `hostfxr`
 ``` C++
-typedef void(* nethost_get_hosfxr_path_result_fn)(const char * hostfxr_path);
+typedef void(* nethost_get_hosfxr_path_result_fn)(const char_t * hostfxr_path);
 
 int nethost_get_hostfxr_path(
         nethost_get_hostfxr_path_result_fn result,
-        const char * assembly_path); // Optional
+        const_t char * assembly_path); // Optional
 ```
 
 This API locates the `hostfxr` and returns its path by calling the `result` function. (This callback design is chosen so that it's clear and easy to define memory ownership.)
 
 `assembly_path` is optional:
-* If not specified, the "muxer" (`dotnet.exe`) behavior is used to locate the `hostfxr`
-* If specified, the `apphost` behavior is used
+* If `nullptr` the "muxer" (`dotnet.exe`) behavior is used to locate the `hostfxr`.
+* If specified the `apphost` behavior is used.
 
 
 ## Improve API to run application
 New API will be added to `hostfxr`.
 
 ``` C++
-struct hostfxr_runtime_properties
+struct hostfxr_runtime_property
 {
-    int count;
-    const char ** keys;
-    const char ** values;
+    const char_t * key;
+    const char_t * value;
 };
 
 struct hostfxr_parameters
 {
-    int size;
-    const char * host_path;
-    const char * dotnet_root;
-    const char * app_path;
-    hostfxr_runtime_properties additional_properties;
+    size_t size;
+    const char_t * host_path;
+    const char_t * dotnet_root;
+    const char_t * app_path;
+    size_t additional_properties_count;
+    const hostfxr_runtime_property * additional_properties;
 };
 
 int hostfxr_main_with_parameters(
         const int argc,
-        const char* argv[],
+        const char_t * argv[],
         const hostfxr_parameters * parameters);
 ```
 
@@ -133,7 +138,7 @@ This new API supercedes the existing `hostfxr_main` and `hostfxr_main_startupinf
 
 The proposed behavior is the same as for the existing entry points `hostfxr_main` and `hostfxr_main_startupinfo` with the addition of `parameters` structure. This is meant to:
 * Add the ability to specify additional runtime properties which will be added to the property bag pass to the runtime during its initialization.
-* Make the API extensible without adding new entry point. In the future the parameters structure can be extended with additional members.
+* Make the API extensible without adding new entry point. In the future the parameters structure can be extended with additional members. The `hostfxr_parameters` structure is versioned by its `size` field which must be set by the caller to `sizeof(hostfxr_parameters)`. If we rev it in the future, we would introduce a new type, for example `hostfxr_parameters_extended` which would add new fields and thus increase the size.
 
 The ability to specify additional runtime properties introduces potential collisions with runtime properties initialized by the hosting layer. This ability is not new, it's already possible to specify arbitrary set of additional runtime properties through the `configProperties` section of the `.runtimeconfig.json`. The existing behavior for collisions is somewhat undefined by it effectively means:
 * Properties supplied by the host are added first
