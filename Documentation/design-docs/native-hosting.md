@@ -54,7 +54,7 @@ This new ability would be added to both `hostfxr` and to the `nethost`.
 
 ## New host binary for component hosting
 Add new library `nethost` which will act as the easy to use host for loading managed components.
-The library would be a dynamically loaded library (`.dll`, `.so`, `.dynlib`). For ease of use there would be a header file for C++ apps as well as `.lib`/`.a` for easy linking.
+The library would be a dynamically loaded library (`.dll`, `.so`, `.dylib`). For ease of use there would be a header file for C++ apps as well as `.lib`/`.a` for easy linking.
 Apps using the component hosting functionality would ship this library as part of the app. So similarly to `apphost`/`comhost`/`ijwhost` the `nethost` will be shipped as part of .NET Core SDK to be included in customer's projects.
 
 This library would expose two APIs
