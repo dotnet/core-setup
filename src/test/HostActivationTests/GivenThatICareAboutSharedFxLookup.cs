@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
@@ -358,20 +357,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
             // Add some dummy versions in the exe
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "10000.1.1");
 
-            string expectedPrereqInstallUrl;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                expectedPrereqInstallUrl = "https://go.microsoft.com/fwlink/?linkid=798306";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                expectedPrereqInstallUrl = "https://go.microsoft.com/fwlink/?linkid=2063366";
-            }
-            else
-            {
-                expectedPrereqInstallUrl = "https://go.microsoft.com/fwlink/?linkid=2063370";
-            }
-
             // Version: 9999.0.0
             // 'Roll forward on no candidate fx' default value of 1 (minor)
             // exe: 10000.1.1
@@ -386,8 +371,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .Fail()
                 .And
                 .HaveStdErrContaining("It was not possible to find any compatible framework version")
-                .And
-                .HaveStdErrContaining(expectedPrereqInstallUrl)
                 .And
                 .HaveStdErrContaining("aka.ms/dotnet-download");
 
@@ -1069,14 +1052,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .Values()["native"].Children().OfType<JProperty>();
 
             // Change the coreclr.dll asset to specify only "coreclr.dll" as the relative path (no directories).
-            string coreClrLibraryName = $"{fixture.SharedLibraryPrefix}coreclr{fixture.SharedLibraryExtension}";
+            string coreClrLibraryName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("coreclr");
             JProperty coreClrProperty = netCoreAppNativeAssets.First(p => p.Name.Contains(coreClrLibraryName));
             JProperty newCoreClrProperty = new JProperty(coreClrProperty.Name.Substring(coreClrProperty.Name.LastIndexOf('/') + 1), coreClrProperty.Value);
             coreClrProperty.Parent.Add(newCoreClrProperty);
             coreClrProperty.Remove();
 
             // Change the clrjit.dll asset to specify only "clrjit.dll" as the relative path (no directories).
-            string clrJitLibraryName = $"{fixture.SharedLibraryPrefix}clrjit{fixture.SharedLibraryExtension}";
+            string clrJitLibraryName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("clrjit");
             JProperty clrJitProperty = netCoreAppNativeAssets.First(p => p.Name.Contains(clrJitLibraryName));
             JProperty newClrJitProperty = new JProperty(clrJitProperty.Name.Substring(clrJitProperty.Name.LastIndexOf('/') + 1), clrJitProperty.Value);
             clrJitProperty.Parent.Add(newClrJitProperty);

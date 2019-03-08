@@ -9,13 +9,6 @@
 #include "trace.h"
 #include "utils.h"
 
-
-// Declarations of hostfxr entry points
-bool get_latest_fxr(pal::string_t fxr_root, pal::string_t* out_fxr_path);
-
-// Attempt to resolve fxr and the dotnet root using host specific logic
-bool resolve_fxr_path(const pal::string_t& root_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path);
-
 #if FEATURE_APPHOST
 #define CURHOST_TYPE    _X("apphost")
 #define CUREXE_PKG_VER  APPHOST_PKG_VER
@@ -64,7 +57,7 @@ bool is_exe_enabled_for_execution(pal::string_t* app_dll)
     size_t hi_len = (sizeof(hi_part) / sizeof(hi_part[0])) - 1;
     size_t lo_len = (sizeof(lo_part) / sizeof(lo_part[0])) - 1;
 
-    if ((binding.size() >= (hi_len + lo_len)) && 
+    if ((binding.size() >= (hi_len + lo_len)) &&
         binding.compare(0, hi_len, &hi_part[0]) == 0 &&
         binding.compare(hi_len, lo_len, &lo_part[0]) == 0)
     {
@@ -75,12 +68,7 @@ bool is_exe_enabled_for_execution(pal::string_t* app_dll)
     trace::info(_X("The managed DLL bound to this executable is: '%s'"), app_dll->c_str());
     return true;
 }
-
-#elif FEATURE_LIBHOST
-
-#error "corehost.cpp not applicable for libhost scenario."
-
-#else // !FEATURE_APPHOST && !FEATURE_LIBHOST
+#elif !FEATURE_LIBHOST
 #define CURHOST_TYPE    _X("dotnet")
 #define CUREXE_PKG_VER  HOST_PKG_VER
 #define CURHOST_EXE

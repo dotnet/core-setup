@@ -209,31 +209,27 @@ void fx_muxer_t::display_missing_framework_error(
     }
     else
     {
-        trace::error(_X("No frameworks were found."));
+        trace::error(_X("The specified framework '%s' was not found."), fx_name.c_str());
     }
 
-    trace::error(_X("  - Check application dependencies and target a framework version installed at:"));
-    trace::error(_X("      %s"), fx_ver_dirs.c_str());
-    trace::error(_X("  - The .NET Core framework and SDK can be installed from:"));
-    trace::error(_X("      %s"), DOTNET_CORE_DOWNLOAD_URL);
-
-    // Gather the list of versions installed at the shared FX location.
-    bool is_print_header = true;
-
-    for (const framework_info& info : framework_infos)
+    if (framework_infos.size())
     {
-        // Print banner only once before printing the versions
-        if (is_print_header)
+        trace::error(_X("  - The following frameworks were found:"));
+        for (const framework_info& info : framework_infos)
         {
-            trace::error(_X("  - The following versions are installed:"));
-            is_print_header = false;
+            trace::error(_X("      %s at [%s]"), info.version.as_str().c_str(), info.path.c_str());
         }
-
-        trace::error(_X("      %s at [%s]"), info.version.as_str().c_str(), info.path.c_str());
+    }
+    else
+    {
+        trace::error(_X("  - No frameworks were found."));
     }
 
-    trace::error(_X("  - Installing .NET Core prerequisites might help resolve this problem:"));
-    trace::error(_X("      %s"), DOTNET_CORE_INSTALL_PREREQUISITES_URL);
+    trace::error(_X(""));
+    trace::error(_X("You can resolve the problem by installing the specified framework and/or SDK."));
+    trace::error(_X(""));
+    trace::error(_X("The .NET Core frameworks can be found at:"));
+    trace::error(_X("  - %s"), DOTNET_CORE_DOWNLOAD_URL);
 }
 
 /**
@@ -989,8 +985,7 @@ int fx_muxer_t::soft_roll_forward_helper(
     const fx_reference_t& newer,
     const fx_reference_t& older,
     bool older_is_hard_roll_forward,
-    fx_name_to_fx_reference_map_t& newest_references,
-    fx_name_to_fx_reference_map_t& oldest_references)
+    fx_name_to_fx_reference_map_t& newest_references)
 {
     const pal::string_t& fx_name = newer.get_fx_name();
     fx_reference_t updated_newest = newer;
@@ -1006,12 +1001,6 @@ int fx_muxer_t::soft_roll_forward_helper(
     {
         updated_newest.merge_roll_forward_settings_from(older);
         newest_references[fx_name] = updated_newest;
-
-        auto oldest = oldest_references[fx_name];
-        if (older.get_fx_version_number() < oldest.get_fx_version_number())
-        {
-            oldest_references[fx_name] = older;
-        }
 
         if (older_is_hard_roll_forward)
         {
@@ -1034,19 +1023,18 @@ int fx_muxer_t::soft_roll_forward_helper(
 int fx_muxer_t::soft_roll_forward(
     const fx_reference_t fx_ref, //byval to avoid side-effects with mutable newest_references and oldest_references
     bool current_is_hard_roll_forward, // true if reference was obtained from a "real" roll-forward meaning it probed the disk to find the most compatible version
-    fx_name_to_fx_reference_map_t& newest_references,
-    fx_name_to_fx_reference_map_t& oldest_references)
+    fx_name_to_fx_reference_map_t& newest_references)
 {
     /*byval*/ fx_reference_t current_ref = newest_references[fx_ref.get_fx_name()];
 
     // Perform soft "in-memory" roll-forwards
     if (fx_ref.get_fx_version_number() >= current_ref.get_fx_version_number())
     {
-        return soft_roll_forward_helper(fx_ref, current_ref, current_is_hard_roll_forward, newest_references, oldest_references);
+        return soft_roll_forward_helper(fx_ref, current_ref, current_is_hard_roll_forward, newest_references);
     }
 
     assert(fx_ref.get_fx_version_number() < current_ref.get_fx_version_number());
-    return soft_roll_forward_helper(current_ref, fx_ref, false, newest_references, oldest_references);
+    return soft_roll_forward_helper(current_ref, fx_ref, false, newest_references);
 }
 
 int fx_muxer_t::read_framework(
@@ -1068,6 +1056,13 @@ int fx_muxer_t::read_framework(
             newest_references.insert({fx_name, fx_ref});
             oldest_references.insert({fx_name, fx_ref});
         }
+        else
+        {
+            if (fx_ref.get_fx_version_number() < oldest_references[fx_name].get_fx_version_number())
+            {
+                oldest_references[fx_name] = fx_ref;
+            }
+        }
     }
 
     int rc = StatusCode::Success;
@@ -1085,17 +1080,16 @@ int fx_muxer_t::read_framework(
         if (existing_framework == fx_definitions.end())
         {
             // Perform a "soft" roll-forward meaning we don't read any physical framework folders yet
-            rc = soft_roll_forward(fx_ref, false, newest_references, oldest_references);
+            rc = soft_roll_forward(fx_ref, false, newest_references);
             if (rc)
             {
                 break; // Error case
             }
 
-            const pal::string_t& oldest_requested_version = oldest_references[fx_name].get_fx_version();
             fx_reference_t& newest_ref = newest_references[fx_name];
 
             // Resolve the framwork against the the existing physical framework folders
-            fx_definition_t* fx = resolve_fx(newest_ref, oldest_requested_version, host_info.dotnet_root);
+            fx_definition_t* fx = resolve_fx(newest_ref, oldest_references[fx_name].get_fx_version(), host_info.dotnet_root);
             if (fx == nullptr)
             {
                 display_missing_framework_error(fx_name, newest_ref.get_fx_version(), pal::string_t(), host_info.dotnet_root);
@@ -1129,7 +1123,7 @@ int fx_muxer_t::read_framework(
         else
         {
             // Perform a "soft" roll-forward meaning we don't read any physical framework folders yet
-            rc = soft_roll_forward(fx_ref, true, newest_references, oldest_references);
+            rc = soft_roll_forward(fx_ref, true, newest_references);
             if (rc)
             {
                 break; // Error or retry case

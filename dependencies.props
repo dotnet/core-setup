@@ -9,11 +9,16 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <BuildToolsCurrentRef>54b97b3c6d88d08b4710f2e3a576e6dc6239329c</BuildToolsCurrentRef>
+    <BuildToolsCurrentRef>139d174fa87f35164137ba19b52cec7361325475</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <PropertyGroup>
     <MicrosoftDiaSymReaderNativePackageVersion>1.7.0</MicrosoftDiaSymReaderNativePackageVersion>
+  </PropertyGroup>
+
+  <!-- Get Windows.winmd for crossgen. -->
+  <PropertyGroup>
+    <MicrosoftTargetingPackPrivateWinRTPackage>Microsoft.TargetingPack.Private.WinRT</MicrosoftTargetingPackPrivateWinRTPackage>
     <MicrosoftTargetingPackPrivateWinRTPackageVersion>1.0.5</MicrosoftTargetingPackPrivateWinRTPackageVersion>
   </PropertyGroup>
 
