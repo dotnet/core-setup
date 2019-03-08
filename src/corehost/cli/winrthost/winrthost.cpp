@@ -1,0 +1,80 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#include "redirected_error_writer.h"
+#include "hostfxr.h"
+#include "fxr_resolver.h"
+#include "pal.h"
+#include "trace.h"
+#include "error_codes.h"
+#include "utils.h"
+#include <hstring.h>
+#include <activation.h>
+#include <roerrorapi.h>
+
+
+#if defined(_WIN32)
+
+// WinRT entry points are defined without the __declspec(dllexport) attribute.
+// The issue here is that the compiler will throw an error regarding linkage
+// redefinion. The solution here is to the use a .def file on Windows.
+#define WINRT_API extern "C"
+
+#else
+
+#define WINRT_API SHARED_API
+
+#endif // _WIN32
+
+using winrt_activation_fn = pal::hresult_t(STDMETHODCALLTYPE*)(HSTRING activatableClassId, IActivationFactory** factory);
+
+namespace
+{
+    int get_winrt_activation_delegate(winrt_activation_fn *delegate)
+    {
+        return load_fxr_and_get_delegate(
+            hostfxr_delegate_type::com_activation,
+            [](const pal::string_t& host_path, pal::string_t* app_path_out)
+            {
+                pal::string_t app_path_local{ host_path };
+
+                // Change the extension to get the 'app'
+                size_t idx = app_path_local.rfind(_X(".dll"));
+                assert(idx != pal::string_t::npos);
+                app_path_local.replace(app_path_local.begin() + idx, app_path_local.end(), _X(".winmd"));
+
+                *app_path_out = std::move(app_path_local);
+
+                return StatusCode::Success;
+            },
+            delegate
+        );
+    }
+}
+
+
+WINRT_API HRESULT STDMETHODCALLTYPE DllGetActivationFactory(_In_ HSTRING activatableClassId, _Out_ IActivationFactory** factory)
+{
+    HRESULT hr;
+    pal::string_t app_path;
+    winrt_activation_fn activator;
+    {
+        trace::setup();
+        reset_redirected_error_writer();
+        error_writer_scope_t writer_scope(redirected_error_writer);
+
+        int ec = get_winrt_activation_delegate(&activator);
+        if (ec != StatusCode::Success)
+        {
+            RoOriginateErrorW(__HRESULT_FROM_WIN32(ec), 0 /* message is null-terminated */, get_redirected_error_string().c_str());
+            return __HRESULT_FROM_WIN32(ec);
+        }
+    }
+
+    return activator(activatableClassId, factory);
+}
+
+WINRT_API HRESULT STDMETHODCALLTYPE DllCanUnloadNow(void)
+{
+    return S_FALSE;
+}

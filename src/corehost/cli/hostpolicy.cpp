@@ -621,6 +621,13 @@ SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void** 
             "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
             "LoadInMemoryAssembly",
             delegate);
+    case coreclr_delegate_type::winrt_activation:
+        return coreclr->create_delegate(
+            "System.Private.CoreLib",
+            "Internal.Runtime.InteropServices.WinRTActivator",
+            "GetActivationFactory",
+            delegate
+        );
     default:
         return StatusCode::LibHostInvalidArgs;
     }    
