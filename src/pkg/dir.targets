@@ -14,14 +14,17 @@
     <MSBuild Projects="$(MSBuildThisFileDirectory)deps\init-deb-tool-consumer.proj" />
   </Target>
 
-  <!-- Check if the deb package build tool prereq is available. -->
+  <!--
+    Check if the deb package build tool prereq is available.
+    This issue tracks adding a way to raise this as a build error: https://github.com/dotnet/core-setup/issues/5396
+  -->
   <Target Name="TestDebuild">
     <!-- run Debuild -->
     <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
     </Exec>
 
-    <!-- Check if it returned 0 -->
+    <!-- Check if it successfully showed us a help message. -->
     <PropertyGroup>
       <DebuildPresent>false</DebuildPresent>
       <DebuildPresent Condition=" '$(DebuildExitCode)' == '0' ">true</DebuildPresent>
@@ -32,20 +35,22 @@
              Importance="High" />
   </Target>
 
-  <!-- Check if the RPM package build tool prereq is available. -->
+  <!--
+    Check if the RPM package build tool prereq is available.
+    This issue tracks adding a way to raise this as a build error: https://github.com/dotnet/core-setup/issues/5396
+  -->
   <Target Name="TestFPMTool">
     <!-- run FPM  -->
     <Exec Command="/usr/bin/env fpm -h" ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="FPMExitCode" />
     </Exec>
 
-    <!-- Check if it returned 0 -->
+    <!-- Check if it successfully showed us a help message. -->
     <PropertyGroup>
       <FPMPresent>false</FPMPresent>
       <FPMPresent Condition=" '$(FPMExitCode)' == '0' ">true</FPMPresent>
     </PropertyGroup>
 
-    <!-- Workaround for Jenkins machines that don't have the necessary packages https://github.com/dotnet/core-setup/issues/2260 -->
     <Message Condition=" '$(FPMPresent)'  != 'true' "
              Text="FPM tool Not found, RPM packages will not be built."
              Importance="High" />

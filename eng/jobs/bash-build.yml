@@ -103,7 +103,7 @@ jobs:
             rm -v -rf a b
             cd s
             git clean -xdf'
-      displayName: Clean using Docker elevation
+      displayName: Clean up old artifacts owned by root
 
     # Build binary and nuget packages
     - script: |
@@ -198,6 +198,6 @@ jobs:
 
     # Force clean up machine in case any docker images are left behind
     - ${{ if ne(parameters.displayName, 'Build_FreeBSD_x64')}}:
-      - script: docker system prune -f && df -h
+      - script: docker system prune -af && df -h
         displayName: Run Docker clean up
         condition: succeededOrFailed()
