@@ -24,6 +24,7 @@ set(SOURCES
     ../fx_definition.cpp
     ../fx_reference.cpp
     ../version.cpp
+    ./corehost_init.cpp
     ./hostfxr.cpp
     ./fx_ver.cpp
     ./fx_muxer.cpp
