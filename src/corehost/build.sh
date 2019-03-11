@@ -266,4 +266,4 @@ fi
 popd
 
 set +x # turn off trace
-cmake --build $__intermediateOutputPath --target install
+cmake --build $__intermediateOutputPath --target install --config $__configuration
