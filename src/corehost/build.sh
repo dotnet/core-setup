@@ -11,7 +11,7 @@ init_rid_plat()
             if [ -e $ROOTFS_DIR/etc/os-release ]; then
                 source $ROOTFS_DIR/etc/os-release
                 __rid_plat="$ID.$VERSION_ID"
-                if [[ "$ID" == "alpine" ]]
+                if [[ "$ID" == "alpine" ]]; then
                     __rid_plat="linux-musl"
                 fi
             fi
