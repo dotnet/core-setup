@@ -13,6 +13,3 @@ if(WIN32)
 endif()
 
 include(../exe.cmake)
-
-install(TARGETS dotnet DESTINATION corehost)
-install_symbols(dotnet corehost)
