@@ -105,7 +105,7 @@
 
     <Exec Command="fpm $(FPMCmdParameters)" WorkingDirectory="$(RpmIntermediatesDir)" />
 
-   <!-- Copy package to output -->
+    <!-- Copy package to output -->
     <ItemGroup>
       <GeneratedRpmFiles Include="$(RpmIntermediatesDir)/*.rpm" />
     </ItemGroup>
