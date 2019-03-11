@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Build.Framework
         public Process Process { get; }
 
         // Priority order of runnable suffixes to look for and run
-        public static readonly string[] RunnableSuffixes = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+        private static readonly string[] RunnableSuffixes = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                                                          ? new string[] { ".exe", ".cmd", ".bat" }
                                                          : new string[] { string.Empty };
 
