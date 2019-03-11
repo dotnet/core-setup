@@ -100,6 +100,7 @@ __linkPortable=0
 __cmake_defines=
 __baseIntermediateOutputPath="$RootRepo/bin/obj"
 __versionSourceFile="$__baseIntermediateOutputPath/version.cpp"
+__cmake_bin_prefix=
 
 while [ "$1" != "" ]; do
         lowerI="$(echo $1 | awk '{print tolower($0)}')"
@@ -182,7 +183,8 @@ if [ "$__CrossBuild" == 1 ]; then
     fi
 fi
 
-# __rid_plat is the base RID that corehost is shipped for, effectively, the name of the folder in "runtimes/{__rid_plat}/native/" inside the nupkgs.
+# __base_rid is the base RID that corehost is shipped for, effectively, the name of the folder in "runtimes/{__base_rid}/native/" inside the nupkgs.
+# __rid_plat is the OS portion of the RID.
 __rid_plat=
 init_rid_plat
 
@@ -196,9 +198,11 @@ if [ -z $__commit_hash ]; then
     exit -1
 fi
 
+
 __build_arch_lowcase=$(echo "$__build_arch" | tr '[:upper:]' '[:lower:]')
 __base_rid=$__rid_plat-$__build_arch_lowcase
 echo "Computed RID for native build is $__base_rid"
+__cmake_bin_prefix="${__base_rid}.${__configuration}"
 export __CrossToolChainTargetRID=$__base_rid
 
 # Set up the environment to be used for building with clang.
@@ -250,9 +254,9 @@ if [ $__CrossBuild == 1 ]; then
     fi
     export TARGET_BUILD_ARCH=$__build_arch_lowcase
     export __DistroRid=$__rid_plat
-    cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash -DCMAKE_TOOLCHAIN_FILE=$DIR/../../cross/toolchain.cmake
+    cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash -DCMAKE_INSTALL_PREFIX=$__cmake_bin_prefix -DCMAKE_TOOLCHAIN_FILE=$DIR/../../cross/toolchain.cmake
 else
-    cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash
+    cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash -DCMAKE_INSTALL_PREFIX=$__cmake_bin_prefix
 fi
 set +x # turn off trace
 make install
