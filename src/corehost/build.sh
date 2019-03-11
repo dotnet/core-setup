@@ -236,6 +236,7 @@ fi
 
 __cmake_defines="${__cmake_defines} -DVERSION_FILE_PATH:STRING=${__versionSourceFile}"
 
+mkdir -p $__intermediateOutputPath
 pushd $__intermediateOutputPath
 
 echo "Building Corehost from $DIR to $(pwd)"
