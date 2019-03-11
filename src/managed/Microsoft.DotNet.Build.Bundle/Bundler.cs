@@ -175,8 +175,10 @@ namespace Microsoft.DotNet.Build.Bundle
                 Manifest manifest = new Manifest();
 
                 bundle.Position = bundle.Length;
-                string [] contents = Directory.GetFiles(ContentDir);
-                Array.Sort(contents); // Sort the file names to keep the bundle construction deterministic.
+
+                // Sort the file names to keep the bundle construction deterministic.
+                string[] contents = Directory.GetFiles(ContentDir);
+                Array.Sort(contents, StringComparer.Ordinal); 
                 foreach (string filePath in contents)
                 {
                     string fileName = Path.GetFileName(filePath);
