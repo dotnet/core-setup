@@ -25,13 +25,9 @@
       <BuildArgs Condition="'$(CrossBuild)' == 'true'">$(BuildArgs) --cross</BuildArgs>  
       <BuildArgs Condition="'$(StripSymbols)' == 'true'">$(BuildArgs) --stripsymbols</BuildArgs>   
     </PropertyGroup>
-
-    <RemoveDir Directories="$(CMakeBuildDir)" Condition="Exists('$(CMakeBuildDir)') And '$(IncrementalNativeBuild)' != 'true'" />
-    <MakeDir Directories="$(CMakeBuildDir)" Condition="!(Exists('$(CMakeBuildDir)'))" />
-
+    
     <Message Text="$(MSBuildProjectDirectory)\build.sh $(BuildArgs)" Importance="High"/>
-    <Exec Command="$(MSBuildProjectDirectory)\build.sh $(BuildArgs)"
-          WorkingDirectory="$(CMakeBuildDir)"/>
+    <Exec Command="$(MSBuildProjectDirectory)\build.sh $(BuildArgs)" />
   </Target>
 
   <Target Name="BuildCoreHostWindows"

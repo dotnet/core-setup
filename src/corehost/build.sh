@@ -87,6 +87,7 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 RootRepo="$DIR/../.."
 
+__bin_dir="$RootRepo/bin"
 __build_arch=
 __host_ver=
 __apphost_ver=
@@ -202,7 +203,8 @@ fi
 __build_arch_lowcase=$(echo "$__build_arch" | tr '[:upper:]' '[:lower:]')
 __base_rid=$__rid_plat-$__build_arch_lowcase
 echo "Computed RID for native build is $__base_rid"
-__cmake_bin_prefix="${__base_rid}.${__configuration}"
+__cmake_bin_prefix="$__bin_dir/$__base_rid.$__configuration"
+__intermediateOutputPath="$__baseIntermediateOutputPath/$__base_rid.$__configuration/corehost"
 export __CrossToolChainTargetRID=$__base_rid
 
 # Set up the environment to be used for building with clang.
@@ -234,6 +236,8 @@ fi
 
 __cmake_defines="${__cmake_defines} -DVERSION_FILE_PATH:STRING=${__versionSourceFile}"
 
+pushd $__intermediateOutputPath
+
 echo "Building Corehost from $DIR to $(pwd)"
 set -x # turn on trace
 if [ $__CrossBuild == 1 ]; then
@@ -258,5 +262,7 @@ if [ $__CrossBuild == 1 ]; then
 else
     cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash -DCMAKE_INSTALL_PREFIX=$__cmake_bin_prefix
 fi
+popd
+
 set +x # turn off trace
-make install
+cmake --build $__intermediateOutputPath --target install
