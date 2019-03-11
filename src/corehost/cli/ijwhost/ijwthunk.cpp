@@ -66,6 +66,8 @@ bool patch_vtable_entries(PEDecoder& pe)
         g_pVtableBootstrapThunkChunkList = chunk;
     }
 
+    trace::setup();
+
     size_t currentThunk = 0;
     for(size_t i = 0; i < numFixupRecords; ++i)
     {
@@ -112,8 +114,9 @@ bool patch_vtable_entries(PEDecoder& pe)
 
 extern "C" std::uintptr_t __stdcall start_runtime_and_get_target_address(std::uintptr_t cookie)
 {
+    trace::setup();
+    
     bootstrap_thunk *pThunk = bootstrap_thunk::get_thunk_from_cookie(cookie);
-
     load_in_memory_assembly_fn loadInMemoryAssembly;
     pal::dll_t moduleHandle = pThunk->get_dll_handle();
     pal::hresult_t status = get_load_in_memory_assembly_delegate(moduleHandle, &loadInMemoryAssembly);

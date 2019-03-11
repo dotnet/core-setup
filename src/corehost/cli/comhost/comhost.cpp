@@ -127,6 +127,7 @@ COM_API HRESULT STDMETHODCALLTYPE DllGetClassObject(
     pal::string_t app_path;
     com_activation_fn act;
     {
+        trace::setup();
         reset_comhost_error_stream();
         trace::set_error_writer(comhost_error_writer);
 
