@@ -85,8 +85,13 @@ namespace Microsoft.DotNet.Build.Bundle
             // Allign assemblies, since they are loaded directly from bundle
             if (type == FileType.Assembly)
             {
-                long padding = AssemblyAlignment - (bundle.Position % AssemblyAlignment);
-                bundle.Position += padding;
+                long misalignment = (bundle.Position % AssemblyAlignment);
+
+                if (misalignment != 0)
+                {
+                    long padding = AssemblyAlignment - misalignment;
+                    bundle.Position += padding;
+                }
             }
 
             file.Position = 0;
@@ -170,7 +175,9 @@ namespace Microsoft.DotNet.Build.Bundle
                 Manifest manifest = new Manifest();
 
                 bundle.Position = bundle.Length;
-                foreach (string filePath in Directory.GetFiles(ContentDir))
+                string [] contents = Directory.GetFiles(ContentDir);
+                Array.Sort(contents); // Sort the file names to keep the bundle construction deterministic.
+                foreach (string filePath in contents)
                 {
                     string fileName = Path.GetFileName(filePath);
 

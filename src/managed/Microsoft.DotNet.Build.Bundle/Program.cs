@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Build.Bundle
                         OutputDir = NextArg(arg);
                         break;
 
-                    case "-pdb+":
+                    case "--pdb":
                         EmbedPDBs = true;
                         break;
                 }
