@@ -4,16 +4,13 @@
 cmake_minimum_required (VERSION 2.6)
 project(ijwhost)
 
-include(../setup.cmake)
+set(DOTNET_PROJECT_NAME "ijwhost")
 
 # Include directories
-include_directories(./)
-include_directories(../)
 include_directories(../fxr)
-include_directories(../../)
-include_directories(../../common)
 include_directories(${ARCH_SPECIFIC_FOLDER_NAME})
 
+# CMake does not recommend using globbing since it messes with the freshness checks
 set(SOURCES
     ijwthunk.cpp
     ijwhost.cpp
@@ -29,12 +26,7 @@ set(SOURCES
 
 if(WIN32)
     list(APPEND SOURCES
-        ../../common/pal.windows.cpp
-        ../../common/longfile.windows.cpp)
-else()
-    list(APPEND SOURCES
-        ../../common/pal.unix.cpp
-        ${VERSION_FILE_PATH})
+        Exports.def)
 endif()
 
 # Move to setup.cmake if IJWHOST is ever built on non-Windows
@@ -47,7 +39,6 @@ endif()
 set (ASM_HELPERS_SOURCES
     ${ARCH_SPECIFIC_FOLDER_NAME}/asmhelpers.asm)
 
-add_definitions(-DEXPORT_SHARED_API=1)
 add_definitions(-DFEATURE_LIBHOST=1)
 
 convert_to_absolute_path(SOURCES ${SOURCES})
@@ -88,15 +79,17 @@ if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))
     endforeach()
 endif ()
 
-add_library(ijwhost SHARED ${SOURCES} ${ASM_HELPERS_SOURCES})
-
 if (WIN32 AND CLI_CMAKE_PLATFORM_ARCH_I386)
-set_source_files_properties(${ASM_HELPERS_SOURCES} PROPERTIES COMPILE_FLAGS "/safeseh")
+    set_source_files_properties(${ASM_HELPERS_SOURCES} PROPERTIES COMPILE_FLAGS "/safeseh")
 endif ()
+
+list(APPEND SOURCES ${ASM_HELPERS_SOURCES})
+
+include(../lib.cmake)
 
 # Specify non-default Windows libs to be used for Arm/Arm64 builds
 if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))
-    target_link_libraries(ijwhost Advapi32.lib Ole32.lib Shell32.lib)
+    target_link_libraries(ijwhost Advapi32.lib Ole32.lib)
 endif()
 
 install_library_and_symbols (ijwhost) 

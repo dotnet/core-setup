@@ -7,9 +7,18 @@ class fx_definition_t;
 struct fx_ver_t;
 struct host_startup_info_t;
 
-#include "libhost.h"
+#include "fx_definition.h"
+#include "host_interface.h"
+#include "host_startup_info.h"
 
 const int Max_Framework_Resolve_Retries = 100;
+
+enum class coreclr_delegate_type
+{
+    invalid,
+    com_activation,
+    load_in_memory_assembly
+};
 
 class fx_muxer_t
 {

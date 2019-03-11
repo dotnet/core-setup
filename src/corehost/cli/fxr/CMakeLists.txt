@@ -11,9 +11,6 @@ include_directories(../json/casablanca/include)
 
 # CMake does not recommend using globbing since it messes with the freshness checks
 set(SOURCES
-    ../../common/trace.cpp
-    ../../common/utils.cpp
-    ../libhost.cpp
     ../deps_format.cpp
     ../deps_entry.cpp
     ../host_startup_info.cpp
@@ -25,6 +22,7 @@ set(SOURCES
     ../fx_definition.cpp
     ../fx_reference.cpp
     ../version.cpp
+    ./corehost_init.cpp
     ./hostfxr.cpp
     ./fx_ver.cpp
     ./fx_muxer.cpp
