@@ -14,5 +14,5 @@ endif()
 
 include(../exe.cmake)
 
-install(TARGETS dotnet DESTINATION .)
-install_symbols(dotnet .)
+install(TARGETS dotnet DESTINATION corehost)
+install_symbols(dotnet corehost)

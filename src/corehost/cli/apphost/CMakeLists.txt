@@ -25,7 +25,7 @@ include(../exe.cmake)
 
 add_definitions(-DFEATURE_APPHOST=1)
 
-install_symbols(apphost .)
+install_symbols(apphost corehost)
 
 # Disable manifest generation into the file .exe on Windows
 if(WIN32)

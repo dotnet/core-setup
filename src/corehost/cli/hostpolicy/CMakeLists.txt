@@ -36,5 +36,5 @@ set(SOURCES
 
 include(../lib.cmake)
 
-install(TARGETS hostpolicy DESTINATION .)
-install_symbols(hostpolicy .)
+install(TARGETS hostpolicy DESTINATION corehost)
+install_symbols(hostpolicy corehost)

@@ -36,5 +36,5 @@ set(SOURCES
 
 include(../lib.cmake)
 
-install(TARGETS hostfxr DESTINATION .)
-install_symbols(hostfxr .)
+install(TARGETS hostfxr DESTINATION corehost)
+install_symbols(hostfxr corehost)

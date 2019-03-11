@@ -91,7 +91,7 @@ echo Commencing build of corehost
 echo.
 
 if %__CMakeBinDir% == "" (
-    set "__CMakeBinDir=%__binDir%\%__TargetRid%.%CMAKE_BUILD_TYPE%\corehost"
+    set "__CMakeBinDir=%__binDir%\%__TargetRid%.%CMAKE_BUILD_TYPE%"
 )
 if %__IntermediatesDir% == "" (
     set "__IntermediatesDir=%__binDir%\obj\%__TargetRid%.%CMAKE_BUILD_TYPE%\corehost"
