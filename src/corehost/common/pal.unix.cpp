@@ -200,7 +200,7 @@ bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* recv)
     return false;
 }
 
-bool pal::get_dotnet_self_registered_dir(std::vector<pal::string_t>* recv)
+bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
 {
     // No support for global directories in Unix.
     return false;
