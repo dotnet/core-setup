@@ -202,7 +202,6 @@ if [ -z $__commit_hash ]; then
     exit -1
 fi
 
-
 __build_arch_lowcase=$(echo "$__build_arch" | tr '[:upper:]' '[:lower:]')
 __base_rid=$__rid_plat-$__build_arch_lowcase
 echo "Computed RID for native build is $__base_rid"
