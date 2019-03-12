@@ -1,26 +1,22 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.DotNet.CoreSetup.Test;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using Xunit;
 
-namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
+namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 {
-    public class GivenThatICareAboutPortableAppActivation : IClassFixture<GivenThatICareAboutPortableAppActivation.SharedTestState>
+    public class PortableAppActivation : IClassFixture<PortableAppActivation.SharedTestState>
     {
         private SharedTestState sharedTestState;
 
-        public GivenThatICareAboutPortableAppActivation(GivenThatICareAboutPortableAppActivation.SharedTestState fixture)
+        public PortableAppActivation(PortableAppActivation.SharedTestState fixture)
         {
             sharedTestState = fixture;
         }
@@ -28,7 +24,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
         [Fact]
         public void Muxer_activation_of_Build_Output_Portable_DLL_with_DepsJson_and_RuntimeConfig_Local_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Built
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -38,25 +34,21 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
 
             dotnet.Exec("exec", appDll)
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
         }
 
         [Fact]
         public void Muxer_activation_of_Build_Output_Portable_DLL_with_DepsJson_having_Assembly_with_Different_File_Extension_Fails()
         {
-            var fixture = sharedTestState.PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Built
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -70,16 +62,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
             dotnet.Exec("exec", appExe)
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("has already been found but with a different file extension");
+                .Should().Fail()
+                .And.HaveStdErrContaining("has already been found but with a different file extension");
         }
 
         [Fact]
         public void Muxer_activation_of_Apps_with_AltDirectorySeparatorChar()
         {
-            var fixture = sharedTestState.PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Built
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -89,15 +79,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
         }
         [Fact]
         public void Muxer_Exec_activation_of_Build_Output_Portable_DLL_with_DepsJson_Local_and_RuntimeConfig_Remote_Without_AdditionalProbingPath_Fails()
         {
-            var fixture = sharedTestState.PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Built
                 .Copy();
 
             var runtimeConfig = MoveRuntimeConfigToSubdirectory(fixture);
@@ -109,14 +97,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute(fExpectedToFail:true)
-                .Should()
-                .Fail();
+                .Should().Fail();
         }
 
         [Fact]
         public void Muxer_Exec_activation_of_Build_Output_Portable_DLL_with_DepsJson_Local_and_RuntimeConfig_Remote_With_AdditionalProbingPath_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Built
                 .Copy();
 
             var runtimeConfig = MoveRuntimeConfigToSubdirectory(fixture);
@@ -133,16 +120,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
         }
 
         [Fact]
         public void Muxer_Activation_With_Templated_AdditionalProbingPath_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Built
                 .Copy();
 
             var store_path = CreateAStore(fixture);
@@ -166,18 +151,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdErrContaining($"Adding tpa entry: {Path.Combine(store_path, fixture.RepoDirProvider.BuildArchitecture, fixture.Framework)}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdErrContaining($"Adding tpa entry: {Path.Combine(store_path, fixture.RepoDirProvider.BuildArchitecture, fixture.Framework)}");
         }
 
         [Fact]
         public void Muxer_Exec_activation_of_Build_Output_Portable_DLL_with_DepsJson_Remote_and_RuntimeConfig_Local_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Built
                 .Copy();
 
             var depsJson = MoveDepsJsonToSubdirectory(fixture);
@@ -189,17 +171,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
             
         }
 
         [Fact]
         public void Muxer_activation_of_Publish_Output_Portable_DLL_with_DepsJson_and_RuntimeConfig_Local_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Published
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -209,26 +189,22 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
 
             dotnet.Exec("exec", appDll)
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
         }
 
 
         [Fact]
         public void Muxer_Exec_activation_of_Publish_Output_Portable_DLL_with_DepsJson_Local_and_RuntimeConfig_Remote_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Published
                 .Copy();
 
             var runtimeConfig = MoveRuntimeConfigToSubdirectory(fixture);
@@ -240,16 +216,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
         }
 
         [Fact]
         public void Muxer_Exec_activation_of_Publish_Output_Portable_DLL_with_DepsJson_Remote_and_RuntimeConfig_Local_Fails()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Published
                 .Copy();
 
             var depsJson = MoveDepsJsonToSubdirectory(fixture);
@@ -261,14 +235,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute(fExpectedToFail:true)
-                .Should()
-                .Fail();
+                .Should().Fail();
         }
 
         [Fact]
         public void Framework_Dependent_AppHost_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Published
                 .Copy();
 
             // Since SDK doesn't support building framework dependent apphost yet, emulate that behavior
@@ -305,12 +278,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
                 .EnvironmentVariable("DOTNET_ROOT", builtDotnet)
                 .EnvironmentVariable("DOTNET_ROOT(x86)", builtDotnet)
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
 
 
             // Verify running from within the working directory
@@ -463,27 +433,27 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.PortableApp
 
         public class SharedTestState : IDisposable
         {
-            public TestProjectFixture PreviouslyBuiltAndRestoredPortableTestProjectFixture { get; set; }
-            public TestProjectFixture PreviouslyPublishedAndRestoredPortableTestProjectFixture { get; set; }
-            public RepoDirectoriesProvider RepoDirectories { get; set; }
+            public TestProjectFixture PortableAppFixture_Built { get; }
+            public TestProjectFixture PortableAppFixture_Published { get; }
+            public RepoDirectoriesProvider RepoDirectories { get; }
 
             public SharedTestState()
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                PreviouslyBuiltAndRestoredPortableTestProjectFixture = new TestProjectFixture("PortableApp", RepoDirectories)
+                PortableAppFixture_Built = new TestProjectFixture("PortableApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .BuildProject();
 
-                PreviouslyPublishedAndRestoredPortableTestProjectFixture = new TestProjectFixture("PortableApp", RepoDirectories)
+                PortableAppFixture_Published = new TestProjectFixture("PortableApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
             }
 
             public void Dispose()
             {
-                PreviouslyBuiltAndRestoredPortableTestProjectFixture.Dispose();
-                PreviouslyPublishedAndRestoredPortableTestProjectFixture.Dispose();
+                PortableAppFixture_Built.Dispose();
+                PortableAppFixture_Published.Dispose();
             }
         }
     }
