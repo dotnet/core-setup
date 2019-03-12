@@ -1,52 +1,45 @@
-﻿using Microsoft.DotNet.Cli.Build.Framework;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
+namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 {
-    public partial class GivenThatICareAboutSharedFxLookup : IDisposable
+    public class SharedFxLookup : IDisposable
     {
         private const string SystemCollectionsImmutableFileVersion = "88.2.3.4";
         private const string SystemCollectionsImmutableAssemblyVersion = "88.0.1.2";
 
-        private RepoDirectoriesProvider RepoDirectories;
-        private TestProjectFixture PreviouslyBuiltAndRestoredPortableTestProjectFixture;
+        private readonly RepoDirectoriesProvider RepoDirectories;
+        private readonly TestProjectFixture SharedFxLookupPortableAppFixture;
 
-        private string _currentWorkingDir;
-        private string _userDir;
-        private string _executableDir;
-        private string _globalDir;
-        private string _cwdSharedFxBaseDir;
-        private string _cwdSharedUberFxBaseDir;
-        private string _userSharedFxBaseDir;
-        private string _userSharedUberFxBaseDir;
-        private string _exeSharedFxBaseDir;
-        private string _exeSharedUberFxBaseDir;
-        private string _globalSharedFxBaseDir;
-        private string _globalSharedUberFxBaseDir;
-        private string _builtSharedFxDir;
-        private string _builtSharedUberFxDir;
+        private readonly string _currentWorkingDir;
+        private readonly string _userDir;
+        private readonly string _executableDir;
+        private readonly string _globalDir;
+        private readonly string _cwdSharedFxBaseDir;
+        private readonly string _cwdSharedUberFxBaseDir;
+        private readonly string _userSharedFxBaseDir;
+        private readonly string _userSharedUberFxBaseDir;
+        private readonly string _exeSharedFxBaseDir;
+        private readonly string _exeSharedUberFxBaseDir;
+        private readonly string _globalSharedFxBaseDir;
+        private readonly string _globalSharedUberFxBaseDir;
+        private readonly string _builtSharedFxDir;
+        private readonly string _builtSharedUberFxDir;
 
-        private string _cwdSelectedMessage;
-        private string _userSelectedMessage;
-        private string _exeSelectedMessage;
-        private string _globalSelectedMessage;
+        private readonly string _exeSelectedMessage;
 
-        private string _cwdFoundUberFxMessage;
-        private string _userFoundUberFxMessage;
-        private string _exeFoundUberFxMessage;
-        private string _globalFoundUberFxMessage;
+        private readonly string _exeFoundUberFxMessage;
 
-        private string _sharedFxVersion;
-        private string _baseDir;
-        private string _builtDotnet;
-        private string _hostPolicyDllName;
+        private readonly string _sharedFxVersion;
+        private readonly string _baseDir;
+        private readonly string _builtDotnet;
+        private readonly string _hostPolicyDllName;
 
-        public GivenThatICareAboutSharedFxLookup()
+        public SharedFxLookup()
         {
             // From the artifacts dir, it's possible to find where the sharedFrameworkPublish folder is. We need
             // to locate it because we'll copy its contents into other folders
@@ -90,13 +83,16 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
             SharedFramework.CopyDirectory(_builtDotnet, _executableDir);
 
             //Copy dotnet to global directory
-            File.Copy(Path.Combine(_builtDotnet, $"dotnet{Constants.ExeSuffix}"), Path.Combine(_globalDir, $"dotnet{Constants.ExeSuffix}"), true);
+            File.Copy(
+                Path.Combine(_builtDotnet, RuntimeInformationExtensions.GetExeFileNameForCurrentPlatform("dotnet")),
+                Path.Combine(_globalDir, RuntimeInformationExtensions.GetExeFileNameForCurrentPlatform("dotnet")),
+                true);
 
             // Restore and build SharedFxLookupPortableApp from exe dir
-            PreviouslyBuiltAndRestoredPortableTestProjectFixture = new TestProjectFixture("SharedFxLookupPortableApp", RepoDirectories)
+            SharedFxLookupPortableAppFixture = new TestProjectFixture("SharedFxLookupPortableApp", RepoDirectories)
                 .EnsureRestored(RepoDirectories.CorehostPackages)
                 .BuildProject();
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture;
+            var fixture = SharedFxLookupPortableAppFixture;
 
             // The actual framework version can be obtained from the built fixture. We'll use it to
             // locate the builtSharedFxDir from which we can get the files contained in the version folder
@@ -108,20 +104,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
 
             // Trace messages used to identify from which folder the framework was picked
             _hostPolicyDllName = Path.GetFileName(fixture.TestProject.HostPolicyDll);
-            _cwdSelectedMessage = $"The expected {_hostPolicyDllName} directory is [{_cwdSharedFxBaseDir}";
-            _userSelectedMessage = $"The expected {_hostPolicyDllName} directory is [{_userSharedFxBaseDir}";
             _exeSelectedMessage = $"The expected {_hostPolicyDllName} directory is [{_exeSharedFxBaseDir}";
-            _globalSelectedMessage = $"The expected {_hostPolicyDllName} directory is [{_globalSharedFxBaseDir}";
 
-            _cwdFoundUberFxMessage = $"Chose FX version [{_cwdSharedUberFxBaseDir}";
-            _userFoundUberFxMessage = $"Chose FX version [{_userSharedUberFxBaseDir}";
             _exeFoundUberFxMessage = $"Chose FX version [{_exeSharedUberFxBaseDir}";
-            _globalFoundUberFxMessage = $"Chose FX version [{_globalSharedUberFxBaseDir}";
         }
 
         public void Dispose()
         {
-            PreviouslyBuiltAndRestoredPortableTestProjectFixture.Dispose();
+            SharedFxLookupPortableAppFixture.Dispose();
 
             if (!TestProject.PreserveTestRuns())
             {
@@ -132,7 +122,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
         [Fact]
         public void SharedFxLookup_Must_Verify_Folders_in_the_Correct_Order()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -156,10 +146,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(_exeSelectedMessage);
+                .Should().Pass()
+                .And.HaveStdErrContaining(_exeSelectedMessage);
 
             // Add a dummy version in the user dir
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _userSharedFxBaseDir, "9999.0.0");
@@ -175,10 +163,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(_exeSelectedMessage);
+                .Should().Pass()
+                .And.HaveStdErrContaining(_exeSelectedMessage);
 
             // Add a dummy version in the cwd
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _cwdSharedFxBaseDir, "9999.0.0");
@@ -195,10 +181,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(_exeSelectedMessage);
+                .Should().Pass()
+                .And.HaveStdErrContaining(_exeSelectedMessage);
 
             // Verify we have the expected runtime versions
             dotnet.Exec("--list-runtimes")
@@ -206,16 +190,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .WithUserProfile(_userDir)
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0");
         }
 
         [Fact]
         public void SharedFxLookup_Must_Not_Roll_Forward_If_Framework_Version_Is_Specified_Through_Argument()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -234,10 +216,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0"));
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0"));
 
             // Version: 9999.0.0-dummy1 (through --fx-version arg)
             // Exe: 9999.0.2, 9999.0.0-dummy2,9999.0.0, 9999.0.3, 9999.0.0-dummy3
@@ -249,34 +229,26 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("It was not possible to find any compatible framework version");
+                .Should().Fail()
+                .And.HaveStdErrContaining("It was not possible to find any compatible framework version");
 
             // Verify we have the expected runtime versions
             dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy2")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.2")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.3")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy3");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy2")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.2")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.3")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0-dummy3");
         }
 
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Must_Happen_If_Compatible_Patch_Version_Is_Not_Available()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -300,10 +272,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "10000.1.3"));
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "10000.1.3"));
 
             // Add a dummy version in the exe dir 
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.1.1");
@@ -319,32 +289,25 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.1"))
-                .And
-                .HaveStdOutContaining("Framework Version:9999.1.1");
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.1"))
+                .And.HaveStdOutContaining("Framework Version:9999.1.1");
 
             // Verify we have the expected runtime versions
             dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.1.1")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 10000.1.1")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 10000.1.3");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.1.1")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 10000.1.1")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 10000.1.3");
         }
 
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Minor_And_Disabled()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -367,12 +330,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("It was not possible to find any compatible framework version")
-                .And
-                .HaveStdErrContaining("aka.ms/dotnet-download");
+                .Should().Fail()
+                .And.HaveStdErrContaining("It was not possible to find any compatible framework version")
+                .And.HaveStdErrContaining("aka.ms/dotnet-download");
 
             // Add a dummy version in the exe dir 
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.1.1");
@@ -387,12 +347,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.1"))
-                .And
-                .HaveStdOutContaining("Framework Version:9999.1.1");
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.1"))
+                .And.HaveStdOutContaining("Framework Version:9999.1.1");
 
             // Version: 9999.0.0
             // 'Roll forward on no candidate fx' disabled through env var
@@ -405,28 +362,23 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("It was not possible to find any compatible framework version");
+                .Should().Fail()
+                .And.HaveStdErrContaining("It was not possible to find any compatible framework version");
 
             // Verify we have the expected runtime versions
             dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.1.1")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 10000.1.1");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.1.1")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 10000.1.1");
         }
 
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Production_To_Preview()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -449,10 +401,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.1-dummy1"));
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.1-dummy1"));
 
             // Add a production version with higher value
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.2.1");
@@ -467,10 +417,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.2.1"));
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.2.1"));
 
             // Add a preview version with same major.minor as production
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.2.1-dummy1");
@@ -485,10 +433,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.2.1"));
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.2.1"));
 
             // Add a preview version with same major.minor as production but higher patch version
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.2.2-dummy1");
@@ -503,32 +449,25 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.2.1"));
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.2.1"));
 
             // Verify we have the expected runtime versions
             dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.1.1-dummy1")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.2.1")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.2.1-dummy1")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.2.2-dummy1");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.1.1-dummy1")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.2.1")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.2.1-dummy1")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.2.2-dummy1");
         }
 
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Preview_To_Production()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -550,10 +489,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("It was not possible to find any compatible framework version");
+                .Should().Fail()
+                .And.HaveStdErrContaining("It was not possible to find any compatible framework version");
 
             // Add preview versions in the exe with name major.minor.patch
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.0.0-dummy2", "9999.0.0-dummy3");
@@ -567,34 +504,26 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0-dummy2"))
-                .And
-                .HaveStdOutContaining("Framework Version:9999.0.0-dummy2");
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0-dummy2"))
+                .And.HaveStdOutContaining("Framework Version:9999.0.0-dummy2");
 
             // Verify we have the expected runtime versions
             dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("9999.0.0-dummy2")
-                .And
-                .HaveStdOutContaining("9999.0.0-dummy3")
-                .And
-                .HaveStdOutContaining("9999.0.0")
-                .And
-                .HaveStdOutContaining("9999.0.1-dummy1");
+                .Should().Pass()
+                .And.HaveStdOutContaining("9999.0.0-dummy2")
+                .And.HaveStdOutContaining("9999.0.0-dummy3")
+                .And.HaveStdOutContaining("9999.0.0")
+                .And.HaveStdOutContaining("9999.0.1-dummy1");
         }
 
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Fails_If_No_Higher_Version_Is_Available()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -616,34 +545,26 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("It was not possible to find any compatible framework version");
+                .Should().Fail()
+                .And.HaveStdErrContaining("It was not possible to find any compatible framework version");
 
             // Verify we have the expected runtime versions
             dotnet.Exec("--list-runtimes")
                 .WorkingDirectory(_currentWorkingDir)
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9998.0.1")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9998.1.0")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.1")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.1.0");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9998.0.1")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9998.1.0")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.1")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.1.0");
         }
 
         [Fact]
         public void Multiple_SharedFxLookup_Independent_Roll_Forward()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -668,14 +589,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0"))
-                .And
-                .HaveStdOutContaining("Framework Version:9999.0.0")
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeFoundUberFxMessage, "7777.0.0"));
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.0"))
+                .And.HaveStdOutContaining("Framework Version:9999.0.0")
+                .And.HaveStdErrContaining(Path.Combine(_exeFoundUberFxMessage, "7777.0.0"));
 
             // Add a newer version to verify roll-forward
             SharedFramework.AddAvailableSharedFxVersions(_builtSharedFxDir, _exeSharedFxBaseDir, "9999.0.1");
@@ -693,12 +610,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.1"))
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeFoundUberFxMessage, "7777.0.1"));
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.0.1"))
+                .And.HaveStdErrContaining(Path.Combine(_exeFoundUberFxMessage, "7777.0.1"));
 
             // Verify we have the expected runtime versions
             dotnet.Exec("--list-runtimes")
@@ -706,22 +620,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .WithUserProfile(_userDir)
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
-                .And
-                .HaveStdOutContaining("Microsoft.NETCore.App 9999.0.1")
-                .And
-                .HaveStdOutContaining("Microsoft.UberFramework 7777.0.0")
-                .And
-                .HaveStdOutContaining("Microsoft.UberFramework 7777.0.1");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.0")
+                .And.HaveStdOutContaining("Microsoft.NETCore.App 9999.0.1")
+                .And.HaveStdOutContaining("Microsoft.UberFramework 7777.0.0")
+                .And.HaveStdOutContaining("Microsoft.UberFramework 7777.0.1");
         }
 
         [Fact]
         public void Multiple_SharedFxLookup_Do_Not_Propagate()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -747,10 +656,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("It was not possible to find any compatible framework version");
+                .Should().Fail()
+                .And.HaveStdErrContaining("It was not possible to find any compatible framework version");
 
             // Enable rollForwardOnNoCandidateFx on app's config, which will not be used as the default for Uber's config
             SharedFramework.SetRuntimeConfigJson(runtimeConfig, "7777.0.0", rollFwdOnNoCandidateFx: 1, useUberFramework: true);
@@ -768,16 +675,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("It was not possible to find any compatible framework version");
+                .Should().Fail()
+                .And.HaveStdErrContaining("It was not possible to find any compatible framework version");
         }
 
         [Fact]
         public void Multiple_Fx_References_Cant_Roll_Forward_Because_Incompatible_Config()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -785,8 +690,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
 
             string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
 
-            var additionalfxs = new JArray();
-            additionalfxs.Add(GetAdditionalFramework("Microsoft.NETCore.App", "9999.1.0", applyPatches: false, rollForwardOnNoCandidateFx: 0));
+            var additionalfxs = new JArray
+            {
+                GetAdditionalFramework("Microsoft.NETCore.App", "9999.1.0", applyPatches: false, rollForwardOnNoCandidateFx: 0)
+            };
             SharedFramework.SetRuntimeConfigJson(runtimeConfig, "7777.0.0", null, useUberFramework: true, frameworks: additionalfxs);
 
             // Add versions in the exe folders
@@ -807,16 +714,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("cannot roll-forward to the previously referenced version '9999.5.5");
+                .Should().Fail()
+                .And.HaveStdErrContaining("cannot roll-forward to the previously referenced version '9999.5.5");
         }
 
         [Fact]
         public void Multiple_Fx_References_Can_Roll_Forward_Without_Retry()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -824,8 +729,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
 
             string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
 
-            var additionalfxs = new JArray();
-            additionalfxs.Add(GetAdditionalFramework("Microsoft.NETCore.App", "9999.1.1", applyPatches: false, rollForwardOnNoCandidateFx: 1));
+            var additionalfxs = new JArray
+            {
+                GetAdditionalFramework("Microsoft.NETCore.App", "9999.1.1", applyPatches: false, rollForwardOnNoCandidateFx: 1)
+            };
             SharedFramework.SetRuntimeConfigJson(runtimeConfig, "7777.0.0", null, useUberFramework: true, frameworks: additionalfxs);
 
             // Add versions in the exe folders
@@ -846,22 +753,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.5.5"))
-                .And
-                .HaveStdOutContaining("Framework Version:9999.5.5")
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeFoundUberFxMessage, "7777.0.0"))
-                .And
-                .NotHaveStdErrContaining("Restarting all framework resolution");
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.5.5"))
+                .And.HaveStdOutContaining("Framework Version:9999.5.5")
+                .And.HaveStdErrContaining(Path.Combine(_exeFoundUberFxMessage, "7777.0.0"))
+                .And.NotHaveStdErrContaining("Restarting all framework resolution");
         }
 
         [Fact]
         public void Multiple_Fx_References_Can_Roll_Forward_With_Retry()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -869,8 +771,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
 
             string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
 
-            var additionalfxs = new JArray();
-            additionalfxs.Add(GetAdditionalFramework("Microsoft.UberFramework", "7777.0.0", null, null));
+            var additionalfxs = new JArray
+            {
+                GetAdditionalFramework("Microsoft.UberFramework", "7777.0.0", null, null)
+            };
             // Specify Uber as additional fx so we find NetCoreApp 9999.1.1 and then need to do a re-try for 9999.5.5
             SharedFramework.SetRuntimeConfigJson(runtimeConfig, "9999.1.1", null, null, frameworks: additionalfxs);
 
@@ -892,22 +796,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.5.5"))
-                .And
-                .HaveStdOutContaining("Framework Version:9999.5.5")
-                .And
-                .HaveStdErrContaining(Path.Combine(_exeFoundUberFxMessage, "7777.0.0"))
-                .And
-                .HaveStdErrContaining("Restarting all framework resolution because the previously resolved framework 'Microsoft.NETCore.App', version '9999.1.1' must be re-resolved with the new version '9999.5.5'");
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.5.5"))
+                .And.HaveStdOutContaining("Framework Version:9999.5.5")
+                .And.HaveStdErrContaining(Path.Combine(_exeFoundUberFxMessage, "7777.0.0"))
+                .And.HaveStdErrContaining("Restarting all framework resolution because the previously resolved framework 'Microsoft.NETCore.App', version '9999.1.1' must be re-resolved with the new version '9999.5.5'");
         }
 
         [Fact]
         public void Multiple_Fx_References_Cant_Roll_Forward_Because_Disabled_Through_CommandLine()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -915,8 +814,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
 
             string runtimeConfig = Path.Combine(fixture.TestProject.OutputDirectory, "SharedFxLookupPortableApp.runtimeconfig.json");
 
-            var additionalfxs = new JArray();
-            additionalfxs.Add(GetAdditionalFramework("Microsoft.NETCore.App", "9999.1.1", applyPatches: false, rollForwardOnNoCandidateFx: 1));
+            var additionalfxs = new JArray
+            {
+                GetAdditionalFramework("Microsoft.NETCore.App", "9999.1.1", applyPatches: false, rollForwardOnNoCandidateFx: 1)
+            };
             SharedFramework.SetRuntimeConfigJson(runtimeConfig, "7777.0.0", null, useUberFramework: true, frameworks: additionalfxs);
 
             // Add versions in the exe folders
@@ -942,16 +843,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining("cannot roll-forward to the previously referenced version '9999.5.5");
+                .Should().Fail()
+                .And.HaveStdErrContaining("cannot roll-forward to the previously referenced version '9999.5.5");
         }
 
         [Fact]
         public void Multiple_SharedFxLookup_NetCoreApp_MinorRollForward_Wins_Over_UberFx()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -983,16 +882,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining($"Replacing deps entry [{uberFile}, AssemblyVersion:0.0.0.1, FileVersion:0.0.0.2] with [{netCoreAppFile}");
+                .Should().Pass()
+                .And.HaveStdErrContaining($"Replacing deps entry [{uberFile}, AssemblyVersion:0.0.0.1, FileVersion:0.0.0.2] with [{netCoreAppFile}");
         }
 
         [Fact]
         public void Multiple_SharedFxLookup_Uber_Wins_Over_NetCoreApp_On_PatchRollForward()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -1019,18 +916,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining(Path.Combine("7777.0.0", "System.Collections.Immutable.dll"))
-                .And
-                .NotHaveStdErrContaining(Path.Combine("9999.1.0", "System.Collections.Immutable.dll"));
+                .Should().Pass()
+                .And.HaveStdErrContaining(Path.Combine("7777.0.0", "System.Collections.Immutable.dll"))
+                .And.NotHaveStdErrContaining(Path.Combine("9999.1.0", "System.Collections.Immutable.dll"));
         }
 
         [Fact]
         public void CoreClrLookup_WithNoDirectorySeparatorInDeps()
         {
-            var fixture = PreviouslyBuiltAndRestoredPortableTestProjectFixture
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -1073,12 +967,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdErrContaining($"CoreCLR path = '{Path.Combine(sharedFxPath, coreClrLibraryName)}'")
-                .And
-                .HaveStdErrContaining($"The resolved JIT path is '{Path.Combine(sharedFxPath, clrJitLibraryName)}'");
+                .Should().Pass()
+                .And.HaveStdErrContaining($"CoreCLR path = '{Path.Combine(sharedFxPath, coreClrLibraryName)}'")
+                .And.HaveStdErrContaining($"The resolved JIT path is '{Path.Combine(sharedFxPath, clrJitLibraryName)}'");
         }
 
         static private JObject GetAdditionalFramework(string fxName, string fxVersion, bool? applyPatches, int? rollForwardOnNoCandidateFx)
@@ -1101,19 +992,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.SharedFxLookup
             }
 
             return jobject;
-        }
-
-        static private string CreateAStore(TestProjectFixture testProjectFixture)
-        {
-            var storeoutputDirectory = Path.Combine(testProjectFixture.TestProject.ProjectDirectory, "store");
-            if (!Directory.Exists(storeoutputDirectory))
-            {
-                Directory.CreateDirectory(storeoutputDirectory);
-            }
-
-            testProjectFixture.StoreProject(outputDirectory: storeoutputDirectory);
-
-            return storeoutputDirectory;
         }
     }
 }

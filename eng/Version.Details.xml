@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview3.19158.9">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview4.19162.3">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>2d3c7c7db8cc564a7ea714cecf619e24f84f50d0</Sha>
+      <Sha>ef145001b10660be940aeb9318e0ff7e306f65bc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview3.19158.9">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview4.19162.3">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>2d3c7c7db8cc564a7ea714cecf619e24f84f50d0</Sha>
+      <Sha>ef145001b10660be940aeb9318e0ff7e306f65bc</Sha>
     </Dependency>
     <PinnedDependency Name="Microsoft.NETCore.Targets" Version="2.0.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -15,9 +15,9 @@
     <PinnedDependency Name="NETStandard.Library" Version="2.0.3">
       <Uri>https://github.com/dotnet/standard</Uri>
     </PinnedDependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview3-27512-73">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview4-27512-71">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>3aff9b63902e4917d4649d7152f430a38c45c10c</Sha>
+      <Sha>2929df03c2defe59381ccdaf7cec15ecde0e4140</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App" Version="3.0.0-preview4-27419-14">
       <Uri>https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted</Uri>
@@ -25,9 +25,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19157.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19160.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>951b378f6b173d58c6d93ef33ce7ca83c2ce5ec5</Sha>
+      <Sha>89ab8b2b806397e5e444809a6ac12e275e0e20a2</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

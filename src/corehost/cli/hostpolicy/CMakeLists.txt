@@ -12,9 +12,6 @@ include_directories(../json/casablanca/include)
 
 # CMake does not recommend using globbing since it messes with the freshness checks
 set(SOURCES
-    ../../common/trace.cpp
-    ../../common/utils.cpp
-    ../libhost.cpp
     ../runtime_config.cpp
     ../json/casablanca/src/json/json.cpp
     ../json/casablanca/src/json/json_parsing.cpp
@@ -23,6 +20,7 @@ set(SOURCES
     ../fxr/fx_ver.cpp
     ../breadcrumbs.cpp
     ../args.cpp
+    ../hostpolicy_init.cpp
     ../hostpolicy.cpp
     ../host_startup_info.cpp
     ../coreclr.cpp
@@ -36,4 +34,5 @@ set(SOURCES
 
 include(../lib.cmake)
 
-install_library_and_symbols (hostpolicy)
+install(TARGETS hostpolicy DESTINATION corehost)
+install_symbols(hostpolicy corehost)
