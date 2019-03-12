@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview4.19161.4">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview4.19162.3">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>e433981ea570928efbb1587cc6735c90c1881a58</Sha>
+      <Sha>ef145001b10660be940aeb9318e0ff7e306f65bc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview4.19161.4">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview4.19162.3">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>e433981ea570928efbb1587cc6735c90c1881a58</Sha>
+      <Sha>ef145001b10660be940aeb9318e0ff7e306f65bc</Sha>
     </Dependency>
     <PinnedDependency Name="Microsoft.NETCore.Targets" Version="2.0.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -15,9 +15,9 @@
     <PinnedDependency Name="NETStandard.Library" Version="2.0.3">
       <Uri>https://github.com/dotnet/standard</Uri>
     </PinnedDependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview4-27511-71">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview4-27512-71">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>c132634fa1215e8145e35164733da7485bacb262</Sha>
+      <Sha>2929df03c2defe59381ccdaf7cec15ecde0e4140</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App" Version="3.0.0-preview4-27419-14">
       <Uri>https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted</Uri>
