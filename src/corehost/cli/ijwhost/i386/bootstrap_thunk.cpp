@@ -42,11 +42,6 @@ std::uint32_t bootstrap_thunk::get_token()
 
     memcpy(pbTok, &m_tok[0], sizeof(m_tok));
 
-    if (((std::uintptr_t)m_slot & 0x1))
-        ulTok |= mdtMethodDef;
-    else
-        ulTok |= mdtMemberRef;
-
     return ulTok;
 }
 
@@ -83,12 +78,5 @@ void bootstrap_thunk::initialize(std::uintptr_t pThunkInitFcn,
     // Fill out the rest of the info
     m_dll = dll;
     m_slot = pSlot;
-
-    assert(TypeFromToken(token) == mdtMethodDef ||
-             TypeFromToken(token) == mdtMemberRef);
-    assert(!((std::uintptr_t)m_slot & 0x1));
-
-    if (TypeFromToken(token) == mdtMethodDef)
-        m_slot = (std::uintptr_t *)((std::uintptr_t)m_slot | 0x1);
 }
 

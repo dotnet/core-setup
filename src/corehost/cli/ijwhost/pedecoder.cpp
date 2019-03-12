@@ -2,12 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pedecoder.h"
+#include "corhdr.h"
 
 bool PEDecoder::HasManagedEntryPoint() const
 {
     ULONG flags = GetCorHeader()->Flags;
-    return (!(flags & (std::uint32_t)(COMIMAGE_FLAGS_NATIVE_ENTRYPOINT)) &&
-            (!IsNilToken(GetEntryPointToken())));
+    return (!(flags & COMIMAGE_FLAGS_NATIVE_ENTRYPOINT) &&
+            (!IsNilToken(GetCorHeader()->EntryPointToken)));
 }
 
 IMAGE_COR_VTABLEFIXUP *PEDecoder::GetVTableFixups(std::size_t *pCount) const

@@ -135,7 +135,7 @@ BOOL STDMETHODCALLTYPE DllMain(HINSTANCE hInst,
 
 SHARED_API mdToken STDMETHODCALLTYPE GetTokenForVTableEntry(HMODULE hMod, void** ppVTEntry)
 {
-    mdToken tok = mdTokenNil;
+    mdToken tok;
     if (are_thunks_installed_for_module(hMod))
     {
         bootstrap_thunk* pThunk =
@@ -146,7 +146,6 @@ SHARED_API mdToken STDMETHODCALLTYPE GetTokenForVTableEntry(HMODULE hMod, void**
     {
         tok = (mdToken)(std::uintptr_t) *ppVTEntry;
     }
-    assert(TypeFromToken(tok) == mdtMethodDef || TypeFromToken(tok) == mdtMemberRef);
 
     return tok;
 }

@@ -129,7 +129,8 @@ COM_API HRESULT STDMETHODCALLTYPE DllGetClassObject(
     {
         trace::setup();
         reset_comhost_error_stream();
-        trace::set_error_writer(comhost_error_writer);
+        
+        error_writer_scope_t writer_scope(comhost_error_writer);
 
         int ec = get_com_activation_delegate(&app_path, &act);
         if (ec != StatusCode::Success)

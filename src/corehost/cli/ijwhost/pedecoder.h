@@ -6,7 +6,8 @@
 #define PEDECODER_H
 
 #include "pal.h"
-#include "corhdr.h"
+
+struct IMAGE_COR_VTABLEFIXUP;
 
 // A subsection of the PEDecoder from CoreCLR that has only the methods we need.
 class PEDecoder
@@ -84,11 +85,6 @@ private:
     std::uintptr_t PEDecoder::GetDirectoryData(IMAGE_DATA_DIRECTORY *pDir) const
     {
         return GetRvaData(pDir->VirtualAddress);
-    }
-
-    std::uint32_t PEDecoder::GetEntryPointToken() const
-    {
-        return GetCorHeader()->EntryPointToken;
     }
 
     std::uintptr_t m_base;

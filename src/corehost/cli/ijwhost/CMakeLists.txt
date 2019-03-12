@@ -94,4 +94,4 @@ endif()
 install(TARGETS comhost
         LIBRARY DESTINATION corehost
         ARCHIVE DESTINATION corehost)
-install_symbols (ijwhost) 
+install_symbols (ijwhost corehost) 

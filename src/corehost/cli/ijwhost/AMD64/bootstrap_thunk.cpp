@@ -76,7 +76,4 @@ void bootstrap_thunk::initialize(std::uintptr_t pThunkInitFcn,
     m_token = token;
     m_dll = dll;
     m_slot = pSlot;
-
-    assert(TypeFromToken(token) == mdtMethodDef ||
-             TypeFromToken(token) == mdtMemberRef);
 }
