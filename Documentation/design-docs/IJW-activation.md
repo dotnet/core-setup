@@ -1,6 +1,6 @@
 # IJW Activation for .NET Core on Windows
 
-To support all C++/CLI users that wish to use .NET Core, the runtime and hosting APIs must be updated to provide support activation of the managed portion of mixed-mode assemblies. Without this support, any users of C++/CLI cannot move to .NET Core without using the deprecated Visual C++ compiler `/clr:pure` switch.
+To support any C++/CLI users that wish to use .NET Core, the runtime and hosting APIs must be updated to provide support activation of the managed portion of mixed-mode assemblies. Without this support, any users of C++/CLI cannot move to .NET Core without using the deprecated Visual C++ compiler `/clr:pure` switch.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ Additionally, .NET Framework has support for a legacy code-path to forward calls
 
 ### .NET Core IJW Activation
 
-Like with COM activation, our intent is to avoid a system-wide shim for IJW activation, especially since the host DLL needs to be linked to any C++/CLI assemblies. This new library (henceforth called the 'shim') will export functions to fulfill the requirements that the Visual C++ compiler needs to compile C++/CLI assemblies. Since we do not need to support backward compatibility with previously compiled mixed-mode assemblies, we are free to rename the exported functions while finalizing the design.
+Like with COM activation, our intent is to avoid a system-wide shim for IJW activation, especially since the host DLL needs to be linked to all C++/CLI assemblies. This new library (henceforth called the 'shim') will export functions to fulfill the requirements that the Visual C++ compiler needs to compile C++/CLI assemblies. Since we do not need to support backward compatibility with previously compiled mixed-mode assemblies, we are free to rename the exported functions while finalizing the design.
 
 Below are the entry-points that the Visual C++ team needs
 
