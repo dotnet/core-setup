@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         private readonly string _fxBaseDir;
         private readonly string _uberFxBaseDir;
 
-        private TestProjectFixture GlobalLightupClientFixture_Built;
+        private TestProjectFixture GlobalLightupClientFixture;
 
         public LightupAppActivation(LightupAppActivation.SharedTestState fixture)
         {
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             SharedFramework.CopyDirectory(builtDotnet, _currentWorkingDir);
 
             var repoDirectories = new RepoDirectoriesProvider(builtDotnet: _currentWorkingDir);
-            GlobalLightupClientFixture_Built = new TestProjectFixture("LightupClient", repoDirectories)
+            GlobalLightupClientFixture = new TestProjectFixture("LightupClient", repoDirectories)
                 .EnsureRestored(sharedTestState.RepoDirectories.CorehostPackages)
                 .BuildProject();
 
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
         public void Dispose()
         {
-            GlobalLightupClientFixture_Built.Dispose();
+            GlobalLightupClientFixture.Dispose();
 
             if (!TestProject.PreserveTestRuns())
             {
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var fixtureLib = sharedTestState.LightupLibFixture_Built
                 .Copy();
 
-            var fixtureApp = sharedTestState.LightupClientFixture_Built
+            var fixtureApp = sharedTestState.LightupClientFixture
                 .Copy();
 
             var dotnet = fixtureApp.BuiltDotnet;
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var fixtureLib = sharedTestState.LightupLibFixture_Published
                 .Copy();
 
-            var fixtureApp = sharedTestState.LightupClientFixture_Built
+            var fixtureApp = sharedTestState.LightupClientFixture
                 .Copy();
 
             var dotnet = fixtureApp.BuiltDotnet;
@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var fixtureLib = sharedTestState.LightupLibFixture_Published
                 .Copy();
 
-            var fixtureApp = GlobalLightupClientFixture_Built
+            var fixtureApp = GlobalLightupClientFixture
                 .Copy();
 
             var dotnet = fixtureApp.BuiltDotnet;
@@ -211,7 +211,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var fixtureLib = sharedTestState.LightupLibFixture_Published
                 .Copy();
 
-            var fixtureApp = GlobalLightupClientFixture_Built
+            var fixtureApp = GlobalLightupClientFixture
                 .Copy();
 
             var dotnet = fixtureApp.BuiltDotnet;
@@ -271,7 +271,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var fixtureLib = sharedTestState.LightupLibFixture_Published
                 .Copy();
 
-            var fixtureApp = GlobalLightupClientFixture_Built
+            var fixtureApp = GlobalLightupClientFixture
                 .Copy();
 
             var dotnet = fixtureApp.BuiltDotnet;
@@ -324,7 +324,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var fixtureLib = sharedTestState.LightupLibFixture_Built
                 .Copy();
 
-            var fixtureApp = sharedTestState.LightupClientFixture_Built
+            var fixtureApp = sharedTestState.LightupClientFixture
                 .Copy();
 
             var dotnet = fixtureApp.BuiltDotnet;
@@ -347,7 +347,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Additional_Deps_Lightup_Folder_With_Bad_JsonFile()
         {
-            var fixture = GlobalLightupClientFixture_Built
+            var fixture = GlobalLightupClientFixture
                 .Copy();
 
             var fixtureLib = sharedTestState.LightupLibFixture_Published
@@ -386,7 +386,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void SharedFx_With_Higher_Version_Wins_Against_Additional_Deps()
         {
-            var fixture = GlobalLightupClientFixture_Built
+            var fixture = GlobalLightupClientFixture
                 .Copy();
 
             var fixtureLib = sharedTestState.LightupLibFixture_Published
@@ -444,7 +444,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void SharedFx_With_Lower_Version_Loses_Against_Additional_Deps()
         {
-            var fixture = GlobalLightupClientFixture_Built
+            var fixture = GlobalLightupClientFixture
                 .Copy();
 
             var fixtureLib = sharedTestState.LightupLibFixture_Published
@@ -549,7 +549,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             public TestProjectFixture LightupLibFixture_Built { get; }
             public TestProjectFixture LightupLibFixture_Published { get; }
 
-            public TestProjectFixture LightupClientFixture_Built { get; }
+            public TestProjectFixture LightupClientFixture { get; }
 
             public RepoDirectoriesProvider RepoDirectories { get; }
 
@@ -565,7 +565,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
-                LightupClientFixture_Built = new TestProjectFixture("LightupClient", RepoDirectories)
+                LightupClientFixture = new TestProjectFixture("LightupClient", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .BuildProject();
             }
@@ -574,7 +574,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             {
                 LightupLibFixture_Built.Dispose();
                 LightupLibFixture_Published.Dispose();
-                LightupClientFixture_Built.Dispose();
+                LightupClientFixture.Dispose();
             }
         }
     }

@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 return;
             }
 
-            TestProjectFixture portableAppFixture = sharedTestState.TestWindowsOsShimsAppFixture_Published.Copy();
+            TestProjectFixture portableAppFixture = sharedTestState.TestWindowsOsShimsAppFixture.Copy();
 
             portableAppFixture.BuiltDotnet.Exec(portableAppFixture.TestProject.AppDll)
                 .CaptureStdErr()
@@ -39,20 +39,20 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         {
             private static RepoDirectoriesProvider RepoDirectories { get; set; }
 
-            public TestProjectFixture TestWindowsOsShimsAppFixture_Published { get; set; }
+            public TestProjectFixture TestWindowsOsShimsAppFixture { get; set; }
 
             public SharedTestState()
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                TestWindowsOsShimsAppFixture_Published = new TestProjectFixture("TestWindowsOsShimsApp", RepoDirectories)
+                TestWindowsOsShimsAppFixture = new TestProjectFixture("TestWindowsOsShimsApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
             }
 
             public void Dispose()
             {
-                TestWindowsOsShimsAppFixture_Published.Dispose();
+                TestWindowsOsShimsAppFixture.Dispose();
             }
         }
     }

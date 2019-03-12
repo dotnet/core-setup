@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         private TestProjectFixture ConfigureAppAndFrameworks(string appAssemblyVersion, string uberFxAssemblyVersion, string uberFxProductVersion, out string appAssembly, out string uberAssembly, out string netcoreAssembly)
         {
             const string fileVersion = "0.0.0.9";
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             if (!string.IsNullOrEmpty(uberFxAssemblyVersion))

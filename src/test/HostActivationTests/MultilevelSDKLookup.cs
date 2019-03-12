@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         };
 
         private RepoDirectoriesProvider RepoDirectories;
-        private TestProjectFixture PortableAppFixture_Built;
+        private TestProjectFixture PortableAppFixture;
 
         private readonly string _currentWorkingDir;
         private readonly string _userDir;
@@ -75,10 +75,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             Directory.CreateDirectory(_regSdkBaseDir);
 
             // Restore and build PortableApp from exe dir
-            PortableAppFixture_Built = new TestProjectFixture("PortableApp", RepoDirectories)
+            PortableAppFixture = new TestProjectFixture("PortableApp", RepoDirectories)
                 .EnsureRestored(RepoDirectories.CorehostPackages)
                 .BuildProject();
-            var fixture = PortableAppFixture_Built;
+            var fixture = PortableAppFixture;
 
             // Set a dummy framework version (9999.0.0) in the exe sharedFx location. We will
             // always pick the framework from this to avoid interference with the sharedFxLookup
@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
         public void Dispose()
         {
-            PortableAppFixture_Built.Dispose();
+            PortableAppFixture.Dispose();
 
             if (!TestProject.PreserveTestRuns())
             {
@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 return;
             }
 
-            var fixture = PortableAppFixture_Built
+            var fixture = PortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -304,7 +304,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 return;
             }
 
-            var fixture = PortableAppFixture_Built
+            var fixture = PortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -489,7 +489,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 return;
             }
 
-            var fixture = PortableAppFixture_Built
+            var fixture = PortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -557,7 +557,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 return;
             }
 
-            var fixture = PortableAppFixture_Built
+            var fixture = PortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -623,7 +623,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 return;
             }
 
-            var fixture = PortableAppFixture_Built
+            var fixture = PortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;

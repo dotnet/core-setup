@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void TracingOff()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void TracingOnDefault()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void TracingOnVerbose()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void TracingOnInfo()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void TracingOnWarning()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void TracingOnToFileDefault()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void TracingOnToFileBadPathDefault()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         public class SharedTestState : IDisposable
         {
             // Entry point projects
-            public TestProjectFixture PortableAppFixture_Published { get; }
+            public TestProjectFixture PortableAppFixture { get; }
 
             public RepoDirectoriesProvider RepoDirectories { get; }
 
@@ -164,7 +164,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 RepoDirectories = new RepoDirectoriesProvider();
 
                 // Entry point projects
-                PortableAppFixture_Published = new TestProjectFixture("PortableApp", RepoDirectories)
+                PortableAppFixture = new TestProjectFixture("PortableApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
             }
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             public void Dispose()
             {
                 // Entry point projects
-                PortableAppFixture_Published.Dispose();
+                PortableAppFixture.Dispose();
             }
         }
     }

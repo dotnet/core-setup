@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         private const string SystemCollectionsImmutableAssemblyVersion = "88.0.1.2";
 
         private readonly RepoDirectoriesProvider RepoDirectories;
-        private readonly TestProjectFixture SharedFxLookupPortableAppFixture_Built;
+        private readonly TestProjectFixture SharedFxLookupPortableAppFixture;
 
         private readonly string _currentWorkingDir;
         private readonly string _userDir;
@@ -89,10 +89,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 true);
 
             // Restore and build SharedFxLookupPortableApp from exe dir
-            SharedFxLookupPortableAppFixture_Built = new TestProjectFixture("SharedFxLookupPortableApp", RepoDirectories)
+            SharedFxLookupPortableAppFixture = new TestProjectFixture("SharedFxLookupPortableApp", RepoDirectories)
                 .EnsureRestored(RepoDirectories.CorehostPackages)
                 .BuildProject();
-            var fixture = SharedFxLookupPortableAppFixture_Built;
+            var fixture = SharedFxLookupPortableAppFixture;
 
             // The actual framework version can be obtained from the built fixture. We'll use it to
             // locate the builtSharedFxDir from which we can get the files contained in the version folder
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
         public void Dispose()
         {
-            SharedFxLookupPortableAppFixture_Built.Dispose();
+            SharedFxLookupPortableAppFixture.Dispose();
 
             if (!TestProject.PreserveTestRuns())
             {
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void SharedFxLookup_Must_Verify_Folders_in_the_Correct_Order()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void SharedFxLookup_Must_Not_Roll_Forward_If_Framework_Version_Is_Specified_Through_Argument()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -248,7 +248,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Must_Happen_If_Compatible_Patch_Version_Is_Not_Available()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -307,7 +307,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Minor_And_Disabled()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -378,7 +378,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Production_To_Preview()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -467,7 +467,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Preview_To_Production()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -523,7 +523,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Roll_Forward_On_No_Candidate_Fx_Fails_If_No_Higher_Version_Is_Available()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -564,7 +564,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Multiple_SharedFxLookup_Independent_Roll_Forward()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -630,7 +630,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Multiple_SharedFxLookup_Do_Not_Propagate()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -682,7 +682,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Multiple_Fx_References_Cant_Roll_Forward_Because_Incompatible_Config()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -721,7 +721,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Multiple_Fx_References_Can_Roll_Forward_Without_Retry()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -763,7 +763,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Multiple_Fx_References_Can_Roll_Forward_With_Retry()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -806,7 +806,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Multiple_Fx_References_Cant_Roll_Forward_Because_Disabled_Through_CommandLine()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -850,7 +850,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Multiple_SharedFxLookup_NetCoreApp_MinorRollForward_Wins_Over_UberFx()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -889,7 +889,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Multiple_SharedFxLookup_Uber_Wins_Over_NetCoreApp_On_PatchRollForward()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -924,7 +924,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void CoreClrLookup_WithNoDirectorySeparatorInDeps()
         {
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;

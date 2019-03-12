@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         private const string SystemCollectionsImmutableAssemblyVersion = "88.0.1.2";
 
         private readonly RepoDirectoriesProvider RepoDirectories;
-        private readonly TestProjectFixture SharedFxLookupPortableAppFixture_Built;
+        private readonly TestProjectFixture SharedFxLookupPortableAppFixture;
 
         private readonly string _currentWorkingDir;
         private readonly string _userDir;
@@ -88,10 +88,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 true);
 
             // Restore and build SharedFxLookupPortableApp from exe dir
-            SharedFxLookupPortableAppFixture_Built = new TestProjectFixture("SharedFxLookupPortableApp", RepoDirectories)
+            SharedFxLookupPortableAppFixture = new TestProjectFixture("SharedFxLookupPortableApp", RepoDirectories)
                 .EnsureRestored(RepoDirectories.CorehostPackages)
                 .BuildProject();
-            var fixture = SharedFxLookupPortableAppFixture_Built;
+            var fixture = SharedFxLookupPortableAppFixture;
 
             // The actual framework version can be obtained from the built fixture. We'll use it to
             // locate the builtSharedFxDir from which we can get the files contained in the version folder
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
         public void Dispose()
         {
-            SharedFxLookupPortableAppFixture_Built.Dispose();
+            SharedFxLookupPortableAppFixture.Dispose();
 
             if (!TestProject.PreserveTestRuns())
             {
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 return;
             }
 
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -245,7 +245,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 return;
             }
 
-            var fixture = SharedFxLookupPortableAppFixture_Built
+            var fixture = SharedFxLookupPortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;

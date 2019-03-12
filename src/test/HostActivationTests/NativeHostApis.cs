@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_Publish_Output_Portable_DLL_hostfxr_get_native_search_directories_Succeeds()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Hostfxr_get_native_search_directories_invalid_buffer()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
 
             fixture.BuiltDotnet.Exec(fixture.TestProject.AppDll, "Test_hostfxr_get_native_search_directories_invalid_buffer")
                 .CaptureStdOut()
@@ -63,8 +63,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_hostfxr_get_native_search_directories_with_invalid_deps()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var appFixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var appFixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
 
             // Corrupt the .deps.json by appending } to it (malformed json)
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Breadcrumb_thread_finishes_when_app_closes_normally()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Breadcrumb_thread_does_not_finish_when_app_has_unhandled_exception()
         {
-            var fixture = sharedTestState.PortableAppWithExceptionFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppWithExceptionFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             public SdkResolutionFixture(SharedTestState state)
             {
-                _fixture = state.HostApiInvokerAppFixture_Built.Copy();
+                _fixture = state.HostApiInvokerAppFixture.Copy();
 
                 Directory.CreateDirectory(WorkingDir);
 
@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Hostfxr_corehost_set_error_writer_test()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
 
             fixture.BuiltDotnet.Exec(fixture.TestProject.AppDll, "Test_hostfxr_set_error_writer")
                 .CaptureStdOut()
@@ -315,7 +315,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Hostpolicy_corehost_set_error_writer_test()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
 
             fixture.BuiltDotnet.Exec(fixture.TestProject.AppDll, "Test_corehost_set_error_writer")
                 .CaptureStdOut()
@@ -326,9 +326,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
         public class SharedTestState : IDisposable
         {
-            public TestProjectFixture HostApiInvokerAppFixture_Built { get; }
-            public TestProjectFixture PortableAppFixture_Published { get; }
-            public TestProjectFixture PortableAppWithExceptionFixture_Published { get; }
+            public TestProjectFixture HostApiInvokerAppFixture { get; }
+            public TestProjectFixture PortableAppFixture { get; }
+            public TestProjectFixture PortableAppWithExceptionFixture { get; }
             public RepoDirectoriesProvider RepoDirectories { get; }
 
             public string BreadcrumbLocation { get; }
@@ -337,28 +337,28 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                HostApiInvokerAppFixture_Built = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
+                HostApiInvokerAppFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .BuildProject();
 
-                PortableAppFixture_Published = new TestProjectFixture("PortableApp", RepoDirectories)
+                PortableAppFixture = new TestProjectFixture("PortableApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
-                PortableAppWithExceptionFixture_Published = new TestProjectFixture("PortableAppWithException", RepoDirectories)
+                PortableAppWithExceptionFixture = new TestProjectFixture("PortableAppWithException", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     BreadcrumbLocation = Path.Combine(
-                        PortableAppWithExceptionFixture_Published.TestProject.OutputDirectory,
+                        PortableAppWithExceptionFixture.TestProject.OutputDirectory,
                         "opt",
                         "corebreadcrumbs");
                     Directory.CreateDirectory(BreadcrumbLocation);
 
                     // On non-Windows, we can't just P/Invoke to already loaded hostfxr, so copy it next to the app dll.
-                    var fixture = HostApiInvokerAppFixture_Built;
+                    var fixture = HostApiInvokerAppFixture;
                     var hostfxr = Path.Combine(
                         fixture.BuiltDotnet.GreatestVersionHostFxrPath,
                         RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostfxr"));
@@ -371,9 +371,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             public void Dispose()
             {
-                HostApiInvokerAppFixture_Built.Dispose();
-                PortableAppFixture_Published.Dispose();
-                PortableAppWithExceptionFixture_Published.Dispose();
+                HostApiInvokerAppFixture.Dispose();
+                PortableAppFixture.Dispose();
+                PortableAppWithExceptionFixture.Dispose();
             }
         }
     }

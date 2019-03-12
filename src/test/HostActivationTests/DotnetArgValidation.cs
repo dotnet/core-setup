@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_Exec_With_Missing_App_Assembly_Fails()
         {
-            var fixture = sharedTestState.PortableAppFixture_Built
+            var fixture = sharedTestState.PortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_Exec_With_Missing_App_Assembly_And_Bad_Extension_Fails()
         {
-            var fixture = sharedTestState.PortableAppFixture_Built
+            var fixture = sharedTestState.PortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_Exec_With_Bad_Extension_Fails()
         {
-            var fixture = sharedTestState.PortableAppFixture_Built
+            var fixture = sharedTestState.PortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Detect_Missing_Argument_Value()
         {
-            var fixture = sharedTestState.PortableAppFixture_Built
+            var fixture = sharedTestState.PortableAppFixture
                 .Copy();
 
             var dotnet = fixture.BuiltDotnet;
@@ -89,26 +89,26 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         // Return a non-exisitent path that contains a mix of / and \
         private string GetNonexistentAndUnnormalizedPath()
         {
-            return Path.Combine(sharedTestState.PortableAppFixture_Built.SdkDotnet.BinPath, @"x\y/");
+            return Path.Combine(sharedTestState.PortableAppFixture.SdkDotnet.BinPath, @"x\y/");
         }
 
         public class SharedTestState : IDisposable
         {
             public RepoDirectoriesProvider RepoDirectories { get; }
-            public TestProjectFixture PortableAppFixture_Built { get; }
+            public TestProjectFixture PortableAppFixture { get; }
 
             public SharedTestState()
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                PortableAppFixture_Built = new TestProjectFixture("PortableApp", RepoDirectories)
+                PortableAppFixture = new TestProjectFixture("PortableApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .BuildProject();
             }
 
             public void Dispose()
             {
-                PortableAppFixture_Built.Dispose();
+                PortableAppFixture.Dispose();
             }
         }
     }

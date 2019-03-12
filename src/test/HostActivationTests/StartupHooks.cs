@@ -23,14 +23,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_StartupHook_Succeeds()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var startupHookWithNonPublicMethodFixture = sharedTestState.StartupHookWithNonPublicMethodFixture_Published.Copy();
+            var startupHookWithNonPublicMethodFixture = sharedTestState.StartupHookWithNonPublicMethodFixture.Copy();
             var startupHookWithNonPublicMethodDll = startupHookWithNonPublicMethodFixture.TestProject.AppDll;
 
             // Simple startup hook
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdOutContaining("Hello World");
 
             // Startup hook in type that has an additional overload of Initialize with a different signature
-            startupHookFixture = sharedTestState.StartupHookWithOverloadFixture_Published.Copy();
+            startupHookFixture = sharedTestState.StartupHookWithOverloadFixture.Copy();
             startupHookDll = startupHookFixture.TestProject.AppDll;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookDll)
@@ -81,14 +81,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_Multiple_StartupHooks_Succeeds()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var startupHook2Fixture = sharedTestState.StartupHookWithDependencyFixture_Published.Copy();
+            var startupHook2Fixture = sharedTestState.StartupHookWithDependencyFixture.Copy();
             var startupHook2Dll = startupHook2Fixture.TestProject.AppDll;
 
             // Multiple startup hooks
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_Empty_StartupHook_Variable_Succeeds()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
@@ -126,11 +126,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_StartupHook_With_Missing_Dependencies_Fails()
         {
-            var fixture = sharedTestState.PortableAppWithExceptionFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppWithExceptionFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookWithDependencyFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookWithDependencyFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
             // Startup hook has a dependency not on the TPA list
@@ -147,11 +147,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_Invalid_StartupHook_Fails()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
             var fakeAssembly = Path.GetFullPath("Assembly.dll");
@@ -205,11 +205,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_StartupHook_With_Relative_Path_Fails()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
             var relativeAssemblyPath = "Assembly.dll";
@@ -242,11 +242,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_Missing_StartupHook_Assembly_Fails()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
             var startupHookMissingDll = Path.Combine(Path.GetDirectoryName(startupHookDll), "StartupHookMissing.dll");
 
@@ -278,14 +278,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_Invalid_StartupHook_Assembly_Fails()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var startupHookInvalidAssembly = sharedTestState.StartupHookStartupHookInvalidAssemblyFixture_Published.Copy();
+            var startupHookInvalidAssembly = sharedTestState.StartupHookStartupHookInvalidAssemblyFixture.Copy();
             var startupHookInvalidAssemblyDll = Path.Combine(Path.GetDirectoryName(startupHookInvalidAssembly.TestProject.AppDll), "StartupHookInvalidAssembly.dll");
 
             var expectedError = "System.BadImageFormatException";
@@ -314,14 +314,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_Missing_StartupHook_Type_Fails()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var startupHookMissingTypeFixture = sharedTestState.StartupHookWithoutStartupHookTypeFixture_Published.Copy();
+            var startupHookMissingTypeFixture = sharedTestState.StartupHookWithoutStartupHookTypeFixture.Copy();
             var startupHookMissingTypeDll = startupHookMissingTypeFixture.TestProject.AppDll;
 
             // Missing type is detected
@@ -350,14 +350,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_StartupHook_With_Missing_Method()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var startupHookMissingMethodFixture = sharedTestState.StartupHookWithoutInitializeMethodFixture_Published.Copy();
+            var startupHookMissingMethodFixture = sharedTestState.StartupHookWithoutInitializeMethodFixture.Copy();
             var startupHookMissingMethodDll = startupHookMissingMethodFixture.TestProject.AppDll;
 
             var expectedError = "System.MissingMethodException: Method 'StartupHook.Initialize' not found.";
@@ -387,17 +387,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_StartupHook_With_Incorrect_Method_Signature_Fails()
         {
-            var fixture = sharedTestState.PortableAppFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
 
-            var startupHookFixture = sharedTestState.StartupHookFixture_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
             var expectedError = "System.ArgumentException: The signature of the startup hook 'StartupHook.Initialize' in assembly '{0}' was invalid. It must be 'public static void Initialize()'.";
 
             // Initialize is an instance method
-            var startupHookWithInstanceMethodFixture = sharedTestState.StartupHookWithInstanceMethodFixture_Published.Copy();
+            var startupHookWithInstanceMethodFixture = sharedTestState.StartupHookWithInstanceMethodFixture.Copy();
             var startupHookWithInstanceMethodDll = startupHookWithInstanceMethodFixture.TestProject.AppDll;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookWithInstanceMethodDll)
@@ -408,7 +408,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdErrContaining(String.Format(expectedError, startupHookWithInstanceMethodDll));
 
             // Initialize method takes parameters
-            var startupHookWithParameterFixture = sharedTestState.StartupHookWithParameterFixture_Published.Copy();
+            var startupHookWithParameterFixture = sharedTestState.StartupHookWithParameterFixture.Copy();
             var startupHookWithParameterDll = startupHookWithParameterFixture.TestProject.AppDll;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookWithParameterDll)
@@ -419,7 +419,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdErrContaining(String.Format(expectedError, startupHookWithParameterDll));
 
             // Initialize method has non-void return type
-            var startupHookWithReturnTypeFixture = sharedTestState.StartupHookWithReturnTypeFixture_Published.Copy();
+            var startupHookWithReturnTypeFixture = sharedTestState.StartupHookWithReturnTypeFixture.Copy();
             var startupHookWithReturnTypeDll = startupHookWithReturnTypeFixture.TestProject.AppDll;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookWithReturnTypeDll)
@@ -430,7 +430,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdErrContaining(String.Format(expectedError, startupHookWithReturnTypeDll));
 
             // Initialize method that has multiple methods with an incorrect signature
-            var startupHookWithMultipleIncorrectSignaturesFixture = sharedTestState.StartupHookWithMultipleIncorrectSignaturesFixture_Published.Copy();
+            var startupHookWithMultipleIncorrectSignaturesFixture = sharedTestState.StartupHookWithMultipleIncorrectSignaturesFixture.Copy();
             var startupHookWithMultipleIncorrectSignaturesDll = startupHookWithMultipleIncorrectSignaturesFixture.TestProject.AppDll;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookWithMultipleIncorrectSignaturesDll)
@@ -494,13 +494,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void Muxer_activation_of_StartupHook_With_Assembly_Resolver()
         {
-            var fixture = sharedTestState.PortableAppWithMissingRefFixture_Published.Copy();
+            var fixture = sharedTestState.PortableAppWithMissingRefFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
             var appDll = fixture.TestProject.AppDll;
             var appDepsJson = Path.Combine(Path.GetDirectoryName(appDll), Path.GetFileNameWithoutExtension(appDll) + ".deps.json");
             RemoveLibraryFromDepsJson(appDepsJson, "SharedLibrary.dll");
 
-            var startupHookFixture = sharedTestState.StartupHookWithAssemblyResolver_Published.Copy();
+            var startupHookFixture = sharedTestState.StartupHookWithAssemblyResolver.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
             // No startup hook results in failure due to missing app dependency
@@ -524,31 +524,31 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         public class SharedTestState : IDisposable
         {
             // Entry point projects
-            public TestProjectFixture PortableAppFixture_Published { get; }
-            public TestProjectFixture PortableAppWithExceptionFixture_Published { get; }
+            public TestProjectFixture PortableAppFixture { get; }
+            public TestProjectFixture PortableAppWithExceptionFixture { get; }
             // Entry point with missing reference assembly
-            public TestProjectFixture PortableAppWithMissingRefFixture_Published { get; }
+            public TestProjectFixture PortableAppWithMissingRefFixture { get; }
 
             // Correct startup hooks
-            public TestProjectFixture StartupHookFixture_Published { get; }
-            public TestProjectFixture StartupHookWithOverloadFixture_Published { get; }
+            public TestProjectFixture StartupHookFixture { get; }
+            public TestProjectFixture StartupHookWithOverloadFixture { get; }
             // Missing startup hook type (no StartupHook type defined)
-            public TestProjectFixture StartupHookWithoutStartupHookTypeFixture_Published { get; }
+            public TestProjectFixture StartupHookWithoutStartupHookTypeFixture { get; }
             // Missing startup hook method (no Initialize method defined)
-            public TestProjectFixture StartupHookWithoutInitializeMethodFixture_Published { get; }
+            public TestProjectFixture StartupHookWithoutInitializeMethodFixture { get; }
             // Invalid startup hook assembly
-            public TestProjectFixture StartupHookStartupHookInvalidAssemblyFixture_Published { get; }
+            public TestProjectFixture StartupHookStartupHookInvalidAssemblyFixture { get; }
             // Invalid startup hooks (incorrect signatures)
-            public TestProjectFixture StartupHookWithNonPublicMethodFixture_Published { get; }
-            public TestProjectFixture StartupHookWithInstanceMethodFixture_Published { get; }
-            public TestProjectFixture StartupHookWithParameterFixture_Published { get; }
-            public TestProjectFixture StartupHookWithReturnTypeFixture_Published { get; }
-            public TestProjectFixture StartupHookWithMultipleIncorrectSignaturesFixture_Published { get; }
+            public TestProjectFixture StartupHookWithNonPublicMethodFixture { get; }
+            public TestProjectFixture StartupHookWithInstanceMethodFixture { get; }
+            public TestProjectFixture StartupHookWithParameterFixture { get; }
+            public TestProjectFixture StartupHookWithReturnTypeFixture { get; }
+            public TestProjectFixture StartupHookWithMultipleIncorrectSignaturesFixture { get; }
             // Valid startup hooks with incorrect behavior
-            public TestProjectFixture StartupHookWithDependencyFixture_Published { get; }
+            public TestProjectFixture StartupHookWithDependencyFixture { get; }
 
             // Startup hook with an assembly resolver
-            public TestProjectFixture StartupHookWithAssemblyResolver_Published { get; }
+            public TestProjectFixture StartupHookWithAssemblyResolver { get; }
 
             public RepoDirectoriesProvider RepoDirectories { get; }
 
@@ -557,60 +557,60 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 RepoDirectories = new RepoDirectoriesProvider();
 
                 // Entry point projects
-                PortableAppFixture_Published = new TestProjectFixture("PortableApp", RepoDirectories)
+                PortableAppFixture = new TestProjectFixture("PortableApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
-                PortableAppWithExceptionFixture_Published = new TestProjectFixture("PortableAppWithException", RepoDirectories)
+                PortableAppWithExceptionFixture = new TestProjectFixture("PortableAppWithException", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
                 // Entry point with missing reference assembly
-                PortableAppWithMissingRefFixture_Published = new TestProjectFixture("PortableAppWithMissingRef", RepoDirectories)
+                PortableAppWithMissingRefFixture = new TestProjectFixture("PortableAppWithMissingRef", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
                 // Correct startup hooks
-                StartupHookFixture_Published = new TestProjectFixture("StartupHook", RepoDirectories)
+                StartupHookFixture = new TestProjectFixture("StartupHook", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
-                StartupHookWithOverloadFixture_Published = new TestProjectFixture("StartupHookWithOverload", RepoDirectories)
+                StartupHookWithOverloadFixture = new TestProjectFixture("StartupHookWithOverload", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
                 // Missing startup hook type (no StartupHook type defined)
-                StartupHookWithoutStartupHookTypeFixture_Published = new TestProjectFixture("StartupHookWithoutStartupHookType", RepoDirectories)
+                StartupHookWithoutStartupHookTypeFixture = new TestProjectFixture("StartupHookWithoutStartupHookType", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
                 // Missing startup hook method (no Initialize method defined)
-                StartupHookWithoutInitializeMethodFixture_Published = new TestProjectFixture("StartupHookWithoutInitializeMethod", RepoDirectories)
+                StartupHookWithoutInitializeMethodFixture = new TestProjectFixture("StartupHookWithoutInitializeMethod", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
                 // Invalid startup hook assembly
-                StartupHookStartupHookInvalidAssemblyFixture_Published = new TestProjectFixture("StartupHookFake", RepoDirectories)
+                StartupHookStartupHookInvalidAssemblyFixture = new TestProjectFixture("StartupHookFake", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
                 // Invalid startup hooks (incorrect signatures)
-                StartupHookWithNonPublicMethodFixture_Published = new TestProjectFixture("StartupHookWithNonPublicMethod", RepoDirectories)
+                StartupHookWithNonPublicMethodFixture = new TestProjectFixture("StartupHookWithNonPublicMethod", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
-                StartupHookWithInstanceMethodFixture_Published = new TestProjectFixture("StartupHookWithInstanceMethod", RepoDirectories)
+                StartupHookWithInstanceMethodFixture = new TestProjectFixture("StartupHookWithInstanceMethod", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
-                StartupHookWithParameterFixture_Published = new TestProjectFixture("StartupHookWithParameter", RepoDirectories)
+                StartupHookWithParameterFixture = new TestProjectFixture("StartupHookWithParameter", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
-                StartupHookWithReturnTypeFixture_Published = new TestProjectFixture("StartupHookWithReturnType", RepoDirectories)
+                StartupHookWithReturnTypeFixture = new TestProjectFixture("StartupHookWithReturnType", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
-                StartupHookWithMultipleIncorrectSignaturesFixture_Published = new TestProjectFixture("StartupHookWithMultipleIncorrectSignatures", RepoDirectories)
+                StartupHookWithMultipleIncorrectSignaturesFixture = new TestProjectFixture("StartupHookWithMultipleIncorrectSignatures", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
                 // Valid startup hooks with incorrect behavior
-                StartupHookWithDependencyFixture_Published = new TestProjectFixture("StartupHookWithDependency", RepoDirectories)
+                StartupHookWithDependencyFixture = new TestProjectFixture("StartupHookWithDependency", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
                 // Startup hook with an assembly resolver
-                StartupHookWithAssemblyResolver_Published = new TestProjectFixture("StartupHookWithAssemblyResolver", RepoDirectories)
+                StartupHookWithAssemblyResolver = new TestProjectFixture("StartupHookWithAssemblyResolver", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
             }
@@ -618,31 +618,31 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             public void Dispose()
             {
                 // Entry point projects
-                PortableAppFixture_Published.Dispose();
-                PortableAppWithExceptionFixture_Published.Dispose();
+                PortableAppFixture.Dispose();
+                PortableAppWithExceptionFixture.Dispose();
                 // Entry point with missing reference assembly
-                PortableAppWithMissingRefFixture_Published.Dispose();
+                PortableAppWithMissingRefFixture.Dispose();
 
                 // Correct startup hooks
-                StartupHookFixture_Published.Dispose();
-                StartupHookWithOverloadFixture_Published.Dispose();
+                StartupHookFixture.Dispose();
+                StartupHookWithOverloadFixture.Dispose();
                 // Missing startup hook type (no StartupHook type defined)
-                StartupHookWithoutStartupHookTypeFixture_Published.Dispose();
+                StartupHookWithoutStartupHookTypeFixture.Dispose();
                 // Missing startup hook method (no Initialize method defined)
-                StartupHookWithoutInitializeMethodFixture_Published.Dispose();
+                StartupHookWithoutInitializeMethodFixture.Dispose();
                 // Invalid startup hook assembly
-                StartupHookStartupHookInvalidAssemblyFixture_Published.Dispose();
+                StartupHookStartupHookInvalidAssemblyFixture.Dispose();
                 // Invalid startup hooks (incorrect signatures)
-                StartupHookWithNonPublicMethodFixture_Published.Dispose();
-                StartupHookWithInstanceMethodFixture_Published.Dispose();
-                StartupHookWithParameterFixture_Published.Dispose();
-                StartupHookWithReturnTypeFixture_Published.Dispose();
-                StartupHookWithMultipleIncorrectSignaturesFixture_Published.Dispose();
+                StartupHookWithNonPublicMethodFixture.Dispose();
+                StartupHookWithInstanceMethodFixture.Dispose();
+                StartupHookWithParameterFixture.Dispose();
+                StartupHookWithReturnTypeFixture.Dispose();
+                StartupHookWithMultipleIncorrectSignaturesFixture.Dispose();
                 // Valid startup hooks with incorrect behavior
-                StartupHookWithDependencyFixture_Published.Dispose();
+                StartupHookWithDependencyFixture.Dispose();
 
                 // Startup hook with an assembly resolver
-                StartupHookWithAssemblyResolver_Published.Dispose();
+                StartupHookWithAssemblyResolver.Dispose();
             }
         }
     }

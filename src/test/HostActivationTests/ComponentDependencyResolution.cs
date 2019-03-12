@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void InvalidMainComponentAssemblyPathFails()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
 
             string[] args =
             {
@@ -47,8 +47,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void ComponentWithNoDependenciesAndNoDeps()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithNoDependenciesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithNoDependenciesFixture.Copy();
 
             // Remove .deps.json
             File.Delete(componentFixture.TestProject.DepsJson);
@@ -74,8 +74,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void ComponentWithNoDependencies()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithNoDependenciesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithNoDependenciesFixture.Copy();
 
             string[] args =
             {
@@ -129,8 +129,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void ComponentWithDependencies()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithDependenciesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithDependenciesFixture.Copy();
 
             string libuvRid = GetExpectedLibuvRid(fixture);
             if (libuvRid == null)
@@ -163,8 +163,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void ComponentWithDependenciesAndDependencyRemoved()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithDependenciesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithDependenciesFixture.Copy();
 
             // Remove a dependency
             // This will cause the resolution to fail
@@ -190,8 +190,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void ComponentWithDependenciesAndNoDeps()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithDependenciesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithDependenciesFixture.Copy();
 
             // Remove .deps.json
             File.Delete(componentFixture.TestProject.DepsJson);
@@ -217,8 +217,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void ComponentWithDependenciesAndNoDepsAndDependencyRemoved()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithDependenciesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithDependenciesFixture.Copy();
 
             // Remove .deps.json
             File.Delete(componentFixture.TestProject.DepsJson);
@@ -247,8 +247,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void ComponentWithSameDependencyWithDifferentExtensionShouldFail()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithDependenciesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithDependenciesFixture.Copy();
 
             // Add a reference to another package which has asset with the same name as the existing ComponentDependency
             // but with a different extension. This causes a failure.
@@ -287,8 +287,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void ComponentWithCorruptedDepsJsonShouldFail()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithDependenciesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithDependenciesFixture.Copy();
 
             // Corrupt the .deps.json by appending } to it (malformed json)
             File.WriteAllText(
@@ -314,8 +314,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void ComponentWithResourcesShouldReportResourceSearchPaths()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithResourcesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithResourcesFixture.Copy();
 
             string[] args =
             {
@@ -364,8 +364,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void AdditionalDepsDontAffectComponentDependencyResolution()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentFixture = sharedTestState.ComponentWithNoDependenciesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentFixture = sharedTestState.ComponentWithNoDependenciesFixture.Copy();
 
             string additionalDepsPath = Path.Combine(Path.GetDirectoryName(fixture.TestProject.DepsJson), "__duplicate.deps.json");
             File.Copy(fixture.TestProject.DepsJson, additionalDepsPath);
@@ -387,9 +387,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void MultiThreadedComponentDependencyResolutionWhichSucceeeds()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentWithNoDependenciesFixture = sharedTestState.ComponentWithNoDependenciesFixture_Published.Copy();
-            var componentWithResourcesFixture = sharedTestState.ComponentWithResourcesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentWithNoDependenciesFixture = sharedTestState.ComponentWithNoDependenciesFixture.Copy();
+            var componentWithResourcesFixture = sharedTestState.ComponentWithResourcesFixture.Copy();
 
             string componentWithNoDependenciesPrefix = Path.GetFileNameWithoutExtension(componentWithNoDependenciesFixture.TestProject.AppDll);
             string componentWithResourcesPrefix = Path.GetFileNameWithoutExtension(componentWithResourcesFixture.TestProject.AppDll);
@@ -414,9 +414,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [Fact]
         public void MultiThreadedComponentDependencyResolutionWhichFailures()
         {
-            var fixture = sharedTestState.HostApiInvokerAppFixture_Built.Copy();
-            var componentWithNoDependenciesFixture = sharedTestState.ComponentWithNoDependenciesFixture_Published.Copy();
-            var componentWithResourcesFixture = sharedTestState.ComponentWithResourcesFixture_Published.Copy();
+            var fixture = sharedTestState.HostApiInvokerAppFixture.Copy();
+            var componentWithNoDependenciesFixture = sharedTestState.ComponentWithNoDependenciesFixture.Copy();
+            var componentWithResourcesFixture = sharedTestState.ComponentWithResourcesFixture.Copy();
 
             string componentWithNoDependenciesPrefix = Path.GetFileNameWithoutExtension(componentWithNoDependenciesFixture.TestProject.AppDll);
             string componentWithResourcesPrefix = Path.GetFileNameWithoutExtension(componentWithResourcesFixture.TestProject.AppDll);
@@ -447,36 +447,36 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
         public class SharedTestState : IDisposable
         {
-            public TestProjectFixture HostApiInvokerAppFixture_Built { get; }
-            public TestProjectFixture ComponentWithNoDependenciesFixture_Published { get; }
-            public TestProjectFixture ComponentWithDependenciesFixture_Published { get; }
-            public TestProjectFixture ComponentWithResourcesFixture_Published { get; }
+            public TestProjectFixture HostApiInvokerAppFixture { get; }
+            public TestProjectFixture ComponentWithNoDependenciesFixture { get; }
+            public TestProjectFixture ComponentWithDependenciesFixture { get; }
+            public TestProjectFixture ComponentWithResourcesFixture { get; }
             public RepoDirectoriesProvider RepoDirectories { get; }
 
             public SharedTestState()
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                HostApiInvokerAppFixture_Built = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
+                HostApiInvokerAppFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .BuildProject();
 
-                ComponentWithNoDependenciesFixture_Published = new TestProjectFixture("ComponentWithNoDependencies", RepoDirectories)
+                ComponentWithNoDependenciesFixture = new TestProjectFixture("ComponentWithNoDependencies", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
-                ComponentWithDependenciesFixture_Published = new TestProjectFixture("ComponentWithDependencies", RepoDirectories)
+                ComponentWithDependenciesFixture = new TestProjectFixture("ComponentWithDependencies", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
-                ComponentWithResourcesFixture_Published = new TestProjectFixture("ComponentWithResources", RepoDirectories)
+                ComponentWithResourcesFixture = new TestProjectFixture("ComponentWithResources", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
                     .PublishProject();
 
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     // On non-Windows, we can't just P/Invoke to already loaded hostpolicy, so copy it next to the app dll.
-                    var fixture = HostApiInvokerAppFixture_Built;
+                    var fixture = HostApiInvokerAppFixture;
                     var hostpolicy = Path.Combine(
                         fixture.BuiltDotnet.GreatestVersionSharedFxPath,
                         RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostpolicy"));
@@ -489,10 +489,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             public void Dispose()
             {
-                HostApiInvokerAppFixture_Built.Dispose();
-                ComponentWithNoDependenciesFixture_Published.Dispose();
-                ComponentWithDependenciesFixture_Published.Dispose();
-                ComponentWithResourcesFixture_Published.Dispose();
+                HostApiInvokerAppFixture.Dispose();
+                ComponentWithNoDependenciesFixture.Dispose();
+                ComponentWithDependenciesFixture.Dispose();
+                ComponentWithResourcesFixture.Dispose();
             }
         }
     }
