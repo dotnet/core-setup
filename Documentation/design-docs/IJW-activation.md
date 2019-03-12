@@ -1,6 +1,6 @@
 # IJW Activation for .NET Core on Windows
 
-To support any C++/CLI users that wish to use .NET Core, the runtime and hosting APIs must be updated to provide support activation of the managed portion of mixed-mode assemblies. Without this support, any users of C++/CLI cannot move to .NET Core without using the deprecated Visual C++ compiler `/clr:pure` switch.
+To support all C++/CLI users that wish to use .NET Core, the runtime and hosting APIs must be updated to provide support activation of the managed portion of mixed-mode assemblies. Without this support, any users of C++/CLI cannot move to .NET Core without using the deprecated Visual C++ compiler `/clr:pure` switch.
 
 ## Requirements
 
@@ -63,7 +63,7 @@ When `_CorExeMain()` is called, the following will occur:
 
 #### IJW DLLs and Delayed-Activation Thunks
 
-When `_CorDllMain()` is called when the DLL, the following will occur:
+When `_CorDllMain()` is called, the following will occur:
 
 1) If `_CorDllMain` was called because the DLL is being attached to a process:
    1) Calculate how many thunks we need to create from the number of entries in each record in the vtfixup table of the calling DLL.
@@ -73,10 +73,6 @@ When `_CorDllMain()` is called when the DLL, the following will occur:
 2) Call the native `DllMain` if the user provided one.
 3) If `_CorDllMain` was called because the DLL is being unloaded from the process:
    1) Deallocate the thunks allocated for the calling DLL.
-
-The .NET Framework implementation uses the runtime's `PEDecoder` class to validate that the PE is a .NET assembly, bail out early if it is IL only, get the native entry point if it exists, get the vtfixup table, and read RVAs from the module. Our options here are to either port over the `PEDecoder` class to core-setup, move the shim to coreclr and copy a chunk of code from core-setup to coreclr along with it to enable the shim to activate the runtime through hostfxr, or some other code-sharing model. The `PEDecoder` class heavily uses the CoreCLR `CONTRACT` and `CHECK` APIs, so porting it over to core-setup is not a simple task. A subset has been ported to be able to test behavior. Since the OS will validate the image when loading it, we can avoid having to port over all of the validation code and just add a check for the NT header that .NET uses to specify that it is a .NET assembly.
-
-Additionally, the .NET Framework implementation of the allocation uses the CLR's Executable Heap from the CLR's `utilcode` library. We can use the Windows Heap API directly to create our own executable heap.
 
 #### Loading the Assembly Into the Runtime
 
@@ -96,7 +92,7 @@ The naming of these APIs is designed to be useful for non-IJW scenarios as well,
 
 When the runtime loads the assembly, it needs to know if each element in the vtfixup table is a token or a stub. In .NET Framework, this check is implemented by the runtime querying `mscoree.dll` by looking up callbacks. When the runtime is traversing the vtfixup table and updating the entries to point to JIT stubs, it queries `mscoree.dll` if the module has stubs. If the module has stubs, it calls back into `mscoree.dll` to query the stub data structures for the metadata token. Otherwise, it grabs the token from the slot.
 
-We will implement it similarly, by having CoreCLR call back into `ijwhost.dll` if it is present.
+We will implement it similarly, by having CoreCLR call back into the IJW assembly's shim. We will discover this shim by traversing the IJW assembly's import table to find the `_CorDllMain` import, and from there resolve the shim's `HMODULE`. Since it is technically possible to craft a non-IJW assembly that exports functions via the vtfixup table, we will enable CoreCLR to resolve the tokens from the table in the simple case where no delayed-activation thunks are used.
 
 #### Caveats
 
