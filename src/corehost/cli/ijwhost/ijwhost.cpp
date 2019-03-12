@@ -85,7 +85,7 @@ IJW_API BOOL STDMETHODCALLTYPE _CorDllMain(HINSTANCE hInst,
             return FALSE;
         }
 
-        if (pe.IsILOnly() || (!pe.HasManagedEntryPoint() && !pe.HasNativeEntryPoint()))
+        if (!pe.HasManagedEntryPoint() && !pe.HasNativeEntryPoint())
         {
             // If there is no user entry point, then we don't want the
             // thread start/stop events going through because it slows down

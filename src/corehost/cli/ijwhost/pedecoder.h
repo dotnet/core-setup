@@ -8,8 +8,6 @@
 #include "pal.h"
 #include "corhdr.h"
 
-struct READYTORUN_HEADER;
-
 // A subsection of the PEDecoder from CoreCLR that has only the methods we need.
 class PEDecoder
 {
@@ -22,11 +20,6 @@ public:
     bool HasCorHeader() const
     {
         return HasDirectoryEntry(IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
-    }
-
-    bool IsILOnly() const
-    {
-        return ((GetCorHeader()->Flags & COMIMAGE_FLAGS_ILONLY) != 0) || HasReadyToRunHeader();
     }
 
     bool HasManagedEntryPoint() const;
@@ -50,14 +43,6 @@ public:
     }
 
 private:
-
-    bool HasReadyToRunHeader() const
-    {
-        return FindReadyToRunHeader() != nullptr;
-    }
-
-    READYTORUN_HEADER * FindReadyToRunHeader() const;
-
     bool HasDirectoryEntry(int entry) const
     {
         return FindNTHeaders()->OptionalHeader.DataDirectory[entry].VirtualAddress != 0;

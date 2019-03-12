@@ -27,13 +27,7 @@ namespace
 HANDLE g_heapHandle;
 
 bool patch_vtable_entries(PEDecoder& pe)
-{
-    if (pe.IsILOnly())
-    {
-        // Nothing to do if the PE is IL-only.
-        return true;
-    }
-    
+{    
     size_t numFixupRecords;
     IMAGE_COR_VTABLEFIXUP* pFixupTable = pe.GetVTableFixups(&numFixupRecords);
 
@@ -151,10 +145,6 @@ extern "C" std::uintptr_t __stdcall start_runtime_and_get_target_address(std::ui
 
 void release_bootstrap_thunks(PEDecoder& pe)
 {
-    if (pe.IsILOnly())
-    {
-        return;
-    }
     std::lock_guard<std::mutex> lock(g_thunkChunkLock);
     // Clean up the VTable thunks if they exist.
     for (bootstrap_thunk_chunk **ppCurChunk = &g_pVtableBootstrapThunkChunkList;

@@ -3,15 +3,6 @@
 
 #include "pedecoder.h"
 
-namespace
-{
-    std::uint32_t AlignUp(std::uint32_t value, std::uint32_t alignment)
-    {
-        return (value+alignment-1)&~(alignment-1);
-    }
-}
-
-
 bool PEDecoder::HasManagedEntryPoint() const
 {
     ULONG flags = GetCorHeader()->Flags;
@@ -39,32 +30,4 @@ bool PEDecoder::HasNativeEntryPoint() const
 void *PEDecoder::GetNativeEntryPoint() const
 {
     return ((void *) GetRvaData(GetCorHeader()->EntryPointToken));
-}
-
-#define READYTORUN_SIGNATURE 0x00525452 // 'RTR'
-struct READYTORUN_HEADER
-{
-    DWORD                   Signature;      // READYTORUN_SIGNATURE
-    USHORT                  MajorVersion;   // READYTORUN_VERSION_XXX
-    USHORT                  MinorVersion;
-
-    DWORD                   Flags;          // READYTORUN_FLAG_XXX
-
-    DWORD                   NumberOfSections;
-};
-
-READYTORUN_HEADER* PEDecoder::FindReadyToRunHeader() const
-{
-    IMAGE_DATA_DIRECTORY *pDir = &GetCorHeader()->ManagedNativeHeader;
-
-    if (pDir->Size >= sizeof(READYTORUN_HEADER))
-    {
-        READYTORUN_HEADER* pHeader = reinterpret_cast<READYTORUN_HEADER*>(GetDirectoryData(pDir));
-        if (pHeader->Signature == READYTORUN_SIGNATURE)
-        {
-            return pHeader;
-        }
-    }
-
-    return nullptr;
 }
