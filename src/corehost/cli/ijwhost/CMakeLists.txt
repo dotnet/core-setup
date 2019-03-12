@@ -21,7 +21,6 @@ set(SOURCES
     pedecoder.cpp
     bootstrap_thunk_chunk.cpp
     ${ARCH_SPECIFIC_FOLDER_NAME}/bootstrap_thunk.cpp
-    Exports.def
 )
 
 if(WIN32)
@@ -92,4 +91,7 @@ if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))
     target_link_libraries(ijwhost Advapi32.lib Ole32.lib)
 endif()
 
-install_library_and_symbols (ijwhost) 
+install(TARGETS comhost
+        LIBRARY DESTINATION corehost
+        ARCHIVE DESTINATION corehost)
+install_symbols (ijwhost) 
