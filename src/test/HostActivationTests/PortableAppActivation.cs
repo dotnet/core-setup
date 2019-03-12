@@ -291,12 +291,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
         }
 
         [Fact]
@@ -353,12 +350,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                     .CaptureStdOut()
                     .EnvironmentVariable("_DOTNET_TEST_SDK_REGISTRY_PATH", testKey.Name)
                     .Execute()
-                    .Should()
-                    .Pass()
-                    .And
-                    .HaveStdOutContaining("Hello World")
-                    .And
-                    .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                    .Should().Pass()
+                    .And.HaveStdOutContaining("Hello World")
+                    .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
 
                 // Verify running from within the working directory
                 Command.Create(appExe)
@@ -367,12 +361,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                     .CaptureStdErr()
                     .CaptureStdOut()
                     .Execute()
-                    .Should()
-                    .Pass()
-                    .And
-                    .HaveStdOutContaining("Hello World")
-                    .And
-                    .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                    .Should().Pass()
+                    .And.HaveStdOutContaining("Hello World")
+                    .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
             }
             finally
             {
