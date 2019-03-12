@@ -91,7 +91,7 @@ if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))
     target_link_libraries(ijwhost Advapi32.lib Ole32.lib)
 endif()
 
-install(TARGETS comhost
+install(TARGETS ijwhost
         LIBRARY DESTINATION corehost
         ARCHIVE DESTINATION corehost)
 install_symbols (ijwhost corehost) 
