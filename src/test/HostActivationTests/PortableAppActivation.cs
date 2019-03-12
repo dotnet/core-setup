@@ -304,7 +304,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 return;
             }
 
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredPortableTestProjectFixture
+            var fixture = sharedTestState.PortableAppFixture_Published
                 .Copy();
 
             // Since SDK doesn't support building framework dependent apphost yet, emulate that behavior
