@@ -127,16 +127,16 @@ bool resolve_fxr_path(const pal::string_t& root_path, pal::string_t* out_dotnet_
     }
     else
     {
-		if (pal::get_dotnet_self_registered_dir(&default_install_location) || pal::get_default_installation_dir(&default_install_location))
-		{
-			trace::info(_X("Using global installation location [%s] as runtime location."), default_install_location.c_str());
-			out_dotnet_root->assign(default_install_location);
-		}
-		else
-		{
-			trace::error(_X("A fatal error occurred, the default install location cannot be obtained."));
-			return false;
-		}
+        if (pal::get_dotnet_self_registered_dir(&default_install_location) || pal::get_default_installation_dir(&default_install_location))
+        {
+            trace::info(_X("Using global installation location [%s] as runtime location."), default_install_location.c_str());
+            out_dotnet_root->assign(default_install_location);
+        }
+        else
+        {
+            trace::error(_X("A fatal error occurred, the default install location cannot be obtained."));
+            return false;
+        }
     }
 
     fxr_dir = *out_dotnet_root;
@@ -148,9 +148,9 @@ bool resolve_fxr_path(const pal::string_t& root_path, pal::string_t* out_dotnet_
         {
             pal::get_dotnet_self_registered_dir(&default_install_location);
         }
-		if (default_install_location.empty())
-		{
-			pal::get_default_installation_dir(&default_install_location);
+        if (default_install_location.empty())
+        {
+            pal::get_default_installation_dir(&default_install_location);
         }
 
         trace::error(_X("A fatal error occurred. The required library %s could not be found.\n"
