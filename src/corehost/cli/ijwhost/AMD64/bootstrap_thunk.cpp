@@ -4,9 +4,15 @@
 #include "bootstrap_thunk.h"
 #include "corhdr.h"
 
-BYTE bootstrap_thunk::s_mov_r10[2] = {0x49, 0xBA};
-BYTE bootstrap_thunk::s_mov_r11[2] = {0x49, 0xBB};
-BYTE bootstrap_thunk::s_jmp_r11[3] = {0x41, 0xFF, 0xE3};
+namespace
+{
+    // 49 BA 78 56 34 12 78 56 34 12 mov         r10,1234567812345678h
+    // 49 BB 34 12 34 12 34 12 34 12 mov         r11,1234123412341234h
+    // 41 FF E3                      jmp         r11
+    BYTE mov_r10_instruction[2] = {0x49, 0xBA};
+    BYTE mov_r11_instruction[2] = {0x49, 0xBB};
+    BYTE jmp_r11_instruction[3] = {0x41, 0xFF, 0xE3};
+}
 
 //=================================================================================
 // Get thunk from the return address that the call instruction would have pushed
@@ -60,21 +66,17 @@ void bootstrap_thunk::initialize(std::uintptr_t pThunkInitFcn,
                                           std::uintptr_t *pSlot)
 {
     // Initialize the jump thunk.
-    memcpy(&m_mov_r10[0], &s_mov_r10[0], sizeof(s_mov_r10));
+    memcpy(&m_mov_r10[0], &mov_r10_instruction[0], sizeof(mov_r10_instruction));
     (*((void **)&m_val_r10[0])) = (void *)this;
-    memcpy(&m_mov_r11[0], &s_mov_r11[0], sizeof(s_mov_r11));
+    memcpy(&m_mov_r11[0], &mov_r11_instruction[0], sizeof(mov_r11_instruction));
     (*((void **)&m_val_r11[0])) = (void *)pThunkInitFcn;
-    memcpy(&m_jmp_r11[0], &s_jmp_r11[0], sizeof(s_jmp_r11));
+    memcpy(&m_jmp_r11[0], &jmp_r11_instruction[0], sizeof(jmp_r11_instruction));
 
     // Fill out the rest of the info
     m_token = token;
     m_dll = dll;
     m_slot = pSlot;
-    m_flags = 0;
 
     assert(TypeFromToken(token) == mdtMethodDef ||
              TypeFromToken(token) == mdtMemberRef);
-
-    if (TypeFromToken(token) == mdtMethodDef)
-        m_flags = e_TOKEN_IS_DEF;
 }

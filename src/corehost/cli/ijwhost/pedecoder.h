@@ -21,7 +21,7 @@ public:
 
     bool HasCorHeader() const
     {
-        return HasDirectoryEntry(IMAGE_DIRECTORY_ENTRY_COMHEADER);
+        return HasDirectoryEntry(IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR);
     }
 
     bool IsILOnly() const
@@ -75,7 +75,7 @@ private:
 
     inline IMAGE_COR20_HEADER *FindCorHeader() const
     {
-        return reinterpret_cast<IMAGE_COR20_HEADER*>(GetDirectoryEntryData(IMAGE_DIRECTORY_ENTRY_COMHEADER));
+        return reinterpret_cast<IMAGE_COR20_HEADER*>(GetDirectoryEntryData(IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR));
     }
 
     IMAGE_DATA_DIRECTORY *GetDirectoryEntry(int entry) const

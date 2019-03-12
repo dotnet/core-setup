@@ -25,7 +25,7 @@ namespace
             pal::string_t ver = get_filename(dir);
 
             fx_ver_t fx_ver;
-            if (fx_ver_t::parse(ver, &fx_ver, false))
+            if (fx_ver_t::parse(ver, &fx_ver, /* parse_only_production */ false))
             {
                 max_ver = std::max(max_ver, fx_ver);
             }

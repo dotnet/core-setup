@@ -40,7 +40,7 @@ std::uint32_t bootstrap_thunk::get_token()
     std::uint32_t ulTok = 0;
     BYTE *pbTok = (BYTE *)&ulTok;
 
-    memcpy(pbTok, &m_tok[0], 3);
+    memcpy(pbTok, &m_tok[0], sizeof(m_tok));
 
     if (((std::uintptr_t)m_slot & 0x1))
         ulTok |= mdtMethodDef;
@@ -68,7 +68,7 @@ void bootstrap_thunk::initialize(std::uintptr_t pThunkInitFcn,
     
     // First fill in the token portion of the struct.
     BYTE *pbTok = (BYTE *)(&token);
-    memcpy(&m_tok[0], pbTok, 3);
+    memcpy(&m_tok[0], pbTok, sizeof(m_tok));
 
     // Now set up the thunk code
     std::uintptr_t pFrom;
@@ -77,7 +77,7 @@ void bootstrap_thunk::initialize(std::uintptr_t pThunkInitFcn,
     // This is the call to the thunk bootstrapper function
     pFrom = (std::uintptr_t)&m_code.m_thunkFcn + sizeof(m_code.m_thunkFcn);
     pTo = pThunkInitFcn;
-    m_code.m_call            = 0xe8;
+    m_code.m_call            = 0xe8; // 0xe8 is the hex encoding of the x86 call instruction opcode
     m_code.m_thunkFcn        = (UINT32)(pTo - pFrom);
 
     // Fill out the rest of the info

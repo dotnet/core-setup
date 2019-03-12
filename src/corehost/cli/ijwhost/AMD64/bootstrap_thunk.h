@@ -17,31 +17,17 @@ extern "C" void start_runtime_thunk_stub();
 class bootstrap_thunk
 {
 private:
-    // 49 BA 78 56 34 12 78 56 34 12 mov         r10,1234567812345678h
-    // 49 BB 34 12 34 12 34 12 34 12 mov         r11,1234123412341234h
-    // 41 FF E3                      jmp         r11
-
-    static BYTE             s_mov_r10[2];
-    static BYTE             s_mov_r11[2];
-    static BYTE             s_jmp_r11[3];
 
     BYTE                    m_mov_r10[2];
     BYTE                    m_val_r10[8];
     BYTE                    m_mov_r11[2];
     BYTE                    m_val_r11[8];
-    BYTE                    m_jmp_r11[3];   // total 23 bytes
-    BYTE                    m_padding[1];   // 1 byte to pad to 24
+    BYTE                    m_jmp_r11[3];
+    BYTE                    m_padding[1];
     // Data for the thunk
-    std::uint32_t           m_token;                        // 4 bytes
-    enum {
-        e_TOKEN_IS_DEF = 0x1
-    };
-    UINT32                  m_flags;                        // 4 bytes
-
-    pal::dll_t               m_dll;            // pal::dll_t of this module
-                                                    // 8 bytes
-    std::uintptr_t               *m_slot;             // VTable slot for this thunk
-                                                    // 8 bytes
+    std::uint32_t           m_token;
+    pal::dll_t              m_dll;
+    std::uintptr_t          *m_slot;
 public:
     // Get thunk from the return address that the call instruction would have pushed
     static bootstrap_thunk *get_thunk_from_cookie(std::uintptr_t cookie);

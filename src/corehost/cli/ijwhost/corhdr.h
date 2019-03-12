@@ -55,10 +55,4 @@ typedef enum CorTokenType
 
 #define mdTokenNil                  ((mdToken)0)
 
-typedef enum ReplacesGeneralNumericDefines
-{
-    IMAGE_DIRECTORY_ENTRY_COMHEADER     =14,
-} ReplacesGeneralNumericDefines;
-
-
 #endif

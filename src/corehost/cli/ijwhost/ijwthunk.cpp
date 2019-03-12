@@ -21,7 +21,7 @@
 namespace
 {
     std::mutex g_thunkChunkLock{};
-    bootstrap_thunk_chunk* g_pVtableBootstrapThunkChunkList = nullptr;
+    bootstrap_thunk_chunk* g_pVtableBootstrapThunkChunkList;
 }
 
 HANDLE g_heapHandle;
@@ -61,7 +61,7 @@ bool patch_vtable_entries(PEDecoder& pe)
     bootstrap_thunk_chunk* chunk = new (pbChunk) bootstrap_thunk_chunk(numThunks, (pal::dll_t)pe.GetBase());
 
     {
-        std::lock_guard<std::mutex> _(g_thunkChunkLock);
+        std::lock_guard<std::mutex> lock(g_thunkChunkLock);
         chunk->SetNext(g_pVtableBootstrapThunkChunkList);
         g_pVtableBootstrapThunkChunkList = chunk;
     }
@@ -71,9 +71,6 @@ bool patch_vtable_entries(PEDecoder& pe)
     size_t currentThunk = 0;
     for(size_t i = 0; i < numFixupRecords; ++i)
     {
-#ifndef _WIN64
-        assert((pFixupTable[i].Type & (COR_VTABLE_FROM_UNMANAGED | COR_VTABLE_FROM_UNMANAGED_RETAIN_APPDOMAIN)) && "managed->managed vtablefixup slots are not supported!");
-#endif
         if (pFixupTable[i].Type & COR_VTABLE_PTRSIZED)
         {
             const BYTE** pointers = (const BYTE**)pe.GetRvaData(pFixupTable[i].RVA);
@@ -154,22 +151,22 @@ extern "C" std::uintptr_t __stdcall start_runtime_and_get_target_address(std::ui
 
 void release_bootstrap_thunks(PEDecoder& pe)
 {
-    // Is this an IJW module
-    if (!pe.IsILOnly())
+    if (pe.IsILOnly())
     {
-        std::lock_guard<std::mutex> _(g_thunkChunkLock);
-        // Clean up the VTable thunks if they exist.
-        for (bootstrap_thunk_chunk **ppCurChunk = &g_pVtableBootstrapThunkChunkList;
-             *ppCurChunk != NULL;
-             ppCurChunk = (*ppCurChunk)->GetNextPtr())
+        return;
+    }
+    std::lock_guard<std::mutex> lock(g_thunkChunkLock);
+    // Clean up the VTable thunks if they exist.
+    for (bootstrap_thunk_chunk **ppCurChunk = &g_pVtableBootstrapThunkChunkList;
+            *ppCurChunk != NULL;
+            ppCurChunk = (*ppCurChunk)->GetNextPtr())
+    {
+        if ((*ppCurChunk)->get_dll_handle() == (pal::dll_t) pe.GetBase())
         {
-            if ((*ppCurChunk)->get_dll_handle() == (pal::dll_t) pe.GetBase())
-            {
-                bootstrap_thunk_chunk *pDel = *ppCurChunk;
-                *ppCurChunk = (*ppCurChunk)->GetNext();
-                HeapFree(g_heapHandle, 0, pDel);
-                break;
-            }
+            bootstrap_thunk_chunk *pDel = *ppCurChunk;
+            *ppCurChunk = (*ppCurChunk)->GetNext();
+            HeapFree(g_heapHandle, 0, pDel);
+            break;
         }
     }
 }
@@ -177,7 +174,7 @@ void release_bootstrap_thunks(PEDecoder& pe)
 
 bool are_thunks_installed_for_module(pal::dll_t instance)
 {
-    std::lock_guard<std::mutex> _{g_thunkChunkLock};
+    std::lock_guard<std::mutex> lock{g_thunkChunkLock};
 
     bootstrap_thunk_chunk* currentChunk = g_pVtableBootstrapThunkChunkList;
     while (currentChunk != nullptr)

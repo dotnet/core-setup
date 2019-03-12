@@ -622,8 +622,7 @@ SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void** 
             delegate);
     default:
         return StatusCode::LibHostInvalidArgs;
-    }
-    
+    }    
 }
 
 SHARED_API int corehost_unload()
