@@ -45,9 +45,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
                                             "Microsoft.DotNet.Build.Bundle",
                                             "netcoreapp2.0",
                                             "Microsoft.DotNet.Build.Bundle.dll");
-            string[] bundleArgs = { "-d", fixture.TestProject.OutputDirectory,
-                                    "-a", hostName,
-                                    "-o", singleFileDir };
+            string[] bundleArgs = { "--source", fixture.TestProject.OutputDirectory,
+                                    "--apphost", hostName,
+                                    "--output", singleFileDir };
 
             dotnet.Exec(bundleDll, bundleArgs)
                 .CaptureStdErr()
@@ -58,8 +58,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
 
             // Extract the contents
             string singleFile = Path.Combine(singleFileDir, hostName);
-            string[] extractArgs = { "-e", singleFile,
-                                    "-o", singleFileDir };
+            string[] extractArgs = { "--extract", singleFile,
+                                     "--output", singleFileDir };
 
             dotnet.Exec(bundleDll, extractArgs)
                 .CaptureStdErr()

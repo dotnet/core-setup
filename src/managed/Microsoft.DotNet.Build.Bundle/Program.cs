@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Build.Bundle
         // Bundle options:
         static bool EmbedPDBs = false;
         static string HostName;
-        static string ContentDir;
+        static string SourceDir;
 
         // Extract options:
         static string BundleToExtract;
@@ -35,16 +35,23 @@ namespace Microsoft.DotNet.Build.Bundle
         {
             Console.WriteLine($".NET Core Bundler (version {Bundler.Version})");
             Console.WriteLine("Usage: bundle <options>");
-            Console.WriteLine("  -d <path> Directory containing the files to bundle (required for bundling)");
-            Console.WriteLine("  -a <name> Application host within the content directory (required for bundling)");
-            Console.WriteLine("  --pdb     Embed PDB files");
-            Console.WriteLine("  -e <path> Extract files from the specified bundle");
-            Console.WriteLine("  -o <path> Output directory (default: current)");
-            Console.WriteLine("  -v        Generate verbose output");
-            Console.WriteLine("  -?        Display usage information");
+            Console.WriteLine("");
+            Console.WriteLine("Bundle options:");
+            Console.WriteLine("  --source <PATH>    Directory containing files to bundle (required).");
+            Console.WriteLine("  --apphost <NAME>   Application host within source directory (required).");
+            Console.WriteLine("  --pdb              Embed PDB files.");
+            Console.WriteLine("");
+            Console.WriteLine("Extract options:");
+            Console.WriteLine("  --extract <PATH>   Extract files from the specified bundle.");
+            Console.WriteLine("");
+            Console.WriteLine("Common options:");
+            Console.WriteLine("  -o|--output <PATH> Output directory (default: current).");
+            Console.WriteLine("  -d|--diagnostics   Enable diagnostic output.");
+            Console.WriteLine("  -?|-h|--help       Display usage information.");
+            Console.WriteLine("");
             Console.WriteLine("Examples:");
-            Console.WriteLine("Bundle:  bundle -d <publish-dir> -a <host-exe> -o <output-dir>");
-            Console.WriteLine("Extract: bundle -e <bundle-exe> -o <output-dir>");
+            Console.WriteLine("Bundle:  bundle --source <publish-dir> --apphost <host-exe> -o <output-dir>");
+            Console.WriteLine("Extract: bundle --extract <bundle-exe> -o <output-dir>");
         }
 
         public static void Log(string fmt, params object[] args)
@@ -79,46 +86,52 @@ namespace Microsoft.DotNet.Build.Bundle
                 {
                     case "-?":
                     case "-h":
+                    case "--help":
                         Mode = RunMode.Help;
                         break;
 
-                    case "-e":
+                    case "--extract":
                         Mode = RunMode.Extract;
                         BundleToExtract = NextArg(arg);
                         break;
 
-                    case "-v":
+                    case "-d":
+                    case "--diagnostics":
                         Verbose = true;
                         break;
 
-                    case "-a":
+                    case "--apphost":
                         HostName = NextArg(arg);
                         break;
 
-                    case "-d":
-                        ContentDir = NextArg(arg);
+                    case "--source":
+                        SourceDir = NextArg(arg);
                         break;
 
                     case "-o":
+                    case "--output":
                         OutputDir = NextArg(arg);
                         break;
 
                     case "--pdb":
                         EmbedPDBs = true;
                         break;
+
+                    default:
+                        throw new BundleException("Invalid option: " + arg);
                 }
             }
 
             if (Mode == RunMode.Bundle)
             {
-                if (ContentDir == null)
+                if (SourceDir == null)
                 {
-                    throw new BundleException("Missing argument: -d");
+                    throw new BundleException("Missing argument: source directory");
                 }
 
                 if (HostName == null)
                 {
-                    throw new BundleException("Missing argument: -a");
+                    throw new BundleException("Missing argument: host");
                 }
             }
 
@@ -137,9 +150,9 @@ namespace Microsoft.DotNet.Build.Bundle
                     break;
 
                 case RunMode.Bundle:
-                    Log($"Bundle from dir: {ContentDir}");
+                    Log($"Bundle from dir: {SourceDir}");
                     Log($"Output Directory: {OutputDir}");
-                    Bundler bundle = new Bundler(HostName, ContentDir, OutputDir, EmbedPDBs);
+                    Bundler bundle = new Bundler(HostName, SourceDir, OutputDir, EmbedPDBs);
                     bundle.MakeBundle();
                     break;
 

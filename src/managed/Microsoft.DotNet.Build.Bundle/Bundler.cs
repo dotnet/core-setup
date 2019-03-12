@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Build.Bundle
     public class Bundler
     {
         string HostName;
-        string ContentDir;
+        string SourceDir;
         string OutputDir;
         bool EmbedPDBs;
 
@@ -33,9 +33,9 @@ namespace Microsoft.DotNet.Build.Bundle
 
         public static string Version => (Manifest.MajorVersion + "." + Manifest.MinorVersion);
 
-        public Bundler(string hostName, string contentDir, string outputDir, bool embedPDBs)
+        public Bundler(string hostName, string sourceDir, string outputDir, bool embedPDBs)
         {
-            ContentDir = contentDir;
+            SourceDir = sourceDir;
             OutputDir = outputDir;
             HostName = hostName;
             EmbedPDBs = embedPDBs;
@@ -44,9 +44,9 @@ namespace Microsoft.DotNet.Build.Bundle
         void ValidateFiles()
         {
             // Check required directories
-            if (!Directory.Exists(ContentDir))
+            if (!Directory.Exists(SourceDir))
             {
-                throw new BundleException("Dirctory not found: " + ContentDir);
+                throw new BundleException("Dirctory not found: " + SourceDir);
             }
             if (!Directory.Exists(OutputDir))
             {
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Build.Bundle
             // Check that required files exist on disk.
             Action<string> checkFileExists = (string name) =>
             {
-                string path = Path.Combine(ContentDir, name);
+                string path = Path.Combine(SourceDir, name);
                 if (!File.Exists(path))
                 {
                     throw new BundleException("File not found: " + path);
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.Build.Bundle
 
             // Start with a copy of the host executable.
             // Copy the file to preserve its permissions.
-            File.Copy(Path.Combine(ContentDir, HostName), bundlePath, overwrite: true);
+            File.Copy(Path.Combine(SourceDir, HostName), bundlePath, overwrite: true);
 
             using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(bundlePath)))
             {
@@ -177,9 +177,9 @@ namespace Microsoft.DotNet.Build.Bundle
                 bundle.Position = bundle.Length;
 
                 // Sort the file names to keep the bundle construction deterministic.
-                string[] contents = Directory.GetFiles(ContentDir);
-                Array.Sort(contents, StringComparer.Ordinal); 
-                foreach (string filePath in contents)
+                string[] sources = Directory.GetFiles(SourceDir);
+                Array.Sort(sources, StringComparer.Ordinal); 
+                foreach (string filePath in sources)
                 {
                     string fileName = Path.GetFileName(filePath);
 
