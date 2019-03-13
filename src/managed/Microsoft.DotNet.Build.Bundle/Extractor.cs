@@ -37,9 +37,17 @@ namespace Microsoft.DotNet.Build.Bundle
                     foreach (FileEntry entry in manifest.Files)
                     {
                         Program.Log($"Spill: {entry}");
-                        string filePath = Path.Combine(OutputDir, entry.Name);
-                        reader.BaseStream.Position = entry.Offset;
 
+                        string fileRelativePath = entry.RelativePath.Replace(Manifest.DirectorySeparatorChar, Path.DirectorySeparatorChar);
+                        string filePath = Path.Combine(OutputDir, fileRelativePath);
+                        string fileDir = Path.GetDirectoryName(filePath);
+
+                        if ((fileDir != null) && !fileDir.Equals(String.Empty))
+                        {
+                            Directory.CreateDirectory(fileDir);
+                        }
+
+                        reader.BaseStream.Position = entry.Offset;
                         using (BinaryWriter file = new BinaryWriter(File.Create(filePath)))
                         {
                             long size = entry.Size;

@@ -101,21 +101,21 @@ namespace Microsoft.DotNet.Build.Bundle
             return startOffset;
         }
 
-        bool ShouldEmbed(string fileName)
+        bool ShouldEmbed(string fileRelativePath)
         {
-            if (fileName.Equals(HostName))
+            if (fileRelativePath.Equals(HostName))
             {
                 // The bundle starts with the host, so ignore it while embedding.
                 return false;
             }
 
-            if (fileName.Equals(RuntimeConfigDevJson))
+            if (fileRelativePath.Equals(RuntimeConfigDevJson))
             {
                 // Ignore the machine specific configuration file.
                 return false;
             }
 
-            if (Path.GetExtension(fileName).ToLower().Equals(".pdb"))
+            if (Path.GetExtension(fileRelativePath).ToLower().Equals(".pdb"))
             {
                 return EmbedPDBs;
             }
@@ -123,19 +123,19 @@ namespace Microsoft.DotNet.Build.Bundle
             return true;
         }
 
-        FileType InferType(string fileName, Stream file)
+        FileType InferType(string fileRelativePath, Stream file)
         {
-            if (fileName.Equals(DepsJson))
+            if (fileRelativePath.Equals(DepsJson))
             {
                 return FileType.DepsJson;
             }
 
-            if (fileName.Equals(RuntimeConfigJson))
+            if (fileRelativePath.Equals(RuntimeConfigJson))
             {
                 return FileType.RuntimeConfigJson;
             }
 
-            if (fileName.Equals(Application))
+            if (fileRelativePath.Equals(Application))
             {
                 return FileType.Application;
             }
@@ -175,25 +175,31 @@ namespace Microsoft.DotNet.Build.Bundle
                 Manifest manifest = new Manifest();
 
                 bundle.Position = bundle.Length;
+                int sourceDirLen = Path.GetFullPath(SourceDir).Length + 1;
 
+                // Get all files in the source directory and all sub-directories.
+                string[] sources = Directory.GetFiles(SourceDir, searchPattern: "*", searchOption: SearchOption.AllDirectories);
+            
                 // Sort the file names to keep the bundle construction deterministic.
-                string[] sources = Directory.GetFiles(SourceDir);
-                Array.Sort(sources, StringComparer.Ordinal); 
+                Array.Sort(sources, StringComparer.Ordinal);
+
                 foreach (string filePath in sources)
                 {
-                    string fileName = Path.GetFileName(filePath);
+				    // filePath is the full-path of files within source directory, and any of its sub-directories.
+					// We only need the relative paths with respect to the source directory.
+                    string relativePath = filePath.Substring(sourceDirLen);
 
-                    if (!ShouldEmbed(fileName))
+                    if (!ShouldEmbed(relativePath))
                     {
-                        Program.Log($"Skip: {fileName}");
+                        Program.Log($"Skip: {relativePath}");
                         continue;
                     }
 
                     using (FileStream file = File.OpenRead(filePath))
                     {
-                        FileType type = InferType(fileName, file);
+                        FileType type = InferType(relativePath, file);
                         long startOffset = AddToBundle(bundle, file, type);
-                        FileEntry entry = new FileEntry(type, fileName, startOffset, file.Length);
+                        FileEntry entry = new FileEntry(type, relativePath, startOffset, file.Length);
                         manifest.Files.Add(entry);
                         Program.Log($"Embed: {entry}");
                     }

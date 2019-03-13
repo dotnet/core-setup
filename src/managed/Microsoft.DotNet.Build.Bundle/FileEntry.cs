@@ -20,14 +20,14 @@ namespace Microsoft.DotNet.Build.Bundle
     public class FileEntry
     {
         public FileType Type;
-        public string Name;
+        public string RelativePath; // Path of an embedded file, relative to the Bundle source-directory.
         public long Offset;
         public long Size;
 
-        public FileEntry(FileType fileType, string name, long offset, long size)
+        public FileEntry(FileType fileType, string relativePath, long offset, long size)
         {
             Type = fileType;
-            Name = name;
+            RelativePath = relativePath.Replace(Path.DirectorySeparatorChar, Manifest.DirectorySeparatorChar);
             Offset = offset;
             Size = size;
         }
@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Build.Bundle
         public void Write(BinaryWriter writer)
         {
             writer.Write((byte) Type);
-            writer.Write(Name);
+            writer.Write(RelativePath);
             writer.Write(Offset);
             writer.Write(Size);
         }
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Build.Bundle
 
         public override string ToString()
         {
-            return String.Format($"{Name} [{Type}] @{Offset} Sz={Size}");
+            return String.Format($"{RelativePath} [{Type}] @{Offset} Sz={Size}");
         }
     }
 }

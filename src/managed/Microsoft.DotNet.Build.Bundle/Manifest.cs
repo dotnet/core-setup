@@ -49,6 +49,7 @@ namespace Microsoft.DotNet.Build.Bundle
         public const string Signature = ".NetCoreBundle";
         public const uint MajorVersion = 0;
         public const uint MinorVersion = 1;
+        public const char DirectorySeparatorChar = '/';
 
         public List<FileEntry> Files;
 

@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("Hello World");
+                .HaveStdOutContaining("Wow! We now say hello to the big world and you.");
 
             // Bundle to a single-file
             string singleFileDir = Path.Combine(fixture.TestProject.OutputDirectory, "oneExe");
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("Hello World");
+                .HaveStdOutContaining("Wow! We now say hello to the big world and you.");
         }
 
         public class SharedTestState : IDisposable
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                TestFixture = new TestProjectFixture("StandaloneApp", RepoDirectories);
+                TestFixture = new TestProjectFixture("StandaloneAppWithSubDirs", RepoDirectories);
                 TestFixture
                     .EnsureRestoredForRid(TestFixture.CurrentRid, RepoDirectories.CorehostPackages)
                     .PublishProject(runtime: TestFixture.CurrentRid);
