@@ -15,56 +15,99 @@ namespace Microsoft.DotNet.Build.Tasks
         private const string TableComment = "generated table";
         private const string LinksComment = "links to include in table";
 
+        /// <summary>
+        /// A readme file that contains a Markdown table and a list of links. This task reads the
+        /// "links to include in table" section to find available links, then updates the
+        /// "generated table" section to include a Markdown table. Cells in the table are generated
+        /// by looking for links that apply to the current combination of platform and branch.
+        ///
+        /// The sections are marked by one-line html comments:
+        ///
+        /// <!-- BEGIN <section name> -->
+        /// ...
+        /// <!-- END <section name> -->
+        /// </summary>
         [Required]
         public string ReadmeFile { get; set; }
 
+        /// <summary>
+        /// %(Identity): Name of this branch, as appears in the column header.
+        /// %(Abbr): Abbreviation of this branch, used to match up with link names.
+        /// </summary>
         [Required]
         public ITaskItem[] Branches { get; set; }
 
+        /// <summary>
+        /// %(Identity): Name of this platform, as appears in bold as the first column of the row.
+        /// %(Parenthetical): An extra non-bold string to add after the platform name.
+        /// %(Abbr): Abbreviation of this platform, used to match up with link names.
+        /// </summary>
         [Required]
         public ITaskItem[] Platforms { get; set; }
+
+
+        private string Begin(string marker) => $"<!-- BEGIN {marker} -->";
+        private string End(string marker) => $"<!-- END {marker} -->";
+
 
         public override bool Execute()
         {
             string[] readmeLines = File.ReadAllLines(ReadmeFile);
 
-            var links = readmeLines
-                .SkipWhile(line => line != Begin(LinksComment))
-                .Skip(1)
-                .TakeWhile(line => line != End(LinksComment))
-                .Where(line => line.StartsWith("[") && line.Contains("]:"))
-                .Select(line => line.Substring(1, line.IndexOf("]:", StringComparison.Ordinal) - 1))
-                .ToArray();
-
-            var rows = Platforms.Select(p => CreateRow(p, links)).ToArray();
-
-            var table = new[]
+            if (readmeLines.Contains(Begin(LinksComment)) &&
+                readmeLines.Contains(End(LinksComment)))
             {
-                "",
-                $"| Platform |{string.Concat(Branches.Select(p => $" {p.ItemSpec} |"))}",
-                $"| --- | {string.Concat(Enumerable.Repeat(" :---: |", Branches.Length))}"
-            }.Concat(rows).Concat(new[] { "" });
-
-            if (readmeLines.Contains(Begin(TableComment)) &&
-                readmeLines.Contains(End(TableComment)))
-            {
-                string[] beforeTable = readmeLines
-                    .TakeWhile(line => line != Begin(TableComment))
-                    .Concat(new[] { Begin(TableComment) })
+                // In the links section, extract the name of each reference-style Markdown link.
+                // For example, grabs 'win-x86-badge-2.1.X' from
+                // [win-x86-badge-2.1.X]: https://example.org/foo
+                string[] links = readmeLines
+                    .SkipWhile(line => line != Begin(LinksComment))
+                    .Skip(1)
+                    .TakeWhile(line => line != End(LinksComment))
+                    .Where(line => line.StartsWith("[") && line.Contains("]:"))
+                    .Select(line => line.Substring(
+                        1,
+                        line.IndexOf("]:", StringComparison.Ordinal) - 1))
                     .ToArray();
 
-                string[] afterTable = readmeLines
-                    .Skip(beforeTable.Length)
-                    .SkipWhile(line => line != End(TableComment))
-                    .ToArray();
+                string[] rows = Platforms.Select(p => CreateRow(p, links)).ToArray();
 
-                File.WriteAllLines(
-                    ReadmeFile,
-                    beforeTable.Concat(table).Concat(afterTable));
+                // Final table to write to the file, with a newline before and after.
+                string[] table = new[]
+                {
+                    "",
+                    $"| Platform |{string.Concat(Branches.Select(p => $" {p.ItemSpec} |"))}",
+                    $"| --- | {string.Concat(Enumerable.Repeat(" :---: |", Branches.Length))}"
+                }.Concat(rows).Concat(new[]
+                {
+                    ""
+                }).ToArray();
+
+                if (readmeLines.Contains(Begin(TableComment)) &&
+                    readmeLines.Contains(End(TableComment)))
+                {
+                    string[] beforeTable = readmeLines
+                        .TakeWhile(line => line != Begin(TableComment))
+                        .Concat(new[] { Begin(TableComment) })
+                        .ToArray();
+
+                    string[] afterTable = readmeLines
+                        .Skip(beforeTable.Length)
+                        .SkipWhile(line => line != End(TableComment))
+                        .ToArray();
+
+                    File.WriteAllLines(
+                        ReadmeFile,
+                        beforeTable.Concat(table).Concat(afterTable));
+                }
+                else
+                {
+                    Log.LogError($"Readme '{ReadmeFile}' has no '{TableComment}' section.");
+                }
             }
             else
             {
-                Log.LogError($"Readme '{ReadmeFile}' has no 'BEGIN/END generated table' section.");
+                Log.LogError($"Readme '{ReadmeFile}' has no '{LinksComment}' section.");
             }
 
             return !Log.HasLoggedErrors;
@@ -95,7 +138,7 @@ namespace Microsoft.DotNet.Build.Tasks
             }
 
             var sb = new StringBuilder();
-            
+
             string Link(string type) => $"{platformAbbr}-{type}-{branchAbbr}";
 
             void AddLink(string name, string type)
@@ -122,6 +165,11 @@ namespace Microsoft.DotNet.Build.Tasks
                 sb.Append($"[![][{badge}]][{version}]");
             }
 
+            // Look for various types of links. The first parameter is the name of the link as it
+            // appears in the table cell. The second parameter is how this type of link is
+            // abbreviated in the link section. A generic checksum link is added for any of these
+            // that also have a '<type>-checksum' link.
+
             AddLink("Installer", "installer");
 
             AddLink("Runtime-Deps", "runtime-deps");
@@ -142,8 +190,5 @@ namespace Microsoft.DotNet.Build.Tasks
 
             return sb.ToString();
         }
-
-        private string Begin(string marker) => $"<!-- BEGIN {marker} -->";
-        private string End(string marker) => $"<!-- END {marker} -->";
     }
 }

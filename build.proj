@@ -77,6 +77,10 @@
   <UsingTask TaskName="RegenerateReadmeTable" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll" />
 
   <Target Name="RegenerateReadmeTable">
+    <!--
+      Column and row configuration for the readme table. The abbreviations match up with
+      reference-style Markdown links in the readme file to figure out what to put in the cells.
+    -->
     <ItemGroup>
       <Branches Include="Master" Abbr="master" />
       <Branches Include="Release/3.0.X" Abbr="3.0.X" />
