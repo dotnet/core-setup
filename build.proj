@@ -79,8 +79,9 @@
   <Target Name="RegenerateReadmeTable">
     <ItemGroup>
       <Branches Include="Master" Abbr="master" />
+      <Branches Include="Release/3.0.X" Abbr="3.0.X" />
+      <Branches Include="Release/2.2.X" Abbr="2.2.X" />
       <Branches Include="Release/2.1.X" Abbr="2.1.X" />
-      <Branches Include="Release/2.0.X" Abbr="2.0.X" />
       <Branches Include="Release/1.1.X" Abbr="1.1.X" />
       <Branches Include="Release/1.0.X" Abbr="preview" />
 
