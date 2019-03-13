@@ -335,16 +335,16 @@ Daily Builds
 [ubuntu-14.04-sharedfx-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-x64.deb
 [ubuntu-14.04-sharedfx-checksum-master]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-x64.deb.sha512
 
-[ubuntu-14.04-badge-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/3.0/sharedfx_ubuntu.14.04-x64_Release_version_badge.svg
-[ubuntu-14.04-version-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/3.0/latest.version
-[ubuntu-14.04-runtime-deps-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/3.0/dotnet-runtime-deps-latest-ubuntu.14.04-x64.deb
-[ubuntu-14.04-runtime-deps-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/3.0/dotnet-runtime-deps-latest-ubuntu.14.04-x64.deb.sha512
-[ubuntu-14.04-host-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/3.0/dotnet-host-latest-x64.deb
-[ubuntu-14.04-host-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/3.0/dotnet-host-latest-x64.deb.sha512
-[ubuntu-14.04-hostfxr-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/3.0/dotnet-hostfxr-latest-x64.deb
-[ubuntu-14.04-hostfxr-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/3.0/dotnet-hostfxr-latest-x64.deb.sha512
-[ubuntu-14.04-sharedfx-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/3.0/dotnet-runtime-latest-x64.deb
-[ubuntu-14.04-sharedfx-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/3.0/dotnet-runtime-latest-x64.deb.sha512
+[ubuntu-14.04-badge-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/sharedfx_ubuntu.14.04-x64_Release_version_badge.svg
+[ubuntu-14.04-version-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/latest.version
+[ubuntu-14.04-runtime-deps-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-deps-latest-ubuntu.14.04-x64.deb
+[ubuntu-14.04-runtime-deps-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-deps-latest-ubuntu.14.04-x64.deb.sha512
+[ubuntu-14.04-host-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-host-latest-x64.deb
+[ubuntu-14.04-host-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-host-latest-x64.deb.sha512
+[ubuntu-14.04-hostfxr-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-hostfxr-latest-x64.deb
+[ubuntu-14.04-hostfxr-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-hostfxr-latest-x64.deb.sha512
+[ubuntu-14.04-sharedfx-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-latest-x64.deb
+[ubuntu-14.04-sharedfx-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-latest-x64.deb.sha512
 
 [ubuntu-14.04-badge-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/sharedfx_ubuntu.14.04-x64_Release_version_badge.svg
 [ubuntu-14.04-version-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/latest.version
