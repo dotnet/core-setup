@@ -5,7 +5,6 @@
 #include "args.h"
 #include "utils.h"
 #include "coreclr.h"
-#include "libhost.h"
 
 arguments_t::arguments_t()
     : managed_application(_X(""))

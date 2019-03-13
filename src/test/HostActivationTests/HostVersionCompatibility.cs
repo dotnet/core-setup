@@ -2,26 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.DotNet.CoreSetup.Test;
-using Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp;
 using Microsoft.DotNet.PlatformAbstractions;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 using Xunit;
 
-namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
+namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 {
-    public class GivenThatICareAboutHostVersionCompatibility : IClassFixture<GivenThatICareAboutHostVersionCompatibility.SharedTestState>
+    public class HostVersionCompatibility : IClassFixture<HostVersionCompatibility.SharedTestState>
     {
         private SharedTestState sharedTestState;
 
-        public GivenThatICareAboutHostVersionCompatibility(SharedTestState fixture)
+        public HostVersionCompatibility(SharedTestState fixture)
         {
             sharedTestState = fixture;
         }
@@ -57,12 +50,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdErrContaining($"--- Invoked apphost [version: {fixture.RepoDirProvider.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdErrContaining($"--- Invoked apphost [version: {fixture.RepoDirProvider.MicrosoftNETCoreAppVersion}");
 
             // Use the newer apphost
             // This emulates the case when:
@@ -74,12 +64,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdErrContaining($"--- Invoked apphost [version: {sharedTestState.FixtureLatest.RepoDirProvider.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdErrContaining($"--- Invoked apphost [version: {sharedTestState.FixtureLatest.RepoDirProvider.MicrosoftNETCoreAppVersion}");
 
             // Use the newer apphost and hostFxr
             // This emulates the case when:
@@ -91,12 +78,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdErrContaining($"--- Invoked apphost [version: {sharedTestState.FixtureLatest.RepoDirProvider.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdErrContaining($"--- Invoked apphost [version: {sharedTestState.FixtureLatest.RepoDirProvider.MicrosoftNETCoreAppVersion}");
         }
 
         [Fact]
@@ -130,12 +114,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdErrContaining($"--- Invoked apphost [version: {fixture.RepoDirProvider.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdErrContaining($"--- Invoked apphost [version: {fixture.RepoDirProvider.MicrosoftNETCoreAppVersion}");
 
             // Use the older apphost and hostfxr
             // This emulates the case when:
@@ -149,12 +130,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdErrContaining($"--- Invoked apphost [version: {previousVersionFixture.RepoDirProvider.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdErrContaining($"--- Invoked apphost [version: {previousVersionFixture.RepoDirProvider.MicrosoftNETCoreAppVersion}");
         }
 
         private static bool IsRidSupported()
@@ -173,9 +151,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.VersionCompatibility
         {
             private static RepoDirectoriesProvider RepoDirectories { get; set; }
 
-            public TestProjectFixture Fixture20 { get; set; }
-            public TestProjectFixture Fixture21 { get; set; }
-            public TestProjectFixture FixtureLatest { get; set; }
+            public TestProjectFixture Fixture20 { get; }
+            public TestProjectFixture Fixture21 { get; }
+            public TestProjectFixture FixtureLatest { get; }
 
             public SharedTestState()
             {

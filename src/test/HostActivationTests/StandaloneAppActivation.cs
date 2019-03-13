@@ -2,29 +2,27 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using Xunit;
 using FluentAssertions;
-using Microsoft.DotNet.CoreSetup.Test;
 using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.DotNet.CoreSetup.Test;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Diagnostics;
-using System.Collections.Generic;
 using System.Threading;
+using Xunit;
 
-namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
+namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 {
-    public class GivenThatICareAboutStandaloneAppActivation : IClassFixture<GivenThatICareAboutStandaloneAppActivation.SharedTestState>
+    public class StandaloneAppActivation : IClassFixture<StandaloneAppActivation.SharedTestState>
     {
-        private readonly string AppHostExeName = "apphost" + Constants.ExeSuffix;
+        private readonly string AppHostExeName = RuntimeInformationExtensions.GetExeFileNameForCurrentPlatform("apphost");
 
         private SharedTestState sharedTestState;
 
-        public GivenThatICareAboutStandaloneAppActivation(GivenThatICareAboutStandaloneAppActivation.SharedTestState fixture)
+        public StandaloneAppActivation(StandaloneAppActivation.SharedTestState fixture)
         {
             sharedTestState = fixture;
         }
@@ -32,7 +30,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
         [Fact]
         public void Running_Build_Output_Standalone_EXE_with_DepsJson_and_RuntimeConfig_Local_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyBuiltAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Built
                 .Copy();
 
             var appExe = fixture.TestProject.AppExe;
@@ -41,18 +39,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
         }
 
         [Fact]
         public void Running_Publish_Output_Standalone_EXE_with_DepsJson_and_RuntimeConfig_Local_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Published
                 .Copy();
 
             var appExe = fixture.TestProject.AppExe;
@@ -61,24 +56,20 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
         }
 
         [Fact]
         public void Running_Publish_Output_Standalone_EXE_with_Unbound_AppHost_Fails()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Published
                 .Copy();
 
             var appExe = fixture.TestProject.AppExe;
 
-            string hostExeName = $"apphost{Constants.ExeSuffix}";
-            string builtAppHost = Path.Combine(sharedTestState.RepoDirectories.HostArtifacts, hostExeName);
+            string builtAppHost = Path.Combine(sharedTestState.RepoDirectories.HostArtifacts, AppHostExeName);
             File.Copy(builtAppHost, appExe, true);
 
             int exitCode = Command.Create(appExe)
@@ -101,12 +92,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
         [Fact]
         public void Running_Publish_Output_Standalone_EXE_By_Renaming_dotnet_exe_Fails()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Published
                 .Copy();
 
             var appExe = fixture.TestProject.AppExe;
 
-            string hostExeName = $"dotnet{Constants.ExeSuffix}";
+            string hostExeName = RuntimeInformationExtensions.GetExeFileNameForCurrentPlatform("dotnet");
             string builtHost = Path.Combine(sharedTestState.RepoDirectories.HostArtifacts, hostExeName);
             File.Copy(builtHost, appExe, true);
 
@@ -130,11 +121,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
         [Fact]
         public void Running_Publish_Output_Standalone_EXE_By_Renaming_apphost_exe_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Published
                 .Copy();
 
             var appExe = fixture.TestProject.AppExe;
-            var renamedAppExe = fixture.TestProject.AppExe + $"renamed{Constants.ExeSuffix}";
+            var renamedAppExe = fixture.TestProject.AppExe + RuntimeInformationExtensions.GetExeFileNameForCurrentPlatform("renamed");
 
             File.Copy(appExe, renamedAppExe, true);
 
@@ -142,18 +133,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
         }
 
         [Fact]
         public void Running_Publish_Output_Standalone_EXE_With_Relative_Embedded_Path_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Published
                 .Copy();
 
             var appExe = fixture.TestProject.AppExe;
@@ -181,18 +169,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
         }
 
         [Fact]
         public void Running_Publish_Output_Standalone_EXE_With_DOTNET_ROOT_Fails()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Published
                 .Copy();
 
             var appExe = fixture.TestProject.AppExe;
@@ -224,20 +209,16 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute(fExpectedToFail: true)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining($"Using environment variable DOTNET_ROOT") // use the first part avoiding "(x86)" if present
-                .And
-                .HaveStdErrContaining($"=[{Path.GetFullPath(newOutDir)}] as runtime location.") // use the last part
-                .And
-                .HaveStdErrContaining("A fatal error occurred");
+                .Should().Fail()
+                .And.HaveStdErrContaining($"Using environment variable DOTNET_ROOT") // use the first part avoiding "(x86)" if present
+                .And.HaveStdErrContaining($"=[{Path.GetFullPath(newOutDir)}] as runtime location.") // use the last part
+                .And.HaveStdErrContaining("A fatal error occurred");
         }
 
         [Fact]
         public void Running_Publish_Output_Standalone_EXE_with_Bound_AppHost_Succeeds()
         {
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Published
                 .Copy();
 
             string appExe = fixture.TestProject.AppExe;
@@ -250,12 +231,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World")
-                .And
-                .HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World")
+                .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
         }
 
         [Fact]
@@ -267,7 +245,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 return;
             }
 
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Published
                 .Copy();
 
             string appExe = fixture.TestProject.AppExe;
@@ -306,7 +284,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                 return;
             }
 
-            var fixture = sharedTestState.PreviouslyPublishedAndRestoredStandaloneTestProjectFixture
+            var fixture = sharedTestState.StandaloneAppFixture_Published
                 .Copy();
 
             string appExe = fixture.TestProject.AppExe;
@@ -414,9 +392,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
 
         public class SharedTestState : IDisposable
         {
-            public TestProjectFixture PreviouslyBuiltAndRestoredStandaloneTestProjectFixture { get; set; }
-            public TestProjectFixture PreviouslyPublishedAndRestoredStandaloneTestProjectFixture { get; set; }
-            public RepoDirectoriesProvider RepoDirectories { get; set; }
+            public TestProjectFixture StandaloneAppFixture_Built { get; }
+            public TestProjectFixture StandaloneAppFixture_Published { get; }
+            public RepoDirectoriesProvider RepoDirectories { get; }
 
             public SharedTestState()
             {
@@ -434,14 +412,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
 
                 ReplaceTestProjectOutputHostInTestProjectFixture(buildFixture);
 
-                PreviouslyBuiltAndRestoredStandaloneTestProjectFixture = buildFixture;
-                PreviouslyPublishedAndRestoredStandaloneTestProjectFixture = publishFixture;
+                StandaloneAppFixture_Built = buildFixture;
+                StandaloneAppFixture_Published = publishFixture;
             }
 
             public void Dispose()
             {
-                PreviouslyBuiltAndRestoredStandaloneTestProjectFixture.Dispose();
-                PreviouslyPublishedAndRestoredStandaloneTestProjectFixture.Dispose();
+                StandaloneAppFixture_Built.Dispose();
+                StandaloneAppFixture_Published.Dispose();
             }
 
             /*
@@ -461,8 +439,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.StandaloneApp
                     throw new Exception("host or hostpolicy does not exist in test project output. Is this a standalone app?");
                 }
 
-                var dotnetHostPolicy = Path.Combine(dotnet.GreatestVersionSharedFxPath, $"{testProjectFixture.SharedLibraryPrefix}hostpolicy{testProjectFixture.SharedLibraryExtension}");
-                var dotnetHostFxr = Path.Combine(dotnet.GreatestVersionHostFxrPath, $"{testProjectFixture.SharedLibraryPrefix}hostfxr{testProjectFixture.SharedLibraryExtension}");
+                var dotnetHostPolicy = Path.Combine(dotnet.GreatestVersionSharedFxPath, RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostpolicy"));
+                var dotnetHostFxr = Path.Combine(dotnet.GreatestVersionHostFxrPath, RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostfxr"));
 
                 File.Copy(dotnetHostPolicy, testProjectHostPolicy, true);
 

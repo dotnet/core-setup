@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.DotNet.PlatformAbstractions;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Extensions.DependencyModel.Resolution
 {
@@ -28,14 +28,12 @@ namespace Microsoft.Extensions.DependencyModel.Resolution
 
         private static string GetDefaultDotNetReferenceAssembliesPath(IFileSystem fileSystem)
         {
-            var os = RuntimeEnvironment.OperatingSystemPlatform;
-
-            if (os == Platform.Windows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return null;
             }
 
-            if (os == Platform.Darwin &&
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) &&
                 fileSystem.Directory.Exists("/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/xbuild-frameworks"))
             {
                 return "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/xbuild-frameworks";

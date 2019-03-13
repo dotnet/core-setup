@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Xunit;
 using F = Microsoft.Extensions.DependencyModel.Tests.TestLibraryFactory;
@@ -25,7 +22,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 .AddVariable("NUGET_PACKAGES", PackagesPath)
                 .Build();
 
-            var result = PackageCompilationAssemblyResolver.GetDefaultProbeDirectories(Platform.Unknown, environment);
+            var result = PackageCompilationAssemblyResolver.GetDefaultProbeDirectories(environment);
             // The host for .NET Core 2.0 always sets the PROBING_DIRECTORIES property on the AppContext. Because of that,
             // no additional package directories should be returned from this, even if they are set as environment variables.
             result.Should().NotContain(PackagesPath);
@@ -36,10 +33,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         public void ShouldUseNugetUnderUserProfileOnWindows()
         {
             var environment = EnvironmentMockBuilder.Create()
+                .SetIsWindows(true)
                 .AddVariable("USERPROFILE", "User Profile")
                 .Build();
 
-            var result = PackageCompilationAssemblyResolver.GetDefaultProbeDirectories(Platform.Windows, environment);
+            var result = PackageCompilationAssemblyResolver.GetDefaultProbeDirectories(environment);
             // The host for .NET Core 2.0 always sets the PROBING_DIRECTORIES property on the AppContext. Because of that,
             // no additional package directories should be returned from this, even if they are set as environment variables.
             result.Should().NotContain(Path.Combine("User Profile", ".nuget", "packages"));
@@ -49,10 +47,11 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         public void ShouldUseNugetUnderHomeOnNonWindows()
         {
             var environment = EnvironmentMockBuilder.Create()
+                .SetIsWindows(false)
                 .AddVariable("HOME", "User Home")
                 .Build();
 
-            var result = PackageCompilationAssemblyResolver.GetDefaultProbeDirectories(Platform.Linux, environment);
+            var result = PackageCompilationAssemblyResolver.GetDefaultProbeDirectories(environment);
             // The host for .NET Core 2.0 always sets the PROBING_DIRECTORIES property on the AppContext. Because of that,
             // no additional package directories should be returned from this, even if they are set as environment variables.
             result.Should().NotContain(Path.Combine("User Home", ".nuget", "packages"));
