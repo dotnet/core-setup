@@ -1462,7 +1462,10 @@ static int get_delegate_from_runtime(
 
     int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_coreclr_delegate", &coreclr_delegate);
     if (code != StatusCode::Success)
+    {
+        trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
         return code;
+    }
 
     // Previous hostfxr trace messages must be printed before calling trace::setup in hostpolicy
     trace::flush();
