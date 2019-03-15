@@ -36,10 +36,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
                 .And
                 .HaveStdOutContaining("Wow! We now say hello to the big world and you.");
 
-            // Bundle to a single-file
-            string singleFileDir = Path.Combine(fixture.TestProject.OutputDirectory, "oneExe");
+
+            // Create a directory for bundle/extraction output.
+            // This directory shouldn't be within TestProject.OutputDirectory, since the bundler
+            // will (attempt to) embed all files below the TestProject.OutputDirectory tree into one file.
+            string singleFileDir = Path.Combine(fixture.TestProject.ProjectDirectory, "oneExe");
             Directory.CreateDirectory(singleFileDir);
 
+            // Bundle to a single-file
             string hostName = Path.GetFileName(fixture.TestProject.AppExe);
             string bundleDll = Path.Combine(sharedTestState.RepoDirectories.Artifacts,
                                             "Microsoft.DotNet.Build.Bundle",

@@ -185,8 +185,8 @@ namespace Microsoft.DotNet.Build.Bundle
 
                 foreach (string filePath in sources)
                 {
-				    // filePath is the full-path of files within source directory, and any of its sub-directories.
-					// We only need the relative paths with respect to the source directory.
+                    // filePath is the full-path of files within source directory, and any of its sub-directories.
+                    // We only need the relative paths with respect to the source directory.
                     string relativePath = filePath.Substring(sourceDirLen);
 
                     if (!ShouldEmbed(relativePath))
