@@ -39,7 +39,7 @@ namespace Microsoft.Extensions.DependencyModel
             return ReadCore(reader);
         }
 
-        // Borrowed from https://github.com/dotnet/corefx/blob/ef23e3317ca6e83f1e959ab265a8e59fb8a6dcd9/src/System.Text.Json/src/System/Text/Json/Document/JsonDocument.Parse.cs#L176-L225
+        // Borrowed from https://github.com/dotnet/corefx/blob/b8bc4ff80c5f7baa681e8a569d367356957ba78a/src/System.Text.Json/src/System/Text/Json/Document/JsonDocument.Parse.cs#L290-L362
         private static ArraySegment<byte> ReadToEnd(Stream stream)
         {
             int written = 0;
