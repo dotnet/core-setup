@@ -226,7 +226,7 @@ bool pal::get_default_installation_dir(pal::string_t* recv)
     return true;
 }
 
-bool get_sdk_self_registered_dir(pal::string_t* recv)
+bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
 {
 #if !defined(_TARGET_AMD64_) && !defined(_TARGET_X86_)
     //  Self-registered SDK installation directory is only supported for x64 and x86 architectures.
@@ -261,7 +261,7 @@ bool get_sdk_self_registered_dir(pal::string_t* recv)
         dotnet_key_path = environmentRegistryPathOverride;
     }
 
-    pal::string_t sub_key = dotnet_key_path + pal::string_t(_X("\\Setup\\InstalledVersions\\")) + get_arch() + pal::string_t(_X("\\sdk"));
+    pal::string_t sub_key = dotnet_key_path + pal::string_t(_X("\\Setup\\InstalledVersions\\")) + get_arch();
     pal::char_t* value = _X("InstallLocation");
 
     // Must use RegOpenKeyEx to be able to specify KEY_WOW64_32KEY to access the 32-bit registry in all cases.
@@ -304,7 +304,7 @@ bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* dirs)
     pal::string_t default_dir;
     pal::string_t custom_dir;
     bool dir_found = false;
-    if (get_sdk_self_registered_dir(&custom_dir))
+    if (pal::get_dotnet_self_registered_dir(&custom_dir))
     {
         dirs->push_back(custom_dir);
         dir_found = true;

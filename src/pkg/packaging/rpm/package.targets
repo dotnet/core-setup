@@ -5,12 +5,6 @@
   <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
   <UsingTask TaskName="BuildFPMToolPreReqs" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
 
-  <PropertyGroup>
-    <IsRPMBasedDistro Condition="'$(InstallerExtension)' == '.rpm'">true</IsRPMBasedDistro>
-    <BuildRpmPackage Condition="'$(IsRPMBasedDistro)' == true and '$(TargetArchitecture)' == 'x64'">true</BuildRpmPackage>
-    <BuildRuntimeRpms>true</BuildRuntimeRpms>
-  </PropertyGroup>
-
   <Target Name="GenerateRpms"
           DependsOnTargets="TestFPMTool;BuildRpms;"
           Condition="'$(BuildRpmPackage)'=='true'" />
@@ -33,14 +27,16 @@
       <ConfigJsonName>dotnet-sharedhost-rpm_config.json</ConfigJsonName>
       <ConfigJsonFile>$(rpmPackagingConfigPath)$(ConfigJsonName)</ConfigJsonFile>
       <RpmIntermediatesDir>$(PackagesIntermediateDir)$(RpmPackageName)/$(RpmPackageVersion)</RpmIntermediatesDir>
+      <UsrShareDotnetPath>usr/share/dotnet/</UsrShareDotnetPath>
     </PropertyGroup>
 
     <PropertyGroup>
       <rpmLayoutDirectory>$(RpmIntermediatesDir)/rpmLayoutDirectory/</rpmLayoutDirectory>
-      <rpmLayoutPackageRoot>$(rpmLayoutDirectory)package_root</rpmLayoutPackageRoot>
+      <rpmLayoutPackageRoot>$(rpmLayoutDirectory)package_root/</rpmLayoutPackageRoot>
+      <rpmLayoutUsrShareDotnetDir>$(rpmLayoutPackageRoot)$(UsrShareDotnetPath)</rpmLayoutUsrShareDotnetDir>
+      <rpmLayoutUsrBinDir>$(rpmLayoutPackageRoot)usr/bin/</rpmLayoutUsrBinDir>
       <rpmLayoutDocs>$(rpmLayoutDirectory)docs</rpmLayoutDocs>                <!-- Man Pages -->
       <rpmLayoutTemplates>$(rpmLayoutDirectory)templates</rpmLayoutTemplates> <!-- Copyright, Changelog -->
-      <rpmLayoutScripts>$(rpmLayoutDirectory)scripts</rpmLayoutScripts>
     </PropertyGroup>
 
     <RemoveDir Condition="Exists('$(RpmIntermediatesDir)')" Directories="$(RpmIntermediatesDir)" />
@@ -50,23 +46,28 @@
     <RemoveDir Condition="Exists('$(rpmLayoutDirectory)')" Directories="$(rpmLayoutDirectory)" />
     <MakeDir Directories="$(rpmLayoutDirectory)" />
     <MakeDir Directories="$(rpmLayoutPackageRoot)" />
+    <MakeDir Directories="$(rpmLayoutUsrShareDotnetDir)" />
+    <MakeDir Directories="$(rpmLayoutUsrBinDir)" />
     <MakeDir Directories="$(rpmLayoutDocs)" />
     <MakeDir Directories="$(rpmLayoutTemplates)" />
-    <MakeDir Directories="$(rpmLayoutScripts)" />
 
     <!-- Copy files to rpm layout -->
     <ItemGroup>
         <SHFiles Include="$(InputRoot)/**/*" />
         <SHManpages Include="$(ManPagesDir)/**/*" />
         <SHTemplatesFiles Include="$(TemplatesDir)/**/*" />
-        <SHScriptsFiles Include="$(ScriptsDir)/**/*" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(SHFiles)" DestinationFiles="@(SHFiles->'$(rpmLayoutPackageRoot)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(SHFiles)" DestinationFiles="@(SHFiles->'$(rpmLayoutUsrShareDotnetDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(SHManpages)" DestinationFiles="@(SHManpages->'$(rpmLayoutDocs)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(SHTemplatesFiles)" DestinationFiles="@(SHTemplatesFiles->'$(rpmLayoutTemplates)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(SHScriptsFiles)" DestinationFiles="@(SHScriptsFiles->'$(rpmLayoutScripts)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    
+
+    <!--
+      Create symlink so the dotnet host is in PATH. It points to where dotnet will be installed, so
+      it may seem to point to the wrong place in the build machine's layout.
+    -->
+    <Exec Command="ln -sf &quot;/$(UsrShareDotnetPath)dotnet&quot; &quot;$(rpmLayoutUsrBinDir)dotnet&quot;" />
+
     <!-- Replace config json variables -->
     <ItemGroup>
       <SharedHostTokenValue Include="%SHARED_HOST_BRAND_NAME%">
@@ -106,6 +107,11 @@
           SkipUnchangedFiles="False"
           UseHardlinksIfPossible="False" />
 
+    <!--
+      Clean up dotnet symlink. Later build steps are confused and fail because the symlink points to
+      a path that doesn't exist on the build machine.
+    -->
+    <Delete Files="$(rpmLayoutUsrBinDir)dotnet" />
   </Target>
 
   <Target Name="GenerateHostFxrRpm">
@@ -375,22 +381,4 @@
 
   </Target>
 
-  <Target Name="TestFPMTool">
-
-    <!-- run FPM  -->
-    <Exec Command="/usr/bin/env fpm -h" ContinueOnError="true">
-      <Output TaskParameter="ExitCode" PropertyName="FPMExitCode" />
-    </Exec>
-
-    <!-- Check if it returned 0 -->
-    <PropertyGroup>
-      <FPMPresent>false</FPMPresent>
-      <FPMPresent Condition=" '$(FPMExitCode)' == '0' ">true</FPMPresent>
-    </PropertyGroup>
-
-    <!-- Workaround for Jenkins machines that don't have the necessary packages https://github.com/dotnet/core-setup/issues/2260 -->
-    <Message Condition=" '$(FPMPresent)'  != 'true' "
-             Text="FPM tool Not found, RPM packages will not be built."
-             Importance="High" />
-  </Target>
 </Project>

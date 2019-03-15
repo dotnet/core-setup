@@ -1,6 +1,13 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.targets" />
 
+  <!--
+    Include common targets for specific project types. These files include BuildTools target
+    overrides that shouldn't be applied to other projects.
+  -->
+  <Import Project="framework.dependency.targets" Condition="'$(MSBuildProjectExtension)' == '.depproj'"/>
+  <Import Project="framework.packaging.targets" Condition="'$(IsFrameworkPackage)' == 'true'"/>
+
   <UsingTask TaskName="CreateFrameworkListFile" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
   <UsingTask TaskName="GenerateFileVersionProps" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll"/>
 
@@ -22,7 +29,10 @@
   -->
   <Target Name="GetSymbolPackageFiles" BeforeTargets="GetPackageFiles">
     <ItemGroup Condition="'$(SymbolFileExtension)' != ''">
-      <AdditionalLibPackageExcludes Include="%2A%2A\%2a$(SymbolFileExtension)" />
+      <AdditionalLibPackageExcludes Include="%2A%2A\%2A$(SymbolFileExtension)" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(CrossGenSymbolExtension)' != ''">
+      <AdditionalLibPackageExcludes Include="%2A%2A\%2A$(CrossGenSymbolExtension)" />
     </ItemGroup>
 
     <ItemGroup>
@@ -110,7 +120,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="GetDependenciesToPackage"
+  <Target Name="GetNonPkgProjDependenciesToPackage"
           Condition="'$(PackProjectDependencies)' == 'true'"
           AfterTargets="ExpandProjectReferences">
     <!-- allow projects to provide dependencies -->
@@ -191,12 +201,29 @@
     <CreateFrameworkListFile
       Files="@(File)"
       TargetFile="$(FrameworkListFile)"
+      TargetFilePrefixes="ref/;runtimes/"
       RootAttributes="@(FrameworkListRootAttributes)" />
 
     <ItemGroup>
       <File Include="$(FrameworkListFile)">
         <TargetPath>$(FrameworkListTargetPath)</TargetPath>
       </File>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    Get Project items: build the project, and build runtime packages if necessary. All projects in
+    this directory are ProjectProviders.
+  -->
+  <Target Name="GetProjectsToBuild" Returns="@(Project)">
+    <ItemGroup>
+      <!-- The pkg and src builds both build these projects. Add them to both phases. -->
+      <PkgSrcProject Include="@(RuntimeProject)" Condition="'$(BuildRuntimePackages)' == 'true'" />
+      <PkgSrcProject Include="$(MSBuildProjectFullPath)" />
+
+      <Project Include="@(PkgSrcProject)" Phase="pkg" />
+      <Project Include="@(PkgSrcProject)" Phase="src" />
+      <Project Include="@(InstallerPackageProject)" Phase="installer" />
     </ItemGroup>
   </Target>
 

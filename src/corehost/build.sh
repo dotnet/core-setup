@@ -11,6 +11,9 @@ init_rid_plat()
             if [ -e $ROOTFS_DIR/etc/os-release ]; then
                 source $ROOTFS_DIR/etc/os-release
                 __rid_plat="$ID.$VERSION_ID"
+                if [[ "$ID" == "alpine" ]]; then
+                    __rid_plat="linux-musl"
+                fi
             fi
             echo "__rid_plat is $__rid_plat"
         fi
@@ -87,6 +90,7 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 RootRepo="$DIR/../.."
 
+__bin_dir="$RootRepo/bin"
 __build_arch=
 __host_ver=
 __apphost_ver=
@@ -100,6 +104,7 @@ __linkPortable=0
 __cmake_defines=
 __baseIntermediateOutputPath="$RootRepo/bin/obj"
 __versionSourceFile="$__baseIntermediateOutputPath/version.cpp"
+__cmake_bin_prefix=
 
 while [ "$1" != "" ]; do
         lowerI="$(echo $1 | awk '{print tolower($0)}')"
@@ -182,7 +187,8 @@ if [ "$__CrossBuild" == 1 ]; then
     fi
 fi
 
-# __rid_plat is the base RID that corehost is shipped for, effectively, the name of the folder in "runtimes/{__rid_plat}/native/" inside the nupkgs.
+# __base_rid is the base RID that corehost is shipped for, effectively, the name of the folder in "runtimes/{__base_rid}/native/" inside the nupkgs.
+# __rid_plat is the OS portion of the RID.
 __rid_plat=
 init_rid_plat
 
@@ -199,6 +205,8 @@ fi
 __build_arch_lowcase=$(echo "$__build_arch" | tr '[:upper:]' '[:lower:]')
 __base_rid=$__rid_plat-$__build_arch_lowcase
 echo "Computed RID for native build is $__base_rid"
+__cmake_bin_prefix="$__bin_dir/$__base_rid.$__configuration"
+__intermediateOutputPath="$__baseIntermediateOutputPath/$__base_rid.$__configuration/corehost"
 export __CrossToolChainTargetRID=$__base_rid
 
 # Set up the environment to be used for building with clang.
@@ -211,12 +219,15 @@ elif command -v "clang-3.6" > /dev/null 2>&1; then
 elif command -v "clang-3.9" > /dev/null 2>&1; then
     export CC="$(command -v clang-3.9)"
     export CXX="$(command -v clang++-3.9)"
+elif command -v "clang-5.0" > /dev/null 2>&1; then
+    export CC="$(command -v clang-5.0)"
+    export CXX="$(command -v clang++-5.0)"
 elif command -v clang > /dev/null 2>&1; then
     export CC="$(command -v clang)"
     export CXX="$(command -v clang++)"
 else
     echo "Unable to find Clang Compiler"
-    echo "Install clang-3.5 or clang3.6 or clang3.9"
+    echo "Install clang-3.5 or clang3.6 or clang3.9 or clang5.0"
     exit 1
 fi
 
@@ -226,6 +237,9 @@ if [ ! -f $__versionSourceFile ]; then
 fi
 
 __cmake_defines="${__cmake_defines} -DVERSION_FILE_PATH:STRING=${__versionSourceFile}"
+
+mkdir -p $__intermediateOutputPath
+pushd $__intermediateOutputPath
 
 echo "Building Corehost from $DIR to $(pwd)"
 set -x # turn on trace
@@ -237,16 +251,21 @@ if [ $__CrossBuild == 1 ]; then
     elif command -v "clang-4.0" > /dev/null 2>&1; then
         export CC="$(command -v clang-4.0)"
         export CXX="$(command -v clang++-4.0)"
+    elif command -v "clang-5.0" > /dev/null 2>&1; then
+        export CC="$(command -v clang-5.0)"
+        export CXX="$(command -v clang++-5.0)"
     else
-        echo "Unable to find Clang 3.9 or Clang 4.0 Compiler"
-        echo "Install clang-3.9 or clang-4.0 for cross compilation"
+        echo "Unable to find Clang 3.9 or Clang 4.0 or Clang 5.0 Compiler"
+        echo "Install clang-3.9 or clang-4.0 or clang-5.0 for cross compilation"
         exit 1
     fi
     export TARGET_BUILD_ARCH=$__build_arch_lowcase
     export __DistroRid=$__rid_plat
-    cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash -DCMAKE_TOOLCHAIN_FILE=$DIR/../../cross/toolchain.cmake
+    cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash -DCMAKE_INSTALL_PREFIX=$__cmake_bin_prefix -DCMAKE_TOOLCHAIN_FILE=$DIR/../../cross/toolchain.cmake
 else
-    cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash
+    cmake "$DIR" -G "Unix Makefiles" $__cmake_defines -DCLI_CMAKE_HOST_VER:STRING=$__host_ver -DCLI_CMAKE_APPHOST_VER:STRING=$__apphost_ver -DCLI_CMAKE_HOST_FXR_VER:STRING=$__fxr_ver -DCLI_CMAKE_HOST_POLICY_VER:STRING=$__policy_ver -DCLI_CMAKE_PKG_RID:STRING=$__base_rid -DCLI_CMAKE_COMMIT_HASH:STRING=$__commit_hash -DCMAKE_INSTALL_PREFIX=$__cmake_bin_prefix
 fi
+popd
+
 set +x # turn off trace
-make
+cmake --build $__intermediateOutputPath --target install --config $__configuration
