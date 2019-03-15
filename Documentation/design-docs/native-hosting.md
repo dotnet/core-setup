@@ -60,37 +60,11 @@ This new ability would be added to both `hostfxr` and to the `nethost`.
 ## New host binary for component hosting
 Add new library `nethost` which will act as the easy to use host for loading managed components.
 The library would be a dynamically loaded library (`.dll`, `.so`, `.dylib`). For ease of use there would be a header file for C++ apps as well as `.lib`/`.a` for easy linking.
-Apps using the component hosting functionality would ship this library as part of the app. So similarly to `apphost`/`comhost`/`ijwhost` the `nethost` will be shipped as part of .NET Core SDK to be included in customer's projects.
+Apps using the component hosting functionality would ship this library as part of the app. Unlike the `apphost`, `comhost` and `ijwhost`, the `nethost` will not be directly supported by the .NET Core SDK since it's target usage is not from .NET Core apps.
 
-This library would expose two APIs
+The exact delivery mechanism is TBD (pending investigation), but it probably should include NuGet (for C++ projects) and plain `.zip` (for any consumer). The binary itself should be signed by Microsoft as there will be no support for modifying the binary as part of custom application build (unlike `apphost`).
 
-### Load managed component and get a function pointer
-``` C++
-int nethost_load_assembly_method(
-        const char_t * assembly_path,
-        const char_t * type_name,
-        const char_t * method_name,
-        const void * reserved,
-        void ** delegate);
-)
-```
-This API will
-* Locate the assembly using the `assembly_path` and its `.runtimeconfig.json` and determine the frameworks it requires to run. (Note that only framework dependent components will be supported for now).
-* If the process doesn't have CoreCLR loaded (more specifically `hostpolicy` library)
-  * Using the `.runtimeconfig.json` resolve required frameworks (just like if running an application) and load the runtime.
-* Else the CoreCLR is already loaded, in that case validate that required frameworks for the component can be satisfied by the runtime.
-  * If the required frameworks are not already present, fail. No support to load additional frameworks for now.
-* Call into the runtime (`System.Private.CoreLib` specifically)
-  * Create a new isolated `AssemblyLoadContext` (possibly reusing for the same components)
-  * Load the component's assembly into it
-  * Find the requested `type_name` and `method_name`
-  * Return a native callable function pointer to the requested method
-
-The `reserved` argument is currently not used and must be set to `nullptr`. It is present to make this API extensible. In a future version we may need to add more parameters to this call in which case this parameter would be a pointer to a `struct` with the additional fields.
-
-If the runtime is initialized by this function, it will only be populated with framework assemblies (its TPA), none of the component's assemblies will be loaded into the default context.
-
-*As proposed there would be no support for unloading components. For discussion on possible solutions see open issues below.*
+For details on the proposed component hosting see [Native hosting - Load assembly](native-hosting-load-assembly.md).
 
 ### Locate `hostfxr`
 ``` C++
@@ -152,30 +126,14 @@ For now, this proposal is not trying to improve this behavior and the additional
 
 ## Impact on hosting components
 
-### `hostfxr`
-Aside from the new API `hostfxr_main_with_parameters` the only other improvement is to extend the existing `hostfxr_get_runtime_delegate` to accept additional properties:
-``` C++
-int hostfxr_get_runtime_delegate(
-        const hostfxr_parameters * parameters,
-        hostfxr_delegate_type type,
-        void **delegate);
-```
+See [Native hosting - Load assembly](native-hosting-load-assembly.md) for the impact from component loading.
 
-The functionality of the entry point will remain as is, the only addition is using extensible parameter structure and the ability to pass additional runtime properties.
+### `hostfxr`
+No modifications to existing APIs.
 
 ### `hostpolicy`
 Impact on `hostpolicy` API is minimal:
 * Passing additional properties is already implemented as that is the mechanism used to pass properties defined in `.runtimeconfig.json`. So `hostfxr` would just merge the properties from the API with those from `.runtimeconfig.json` and use existing mechanism to pass it to `hostpolicy`.
-* Implementation of the `nethost_load_assembly_method` will just add a new value to the `coreclr_delegate_type` (soon to be introduced with the `ijwhost`) and the respective managed method in `System.Private.CoreLib`.
 
 # Open issues
-* Support unloading of managed components  
-Currently there's no way to unload the runtime itself (and we don't have any plans to add this ability). That said, managed components will be loaded into isolated ALCs and thus the ALC unload feature can be used to unload the managed component (leaving the runtime still active in the process).
-  * How to expose this functionality - how to identify which component to unload (assembly name, one of the returned function pointers)?
-  * What happens with the returned function pointers - unloading the underlying code would lead to these function pointers to become invalid, likely causing undefined behavior when used.
-  * How to handle sharing - for performance and functionality reasons it would make a lot of sense to not load the same assembly twice - basically if the component loading API is used twice on the same assembly, the assembly is loaded only once and two separate function pointers are returned. Unloading may introduce unexpected failure modes.
 * Maybe add `apphost_get_hostfxr_path` on the existing `apphost` - this is to make it even easier to implement custom hosting for entire managed app as the custom host would not need to carry a `nethost` and would get a 100% compatible behavior by using the same `apphost` as the app itself.
-* Future interop considerations
-  * .NET Core WinRT components - we believe that this is very similar to `comhost` and thus should work with the current design
-  * `NativeCallableAttribute` (DLL_EXPORT implemented in managed) - we believe that on Windows this would be close to `ijwhost` and on Linux/macOS we should be able to create something which uses `nethost`.
-  * The proposed `nethost` API only supports calling static managed methods. If the use case requires exposing objects/interfaces some amount of infra work is needed to expose those on top of the proposed API.
