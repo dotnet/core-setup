@@ -23,8 +23,9 @@ namespace
         // If the first character of the GUID is not '{' COM will
         // interpret the string as a ProgID. The COM host doesn't
         // support ProgIDs so coerce strings into GUID format.
+        // The buffer size is minus 2 to account for null and first '{'.
         if (str[0] != _X('{')
-            && str.size() < ((sizeof(guid_buf) / sizeof(pal::char_t)) - 1))
+            && str.size() < ((sizeof(guid_buf) / sizeof(pal::char_t)) - 2))
         {
             // Increment the output buffer 1 to skip over the '{'.
             std::memcpy(guid_buf + 1, str.data(), str.size() * sizeof(pal::char_t));
