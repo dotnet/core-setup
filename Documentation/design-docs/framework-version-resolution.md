@@ -95,12 +95,9 @@ set DOTNET_ROLL_FORWARD=LatestMajor
 dotnet --roll-forward LatestMinor app.dll
 ```
 
-For the framework references specified by the application itself:  
 The order above defines precedence. Later scopes take precedence over earlier ones. So command line wins over everything, environment variable wins over `.runtimeconfig.json` and per-framework setting wins over config-wide setting.
 
-For dependent frameworks:
-Each dependent framework (for example FX1) is loaded with an effective roll-forward value (the one used to resolve that framework). If FX1 has additional framework references those will be loaded using this same roll-forward value as the default, that is unless FX1 specifies different value in its `.runtimeconfig.json` or there's a higher precedence override (environment variable `DOTNET_ROLL_FORWARD` or command line argument `--roll-forward`).
-
+*Note: There's no inheritance applied when chaining framework references. So for example if the application references FX1, then if FX1 has a reference to FX2, the roll-forward value used to resolved FX2 will be determined solely by looking at the `.runtimeconfig.json` from FX1 and the CLI and env. variables. Any roll-forward settings in the app's `.runtimeconfig.json` will have not effect on the resolution of FX2.*
 
 ## Pre-release versions
 Pre-release version is a version which has a pre-release part, for example `3.0.0-preview4-27415-15`. Everything after the `-` (dash) character is a pre-release identifier. Per [semantic versioning rules](https://semver.org/) pre-release versions are ordered before the same version without any pre-release part. So `3.0.0-preview4-27415-15` comes before `3.0.0`.
