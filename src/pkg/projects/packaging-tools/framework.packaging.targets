@@ -139,8 +139,8 @@
   </Target>
 
   <!--
-    If DependencyKeyProviderGuid isn't manually set, generate based on installer full path.
-    Not suitable for bundles.
+    If UpgradeCode isn't manually set, generate based on installer full path. Not suitable for
+    bundles.
   -->
   <Target Name="GetUpgradeCode"
           Condition="'$(UpgradeCode)' == ''">
