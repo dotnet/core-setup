@@ -40,8 +40,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTest(
                 runtimeConfig => runtimeConfig
-                    .WithFramework(MicrosoftNETCoreApp, "4.0.0")
-                    .WithRollForwardOnNoCandidateFx(2),
+                    .WithRollForwardOnNoCandidateFx(2)
+                    .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
                 result => result.Should().Pass()
                     .And.HaveResolvedFrameworkVersion("5.1.3"));
         }
@@ -117,8 +117,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTestWithRollForwardOnNoCandidateFxSetting(
                 runtimeConfig => runtimeConfig
-                    .WithFramework(MicrosoftNETCoreApp, "4.0.0")
-                    .WithRollForwardOnNoCandidateFx(2),
+                    .WithRollForwardOnNoCandidateFx(2)
+                    .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
                 settingLocation: settingLocation,
                 settingValue: 0,
                 resolvedFramework: resolvedFramework);
