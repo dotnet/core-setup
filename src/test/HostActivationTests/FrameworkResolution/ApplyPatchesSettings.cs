@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "5.1.2"),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithApplyPatches(false)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.2"),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.2"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.2"));
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, "5.1.2")
                         .WithApplyPatches(false)),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.2"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.2"));
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, "5.1.2")
                         .WithApplyPatches(false)),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.2"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.2"));
 
             RunTest(
                 runtimeConfig => runtimeConfig
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, "5.1.2")
                         .WithApplyPatches(true)),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         [Fact]
@@ -83,8 +83,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     runtimeConfig => runtimeConfig
                         .WithFramework("MiddleWare", "2.1.0"),
                     result => result.Should().Pass()
-                        .And.HaveResolvedFrameworkVersion("5.1.2")
-                        .And.HaveResolvedFrameworkVersion("2.1.2"));
+                        .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.2")
+                        .And.HaveResolvedFramework("MiddleWare", "2.1.2"));
             }
         }
 
@@ -100,8 +100,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     runtimeConfig => runtimeConfig
                         .WithFramework("MiddleWare", "2.1.0"),
                     result => result.Should().Pass()
-                        .And.HaveResolvedFrameworkVersion("5.1.2")
-                        .And.HaveResolvedFrameworkVersion("2.1.2"));
+                        .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.2")
+                        .And.HaveResolvedFramework("MiddleWare", "2.1.2"));
             }
         }
 
@@ -113,14 +113,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithApplyPatches(false)
                     .WithFramework("MiddleWare", "2.1.2"),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
 
             RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(new RuntimeConfig.Framework("MiddleWare", "2.1.2")
                         .WithApplyPatches(false)),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         private void RunTest(

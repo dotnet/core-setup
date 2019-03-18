@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "5.1.3"),
                 commandResult => commandResult.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         [Theory]
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.0"),
                 commandResult => commandResult.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         [Theory]
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (passes)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion("5.1.3");
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3");
                     }
                     else
                     {
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (passes)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion("5.1.3");
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3");
                     }
                     else
                     {
@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithApplyPatches(false)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.3"),
                 commandResult => commandResult.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         [Fact]
@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "5.1.3-preview.2"),
                 commandResult => commandResult.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3-preview.2"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3-preview.2"));
         }
 
         [Fact]
@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.3-preview.1"),
                 commandResult => commandResult.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3-preview.2"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3-preview.2"));
         }
 
         [Theory]
@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (passes)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion("5.1.3-preview.2");
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3-preview.2");
                     }
                     else
                     {
@@ -255,7 +255,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (passes)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion("5.1.3-preview.2");
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3-preview.2");
                     }
                     else
                     {
@@ -284,7 +284,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (passes)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion("5.1.3-preview.2");
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3-preview.2");
                     }
                     else
                     {
@@ -334,7 +334,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "4.1.1"),
                 commandResult => commandResult.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion(resolvedVersion));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion));
         }
 
         [Theory]
@@ -358,7 +358,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (resolvedVersion != null)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion(resolvedVersion);
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion);
                     }
                     else
                     {
@@ -389,7 +389,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (resolvedVersion != null)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion(resolvedVersion);
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion);
                     }
                     else
                     {
@@ -420,7 +420,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (resolvedVersion != null)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion(resolvedVersion);
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion);
                     }
                     else
                     {
@@ -451,7 +451,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (resolvedVersion != null)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion(resolvedVersion);
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion);
                     }
                     else
                     {
@@ -482,7 +482,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (resolvedVersion != null)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion(resolvedVersion);
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion);
                     }
                     else
                     {
@@ -509,7 +509,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (resolvedVersion != null)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion(resolvedVersion);
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion);
                     }
                     else
                     {
@@ -537,7 +537,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     if (resolvedVersion != null)
                     {
                         commandResult.Should().Pass()
-                            .And.HaveResolvedFrameworkVersion(resolvedVersion);
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion);
                     }
                     else
                     {
@@ -558,7 +558,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithFramework(MicrosoftNETCoreApp, "6.1.0"),
                 commandResult => commandResult.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("6.1.1"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "6.1.1"));
         }
 
 

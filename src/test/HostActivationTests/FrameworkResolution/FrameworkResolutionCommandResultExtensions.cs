@@ -7,9 +7,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 {
     internal static class FrameworkResolutionCommandResultExtensions
     {
-        public static AndConstraint<CommandResultAssertions> HaveResolvedFrameworkVersion(this CommandResultAssertions assertion, string version)
+        public static AndConstraint<CommandResultAssertions> HaveResolvedFramework(this CommandResultAssertions assertion, string name, string version)
         {
-            return assertion.HaveStdOutContaining("mock fx_found_versions: " + version);
+            return assertion.HaveStdOutContaining($"mock frameworks: {name} {version}");
         }
 
         public static AndConstraint<CommandResultAssertions> DidNotFindCompatibleFrameworkVersion(this CommandResultAssertions assertion)

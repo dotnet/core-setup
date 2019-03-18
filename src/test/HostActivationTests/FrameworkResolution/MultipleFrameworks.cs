@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     commandResult.Should().Pass()
                         .And.RestartedFrameworkResolution("5.1.3", "5.4.1")
                         .And.RestartedFrameworkResolution("5.4.1", "5.6.0")
-                        .And.HaveResolvedFrameworkVersion("5.6.0"));
+                        .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.6.0"));
         }
 
         // This test does:
@@ -334,7 +334,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     commandResult.Should().Pass()
                         .And.RestartedFrameworkResolution("5.1.3", "5.4.1")
                         .And.RestartedFrameworkResolution("5.4.1", "5.6.0")
-                        .And.HaveResolvedFrameworkVersion("5.6.0"));
+                        .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.6.0"));
         }
 
         private void RunTest(
@@ -356,7 +356,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         if (resolvedFramework != null)
                         {
                             commandResult.Should().Pass()
-                                .And.HaveResolvedFrameworkVersion(resolvedFramework);
+                                .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
                         }
                         else
                         {

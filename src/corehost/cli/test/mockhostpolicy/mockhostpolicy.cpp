@@ -65,6 +65,23 @@ SHARED_API int corehost_load(host_interface_t* init)
     std::cout << "mock host_info_dotnet_root:" << tostr(init->host_info_dotnet_root).data() << std::endl;
     std::cout << "mock host_info_app_path:" << tostr(init->host_info_app_path).data() << std::endl;
 
+    if (init->fx_names.len == 0)
+    {
+        std::cout << "mock frameworks: <empty>" << std::endl;
+    }
+    else
+    {
+        for (int i = 0; i < init->fx_names.len; i++)
+        {
+            std::cout << "mock frameworks: " 
+                << tostr(init->fx_names.arr[i]).data() << " " 
+                << tostr(init->fx_found_versions.arr[i]).data() << " [requested: "
+                << tostr(init->fx_requested_versions.arr[i]).data() << "] [path: "
+                << tostr(init->fx_dirs.arr[i]).data() << "]"
+                << std::endl;
+        }
+    }
+
     return StatusCode::Success;
 }
 

@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "5.0.0"),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(2)
                     .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, "4.0.0")
                         .WithRollForwardOnNoCandidateFx(2)),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"));
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"),
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"),
                 environment: new string[] { "DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX=2" });
         }
 
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
                 result => result.Should().Pass()
-                    .And.HaveResolvedFrameworkVersion("5.1.3"),
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"),
                 commandLine: new string[] { "--roll-forward-on-no-candidate-fx", "2" });
         }
 
@@ -240,7 +240,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         if (resolvedFramework != null)
                         {
                             commandResult.Should().Pass()
-                                .And.HaveResolvedFrameworkVersion(resolvedFramework);
+                                .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
                         }
                         else
                         {
