@@ -125,7 +125,7 @@ Since there are three ways to specify the values, conflicts will be resolved by 
 	The feature is DISABLED.
 ```	
 	
-There is no inheritance when there are chained framework references. If the app references FX1, and FX1 references FX2, then the resolution of FX2 only takes into account settings from `.runtimeconfig.json` in FX1 and CLI and env. variable. The settings in app's `.runtimeconfig.json` have no effect on resolution of FX2.
+There is no inheritance when there are chained framework references. If the app references FX1, and FX1 references FX2, then the resolution of FX2 only takes into account settings from `.runtimeconfig.json` in FX1, CLI and env. variable. The settings in the app's `.runtimeconfig.json` have no effect on resolution of FX2.
 
 ## Multilevel SharedFx Lookup
 
