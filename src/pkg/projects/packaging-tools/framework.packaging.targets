@@ -149,14 +149,6 @@
     </GenerateGuidFromName>
   </Target>
 
-  <!-- If DependencyKeyProviderGuid isn't manually set, generate based on project name. -->
-  <Target Name="GetDependencyKeyProviderGuid"
-          Condition="'$(DependencyKeyProviderGuid)' == ''">
-    <GenerateGuidFromName Name="$(MSBuildProjectName)__DependencyKeyProviderGuid">
-      <Output TaskParameter="GeneratedGuid" PropertyName="DependencyKeyProviderGuid" />
-    </GenerateGuidFromName>
-  </Target>
-
   <Target Name="RunHeatHarvester">
     <PropertyGroup>
       <InstallFilesWixSourceFile>$(WixObjDir)install-files.wxs</InstallFilesWixSourceFile>
@@ -182,7 +174,6 @@
   <Target Name="RunCandleCompiler"
           DependsOnTargets="
             GetUpgradeCode;
-            GetDependencyKeyProviderGuid;
             GenerateMsiVersionString">
     <PropertyGroup>
       <_wixArgs></_wixArgs>
@@ -198,7 +189,6 @@
       <_wixArgs>$(_wixArgs) -dTargetArchitecture="$(TargetArchitecture)"</_wixArgs>
       <_wixArgs>$(_wixArgs) -dUpgradeCode="$(UpgradeCode)"</_wixArgs>
       <_wixArgs>$(_wixArgs) -dDependencyKeyName="$(InstallerName.Replace('-', '_'))"</_wixArgs>
-      <_wixArgs>$(_wixArgs) -dDependencyKeyGuid="$(DependencyKeyProviderGuid)"</_wixArgs>
 
       <_wixArgs>$(_wixArgs) "$(MSBuildThisFileDirectory)windows/targetingpack.wxs"</_wixArgs>
       <_wixArgs>$(_wixArgs) "$(MSBuildThisFileDirectory)windows/provider.wxs"</_wixArgs>
