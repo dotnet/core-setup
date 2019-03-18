@@ -7,13 +7,13 @@
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
 
     <PreReleaseLabel Condition="'$(PackageVersionStamp)' != ''">$(PackageVersionStamp)</PreReleaseLabel>
-    <PreReleaseLabel Condition="'$(PreReleaseLabel)' == ''">preview4</PreReleaseLabel>
+    <PreReleaseLabel Condition="'$(PreReleaseLabel)' == ''">preview3</PreReleaseLabel>
     <IncludePreReleaseLabelInPackageVersion Condition="'$(StabilizePackageVersion)' != 'true' or '$(PackageVersionStamp)' != ''">true</IncludePreReleaseLabelInPackageVersion>
     <IncludeBuildNumberInPackageVersion Condition="'$(StabilizePackageVersion)' != 'true'">true</IncludeBuildNumberInPackageVersion>
 
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
-    <ReleaseBrandSuffix>Preview 4</ReleaseBrandSuffix>
-    <Channel>master</Channel>
+    <ReleaseBrandSuffix>Preview 3</ReleaseBrandSuffix>
+    <Channel>release/3.0</Channel>
     <ContainerName>dotnet</ContainerName>
     <ChecksumContainerName>$(ContainerName)</ChecksumContainerName>
     <NETCoreAppMaximumVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppMaximumVersion>
