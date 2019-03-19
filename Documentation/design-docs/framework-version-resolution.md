@@ -102,7 +102,7 @@ The order above defines precedence. Later scopes take precedence over earlier on
 ## Pre-release versions
 Pre-release version is a version which has a pre-release part, for example `3.0.0-preview4-27415-15`. Everything after the `-` (dash) character is a pre-release identifier. Per [semantic versioning rules](https://semver.org/) pre-release versions are ordered before the same version without any pre-release part. So `3.0.0-preview4-27415-15` comes before `3.0.0`.
 
-TODO: Figure out the equality of pre-release and normal versions. That is, per SemVer rules, is it acceptable to resolve reference to `3.0.0` with a pre-release `3.0.0-preview`?
+Note that due to the above described ordering, application which refers framework version `3.0.0` will NOT run on `3.0.0-preview`.
 
 ### Behavior before 3.0
 Before .NET Core 3.0 (so 2.2 and older) the roll-forward behavior for pre-release versions ignored any of the roll-forward related settings, that is both `rollForwardOnNoCandidateFx` as well as `applyPatches`.
@@ -137,7 +137,7 @@ Later on component B is loaded which asks for `3.1.0-preview LatestMajor` (for e
 Loading the components in reverse order (B first and then A) will work since the `3.1.0-preview` runtime will be selected.*
 
 ### Proposed new "pre-release" mode
-The above behavior makes sense for most users, but it makes it hard for us to test new versions of frameworks. Let's assume .NET Core 3.0 already shipped and there are apps which target `3.0.0 rollForward = Minor` (the default). The shipped framework is version `3.0.0`. Now the next patch release is being prepared and `3.0.1.preview` is produced. With the proposed (and current) behavior, there's no good way to make the apps use the new preview for testing purposes.
+The above behavior makes sense for most users, but it makes it hard for us to test new versions of frameworks. Let's assume .NET Core 3.0 already shipped and there are apps which target `3.0.0 rollForward = Minor` (the default). The shipped framework is version `3.0.0`. Now the next patch release is being prepared and `3.0.1-preview` is produced. With the proposed (and current) behavior, there's no good way to make the apps use the new preview for testing purposes.
 
 The proposal is to add a new environment variable `DOTNET_ROLL_FORWARD_TO_PRERELEASE`. There would only be the environment variable (no command line or `.runtimeconfig.json` property). By default when it's not set or set to anything but `1` the behavior would be as described above.
 
@@ -152,6 +152,8 @@ This would mean that with `DOTNET_ROLL_FORWARD_TO_PRERELEASE=1`:
 It's important for this setting to work "on top" of the roll forward settings described above. We need to be able to test pre-release versions without otherwise changing the roll forward policy chosen by the app/environment and without changing the app's configuration assets (files, command line and so on). The other possibilities:
 * `.runtimeconfig.json` version of this setting - this would allow per-framework-reference setting. This may come useful when testing third party framework pre-release versions, but right now there's no such scenario yet. Even then the environment variable might be enough to support testing.
 * CLI version of this setting - this would allow per-process setting (unlike the env. variable which is inherited by all child processes). This is not needed for the testing scenario described above. Currently we're not aware of another scenario which would require such behavior.
+
+Also of note is that SemVer2 rules still apply, and thus pre-release versions order before the respective release version counterpart. So even if this setting is on, application referring to `3.0.0` will NOT run `3.0.0-preview` regardless of roll forward settings. This is because per versioning rules it would be a downgrade to run on the pre-release and the framework resolution doesn't allow any downgrades.
 
 Pros
 * Enables easy testing of future releases using pre-release versions.
@@ -293,8 +295,3 @@ There should not be any circular dependencies between frameworks.
 A newer version of a shared framework should keep or increase the version to another shared framework (never decrease the version number).
 
 By following these best practices we have optimal run-time performance (less processing and probing) and less chance of incompatible framework references.
-
-
-## Open issues
-### Pre-release versions
-Determine which policy to use for roll-forward of pre-release versions.
