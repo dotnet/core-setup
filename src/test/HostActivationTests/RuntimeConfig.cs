@@ -47,12 +47,16 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
                 if (RollForwardOnNoCandidateFx.HasValue)
                 {
-                    frameworkReference.Add("rollForwardOnNoCandidateFx", RollForwardOnNoCandidateFx.Value);
+                    frameworkReference.Add(
+                        Constants.RollFowardOnNoCandidateFxSetting.RuntimeConfigPropertyName,
+                        RollForwardOnNoCandidateFx.Value);
                 }
 
                 if (ApplyPatches.HasValue)
                 {
-                    frameworkReference.Add("applyPatches", ApplyPatches.Value);
+                    frameworkReference.Add(
+                        Constants.ApplyPatchesSetting.RuntimeConfigPropertyName,
+                        ApplyPatches.Value);
                 }
 
                 return frameworkReference;
@@ -62,8 +66,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             {
                 return new Framework((string)jobject["name"], (string)jobject["version"])
                 {
-                    RollForwardOnNoCandidateFx = (int?)jobject["rollForwardOnNoCandidateFx"],
-                    ApplyPatches = (bool?)jobject["applyPatches"]
+                    RollForwardOnNoCandidateFx = (int?)jobject[Constants.RollFowardOnNoCandidateFxSetting.RuntimeConfigPropertyName],
+                    ApplyPatches = (bool?)jobject[Constants.ApplyPatchesSetting.RuntimeConfigPropertyName]
                 };
             }
         }
@@ -100,8 +104,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                         runtimeConfig.WithFramework(Framework.FromJson(framework));
                     }
 
-                    runtimeConfig._rollForwardOnNoCandidateFx = (int?)runtimeOptions["rollForwardOnNoCandidateFx"];
-                    runtimeConfig._applyPatches = (bool?)runtimeOptions["applyPatches"];
+                    runtimeConfig._rollForwardOnNoCandidateFx = (int?)runtimeOptions[Constants.RollFowardOnNoCandidateFxSetting.RuntimeConfigPropertyName];
+                    runtimeConfig._applyPatches = (bool?)runtimeOptions[Constants.ApplyPatchesSetting.RuntimeConfigPropertyName];
                 }
             }
 
@@ -150,12 +154,16 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             if (_rollForwardOnNoCandidateFx.HasValue)
             {
-                runtimeOptions.Add("rollForwardOnNoCandidateFx", _rollForwardOnNoCandidateFx.Value);
+                runtimeOptions.Add(
+                    Constants.RollFowardOnNoCandidateFxSetting.RuntimeConfigPropertyName,
+                    _rollForwardOnNoCandidateFx.Value);
             }
 
             if (_applyPatches.HasValue)
             {
-                runtimeOptions.Add("applyPatches", _applyPatches.Value);
+                runtimeOptions.Add(
+                    Constants.ApplyPatchesSetting.RuntimeConfigPropertyName,
+                    _applyPatches.Value);
             }
 
             JObject json = new JObject()

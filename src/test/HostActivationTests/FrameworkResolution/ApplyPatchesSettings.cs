@@ -12,6 +12,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         FrameworkResolutionBase,
         IClassFixture<ApplyPatchesSettings.SharedTestState>
     {
+        private const string MiddleWare = "MiddleWare";
+
         private SharedTestState SharedState { get; }
 
         public ApplyPatchesSettings(SharedTestState sharedState)
@@ -76,15 +78,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             using (var dotnetCustomizer = SharedState.DotNetWithFrameworks.Customize())
             {
-                dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.WithApplyPatches(false));
 
                 RunTest(
                     runtimeConfig => runtimeConfig
-                        .WithFramework("MiddleWare", "2.1.0"),
+                        .WithFramework(MiddleWare, "2.1.0"),
                     result => result.Should().Pass()
                         .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.2")
-                        .And.HaveResolvedFramework("MiddleWare", "2.1.2"));
+                        .And.HaveResolvedFramework(MiddleWare, "2.1.2"));
             }
         }
 
@@ -93,15 +95,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             using (var dotnetCustomizer = SharedState.DotNetWithFrameworks.Customize())
             {
-                dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp).WithApplyPatches(false));
 
                 RunTest(
                     runtimeConfig => runtimeConfig
-                        .WithFramework("MiddleWare", "2.1.0"),
+                        .WithFramework(MiddleWare, "2.1.0"),
                     result => result.Should().Pass()
                         .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.2")
-                        .And.HaveResolvedFramework("MiddleWare", "2.1.2"));
+                        .And.HaveResolvedFramework(MiddleWare, "2.1.2"));
             }
         }
 
@@ -111,13 +113,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             RunTest(
                 runtimeConfig => runtimeConfig
                     .WithApplyPatches(false)
-                    .WithFramework("MiddleWare", "2.1.2"),
+                    .WithFramework(MiddleWare, "2.1.2"),
                 result => result.Should().Pass()
                     .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
 
             RunTest(
                 runtimeConfig => runtimeConfig
-                    .WithFramework(new RuntimeConfig.Framework("MiddleWare", "2.1.2")
+                    .WithFramework(new RuntimeConfig.Framework(MiddleWare, "2.1.2")
                         .WithApplyPatches(false)),
                 result => result.Should().Pass()
                     .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
@@ -149,7 +151,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 DotNetWithFrameworks = DotNet("WithOneFramework")
                     .AddMicrosoftNETCoreAppFramework("5.1.2")
                     .AddMicrosoftNETCoreAppFramework("5.1.3")
-                    .AddFramework("MiddleWare", "2.1.2", runtimeConfig =>
+                    .AddFramework(MiddleWare, "2.1.2", runtimeConfig =>
                         runtimeConfig.WithFramework(MicrosoftNETCoreApp, "5.1.2"))
                     .Build();
 

@@ -12,6 +12,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         FrameworkResolutionBase,
         IClassFixture<MultipleFrameworks.SharedTestState>
     {
+        private const string MiddleWare = "MiddleWare";
+        private const string AnotherMiddleWare = "AnotherMiddleWare";
+        private const string HighWare = "HighWare";
+
         private SharedTestState SharedState { get; }
 
         public MultipleFrameworks(SharedTestState sharedState)
@@ -37,9 +41,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTest(
                 runtimeConfig => runtimeConfig
-                    .WithFramework("MiddleWare", "2.1.0")
+                    .WithFramework(MiddleWare, "2.1.0")
                     .WithFramework(MicrosoftNETCoreApp, "5.1.1"),
-                dotnetCustomizer => dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                         .WithApplyPatches(applyPatches)
@@ -71,8 +75,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "5.1.1")
-                    .WithFramework("MiddleWare", "2.1.0"),
-                dotnetCustomizer => dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                    .WithFramework(MiddleWare, "2.1.0"),
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                         .WithApplyPatches(applyPatches)
@@ -94,9 +98,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTest(
                 runtimeConfig => runtimeConfig
-                    .WithFramework("MiddleWare", "2.1.0")
+                    .WithFramework(MiddleWare, "2.1.0")
                     .WithFramework(MicrosoftNETCoreApp, "5.1.1"),
-                dotnetCustomizer => dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                         .WithApplyPatches(applyPatches)
@@ -122,8 +126,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "5.1.1")
-                    .WithFramework("MiddleWare", "2.1.0"),
-                dotnetCustomizer => dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                    .WithFramework(MiddleWare, "2.1.0"),
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                         .WithApplyPatches(applyPatches)
@@ -149,8 +153,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "6.0.1-preview.0")
-                    .WithFramework("MiddleWare", "2.1.0"),
-                dotnetCustomizer => dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                    .WithFramework(MiddleWare, "2.1.0"),
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                         .Version = versionReference),
@@ -177,11 +181,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTest(
                 runtimeConfig => runtimeConfig
-                    .WithFramework("MiddleWare", "2.1.0")
+                    .WithFramework(MiddleWare, "2.1.0")
                     .WithFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, versionReference)
                         .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                         .WithApplyPatches(applyPatches)),
-                dotnetCustomizer => dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .Version = "5.1.1"),
                 resolvedFramework: resolvedFramework,
@@ -201,11 +205,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTest(
                 runtimeConfig => runtimeConfig
-                    .WithFramework("MiddleWare", "2.1.0")
+                    .WithFramework(MiddleWare, "2.1.0")
                     .WithFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, versionReference)
                         .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                         .WithApplyPatches(applyPatches)),
-                dotnetCustomizer => dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .Version = "5.1.1"),
                 resolvedFramework: resolvedFramework,
@@ -230,13 +234,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTest(
                 runtimeConfig => runtimeConfig
-                    .WithFramework("HighWare", "7.0.0"),
+                    .WithFramework(HighWare, "7.0.0"),
                 dotnetCustomizer =>
                 {
-                    dotnetCustomizer.Framework("HighWare").RuntimeConfig(runtimeConfig =>
+                    dotnetCustomizer.Framework(HighWare).RuntimeConfig(runtimeConfig =>
                         runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                             .Version = "5.1.1");
-                    dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                    dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                         runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                             .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                             .WithApplyPatches(applyPatches)
@@ -259,13 +263,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTest(
                 runtimeConfig => runtimeConfig
-                    .WithFramework("HighWare", "7.0.0"),
+                    .WithFramework(HighWare, "7.0.0"),
                 dotnetCustomizer =>
                 {
-                    dotnetCustomizer.Framework("HighWare").RuntimeConfig(runtimeConfig =>
+                    dotnetCustomizer.Framework(HighWare).RuntimeConfig(runtimeConfig =>
                         runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                             .Version = "5.1.1");
-                    dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                    dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                         runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                             .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                             .WithApplyPatches(applyPatches)
@@ -289,13 +293,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 runtimeConfig => runtimeConfig
                     .WithRollForwardOnNoCandidateFx(2)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.1")
-                    .WithFramework("HighWare", "7.3.1"),
+                    .WithFramework(HighWare, "7.3.1"),
                 dotnetCustomizer =>
                 {
-                    dotnetCustomizer.Framework("HighWare").RuntimeConfig(runtimeConfig =>
+                    dotnetCustomizer.Framework(HighWare).RuntimeConfig(runtimeConfig =>
                         runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                             .Version = "5.4.1");
-                    dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                    dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                         runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                             .Version = "5.6.0");
                 },
@@ -319,14 +323,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 runtimeConfig => runtimeConfig
                     .WithRollForwardOnNoCandidateFx(2)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.1")
-                    .WithFramework("MiddleWare", "2.1.2")
-                    .WithFramework("AnotherMiddleWare", "3.0.0"),
+                    .WithFramework(MiddleWare, "2.1.2")
+                    .WithFramework(AnotherMiddleWare, "3.0.0"),
                 dotnetCustomizer =>
                 {
-                    dotnetCustomizer.Framework("MiddleWare").RuntimeConfig(runtimeConfig =>
+                    dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                         runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                             .Version = "5.4.1");
-                    dotnetCustomizer.Framework("AnotherMiddleWare").RuntimeConfig(runtimeConfig =>
+                    dotnetCustomizer.Framework(AnotherMiddleWare).RuntimeConfig(runtimeConfig =>
                         runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                             .Version = "5.6.0");
                 },
@@ -380,14 +384,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .AddMicrosoftNETCoreAppFramework("5.4.1")
                     .AddMicrosoftNETCoreAppFramework("5.6.0")
                     .AddMicrosoftNETCoreAppFramework("6.0.1-preview.1")
-                    .AddFramework("MiddleWare", "2.1.2", runtimeConfig =>
+                    .AddFramework(MiddleWare, "2.1.2", runtimeConfig =>
                         runtimeConfig.WithFramework(MicrosoftNETCoreApp, "5.1.3"))
-                    .AddFramework("AnotherMiddleWare", "3.0.0", runtimeConfig =>
+                    .AddFramework(AnotherMiddleWare, "3.0.0", runtimeConfig =>
                         runtimeConfig.WithFramework(MicrosoftNETCoreApp, "5.1.3"))
-                    .AddFramework("HighWare", "7.3.1", runtimeConfig =>
+                    .AddFramework(HighWare, "7.3.1", runtimeConfig =>
                         runtimeConfig
                             .WithFramework(MicrosoftNETCoreApp, "5.1.3")
-                            .WithFramework("MiddleWare", "2.1.2"))
+                            .WithFramework(MiddleWare, "2.1.2"))
                     .Build();
 
                 FrameworkReferenceApp = CreateFrameworkReferenceApp();
