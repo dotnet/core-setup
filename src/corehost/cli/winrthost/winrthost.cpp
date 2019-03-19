@@ -33,7 +33,7 @@ namespace
     int get_winrt_activation_delegate(winrt_activation_fn *delegate)
     {
         return load_fxr_and_get_delegate(
-            hostfxr_delegate_type::com_activation,
+            hostfxr_delegate_type::winrt_activation,
             [](const pal::string_t& host_path, pal::string_t* app_path_out)
             {
                 pal::string_t app_path_local{ host_path };

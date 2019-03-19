@@ -624,7 +624,7 @@ SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void** 
     case coreclr_delegate_type::winrt_activation:
         return coreclr->create_delegate(
             "System.Private.CoreLib",
-            "Internal.Runtime.InteropServices.WinRTActivator",
+            "Internal.Runtime.InteropServices.WindowsRuntime.ActivationFactoryLoader",
             "GetActivationFactory",
             delegate
         );
