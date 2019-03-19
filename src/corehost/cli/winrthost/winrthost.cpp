@@ -26,11 +26,11 @@
 
 #endif // _WIN32
 
-using winrt_activation_fn = pal::hresult_t(STDMETHODCALLTYPE*)(HSTRING activatableClassId, IActivationFactory** factory);
+using winrt_activation_fn = pal::hresult_t(STDMETHODCALLTYPE*)(const pal::char_t* appPath, HSTRING activatableClassId, IActivationFactory** factory);
 
 namespace
 {
-    int get_winrt_activation_delegate(winrt_activation_fn *delegate)
+    int get_winrt_activation_delegate(pal::string_t* app_path, winrt_activation_fn *delegate)
     {
         return load_fxr_and_get_delegate(
             hostfxr_delegate_type::winrt_activation,
@@ -47,7 +47,8 @@ namespace
 
                 return StatusCode::Success;
             },
-            delegate
+            delegate,
+            app_path
         );
     }
 }
@@ -62,8 +63,8 @@ WINRT_API HRESULT STDMETHODCALLTYPE DllGetActivationFactory(_In_ HSTRING activat
         trace::setup();
         reset_redirected_error_writer();
         error_writer_scope_t writer_scope(redirected_error_writer);
-
-        int ec = get_winrt_activation_delegate(&activator);
+        
+        int ec = get_winrt_activation_delegate(&app_path, &activator);
         if (ec != StatusCode::Success)
         {
             RoOriginateErrorW(__HRESULT_FROM_WIN32(ec), 0 /* message is null-terminated */, get_redirected_error_string().c_str());
@@ -71,7 +72,7 @@ WINRT_API HRESULT STDMETHODCALLTYPE DllGetActivationFactory(_In_ HSTRING activat
         }
     }
 
-    return activator(activatableClassId, factory);
+    return activator(app_path.c_str(), activatableClassId, factory);
 }
 
 WINRT_API HRESULT STDMETHODCALLTYPE DllCanUnloadNow(void)
