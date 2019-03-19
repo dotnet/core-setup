@@ -63,7 +63,7 @@
         <SharedBundle>$(CombinedInstallerFile)</SharedBundle>
        <!-- Warning: changing the value "BundleInstallerOutputGuidString" can only occur on a product-band boundary [ProductBandVersion], 
                Changing "BundleInstallerOutputGuidString" mid-product-band will break the upgradability of the Shared Framework bundle installer. -->
-        <BundleInstallerOutputGuidString>Dotnet Shared Framework Bundle Installer $(ProductBandVersion) $(PackageTargetRid)</BundleInstallerOutputGuidString>
+        <BundleInstallerOutputGuidString>.NET Core Shared Framework Bundle Installer $(ProductBandVersion) $(PackageTargetRid)</BundleInstallerOutputGuidString>
         <SharedBrandName>$(SharedFrameworkBrandName)</SharedBrandName>
         <ArchParams>"$(MsiArch)" "$(TargetArchitecture)"</ArchParams>
      </PropertyGroup>
