@@ -304,6 +304,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
         #region With many versions
         // RunWithManyVersions has these frameworks
+        //  - Microsoft.NETCore.App 2.3.1-preview.1
+        //  - Microsoft.NETCore.App 2.3.1
         //  - Microsoft.NETCore.App 4.1.1
         //  - Microsoft.NETCore.App 4.1.2
         //  - Microsoft.NETCore.App 4.1.3-preview.1
@@ -524,6 +526,37 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 });
         }
 
+        [Theory] // Both 2.3.1-preview.1 and 2.3.2 are available
+        [InlineData(null, null, "2.3.2")]
+        [InlineData(null, false, "2.3.2")]
+        [InlineData(0, null, "2.3.2")]  // Pre-release is ignored, roll forward to latest release patch
+        [InlineData(0, false, null)]    // No exact match available
+        [InlineData(1, null, "2.3.2")]
+        [InlineData(1, false, "2.3.2")] // Pre-release is ignored, roll forward to closest release available
+        [InlineData(2, null, "2.3.2")]
+        [InlineData(2, false, "2.3.2")] // Pre-release is ignored, roll forward to closest release available
+        public void RollForwardToClosestReleaseWithPreReleaseAvailable_FromRelease(int? rollForwardOnNoCandidateFx, bool? applyPatches, string resolvedVersion)
+        {
+            RunTestWithManyVersions(
+                runtimeConfig => runtimeConfig
+                    .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
+                    .WithApplyPatches(applyPatches)
+                    .WithFramework(MicrosoftNETCoreApp, "2.3.0"),
+                commandResult =>
+                {
+                    if (resolvedVersion != null)
+                    {
+                        commandResult.Should().Pass()
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion);
+                    }
+                    else
+                    {
+                        commandResult.Should().Fail()
+                            .And.DidNotFindCompatibleFrameworkVersion();
+                    }
+                });
+        }
+
         [Theory]
         [InlineData(null, null, null)]   // Pre-release will only match the extact x.y.z version, regardless of settings
         [InlineData(0, false, null)]
@@ -636,6 +669,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .Build();
 
                 DotNetWithManyVersions = DotNet("WithManyVersions")
+                    .AddMicrosoftNETCoreAppFramework("2.3.1-preview.1")
+                    .AddMicrosoftNETCoreAppFramework("2.3.2")
                     .AddMicrosoftNETCoreAppFramework("4.1.1")
                     .AddMicrosoftNETCoreAppFramework("4.1.2")
                     .AddMicrosoftNETCoreAppFramework("4.1.3-preview.1")

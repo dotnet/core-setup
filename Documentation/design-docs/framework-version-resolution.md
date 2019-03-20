@@ -115,7 +115,7 @@ The behavior was that:
 | 2.1.0 Minor, AP=true      | 2.0.0, 2.2.0-preview           | 2.2.0-preview      | No matching release found, so pre-release used    |
 | 2.1.0 Major, AP=true      | 3.0.0-preview                  | 3.0.0-preview      | Pre-release is the only one available             |
 | 2.1.0 Minor, AP=true      | 2.1.1-preview, 2.1.2-preview   | 2.1.2-preview      | Roll forward to latest patch works on pre-release |
-| 2.1.0 Minor, AP=false     | 2.1.1-preview, 2.1.2-preview   | 2.1.1-preview      | ApplyPatches=false means no roll forward to latest patch, even on pre-release |
+| 2.1.0 Minor, AP=false     | 2.1.1-preview, 2.1.2-preview   | 2.1.1-preview      | `ApplyPatches=false` means no roll forward to latest patch, even on pre-release |
 | 2.1.0 Disabled, AP=true   | 2.1.1-preview                  | failure            | For some reason we prevent roll forward on patch only to pre-release |
 | 2.1.0 Minor, AP=true      | 2.1.1-preview1, 2.1.1-preview2 | 2.1.1-preview2     | Roll forward to latest patch including latest pre-release |
 
@@ -214,7 +214,9 @@ The `applyPatches` value is only considered if the effective `rollForward` value
 * `LatestPatch`
 * `Minor`
 * `Major`
-For the other values `applyPatches` is ignored. *This is to maintain backward compatibility with `rollForwardOnNoCandidateFx`, `applyPatches` is considered obsolete now.*
+
+For the other values `applyPatches` is ignored.  
+*This is to maintain backward compatibility with `rollForwardOnNoCandidateFx`, `applyPatches` is considered obsolete now.*
 
 If `applyPatches` is set to `true` (the default), then the roll-forward rules described above apply fully.
 If `applyPatches` is set to `false` then for effective roll-forward setting:
@@ -275,11 +277,13 @@ Steps
    * By doing this for all references here, before the next loop, we minimize the number of re-try attempts.
 4. For each framework reference in `config fx references`:
 5. --> If the framework is not in `resolved frameworks` Then resolve the framework reference to the actual framework on disk
-   * If the framework `name` already exists in the `newest fx references` resolve the currently processed reference with the one from the `newest fx references` (see above for the algorithm). *term "soft roll-forward" is used for this in the code*
+   * If the framework `name` already exists in the `newest fx references` resolve the currently processed reference with the one from the `newest fx references` (see above for the algorithm).  
+   *Term "soft roll-forward" is used for this in the code*
      * The resolution will always pick the higher `version` and will consolidate the `rollForward` and `applyPatches` settings.
      * The resolution may fail if it's not possible to roll forward from one reference to the other.
      * Update the `newest fx references` with the resolved reference.
-   * Probe for the framework on disk  *term "hard roll-forward" is used for this in the code*
+   * Probe for the framework on disk  
+   *Term "hard roll-forward" is used for this in the code*
      * This follows the roll-forward rules as describe above.
    * If success add it to `resolved frameworks`
      * Parse the `.runtimeconfig.json` of the resolved framework and create a new `config fx references`. Make a recursive call back to Step 2 with this new `config fx references`.
