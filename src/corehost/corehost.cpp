@@ -154,9 +154,17 @@ int exe_start(const int argc, const pal::char_t* argv[])
     app_path.append(_X(".dll"));
 #endif
 
+    host_mode_t mode;
+#if FEATURE_APPHOST
+    mode = host_mode_t::apphost;
+#elif FEATURE_LIBHOST
+    mode = host_mode_t::libhost;
+#else
+    mode = host_mode_t::muxer;
+#endif
     pal::string_t dotnet_root;
     pal::string_t fxr_path;
-    if (!resolve_fxr_path(app_root, &dotnet_root, &fxr_path))
+    if (!fxr_resolver::try_get_path(mode, app_root, &dotnet_root, &fxr_path))
     {
         return StatusCode::CoreHostLibMissingFailure;
     }

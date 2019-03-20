@@ -12,6 +12,8 @@ include_directories(../fxr)
 # CMake does not recommend using globbing since it messes with the freshness checks
 set(SOURCES
     nethost.cpp
+    ../fxr_resolver.cpp
+    ../fxr/fx_ver.cpp
 )
 
 include(../lib.cmake)
