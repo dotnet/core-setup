@@ -4,6 +4,7 @@
 
 using System;
 using System.Buffers;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 
@@ -11,6 +12,8 @@ namespace Microsoft.Extensions.DependencyModel
 {
     public partial class DependencyContextJsonReader : IDependencyContextReader
     {
+        private static ReadOnlySpan<byte> Utf8Bom => new byte[] { 0xEF, 0xBB, 0xBF };
+
         public DependencyContext Read(Stream stream)
         {
             if (stream == null)
@@ -37,11 +40,13 @@ namespace Microsoft.Extensions.DependencyModel
             return ReadCore(reader);
         }
 
-        // Borrowed from https://github.com/dotnet/corefx/blob/ef23e3317ca6e83f1e959ab265a8e59fb8a6dcd9/src/System.Text.Json/src/System/Text/Json/Document/JsonDocument.Parse.cs#L176-L225
+        // Borrowed from https://github.com/dotnet/corefx/blob/b8bc4ff80c5f7baa681e8a569d367356957ba78a/src/System.Text.Json/src/System/Text/Json/Document/JsonDocument.Parse.cs#L290-L362
         private static ArraySegment<byte> ReadToEnd(Stream stream)
         {
             int written = 0;
             byte[] rented = null;
+
+            ReadOnlySpan<byte> utf8Bom = Utf8Bom;
 
             try
             {
@@ -49,7 +54,7 @@ namespace Microsoft.Extensions.DependencyModel
                 {
                     // Ask for 1 more than the length to avoid resizing later,
                     // which is unnecessary in the common case where the stream length doesn't change.
-                    long expectedLength = Math.Max(0, stream.Length - stream.Position) + 1;
+                    long expectedLength = Math.Max(utf8Bom.Length, stream.Length - stream.Position) + 1;
                     rented = ArrayPool<byte>.Shared.Rent(checked((int)expectedLength));
                 }
                 else
@@ -58,6 +63,28 @@ namespace Microsoft.Extensions.DependencyModel
                 }
 
                 int lastRead;
+
+                // Read up to 3 bytes to see if it's the UTF-8 BOM, for parity with the behavior
+                // of StreamReader..ctor(Stream).
+                do
+                {
+                    // No need for checking for growth, the minimal rent sizes both guarantee it'll fit.
+                    Debug.Assert(rented.Length >= utf8Bom.Length);
+
+                    lastRead = stream.Read(
+                        rented,
+                        written,
+                        utf8Bom.Length - written);
+
+                    written += lastRead;
+                } while (lastRead > 0 && written < utf8Bom.Length);
+
+                // If we have 3 bytes, and they're the BOM, reset the write position to 0.
+                if (written == utf8Bom.Length &&
+                    utf8Bom.SequenceEqual(rented.AsSpan(0, utf8Bom.Length)))
+                {
+                    written = 0;
+                }
 
                 do
                 {

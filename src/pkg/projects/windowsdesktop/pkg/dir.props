@@ -3,6 +3,7 @@
   <PropertyGroup>
     <IsFrameworkPackage>true</IsFrameworkPackage>
     <ShortFrameworkName>windowsdesktop</ShortFrameworkName>
+    <ProductBrandPrefix>Microsoft Windows Desktop</ProductBrandPrefix>
   </PropertyGroup>
 
   <Import Project="..\..\dir.props" />
@@ -10,6 +11,7 @@
   <PropertyGroup>
     <BuildDebPackage>false</BuildDebPackage>
     <BuildRpmPackage>false</BuildRpmPackage>
+    <GeneratePkg>false</GeneratePkg>
   </PropertyGroup>
 
   <!-- Redistribute package content from other nuget packages. -->
