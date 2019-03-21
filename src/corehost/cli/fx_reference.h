@@ -8,16 +8,16 @@
 #include <list>
 #include "pal.h"
 #include "fx_ver.h"
-#include "roll_fwd_on_no_candidate_fx_option.h"
+#include "roll_forward_option.h"
 
 class fx_reference_t
 {
 public:
     fx_reference_t()
-        : has_patch_roll_fwd(false)
-        , patch_roll_fwd(false)
-        , has_roll_fwd_on_no_candidate_fx(false)
-        , roll_fwd_on_no_candidate_fx((roll_fwd_on_no_candidate_fx_option)0)
+        : has_apply_patches(false)
+        , apply_patches(false)
+        , has_roll_forward(false)
+        , roll_forward(roll_forward_option::Disabled)
         , use_exact_version(false)
         , fx_name(_X(""))
         , fx_version(_X(""))
@@ -49,14 +49,14 @@ public:
         return fx_version_number;
     }
 
-    const bool* get_patch_roll_fwd() const
+    const bool* get_apply_patches() const
     {
-        return (has_patch_roll_fwd ? &patch_roll_fwd : nullptr);
+        return (has_apply_patches ? &apply_patches : nullptr);
     }
-    void set_patch_roll_fwd(bool value)
+    void set_apply_patches(bool value)
     {
-        has_patch_roll_fwd = true;
-        patch_roll_fwd = value;
+        has_apply_patches = true;
+        apply_patches = value;
     }
 
     const bool get_use_exact_version() const
@@ -68,14 +68,14 @@ public:
         use_exact_version = value;
     }
 
-    const roll_fwd_on_no_candidate_fx_option* get_roll_fwd_on_no_candidate_fx() const
+    const roll_forward_option* get_roll_forward() const
     {
-        return (has_roll_fwd_on_no_candidate_fx ? &roll_fwd_on_no_candidate_fx : nullptr);
+        return (has_roll_forward ? &roll_forward : nullptr);
     }
-    void set_roll_fwd_on_no_candidate_fx(roll_fwd_on_no_candidate_fx_option value)
+    void set_roll_forward(roll_forward_option value)
     {
-        has_roll_fwd_on_no_candidate_fx = true;
-        roll_fwd_on_no_candidate_fx = value;
+        has_roll_forward = true;
+        roll_forward = value;
     }
 
     // Is the current version compatible with another instance with roll-forward semantics.
@@ -88,11 +88,11 @@ public:
     void merge_roll_forward_settings_from(const fx_reference_t& from);
 
 private:
-    bool has_patch_roll_fwd;
-    bool patch_roll_fwd;
+    bool has_apply_patches;
+    bool apply_patches;
 
-    bool has_roll_fwd_on_no_candidate_fx;
-    roll_fwd_on_no_candidate_fx_option roll_fwd_on_no_candidate_fx;
+    bool has_roll_forward;
+    roll_forward_option roll_forward;
 
     bool use_exact_version;
 

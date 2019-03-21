@@ -24,15 +24,15 @@ bool fx_reference_t::is_roll_forward_compatible(const fx_ver_t& other) const
 
     // Verify major roll forward
     if (get_fx_version_number().get_major() != other.get_major()
-        && roll_fwd_on_no_candidate_fx != roll_fwd_on_no_candidate_fx_option::major)
+        && roll_forward != roll_forward_option::Major)
     {
         return false;
     }
 
     // Verify minor roll forward
     if (get_fx_version_number().get_minor() != other.get_minor()
-        && roll_fwd_on_no_candidate_fx != roll_fwd_on_no_candidate_fx_option::major
-        && roll_fwd_on_no_candidate_fx != roll_fwd_on_no_candidate_fx_option::minor)
+        && roll_forward != roll_forward_option::Major
+        && roll_forward != roll_forward_option::Minor)
     {
         return false;
     }
@@ -40,12 +40,12 @@ bool fx_reference_t::is_roll_forward_compatible(const fx_ver_t& other) const
     // Verify patch roll forward
     // We do not distinguish here whether a previous framework reference found a patch version based on:
     //  - initial reference matching a patch version,
-    //  - or roll_fwd_on_no_candidate_fx_option=major\minor finding a compatible patch version as initial framework,
+    //  - or roll_forward=major\minor finding a compatible patch version as initial framework,
     //  - or applyPatches=true finding a newer patch version
     if (get_fx_version_number().get_patch() != other.get_patch()
-        && patch_roll_fwd == false
-        && roll_fwd_on_no_candidate_fx != roll_fwd_on_no_candidate_fx_option::major
-        && roll_fwd_on_no_candidate_fx != roll_fwd_on_no_candidate_fx_option::minor)
+        && apply_patches == false
+        && roll_forward != roll_forward_option::Major
+        && roll_forward != roll_forward_option::Minor)
     {
         return false;
     }
@@ -66,40 +66,40 @@ void fx_reference_t::apply_settings_from(const fx_reference_t& from)
         set_fx_version(from.get_fx_version());
     }
 
-    const roll_fwd_on_no_candidate_fx_option* from_rollfwd = from.get_roll_fwd_on_no_candidate_fx();
-    if (from_rollfwd != nullptr)
+    const roll_forward_option* from_roll_forward = from.get_roll_forward();
+    if (from_roll_forward != nullptr)
     {
-        set_roll_fwd_on_no_candidate_fx(*from_rollfwd);
+        set_roll_forward(*from_roll_forward);
     }
 
-    const bool* from_patch = from.get_patch_roll_fwd();
-    if (from_patch != nullptr)
+    const bool* from_apply_patches = from.get_apply_patches();
+    if (from_apply_patches != nullptr)
     {
-        set_patch_roll_fwd(*from_patch);
+        set_apply_patches(*from_apply_patches);
     }
 }
 
 void fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from)
 {
-    const roll_fwd_on_no_candidate_fx_option* from_rollfwd = from.get_roll_fwd_on_no_candidate_fx();
-    if (from_rollfwd != nullptr)
+    const roll_forward_option* from_roll_forward = from.get_roll_forward();
+    if (from_roll_forward != nullptr)
     {
-        const roll_fwd_on_no_candidate_fx_option* to_rollfwd = get_roll_fwd_on_no_candidate_fx();
-        if (to_rollfwd == nullptr ||
-            *from_rollfwd < *to_rollfwd)
+        const roll_forward_option* to_roll_forward = get_roll_forward();
+        if (to_roll_forward == nullptr ||
+            *from_roll_forward < *to_roll_forward)
         {
-            set_roll_fwd_on_no_candidate_fx(*from_rollfwd);
+            set_roll_forward(*from_roll_forward);
         }
     }
 
-    const bool* from_patch = from.get_patch_roll_fwd();
-    if (from_patch != nullptr)
+    const bool* from_apply_patches = from.get_apply_patches();
+    if (from_apply_patches != nullptr)
     {
-        const bool* to_patch = get_patch_roll_fwd();
-        if (to_patch == nullptr ||
-            *from_patch == false)
+        const bool* to_apply_patches = get_apply_patches();
+        if (to_apply_patches == nullptr ||
+            *from_apply_patches == false)
         {
-            set_patch_roll_fwd(*from_patch);
+            set_apply_patches(*from_apply_patches);
         }
     }
 }

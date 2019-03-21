@@ -7,7 +7,24 @@
 #include "utils.h"
 #include "cpprest/json.h"
 #include "runtime_config.h"
+#include "roll_fwd_on_no_candidate_fx_option.h"
 #include <cassert>
+
+roll_forward_option roll_fwd_on_no_candidate_fx_to_roll_forward(roll_fwd_on_no_candidate_fx_option roll_fwd_on_no_candidate_fx)
+{
+    switch (roll_fwd_on_no_candidate_fx)
+    {
+    case roll_fwd_on_no_candidate_fx_option::disabled:
+        return roll_forward_option::LatestPatch;
+    case roll_fwd_on_no_candidate_fx_option::minor:
+        return roll_forward_option::Minor;
+    case roll_fwd_on_no_candidate_fx_option::major:
+        return roll_forward_option::Major;
+    default:
+        assert(false);
+        return roll_forward_option::Disabled;
+    }
+}
 
 
 // The semantics of applying the runtimeconfig.json values follows, in the following steps from
@@ -31,16 +48,17 @@ void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev
     m_fx_overrides = override_settings;
 
     // Step #1: set the defaults from the environment
-    m_fx_defaults.set_patch_roll_fwd(true);
+    m_fx_defaults.set_apply_patches(true);
 
-    roll_fwd_on_no_candidate_fx_option roll_fwd_option = roll_fwd_on_no_candidate_fx_option::minor;
-    pal::string_t env_no_candidate;
-    if (pal::getenv(_X("DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX"), &env_no_candidate))
+    roll_forward_option roll_forward = roll_forward_option::Minor;
+    pal::string_t env_roll_forward_on_no_candidate_fx;
+    if (pal::getenv(_X("DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX"), &env_roll_forward_on_no_candidate_fx))
     {
-        roll_fwd_option = static_cast<roll_fwd_on_no_candidate_fx_option>(pal::xtoi(env_no_candidate.c_str()));
+        auto val = static_cast<roll_fwd_on_no_candidate_fx_option>(pal::xtoi(env_roll_forward_on_no_candidate_fx.c_str()));
+        roll_forward = roll_fwd_on_no_candidate_fx_to_roll_forward(val);
     }
 
-    m_fx_defaults.set_roll_fwd_on_no_candidate_fx(roll_fwd_option);
+    m_fx_defaults.set_roll_forward(roll_forward);
 
     // Parse the file
     m_valid = ensure_parsed();
@@ -89,17 +107,17 @@ bool runtime_config_t::parse_opts(const json_value& opts)
     }
 
     // Step #2: set the defaults from the "runtimeOptions"
-    auto patch_roll_fwd = opts_obj.find(_X("applyPatches"));
-    if (patch_roll_fwd != opts_obj.end())
+    auto apply_patches = opts_obj.find(_X("applyPatches"));
+    if (apply_patches != opts_obj.end())
     {
-        m_fx_defaults.set_patch_roll_fwd(patch_roll_fwd->second.as_bool());
+        m_fx_defaults.set_apply_patches(apply_patches->second.as_bool());
     }
 
     auto roll_fwd_on_no_candidate_fx = opts_obj.find(_X("rollForwardOnNoCandidateFx"));
     if (roll_fwd_on_no_candidate_fx != opts_obj.end())
     {
         auto val = static_cast<roll_fwd_on_no_candidate_fx_option>(roll_fwd_on_no_candidate_fx->second.as_integer());
-        m_fx_defaults.set_roll_fwd_on_no_candidate_fx(val);
+        m_fx_defaults.set_roll_forward(roll_fwd_on_no_candidate_fx_to_roll_forward(val));
     }
 
     auto tfm = opts_obj.find(_X("tfm"));
@@ -156,16 +174,17 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
         fx_out.set_fx_version(fx_ver->second.as_string());
     }
 
-    auto patch_roll_fwd = fx_obj.find(_X("applyPatches"));
-    if (patch_roll_fwd != fx_obj.end())
+    auto apply_patches = fx_obj.find(_X("applyPatches"));
+    if (apply_patches != fx_obj.end())
     {
-        fx_out.set_patch_roll_fwd(patch_roll_fwd->second.as_bool());
+        fx_out.set_apply_patches(apply_patches->second.as_bool());
     }
 
     auto roll_fwd_on_no_candidate_fx = fx_obj.find(_X("rollForwardOnNoCandidateFx"));
     if (roll_fwd_on_no_candidate_fx != fx_obj.end())
     {
-        fx_out.set_roll_fwd_on_no_candidate_fx(static_cast<roll_fwd_on_no_candidate_fx_option>(roll_fwd_on_no_candidate_fx->second.as_integer()));
+        auto val = static_cast<roll_fwd_on_no_candidate_fx_option>(roll_fwd_on_no_candidate_fx->second.as_integer());
+        fx_out.set_roll_forward(roll_fwd_on_no_candidate_fx_to_roll_forward(val));
     }
 
     fx_out.apply_settings_from(m_fx_overrides);
@@ -339,7 +358,7 @@ void runtime_config_t::set_fx_version(pal::string_t version)
     assert(m_frameworks.size() > 0);
 
     m_frameworks[0].set_fx_version(version);
-    m_frameworks[0].set_patch_roll_fwd(false);
-    m_frameworks[0].set_roll_fwd_on_no_candidate_fx(roll_fwd_on_no_candidate_fx_option::disabled);
+    m_frameworks[0].set_apply_patches(false);
+    m_frameworks[0].set_roll_forward(roll_forward_option::Disabled);
     m_frameworks[0].set_use_exact_version(true);
 }

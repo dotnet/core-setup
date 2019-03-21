@@ -43,6 +43,8 @@ set(HEADERS
     ../json/casablanca/include/cpprest/json.h
     ../fx_definition.h
     ../fx_reference.h
+    ../roll_forward_option.h
+    ../roll_fwd_on_no_candidate_fx_option.h
     ../version.h
     ./corehost_init.h
     ./fx_ver.h

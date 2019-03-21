@@ -14,27 +14,27 @@ namespace
         const std::vector<fx_ver_t>& version_list,
         const pal::string_t& fx_ver,
         const fx_ver_t& specified,
-        bool patch_roll_fwd,
-        roll_fwd_on_no_candidate_fx_option roll_fwd_on_no_candidate_fx)
+        bool apply_patches,
+        roll_forward_option roll_forward)
     {
         trace::verbose(_X("Attempting FX roll forward starting from [%s]"), fx_ver.c_str());
 
         fx_ver_t most_compatible = specified;
         if (!specified.is_prerelease())
         {
-            if (roll_fwd_on_no_candidate_fx != roll_fwd_on_no_candidate_fx_option::disabled)
+            if (roll_forward != roll_forward_option::LatestPatch && roll_forward != roll_forward_option::Disabled)
             {
                 fx_ver_t next_lowest;
 
                 // Look for the least production version
-                trace::verbose(_X("'Roll forward on no candidate fx' enabled with value [%d]. Looking for the least production greater than or equal to [%s]"),
-                    roll_fwd_on_no_candidate_fx, fx_ver.c_str());
+                trace::verbose(_X("'Roll forward' enabled with value [%d]. Looking for the least production greater than or equal to [%s]"),
+                    roll_forward, fx_ver.c_str());
 
                 for (const auto& ver : version_list)
                 {
                     if (!ver.is_prerelease() && ver >= specified)
                     {
-                        if (roll_fwd_on_no_candidate_fx == roll_fwd_on_no_candidate_fx_option::minor)
+                        if (roll_forward == roll_forward_option::Minor)
                         {
                             // We only want to roll forward on minor
                             if (ver.get_major() != specified.get_major())
@@ -56,7 +56,7 @@ namespace
                     {
                         if (ver.is_prerelease() && ver >= specified)
                         {
-                            if (roll_fwd_on_no_candidate_fx == roll_fwd_on_no_candidate_fx_option::minor)
+                            if (roll_forward == roll_forward_option::Minor)
                             {
                                 // We only want to roll forward on minor
                                 if (ver.get_major() != specified.get_major())
@@ -80,7 +80,7 @@ namespace
                 }
             }
 
-            if (patch_roll_fwd)
+            if (apply_patches)
             {
                 trace::verbose(_X("Applying patch roll forward from [%s]"), most_compatible.as_str().c_str());
                 for (const auto& ver : version_list)
@@ -99,7 +99,7 @@ namespace
         }
         else
         {
-            // pre-release has its own roll forward rules and ignores roll_fwd_on_no_candidate_fx and patch_roll_fwd
+            // pre-release has its own roll forward rules and ignores roll_forward and apply_patches
             for (const auto& ver : version_list)
             {
                 trace::verbose(_X("Inspecting version... [%s]"), ver.as_str().c_str());
@@ -126,8 +126,8 @@ namespace
     {
         assert(!fx_ref.get_fx_name().empty());
         assert(!fx_ref.get_fx_version().empty());
-        assert(fx_ref.get_patch_roll_fwd() != nullptr);
-        assert(fx_ref.get_roll_fwd_on_no_candidate_fx() != nullptr);
+        assert(fx_ref.get_apply_patches() != nullptr);
+        assert(fx_ref.get_roll_forward() != nullptr);
 
         trace::verbose(_X("--- Resolving FX directory, name '%s' version '%s'"),
             fx_ref.get_fx_name().c_str(), fx_ref.get_fx_version().c_str());
@@ -167,7 +167,8 @@ namespace
                 if (!specified.is_prerelease())
                 {
                     // If production and no roll forward use given version.
-                    do_roll_forward = (*(fx_ref.get_patch_roll_fwd())) || (*(fx_ref.get_roll_fwd_on_no_candidate_fx()) != roll_fwd_on_no_candidate_fx_option::disabled);
+                    do_roll_forward = (*(fx_ref.get_apply_patches())) ||
+                        ((*(fx_ref.get_roll_forward()) != roll_forward_option::LatestPatch) && (*(fx_ref.get_roll_forward()) != roll_forward_option::Disabled));
                 }
                 else
                 {
@@ -180,8 +181,8 @@ namespace
 
             if (!do_roll_forward)
             {
-                trace::verbose(_X("Did not roll forward because patch_roll_fwd=%d, roll_fwd_on_no_candidate_fx=%d, use_exact_version=%d chose [%s]"),
-                    *(fx_ref.get_patch_roll_fwd()), *(fx_ref.get_roll_fwd_on_no_candidate_fx()), fx_ref.get_use_exact_version(), fx_ver.c_str());
+                trace::verbose(_X("Did not roll forward because apply_patches=%d, roll_forward=%d, use_exact_version=%d chose [%s]"),
+                    *(fx_ref.get_apply_patches()), *(fx_ref.get_roll_forward()), fx_ref.get_use_exact_version(), fx_ver.c_str());
 
                 append_path(&fx_dir, fx_ver.c_str());
                 if (pal::directory_exists(fx_dir))
@@ -206,7 +207,7 @@ namespace
                     }
                 }
 
-                fx_ver_t resolved_ver = resolve_framework_version(version_list, fx_ver, specified, *(fx_ref.get_patch_roll_fwd()), *(fx_ref.get_roll_fwd_on_no_candidate_fx()));
+                fx_ver_t resolved_ver = resolve_framework_version(version_list, fx_ver, specified, *(fx_ref.get_apply_patches()), *(fx_ref.get_roll_forward()));
 
                 pal::string_t resolved_ver_str = resolved_ver.as_str();
                 append_path(&fx_dir, resolved_ver_str.c_str());
@@ -219,7 +220,7 @@ namespace
                         std::vector<fx_ver_t> version_list;
                         version_list.push_back(resolved_ver);
                         version_list.push_back(selected_ver);
-                        resolved_ver = resolve_framework_version(version_list, fx_ver, specified, *(fx_ref.get_patch_roll_fwd()), *(fx_ref.get_roll_fwd_on_no_candidate_fx()));
+                        resolved_ver = resolve_framework_version(version_list, fx_ver, specified, *(fx_ref.get_apply_patches()), *(fx_ref.get_roll_forward()));
                     }
 
                     if (resolved_ver != selected_ver)

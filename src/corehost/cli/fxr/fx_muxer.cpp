@@ -23,6 +23,7 @@
 #include "runtime_config.h"
 #include "sdk_info.h"
 #include "sdk_resolver.h"
+#include "roll_fwd_on_no_candidate_fx_option.h"
 
 using corehost_main_fn = int(*) (const int argc, const pal::char_t* argv[]);
 using corehost_get_delegate_fn = int(*)(coreclr_delegate_type type, void** delegate);

@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithApplyPatches(false)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.0"),
                 commandResult => commandResult.Should().Fail()
-                    .And.HaveStdErrContaining("Did not roll forward because patch_roll_fwd=0, roll_fwd_on_no_candidate_fx=0, use_exact_version=0 chose [5.1.0]"));
+                    .And.HaveStdErrContaining("Did not roll forward because apply_patches=0, roll_forward=1, use_exact_version=0 chose [5.1.0]"));
         }
 
         [Fact]
