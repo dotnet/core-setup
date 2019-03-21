@@ -54,6 +54,29 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         [Fact]
+        public void InvalidWithRollForwardOnNoCandidateFxOnCommandLine()
+        {
+            RunTest(
+                runtimeConfig => runtimeConfig.WithFramework(MicrosoftNETCoreApp, "4.0.0"),
+                result => result.Should().Fail()
+                    .And.HaveStdErrContaining($"It's invalid to use both '{Constants.RollForwardSetting.CommandLineArgument}' and '{Constants.RollFowardOnNoCandidateFxSetting.CommandLineArgument}' command line options."),
+                commandLine: new string[] {
+                    Constants.RollForwardSetting.CommandLineArgument, Constants.RollForwardSetting.LatestPatch,
+                    Constants.RollFowardOnNoCandidateFxSetting.CommandLineArgument, "2"
+                });
+        }
+
+        [Fact]
+        public void InvalidWithRollForwardOnNoCandidateFxInRuntimeConfig()
+        {
+            RunTest(
+                runtimeConfig => runtimeConfig
+                    .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
+                result => result.Should().Fail()
+                    .And.HaveStdErrContaining($"It's invalid to use both '{Constants.RollForwardSetting.CommandLineArgument}' and '{Constants.RollFowardOnNoCandidateFxSetting.CommandLineArgument}' command line options."));
+        }
+
+        [Fact]
         public void RuntimeConfigOnly()
         {
             RunTest(
