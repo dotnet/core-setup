@@ -269,6 +269,7 @@ std::vector<host_option> fx_muxer_t::get_known_opts(bool exec_mode, host_mode_t 
     {
         // If mode=host_mode_t::apphost, these are only used when the app is framework-dependent.
         known_opts.push_back({ _X("--fx-version"), _X("<version>"), _X("Version of the installed Shared Framework to use to run the application.")});
+        known_opts.push_back({ _X("--roll-forward"), _X("<value>"), _X("Roll forward to framework version (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disabled)")});
         known_opts.push_back({ _X("--roll-forward-on-no-candidate-fx"), _X("<n>"), _X("Roll forward on no candidate framework (0=off, 1=roll minor, 2=roll major & minor).")});
         known_opts.push_back({ _X("--additional-deps"), _X("<path>"), _X("Path to additional deps.json file.")});
     }
@@ -462,6 +463,7 @@ namespace
         std::unique_ptr<corehost_init_t> &init)
     {
         pal::string_t opts_fx_version = _X("--fx-version");
+        pal::string_t opts_roll_forward = _X("--roll-forward");
         pal::string_t opts_roll_fwd_on_no_candidate_fx = _X("--roll-forward-on-no-candidate-fx");
         pal::string_t opts_deps_file = _X("--depsfile");
         pal::string_t opts_probe_path = _X("--additionalprobingpath");
@@ -479,13 +481,32 @@ namespace
 
         fx_reference_t override_settings;
 
-        // 'Roll forward on no candidate fx' is set to 1 (roll_fwd_on_no_candidate_fx_option::minor) by default. It can be changed through:
-        // 1. Command line argument (--roll-forward-on-no-candidate-fx).
-        // 2. Runtimeconfig json file ('rollForwardOnNoCandidateFx' property in "framework" section).
-        // 3. Runtimeconfig json file ('rollForwardOnNoCandidateFx' property in a referencing "frameworks" section).
-        // 4. DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX env var.
-        // The conflicts will be resolved by following the priority rank described above (from 1 to 4).
+        // `Roll forward` is set to Minor (2) (roll_forward_option::Minor) by default. 
+        // For backward compatibility there are two settings:
+        //  - rollForward (the new one) which has more possible values
+        //  - rollForwardOnNoCandidateFx (the old one) with only 0-Off, 1-Minor, 2-Major
+        // It can be changed through:
+        // 1. Command line argument --roll-forward or --roll-forward-on-no-candidate-fx
+        // 2. DOTNET_ROLL_FORWARD env var.
+        // 3. Runtimeconfig json file ('rollForward' or 'rollForwardOnNoCandidateFx' property in "framework" section).
+        // 4. Runtimeconfig json file ('rollForward' or 'rollForwardOnNoCandidateFx' property in a "runtimeOptions" section).
+        // 5. DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX env var.
+        // The conflicts will be resolved by following the priority rank described above (from 1 to 5, lower number wins over higher number).
         // The env var condition is verified in the config file processing
+
+        pal::string_t roll_forward = get_last_known_arg(opts, opts_roll_forward, _X(""));
+        if (roll_forward.length() > 0)
+        {
+            auto val = roll_forward_option_from_string(roll_forward);
+            if (val == roll_forward_option::__Last)
+            {
+                trace::error(_X("Invalid value for command line argument '%s'"), opts_roll_forward.c_str());
+                return StatusCode::InvalidArgFailure;
+            }
+
+            override_settings.set_roll_forward(val);
+        }
+
         pal::string_t roll_fwd_on_no_candidate_fx = get_last_known_arg(opts, opts_roll_fwd_on_no_candidate_fx, _X(""));
         if (roll_fwd_on_no_candidate_fx.length() > 0)
         {

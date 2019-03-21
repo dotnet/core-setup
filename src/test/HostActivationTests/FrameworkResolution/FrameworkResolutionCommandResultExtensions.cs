@@ -27,5 +27,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             return assertion.HaveStdErrContaining($"--- Restarting all framework resolution because the previously resolved framework 'Microsoft.NETCore.App', version '{resolvedVersion}' must be re-resolved with the new version '{newVersion}'");
         }
+
+        public static AndConstraint<CommandResultAssertions> DidNotRecognizeRollForwardValue(this CommandResultAssertions assertion, string value)
+        {
+            return assertion.HaveStdErrContaining($"Unrecognized roll forward setting value '{value}'.");
+        }
     }
 }

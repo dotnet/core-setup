@@ -10,29 +10,14 @@
 #include "roll_fwd_on_no_candidate_fx_option.h"
 #include <cassert>
 
-roll_forward_option roll_fwd_on_no_candidate_fx_to_roll_forward(roll_fwd_on_no_candidate_fx_option roll_fwd_on_no_candidate_fx)
-{
-    switch (roll_fwd_on_no_candidate_fx)
-    {
-    case roll_fwd_on_no_candidate_fx_option::disabled:
-        return roll_forward_option::LatestPatch;
-    case roll_fwd_on_no_candidate_fx_option::minor:
-        return roll_forward_option::Minor;
-    case roll_fwd_on_no_candidate_fx_option::major:
-        return roll_forward_option::Major;
-    default:
-        assert(false);
-        return roll_forward_option::Disabled;
-    }
-}
-
-
 // The semantics of applying the runtimeconfig.json values follows, in the following steps from
 // first to last, where last always wins. These steps are also annotated in the code here.
-// 1) Apply the environment settings
+// 0) Start with the default values
+// 1) Apply the environment settings for DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX
 // 2) Apply the values in the current "runtimeOptions" section
 // 3) Apply the values in the referenced "frameworks" section
-// 4) Apply the overrides (from command line or other)
+// 4) Apply the environment settings for DOTNET_ROLL_FORWARD
+// 5) Apply the overrides (from command line or other)
 
 runtime_config_t::runtime_config_t()
     : m_is_framework_dependent(false)
@@ -47,10 +32,11 @@ void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev
     m_fx_ref = fx_ref;
     m_fx_overrides = override_settings;
 
-    // Step #1: set the defaults from the environment
+    // Step #0: start with the default values
     m_fx_defaults.set_apply_patches(true);
-
     roll_forward_option roll_forward = roll_forward_option::Minor;
+
+    // Step #1: set the defaults from the environment DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX (apply patches has no env. variable)
     pal::string_t env_roll_forward_on_no_candidate_fx;
     if (pal::getenv(_X("DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX"), &env_roll_forward_on_no_candidate_fx))
     {
@@ -107,6 +93,18 @@ bool runtime_config_t::parse_opts(const json_value& opts)
     }
 
     // Step #2: set the defaults from the "runtimeOptions"
+    auto roll_forward = opts_obj.find(_X("rollForward"));
+    if (roll_forward != opts_obj.end())
+    {
+        auto val = roll_forward_option_from_string(roll_forward->second.as_string());
+        if (val == roll_forward_option::__Last)
+        {
+            trace::error(_X("Invalid value for property 'rollForward'."));
+            return false;
+        }
+        m_fx_defaults.set_roll_forward(val);
+    }
+
     auto apply_patches = opts_obj.find(_X("applyPatches"));
     if (apply_patches != opts_obj.end())
     {
@@ -174,6 +172,18 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
         fx_out.set_fx_version(fx_ver->second.as_string());
     }
 
+    auto roll_forward = fx_obj.find(_X("rollForward"));
+    if (roll_forward != fx_obj.end())
+    {
+        auto val = roll_forward_option_from_string(roll_forward->second.as_string());
+        if (val == roll_forward_option::__Last)
+        {
+            trace::error(_X("Invalid value for property 'rollForward'."));
+            return false;
+        }
+        fx_out.set_roll_forward(val);
+    }
+
     auto apply_patches = fx_obj.find(_X("applyPatches"));
     if (apply_patches != fx_obj.end())
     {
@@ -187,6 +197,21 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
         fx_out.set_roll_forward(roll_fwd_on_no_candidate_fx_to_roll_forward(val));
     }
 
+    // Step #4: apply environment for DOTNET_ROLL_FORWARD
+    pal::string_t env_roll_forward;
+    if (pal::getenv(_X("DOTNET_ROLL_FORWARD"), &env_roll_forward))
+    {
+        auto val = roll_forward_option_from_string(env_roll_forward);
+        if (val == roll_forward_option::__Last)
+        {
+            trace::error(_X("Invalid value for environment variable 'DOTNET_ROLL_FORWARD'."));
+            return false;
+        }
+
+        fx_out.set_roll_forward(val);
+    }
+
+    // Step #5: apply overrides (command line and such)
     fx_out.apply_settings_from(m_fx_overrides);
 
     return true;

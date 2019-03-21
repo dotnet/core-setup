@@ -15,6 +15,7 @@ set(SOURCES
     ../deps_format.cpp
     ../deps_entry.cpp
     ../host_startup_info.cpp
+    ../roll_forward_option.cpp
     ../runtime_config.cpp
     ../json/casablanca/src/json/json.cpp
     ../json/casablanca/src/json/json_parsing.cpp
