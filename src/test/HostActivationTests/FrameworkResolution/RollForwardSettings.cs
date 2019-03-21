@@ -38,18 +38,18 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         [Theory]
-        [InlineData("CommandLine")]
-        [InlineData("Environment")]
-        [InlineData("RuntimeConfig")]
-        [InlineData("Framework")]
-        public void InvalidValue(string settingLocation)
+        [InlineData(SettingLocation.CommandLine)]
+        [InlineData(SettingLocation.Environment)]
+        [InlineData(SettingLocation.RuntimeOptions)]
+        [InlineData(SettingLocation.FrameworkReference)]
+        public void InvalidValue(SettingLocation settingLocation)
         {
-            RunTestWithRollForwardSetting(
-                runtimeConfig => runtimeConfig
-                    .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
-                settingLocation: settingLocation,
-                settingValue: "InvalidValue",
-                resultAction: result => result.Should().Fail()
+            RunTest(
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
+                    .With(RollForwardSetting(settingLocation, "InvalidValue")),
+                result => result.Should().Fail()
                     .And.DidNotRecognizeRollForwardValue("InvalidValue"));
         }
 
@@ -87,49 +87,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
-        private void RunTestWithRollForwardSetting(
-            Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
-            Action<DotNetCliExtensions.DotNetCliCustomizer> customizeDotNet = null,
-            string[] environment = null,
-            string[] commandLine = null,
-            string settingLocation = null,
-            string settingValue = null,
-            string frameworkReferenceName = MicrosoftNETCoreApp,
-            Action<CommandResult> resultAction = null)
-        {
-            using (DotNetCliExtensions.DotNetCliCustomizer dotnetCustomizer = SharedState.DotNetWithFrameworks.Customize())
-            {
-                customizeDotNet?.Invoke(dotnetCustomizer);
-
-                Func<RuntimeConfig, RuntimeConfig> runtimeConfigCustomization = runtimeConfig;
-                switch (settingLocation)
-                {
-                    case "Environment":
-                        environment = new string[] { $"{Constants.RollForwardSetting.EnvironmentVariable}={settingValue}" };
-                        break;
-                    case "CommandLine":
-                        commandLine = new string[] { Constants.RollForwardSetting.CommandLineArgument, settingValue.ToString() };
-                        break;
-                    case "RuntimeConfig":
-                        runtimeConfigCustomization = rc => runtimeConfig(rc).WithRollForward(settingValue);
-                        break;
-                    case "Framework":
-                        runtimeConfigCustomization = rc =>
-                        {
-                            runtimeConfig(rc).GetFramework(frameworkReferenceName).WithRollForward(settingValue);
-                            return rc;
-                        };
-                        break;
-                }
-
-                RunTest(
-                    runtimeConfigCustomization,
-                    resultAction,
-                    environment,
-                    commandLine);
-            }
-        }
-
         private void RunTest(
             Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
             Action<CommandResult> resultAction,
@@ -143,6 +100,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 resultAction,
                 environment,
                 commandLine);
+        }
+
+        private void RunTest(
+            TestSettings testSettings,
+            Action<CommandResult> resultAction)
+        {
+            RunTest(
+                SharedState.DotNetWithFrameworks,
+                SharedState.FrameworkReferenceApp,
+                testSettings,
+                resultAction);
         }
 
         public class SharedTestState : SharedTestStateBase
