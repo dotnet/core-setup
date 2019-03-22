@@ -124,17 +124,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
         private void RunTest(
             Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
-            Action<CommandResult> resultAction,
-            string[] environment = null,
-            string[] commandLine = null)
+            Action<CommandResult> resultAction)
         {
             RunTest(
                 SharedState.DotNetWithFrameworks,
                 SharedState.FrameworkReferenceApp,
                 runtimeConfig,
-                resultAction,
-                environment,
-                commandLine);
+                resultAction);
         }
 
         private void RunTest(

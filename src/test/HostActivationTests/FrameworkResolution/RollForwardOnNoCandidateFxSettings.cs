@@ -5,6 +5,7 @@
 using Microsoft.DotNet.Cli.Build;
 using Microsoft.DotNet.Cli.Build.Framework;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
@@ -68,7 +69,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
                 result => result.Should().Pass()
                     .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"),
-                environment: new string[] { "DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX=2" });
+                environment: new Dictionary<string, string>() { { "DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX", "2" } });
         }
 
         [Fact]
@@ -79,7 +80,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
                 result => result.Should().Pass()
                     .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"),
-                commandLine: new string[] { Constants.RollFowardOnNoCandidateFxSetting.CommandLineArgument, "2" });
+                commandLine: new string[] { Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument, "2" });
         }
 
         [Theory]  // CLI wins over everything
@@ -93,7 +94,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
                     .With(RollForwardOnNoCandidateFxSetting(settingLocation, 0))
-                    .WithCommandLine(Constants.RollFowardOnNoCandidateFxSetting.CommandLineArgument, "2"),
+                    .WithCommandLine(Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument, "2"),
                 resolvedFramework: resolvedFramework);
         }
 
@@ -138,7 +139,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
                     .With(RollForwardOnNoCandidateFxSetting(settingLocation, 0))
-                    .WithEnvironment(Constants.RollFowardOnNoCandidateFxSetting.EnvironmentVariable, "2"),
+                    .WithEnvironment(Constants.RollForwardOnNoCandidateFxSetting.EnvironmentVariable, "2"),
                 resolvedFramework: resolvedFramework);
         }
 
@@ -229,7 +230,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         private void RunTest(
             Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
             Action<CommandResult> resultAction,
-            string[] environment = null,
+            IDictionary<string, string> environment = null,
             string[] commandLine = null)
         {
             RunTest(

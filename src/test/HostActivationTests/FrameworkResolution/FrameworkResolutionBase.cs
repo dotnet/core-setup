@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             TestApp app,
             Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
             Action<CommandResult> resultAction,
-            string[] environment = null,
+            IDictionary<string, string> environment = null,
             string[] commandLine = null,
             bool multiLevelLookup = false)
         {
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         public class TestSettings
         {
             public Func<RuntimeConfig, RuntimeConfig> RuntimeConfigCustomizer { get; set; }
-            public IEnumerable<string> Environment { get; set; }
+            public IDictionary<string, string> Environment { get; set; }
             public IEnumerable<string> CommandLine { get; set; }
 
             public TestSettings WithRuntimeConfigCustomizer(Func<RuntimeConfig, RuntimeConfig> customizer)
@@ -60,8 +60,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
             public TestSettings WithEnvironment(string key, string value)
             {
-                string [] env = new string[] { key + "=" + value };
-                Environment = Environment == null ? env : Environment.Concat(env);
+                Environment = Environment == null ? 
+                    new Dictionary<string, string>() { { key, value } } : 
+                    new Dictionary<string, string>(Environment.Append(new KeyValuePair<string, string>(key, value)));
                 return this;
             }
 
@@ -91,21 +92,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
             settings.WithCommandLine(app.AppDll);
 
-            IDictionary<string, string> environmentVariables = null;
-            if (settings.Environment != null)
-            {
-                environmentVariables = new Dictionary<string, string>();
-                foreach (string v in settings.Environment)
-                {
-                    string[] s = v.Split('=');
-                    environmentVariables.Add(s[0], s[1]);
-                }
-            }
-
             CommandResult result = dotnet.Exec(settings.CommandLine.First(), settings.CommandLine.Skip(1).ToArray())
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", multiLevelLookup ? "1" : "0")
-                .Environment(environmentVariables)
+                .Environment(settings.Environment)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute();

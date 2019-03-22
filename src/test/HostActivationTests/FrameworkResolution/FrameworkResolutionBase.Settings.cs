@@ -29,9 +29,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             switch (location)
             {
                 case SettingLocation.Environment:
-                    return testSettings => testSettings.WithEnvironment(Constants.RollFowardOnNoCandidateFxSetting.EnvironmentVariable, value.ToString());
+                    return testSettings => testSettings.WithEnvironment(Constants.RollForwardOnNoCandidateFxSetting.EnvironmentVariable, value.ToString());
                 case SettingLocation.CommandLine:
-                    return testSettings => testSettings.WithCommandLine(Constants.RollFowardOnNoCandidateFxSetting.CommandLineArgument, value.ToString());
+                    return testSettings => testSettings.WithCommandLine(Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument, value.ToString());
                 case SettingLocation.RuntimeOptions:
                     return testSettings => testSettings.WithRuntimeConfigCustomizer(rc => rc.WithRollForwardOnNoCandidateFx(value));
                 case SettingLocation.FrameworkReference:
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         return rc;
                     });
                 default:
-                    throw new Exception($"RollFowardOnNoCandidateFx doesn't support setting location {location}.");
+                    throw new Exception($"RollForwardOnNoCandidateFx doesn't support setting location {location}.");
             }
         }
 
