@@ -22,11 +22,5 @@ include(../lib.cmake)
 add_definitions(-DFEATURE_LIBHOST=1)
 add_definitions(-DNETHOST_EXPORT)
 
-if("${CLI_CMAKE_NETHOST_VER}" STREQUAL "")
-    message(FATAL_ERROR "nethost version is not specified")
-else()
-    add_definitions(-DLIBHOST_PKG_VER="${CLI_CMAKE_NETHOST_VER}")
-endif()
-
 install(TARGETS nethost DESTINATION corehost)
 install_symbols(nethost corehost)

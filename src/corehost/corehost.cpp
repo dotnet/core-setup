@@ -12,7 +12,7 @@
 
 #if FEATURE_APPHOST
 #define CURHOST_TYPE    _X("apphost")
-#define CUREXE_PKG_VER  APPHOST_PKG_VER
+#define CUREXE_PKG_VER  COMMON_HOST_PKG_VER
 #define CURHOST_EXE
 
 /**

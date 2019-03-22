@@ -10,7 +10,7 @@
 #include <trace.h>
 #include <utils.h>
 
-NETHOST_API int STDMETHODCALLTYPE nethost_get_hostfxr_path(
+NETHOST_API int NETHOST_CALLTYPE nethost_get_hostfxr_path(
     nethost_get_hostfxr_path_result_fn result,
     const char_t * assembly_path)
 {
