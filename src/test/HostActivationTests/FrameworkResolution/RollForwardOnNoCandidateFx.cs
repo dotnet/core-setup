@@ -305,7 +305,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         #region With many versions
         // RunWithManyVersions has these frameworks
         //  - Microsoft.NETCore.App 2.3.1-preview.1
-        //  - Microsoft.NETCore.App 2.3.1
+        //  - Microsoft.NETCore.App 2.3.2
         //  - Microsoft.NETCore.App 4.1.1
         //  - Microsoft.NETCore.App 4.1.2
         //  - Microsoft.NETCore.App 4.1.3-preview.1

@@ -216,7 +216,7 @@ The `applyPatches` value is only considered if the effective `rollForward` value
 * `Major`
 
 For the other values `applyPatches` is ignored.  
-*This is to maintain backward compatibility with `rollForwardOnNoCandidateFx`, `applyPatches` is considered obsolete now.*
+*This is to maintain backward compatibility with `rollForwardOnNoCandidateFx`. `applyPatches` is now considered obsolete.*
 
 If `applyPatches` is set to `true` (the default), then the roll-forward rules described above apply fully.
 If `applyPatches` is set to `false` then for effective roll-forward setting:
