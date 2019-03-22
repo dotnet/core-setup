@@ -154,7 +154,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(new RuntimeConfig.Framework(MiddleWare, "2.1.0")))
                     .With(RollForwardOnNoCandidateFxSetting(settingLocation, 1, MiddleWare)),
-                customizeDotNet: dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig
                         .WithRollForwardOnNoCandidateFx(2)
                         .GetFramework(MicrosoftNETCoreApp).Version = "4.0.0"),
@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(MiddleWare, "1.0.0"))
                     .With(RollForwardOnNoCandidateFxSetting(settingLocation, 2, MiddleWare)),
-                customizeDotNet: dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig
                         .GetFramework(MicrosoftNETCoreApp).Version = "4.0.0"),
                 resolvedFramework);
@@ -191,7 +191,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(new RuntimeConfig.Framework(MiddleWare, "2.1.2")))
                     .With(RollForwardOnNoCandidateFxSetting(settingLocation, 0, MiddleWare)),
-                customizeDotNet: dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig
                         .GetFramework(MicrosoftNETCoreApp).Version = "5.0.0"),
                 resolvedFramework);
