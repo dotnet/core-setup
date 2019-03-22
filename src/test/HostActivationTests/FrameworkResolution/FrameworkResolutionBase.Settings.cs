@@ -10,6 +10,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
     {
         public enum SettingLocation
         {
+            None,
             CommandLine,
             Environment,
             RuntimeOptions,
@@ -21,7 +22,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             string value,
             string frameworkReferenceName = MicrosoftNETCoreApp)
         {
-            if (value == null)
+            if (value == null || location == SettingLocation.None)
             {
                 return testSettings => testSettings;
             }
@@ -50,7 +51,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             int? value,
             string frameworkReferenceName = MicrosoftNETCoreApp)
         {
-            if (!value.HasValue)
+            if (!value.HasValue || location == SettingLocation.None)
             {
                 return testSettings => testSettings;
             }
@@ -79,7 +80,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             bool? value,
             string frameworkReferenceName = MicrosoftNETCoreApp)
         {
-            if (!value.HasValue)
+            if (!value.HasValue || location == SettingLocation.None)
             {
                 return testSettings => testSettings;
             }

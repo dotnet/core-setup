@@ -22,6 +22,8 @@
 runtime_config_t::runtime_config_t()
     : m_is_framework_dependent(false)
     , m_valid(false)
+    , m_has_roll_forward_option(false)
+    , m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option(false)
 {
 }
 
@@ -103,12 +105,14 @@ bool runtime_config_t::parse_opts(const json_value& opts)
             return false;
         }
         m_fx_defaults.set_roll_forward(val);
+        m_has_roll_forward_option = true;
     }
 
     auto apply_patches = opts_obj.find(_X("applyPatches"));
     if (apply_patches != opts_obj.end())
     {
         m_fx_defaults.set_apply_patches(apply_patches->second.as_bool());
+        m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option = true;
     }
 
     auto roll_fwd_on_no_candidate_fx = opts_obj.find(_X("rollForwardOnNoCandidateFx"));
@@ -116,6 +120,7 @@ bool runtime_config_t::parse_opts(const json_value& opts)
     {
         auto val = static_cast<roll_fwd_on_no_candidate_fx_option>(roll_fwd_on_no_candidate_fx->second.as_integer());
         m_fx_defaults.set_roll_forward(roll_fwd_on_no_candidate_fx_to_roll_forward(val));
+        m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option = true;
     }
 
     auto tfm = opts_obj.find(_X("tfm"));
@@ -153,6 +158,15 @@ bool runtime_config_t::parse_opts(const json_value& opts)
         }
     }
 
+    if (rc)
+    {
+        if (m_has_roll_forward_option && m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option)
+        {
+            trace::error(_X("It's invalid to use both `rollForward` and one of `rollForwardOnNoCandidateFx` or `applyPatches` in the same runtime config."));
+            return false;
+        }
+    }
+
     return rc;
 }
 
@@ -182,12 +196,14 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
             return false;
         }
         fx_out.set_roll_forward(val);
+        m_has_roll_forward_option = true;
     }
 
     auto apply_patches = fx_obj.find(_X("applyPatches"));
     if (apply_patches != fx_obj.end())
     {
         fx_out.set_apply_patches(apply_patches->second.as_bool());
+        m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option = true;
     }
 
     auto roll_fwd_on_no_candidate_fx = fx_obj.find(_X("rollForwardOnNoCandidateFx"));
@@ -195,6 +211,7 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
     {
         auto val = static_cast<roll_fwd_on_no_candidate_fx_option>(roll_fwd_on_no_candidate_fx->second.as_integer());
         fx_out.set_roll_forward(roll_fwd_on_no_candidate_fx_to_roll_forward(val));
+        m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option = true;
     }
 
     // Step #4: apply environment for DOTNET_ROLL_FORWARD

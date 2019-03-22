@@ -45,6 +45,11 @@ private:
 
     pal::string_t m_tfm;
 
+    // These two are used to detect collisions between rollForward and rollForwardOnNoCandidateFx/applyPatches
+    // as it's illegal to combine rollForward with the other two in the same runtime config.
+    bool m_has_roll_forward_option;
+    bool m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option;
+
     pal::string_t m_dev_path;
     pal::string_t m_path;
     bool m_is_framework_dependent;
