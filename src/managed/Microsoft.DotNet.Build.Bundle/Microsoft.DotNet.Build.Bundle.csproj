@@ -5,11 +5,16 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <Description>.Net Core Single File Bundler</Description>
   </PropertyGroup>
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), CommonManaged.props))\CommonManaged.props" />
-  
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG</DefineConstants>
-  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Sdk.props">
+      <Pack>true</Pack>
+      <PackagePath>Sdk</PackagePath>
+    </Content>
+  </ItemGroup>
+
 </Project>
 
 
