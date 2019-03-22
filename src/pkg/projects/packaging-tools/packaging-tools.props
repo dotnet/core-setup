@@ -52,7 +52,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <VersionedInstallerName>$(InstallerName)-$(PackageNameSuffix)</VersionedInstallerName>
+    <VersionedInstallerName>$(InstallerName)-$(ProductBandVersion)</VersionedInstallerName>
     <VersionedInstallerName>$(VersionedInstallerName.ToLowerInvariant())</VersionedInstallerName>
     <InstallerPackageRelease>1</InstallerPackageRelease>
 
