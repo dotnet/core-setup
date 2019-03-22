@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <!-- .NET Standard has no platforms.-->
+    <!-- .NET Standard has no shared framework, so there is no data for a platform manifest. -->
     <PlatformManifestTargetPath />
   </PropertyGroup>
 
