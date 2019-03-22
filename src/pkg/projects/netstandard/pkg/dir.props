@@ -4,6 +4,9 @@
     <IsFrameworkPackage>true</IsFrameworkPackage>
     <ShortFrameworkName>netstandard</ShortFrameworkName>
     <ProductBrandPrefix>Microsoft .NET Standard</ProductBrandPrefix>
+
+    <ProductBandVersion>2.1</ProductBandVersion>
+    <ProductionVersion>$(ProductBandVersion).0</ProductionVersion>
   </PropertyGroup>
 
   <Import Project="..\..\dir.props" />
