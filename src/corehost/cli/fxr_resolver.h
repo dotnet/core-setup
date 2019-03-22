@@ -9,6 +9,7 @@
 #include "hostfxr.h"
 #include "trace.h"
 #include "utils.h"
+#include "error_codes.h"
 
 bool resolve_fxr_path(const pal::string_t& host_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path);
 
