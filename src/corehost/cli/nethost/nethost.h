@@ -42,8 +42,8 @@ using nethost_get_hostfxr_path_result_fn = void(*)(const char_t * hostfxr_path);
 //   assembly_path
 //     Optional. Path to the compenent's assembly. Whether or not this is specified
 //     determines the behaviour for locating the hostfxr library.
-//     If nullptr, hostfxr will be located as if the running executable is the muxer
-//     If specified, hostfxr will be located as if the assembly_path is the apphost
+//     If nullptr, hostfxr is located using the enviroment variable or global registration
+//     If specified, hostfxr is located as if the assembly_path is the apphost
 //
 // Return value:
 //   0 on success, otherwise failure

@@ -6,11 +6,10 @@
 #define _COREHOST_CLI_FXR_RESOLVER_H_
 
 #include <pal.h>
-#include "host_interface.h"
 
 namespace fxr_resolver
 {
-    bool try_get_path(const host_mode_t mode, const pal::string_t& root_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path);
+    bool try_get_path(const pal::string_t& root_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path);
 }
 
 #endif //_COREHOST_CLI_FXR_RESOLVER_H_

@@ -34,7 +34,7 @@ pal::hresult_t get_load_in_memory_assembly_delegate(pal::dll_t handle, load_in_m
 
     pal::string_t dotnet_root;
     pal::string_t fxr_path;
-    if (!fxr_resolver::try_get_path(host_mode_t::libhost, get_directory(host_path), &dotnet_root, &fxr_path))
+    if (!fxr_resolver::try_get_path(get_directory(host_path), &dotnet_root, &fxr_path))
     {
         return StatusCode::CoreHostLibMissingFailure;
     }

@@ -74,7 +74,7 @@ namespace
 
         pal::string_t dotnet_root;
         pal::string_t fxr_path;
-        if (!fxr_resolver::try_get_path(host_mode_t::libhost, get_directory(host_path), &dotnet_root, &fxr_path))
+        if (!fxr_resolver::try_get_path(get_directory(host_path), &dotnet_root, &fxr_path))
         {
             return StatusCode::CoreHostLibMissingFailure;
         }
