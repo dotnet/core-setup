@@ -31,8 +31,6 @@
     using char_t = char;
 #endif
 
-using nethost_get_hostfxr_path_result_fn = void(*)(const char_t * hostfxr_path);
-
 //
 // Get the path to the hostfxr library
 //

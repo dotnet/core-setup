@@ -22,5 +22,6 @@ include(../lib.cmake)
 add_definitions(-DFEATURE_LIBHOST=1)
 add_definitions(-DNETHOST_EXPORT)
 
+install(FILES nethost.h DESTINATION corehost)
 install(TARGETS nethost DESTINATION corehost)
 install_symbols(nethost corehost)
