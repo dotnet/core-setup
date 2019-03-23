@@ -61,10 +61,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 result => result.Should().Fail()
                     .And.HaveStdErrContaining(
                         $"It's invalid to use both '{Constants.RollForwardSetting.CommandLineArgument}' and " +
-                        $"'{Constants.RollFowardOnNoCandidateFxSetting.CommandLineArgument}' command line options."),
+                        $"'{Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument}' command line options."),
                 commandLine: new string[] {
                     Constants.RollForwardSetting.CommandLineArgument, Constants.RollForwardSetting.LatestPatch,
-                    Constants.RollFowardOnNoCandidateFxSetting.CommandLineArgument, "2"
+                    Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument, "2"
                 });
         }
 
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         result.Should().Fail()
                         .And.HaveStdErrContaining(
                             $"It's invalid to use both `{Constants.RollForwardSetting.RuntimeConfigPropertyName}` and one of " +
-                            $"`{Constants.RollFowardOnNoCandidateFxSetting.RuntimeConfigPropertyName}` or " +
+                            $"`{Constants.RollForwardOnNoCandidateFxSetting.RuntimeConfigPropertyName}` or " +
                             $"`{Constants.ApplyPatchesSetting.RuntimeConfigPropertyName}` in the same runtime config.");
                     }
                 });
@@ -128,7 +128,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         private void RunTest(
             Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
             Action<CommandResult> resultAction,
-            string[] environment = null,
             string[] commandLine = null)
         {
             RunTest(
@@ -136,8 +135,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 SharedState.FrameworkReferenceApp,
                 runtimeConfig,
                 resultAction,
-                environment,
-                commandLine);
+                commandLine: commandLine);
         }
 
         private void RunTest(

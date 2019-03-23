@@ -144,16 +144,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 resultAction);
         }
 
-        private void RunTest(
-            TestSettings testSettings,
-            Action<CommandResult> resultAction)
-        {
-            RunTest(
-                SharedState.DotNetWithFrameworks,
-                SharedState.FrameworkReferenceApp,
-                testSettings,
-                resultAction);
-        }
 
         public class SharedTestState : SharedTestStateBase
         {
