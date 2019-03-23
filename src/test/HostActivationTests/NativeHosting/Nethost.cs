@@ -44,8 +44,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             else
             {
                 result.Should().Fail()
-                    .And.ExitWith(CoreHostLibMissingFailure)
-                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed");
+                    .And.ExitWith(1)
+                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}");
             }
         }
 
@@ -77,8 +77,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             else
             {
                 result.Should().Fail()
-                    .And.ExitWith(CoreHostLibMissingFailure)
-                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed");
+                    .And.ExitWith(1)
+                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}");
             }
         }
 

@@ -59,19 +59,17 @@ int main(const int argc, const pal::char_t *argv[])
         {
             std::cout << "nethost_get_hostfxr_path succeeded" << std::endl;
             std::cout << "hostfxr_path: " << tostr(pal::to_lower(fxr_path)).data() << std::endl;
+            return 0;
         }
         else
         {
             std::cout << "nethost_get_hostfxr_path failed: " << std::hex << std::showbase << res << std::endl;
+            return 1;
         }
-
-        return res;
     }
     else
     {
         std::cerr << "Invalid arguments" << std::endl;
         return -1;
     }
-
-    return 0;
 }
