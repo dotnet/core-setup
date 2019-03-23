@@ -12,3 +12,5 @@ add_executable(${DOTNET_PROJECT_NAME} ${SOURCES})
 
 install(TARGETS ${DOTNET_PROJECT_NAME} DESTINATION corehost_test)
 install_symbols(${DOTNET_PROJECT_NAME} corehost_test)
+
+set_common_libs("exe")

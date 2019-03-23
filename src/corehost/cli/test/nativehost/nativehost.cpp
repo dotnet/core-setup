@@ -4,16 +4,11 @@
 
 #include <iostream>
 #include <pal.h>
+#include <error_codes.h>
 #include <nethost.h>
 
 namespace
 {
-    pal::string_t fxr_path;
-    void hostfxr_path_callback(const char_t *hostfxr_path)
-    {
-        fxr_path.assign(hostfxr_path);
-    }
-
     std::vector<char> tostr(const pal::string_t &value)
     {
         std::vector<char> vect;
@@ -51,8 +46,16 @@ int main(const int argc, const pal::char_t *argv[])
         }
 #endif
 
-        int res = nethost_get_hostfxr_path(hostfxr_path_callback, assembly_path);
-        if (res == 0)
+        pal::string_t fxr_path;
+        size_t len = 0;
+        int res = nethost_get_hostfxr_path(nullptr, 0, &len, assembly_path);
+        if (res == StatusCode::HostApiBufferTooSmall)
+        {
+            fxr_path.resize(len);
+            res = nethost_get_hostfxr_path(&fxr_path[0], fxr_path.size(), &len, assembly_path);
+        }
+
+        if (res == StatusCode::Success)
         {
             std::cout << "nethost_get_hostfxr_path succeeded" << std::endl;
             std::cout << "hostfxr_path: " << tostr(pal::to_lower(fxr_path)).data() << std::endl;

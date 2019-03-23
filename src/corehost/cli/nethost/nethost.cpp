@@ -9,9 +9,14 @@
 #include <utils.h>
 
 NETHOST_API int NETHOST_CALLTYPE nethost_get_hostfxr_path(
-    nethost_get_hostfxr_path_result_fn result,
+    char_t * result_buffer,
+    size_t buffer_size,
+    size_t * out_buffer_required_size,
     const char_t * assembly_path)
 {
+    if (out_buffer_required_size == nullptr)
+        return StatusCode::InvalidArgFailure;
+
     pal::string_t root_path;
     if (assembly_path != nullptr)
         root_path = get_directory(assembly_path);
@@ -21,6 +26,14 @@ NETHOST_API int NETHOST_CALLTYPE nethost_get_hostfxr_path(
     if(!fxr_resolver::try_get_path(root_path, &dotnet_root, &fxr_path))
         return StatusCode::CoreHostLibMissingFailure;
 
-    result(fxr_path.c_str());
+    size_t len = fxr_path.length();
+    size_t required_size = len + 1; // null terminator
+
+    *out_buffer_required_size = required_size;
+    if (result_buffer == nullptr || buffer_size < required_size)
+        return StatusCode::HostApiBufferTooSmall;
+
+    fxr_path.copy(result_buffer, len);
+    result_buffer[len] = '\0';
     return StatusCode::Success;
 }

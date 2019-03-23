@@ -23,5 +23,4 @@ set(SOURCES
 
 include(../testexe.cmake)
 
-set_common_libs("exe")
 target_link_libraries(${DOTNET_PROJECT_NAME} nethost)
