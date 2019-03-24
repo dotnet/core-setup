@@ -9,8 +9,6 @@
 #include <cassert>
 #include <dlfcn.h>
 #include <dirent.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <pwd.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -108,6 +106,11 @@ void pal::unload_library(dll_t library)
     }
 }
 
+int pal::get_pid()
+{
+	return getpid();
+}
+
 int pal::xtoi(const char_t* input)
 {
     return atoi(input);
@@ -181,6 +184,12 @@ bool pal::get_default_servicing_directory(string_t* recv)
     recv->assign(ext);
     trace::info(_X("Using core servicing at [%s]"), ext.c_str());
     return true;
+}
+
+bool pal::get_temp_directory(pal::string_t& tmp_dir)
+{
+	pal::getenv(_X("TMPDIR"), &tmp_dir);
+	return pal::realpath(&tmp_dir);
 }
 
 bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* recv)

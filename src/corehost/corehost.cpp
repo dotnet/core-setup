@@ -7,6 +7,7 @@
 #include "fxr_resolver.h"
 #include "error_codes.h"
 #include "fx_ver.h"
+#include "bdl_processor.h"
 #include "trace.h"
 #include "utils.h"
 
@@ -33,9 +34,18 @@
 #define EMBED_HASH_HI_PART_UTF8 "c3ab8ff13720e8ad9047dd39466b3c89" // SHA-256 of "foobar" in UTF-8
 #define EMBED_HASH_LO_PART_UTF8 "74e592c2fa383d4a3960714caef0c4f2"
 #define EMBED_HASH_FULL_UTF8    (EMBED_HASH_HI_PART_UTF8 EMBED_HASH_LO_PART_UTF8) // NUL terminated
+
+bool is_exe_enabled_for_execution_hack(pal::string_t* app_dll)
+{
+	pal::string_t host_path;
+	pal::get_own_executable_path(&host_path);
+	*app_dll = strip_executable_ext(get_filename(host_path)).append(_X(".dll"));
+	return true;
+}
+
 bool is_exe_enabled_for_execution(pal::string_t* app_dll)
 {
-    constexpr int EMBED_SZ = sizeof(EMBED_HASH_FULL_UTF8) / sizeof(EMBED_HASH_FULL_UTF8[0]);
+	constexpr int EMBED_SZ = sizeof(EMBED_HASH_FULL_UTF8) / sizeof(EMBED_HASH_FULL_UTF8[0]);
     constexpr int EMBED_MAX = (EMBED_SZ > 1025 ? EMBED_SZ : 1025); // 1024 DLL name length, 1 NUL
 
     // Contains the embed hash value at compile time or the managed DLL name replaced by "dotnet build".
@@ -89,10 +99,10 @@ int exe_start(const int argc, const pal::char_t* argv[])
     pal::string_t app_path;
     pal::string_t app_root;
     bool requires_v2_hostfxr_interface = false;
-
+	
 #if FEATURE_APPHOST
     pal::string_t embedded_app_name;
-    if (!is_exe_enabled_for_execution(&embedded_app_name))
+    if (!is_exe_enabled_for_execution_hack(&embedded_app_name))
     {
         trace::error(_X("A fatal error was encountered. This executable was not bound to load a managed DLL."));
         return StatusCode::AppHostExeNotBoundFailure;
@@ -109,7 +119,27 @@ int exe_start(const int argc, const pal::char_t* argv[])
         requires_v2_hostfxr_interface = true;
     }
 
-    app_path.assign(get_directory(host_path));
+	bdl_processor_t extractor(host_path);
+	StatusCode bundle_status = extractor.extract();
+
+	switch (bundle_status)
+	{
+	case StatusCode::Success:
+		app_path.assign(extractor.get_extraction_dir());
+	    break;
+
+	case StatusCode::AppHostExeNotBundle:
+		app_path.assign(get_directory(host_path));
+		break;
+
+	case StatusCode::BundleExtractionFailure:
+	default:
+		trace::error(_X("A fatal error was encountered. Could not extract contents of the bundle"));
+		return StatusCode::AppHostExeNotBoundFailure;
+	}
+
+	app_root.assign(app_path);
+
     append_path(&app_path, embedded_app_name.c_str());
     if (!pal::realpath(&app_path))
     {
@@ -117,7 +147,6 @@ int exe_start(const int argc, const pal::char_t* argv[])
         return StatusCode::LibHostAppRootFindFailure;
     }
 
-    app_root.assign(get_directory(app_path));
 #else
     pal::string_t own_name = strip_executable_ext(get_filename(host_path));
 
