@@ -23,16 +23,24 @@ bool fx_reference_t::is_roll_forward_compatible(const fx_ver_t& other) const
     }
 
     // Verify major roll forward
+    static_assert(
+        roll_forward_option::LatestMajor > roll_forward_option::Major,
+        "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
     if (get_fx_version_number().get_major() != other.get_major()
-        && roll_forward != roll_forward_option::Major)
+        && roll_forward < roll_forward_option::Major)
     {
         return false;
     }
 
     // Verify minor roll forward
+    static_assert(
+        roll_forward_option::LatestMinor > roll_forward_option::Minor,
+        "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
+    static_assert(
+        roll_forward_option::Major > roll_forward_option::LatestMinor,
+        "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
     if (get_fx_version_number().get_minor() != other.get_minor()
-        && roll_forward != roll_forward_option::Major
-        && roll_forward != roll_forward_option::Minor)
+        && roll_forward < roll_forward_option::Minor)
     {
         return false;
     }
@@ -42,10 +50,15 @@ bool fx_reference_t::is_roll_forward_compatible(const fx_ver_t& other) const
     //  - initial reference matching a patch version,
     //  - or roll_forward=major\minor finding a compatible patch version as initial framework,
     //  - or applyPatches=true finding a newer patch version
+    static_assert(
+        roll_forward_option::Minor > roll_forward_option::LatestPatch,
+        "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
+    static_assert(
+        roll_forward_option::LatestPatch > roll_forward_option::Disabled,
+        "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
     if (get_fx_version_number().get_patch() != other.get_patch()
-        && apply_patches == false
-        && roll_forward != roll_forward_option::Major
-        && roll_forward != roll_forward_option::Minor)
+        && roll_forward == roll_forward_option::Disabled
+        || (apply_patches == false && roll_forward == roll_forward_option::LatestPatch))
     {
         return false;
     }

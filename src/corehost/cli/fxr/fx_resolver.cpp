@@ -252,7 +252,7 @@ StatusCode fx_resolver_t::soft_roll_forward_helper(
     bool newest_is_hard_roll_forward)
 {
     const pal::string_t& fx_name = higher_fx_ref.get_fx_name();
-    fx_reference_t updated_newest = higher_fx_ref;
+    fx_reference_t updated_newest = higher_fx_ref; // copy
 
     if (lower_fx_ref.get_fx_version_number() == higher_fx_ref.get_fx_version_number())
     {
