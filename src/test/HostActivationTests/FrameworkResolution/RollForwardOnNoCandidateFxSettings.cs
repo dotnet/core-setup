@@ -198,6 +198,74 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 resolvedFramework);
         }
 
+        [Theory]
+        [InlineData("1.0.0", "2.5.5", "2.5.5")]
+        [InlineData("2.0.0", "2.5.5", "2.5.5")]
+        [InlineData("2.5.4", "2.5.5", "2.5.5")]
+        [InlineData("2.5.5", "2.5.5", "2.5.5")]
+        [InlineData("2.5.5", "2.5.4", "2.5.4")]
+        [InlineData("2.5.5", "2.5.3", null)]
+        [InlineData("2.5.5", "2.5.5-preview1", null)]
+        public void FxVersionCLIOverride(string frameworkReferenceVersion, string fxVersion, string resolvedFramework)
+        {
+            RunTestWithRollForwardOnNoCandidateFxSetting(
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MicrosoftNETCoreApp, frameworkReferenceVersion))
+                    .WithCommandLine(Constants.FxVersion.CommandLineArgument, fxVersion),
+                resolvedFramework: resolvedFramework);
+        }
+
+        [Theory]
+        [InlineData(null, null)]
+        [InlineData(0, null)]
+        [InlineData(0, true)]
+        [InlineData(1, null)]
+        [InlineData(1, true)]
+        [InlineData(2, null)]
+        [InlineData(0, false)]
+        public void FxVersionCLIIgnoresOtherSettings(int? rollForwardOnNoCandidateFx, bool? applyPatches)
+        {
+            RunTestWithRollForwardOnNoCandidateFxSetting(
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MicrosoftNETCoreApp, "2.5.4"))
+                    .WithCommandLine(Constants.FxVersion.CommandLineArgument, "2.5.5")
+                    .With(RollForwardOnNoCandidateFxSetting(SettingLocation.CommandLine, rollForwardOnNoCandidateFx))
+                    .With(ApplyPatchesSetting(SettingLocation.RuntimeOptions, applyPatches)),
+                resolvedFramework: "2.5.5");
+        }
+
+        [Fact]
+        public void FxVersionCLIAppliesToFirstFrameworkReference_NETCoreAppFirst()
+        {
+            RunTestWithRollForwardOnNoCandidateFxSetting(
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MicrosoftNETCoreApp, "1.0.0")
+                        .WithFramework(MiddleWare, "2.1.2"))
+                    .WithCommandLine(Constants.FxVersion.CommandLineArgument, "2.5.5"),
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
+                    runtimeConfig
+                        .GetFramework(MicrosoftNETCoreApp).Version = "2.5.5"),
+                resolvedFramework: "2.5.5");
+        }
+
+        [Fact]
+        public void FxVersionCLIAppliesToFirstFrameworkReference_MiddleWareFirst()
+        {
+            RunTestWithRollForwardOnNoCandidateFxSetting(
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MiddleWare, "1.0.0")
+                        .WithFramework(MicrosoftNETCoreApp, "2.5.0"))
+                    .WithCommandLine(Constants.FxVersion.CommandLineArgument, "2.1.2"),
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
+                    runtimeConfig
+                        .GetFramework(MicrosoftNETCoreApp).Version = "2.5.5"),
+                resolvedFramework: "2.5.5");
+        }
+
         private void RunTestWithRollForwardOnNoCandidateFxSetting(
             TestSettings testSettings,
             Action<DotNetCliExtensions.DotNetCliCustomizer> customizeDotNet = null,
@@ -251,6 +319,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             public SharedTestState()
             {
                 DotNetWithFrameworks = DotNet("WithOneFramework")
+                    .AddMicrosoftNETCoreAppFramework("2.5.4")
+                    .AddMicrosoftNETCoreAppFramework("2.5.5")
                     .AddMicrosoftNETCoreAppFramework("5.1.3")
                     .AddFramework(
                         MiddleWare, "2.1.2", 
