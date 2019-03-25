@@ -21,7 +21,8 @@ In the managed (.NET) world, we put all of the code that implements the componen
    * If a CLR is active with the process, the requested CLR version will be validated against that CLR. If version satisfiability fails, activation will fail.
    * If a CLR is **not** active with the process, an attempt will be made to create a satisfying CLR instance.
    * Failure to create an instance will result in activation failure.
-3) A request to the CLR will be made to load the assembly from memory and get the entry-point.
+3) A request to the CLR will be made to load the corresponding WinRT type for the given type name into the runtime.
+   * This request will use the runtime's current support for resolving WinRT types to correctly resolve them.
    * The ability to load an assembly from memory will require exposing a new function that can be called from `hostfxr`, as well as a new API in `System.Private.CoreLib` on a new class in `Internal.Runtime.InteropServices`:
 
 ```csharp
@@ -29,8 +30,8 @@ namespace Internal.Runtime.InteropServices.WindowsRuntime
 {
     public static class ActivationFactoryLoader
     {
-        public static int GetActivationFactory(
-            IntPtr componentPath,
+        public unsafe static int GetActivationFactory(
+            char* componentPath,
             [MarshalAs(UnmanagedType.HString)] string typeName,
             [MarshalAs(UnmanagedType.Interface)] out IActivationFactory activationFactory);
     }
@@ -49,3 +50,4 @@ If the runtime activation fails, we want to ensure that the user can diagnose th
 
 * The tool that converts the `.winmdobj` to a `.winmd`, WinMDExp, is only available in Desktop MSBuild and is not available in the .NET Core MSBuild distribution. Additionally, WinMDExp only supports full PDBs and will fail if given portable PDBs.
 * To build a `.winmdobj`, the user will need to reference a contract assembly that includes the `Windows.Foundation` namespace. There are new packages that expose these contract assemblies, but we should ensure that these contract assemblies will be released by the time that we finalize our Managed WinRT Component support.
+* Writing unit tests for the WinRT host without modifying system-global state requires the new Reg-Free WinRT support, which is Windows 10 19H1 only.
