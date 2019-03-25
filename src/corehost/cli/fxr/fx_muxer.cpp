@@ -1263,6 +1263,34 @@ StatusCode fx_muxer_t::read_framework(
     return rc;
 }
 
+StatusCode fx_muxer_t::resolve_frameworks_for_app(
+    const host_startup_info_t& host_info,
+    const fx_reference_t& override_settings,
+    const runtime_config_t& app_config,
+    fx_definition_vector_t& fx_definitions)
+{
+    fx_name_to_fx_reference_map_t newest_references;
+    fx_name_to_fx_reference_map_t oldest_references;
+
+    // Read the shared frameworks; retry is necessary when a framework is already resolved, but then a newer compatible version is processed.
+    StatusCode rc = StatusCode::Success;
+    int retry_count = 0;
+    do
+    {
+        fx_definitions.resize(1); // Erase any existing frameworks for re-try
+        rc = read_framework(host_info, override_settings, app_config, newest_references, oldest_references, fx_definitions);
+    } while (rc == StatusCode::FrameworkCompatRetry && retry_count++ < Max_Framework_Resolve_Retries);
+
+    assert(retry_count < Max_Framework_Resolve_Retries);
+
+    if (rc == StatusCode::Success)
+    {
+        display_summary_of_frameworks(fx_definitions, newest_references);
+    }
+
+    return rc;
+}
+
 int fx_muxer_t::read_config_and_execute(
     const pal::string_t& host_command,
     const host_startup_info_t& host_info,
@@ -1353,26 +1381,11 @@ int fx_muxer_t::read_config_and_execute(
         }
         else
         {
-            fx_name_to_fx_reference_map_t newest_references;
-            fx_name_to_fx_reference_map_t oldest_references;
-
-            // Read the shared frameworks; retry is necessary when a framework is already resolved, but then a higher_fx_ref compatible version is processed.
-            int rc = StatusCode::Success;
-            int retry_count = 0;
-            do
-            {
-                fx_definitions.resize(1); // Erase any existing frameworks for re-try
-                rc = read_framework(host_info, override_settings, app_config, newest_references, oldest_references, fx_definitions);
-            } while (rc == StatusCode::FrameworkCompatRetry && retry_count++ < Max_Framework_Resolve_Retries);
-
-            assert(retry_count < Max_Framework_Resolve_Retries);
-
-            if (rc)
+            rc = resolve_frameworks_for_app(host_info, override_settings, app_config, fx_definitions);
+            if (rc != StatusCode::Success)
             {
                 return rc;
             }
-
-            display_summary_of_frameworks(fx_definitions, newest_references);
         }
     }
 
@@ -1535,7 +1548,6 @@ static int get_delegate_from_runtime(
     return code;
 }
 
-
 int fx_muxer_t::load_runtime_and_get_delegate(
     const host_startup_info_t& host_info,
     host_mode_t mode,
@@ -1560,26 +1572,11 @@ int fx_muxer_t::load_runtime_and_get_delegate(
     bool is_framework_dependent = app_config.get_is_framework_dependent();
     if (is_framework_dependent)
     {
-        fx_name_to_fx_reference_map_t newest_references;
-        fx_name_to_fx_reference_map_t oldest_references;
-
-        // Read the shared frameworks; retry is necessary when a framework is already resolved, but then a higher_fx_ref compatible version is processed.
-        rc = StatusCode::Success;
-        int retry_count = 0;
-        do
-        {
-            fx_definitions.resize(1); // Erase any existing frameworks for re-try
-            rc = fx_muxer_t::read_framework(host_info, override_settings, app_config, newest_references, oldest_references, fx_definitions);
-        } while (rc == StatusCode::FrameworkCompatRetry && retry_count++ < Max_Framework_Resolve_Retries);
-
-        assert(retry_count < Max_Framework_Resolve_Retries);
-
+        rc = resolve_frameworks_for_app(host_info, override_settings, app_config, fx_definitions);
         if (rc != StatusCode::Success)
         {
             return rc;
         }
-
-        display_summary_of_frameworks(fx_definitions, newest_references);
     }
 
     // Append specified probe paths first and then config file probe paths into realpaths.
