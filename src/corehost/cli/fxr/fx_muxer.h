@@ -110,7 +110,7 @@ private:
         fx_name_to_fx_reference_map_t& newest_references,
         fx_name_to_fx_reference_map_t& oldest_references,
         fx_definition_vector_t& fx_definitions);
-    static StatusCode fx_muxer_t::resolve_frameworks_for_app(
+    static StatusCode resolve_frameworks_for_app(
         const host_startup_info_t& host_info,
         const fx_reference_t& override_settings,
         const runtime_config_t& app_config,
