@@ -540,7 +540,8 @@ bool fx_muxer_t::resolve_hostpolicy_dir(
     return false;
 }
 
-fx_ver_t fx_muxer_t::resolve_framework_version(const std::vector<fx_ver_t>& version_list,
+fx_ver_t fx_muxer_t::resolve_framework_version(
+    const std::vector<fx_ver_t>& version_list,
     const pal::string_t& fx_ver,
     const fx_ver_t& specified,
     bool patch_roll_fwd,
@@ -1053,48 +1054,65 @@ host_mode_t detect_operating_mode(const host_startup_info_t& host_info)
     return host_mode_t::muxer;
 }
 
-int fx_muxer_t::soft_roll_forward_helper(
-    const fx_reference_t& newer,
-    const fx_reference_t& older,
-    bool older_is_hard_roll_forward,
+StatusCode fx_muxer_t::soft_roll_forward_helper(
+    const fx_reference_t& higher_fx_ref,
+    const fx_reference_t& lower_fx_ref,
+    bool newest_is_hard_roll_forward,
     fx_name_to_fx_reference_map_t& newest_references)
 {
-    const pal::string_t& fx_name = newer.get_fx_name();
-    fx_reference_t updated_newest = newer;
+    const pal::string_t& fx_name = higher_fx_ref.get_fx_name();
+    fx_reference_t updated_newest = higher_fx_ref;
 
-    if (older.get_fx_version_number() == newer.get_fx_version_number())
+    if (lower_fx_ref.get_fx_version_number() == higher_fx_ref.get_fx_version_number())
     {
-        updated_newest.merge_roll_forward_settings_from(older);
+        updated_newest.merge_roll_forward_settings_from(lower_fx_ref);
         newest_references[fx_name] = updated_newest;
         return StatusCode::Success;
     }
 
-    if (older.is_roll_forward_compatible(newer.get_fx_version_number()))
+    if (lower_fx_ref.is_roll_forward_compatible(higher_fx_ref.get_fx_version_number()))
     {
-        updated_newest.merge_roll_forward_settings_from(older);
+        updated_newest.merge_roll_forward_settings_from(lower_fx_ref);
         newest_references[fx_name] = updated_newest;
 
-        if (older_is_hard_roll_forward)
+        if (newest_is_hard_roll_forward)
         {
-            display_retry_framework_trace(older, newer);
+            display_retry_framework_trace(lower_fx_ref, higher_fx_ref);
             return StatusCode::FrameworkCompatRetry;
         }
 
-        display_compatible_framework_trace(newer.get_fx_version(), older);
+        display_compatible_framework_trace(higher_fx_ref.get_fx_version(), lower_fx_ref);
         return StatusCode::Success;
     }
 
     // Error condition - not compatible with the other reference
-    display_incompatible_framework_error(newer.get_fx_version(), older);
+    display_incompatible_framework_error(higher_fx_ref.get_fx_version(), lower_fx_ref);
     return StatusCode::FrameworkCompatFailure;
 }
 
-// Peform a "soft" roll-forward meaning we don't read any physical framework folders
-// and just check if the older reference is compatible with the newer reference
-// with respect to roll-forward\applypatches.
-int fx_muxer_t::soft_roll_forward(
-    const fx_reference_t fx_ref, //byval to avoid side-effects with mutable newest_references and oldest_references
-    bool current_is_hard_roll_forward, // true if reference was obtained from a "real" roll-forward meaning it probed the disk to find the most compatible version
+// Performs a "soft" roll-forward meaning we don't read any physical framework folders
+// and just check if the lower_fx_ref reference is compatible with the higher_fx_ref reference
+// with respect to roll-forward/apply-patches.
+//  - fx_ref
+//      The reference to resolve (the one we're processing).
+//      Passed by-value to avoid side-effects with mutable newest_references and oldest_references.
+//  - newest_is_hard_roll_forward
+//      true if there is a reference to the framework specified by fx_ref in the newest_references
+//      and that reference is pointing to a physically resolved framework on the disk (so the version in it
+//      actually exists on disk).
+//      This is used to restart the framework resolution if the soft-roll-forward results in updating
+//      the newest_references for the processed framework with a higher version. In that case
+//      it is necessary to throw away the results of the previous disk resolution and resolve the new
+//      current reference against the frameworks available on disk.
+//      If the current reference on the other hand has not been resolved against the disk yet
+//      then we can safely move it forward to a higher version. It will be resolved against the disk eventually
+//      but there's no work to throw away/retry yet.
+//  - newest_references
+//      Map of FX name -> FX reference of all frameworks which were already processed so far.
+//      For each framework name the FX reference is the newest, that is the highest version.
+StatusCode fx_muxer_t::soft_roll_forward(
+    const fx_reference_t fx_ref,
+    bool newest_is_hard_roll_forward,
     fx_name_to_fx_reference_map_t& newest_references)
 {
     /*byval*/ fx_reference_t current_ref = newest_references[fx_ref.get_fx_name()];
@@ -1102,14 +1120,46 @@ int fx_muxer_t::soft_roll_forward(
     // Perform soft "in-memory" roll-forwards
     if (fx_ref.get_fx_version_number() >= current_ref.get_fx_version_number())
     {
-        return soft_roll_forward_helper(fx_ref, current_ref, current_is_hard_roll_forward, newest_references);
+        return soft_roll_forward_helper(fx_ref, current_ref, newest_is_hard_roll_forward, newest_references);
     }
 
     assert(fx_ref.get_fx_version_number() < current_ref.get_fx_version_number());
     return soft_roll_forward_helper(current_ref, fx_ref, false, newest_references);
 }
 
-int fx_muxer_t::read_framework(
+// Processes one framework's runtime configuration.
+// For the most part this is about resolving framework references.
+// - host_info
+//     Information about the host - mainly used to determine where to search for frameworks.
+// - override_settings
+//     Framework resolution settings which will win over anything found (settings comming from command line).
+//     Passed as fx_reference_t for simplicity, the version part of that structure is ignored.
+// - config
+//     Parsed runtime configuration to process.
+// - newest_references
+//     Map of FX Name -> FX Reference of the most up-to-date resolved references so far. This map is keeping the state
+//     of the resolution algorithm. For each framework it holds the highest version referenced and the merged
+//     roll-forward settings. If the reference has been resolved against the frameworks on disk, this map will hold
+//     the version of the actually resolved version on the disk (so called hard-roll-forward).
+// - oldest_references
+//     Map of FX Name -> FX Reference of the oldest reference found for the framework yet. This map is only used
+//     to fill the "oldest reference" for each resolved framework in the end. It does not affect the behavior
+//     of the algorithm.
+// - fx_definitions
+//     List of "hard" resolved frameworks, that is frameworks actually found on the disk.
+//     Frameworks are added to the list as they are resolved.
+//     The order in the list is maintained such that the app is always the first and then the framework in their dependency order.
+//     That means that the root framework (typically Microsoft.NETCore.App) is the last.
+//     Frameworks are never removed as there's no operation which would "remove" a framework reference.
+//     Frameworks are never updated in the list. If such operation is required, instead the function returns FrameworkCompatRetry
+//     and the caller will restart the framework resolution process (with new fx_definitions).
+// Return value
+//     Success - if all frameworks were successfully resolved and the final (disk resolved) frameworks are in the fx_definitions.
+//     FrameworkCompatRetry - the resolution algorithm needs to restart as some of already processed references has changed.
+//     FrameworkCompatFailure - the resolution failed with unrecoverable error which is due to framework resolution algorithm itself.
+//     FrameworkMissingFailure - the resolution failed because the requested framework doesn't exist on disk.
+//     InvalidConfigFile - reading of a runtime config for some of the processed frameworks has failed.
+StatusCode fx_muxer_t::read_framework(
     const host_startup_info_t& host_info,
     const fx_reference_t& override_settings,
     const runtime_config_t& config,
@@ -1137,7 +1187,7 @@ int fx_muxer_t::read_framework(
         }
     }
 
-    int rc = StatusCode::Success;
+    StatusCode rc = StatusCode::Success;
 
     // Loop through each reference and resolve the framework
     for (const fx_reference_t& fx_ref : config.get_frameworks())
@@ -1306,7 +1356,7 @@ int fx_muxer_t::read_config_and_execute(
             fx_name_to_fx_reference_map_t newest_references;
             fx_name_to_fx_reference_map_t oldest_references;
 
-            // Read the shared frameworks; retry is necessary when a framework is already resolved, but then a newer compatible version is processed.
+            // Read the shared frameworks; retry is necessary when a framework is already resolved, but then a higher_fx_ref compatible version is processed.
             int rc = StatusCode::Success;
             int retry_count = 0;
             do
@@ -1513,7 +1563,7 @@ int fx_muxer_t::load_runtime_and_get_delegate(
         fx_name_to_fx_reference_map_t newest_references;
         fx_name_to_fx_reference_map_t oldest_references;
 
-        // Read the shared frameworks; retry is necessary when a framework is already resolved, but then a newer compatible version is processed.
+        // Read the shared frameworks; retry is necessary when a framework is already resolved, but then a higher_fx_ref compatible version is processed.
         rc = StatusCode::Success;
         int retry_count = 0;
         do
