@@ -1,6 +1,6 @@
 # Managed WinRT Activation of .NET Core components
 
-As part of supporting a complete story for XAML Islands on .NET Core, we should provide a mechanism of activating .NET Core WinRT components. To do so, we will follow the path of the COM and IJW activations and provide a new host for activating these components in a manner similar to native WinRT components, which we will call the `winrthost`.
+As part of supporting a complete story for XAML Islands on .NET Core, we should provide a mechanism of activating .NET Core WinRT components. To do so, we will follow the path of the COM and IJW activations and provide a new host for activating these components in a manner similar to native WinRT components, which we will call the `winrthost`. We are creating a separate host instead of combining with the COM host because the COM and WinRT hosts (although generally similar in design in Windows) have very different activation and resolution paths. As a result, we would not be able to reuse much code at all. Additionally, the WinRT host does not require a `clsidmap` or similar functionality to function. If we were to combine the two hosts, we would have to emit an empty clsidmap when creating the host and modify it even though the WinRT portion has no dependencies on any embedded resources.
 
 ## Requirements
 
