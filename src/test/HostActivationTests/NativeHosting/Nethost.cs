@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             // the product falls back to the default install location.
             CommandResult result;
             string installRoot = Path.Combine(isValid ? sharedState.ValidInstallRoot : sharedState.InvalidInstallRoot);
-            using (var regKeyOverride = new TestRegistryKeyOverride())
+            using (var regKeyOverride = new RegisteredInstallKeyOverride())
             {
                 if (useRegisteredLocation)
                 {
@@ -128,41 +128,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining($"hostfxr_path: {hostFxrPath}".ToLower());
-        }
-
-        private class TestRegistryKeyOverride : IDisposable
-        {
-            public string KeyPath { get; }
-
-            private readonly RegistryKey parentKey;
-            private readonly RegistryKey key;
-            private readonly string keyName;
-
-            public TestRegistryKeyOverride()
-            {
-                using (RegistryKey hkcu = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
-                {
-                    parentKey = hkcu.CreateSubKey(@"Software\Classes\Interface");
-                    keyName = "_DOTNET_Test" + System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
-                    key = parentKey.CreateSubKey(keyName);
-                    KeyPath = key.Name;
-                }
-            }
-
-            public void SetInstallLocation(string installLocation, string architecture)
-            {
-                using (RegistryKey dotnetLocationKey = key.CreateSubKey($@"Setup\InstalledVersions\{architecture}"))
-                {
-                    dotnetLocationKey.SetValue("InstallLocation", installLocation);
-                }
-            }
-
-            public void Dispose()
-            {
-                parentKey.DeleteSubKeyTree(keyName, throwOnMissingSubKey: false);
-                key.Dispose();
-                parentKey.Dispose();
-            }
         }
 
         public class SharedTestState : IDisposable
