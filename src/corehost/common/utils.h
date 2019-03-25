@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #ifndef UTILS_H
 #define UTILS_H
@@ -97,4 +98,23 @@ public:
 		}
 	}
 };
+
+// Helper class to make it easy to change the error writer within a specific scope only.
+class error_writer_scope_t
+{
+private:
+	trace::error_writer_fn m_old_error_writer;
+
+public:
+	error_writer_scope_t(trace::error_writer_fn new_error_writer)
+	{
+		m_old_error_writer = trace::set_error_writer(new_error_writer);
+	}
+
+	~error_writer_scope_t()
+	{
+		trace::set_error_writer(m_old_error_writer);
+	}
+};
+
 #endif

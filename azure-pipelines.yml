@@ -56,12 +56,10 @@ variables:
         /p:VersionsRepoPath=build-info/dotnet/core-setup/$(FullBranchName)
 
     # Symbol Server update
-    - name: _SymbolServerPath
-      value: https://microsoftpublicsymbols.artifacts.visualstudio.com/DefaultCollection
     - name: _SymbolServerArgs
-      value: /p:SymbolServerPath=$(_SymbolServerPath)
-         /p:SymbolServerPAT=$(microsoft-symbol-server-pat)
-         /p:SymbolExpirationInDays=365
+      value: >-
+        /p:MicrosoftSymbolServerPat=$(microsoft-symbol-server-pat)
+        /p:SymwebSymbolServerPat=$(symweb-symbol-server-pat)
 
     # ******** Official values *****
     - name: _CommonPublishArgs
@@ -91,7 +89,7 @@ jobs:
   parameters:
     crossBuild: true
     displayName: Build_Linux_Arm
-    dockerImage: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-14.04-cross-e435274-20180323032140
+    dockerImage: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-14.04-cross-e435274-20180426002420
     additionalRunArgs: -e ROOTFS_DIR=/crossrootfs/arm
     portableBuild: true
     skipTests: true

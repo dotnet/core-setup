@@ -1,5 +1,6 @@
-# Copyright (c) .NET Foundation and contributors. All rights reserved.
-# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+# Licensed to the .NET Foundation under one or more agreements.
+# The .NET Foundation licenses this file to you under the MIT license.
+# See the LICENSE file in the project root for more information.
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -218,12 +219,16 @@ endif()
 
 if(CLI_CMAKE_PLATFORM_ARCH_I386)
     add_definitions(-D_TARGET_X86_=1)
+    set(ARCH_SPECIFIC_FOLDER_NAME "i386")
 elseif(CLI_CMAKE_PLATFORM_ARCH_AMD64)
     add_definitions(-D_TARGET_AMD64_=1)
+    set(ARCH_SPECIFIC_FOLDER_NAME "AMD64")
 elseif(CLI_CMAKE_PLATFORM_ARCH_ARM)
     add_definitions(-D_TARGET_ARM_=1)
+    set(ARCH_SPECIFIC_FOLDER_NAME "arm")
 elseif(CLI_CMAKE_PLATFORM_ARCH_ARM64)
     add_definitions(-D_TARGET_ARM64_=1) 
+    set(ARCH_SPECIFIC_FOLDER_NAME "arm64")
 else()
     message(FATAL_ERROR "Unknown target architecture")
 endif()
@@ -236,3 +241,29 @@ if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))
 	      message("Using Windows SDK version ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
       endif()
 endif ()
+
+if (WIN32)
+    if(CLI_CMAKE_PLATFORM_ARCH_ARM)
+      # Explicitly specify the assembler to be used for Arm32 compile
+      file(TO_CMAKE_PATH "$ENV{VCToolsInstallDir}\\bin\\HostX86\\arm\\armasm.exe" CMAKE_ASM_COMPILER)
+
+      set(CMAKE_ASM_MASM_COMPILER ${CMAKE_ASM_COMPILER})
+      message("CMAKE_ASM_MASM_COMPILER explicitly set to: ${CMAKE_ASM_MASM_COMPILER}")
+
+      # Enable generic assembly compilation to avoid CMake generate VS proj files that explicitly
+      # use ml[64].exe as the assembler.
+      enable_language(ASM)
+    elseif(CLI_CMAKE_PLATFORM_ARCH_ARM64)
+      # Explicitly specify the assembler to be used for Arm64 compile
+      file(TO_CMAKE_PATH "$ENV{VCToolsInstallDir}\\bin\\HostX86\\arm64\\armasm64.exe" CMAKE_ASM_COMPILER)
+
+      set(CMAKE_ASM_MASM_COMPILER ${CMAKE_ASM_COMPILER})
+      message("CMAKE_ASM_MASM_COMPILER explicitly set to: ${CMAKE_ASM_MASM_COMPILER}")
+
+      # Enable generic assembly compilation to avoid CMake generate VS proj files that explicitly
+      # use ml[64].exe as the assembler.
+      enable_language(ASM)
+    else()
+      enable_language(ASM_MASM)
+    endif()
+endif()

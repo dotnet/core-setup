@@ -1,18 +1,21 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #ifndef __FX_VER_H__
 #define __FX_VER_H__
 
 #include <pal.h>
 
-// Note: This is not SemVer (esp., in comparing pre-release part, fx_ver_t does not
-// compare multiple dot separated identifiers individually.) ex: 1.0.0-beta.2 vs. 1.0.0-beta.11
+// Note: This is intended to implement SemVer 2.0
 struct fx_ver_t
 {
     fx_ver_t();
     fx_ver_t(int major, int minor, int patch);
+    // if not empty pre contains valid prerelease label with leading '-'
     fx_ver_t(int major, int minor, int patch, const pal::string_t& pre);
+    // if not empty pre contains valid prerelease label with leading '-'
+    // if not empty build contains valid build label with leading '+'
     fx_ver_t(int major, int minor, int patch, const pal::string_t& pre, const pal::string_t& build);
 
     int get_major() const { return m_major; }

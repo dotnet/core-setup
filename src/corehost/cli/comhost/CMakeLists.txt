@@ -1,5 +1,6 @@
-# Copyright (c) .NET Foundation and contributors. All rights reserved.
-# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+# Licensed to the .NET Foundation under one or more agreements.
+# The .NET Foundation licenses this file to you under the MIT license.
+# See the LICENSE file in the project root for more information.
 
 cmake_minimum_required (VERSION 2.6)
 project(comhost)
@@ -12,14 +13,20 @@ include_directories(../json/casablanca/include)
 
 # CMake does not recommend using globbing since it messes with the freshness checks
 set(SOURCES
-    ../../corehost.cpp
-    exports.cpp
+    comhost.cpp
+    ../fxr_resolver.cpp
     clsidmap.cpp
     ../fxr/fx_ver.cpp
     ../json/casablanca/src/json/json.cpp
     ../json/casablanca/src/json/json_parsing.cpp
     ../json/casablanca/src/json/json_serialization.cpp
     ../json/casablanca/src/utilities/asyncrt_utils.cpp
+)
+
+set(HEADERS
+    comhost.h
+    ../fxr/fx_ver.h
+    ../json/casablanca/include/cpprest/json.h
 )
 
 if(WIN32)

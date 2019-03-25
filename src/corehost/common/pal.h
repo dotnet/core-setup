@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #ifndef PAL_H
 #define PAL_H
@@ -216,6 +217,7 @@ namespace pal
 
     bool get_own_executable_path(string_t* recv);
     bool get_own_module_path(string_t* recv);
+    bool get_module_path(dll_t mod, string_t* recv);
     bool get_current_module(dll_t *mod);
     bool getenv(const char_t* name, string_t* recv);
     bool get_default_servicing_directory(string_t* recv);
