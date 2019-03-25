@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -15,6 +16,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         private const string GetHostFxrPath = "nethost_get_hostfxr_path";
         private const int CoreHostLibMissingFailure = unchecked((int)0x80008083);
 
+        private static readonly string HostFxrName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostfxr");
         private readonly SharedTestState sharedState;
 
         public Nethost(SharedTestState sharedTestState)
@@ -33,8 +35,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             CommandResult result = Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} {(useAssemblyPath ? sharedState.TestAssemblyPath : string.Empty)}")
                 .CaptureStdErr()
                 .CaptureStdOut()
+                .EnvironmentVariable("COREHOST_TRACE", "1")
                 .EnvironmentVariable("DOTNET_ROOT", dotNetRoot)
                 .Execute();
+
+            result.Should().HaveStdErrContaining("Using environment variable");
 
             if (isValid)
             {
@@ -45,16 +50,21 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             {
                 result.Should().Fail()
                     .And.ExitWith(1)
-                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}");
+                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}")
+                    .And.HaveStdErrContaining($"The required library {HostFxrName} could not be found");
             }
         }
 
         [Theory]
-        [InlineData(false, true)]
-        [InlineData(false, false)]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        public void GetHostFxrPath_GlobalInstallation(bool useAssemblyPath, bool isValid)
+        [InlineData(false, true, false)]
+        [InlineData(false, true, true)]
+        [InlineData(false, false, false)]
+        [InlineData(false, false, true)]
+        [InlineData(true, true, false)]
+        [InlineData(true, true, true)]
+        [InlineData(true, false, false)]
+        [InlineData(true, false, true)]
+        public void GetHostFxrPath_GlobalInstallation(bool useAssemblyPath, bool useRegisteredLocation, bool isValid)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -62,12 +72,30 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 return;
             }
 
-            string programFilesOverride = isValid ? sharedState.ValidInstallRoot : sharedState.InvalidInstallRoot;
-            CommandResult result = Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} {(useAssemblyPath ? sharedState.TestAssemblyPath : string.Empty)}")
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("TEST_OVERRIDE_PROGRAMFILES", programFilesOverride)
-                .Execute();
+            // Overide the registry key for self-registered global installs.
+            // If using the registered location, set the install location value to the valid/invalid root.
+            // If not using the registered location, do not set the value. When the value does not exist,
+            // the product falls back to the default install location.
+            CommandResult result;
+            string installRoot = Path.Combine(isValid ? sharedState.ValidInstallRoot : sharedState.InvalidInstallRoot);
+            using (var regKeyOverride = new TestRegistryKeyOverride())
+            {
+                if (useRegisteredLocation)
+                {
+                    regKeyOverride.SetInstallLocation(Path.Combine(installRoot, "dotnet"), sharedState.RepoDirectories.BuildArchitecture);
+                }
+
+                string programFilesOverride = useRegisteredLocation ? sharedState.InvalidInstallRoot : installRoot;
+                result = Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} {(useAssemblyPath ? sharedState.TestAssemblyPath : string.Empty)}")
+                    .CaptureStdErr()
+                    .CaptureStdOut()
+                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnvironmentVariable("_DOTNET_TEST_SDK_REGISTRY_PATH", regKeyOverride.KeyPath)
+                    .EnvironmentVariable("TEST_OVERRIDE_PROGRAMFILES", programFilesOverride)
+                    .Execute();
+            }
+
+            result.Should().HaveStdErrContaining("Using global installation location");
 
             if (isValid)
             {
@@ -78,7 +106,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             {
                 result.Should().Fail()
                     .And.ExitWith(1)
-                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}");
+                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}")
+                    .And.HaveStdErrContaining($"The required library {HostFxrName} could not be found");
             }
         }
 
@@ -88,22 +117,59 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             string appLocalFxrDir = Path.Combine(sharedState.BaseDirectory, "appLocalFxr");
             Directory.CreateDirectory(appLocalFxrDir);
             string assemblyPath = Path.Combine(appLocalFxrDir, "AppLocalFxr.dll");
-            string hostFxrPath = Path.Combine(appLocalFxrDir, RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostfxr"));
+            string hostFxrPath = Path.Combine(appLocalFxrDir, HostFxrName);
             File.WriteAllText(assemblyPath, string.Empty);
             File.WriteAllText(hostFxrPath, string.Empty);
 
             Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} {assemblyPath}")
                 .CaptureStdErr()
                 .CaptureStdOut()
+                .EnvironmentVariable("COREHOST_TRACE", "1")
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining($"hostfxr_path: {hostFxrPath}".ToLower());
+        }
+
+        private class TestRegistryKeyOverride : IDisposable
+        {
+            public string KeyPath { get; }
+
+            private readonly RegistryKey parentKey;
+            private readonly RegistryKey key;
+            private readonly string keyName;
+
+            public TestRegistryKeyOverride()
+            {
+                using (RegistryKey hkcu = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
+                {
+                    parentKey = hkcu.CreateSubKey(@"Software\Classes\Interface");
+                    keyName = "_DOTNET_Test" + System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
+                    key = parentKey.CreateSubKey(keyName);
+                    KeyPath = key.Name;
+                }
+            }
+
+            public void SetInstallLocation(string installLocation, string architecture)
+            {
+                using (RegistryKey dotnetLocationKey = key.CreateSubKey($@"Setup\InstalledVersions\{architecture}"))
+                {
+                    dotnetLocationKey.SetValue("InstallLocation", installLocation);
+                }
+            }
+
+            public void Dispose()
+            {
+                parentKey.DeleteSubKeyTree(keyName, throwOnMissingSubKey: false);
+                key.Dispose();
+                parentKey.Dispose();
+            }
         }
 
         public class SharedTestState : IDisposable
         {
             public string BaseDirectory { get; }
             public string NativeHostPath { get; }
+            public RepoDirectoriesProvider RepoDirectories { get; }
 
             public string HostFxrPath { get; }
             public string InvalidInstallRoot { get; }
@@ -120,10 +186,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 NativeHostPath = Path.Combine(BaseDirectory, nativeHostName);
 
                 // Copy over native host and nethost
-                var repoDirectories = new RepoDirectoriesProvider();
+                RepoDirectories = new RepoDirectoriesProvider();
                 string nethostName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("nethost");
-                File.Copy(Path.Combine(repoDirectories.CorehostPackages, nethostName), Path.Combine(BaseDirectory, nethostName));
-                File.Copy(Path.Combine(repoDirectories.Artifacts, "corehost_test", nativeHostName), NativeHostPath);
+                File.Copy(Path.Combine(RepoDirectories.CorehostPackages, nethostName), Path.Combine(BaseDirectory, nethostName));
+                File.Copy(Path.Combine(RepoDirectories.Artifacts, "corehost_test", nativeHostName), NativeHostPath);
 
                 InvalidInstallRoot = Path.Combine(BaseDirectory, "invalid");
                 Directory.CreateDirectory(InvalidInstallRoot);
@@ -140,7 +206,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
 
             private string CreateHostFxr(string destinationDirectory)
             {
-                string hostFxrName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostfxr");
                 string fxrRoot = Path.Combine(destinationDirectory, "host", "fxr");
                 Directory.CreateDirectory(fxrRoot);
 
@@ -149,10 +214,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 {
                     string versionDirectory = Path.Combine(fxrRoot, version);
                     Directory.CreateDirectory(versionDirectory);
-                    File.WriteAllText(Path.Combine(versionDirectory, hostFxrName), string.Empty);
+                    File.WriteAllText(Path.Combine(versionDirectory, HostFxrName), string.Empty);
                 }
 
-                return Path.Combine(fxrRoot, "2.3.0", hostFxrName);
+                return Path.Combine(fxrRoot, "2.3.0", HostFxrName);
             }
 
             public void Dispose()

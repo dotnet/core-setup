@@ -6,7 +6,17 @@
 #include <error_codes.h>
 #include <fxr_resolver.h>
 #include <pal.h>
+#include <trace.h>
 #include <utils.h>
+
+namespace
+{
+    // Swallow the trace messages so we don't output to stderr of a process that we do not own unless tracing is enabled.
+    void swallow_trace(const pal::char_t* msg)
+    {
+        (void)msg;
+    }
+}
 
 NETHOST_API int NETHOST_CALLTYPE nethost_get_hostfxr_path(
     char_t * result_buffer,
@@ -16,6 +26,9 @@ NETHOST_API int NETHOST_CALLTYPE nethost_get_hostfxr_path(
 {
     if (out_buffer_required_size == nullptr)
         return StatusCode::InvalidArgFailure;
+
+    trace::setup();
+    error_writer_scope_t writer_scope(swallow_trace);
 
     pal::string_t root_path;
     if (assembly_path != nullptr)
