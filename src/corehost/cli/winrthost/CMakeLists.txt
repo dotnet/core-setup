@@ -28,13 +28,6 @@ endif()
 
 include(../lib.cmake)
 
-# Move to setup.cmake if WinRT host is ever built on non-Windows
-if("${CLI_CMAKE_WINRTHOST_VER}" STREQUAL "")
-    message(FATAL_ERROR "winrthost version is not specified")
-else()
-    add_definitions(-DLIBHOST_PKG_VER="${CLI_CMAKE_WINRTHOST_VER}")
-endif()
-
 add_definitions(-DFEATURE_LIBHOST=1)
 
 # Specify non-default Windows libs to be used for Arm/Arm64 builds

@@ -11,7 +11,10 @@
 #include "utils.h"
 #include "error_codes.h"
 
-bool resolve_fxr_path(const pal::string_t& host_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path);
+namespace fxr_resolver
+{
+    bool try_get_path(const pal::string_t& root_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path);
+}
 
 template<typename THostNameToAppNameCallback, typename TDelegate>
 int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostNameToAppNameCallback host_path_to_app_path, TDelegate* delegate, pal::string_t* out_app_path = nullptr)
@@ -27,7 +30,7 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostNameToAppNameCall
 
     pal::string_t dotnet_root;
     pal::string_t fxr_path;
-    if (!resolve_fxr_path(get_directory(host_path), &dotnet_root, &fxr_path))
+    if (!fxr_resolver::try_get_path(get_directory(host_path), &dotnet_root, &fxr_path))
     {
         return StatusCode::CoreHostLibMissingFailure;
     }
