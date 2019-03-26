@@ -1154,7 +1154,7 @@ StatusCode fx_muxer_t::soft_roll_forward(
 //     Frameworks are never updated in the list. If such operation is required, instead the function returns FrameworkCompatRetry
 //     and the caller will restart the framework resolution process (with new fx_definitions).
 // Return value
-//     Success - if all frameworks were successfully resolved and the final (disk resolved) frameworks are in the fx_definitions.
+//     Success - all frameworks were successfully resolved and the final (disk resolved) frameworks are in the fx_definitions.
 //     FrameworkCompatRetry - the resolution algorithm needs to restart as some of already processed references has changed.
 //     FrameworkCompatFailure - the resolution failed with unrecoverable error which is due to framework resolution algorithm itself.
 //     FrameworkMissingFailure - the resolution failed because the requested framework doesn't exist on disk.
