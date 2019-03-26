@@ -8,6 +8,13 @@ using System.IO;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 {
+    /// <summary>
+    /// Helper class for creating a mock version of a dotnet installation
+    /// </summary>
+    /// <remarks>
+    /// This class uses a mock version of hostpolicy and does not use the product coreclr runtime,
+    /// so the mock installation cannot be used to actually run apps.
+    /// </remarks>
     public class DotNetBuilder
     {
         private readonly string _path;
@@ -35,6 +42,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 Path.Combine(_path, "host", "fxr", Path.GetFileName(builtDotNetCli.GreatestVersionHostFxrPath)));
         }
 
+        /// <summary>
+        /// Add a mock of the Microsoft.NETCore.App framework with the specified version
+        /// </summary>
+        /// <param name="version">Version to add</param>
+        /// <remarks>
+        /// Product runtime binaries are not added. All the added mock framework will contain is a mock version of host policy.
+        /// </remarks>
         public DotNetBuilder AddMicrosoftNETCoreAppFramework(string version)
         {
             // ./shared/Microsoft.NETCore.App/<version> - create a mock of the root framework
@@ -51,6 +65,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             return this;
         }
 
+        /// <summary>
+        /// Add a mock framework with the specified framework name and version
+        /// </summary>
+        /// <param name="name">Framework name</param>
+        /// <param name="version">Framework version</param>
+        /// <param name="runtimeConfigCustomizer">Customization function for the runtime config</param>
+        /// <remarks>
+        /// The added mock framework will only contain a runtime.config.json file.
+        /// </remarks>
         public DotNetBuilder AddFramework(
             string name,
             string version,
