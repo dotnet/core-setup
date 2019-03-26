@@ -233,7 +233,7 @@
           }
         },
         "test": {
-          "description": "Build and run tests. Assumes product packages are already built.",
+          "description": "Build tests then run tests. Assumes product packages are already built.",
           "settings": {
             "Project": "src\\test\\dir.proj"
           }
