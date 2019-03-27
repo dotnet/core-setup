@@ -22,19 +22,26 @@ namespace
         fx_ver_t most_compatible = specified;
         if (!specified.is_prerelease())
         {
-            if (roll_forward != roll_forward_option::LatestPatch && roll_forward != roll_forward_option::Disabled)
+            static_assert(roll_forward_option::Disabled < roll_forward_option::LatestPatch, "Assuming correct ordering of roll_forward_option values.");
+            static_assert(roll_forward_option::Major > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
+            static_assert(roll_forward_option::LatestMajor > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
+            if (roll_forward > roll_forward_option::LatestPatch)
             {
-                fx_ver_t next_lowest;
+                fx_ver_t best_match_version;
 
-                // Look for the least production version
-                trace::verbose(_X("'Roll forward' enabled with value [%d]. Looking for the least production greater than or equal to [%s]"),
-                    roll_forward, fx_ver.c_str());
+                bool search_for_latest = roll_forward == roll_forward_option::LatestMinor || roll_forward == roll_forward_option::LatestMajor;
+
+                trace::verbose(
+                    _X("'Roll forward' enabled with value [%d]. Looking for the %s production greater than or equal version to [%s]"),
+                    roll_forward,
+                    search_for_latest ? _X("latest") : _X("least"),
+                    fx_ver.c_str());
 
                 for (const auto& ver : version_list)
                 {
                     if (!ver.is_prerelease() && ver >= specified)
                     {
-                        if (roll_forward == roll_forward_option::Minor)
+                        if (roll_forward <= roll_forward_option::LatestMinor)
                         {
                             // We only want to roll forward on minor
                             if (ver.get_major() != specified.get_major())
@@ -42,21 +49,27 @@ namespace
                                 continue;
                             }
                         }
-                        next_lowest = (next_lowest == fx_ver_t()) ? ver : std::min(next_lowest, ver);
+
+                        best_match_version = (best_match_version == fx_ver_t())
+                            ? ver
+                            : (search_for_latest ? std::max(best_match_version, ver) : std::min(best_match_version, ver));
                     }
                 }
 
-                if (next_lowest == fx_ver_t())
+                if (best_match_version == fx_ver_t())
                 {
                     // Look for the least preview version
-                    trace::verbose(_X("No production greater than or equal to [%s] found. Looking for the least preview greater than [%s]"),
-                        fx_ver.c_str(), fx_ver.c_str());
+                    trace::verbose(
+                        _X("No production greater than or equal to [%s] found. Looking for the %s preview greater than [%s]"),
+                        fx_ver.c_str(),
+                        search_for_latest ? _X("latest") : _X("least"),
+                        fx_ver.c_str());
 
                     for (const auto& ver : version_list)
                     {
                         if (ver.is_prerelease() && ver >= specified)
                         {
-                            if (roll_forward == roll_forward_option::Minor)
+                            if (roll_forward <= roll_forward_option::LatestMinor)
                             {
                                 // We only want to roll forward on minor
                                 if (ver.get_major() != specified.get_major())
@@ -64,23 +77,33 @@ namespace
                                     continue;
                                 }
                             }
-                            next_lowest = (next_lowest == fx_ver_t()) ? ver : std::min(next_lowest, ver);
+
+                            best_match_version = (best_match_version == fx_ver_t())
+                                ? ver
+                                : (search_for_latest ? std::max(best_match_version, ver) : std::min(best_match_version, ver));
                         }
                     }
                 }
 
-                if (next_lowest == fx_ver_t())
+                if (best_match_version == fx_ver_t())
                 {
                     trace::verbose(_X("No preview greater than or equal to [%s] found."), fx_ver.c_str());
                 }
                 else
                 {
-                    trace::verbose(_X("Found version [%s]"), next_lowest.as_str().c_str());
-                    most_compatible = next_lowest;
+                    trace::verbose(_X("Found version [%s]"), best_match_version.as_str().c_str());
+                    most_compatible = best_match_version;
                 }
             }
 
-            if (apply_patches)
+            // For LatestMinor and LatestMajor the above search should already find the latest patch (it looks for latest version as a whole).
+            // For Disable, there's no roll forward (in fact we should not even get here).
+            // For Major and Minor, we need to look for latest patch as the above would have find the lowest patch (as it looks for lowest version as a whole).
+            //   For backward compatibility reasons we also need to consider the apply_patches setting though.
+            // For LatestPatch, we need to look for latest patch as there was no search done yet.
+            //   For backward compatibility reasons we also need to consider the apply_patches setting though.
+            if ((roll_forward == roll_forward_option::LatestPatch || roll_forward == roll_forward_option::Minor || roll_forward == roll_forward_option::Major)
+                && apply_patches)
             {
                 trace::verbose(_X("Applying patch roll forward from [%s]"), most_compatible.as_str().c_str());
                 for (const auto& ver : version_list)
