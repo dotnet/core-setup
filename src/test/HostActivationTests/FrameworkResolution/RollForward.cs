@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.DotNet.Cli.Build;
-using Microsoft.DotNet.Cli.Build.Framework;
-using System;
 using Xunit;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
@@ -20,50 +18,182 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             SharedState = sharedState;
         }
 
-        [Theory]
-        [InlineData(Constants.RollForwardSetting.Disable, "5.1.2")]
-        [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.3")]
-        [InlineData(Constants.RollForwardSetting.Minor, "5.1.3")]
-        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.4.1")]
-        [InlineData(Constants.RollForwardSetting.Major, "5.1.3")]
-        [InlineData(Constants.RollForwardSetting.LatestMajor, "6.1.2")]
-        public void ReleaseToRelease(string rollForward, string resolvedFramework)
+        [Fact]
+        public void ExactMatchOnRelease()
         {
-            RunTest(
-                new TestSettings()
-                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
-                        .WithRollForward(rollForward)
-                        .WithFramework(MicrosoftNETCoreApp, "5.1.2")),
-                result => result.Should().Pass()
-                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework));
+            RunTestWithNETCoreAppRelease(
+                "2.1.3",
+                null,
+                null,
+                "2.1.3");
         }
 
-        private void RunTest(
-            TestSettings testSettings,
-            Action<CommandResult> resultAction)
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable,     null,  null)]
+        [InlineData(Constants.RollForwardSetting.Disable,     false, null)]    // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.Disable,     true,  null)]    // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null,  "2.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, false, null)]    // Backward compat, equivalient to rollForwardOnNoCadidateFx=0, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.Minor,       null,  "2.1.3")]
+        [InlineData(Constants.RollForwardSetting.Minor,       false, "2.1.2")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=1, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null,  "2.4.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false, "2.4.1")] // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.Major,       null,  "2.1.3")]
+        [InlineData(Constants.RollForwardSetting.Major,       false, "2.1.2")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=2, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.LatestMajor, null,  "3.1.2")]
+        public void RollForwardOnPatch_ReleaseOnly(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTestWithNETCoreAppRelease(
+                "2.1.0",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable,     null,  null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null,  null)]
+        [InlineData(Constants.RollForwardSetting.Minor,       null,  "2.1.3")]
+        [InlineData(Constants.RollForwardSetting.Minor,       false, "2.1.2")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=1, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null,  "2.4.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false, "2.4.1")] // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.Major,       null,  "2.1.3")]
+        [InlineData(Constants.RollForwardSetting.Major,       false, "2.1.2")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=2, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.LatestMajor, null,  "3.1.2")]
+        public void RollForwardOnMinor_ReleaseOnly(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTestWithNETCoreAppRelease(
+                "2.0.0",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable,     null,  null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null,  null)]
+        [InlineData(Constants.RollForwardSetting.Minor,       null,  null)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null,  null)]
+        [InlineData(Constants.RollForwardSetting.Major,       null,  "2.1.3")]
+        [InlineData(Constants.RollForwardSetting.Major,       false, "2.1.2")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=2, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.LatestMajor, null,  "3.1.2")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, false, "3.1.2")] // applyPatches is ignored for new rollForward settings
+        public void RollForwardOnMajor_ReleaseOnly(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTestWithNETCoreAppRelease(
+                "1.1.0",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable,     null,  null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null,  "5.1.2-preview.2")] // This is an interesting case for backward compat - for 100% backward compat, this should fail
+        [InlineData(Constants.RollForwardSetting.LatestPatch, false, null)]              // Backward compat, equivalient to rollForwardOnNoCadidateFx=0, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.Minor,       null,  "5.1.2-preview.2")]
+        [InlineData(Constants.RollForwardSetting.Minor,       false, "5.1.1-preview.1")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=1, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null,  "5.2.1-preview.2")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false, "5.2.1-preview.2")] // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.Major,       null,  "5.1.2-preview.2")]
+        [InlineData(Constants.RollForwardSetting.Major,       false, "5.1.1-preview.1")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=2, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.LatestMajor, null,  "6.1.0-preview.2")]
+        public void RollForwardOnPatch_FromReleaseToPreRelease(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTestWithNETCoreAppPreRelease(
+                "5.1.0",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
+
+        private void RunTestWithNETCoreAppRelease(
+            string frameworkReferenceVersion,
+            string rollForward,
+            bool? applyPatches,
+            string resolvedFrameworkVersion)
+        {
+            RunTestWithNETCoreApp(
+                SharedState.DotNetWithNETCoreAppRelease,
+                frameworkReferenceVersion,
+                rollForward,
+                applyPatches,
+                resolvedFrameworkVersion);
+        }
+
+        private void RunTestWithNETCoreAppPreRelease(
+            string frameworkReferenceVersion,
+            string rollForward,
+            bool? applyPatches,
+            string resolvedFrameworkVersion)
+        {
+            RunTestWithNETCoreApp(
+                SharedState.DotNetWithNETCoreAppPreRelease,
+                frameworkReferenceVersion,
+                rollForward,
+                applyPatches,
+                resolvedFrameworkVersion);
+        }
+
+        private void RunTestWithNETCoreApp(
+            DotNetCli dotNet,
+            string frameworkReferenceVersion,
+            string rollForward,
+            bool? applyPatches,
+            string resolvedFrameworkVersion)
         {
             RunTest(
-                SharedState.DotNetWithFrameworks,
+                dotNet,
                 SharedState.FrameworkReferenceApp,
-                testSettings,
-                resultAction);
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithApplyPatches(applyPatches)
+                        .WithFramework(MicrosoftNETCoreApp, frameworkReferenceVersion))
+                    .WithCommandLine(Constants.RollForwardSetting.CommandLineArgument, rollForward),
+                result =>
+                {
+                    if (resolvedFrameworkVersion == null)
+                    {
+                        result.Should().Fail()
+                            .And.DidNotFindCompatibleFrameworkVersion();
+                    }
+                    else
+                    {
+                        result.Should().Pass()
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedFrameworkVersion);
+                    }
+                });
         }
 
         public class SharedTestState : SharedTestStateBase
         {
             public TestApp FrameworkReferenceApp { get; }
 
-            public DotNetCli DotNetWithFrameworks { get; }
+            public DotNetCli DotNetWithNETCoreAppRelease { get; }
+
+            public DotNetCli DotNetWithNETCoreAppPreRelease { get; }
 
             public SharedTestState()
             {
-                DotNetWithFrameworks = DotNet("WithOneFramework")
-                    .AddMicrosoftNETCoreAppFramework("5.1.2")
-                    .AddMicrosoftNETCoreAppFramework("5.1.3")
-                    .AddMicrosoftNETCoreAppFramework("5.4.0")
-                    .AddMicrosoftNETCoreAppFramework("5.4.1")
-                    .AddMicrosoftNETCoreAppFramework("6.1.1")
-                    .AddMicrosoftNETCoreAppFramework("6.1.2")
+                DotNetWithNETCoreAppRelease = DotNet("DotNetWithNETCoreAppRelease")
+                    .AddMicrosoftNETCoreAppFramework("2.1.2")
+                    .AddMicrosoftNETCoreAppFramework("2.1.3")
+                    .AddMicrosoftNETCoreAppFramework("2.4.0")
+                    .AddMicrosoftNETCoreAppFramework("2.4.1")
+                    .AddMicrosoftNETCoreAppFramework("3.1.1")
+                    .AddMicrosoftNETCoreAppFramework("3.1.2")
+                    .Build();
+
+                DotNetWithNETCoreAppPreRelease = DotNet("DotNetWithNETCoreAppPreRelease")
+                    .AddMicrosoftNETCoreAppFramework("5.1.1-preview.1")
+                    .AddMicrosoftNETCoreAppFramework("5.1.2-preview.1")
+                    .AddMicrosoftNETCoreAppFramework("5.1.2-preview.2")
+                    .AddMicrosoftNETCoreAppFramework("5.2.0-preview.1")
+                    .AddMicrosoftNETCoreAppFramework("5.2.1-preview.1")
+                    .AddMicrosoftNETCoreAppFramework("5.2.1-preview.2")
+                    .AddMicrosoftNETCoreAppFramework("6.1.0-preview.1")
+                    .AddMicrosoftNETCoreAppFramework("6.1.0-preview.2")
                     .Build();
 
                 FrameworkReferenceApp = CreateFrameworkReferenceApp();
