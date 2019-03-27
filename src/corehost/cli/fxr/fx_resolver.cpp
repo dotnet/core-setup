@@ -22,7 +22,7 @@ namespace
         fx_ver_t most_compatible = specified;
         if (!specified.is_prerelease())
         {
-            static_assert(roll_forward_option::Disabled < roll_forward_option::LatestPatch, "Assuming correct ordering of roll_forward_option values.");
+            static_assert(roll_forward_option::Disable < roll_forward_option::LatestPatch, "Assuming correct ordering of roll_forward_option values.");
             static_assert(roll_forward_option::Major > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
             static_assert(roll_forward_option::LatestMajor > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
             if (roll_forward > roll_forward_option::LatestPatch)
@@ -191,7 +191,7 @@ namespace
                 {
                     // If production and no roll forward use given version.
                     do_roll_forward = (*(fx_ref.get_apply_patches())) ||
-                        ((*(fx_ref.get_roll_forward()) != roll_forward_option::LatestPatch) && (*(fx_ref.get_roll_forward()) != roll_forward_option::Disabled));
+                        ((*(fx_ref.get_roll_forward()) != roll_forward_option::LatestPatch) && (*(fx_ref.get_roll_forward()) != roll_forward_option::Disable));
                 }
                 else
                 {

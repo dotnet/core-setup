@@ -10,7 +10,7 @@ enum class roll_forward_option
     // The order is in increasing level of relaxation
     // Lower values are more restrictive than higher values
 
-    Disabled = 0,    // No roll-forward is allowed - only exact match
+    Disable = 0,    // No roll-forward is allowed - only exact match
     LatestPatch = 1, // Roll forward to latest patch.
     Minor = 2,       // Roll forward to closest minor but same major and then highest patch
     LatestMinor = 3, // Roll forward to highest minor.patch but same major

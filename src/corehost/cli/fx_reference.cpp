@@ -54,10 +54,10 @@ bool fx_reference_t::is_roll_forward_compatible(const fx_ver_t& other) const
         roll_forward_option::Minor > roll_forward_option::LatestPatch,
         "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
     static_assert(
-        roll_forward_option::LatestPatch > roll_forward_option::Disabled,
+        roll_forward_option::LatestPatch > roll_forward_option::Disable,
         "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
     if (get_fx_version_number().get_patch() != other.get_patch()
-        && roll_forward == roll_forward_option::Disabled
+        && roll_forward == roll_forward_option::Disable
         || (apply_patches == false && roll_forward == roll_forward_option::LatestPatch))
     {
         return false;

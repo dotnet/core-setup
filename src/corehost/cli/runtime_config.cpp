@@ -401,6 +401,6 @@ void runtime_config_t::set_fx_version(pal::string_t version)
 
     m_frameworks[0].set_fx_version(version);
     m_frameworks[0].set_apply_patches(false);
-    m_frameworks[0].set_roll_forward(roll_forward_option::Disabled);
+    m_frameworks[0].set_roll_forward(roll_forward_option::Disable);
     m_frameworks[0].set_use_exact_version(true);
 }

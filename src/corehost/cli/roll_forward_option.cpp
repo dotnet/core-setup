@@ -19,7 +19,7 @@ roll_forward_option roll_fwd_on_no_candidate_fx_to_roll_forward(roll_fwd_on_no_c
         return roll_forward_option::Major;
     default:
         assert(false);
-        return roll_forward_option::Disabled;
+        return roll_forward_option::Disable;
     }
 }
 
@@ -27,7 +27,7 @@ namespace
 {
     const pal::char_t* OptionNameMapping[] =
     {
-        _X("Disabled"),
+        _X("Disable"),
         _X("LatestPatch"),
         _X("Minor"),
         _X("LatestMinor"),

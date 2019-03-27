@@ -17,7 +17,7 @@ public:
         : has_apply_patches(false)
         , apply_patches(false)
         , has_roll_forward(false)
-        , roll_forward(roll_forward_option::Disabled)
+        , roll_forward(roll_forward_option::Disable)
         , use_exact_version(false)
         , fx_name(_X(""))
         , fx_version(_X(""))
