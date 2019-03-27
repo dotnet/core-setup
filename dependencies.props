@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftNETCorePlatformsPackageVersion>2.2.0</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>2.1.3</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>2.0.0</MicrosoftNETCoreTargetsPackageVersion>
     <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.220-servicing-27414-05</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.2.3-servicing-27414-05</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
@@ -54,8 +54,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Depend on 2.2 CoreFx packages, except for M.NC.Platforms, where we depend on 2.1 -->
     <RemoteDependencyBuildInfo Include="CoreFx">
       <BuildInfoPath>$(BaseDotNetBuildInfo)corefx/$(DependencyBranch)</BuildInfoPath>
+      <CurrentRef>$(CoreFxCurrentRef)</CurrentRef>
+      <DisabledPackages>Microsoft.NETCore.Platforms</DisabledPackages>
+    </RemoteDependencyBuildInfo>
+    <RemoteDependencyBuildInfo Include="CoreFx">
+      <BuildInfoPath>$(BaseDotNetBuildInfo)corefx/release/2.1</BuildInfoPath>
       <CurrentRef>$(CoreFxCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="CoreClr">
