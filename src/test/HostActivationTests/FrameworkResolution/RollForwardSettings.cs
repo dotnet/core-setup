@@ -54,6 +54,75 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .And.DidNotRecognizeRollForwardValue("InvalidValue"));
         }
 
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch)]
+        [InlineData(Constants.RollForwardSetting.Minor)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor)]
+        [InlineData(Constants.RollForwardSetting.Major)]
+        [InlineData(Constants.RollForwardSetting.LatestMajor)]
+        public void ValueIgnoresCase_CommandLine(string rollForward)
+        {
+            ValueIgnoresCase(SettingLocation.CommandLine, rollForward);
+        }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch)]
+        [InlineData(Constants.RollForwardSetting.Minor)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor)]
+        [InlineData(Constants.RollForwardSetting.Major)]
+        [InlineData(Constants.RollForwardSetting.LatestMajor)]
+        public void ValueIgnoresCase_Environment(string rollForward)
+        {
+            ValueIgnoresCase(SettingLocation.Environment, rollForward);
+        }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch)]
+        [InlineData(Constants.RollForwardSetting.Minor)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor)]
+        [InlineData(Constants.RollForwardSetting.Major)]
+        [InlineData(Constants.RollForwardSetting.LatestMajor)]
+        public void ValueIgnoresCase_RuntimeOptions(string rollForward)
+        {
+            ValueIgnoresCase(SettingLocation.RuntimeOptions, rollForward);
+        }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch)]
+        [InlineData(Constants.RollForwardSetting.Minor)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor)]
+        [InlineData(Constants.RollForwardSetting.Major)]
+        [InlineData(Constants.RollForwardSetting.LatestMajor)]
+        public void ValueIgnoresCase_FrameworkReference(string rollForward)
+        {
+            ValueIgnoresCase(SettingLocation.FrameworkReference, rollForward);
+        }
+
+        private void ValueIgnoresCase(SettingLocation settingLocation, string rollForward)
+        {
+            string[] values = new string[]
+            {
+                rollForward,
+                rollForward.ToLowerInvariant(),
+                rollForward.ToUpperInvariant()
+            };
+
+            foreach (string value in values)
+            {
+                RunTest(
+                    new TestSettings()
+                        .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                            .WithFramework(MicrosoftNETCoreApp, "5.1.3"))
+                        .With(RollForwardSetting(settingLocation, value)),
+                    result => result.Should().Pass()
+                        .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
+            }
+        }
+
         [Fact]
         public void CollisionsOnCommandLine()
         {
