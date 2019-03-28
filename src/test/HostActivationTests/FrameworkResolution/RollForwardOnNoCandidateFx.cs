@@ -227,7 +227,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
         [Theory]
         [InlineData(null, null, true)]
-        [InlineData(0, null, false)]  // Roll forward to pre-release on patch from release is blocked
+        // This is a different behavior in 3.0. In 2.* the app would fail in this case as it was explicitly disallowed
+        // to roll forward from release to pre-release when rollForwardOnNoCandidateFx=0 (and only then).
+        [InlineData(0, null, true)]
         [InlineData(1, null, true)]
         [InlineData(1, false, true)]  // Rolls on patches even when applyPatches = false if rollForwardOnNoCandidateFx != 0, but only to the lowest higher
         [InlineData(2, null, true)]
@@ -475,7 +477,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory]
         [InlineData(null, null, "5.1.4-preview.1")]
         [InlineData(null, false, "5.1.3-preview.1")]
-        [InlineData(0, null, null)]   // This is interesting - we prevent roll forward from release to preview on patch alone
+        // This is a different behavior in 3.0. In 2.* the app would fail in this case as it was explicitly disallowed
+        // to roll forward from release to pre-release when rollForwardOnNoCandidateFx=0 (and only then).
+        [InlineData(0, null, "5.1.4-preview.1")]
         [InlineData(0, false, null)]
         [InlineData(1, null, "5.1.4-preview.1")]
         [InlineData(1, false, "5.1.3-preview.1")]  // Rolls to nearest higher even on patches, but not to latest patch.
@@ -568,7 +572,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory] // Both 5.2.3-preview.1 and 5.2.3-preview.2 are available
         [InlineData(null, null, "5.2.3-preview.2")]     // Rolls to latest patch - including latest pre-release
         [InlineData(null, false, "5.2.3-preview.1")]
-        [InlineData(0, null, null)]   // This is interesting - we prevent roll forward from release to preview on patch alone
+        // This is a different behavior in 3.0. In 2.* the app would fail in this case as it was explicitly disallowed
+        // to roll forward from release to pre-release when rollForwardOnNoCandidateFx=0 (and only then).
+        [InlineData(0, null, "5.2.3-preview.2")]
         [InlineData(0, false, null)]
         [InlineData(1, null, "5.2.3-preview.2")]   // Rolls to latest patch - including latest pre-release
         [InlineData(1, false, "5.2.3-preview.1")]  // Rolls to nearest higher even on patches, but not to latest patch.

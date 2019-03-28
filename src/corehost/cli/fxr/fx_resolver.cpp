@@ -25,10 +25,14 @@ namespace
             static_assert(roll_forward_option::Disable < roll_forward_option::LatestPatch, "Assuming correct ordering of roll_forward_option values.");
             static_assert(roll_forward_option::Major > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
             static_assert(roll_forward_option::LatestMajor > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
-            if (roll_forward > roll_forward_option::LatestPatch)
+            if (roll_forward >= roll_forward_option::LatestPatch)
             {
                 fx_ver_t best_match_version;
 
+                // Note that LatestPatch is no using search_for_latest. This is to maintain backward compatibility with rollForwardOnNoCandidateFx
+                // If rollForwardOnNoCandidateFx is set to 0 (which manifests here as LatestPatch) it still have to consider applyPatches.
+                // It's easier to treat LatestPatch here as "least greater than or equal" and bellow roll forward to the latest patch based on
+                // applyPatches settings. Basically treat it as the non-existing Patch setting (similar to Minor/Major) for now.
                 bool search_for_latest = roll_forward == roll_forward_option::LatestMinor || roll_forward == roll_forward_option::LatestMajor;
 
                 trace::verbose(
@@ -47,6 +51,14 @@ namespace
                             if (ver.get_major() != specified.get_major())
                             {
                                 continue;
+                            }
+
+                            if (roll_forward <= roll_forward_option::LatestPatch)
+                            {
+                                if (ver.get_minor() != specified.get_minor())
+                                {
+                                    continue;
+                                }
                             }
                         }
 
@@ -75,6 +87,14 @@ namespace
                                 if (ver.get_major() != specified.get_major())
                                 {
                                     continue;
+                                }
+
+                                if (roll_forward <= roll_forward_option::LatestPatch)
+                                {
+                                    if (ver.get_minor() != specified.get_minor())
+                                    {
+                                        continue;
+                                    }
                                 }
                             }
 
@@ -110,7 +130,12 @@ namespace
                 {
                     trace::verbose(_X("Inspecting version... [%s]"), ver.as_str().c_str());
 
-                    if (most_compatible.is_prerelease() == ver.is_prerelease() && // prevent production from rolling forward to preview on patch
+                    // Prevent production from rolling forward to pre-release here.
+                    // If the above code landed on a release version, then it's a normal release->release roll forward and 
+                    //   we should not roll to pre-release just on patch.
+                    // If the above code landed on pre-release version, it's because there was no suitable release found.
+                    //   In that case roll forward to latest patch including pre-release (it won't find a release version anyway).
+                    if (most_compatible.is_prerelease() == ver.is_prerelease() &&
                         ver.get_major() == most_compatible.get_major() &&
                         ver.get_minor() == most_compatible.get_minor())
                     {

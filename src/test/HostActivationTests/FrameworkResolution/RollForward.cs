@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithApplyPatches(applyPatches)
                         .WithFramework(MicrosoftNETCoreApp, frameworkReferenceVersion))
-                    .WithCommandLine(Constants.RollForwardSetting.CommandLineArgument, rollForward),
+                    .With(RollForwardSetting(SettingLocation.CommandLine, rollForward)),
                 result =>
                 {
                     if (resolvedFrameworkVersion == null)
