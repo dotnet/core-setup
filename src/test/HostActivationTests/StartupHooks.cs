@@ -213,9 +213,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var relativeAssemblyPath = "Assembly.dll";
+            var relativeAssemblyPath = $".{Path.DirectorySeparatorChar}Assembly.dll";
 
-            var expectedError = "System.ArgumentException: Absolute path information is required.";
+            var expectedError = "System.IO.FileLoadException: The given assembly name or codebase was invalid.";
 
             // Relative path
             var startupHookVar = relativeAssemblyPath;
@@ -228,7 +228,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdErrContaining(expectedError);
 
             // Relative path error is caught before any hooks run
-            startupHookVar = startupHookDll + Path.PathSeparator + "Assembly.dll";
+            startupHookVar = startupHookDll + Path.PathSeparator + relativeAssemblyPath;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -237,6 +237,69 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .Should().Fail()
                 .And.HaveStdErrContaining(expectedError)
                 .And.NotHaveStdOutContaining("Hello from startup hook!");
+        }
+
+        // Run the app with an invalid assembly name for the startup hook assembly
+        [Fact]
+        public void Muxer_activation_of_StartupHook_With_Invalid_Assembly_Name_Fails()
+        {
+            var fixture = sharedTestState.PortableAppFixture.Copy();
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
+            var startupHookDll = startupHookFixture.TestProject.AppDll;
+
+            var assemblyName = "InvalidName,";
+
+            var expectedError = "System.IO.FileLoadException: The given assembly name or codebase was invalid.";
+
+            // Invalid assembly name
+            var startupHookVar = assemblyName;
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should().Fail()
+                .And.HaveStdErrContaining(expectedError);
+
+            // Invalid assembly name is caught before any hooks run
+            startupHookVar = startupHookDll + Path.PathSeparator + assemblyName;
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should().Fail()
+                .And.HaveStdErrContaining(expectedError)
+                .And.NotHaveStdOutContaining("Hello from startup hook!");
+        }
+
+        [Fact]
+        public void Muxer_activation_of_StartupHook_WithSimpleAssemblyName_Succeeds()
+        {
+            var fixture = sharedTestState.PortableAppFixture.Copy();
+            var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
+            var startupHookDll = startupHookFixture.TestProject.AppDll;
+            var startupHookAssemblyName = Path.GetFileNameWithoutExtension(startupHookDll);
+
+            File.Copy(startupHookDll, Path.Combine(fixture.TestProject.BuiltApp.Location, Path.GetFileName(startupHookDll)));
+
+            SharedFramework.AddReferenceToDepsJson(
+                fixture.TestProject.DepsJson,
+                $"{fixture.TestProject.AssemblyName}/1.0.0",
+                startupHookAssemblyName,
+                "1.0.0");
+
+            fixture.BuiltDotnet.Exec(fixture.TestProject.AppDll)
+                .EnvironmentVariable(startupHookVarName, startupHookAssemblyName)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello from startup hook!")
+                .And.HaveStdOutContaining("Hello World");
         }
 
         // Run the app with missing startup hook assembly
