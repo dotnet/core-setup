@@ -58,7 +58,6 @@
 
     <!-- Copy nethost -->
     <PropertyGroup>
-      <InstallerSourceOSPlatformConfig Condition="'$(InstallerSourceOSPlatformConfig)' == ''">$(OSPlatformConfig)</InstallerSourceOSPlatformConfig>
       <_NetHostOutputDir>$(BaseOutputPath)$(InstallerSourceOSPlatformConfig)\corehost\</_NetHostOutputDir>
     </PropertyGroup>
     <ItemGroup>
