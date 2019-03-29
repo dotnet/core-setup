@@ -30,6 +30,11 @@
         "CommonTypes": [ ]
     },
     {
+        "Name": "Microsoft.NETCore.NativeHosting",
+        "Description": "Provides a library that can be used when building a custom native host of .NET Core",
+        "CommonTypes": [ ]
+    },
+    {
         "Name": "Microsoft.NETCore",
         "Description": "Provides a set of packages that can be used when building portable libraries on .NETCore based platforms.",
         "CommonTypes": [ ]

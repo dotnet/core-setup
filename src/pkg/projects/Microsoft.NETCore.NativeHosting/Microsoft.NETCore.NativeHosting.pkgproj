@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+
+  <PropertyGroup>
+    <Version>$(AppHostVersion)</Version>
+    <IncludeRuntimeJson>false</IncludeRuntimeJson>
+    <IsLineupPackage>false</IsLineupPackage>
+    <HasRuntimePackages>false</HasRuntimePackages>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)$(MSBuildProjectName).props" />
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+
+  <Target Name="GetNativeHostingLibDependencies" BeforeTargets="GetNuGetPackageDependencies">
+    <PropertyGroup>
+      <_DependencyPrefix Condition="'$(OSGroup)' == 'Windows_NT'">win</_DependencyPrefix>
+      <_DependencyPrefix Condition="'$(OSGroup)' == 'Linux'">linux</_DependencyPrefix>
+      <_DependencyPrefix Condition="'$(OSGroup)' == 'OSX'">osx</_DependencyPrefix>
+      <_DependencyPrefix Condition="'$(OSGroup)' == 'FreeBSD'">freebsd</_DependencyPrefix>
+    </PropertyGroup>
+    <ItemGroup>
+      <_DependencyRID Include="@(OfficialBuildRID)"
+                     Condition="$([System.String]::new('%(Identity)').StartsWith('$(_DependencyPrefix)'))"/>
+      <Dependency Include="@(_DependencyRID->'runtime.%(Identity).Microsoft.NETCore.NativeHosting.Lib')">
+        <Version>$(AppHostVersion)</Version>
+      </Dependency>
+    </ItemGroup>
+  </Target>
+</Project>
