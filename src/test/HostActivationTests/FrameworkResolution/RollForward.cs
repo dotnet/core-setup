@@ -144,34 +144,64 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 resolvedFramework);
         }
 
-
-        private void RunTestWithNETCoreAppRelease(
-            string frameworkReferenceVersion,
-            string rollForward,
-            bool? applyPatches,
-            string resolvedFrameworkVersion)
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable,     null,  null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null,  "4.1.2")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, false, null)]
+        [InlineData(Constants.RollForwardSetting.Minor,       null,  "4.1.2")]
+        [InlineData(Constants.RollForwardSetting.Minor,       false, "4.1.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null,  "4.1.2")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false, "4.1.2")]  // applyPatches is ignored
+        [InlineData(Constants.RollForwardSetting.Major,       null,  "4.1.2")]
+        [InlineData(Constants.RollForwardSetting.Major,       false, "4.1.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, null,  "6.0.1")]
+        public void RollForwardOnPatch_FromReleaseIgnoresPreReleaseIfReleaseAvailable(string rollForward, bool? applyPatches, string resolvedFramework)
         {
-            RunTestWithNETCoreApp(
-                SharedState.DotNetWithNETCoreAppRelease,
-                frameworkReferenceVersion,
+            RunTestWithNETCoreAppReleaseAndPreRelease(
+                "4.1.0",
                 rollForward,
                 applyPatches,
-                resolvedFrameworkVersion);
+                resolvedFramework);
         }
 
-        private void RunTestWithNETCoreAppPreRelease(
-            string frameworkReferenceVersion,
-            string rollForward,
-            bool? applyPatches,
-            string resolvedFrameworkVersion)
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Minor,       null,  "4.1.2")]
+        [InlineData(Constants.RollForwardSetting.Minor,       false, "4.1.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null,  "4.1.2")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false, "4.1.2")]  // applyPatches is ignored
+        [InlineData(Constants.RollForwardSetting.Major,       null,  "4.1.2")]
+        [InlineData(Constants.RollForwardSetting.Major,       false, "4.1.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, null,  "6.0.1")]
+        public void RollForwardOnMinor_FromReleaseIgnoresPreReleaseIfReleaseAvailable(string rollForward, bool? applyPatches, string resolvedFramework)
         {
-            RunTestWithNETCoreApp(
-                SharedState.DotNetWithNETCoreAppPreRelease,
-                frameworkReferenceVersion,
+            RunTestWithNETCoreAppReleaseAndPreRelease(
+                "4.0.0",
                 rollForward,
                 applyPatches,
-                resolvedFrameworkVersion);
+                resolvedFramework);
         }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Major,       null,  "4.1.2")]
+        [InlineData(Constants.RollForwardSetting.Major,       false, "4.1.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, null,  "6.0.1")]
+        public void RollForwardOnMajor_FromReleaseIgnoresPreReleaseIfReleaseAvailable(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTestWithNETCoreAppReleaseAndPreRelease(
+                "3.0.0",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
+        private void RunTestWithNETCoreAppRelease(string frameworkReferenceVersion, string rollForward, bool? applyPatches, string resolvedFrameworkVersion)
+            => RunTestWithNETCoreApp(SharedState.DotNetWithNETCoreAppRelease, frameworkReferenceVersion, rollForward, applyPatches, resolvedFrameworkVersion);
+
+        private void RunTestWithNETCoreAppPreRelease(string frameworkReferenceVersion, string rollForward, bool? applyPatches, string resolvedFrameworkVersion)
+            => RunTestWithNETCoreApp(SharedState.DotNetWithNETCoreAppPreRelease, frameworkReferenceVersion, rollForward, applyPatches, resolvedFrameworkVersion);
+
+        private void RunTestWithNETCoreAppReleaseAndPreRelease(string frameworkReferenceVersion, string rollForward, bool? applyPatches, string resolvedFrameworkVersion)
+            => RunTestWithNETCoreApp(SharedState.DotNetWithNETCoreAppReleaseAndPreRelease, frameworkReferenceVersion, rollForward, applyPatches, resolvedFrameworkVersion);
 
         private void RunTestWithNETCoreApp(
             DotNetCli dotNet,
@@ -211,6 +241,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
             public DotNetCli DotNetWithNETCoreAppPreRelease { get; }
 
+            public DotNetCli DotNetWithNETCoreAppReleaseAndPreRelease { get; }
+
             public SharedTestState()
             {
                 DotNetWithNETCoreAppRelease = DotNet("DotNetWithNETCoreAppRelease")
@@ -231,6 +263,22 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .AddMicrosoftNETCoreAppFramework("5.2.1-preview.2")
                     .AddMicrosoftNETCoreAppFramework("6.1.0-preview.1")
                     .AddMicrosoftNETCoreAppFramework("6.1.0-preview.2")
+                    .Build();
+
+                DotNetWithNETCoreAppReleaseAndPreRelease = DotNet("DotNetWithNETCoreAppReleaseAndPreRelease")
+
+                    .AddMicrosoftNETCoreAppFramework("4.1.0-preview.1")
+                    .AddMicrosoftNETCoreAppFramework("4.1.1")
+                    .AddMicrosoftNETCoreAppFramework("4.1.2-preview.1")
+                    .AddMicrosoftNETCoreAppFramework("4.1.2")
+                    .AddMicrosoftNETCoreAppFramework("4.1.3-preview.1")
+
+                    .AddMicrosoftNETCoreAppFramework("4.5.1-preview.2")
+                    .AddMicrosoftNETCoreAppFramework("4.5.2-preview.1")
+
+                    .AddMicrosoftNETCoreAppFramework("6.0.1")
+                    .AddMicrosoftNETCoreAppFramework("6.0.2-preview.1")
+
                     .Build();
 
                 FrameworkReferenceApp = CreateFrameworkReferenceApp();
