@@ -46,7 +46,7 @@ set(HEADERS
     ./corehost_init.h
     ./fx_ver.h
     ./fx_muxer.h
-	./fx_resolver.h
+    ./fx_resolver.h
     ./framework_info.h
     ./sdk_info.h
     ./sdk_resolver.h
