@@ -377,7 +377,9 @@ StatusCode fx_resolver_t::read_framework(
         if (existing_framework == fx_definitions.end())
         {
             // Perform a "soft" roll-forward meaning we don't read any physical framework folders yet
-            rc = soft_roll_forward(fx_ref, false);
+            // Since we didn't find the framework in the resolved list yet, it's a pure soft roll-forward
+            // it's OK to update the newest reference as we haven't processed it yet.
+            rc = soft_roll_forward(fx_ref, /*newest_is_hard_roll_forward*/ false);
             if (rc)
             {
                 break; // Error case
@@ -420,7 +422,10 @@ StatusCode fx_resolver_t::read_framework(
         else
         {
             // Perform a "soft" roll-forward meaning we don't read any physical framework folders yet
-            rc = soft_roll_forward(fx_ref, true);
+            // Note that since we found the framework in the already resolved frameworks
+            // pass a flag which marks the newest resolved framework reference as "hard roll-forward"
+            // meaning that if we need to update it, we need to restart the entire process.
+            rc = soft_roll_forward(fx_ref, /*newest_is_hard_roll_forward*/ true);
             if (rc)
             {
                 break; // Error or retry case
