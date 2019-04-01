@@ -10,6 +10,102 @@ namespace
 {
     const int Max_Framework_Resolve_Retries = 100;
 
+    fx_ver_t search_for_best_framework_match(
+        const std::vector<fx_ver_t>& version_list,
+        const pal::string_t& fx_ver,
+        const fx_ver_t& specified,
+        bool apply_patches,
+        roll_forward_option roll_forward,
+        bool release_only)
+    {
+        fx_ver_t best_match_version;
+
+        static_assert(roll_forward_option::Disable < roll_forward_option::LatestPatch, "Assuming correct ordering of roll_forward_option values.");
+        static_assert(roll_forward_option::Major > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
+        static_assert(roll_forward_option::LatestMajor > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
+        if (roll_forward > roll_forward_option::LatestPatch)
+        {
+            bool search_for_latest = roll_forward == roll_forward_option::LatestMinor || roll_forward == roll_forward_option::LatestMajor;
+
+            trace::verbose(
+                _X("'Roll forward' enabled with value [%d]. Looking for the %s %s greater than or equal version to [%s]"),
+                roll_forward,
+                search_for_latest ? _X("latest") : _X("least"),
+                release_only ? _X("release") : _X("release/pre-release"),
+                fx_ver.c_str());
+
+            for (const auto& ver : version_list)
+            {
+                if ((!release_only || !ver.is_prerelease()) && ver >= specified)
+                {
+                    if (roll_forward <= roll_forward_option::LatestMinor)
+                    {
+                        // We only want to roll forward on minor
+                        if (ver.get_major() != specified.get_major())
+                        {
+                            continue;
+                        }
+
+                        if (roll_forward <= roll_forward_option::LatestPatch)
+                        {
+                            if (ver.get_minor() != specified.get_minor())
+                            {
+                                continue;
+                            }
+                        }
+                    }
+
+                    best_match_version = (best_match_version == fx_ver_t())
+                        ? ver
+                        : (search_for_latest ? std::max(best_match_version, ver) : std::min(best_match_version, ver));
+                }
+            }
+
+            if (best_match_version == fx_ver_t())
+            {
+                trace::verbose(_X("No match greater than or equal to [%s] found."), fx_ver.c_str());
+            }
+            else
+            {
+                trace::verbose(_X("Found version [%s]"), best_match_version.as_str().c_str());
+            }
+        }
+
+        // For LatestMinor and LatestMajor the above search should already find the latest patch (it looks for latest version as a whole).
+        // For Disable, there's no roll forward (in fact we should not even get here).
+        // For LatestPatch, Major and Minor, we need to look for latest patch as the above would have find the lowest patch (as it looks for lowest version as a whole).
+        //   For backward compatibility reasons we also need to consider the apply_patches setting though.
+        if ((roll_forward == roll_forward_option::LatestPatch || roll_forward == roll_forward_option::Minor || roll_forward == roll_forward_option::Major)
+            && apply_patches)
+        {
+            fx_ver_t apply_patch_from_version = best_match_version;
+            if (apply_patch_from_version == fx_ver_t())
+            {
+                apply_patch_from_version = specified;
+            }
+
+            trace::verbose(
+                _X("Applying patch roll forward from [%s] on %s"), 
+                apply_patch_from_version.as_str().c_str(),
+                release_only ? _X("release only") : _X("release/pre-release"));
+
+            for (const auto& ver : version_list)
+            {
+                trace::verbose(_X("Inspecting version... [%s]"), ver.as_str().c_str());
+
+                if ((!release_only || !ver.is_prerelease()) && ver >= apply_patch_from_version &&
+                    ver.get_major() == apply_patch_from_version.get_major() &&
+                    ver.get_minor() == apply_patch_from_version.get_minor())
+                {
+                    // Pick the greatest that differs only in patch.
+                    best_match_version = std::max(ver, best_match_version);
+                }
+            }
+        }
+
+        return best_match_version;
+    }
+
     fx_ver_t resolve_framework_version(
         const std::vector<fx_ver_t>& version_list,
         const pal::string_t& fx_ver,
@@ -19,152 +115,41 @@ namespace
     {
         trace::verbose(_X("Attempting FX roll forward starting from [%s]"), fx_ver.c_str());
 
-        fx_ver_t most_compatible = specified;
+        // If the desired framework reference is release, then try release-only search first.
         if (!specified.is_prerelease())
         {
-            static_assert(roll_forward_option::Disable < roll_forward_option::LatestPatch, "Assuming correct ordering of roll_forward_option values.");
-            static_assert(roll_forward_option::Major > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
-            static_assert(roll_forward_option::LatestMajor > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
-            if (roll_forward >= roll_forward_option::LatestPatch)
+            fx_ver_t best_match_release_only = search_for_best_framework_match(
+                version_list,
+                fx_ver,
+                specified,
+                apply_patches,
+                roll_forward,
+                /*release_only*/ true);
+
+            if (best_match_release_only != fx_ver_t())
             {
-                fx_ver_t best_match_version;
-
-                // Note that LatestPatch is no using search_for_latest. This is to maintain backward compatibility with rollForwardOnNoCandidateFx
-                // If rollForwardOnNoCandidateFx is set to 0 (which manifests here as LatestPatch) it still have to consider applyPatches.
-                // It's easier to treat LatestPatch here as "least greater than or equal" and bellow roll forward to the latest patch based on
-                // applyPatches settings. Basically treat it as the non-existing Patch setting (similar to Minor/Major) for now.
-                bool search_for_latest = roll_forward == roll_forward_option::LatestMinor || roll_forward == roll_forward_option::LatestMajor;
-
-                trace::verbose(
-                    _X("'Roll forward' enabled with value [%d]. Looking for the %s production greater than or equal version to [%s]"),
-                    roll_forward,
-                    search_for_latest ? _X("latest") : _X("least"),
-                    fx_ver.c_str());
-
-                for (const auto& ver : version_list)
-                {
-                    if (!ver.is_prerelease() && ver >= specified)
-                    {
-                        if (roll_forward <= roll_forward_option::LatestMinor)
-                        {
-                            // We only want to roll forward on minor
-                            if (ver.get_major() != specified.get_major())
-                            {
-                                continue;
-                            }
-
-                            if (roll_forward <= roll_forward_option::LatestPatch)
-                            {
-                                if (ver.get_minor() != specified.get_minor())
-                                {
-                                    continue;
-                                }
-                            }
-                        }
-
-                        best_match_version = (best_match_version == fx_ver_t())
-                            ? ver
-                            : (search_for_latest ? std::max(best_match_version, ver) : std::min(best_match_version, ver));
-                    }
-                }
-
-                if (best_match_version == fx_ver_t())
-                {
-                    // Look for the least preview version
-                    trace::verbose(
-                        _X("No production greater than or equal to [%s] found. Looking for the %s preview greater than [%s]"),
-                        fx_ver.c_str(),
-                        search_for_latest ? _X("latest") : _X("least"),
-                        fx_ver.c_str());
-
-                    for (const auto& ver : version_list)
-                    {
-                        if (ver.is_prerelease() && ver >= specified)
-                        {
-                            if (roll_forward <= roll_forward_option::LatestMinor)
-                            {
-                                // We only want to roll forward on minor
-                                if (ver.get_major() != specified.get_major())
-                                {
-                                    continue;
-                                }
-
-                                if (roll_forward <= roll_forward_option::LatestPatch)
-                                {
-                                    if (ver.get_minor() != specified.get_minor())
-                                    {
-                                        continue;
-                                    }
-                                }
-                            }
-
-                            best_match_version = (best_match_version == fx_ver_t())
-                                ? ver
-                                : (search_for_latest ? std::max(best_match_version, ver) : std::min(best_match_version, ver));
-                        }
-                    }
-                }
-
-                if (best_match_version == fx_ver_t())
-                {
-                    trace::verbose(_X("No preview greater than or equal to [%s] found."), fx_ver.c_str());
-                }
-                else
-                {
-                    trace::verbose(_X("Found version [%s]"), best_match_version.as_str().c_str());
-                    most_compatible = best_match_version;
-                }
-            }
-
-            // For LatestMinor and LatestMajor the above search should already find the latest patch (it looks for latest version as a whole).
-            // For Disable, there's no roll forward (in fact we should not even get here).
-            // For Major and Minor, we need to look for latest patch as the above would have find the lowest patch (as it looks for lowest version as a whole).
-            //   For backward compatibility reasons we also need to consider the apply_patches setting though.
-            // For LatestPatch, we need to look for latest patch as there was no search done yet.
-            //   For backward compatibility reasons we also need to consider the apply_patches setting though.
-            if ((roll_forward == roll_forward_option::LatestPatch || roll_forward == roll_forward_option::Minor || roll_forward == roll_forward_option::Major)
-                && apply_patches)
-            {
-                trace::verbose(_X("Applying patch roll forward from [%s]"), most_compatible.as_str().c_str());
-                for (const auto& ver : version_list)
-                {
-                    trace::verbose(_X("Inspecting version... [%s]"), ver.as_str().c_str());
-
-                    // Prevent production from rolling forward to pre-release here.
-                    // If the above code landed on a release version, then it's a normal release->release roll forward and 
-                    //   we should not roll to pre-release just on patch.
-                    // If the above code landed on pre-release version, it's because there was no suitable release found.
-                    //   In that case roll forward to latest patch including pre-release (it won't find a release version anyway).
-                    if (most_compatible.is_prerelease() == ver.is_prerelease() &&
-                        ver.get_major() == most_compatible.get_major() &&
-                        ver.get_minor() == most_compatible.get_minor())
-                    {
-                        // Pick the greatest that differs only in patch.
-                        most_compatible = std::max(ver, most_compatible);
-                    }
-                }
+                return best_match_release_only;
             }
         }
-        else
+
+        // If release-only didn't find anything, or the desired framework reference was pre-release
+        // do a full search on all versions.
+        fx_ver_t best_match = search_for_best_framework_match(
+            version_list,
+            fx_ver,
+            specified,
+            apply_patches,
+            roll_forward,
+            /*release_only*/ false);
+
+        if (best_match == fx_ver_t())
         {
-            // pre-release has its own roll forward rules and ignores roll_forward and apply_patches
-            for (const auto& ver : version_list)
-            {
-                trace::verbose(_X("Inspecting version... [%s]"), ver.as_str().c_str());
-
-                if (ver.is_prerelease() && // prevent roll forward to production.
-                    ver.get_major() == specified.get_major() &&
-                    ver.get_minor() == specified.get_minor() &&
-                    ver.get_patch() == specified.get_patch() &&
-                    ver > specified)
-                {
-                    // Pick the smallest prerelease that is greater than specified.
-                    most_compatible = (most_compatible == specified) ? ver : std::min(ver, most_compatible);
-                }
-            }
+            // This is not strictly necessary, we just need to return version which doesn't exist.
+            // But it's cleaner to return the desider reference then invalid -1.-1.-1 version.
+            best_match = specified;
         }
 
-        return most_compatible;
+        return best_match;
     }
 
     fx_definition_t* resolve_fx(

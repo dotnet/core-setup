@@ -51,6 +51,25 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable,     null,  "2.1.2")]
+        [InlineData(Constants.RollForwardSetting.Disable,     false, "2.1.2")] // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.Disable,     true,  "2.1.2")] // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null,  "2.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, false, "2.1.2")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=0, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.Minor,       null,  "2.1.3")]
+        [InlineData(Constants.RollForwardSetting.Minor,       false, "2.1.2")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=1, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.Major,       null,  "2.1.3")]
+        [InlineData(Constants.RollForwardSetting.Major,       false, "2.1.2")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=2, applyPatches=false
+        public void RollForwardOnPatch_FromExisting_ReleaseOnly(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTestWithNETCoreAppRelease(
+                "2.1.2",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
+        [Theory]
         [InlineData(Constants.RollForwardSetting.Disable,     null,  null)]
         [InlineData(Constants.RollForwardSetting.LatestPatch, null,  null)]
         [InlineData(Constants.RollForwardSetting.Minor,       null,  "2.1.3")]
@@ -82,6 +101,37 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTestWithNETCoreAppRelease(
                 "1.1.0",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable, null, null)]
+        [InlineData(Constants.RollForwardSetting.Disable, false, null)]
+        [InlineData(Constants.RollForwardSetting.Disable, true, null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null, null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, false, null)]
+        public void NeverRollBackOnPatch_ReleaseOnly(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTestWithNETCoreAppRelease(
+                "2.1.4",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable, null, null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null, null)]
+        [InlineData(Constants.RollForwardSetting.Minor, null, null)]
+        [InlineData(Constants.RollForwardSetting.Minor, false, null)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null, null)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false, null)]
+        public void NeverRollBackOnMinor_ReleaseOnly(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTestWithNETCoreAppRelease(
+                "2.4.2",
                 rollForward,
                 applyPatches,
                 resolvedFramework);
@@ -147,13 +197,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory]
         [InlineData(Constants.RollForwardSetting.Disable,     null,  null)]
         [InlineData(Constants.RollForwardSetting.LatestPatch, null,  "5.1.2-preview.2")]
-        [InlineData(Constants.RollForwardSetting.LatestPatch, false, null)]              // Backward compat, equivalient to rollForwardOnNoCadidateFx=0, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.LatestPatch, false, null)]             
         [InlineData(Constants.RollForwardSetting.Minor,       null,  "5.1.2-preview.2")]
-        [InlineData(Constants.RollForwardSetting.Minor,       false, "5.1.1-preview.1")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=1, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.Minor,       false, "5.1.1-preview.1")]
         [InlineData(Constants.RollForwardSetting.LatestMinor, null,  "5.2.1-preview.2")]
-        [InlineData(Constants.RollForwardSetting.LatestMinor, false, "5.2.1-preview.2")] // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false, "5.2.1-preview.2")]
         [InlineData(Constants.RollForwardSetting.Major,       null,  "5.1.2-preview.2")]
-        [InlineData(Constants.RollForwardSetting.Major,       false, "5.1.1-preview.1")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=2, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.Major,       false, "5.1.1-preview.1")]
         [InlineData(Constants.RollForwardSetting.LatestMajor, null,  "6.1.0-preview.2")]
         public void RollForwardOnPatch_FromPreReleaseToPreRelease(string rollForward, bool? applyPatches, string resolvedFramework)
         {
@@ -163,6 +213,27 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 applyPatches,
                 resolvedFramework);
         }
+
+        [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable,     null,  "5.1.1-preview.1")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null,  "5.1.2-preview.2")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, false, "5.1.1-preview.1")]
+        [InlineData(Constants.RollForwardSetting.Minor,       null,  "5.1.2-preview.2")]
+        [InlineData(Constants.RollForwardSetting.Minor,       false, "5.1.1-preview.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null,  "5.2.1-preview.2")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false, "5.2.1-preview.2")]
+        [InlineData(Constants.RollForwardSetting.Major,       null,  "5.1.2-preview.2")]
+        [InlineData(Constants.RollForwardSetting.Major,       false, "5.1.1-preview.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, null,  "6.1.0-preview.2")]
+        public void RollForwardOnPatch_FromExisting_PreReleaseOnly(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTestWithNETCoreAppPreRelease(
+                "5.1.1-preview.1",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
 
         [Theory]
         [InlineData(Constants.RollForwardSetting.Disable,     null,  null)]
