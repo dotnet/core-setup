@@ -331,8 +331,8 @@ The new behavior will be to treat all settings of `rollForwardOnNoCandidateFx` t
 
 | Reference                                     | Available versions | Existing behavior | New behavior      |
 | --------------------------------------------- | ------------------ | ----------------- | ----------------- |
-| 3.0.1-preview.1                               | 3.0.0              | 3.0.1-preview.1   | 3.0.1-preview.1   |
-| 3.0.1-preview.1 rollForwardOnNoCandidateFx=0  | 3.0.0              | failure           | 3.0.1-preview.1   |
+| 3.0.0                                         | 3.0.1-preview.1    | 3.0.1-preview.1   | 3.0.1-preview.1   |
+| 3.0.0 rollForwardOnNoCandidateFx=0            | 3.0.1-preview.1    | failure           | 3.0.1-preview.1   |
 
 
 ### Pre-release will roll forward
