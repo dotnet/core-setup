@@ -89,6 +89,34 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             DotNetCli dotnet,
             TestApp app,
             TestSettings settings,
+            string resolvedFrameworkName,
+            string resolvedFrameworkVersion,
+            bool multiLevelLookup = false)
+        {
+            RunTest(
+                dotnet,
+                app,
+                settings,
+                result =>
+                {
+                    if (resolvedFrameworkVersion != null)
+                    {
+                        result.Should().Pass()
+                            .And.HaveResolvedFramework(resolvedFrameworkName, resolvedFrameworkVersion);
+                    }
+                    else
+                    {
+                        result.Should().Fail()
+                            .And.DidNotFindCompatibleFrameworkVersion();
+                    }
+                },
+                multiLevelLookup);
+        }
+
+        protected void RunTest(
+            DotNetCli dotnet,
+            TestApp app,
+            TestSettings settings,
             Action<CommandResult> resultAction,
             bool multiLevelLookup = false)
         {
