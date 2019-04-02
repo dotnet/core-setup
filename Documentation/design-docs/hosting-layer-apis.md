@@ -96,3 +96,50 @@ Set a callback which will be used to report error messages. By default no callba
 The return value is the previouly registered callback (which is now unregistered) or `nullptr` if there was no previously registered callback.
 
 The error writer is registered per-thread. On each thread, only one callback can be registered. Subsequent registrations overwrite the previous ones.
+
+#### [Proposed] .NET Core 3.0+
+
+``` C
+typedef void* context_handle;
+
+struct corehost_context_contract
+{
+    size_t version;
+    context_handle instance;
+    int (*get_property)(
+        context_handle instance,
+        const char_t *key,
+        const char_t **value);
+    int (*set_property)(
+        context_handle instance,
+        const char_t *key,
+        const char_t *value);
+    int (*get_properties)(
+        context_handle instance,
+        size_t *count,
+        const char_t **keys,
+        const char_t **values);
+};
+```
+
+Contract for performing operations on an initialized host context.
+* `version` - version of the struct.
+* `instance` - opaque handle to the initialized host context.
+* `get_property` - function pointer for getting a property on the host context.
+  * `key` - key of the property to get.
+  * `value` - pointer to a buffer with the retrieved property value.
+* `set_property` - function pointer for setting a property on the host context.
+  * `key` - key of the property to set.
+  * `value` - value of the property to set. If `nullptr`, the property is removed.
+* `get_properties` - function pointer for getting all properties on the host context.
+  * `count` - size of `keys` and `values`. If the size is too small, it will be populated with the required size. Otherwise, it will be populated with the size used.
+  * `keys` - buffer to populate with the property keys
+  * `values` - buffer to populate with the property values
+
+``` C
+int corehost_initialize_context(const host_interface_t *init, corehost_context_contract *context_contract)
+```
+
+Initializes the host context. This calculates everything required to start CoreCLR (but does not actually do so).
+* `init` - struct defining how the host context should be initialized. If the host context is already initialized, this function will check if `init` is compatible with the active context.
+* `context_contract` - if initialization is successful, this is populated with the contract for operating on the initialized host context.
