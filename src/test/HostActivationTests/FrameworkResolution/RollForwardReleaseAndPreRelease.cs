@@ -39,6 +39,25 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         [Theory]
+        [InlineData(Constants.RollForwardSetting.Disable, null, "4.1.1")]
+        [InlineData(Constants.RollForwardSetting.Disable, false, "4.1.1")] // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.Disable, true, "4.1.1")] // applyPatches is ignored for new rollForward settings
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null, "4.1.2")] // Prefers release over pre-release
+        [InlineData(Constants.RollForwardSetting.LatestPatch, false, "4.1.1")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=0, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.Minor, null, "4.1.2")] // Prefers release over pre-release
+        [InlineData(Constants.RollForwardSetting.Minor, false, "4.1.1")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=1, applyPatches=false
+        [InlineData(Constants.RollForwardSetting.Major, null, "4.1.2")] // Prefers release over pre-release
+        [InlineData(Constants.RollForwardSetting.Major, false, "4.1.1")] // Backward compat, equivalient to rollForwardOnNoCadidateFx=2, applyPatches=false
+        public void RollForwardOnPatch_FromExisting_FromReleaseToPreRelease(string rollForward, bool? applyPatches, string resolvedFramework)
+        {
+            RunTest(
+                "4.1.1",
+                rollForward,
+                applyPatches,
+                resolvedFramework);
+        }
+
+        [Theory]
         [InlineData(Constants.RollForwardSetting.Minor,       null,  "4.1.2")]
         [InlineData(Constants.RollForwardSetting.Minor,       false, "4.1.1")]
         [InlineData(Constants.RollForwardSetting.LatestMinor, null,  "4.1.2")]

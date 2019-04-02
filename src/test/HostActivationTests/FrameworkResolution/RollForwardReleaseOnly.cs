@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         public void NeverRollBackOnMinor_ReleaseOnly(string rollForward, bool? applyPatches, string resolvedFramework)
         {
             RunTest(
-                "2.4.2",
+                "2.5.0",
                 rollForward,
                 applyPatches,
                 resolvedFramework);
