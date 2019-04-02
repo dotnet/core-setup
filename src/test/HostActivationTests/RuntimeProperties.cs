@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             public string AppTestPropertyName => "APP_TEST_PROPERTY";
             public string AppTestPropertyValue => "VALUE_FROM_APP";
             public string FrameworkTestPropertyName => "FRAMEWORK_TEST_PROPERTY";
-            public string FrameworkTestPropertyValue => "VALUE_FROM_FRAMWEWORK";
+            public string FrameworkTestPropertyValue => "VALUE_FROM_FRAMEWORK";
 
             private readonly string copiedDotnet;
 
