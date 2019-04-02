@@ -23,7 +23,8 @@ This API requires the native host to locate the runtime and to fully specify all
 * **COM-style ABI in `coreclr`**  
 `coreclr` exposes COM-style ABI to host the .NET Core runtime and perform a wide range of operations on it. See this [header file](https://github.com/dotnet/coreclr/blob/master/src/pal/prebuilt/inc/mscoree.h) for more details.
 Similarly to the C-style ABI the COM-style ABI also requires the native host to locate the runtime and to fully specify all startup parameters.
-There's no inherent interoperability between these APIs and the .NET Core SDK.
+There's no inherent interoperability between these APIs and the .NET Core SDK.  
+The COM-style ABI is deprecated and should not be used going forward.
 * **`hostfxr` and `hostpolicy` APIs**  
 The hosting layer of .NET Core already exposes some functionality as C-style ABI on either the `hostfxr` or `hostpolicy` libraries. These can execute application, determine available SDKs, determine native dependency locations, resolve component dependencies and so on.
 Unlike the above `coreclr` based APIs these don't require the caller to fully specify all startup parameters, instead these APIs understand artifacts produced by .NET Core SDK making it much easier to consume SDK produced apps/libraries.
@@ -62,23 +63,26 @@ Add new library `nethost` which will provide a way to locate the right `hostfxr`
 The library would be a dynamically loaded library (`.dll`, `.so`, `.dylib`). For ease of use there would be a header file for C/C++ apps as well as `.lib`/`.a` for easy linking.
 Native host would ship this library as part of the app. Unlike the `apphost`, `comhost` and `ijwhost`, the `nethost` will not be directly supported by the .NET Core SDK since it's target usage is not from .NET Core apps.
 
-The exact delivery mechanism is TBD (pending investigation), but it probably should include NuGet (for C++ projects) and plain `.zip` (for any consumer). The binary itself should be signed by Microsoft as there will be no support for modifying the binary as part of custom application build (unlike `apphost`).
+The exact delivery mechanism is TBD (pending investigation):
+* `.zip` which would contain the `.dll`, `.h` and `.lib` on Windows, `.so` and `.h` on Linux and `.dylib` and `.h` on macOS.
+* Possibly a NuGet package for easy consumption from VS C++ projects
+* Possibly include it in some form in .NET Core SDK as well (similar to `ijwhost`)
+
+The binary itself should be signed by Microsoft as there will be no support for modifying the binary as part of custom application build (unlike `apphost`).
 
 
 ### Locate `hostfxr`
 ``` C++
-int nethost_get_hostfxr_path(
+int get_hostfxr_path(
         char_t * result_buffer,
-        size_t buffer_size,
-        size_t * out_buffer_required_size,
+        size_t * buffer_size,
         const_t char * assembly_path);
 ```
 
-This API locates the `hostfxr` and returns its path by calling the `result` function. (This callback design is chosen so that it's clear and easy to define memory ownership.)
+This API locates the `hostfxr` and returns its path by calling the `result` function.
 
 * `result_buffer` - Buffer that will be populated with the hostfxr path, including a null terminator.
-* `buffer_size` - Size of result_buffer in char_t units
-* `out_buffer_required_size` - Minimum required size in char_t units for a buffer to hold the hostfxr path
+* `buffer_size` - On input this points to the size of the `result_buffer` in `char_t` units. On output this points to the number of `char_t` units used from the `result_buffer` (including the null terminator). If `result_buffer` is `nullptr` the input value is ignored and only the minimum required size in `char_t` units is set on output.
 * `assembly_path` - Optional. Path to the component's assembly. Whether or not this is specified determines the behavior for locating the hostfxr library.
   * If `nullptr`, `hostfxr` is located using the environment variable or global registration
   * If specified, `hostfxr` is located as if the `assembly_path` is and application with `apphost`
@@ -96,6 +100,8 @@ This API locates the `hostfxr` and returns its path by calling the `result` func
   * Allow future improvements without breaking the API
   * Consider explicitly documenting types of behaviors which nobody should take dependency on (specifically failure scenarios)
 * Extensible
+  * It should allow additional parameters to some of the operations without a need to add new exported APIs
+  * It should allow additional interactions with the host - for example modifying how the runtime is initialized via some new options, without a need for a completely new set of APIs
 
 ### New scenarios
 The API should allow these scenarios:
@@ -106,7 +112,7 @@ The API should allow these scenarios:
 
 It should be possible to ship with only some of these supported, then enable more scenarios later on.
 
-All the proposed APIs will be exports of the `hostfxr` library and will use the same calling convention as existing `hostfxr` exports. The names shown are the exact export names (no mangling).
+All the proposed APIs will be exports of the `hostfxr` library and will use the same calling convention and name mangling as existing `hostfxr` exports.
 
 ### Initialize host context
 
@@ -139,7 +145,7 @@ struct hostfxr_initialize_parameters
 
 The `hostfxr_initialize_parameters` structure stores parameters which are common to all forms of initialization.
 * `size` - the size of the structure. This is used for versioning. Should be set to `sizeof(hostfxr_initialize_parameters)`.
-* `host_path` - path to the native host (typically the `.exe`). This value is not used for anything by the hosting components. It's just passed to the CoreCLR as the path to the executable. It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`).
+* `host_path` - path to the native host (typically the `.exe`). This value is not used for anything by the hosting components. It's just passed to the CoreCLR as the path to the executable. It can point to a file which is not executable itself, if such file doesn't exist (for example in COM activation scenarios this points to the `comhost.dll`). This is used by PAL to initialize internal command line structures, process name and so on.
 * `dotnet_root` - path to the root of the .NET Core installation in use. This typically points to the install location from which the `hostfxr` has been loaded. For example on Windows this would typically point to `C:\Program Files\dotnet`. The path is used to search for shared frameworks and potentially SDKs.
 
 
@@ -200,41 +206,40 @@ The function returns specific return code for the first initialized host context
 
 #### Runtime properties
 These functions allow the native host to inspect and modify runtime properties.
-* If the `host_context_handle` represents the first initialized context in the process, these functions expose all properties from runtime configurations as well as those computed by the hosting layer components. These functions will allow modification of the properties via `hostfxr_set_runtime_property`. 
+* If the `host_context_handle` represents the first initialized context in the process, these functions expose all properties from runtime configurations as well as those computed by the hosting layer components. These functions will allow modification of the properties via `hostfxr_set_runtime_property_value`. 
 * If the `host_context_handle` represents any other context (so not the first one), these functions expose only properties from runtime configuration. These functions won't allow modification of the properties.
 
 It is possible to access runtime properties of the first initialized context in the process at any time (for reading only), by specifying `nullptr` as the `host_context_handle`.
 
 ``` C
-int hostfxr_get_runtime_property(
+int hostfxr_get_runtime_property_value(
     const hostfxr_handle host_context_handle,
     const char_t * name,
-    char_t * buffer,
-    size_t buffer_size,
-    size_t * buffer_used);
+    const char_t ** value);
 ```
 
-Returns the value of a property specified by its name.
+Returns the value of a runtime property specified by its name.
 * `host_context_handle` - the initialized host context. If set to `nullptr` the function will operate on runtime properties of the first host context in the process.
 * `name` - the name of the runtime property to get. Must not be `nullptr`.
-* `buffer` - buffer to receive the value of the property
-* `buffer_size` - the size of the `buffer` in `char_t` units.
-* `buffer_used` - when successful contains number of `char_t` units used in the buffer (including the null terminator). If the specified `buffer_size` was too small, the function returns `HostApiBufferTooSmall` and sets the `buffer_used` to the minimum required size.
+* `value` - returns a pointer to a buffer with the property value. The buffer is owned by the host context. The caller should make a copy of it if it needs to store it for anything longer than immediate consumption. The lifetime is only guaranteed until any of the below happens:
+  * one of the "run" methods is called on the host context
+  * the host context is closed via `hostfxr_shutdown`
+  * the value of the property is changed via `hostfxr_set_runtime_property_value`
 
 Trying to get a property which doesn't exist is an error and will return an appropriate error code.
 
-We're proposing a fix in `hostpolicy` which will make sure that there are no duplicates possible after initialization (see dotnet/core-setup#5529). With that `hostfxr_get_runtime_property` will work always (as there can only be one value).
+We're proposing a fix in `hostpolicy` which will make sure that there are no duplicates possible after initialization (see dotnet/core-setup#5529). With that `hostfxr_get_runtime_property_value` will work always (as there can only be one value).
 
 
 ``` C
-int hostfxr_set_runtime_property(
+int hostfxr_set_runtime_property_value(
     const hostfxr_handle host_context_handle,
     const char_t * name,
     const char_t * value);
 ```
 
 Sets the value of a property.
-* `host_context_handle` - the initialized host context.
+* `host_context_handle` - the initialized host context. (Must not be `nullptr`)
 * `name` - the name of the runtime property to set. Must not be `nullptr`.
 * `value` - the value of the property to set. If the property already has a value in the host context, this function will overwrite it. When set to `nullptr` and if the property already has a value then the property is "unset" - removed from the runtime property collection.
 
@@ -242,37 +247,25 @@ Setting properties is only supported on the first host context in the process. T
 
 
 ``` C
-int hostfxr_get_runtime_property_count(
+int hostfxr_get_runtime_properties(
     const hostfxr_handle host_context_handle,
-    size_t * count);
+    size_t * count,
+    const char_t **keys,
+    const char_t **values);
 ```
 
-Gets the number of properties available on the host context. Use this in combination with `hostfxr_get_runtime_property_name` to enumerate all runtime properties on the host context.
+Returns the full set of all runtime properties for the specified host context.
 * `host_context_handle` - the initialized host context. If set to `nullptr` the function will operate on runtime properties of the first host context in the process.
-* `count` - out parameter which must not be `nullptr` and which receives the number of runtime properties on the host context.
+* `count` - in/out parameter which must not be `nullptr`. On input it specifies the size of the the `keys` and `values` buffers. On output it contains the number of entries used from `keys` and `values` buffers - the number of properties returned. If the size of the buffers is too small, the function returns a specific error code and fill the `count` with the number of available properties. If `keys` or `values` is `nullptr` the function ignores the input value of `count` and just returns the number of properties.
+* `keys` - buffer which acts as an array of pointers to buffers with keys for the runtime properties.
+* `values` - buffer which acts as an array of pointer to buffers with values for the runtime properties.
 
-Note that `hostfxr_set_runtime_property` can remove or add new properties, so the number of properties returned is only valid as long as no properties were added/removed.
+`keys` and `values` store pointers to buffers which are owned by the host context. The caller should make a copy of it if it needs to store it for anything longer than immediate consumption. The lifetime is only guaranteed until any of the below happens:
+  * one of the "run" methods is called on the host context
+  * the host context is closed via `hostfxr_shutdown`
+  * the value or existence of any property is changed via `hostfxr_set_runtime_property_value`
 
-
-``` C
-int hostfxr_get_runtime_property_name(
-    const hostfxr_handle host_context_handle,
-    size_t property_index,
-    char_t * buffer,
-    size_t buffer_size,
-    size_t * buffer_used);
-```
-
-Gets the name of a property identified by its index. This can be used to enumerate all runtime properties on the host context.
-* `host_context_handle` - the initialized host context. If set to `nullptr` the function will operate on runtime properties of the first host context in the process.
-* `property_index` - the index of the property to get the name of. This must be greater or equal to `0` and must be smaller than the property count reported by `hostfxr_get_runtime_property_count`.
-* `buffer` - buffer to receive the name of the property
-* `buffer_size` - the size of the `buffer` in `char_t` units.
-* `buffer_used` - when successful contains number of `char_t` units used in the buffer (including the null terminator). If the specified `buffer_size` was too small, the function returns `HostApiBufferTooSmall` and sets the `buffer_used` to the minimum required size.
-
-The order of properties is not defined, but it's stable.
-
-Note that `hostfxr_set_runtime_property` can remove or add new properties, so the property indexes are only stable as long as no properties were added/removed.
+Note that `hostfxr_set_runtime_property_value` can remove or add new properties, so the number of properties returned is only valid as long as no properties were added/removed.
 
 
 ### Start the runtime
