@@ -5,11 +5,11 @@
 using System;
 using System.IO;
 
-namespace Microsoft.DotNet.Build.Bundle
+namespace Microsoft.NET.Build.Bundle
 {
     /// <summary>
     /// Extractor: The functionality to extract the files embedded 
-    /// within a bundle to sepearte files.
+    /// within a bundle to separate files.
     /// </summary>
     public class Extractor
     {

@@ -344,7 +344,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 Command.Create(appExe)
                     .CaptureStdErr()
                     .CaptureStdOut()
-                    .EnvironmentVariable("_DOTNET_TEST_SDK_REGISTRY_PATH", regKeyOverride.KeyPath)
+                    .EnvironmentVariable(Constants.TestOnlyEnvironmentVariables.RegistryPath, regKeyOverride.KeyPath)
                     .Execute()
                     .Should().Pass()
                     .And.HaveStdOutContaining("Hello World")
@@ -353,7 +353,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 // Verify running from within the working directory
                 Command.Create(appExe)
                     .WorkingDirectory(fixture.TestProject.OutputDirectory)
-                    .EnvironmentVariable("_DOTNET_TEST_SDK_REGISTRY_PATH", regKeyOverride.KeyPath)
+                    .EnvironmentVariable(Constants.TestOnlyEnvironmentVariables.RegistryPath, regKeyOverride.KeyPath)
                     .CaptureStdErr()
                     .CaptureStdOut()
                     .Execute()
@@ -362,6 +362,25 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                     .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
             }
         }
+
+        [Fact]
+        public void ComputedTPADoesntEndWithPathSeparator()
+        {
+            var fixture = sharedTestState.PortableAppFixture_Built
+                .Copy();
+
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+
+            dotnet.Exec(appDll)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute()
+                .Should().Pass()
+                .And.HaveStdErrMatching($"Property TRUSTED_PLATFORM_ASSEMBLIES = .*[^{Path.PathSeparator}]$", System.Text.RegularExpressions.RegexOptions.Multiline);
+        }
+
 
         private string MoveDepsJsonToSubdirectory(TestProjectFixture testProjectFixture)
         {

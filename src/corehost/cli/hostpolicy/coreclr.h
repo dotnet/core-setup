@@ -29,7 +29,7 @@ public:
     using domain_id_t = std::uint32_t;
 
     coreclr_t(host_handle_t host_handle, domain_id_t domain_id);
-    ~coreclr_t();
+    ~coreclr_t() = default;
 
     pal::hresult_t execute_assembly(
         int argc,
@@ -77,26 +77,23 @@ class coreclr_property_bag_t
 public:
     coreclr_property_bag_t();
 
-    void add(common_property key, const char *value);
+    void add(common_property key, const pal::char_t *value);
 
-    void add(const char *key, const char *value);
+    void add(const pal::char_t *key, const pal::char_t *value);
 
-    bool try_get(common_property key, const char **value);
+    bool try_get(common_property key, const pal::char_t **value);
 
-    bool try_get(const char *key, const char **value);
+    bool try_get(const pal::char_t *key, const pal::char_t **value);
 
     void log_properties();
 
-public:
     int count();
 
-    const char** keys();
-
-    const char** values();
+    void enumerate(std::function<void(int, const pal::string_t&, const pal::string_t&)> &callback);
 
 private:
-    std::vector<const char*> _keys;
-    std::vector<const char*> _values;
+    std::vector<pal::string_t> _keys;
+    std::vector<pal::string_t> _values;
 };
 
 #endif // _COREHOST_CLI_CORECLR_H_
