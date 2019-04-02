@@ -197,19 +197,9 @@ namespace
             bool do_roll_forward = false;
             if (!fx_ref.get_use_exact_version())
             {
-                if (!specified.is_prerelease())
-                {
-                    // If production and no roll forward use given version.
-                    do_roll_forward = (*(fx_ref.get_apply_patches())) ||
-                        ((*(fx_ref.get_roll_forward()) != roll_forward_option::LatestPatch) && (*(fx_ref.get_roll_forward()) != roll_forward_option::Disable));
-                }
-                else
-                {
-                    // Prerelease, but roll forward only if version doesn't exist.
-                    pal::string_t ver_dir = fx_dir;
-                    append_path(&ver_dir, fx_ver.c_str());
-                    do_roll_forward = !pal::directory_exists(ver_dir);
-                }
+                // If production and no roll forward use given version.
+                do_roll_forward = (*(fx_ref.get_apply_patches())) ||
+                    ((*(fx_ref.get_roll_forward()) != roll_forward_option::LatestPatch) && (*(fx_ref.get_roll_forward()) != roll_forward_option::Disable));
             }
 
             if (!do_roll_forward)

@@ -682,13 +682,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         [Theory]
-        // Pre-release with exact match will not try to roll forward at all
-        [InlineData(null, null)]
-        [InlineData(null, false)]
-        [InlineData(0, false)]
-        [InlineData(1, null)]
-        [InlineData(2, null)]
-        public void RollForwardToPreRelease_ExactPreReleaseMatch(int? rollForwardOnNoCandidateFx, bool? applyPatches)
+        // 3.0 change:
+        // 2.* - Pre-release with exact match will not try to roll forward at all
+        // 3.* - Pre-release uses normal roll forward rules, it will roll forward on patches even on exact match.
+        [InlineData(null, null, "5.1.4-preview.1")]
+        [InlineData(null, false, "5.1.3-preview.1")]
+        [InlineData(0, false, "5.1.3-preview.1")]
+        [InlineData(1, null, "5.1.4-preview.1")]
+        [InlineData(2, null, "5.1.4-preview.1")]
+        public void RollForwardToPreRelease_ExactPreReleaseMatch(int? rollForwardOnNoCandidateFx, bool? applyPatches, string resolvedVersion)
         {
             RunTestWithManyVersions(
                 runtimeConfig => runtimeConfig
@@ -697,8 +699,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithFramework(MicrosoftNETCoreApp, "5.1.3-preview.1"),
                 commandResult =>
                     commandResult.Should().Pass()
-                        .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3-preview.1")
-                        .And.HaveStdErrContaining("Did not roll forward"));
+                        .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion));
         }
 
         // 3.0 change:
