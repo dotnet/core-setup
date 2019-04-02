@@ -9,6 +9,9 @@ So for example, the machine has only `3.0.1-preview.1` installed and the applica
 
 The new behavior will be to treat all settings of `rollForwardOnNoCandidateFx` the same with regard to pre-release. That is release version will roll forward to pre-release if there's no release version available. In the above sample, the app would run using the `3.0.1-preview.1` framework.
 
+### Test names
+All the tests which change behavior due to intended changes - should we rename them where applicable?
+
 # TODOs
 
 * No implementation for pre-release handling yet

@@ -167,14 +167,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .And.DidNotFindCompatibleFrameworkVersion());
         }
 
+        // 3.0 change: In 2.* pre-release never rolled to release. In 3.* it will follow normal roll-forward rules.
         [Fact]
         public void PreReleaseReference_FailsToRollToRelease()
         {
             RunTestWithOneFramework(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "5.1.0-preview.1"),
-                commandResult => commandResult.Should().Fail()
-                    .And.DidNotFindCompatibleFrameworkVersion());
+                commandResult => commandResult.Should().Pass()
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
         }
 
         private void RunTestWithOneFramework(
@@ -200,29 +201,46 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3-preview.2"));
         }
 
+        // 3.0 change:
+        // 2.* - Pre-Release only rolls on the exact same major.minor.patch (it only rolls over the pre-release portion of the version)
+        // 3.* - Pre-Release follows normal roll-forward rules, including rolling over patches
         [Fact]
         public void RollForwardToPreRelease_FailsOnVersionMismatch()
         {
             RunTestWithPreReleaseFramework(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "5.1.2-preview.2"),
-                commandResult => commandResult.Should().Fail()
-                    .And.DidNotFindCompatibleFrameworkVersion());
+                commandResult => commandResult.Should().Pass()
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3-preview.2"));
         }
 
         [Theory]
-        [InlineData(null, null)]
-        [InlineData(0, false)] // Pre-Release ignores roll forward on no candidate FX and apply patches settings
-        [InlineData(2, true)]
-        public void RollForwardToPreRelease(int? rollForwardOnNoCandidateFx, bool? applyPatches)
+        [InlineData(null, null, "5.1.3-preview.2")]
+        // 3.0 change:
+        // 2.* - Pre-Release ignores roll forward on no candidate FX and apply patches settings
+        // 3.* - Pre-Release follows normal roll-forward rules, including all the roll-forward settings
+        [InlineData(0, false, null)] 
+        [InlineData(2, true, "5.1.3-preview.2")]
+        public void RollForwardToPreRelease(int? rollForwardOnNoCandidateFx, bool? applyPatches, string resolvedFramework)
         {
             RunTestWithPreReleaseFramework(
                 runtimeConfig => runtimeConfig
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.3-preview.1"),
-                commandResult => commandResult.Should().Pass()
-                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3-preview.2"));
+                commandResult =>
+                {
+                    if (resolvedFramework != null)
+                    {
+                        commandResult.Should().Pass()
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                    }
+                    else
+                    {
+                        commandResult.Should().Fail()
+                            .And.DidNotFindCompatibleFrameworkVersion();
+                    }
+                });
         }
 
         [Theory]
@@ -633,11 +651,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 });
         }
 
+        // 3.0 change:
+        // 2.* - Pre-release will only match the extact x.y.z version, regardless of settings
+        // 3.* - Pre-release uses normal roll forward rules, including rolling over minor/patches and obeying settings.
         [Theory]
-        [InlineData(null, null, null)]   // Pre-release will only match the extact x.y.z version, regardless of settings
-        [InlineData(0, false, null)]
-        [InlineData(1, null, null)]
-        [InlineData(2, null, null)]
+        [InlineData(null, null, "5.1.4-preview.1")]
+        [InlineData(0, false, null)]  // Roll-forward fully disabled
+        [InlineData(1, null, "5.1.4-preview.1")]
+        [InlineData(2, null, "5.1.4-preview.1")]
         public void RollForwardToPreRelease_FromDifferentPreRelease(int? rollForwardOnNoCandidateFx, bool? applyPatches, string resolvedVersion)
         {
             RunTestWithManyVersions(
@@ -680,12 +701,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .And.HaveStdErrContaining("Did not roll forward"));
         }
 
+        // 3.0 change:
+        // 2.* - Pre-release will select the closest higher version (5.1.3-preview.2 is available in this test, but 5.1.3-preview.1 will be selected over it)
+        // 3.* - Pre-release applies roll forward on patches if enabled, always selecting the latest patch version.
         [Theory]
-        [InlineData(null, null, "5.1.3-preview.1")]   // Pre-release will select the closest higher version (5.1.3-preview.2 is available)
+        [InlineData(null, null, "5.1.4-preview.1")]
         [InlineData(null, false, "5.1.3-preview.1")]
-        [InlineData(0, false, "5.1.3-preview.1")]
-        [InlineData(1, null, "5.1.3-preview.1")]
-        [InlineData(2, null, "5.1.3-preview.1")]
+        [InlineData(0, false, null)] // settings are obeyed in 3.*
+        [InlineData(1, null, "5.1.4-preview.1")]
+        [InlineData(2, null, "5.1.4-preview.1")]
         public void RollForwardToPreRelease_FromSamePreRelease(int? rollForwardOnNoCandidateFx, bool? applyPatches, string resolvedVersion)
         {
             RunTestWithManyVersions(
