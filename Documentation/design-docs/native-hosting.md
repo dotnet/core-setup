@@ -315,8 +315,8 @@ Samples in general ignore error handling.
 ``` C++
 hostfxr_initialize_parameters params;
 params.size = sizeof(params);
-params.host_path = _hostpath_;
-params.dotnet_root = _dotnetroot_;
+params.host_path = get_path_to_the_host_exe(); // Path to the current executable
+params.dotnet_root = get_directory(get_directory(get_directory(hostfxr_path))); // Three levels up from hostfxr typically
 
 hostfxr_handle host_context_handle;
 hostfxr_initialize_for_app(
