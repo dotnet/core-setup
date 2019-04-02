@@ -202,9 +202,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.NotHaveStdOutContaining("Hello from startup hook!");
         }
 
-        // Run the app with a relative path to the startup hook assembly
         [Fact]
-        public void Muxer_activation_of_StartupHook_With_Relative_Path_Fails()
+        public void Muxer_activation_of_StartupHook_With_Invalid_Simple_Name_Fails()
         {
             var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
@@ -213,11 +212,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var relativeAssemblyPath = $".{Path.DirectorySeparatorChar}Assembly.dll";
+            var relativeAssemblyPath = $".{Path.DirectorySeparatorChar}Assembly";
 
-            var expectedError = "System.IO.FileLoadException: The given assembly name or codebase was invalid.";
+            var expectedError = "System.ArgumentException: The startup hook simple assembly name '{0}' is invalid.";
 
-            // Relative path
+            // With directory separator
             var startupHookVar = relativeAssemblyPath;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
@@ -225,23 +224,78 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining(expectedError);
+                .And.HaveStdErrContaining(string.Format(expectedError, startupHookVar))
+                .And.NotHaveStdErrContaining("--->");
 
-            // Relative path error is caught before any hooks run
-            startupHookVar = startupHookDll + Path.PathSeparator + relativeAssemblyPath;
+            // With alternative directory separator
+            startupHookVar = $"{Path.AltDirectorySeparatorChar}Assembly";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining(expectedError)
+                .And.HaveStdErrContaining(string.Format(expectedError, startupHookVar))
+                .And.NotHaveStdErrContaining("--->");
+
+            // With comma
+            startupHookVar = $"Assembly,version=1.0.0.0";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should().Fail()
+                .And.HaveStdErrContaining(string.Format(expectedError, startupHookVar))
+                .And.NotHaveStdErrContaining("--->");
+
+            // With space
+            startupHookVar = $"Assembly version";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should().Fail()
+                .And.HaveStdErrContaining(string.Format(expectedError, startupHookVar))
+                .And.NotHaveStdErrContaining("--->");
+
+            // With .dll suffix
+            startupHookVar = $"{Path.AltDirectorySeparatorChar}Assembly.DLl";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should().Fail()
+                .And.HaveStdErrContaining(string.Format(expectedError, startupHookVar))
+                .And.NotHaveStdErrContaining("--->");
+
+            // With invalid name
+            startupHookVar = $"Assembly=Name";
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should().Fail()
+                .And.HaveStdErrContaining(string.Format(expectedError, startupHookVar))
+                .And.HaveStdErrContaining("---> System.IO.FileLoadException: The given assembly name or codebase was invalid.");
+
+            // Relative path error is caught before any hooks run
+           startupHookVar = startupHookDll + Path.PathSeparator + relativeAssemblyPath;
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should().Fail()
+                .And.HaveStdErrContaining(string.Format(expectedError, relativeAssemblyPath))
                 .And.NotHaveStdOutContaining("Hello from startup hook!");
         }
 
-        // Run the app with an invalid assembly name for the startup hook assembly
         [Fact]
-        public void Muxer_activation_of_StartupHook_With_Invalid_Assembly_Name_Fails()
+        public void Muxer_activation_of_StartupHook_With_Missing_Assembly_Fails()
         {
             var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
@@ -250,30 +304,29 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var assemblyName = "InvalidName,";
+            var expectedError = "System.ArgumentException: Startup hook assembly '{0}' failed to load.";
 
-            var expectedError = "System.IO.FileLoadException: The given assembly name or codebase was invalid.";
-
-            // Invalid assembly name
-            var startupHookVar = assemblyName;
+            // With file path which doesn't exist
+            var startupHookVar = startupHookDll + ".missing.dll";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining(expectedError);
+                .And.HaveStdErrContaining(string.Format(expectedError, startupHookVar))
+                .And.HaveStdErrContaining($"---> System.IO.FileNotFoundException: Could not load file or assembly '{startupHookVar}'. The system cannot find the file specified.");
 
-            // Invalid assembly name is caught before any hooks run
-            startupHookVar = startupHookDll + Path.PathSeparator + assemblyName;
+            // With simple name which won't resolve
+            startupHookVar = "MissingAssembly";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining(expectedError)
-                .And.NotHaveStdOutContaining("Hello from startup hook!");
+                .And.HaveStdErrContaining(string.Format(expectedError, startupHookVar))
+                .And.HaveStdErrContaining($"---> System.IO.FileNotFoundException: Could not load file or assembly '{startupHookVar}");
         }
 
         [Fact]
@@ -412,7 +465,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
         // Run the app with a startup hook that doesn't have any Initialize method
         [Fact]
-        public void Muxer_activation_of_StartupHook_With_Missing_Method()
+        public void Muxer_activation_of_StartupHook_With_Missing_Method_Fails()
         {
             var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
