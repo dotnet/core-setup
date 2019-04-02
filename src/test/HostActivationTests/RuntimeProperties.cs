@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         }
 
         [Fact]
-        public void ConfigProperty_AppCanGetData()
+        public void AppConfigProperty_AppCanGetData()
         {
             var fixture = sharedState.RuntimePropertiesFixture
                 .Copy();
@@ -54,6 +54,24 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .Should().Pass()
                 .And.HaveStdErrContaining($"Property {sharedState.AppTestPropertyName} = {sharedState.AppTestPropertyValue}")
                 .And.HaveStdOutContaining($"AppContext.GetData({sharedState.AppTestPropertyName}) = {sharedState.AppTestPropertyValue}");
+        }
+
+        [Fact]
+        public void FrameworkConfigProperty_AppCanGetData()
+        {
+            var fixture = sharedState.RuntimePropertiesFixture
+                .Copy();
+
+            var dotnet = fixture.BuiltDotnet;
+            var appDll = fixture.TestProject.AppDll;
+            dotnet.Exec(appDll, sharedState.FrameworkTestPropertyName)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute()
+                .Should().Pass()
+                .And.HaveStdErrContaining($"Property {sharedState.FrameworkTestPropertyName} = {sharedState.FrameworkTestPropertyValue}")
+                .And.HaveStdOutContaining($"AppContext.GetData({sharedState.FrameworkTestPropertyName}) = {sharedState.FrameworkTestPropertyValue}");
         }
 
         [Fact]
