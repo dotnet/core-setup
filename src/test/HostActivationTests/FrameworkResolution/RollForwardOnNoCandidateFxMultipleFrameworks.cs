@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("6.0.0", null, null, null)]    // Can't roll forward from release to pre-release
         [InlineData("6.0.1-preview.0", null, null, "6.1.1-preview.1")]
         [InlineData("6.1.1-preview.0", null, null, "6.1.1-preview.1")]
-        [InlineData("6.0.1-preview.0", 0, null, null)]
+        [InlineData("6.1.0-preview.0", 0, null, "6.1.1-preview.1")] // This is effectively a bug, the design was that pre-release should never roll on patches
         [InlineData("6.1.1-preview.0", 0, null, "6.1.1-preview.1")]
         [InlineData("6.1.1-preview.0", 0, false, "6.1.1-preview.1")]
         [InlineData("6.1.1-preview.1", 0, null, "6.1.1-preview.1")]
