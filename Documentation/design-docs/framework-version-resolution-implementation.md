@@ -12,6 +12,35 @@ The new behavior will be to treat all settings of `rollForwardOnNoCandidateFx` t
 ### Test names
 All the tests which change behavior due to intended changes - should we rename them where applicable?
 
+### Potential ordering problem
+In case of many nested frameworks it's potentially possible to run into ordering issues.
+In this sample NETCore is available as 2.1.1 and 2.2.0
+```
+HigherLevelFX
+ -> NETCore 2.1.0 Minor
+ -> MiddleWareFX 1.0.0
+MiddleWareFX
+ -> NETCore 2.1.0 LatestMinor
+```
+This would resolve to `NETCore 2.1.1` - because the reference from `HigherLevelFX` is hard resolved first, and later on when the reference from `MiddleWareFX` is processed, it's compatible.
+
+On the other hand
+```
+HigherLevelFX
+ -> MiddleWareFX 1.0.0
+ -> NETCore 2.1.0 Minor
+MiddleWareFX
+ -> NETCore 2.1.0 LatestMinor
+```
+(Same except the order of references from `HigherLevelFX` is swapped)
+This would resolve to `NETCore 2.2.0` - because the reference from `MiddleWareFX` is hard resolved first, and later on the reference from `HigherLevelFX` is compatible.
+
+Document this, and add tests for this as well.
+Note that this is existing behavior, instead of Minor/LatestMinor use LatestPatch and LatestPatch/applyPatches=false which both can be specified in 2.*. In one case it would roll forward to latest patch, in the other it would not.
+
+### Broken
+If LatestMajor reference is hard resolved first, we may end up with a reference to higher major version, and then if Minor reference is processed, it won't even soft-roll-forward to the higher major version. If the references are processed in reversed order the system works because the LatestMajor can soft-roll-forward just fine.
+
 # TODOs
 
 * No implementation for pre-release handling yet

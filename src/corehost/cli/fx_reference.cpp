@@ -56,18 +56,16 @@ bool fx_reference_t::is_roll_forward_compatible(const fx_ver_t& other) const
     static_assert(
         roll_forward_option::LatestPatch > roll_forward_option::Disable,
         "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
-    if (get_fx_version_number().get_patch() != other.get_patch()
-        && roll_forward == roll_forward_option::Disable
+    if (roll_forward == roll_forward_option::Disable
         || (apply_patches == false && roll_forward == roll_forward_option::LatestPatch))
     {
+        // In this case no roll-forward is allowed, at all.
+        // And we know the versions are different since we compared 100% equality above, so they're not compatible.
+        // The versions could differ in patch or pre-release, in both cases they're not compatible.
         return false;
     }
 
-    // Release cannot roll forward to pre-release
-    if (!get_fx_version_number().is_prerelease() && other.is_prerelease())
-    {
-        return false;
-    }
+    // It's OK to roll forward from release to pre-release and vice versa
 
     return true;
 }
