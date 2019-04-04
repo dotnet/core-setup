@@ -51,7 +51,7 @@ int corehost_main_with_output_buffer(
     int32_t *required_buffer_size)
 ```
 
-Run a host command and return the output. `corehost_load` should have been called with the `host_command` set on the `host_interface_t`. This function operates in the hosting layer and does not actually run CoreCLR.
+Run a host command and return the output. `corehost_load(init)` should have been called with `init->host_command` set. This function operates in the hosting layer and does not actually run CoreCLR.
 * `argc` / `argv` - command-line arguments
 * `buffer` - buffer to populate with the output (including a null terminator)
 * `buffer_size` - size of `buffer` in `char_t` units
@@ -124,7 +124,7 @@ struct corehost_context_contract
 
 Contract for performing operations on an initialized host context.
 * `version` - version of the struct.
-* `instance` - opaque handle to the initialized host context.
+* `instance` - opaque handle to the `corehost_context_contract` state.
 * `get_property` - function pointer for getting a property on the host context.
   * `key` - key of the property to get.
   * `value` - pointer to a buffer with the retrieved property value.
