@@ -76,7 +76,7 @@ namespace
         // For LatestPatch, Major and Minor, we need to look for latest patch as the above would have find the lowest patch (as it looks for lowest version as a whole).
         //   For backward compatibility reasons we also need to consider the apply_patches setting though.
         if ((roll_forward == roll_forward_option::LatestPatch || roll_forward == roll_forward_option::Minor || roll_forward == roll_forward_option::Major)
-            && apply_patches)
+            && (apply_patches || specified.is_prerelease()))
         {
             fx_ver_t apply_patch_from_version = best_match_version;
             if (apply_patch_from_version == fx_ver_t())
@@ -93,7 +93,9 @@ namespace
             {
                 trace::verbose(_X("Inspecting version... [%s]"), ver.as_str().c_str());
 
-                if ((!release_only || !ver.is_prerelease()) && ver >= apply_patch_from_version &&
+                if ((!release_only || !ver.is_prerelease()) && 
+                    (apply_patches || ver.get_patch() == apply_patch_from_version.get_patch()) &&
+                    ver >= apply_patch_from_version &&
                     ver.get_major() == apply_patch_from_version.get_major() &&
                     ver.get_minor() == apply_patch_from_version.get_minor())
                 {
@@ -198,7 +200,7 @@ namespace
             if (!fx_ref.get_use_exact_version())
             {
                 // If production and no roll forward use given version.
-                do_roll_forward = (*(fx_ref.get_apply_patches())) ||
+                do_roll_forward = (*(fx_ref.get_apply_patches()) || fx_ref.get_fx_version_number().is_prerelease()) ||
                     ((*(fx_ref.get_roll_forward()) != roll_forward_option::LatestPatch) && (*(fx_ref.get_roll_forward()) != roll_forward_option::Disable));
             }
 

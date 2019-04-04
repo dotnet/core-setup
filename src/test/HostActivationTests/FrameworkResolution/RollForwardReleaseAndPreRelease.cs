@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory]
         [InlineData(Constants.RollForwardSetting.Disable, null, null)]
         [InlineData(Constants.RollForwardSetting.LatestPatch, null, "5.1.2")]
-        [InlineData(Constants.RollForwardSetting.LatestPatch, false, null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, false, "5.1.0-preview.1")]
         [InlineData(Constants.RollForwardSetting.Minor, null, "5.1.2")]
         [InlineData(Constants.RollForwardSetting.Minor, false, "5.1.0-preview.1")]
         [InlineData(Constants.RollForwardSetting.LatestMinor, null, "5.5.2")]
