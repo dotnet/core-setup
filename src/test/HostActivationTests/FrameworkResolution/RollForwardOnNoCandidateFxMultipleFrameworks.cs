@@ -139,12 +139,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
         // Soft roll forward from inner framework reference [specified] to app's 6.1.1-preview.0 (defaults)
         [Theory]
-        [InlineData("6.0.0", null, null, null)]    // Can't roll forward from release to pre-release
+        // 3.0 change:
+        // 2.* - release would never roll forward to pre-release
+        // 3.* - release rolls forward to pre-release if there is no available release match
+        [InlineData("6.0.0", null, null, "6.1.1-preview.1")]
         [InlineData("6.0.1-preview.0", null, null, "6.1.1-preview.1")]
         [InlineData("6.1.1-preview.0", null, null, "6.1.1-preview.1")]
         [InlineData("6.1.0-preview.0", 0, null, "6.1.1-preview.1")] // This is effectively a bug, the design was that pre-release should never roll on patches
         [InlineData("6.1.1-preview.0", 0, null, "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", 0, false, "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.0", 0, false, null)] // applyPatches applies to pre-release as well
         [InlineData("6.1.1-preview.1", 0, null, "6.1.1-preview.1")]
         public void SoftRollForward_InnerFrameworkReference_PreRelease(
             string versionReference,
