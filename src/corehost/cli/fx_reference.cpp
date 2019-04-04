@@ -9,8 +9,8 @@
 
 bool fx_reference_t::is_roll_forward_compatible(const fx_ver_t& other) const
 {
-    // We expect the version to be <
-    assert(get_fx_version_number() < other);
+    // We expect the version to be <=
+    assert(get_fx_version_number() <= other);
 
     if (get_fx_version_number() == other)
     {
@@ -100,8 +100,9 @@ void fx_reference_t::apply_settings_from(const fx_reference_t& from)
     }
 }
 
-void fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from)
+bool fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from)
 {
+    bool modified = false;
     const roll_forward_option* from_roll_forward = from.get_roll_forward();
     if (from_roll_forward != nullptr)
     {
@@ -110,6 +111,7 @@ void fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from
             *from_roll_forward < *to_roll_forward)
         {
             set_roll_forward(*from_roll_forward);
+            modified = true;
         }
     }
 
@@ -121,6 +123,9 @@ void fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from
             *from_apply_patches == false)
         {
             set_apply_patches(*from_apply_patches);
+            modified = true;
         }
     }
+
+    return modified;
 }

@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithRollForward(rollForward)
                         .Version = versionReference),
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "5.1.3"));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "5.1.1"));
         }
 
         // Soft roll forward from inner framework reference [specified] to  app's 5.1.1 (defaults)
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithRollForward(rollForward)
                         .Version = versionReference),
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.3", versionReference));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference));
         }
 
         // Soft roll forward from inner framework reference [specified] to app's 6.0.1-preview.0 (defaults)
@@ -150,13 +150,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, null)]
         [InlineData("6.1.1-preview.0", null, "6.1.1-preview.1")]
         [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable, null)]
+        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable, "[not found]")]
         [InlineData("6.1.1-preview.1", Constants.RollForwardSetting.Disable, "6.1.1-preview.1")]
         public void SoftRollForward_InnerFrameworkReference_PreRelease(
             string versionReference,
             string rollForward,
             string resolvedFramework)
         {
+            bool notFound = resolvedFramework == "[not found]";
             RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "6.1.1-preview.0")
@@ -165,8 +166,18 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForward(rollForward)
                         .Version = versionReference),
-                resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "6.1.1-preview.1"));
+                notFound ? null : resolvedFramework,
+                commandResult =>
+                {
+                    if (notFound)
+                    {
+                        commandResult.Should().Fail().And.DidNotFindCompatibleFrameworkVersion();
+                    }
+                    else
+                    {
+                        commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "6.1.1-preview.0");
+                    }
+                });
         }
 
         // Soft roll forward from inner framework reference 5.1.1 to app [specified version]
@@ -207,10 +218,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.1.0", Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.0.0", null, "5.1.3")]
         [InlineData("5.0.0", Constants.RollForwardSetting.Minor, "5.1.3")]
-        [InlineData("5.0.0", Constants.RollForwardSetting.LatestMinor, "5.6.0")] // Ordering issue
+        [InlineData("5.0.0", Constants.RollForwardSetting.LatestMinor, "5.1.3")]
         [InlineData("1.0.0", Constants.RollForwardSetting.Minor, null)]
         [InlineData("1.0.0", Constants.RollForwardSetting.Major, "5.1.3")]
-        [InlineData("1.0.0", Constants.RollForwardSetting.LatestMajor, null)] // TODO: This is BROKEN - should be "5.1.3"
+        [InlineData("1.0.0", Constants.RollForwardSetting.LatestMajor, "5.1.3")]
         public void SoftRollForward_AppFrameworkReference_ToLower_HardResolve(
             string versionReference,
             string rollForward,
@@ -234,7 +245,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.4.0", Constants.RollForwardSetting.Minor, "5.4.1")]
         [InlineData("5.4.0", Constants.RollForwardSetting.LatestMinor, "5.4.1")]
         [InlineData("5.4.0", Constants.RollForwardSetting.Major, "5.4.1")]
-        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMajor, "5.4.1")] // Ordering issue
+        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMajor, "5.4.1")]
         [InlineData("5.4.1", Constants.RollForwardSetting.Disable, "5.4.1")]
         [InlineData("6.0.0", Constants.RollForwardSetting.Minor, null)]
         [InlineData("6.0.0", Constants.RollForwardSetting.Major, null)]
@@ -259,9 +270,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory]
         [InlineData("5.4.0", null, "5.4.1")]
         [InlineData("5.4.0", Constants.RollForwardSetting.Minor, "5.4.1")]
-        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMinor, "5.6.0")]
+        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMinor, "5.4.1")]
         [InlineData("5.4.0", Constants.RollForwardSetting.Major, "5.4.1")]
-        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMajor, null)] // TODO: This is BROKEN - should be "5.4.1"
+        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMajor, "5.4.1")]
         [InlineData("5.4.1", Constants.RollForwardSetting.Disable, "5.4.1")]
         [InlineData("6.0.0", Constants.RollForwardSetting.Minor, null)]
         [InlineData("6.0.0", Constants.RollForwardSetting.Major, null)]
@@ -279,7 +290,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .Version = "5.1.1"),
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail()); // TODO: And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference));
+                commandResult => commandResult.Should().Fail()
+                    .And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference));
         }
 
         // Soft roll forward inner framework reference (defaults) to inner framework reference with [specified version]
@@ -313,7 +325,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                             .Version = versionReference);
                 },
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "5.1.3"));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "5.1.1"));
         }
 
         // Soft roll forward inner framework reference (defaults) to inner framework reference with [specified version]
@@ -345,7 +357,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                             .Version = versionReference);
                 },
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.3", versionReference));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference));
         }
 
         // This test does:
@@ -373,7 +385,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 },
                 resultValidator: commandResult =>
                     commandResult.Should().Pass()
-                        .And.RestartedFrameworkResolution("5.1.3", "5.4.1")
+                        .And.RestartedFrameworkResolution("5.1.1", "5.4.1")
                         .And.RestartedFrameworkResolution("5.4.1", "5.6.0")
                         .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.6.0"));
         }
@@ -404,7 +416,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 },
                 resultValidator: commandResult =>
                     commandResult.Should().Pass()
-                        .And.RestartedFrameworkResolution("5.1.3", "5.4.1")
+                        .And.RestartedFrameworkResolution("5.1.1", "5.4.1")
                         .And.RestartedFrameworkResolution("5.4.1", "5.6.0")
                         .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.6.0"));
         }

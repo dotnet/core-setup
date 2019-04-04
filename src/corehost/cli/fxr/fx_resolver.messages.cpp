@@ -79,14 +79,14 @@ void fx_resolver_t::display_summary_of_frameworks(
             {
                 auto newest_ref = newest_references.find(fx->get_name());
                 assert(newest_ref != newest_references.end());
-                assert(newest_ref->second.get_fx_version() == fx->get_found_version());
                 assert(newest_ref->second.get_apply_patches() != nullptr);
                 assert(newest_ref->second.get_roll_forward() != nullptr);
 
-                trace::verbose(_X("     framework:'%s', lowest requested version='%s', found version='%s', apply_patches=%d, roll_forward=%d, folder=%s"),
+                trace::verbose(_X("     framework:'%s', lowest requested version='%s', found version='%s', effective reference version='%s' apply_patches=%d, roll_forward=%d, folder=%s"),
                     fx->get_name().c_str(),
                     fx->get_requested_version().c_str(),
                     fx->get_found_version().c_str(),
+                    newest_ref->second.get_fx_version().c_str(),
                     *newest_ref->second.get_apply_patches(),
                     *newest_ref->second.get_roll_forward(),
                     fx->get_dir().c_str());

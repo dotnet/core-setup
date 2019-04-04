@@ -85,7 +85,8 @@ public:
     void apply_settings_from(const fx_reference_t& from);
 
     // Apply the most restrictive settings
-    void merge_roll_forward_settings_from(const fx_reference_t& from);
+    // Returns true if any settings were modified, false if nothing was updated (this has more restrictive settings then from)
+    bool merge_roll_forward_settings_from(const fx_reference_t& from);
 
 private:
     bool has_apply_patches;

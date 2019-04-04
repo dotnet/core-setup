@@ -115,7 +115,11 @@ namespace
         bool apply_patches,
         roll_forward_option roll_forward)
     {
-        trace::verbose(_X("Attempting FX roll forward starting from [%s]"), fx_ver.c_str());
+        trace::verbose(
+            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, roll_forward=%d "),
+            fx_ver.c_str(),
+            apply_patches,
+            roll_forward);
 
         // If the desired framework reference is release, then try release-only search first.
         if (!specified.is_prerelease())
@@ -272,38 +276,62 @@ namespace
 }
 
 StatusCode fx_resolver_t::soft_roll_forward_helper(
-    const fx_reference_t & higher_fx_ref,
-    const fx_reference_t & lower_fx_ref,
+    const fx_reference_t & so_far_newest_fx_ref,
+    const fx_reference_t & processed_fx_ref,
     bool newest_is_hard_roll_forward)
 {
-    const pal::string_t& fx_name = higher_fx_ref.get_fx_name();
-    fx_reference_t updated_newest = higher_fx_ref; // copy
+    const pal::string_t& fx_name = so_far_newest_fx_ref.get_fx_name();
+    fx_reference_t updated_newest;
 
-    if (lower_fx_ref.get_fx_version_number() == higher_fx_ref.get_fx_version_number())
+    bool newest_needs_update = false;
+    if (so_far_newest_fx_ref.get_fx_version_number() >= processed_fx_ref.get_fx_version_number())
     {
-        updated_newest.merge_roll_forward_settings_from(lower_fx_ref);
-        m_newest_references[fx_name] = updated_newest;
-        return StatusCode::Success;
+        if (!processed_fx_ref.is_roll_forward_compatible(so_far_newest_fx_ref.get_fx_version_number()))
+        {
+            // Error condition - not compatible with the other reference
+            display_incompatible_framework_error(so_far_newest_fx_ref.get_fx_version(), processed_fx_ref);
+            return StatusCode::FrameworkCompatFailure;
+        }
+
+        // No version update since the so_far_newest_fx_ref has higher version than the processed_fx_ref.
+        updated_newest = so_far_newest_fx_ref;
+        newest_needs_update = updated_newest.merge_roll_forward_settings_from(processed_fx_ref);
+
+        display_compatible_framework_trace(so_far_newest_fx_ref.get_fx_version(), processed_fx_ref);
+    }
+    else
+    {
+        if (!so_far_newest_fx_ref.is_roll_forward_compatible(processed_fx_ref.get_fx_version_number()))
+        {
+            // Error condition - not compatible with the other reference
+            display_incompatible_framework_error(processed_fx_ref.get_fx_version(), so_far_newest_fx_ref);
+            return StatusCode::FrameworkCompatFailure;
+        }
+
+        // Update version since the incomming processed_fx_ref has higher version
+        newest_needs_update = true;
+        updated_newest = processed_fx_ref;
+        updated_newest.merge_roll_forward_settings_from(so_far_newest_fx_ref);
+
+        display_compatible_framework_trace(processed_fx_ref.get_fx_version(), so_far_newest_fx_ref);
     }
 
-    if (lower_fx_ref.is_roll_forward_compatible(higher_fx_ref.get_fx_version_number()))
+    if (newest_needs_update)
     {
-        updated_newest.merge_roll_forward_settings_from(lower_fx_ref);
         m_newest_references[fx_name] = updated_newest;
 
         if (newest_is_hard_roll_forward)
         {
-            display_retry_framework_trace(lower_fx_ref, higher_fx_ref);
+            // Trigger retry even if framework reference is the exact same version, but different roll forward settings.
+            // This is needed since if the "old" settings were for example LatestMinor, 
+            //   the resolution would return the highest available minor. But if we now update it to "new" setting of Minor,
+            //   the resolution should return the closest higher available minor, which can be different.
+            display_retry_framework_trace(so_far_newest_fx_ref, processed_fx_ref);
             return StatusCode::FrameworkCompatRetry;
         }
-
-        display_compatible_framework_trace(higher_fx_ref.get_fx_version(), lower_fx_ref);
-        return StatusCode::Success;
     }
 
-    // Error condition - not compatible with the other reference
-    display_incompatible_framework_error(higher_fx_ref.get_fx_version(), lower_fx_ref);
-    return StatusCode::FrameworkCompatFailure;
+    return StatusCode::Success;
 }
 
 // Performs a "soft" roll-forward meaning we don't read any physical framework folders
@@ -328,15 +356,7 @@ StatusCode fx_resolver_t::soft_roll_forward(
     bool newest_is_hard_roll_forward)
 {
     /*byval*/ fx_reference_t current_ref = m_newest_references[fx_ref.get_fx_name()];
-
-    // Perform soft "in-memory" roll-forwards
-    if (fx_ref.get_fx_version_number() >= current_ref.get_fx_version_number())
-    {
-        return soft_roll_forward_helper(fx_ref, current_ref, newest_is_hard_roll_forward);
-    }
-
-    assert(fx_ref.get_fx_version_number() < current_ref.get_fx_version_number());
-    return soft_roll_forward_helper(current_ref, fx_ref, false);
+    return soft_roll_forward_helper(current_ref, fx_ref, newest_is_hard_roll_forward);
 }
 
 // Processes one framework's runtime configuration.
@@ -421,8 +441,15 @@ StatusCode fx_resolver_t::read_framework(
                 return FrameworkMissingFailure;
             }
 
-            // Update the newest version based on the hard version found
-            newest_ref.set_fx_version(fx->get_found_version());
+            // Do NOT update the newest reference to have the same version as the resolved framework.
+            // This could prevent correct resolution in some cases.
+            // For example if the resolution starts with reference "2.1.0 LatestMajor" the resolution could
+            // return "3.0.0". If later on we find another reference "2.1.0 Minor", while the two references are compatible
+            // we would not be able to resolve it, since we would compare "2.1.0 Minor" with "3.0.0 LatestMajor" which are
+            // not compatible.
+            // So instead leave the newest reference as is. If the above situation occurs, the soft roll forward
+            // will change the newest from "2.1.0 LatestMajor" to "2.1.0 Minor" and restart the framework resolution process.
+            // So during the second run we will resolve for example "2.2.0" which will be compatible with both framework references.
 
             fx_definitions.push_back(std::unique_ptr<fx_definition_t>(fx));
 
