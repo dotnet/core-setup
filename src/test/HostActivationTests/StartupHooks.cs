@@ -144,9 +144,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdErrContaining("System.IO.FileNotFoundException: Could not load file or assembly 'Newtonsoft.Json");
         }
 
-        // Run the app with an invalid syntax in startup hook variable
+        // Different variants of the startup hook variable format
         [Fact]
-        public void Muxer_activation_of_Invalid_StartupHook_Fails()
+        public void Muxer_activation_of_StartupHook_VariableVariants()
         {
             var fixture = sharedTestState.PortableAppFixture.Copy();
             var dotnet = fixture.BuiltDotnet;
@@ -155,20 +155,30 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var startupHookFixture = sharedTestState.StartupHookFixture.Copy();
             var startupHookDll = startupHookFixture.TestProject.AppDll;
 
-            var fakeAssembly = Path.GetFullPath("Assembly.dll");
-            var fakeAssembly2 = Path.GetFullPath("Assembly2.dll");
-
-            var expectedError = "System.ArgumentException: The syntax of the startup hook variable was invalid.";
+            var startupHook2Fixture = sharedTestState.StartupHookWithDependencyFixture.Copy();
+            var startupHook2Dll = startupHook2Fixture.TestProject.AppDll;
 
             // Missing entries in the hook
-            var startupHookVar = fakeAssembly + Path.PathSeparator + Path.PathSeparator + fakeAssembly2;
+            var startupHookVar = startupHookDll + Path.PathSeparator + Path.PathSeparator + startupHook2Dll;
+            dotnet.Exec(appDll)
+                .EnvironmentVariable(startupHookVarName, startupHookVar)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute(fExpectedToFail: true)
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello from startup hook!")
+                .And.HaveStdOutContaining("Hello from startup hook with dependency!")
+                .And.HaveStdOutContaining("Hello World");
+
+            // Whitespace is invalid
+            startupHookVar = startupHookDll + Path.PathSeparator + " " + Path.PathSeparator + startupHook2Dll;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining(expectedError);
+                .And.HaveStdErrContaining("System.ArgumentException: The startup hook simple assembly name ' ' is invalid.");
 
             // Leading separator
             startupHookVar = Path.PathSeparator + startupHookDll;
@@ -177,29 +187,21 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should().Fail()
-                .And.HaveStdErrContaining(expectedError);
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello from startup hook!")
+                .And.HaveStdOutContaining("Hello World");
 
             // Trailing separator
-            startupHookVar = fakeAssembly + Path.PathSeparator + fakeAssembly2 + Path.PathSeparator;
+            startupHookVar = startupHookDll + Path.PathSeparator + startupHook2Dll + Path.PathSeparator;
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
-                .Should().Fail()
-                .And.HaveStdErrContaining(expectedError);
-
-            // Syntax errors are caught before any hooks run
-            startupHookVar = startupHookDll + Path.PathSeparator;
-            dotnet.Exec(appDll)
-                .EnvironmentVariable(startupHookVarName, startupHookVar)
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute(fExpectedToFail: true)
-                .Should().Fail()
-                .And.HaveStdErrContaining(expectedError)
-                .And.NotHaveStdOutContaining("Hello from startup hook!");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello from startup hook!")
+                .And.HaveStdOutContaining("Hello from startup hook with dependency!")
+                .And.HaveStdOutContaining("Hello World");
         }
 
         [Fact]
