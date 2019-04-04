@@ -80,7 +80,7 @@ pal::hresult_t coreclr_t::create(
     const pal::string_t& libcoreclr_path,
     const char* exe_path,
     const char* app_domain_friendly_name,
-    coreclr_property_bag_t &properties,
+    const coreclr_property_bag_t &properties,
     std::unique_ptr<coreclr_t> &inst)
 {
     if (!coreclr_bind(libcoreclr_path))
@@ -263,13 +263,13 @@ void coreclr_property_bag_t::log_properties()
         trace::verbose(_X("Property %s = %s"), _keys[i].c_str(), _values[i].c_str());
 }
 
-int coreclr_property_bag_t::count()
+int coreclr_property_bag_t::count() const
 {
     assert(_keys.size() == _values.size());
     return static_cast<int>(_keys.size());
 }
 
-void coreclr_property_bag_t::enumerate(std::function<void(int, const pal::string_t&, const pal::string_t&)> &callback)
+void coreclr_property_bag_t::enumerate(std::function<void(int, const pal::string_t&, const pal::string_t&)> &callback) const
 {
     for (int i = 0; i < count(); ++i)
         callback(i, _keys[i], _values[i]);

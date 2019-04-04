@@ -22,7 +22,7 @@ public: // static
         const pal::string_t& libcoreclr_path,
         const char* exe_path,
         const char* app_domain_friendly_name,
-        coreclr_property_bag_t &properties,
+        const coreclr_property_bag_t &properties,
         std::unique_ptr<coreclr_t> &inst);
 
 public:
@@ -88,9 +88,9 @@ public:
 
     void log_properties();
 
-    int count();
+    int count() const;
 
-    void enumerate(std::function<void(int, const pal::string_t&, const pal::string_t&)> &callback);
+    void enumerate(std::function<void(int, const pal::string_t&, const pal::string_t&)> &callback) const;
 
 private:
     std::vector<pal::string_t> _keys;
