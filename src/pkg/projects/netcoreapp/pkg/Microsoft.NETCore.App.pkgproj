@@ -7,6 +7,12 @@
     <BuildTargetPath>build/$(NETCoreAppFramework)</BuildTargetPath>
     <PlatformManifestTargetPath>$(BuildTargetPath)</PlatformManifestTargetPath>
     <FileVersionPropsTargetPath>$(BuildTargetPath)</FileVersionPropsTargetPath>
+
+    <!--
+      Instead of the crossgen'd files, get pre-crossgen files to generate the manifest with. This
+      works around an issue where crossgen strips the version information.
+    -->
+    <GetPreCrossgenFilesForManifest>true</GetPreCrossgenFilesForManifest>
   </PropertyGroup>
 
   <!-- Identity / Reference package content -->
@@ -24,6 +30,18 @@
       <TargetPath>$(BuildTargetPath)</TargetPath>
     </File>
   </ItemGroup>
+
+  <Target Name="GetPreCrossgenFilesFromReferences"
+          DependsOnTargets="SplitProjectReferences"
+          Outputs="@(_PreCrossgenFiles)">
+    <MSBuild
+      Targets="GetPreCrossgenFilesForManifest"
+      Projects="@(_NonPkgProjProjectReference)">
+      <Output
+        TaskParameter="TargetOutputs"
+        ItemName="_PreCrossgenFiles" />
+    </MSBuild>
+  </Target>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

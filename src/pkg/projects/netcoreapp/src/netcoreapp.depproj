@@ -264,5 +264,9 @@
           DependsOnTargets="GetRuntimeFilesFromPackages;PrepareForCrossGen;GetCrossGenSymbolsFiles">
   </Target>
 
+  <Target Name="GetPreCrossgenFilesForManifest"
+          DependsOnTargets="PrepareForCrossGen"
+          Outputs="@(_filesToCrossGen)" />
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

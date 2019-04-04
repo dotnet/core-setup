@@ -146,13 +146,31 @@
                    '$(BuildFullPlatformManifest)' == 'true'">true</IncludeAllRuntimePackagesInPlatformManifest>
     </PropertyGroup>
 
-    <MSBuild Projects="@(ProjectReference)"
-             Condition="'%(ProjectReference.PackageTargetRuntime)' == '$(PackageRID)' OR
-                        '%(ProjectReference.BuidOnRID)' == '$(PackageRID)' OR
-                        ('$(IncludeAllRuntimePackagesInPlatformManifest)' == 'true' AND
-                         '%(ProjectReference.PackageTargetRuntime)' != '' AND
-                         '%(ProjectReference.ExcludeFromPlatformManifest)' != 'true')"
+    <ItemGroup>
+      <ProjectReferencesWithSharedFrameworkRuntimeFiles
+        Include="@(ProjectReference)"
+        Condition="
+          '%(ProjectReference.PackageTargetRuntime)' == '$(PackageRID)' OR
+          '%(ProjectReference.BuidOnRID)' == '$(PackageRID)' OR
+          ('$(IncludeAllRuntimePackagesInPlatformManifest)' == 'true' AND
+          '%(ProjectReference.PackageTargetRuntime)' != '' AND
+          '%(ProjectReference.ExcludeFromPlatformManifest)' != 'true')"/>
+    </ItemGroup>
+
+    <MSBuild Projects="@(ProjectReferencesWithSharedFrameworkRuntimeFiles)"
              Targets="GetPackageFiles">
+      <Output TaskParameter="TargetOutputs" ItemName="SharedFrameworkRuntimeFiles" />
+    </MSBuild>
+
+    <ItemGroup Condition="'$(GetPreCrossgenFilesForManifest)' == 'true'">
+      <SharedFrameworkRuntimeFiles
+        Remove="@(SharedFrameworkRuntimeFiles)"
+        Condition="'%(SharedFrameworkRuntimeFiles.CrossGenedPath)' != ''" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(ProjectReferencesWithSharedFrameworkRuntimeFiles)"
+             Targets="GetPreCrossgenFilesFromReferences"
+             Condition="'$(GetPreCrossgenFilesForManifest)' == 'true'">
       <Output TaskParameter="TargetOutputs" ItemName="SharedFrameworkRuntimeFiles" />
     </MSBuild>
 
