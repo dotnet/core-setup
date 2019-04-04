@@ -318,7 +318,7 @@ By following these best practices we have optimal run-time performance (less pro
 
 
 ## Changes to existing apps
-The above proposal will impact behavior of existing apps (because framework resolution is in `hostfxr` which is global on the machine for all frameworks). This is mostly a description of the changes as they apply to apps using either default, `rollForwardOnNoCandidateFx` or `applyPatches`.
+The above proposal will impact behavior of existing apps (because framework resolution is in `hostfxr` which is global on the machine for all frameworks). This is a description of the changes as they apply to apps using either default, `rollForwardOnNoCandidateFx` or `applyPatches`.
 
 ### Roll on patches-only will now roll from release to pre-release
 When `rollForwardOnNoCandidateFx` is disabled (set to `0` which is not the default) the existing behavior is to never roll forward to a pre-release version. If the settings is any other value (Minor/Major) it would roll forward to pre-release version if there's no available matching release version.
