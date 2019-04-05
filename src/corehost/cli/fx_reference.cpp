@@ -120,7 +120,7 @@ bool fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from
     {
         const bool* to_apply_patches = get_apply_patches();
         if (to_apply_patches == nullptr ||
-            *from_apply_patches == false)
+            (*to_apply_patches == true && *from_apply_patches == false))
         {
             set_apply_patches(*from_apply_patches);
             modified = true;

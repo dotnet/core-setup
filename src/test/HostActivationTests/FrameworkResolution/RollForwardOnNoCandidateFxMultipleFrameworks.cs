@@ -65,8 +65,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.1.3", 0, false, "5.1.3")]
         [InlineData("5.0.0", null, null, "5.1.3")]
         [InlineData("5.0.0", 1, null, "5.1.3")]
-        // Ordering issue - if the order of FX references in app is swapped, the output would be 5.1.1
-        [InlineData("5.1.0", 1, false, "5.1.3")]
+        [InlineData("5.0.0", 1, false, "5.1.1")]
+        [InlineData("5.1.0", 1, false, "5.1.1")]
         [InlineData("1.0.0", 1, null, null)]
         [InlineData("1.0.0", 2, null, "5.1.3")]
         public void SoftRollForward_InnerFrameworkReference_ToHigher_HardResolve(
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithApplyPatches(applyPatches)
                         .Version = versionReference),
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "5.1.3"));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "5.1.1"));
         }
 
         // Soft roll forward from inner framework reference [specified] to  app's 5.1.1 (defaults)
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithApplyPatches(applyPatches)
                         .Version = versionReference),
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "6.1.1-preview.1"));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "6.1.1-preview.0"));
         }
 
         // Soft roll forward from inner framework reference 5.1.1 to app [specified version]
