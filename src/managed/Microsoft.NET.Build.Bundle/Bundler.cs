@@ -54,6 +54,10 @@ namespace Microsoft.NET.Build.Bundle
                 throw new BundleException("Dirctory not found: " + OutputDir);
             }
 
+            // Convert relative paths to absolute paths.
+            SourceDir = Path.GetFullPath(SourceDir);
+            OutputDir = Path.GetFullPath(OutputDir);
+
             // Set default names
             string baseName = Path.GetFileNameWithoutExtension(HostName);
             Application = baseName + ".dll";
@@ -176,7 +180,6 @@ namespace Microsoft.NET.Build.Bundle
                 Manifest manifest = new Manifest();
 
                 bundle.Position = bundle.Length;
-                int sourceDirLen = Path.GetFullPath(SourceDir).Length + 1;
 
                 // Get all files in the source directory and all sub-directories.
                 string[] sources = Directory.GetFiles(SourceDir, searchPattern: "*", searchOption: SearchOption.AllDirectories);
@@ -187,8 +190,8 @@ namespace Microsoft.NET.Build.Bundle
                 foreach (string filePath in sources)
                 {
                     // filePath is the full-path of files within source directory, and any of its sub-directories.
-                    // We only need the relative paths with respect to the source directory.
-                    string relativePath = filePath.Substring(sourceDirLen);
+                    // We need the relative paths with respect to the source directory.
+                    string relativePath = Path.GetRelativePath(SourceDir, filePath);
 
                     if (!ShouldEmbed(relativePath))
                     {

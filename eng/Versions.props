@@ -7,13 +7,18 @@
   </PropertyGroup>
   <!--Package versions-->
   <PropertyGroup>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-preview4.19202.3</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview4.19202.3</MicrosoftNETCorePlatformsPackageVersion>
+    <!-- corefx -->
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-preview4.19204.7</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview4.19204.7</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>2.0.0</MicrosoftNETCoreTargetsPackageVersion>
-    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19203.1</NETStandardLibraryPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview3-27604-74</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <!-- standard -->
+    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19205.1</NETStandardLibraryPackageVersion>
+    <!-- coreclr -->
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview4-27604-73</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <!-- dotnet-trusted -->
+    <MicrosoftWindowsDesktopAppPackageVersion>3.0.0-preview4-27604-23</MicrosoftWindowsDesktopAppPackageVersion>
+    <!-- Not auto-updated. -->
     <MicrosoftBclJsonSourcesPackageVersion>4.6.0-preview.19072.2</MicrosoftBclJsonSourcesPackageVersion>
-    <MicrosoftWindowsDesktopAppPackageVersion>3.0.0-preview4-27601-10</MicrosoftWindowsDesktopAppPackageVersion>
   </PropertyGroup>
   <!--Package names-->
   <PropertyGroup>
