@@ -169,5 +169,5 @@ Initializes the host context. This calculates everything required to start CoreC
 int corehost_close_context(corehost_context_contract *context_contract)
 ```
 
-Closes the host context. Once closed, any operations targeting the closed context will return an error.
+Closes the host context.
 * `context_contract` - contract of the context to close.
