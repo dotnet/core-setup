@@ -38,12 +38,8 @@ This would resolve to `NETCore 2.2.0` - because the reference from `MiddleWareFX
 Document this, and add tests for this as well.
 Note that this is existing behavior, instead of Minor/LatestMinor use LatestPatch and LatestPatch/applyPatches=false which both can be specified in 2.*. In one case it would roll forward to latest patch, in the other it would not.
 
-### Broken
-If LatestMajor reference is hard resolved first, we may end up with a reference to higher major version, and then if Minor reference is processed, it won't even soft-roll-forward to the higher major version. If the references are processed in reversed order the system works because the LatestMajor can soft-roll-forward just fine.
-
 # TODOs
 
-* No implementation for pre-release handling yet
 * No implementation of `DOTNET_ROLL_FORWARD_TO_PRERELEASE`
   * `fx_reference::is_roll_forward_compatible` - checks that release can't roll forward to pre-release.
 * Update SDK to show correct command line usage for `--roll-forward`
