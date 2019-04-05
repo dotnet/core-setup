@@ -19,6 +19,7 @@ set(SOURCES
     ./deps_resolver.cpp
     ./hostpolicy.cpp
     ./hostpolicy_init.cpp
+    ./run_context.cpp
     ../runtime_config.cpp
     ../json/casablanca/src/json/json.cpp
     ../json/casablanca/src/json/json_parsing.cpp
@@ -39,6 +40,7 @@ set(HEADERS
     ./coreclr.h
     ./deps_resolver.h
     ./hostpolicy_init.h
+    ./run_context.h
     ../runtime_config.h
     ../json/casablanca/include/cpprest/json.h
     ../fxr/fx_ver.h
