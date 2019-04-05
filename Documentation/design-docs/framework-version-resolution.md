@@ -286,7 +286,7 @@ Steps
      * The resolution may fail if it's not possible to roll forward from one reference to the other.
      * Update the `newest fx references` with the resolved reference.
    * Probe for the framework on disk  
-   *Term "hard roll-forward" is used for this in the code*
+   *Term "hard resolve" is used for this in the code*
      * This follows the roll-forward rules as describe above.
    * If success add it to `resolved frameworks`
      * Parse the `.runtimeconfig.json` of the resolved framework and create a new `config fx references`. Make a recursive call back to Step 2 with this new `config fx references`.
