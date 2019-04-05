@@ -75,6 +75,9 @@ namespace
         // For Disable, there's no roll forward (in fact we should not even get here).
         // For LatestPatch, Major and Minor, we need to look for latest patch as the above would have find the lowest patch (as it looks for lowest version as a whole).
         //   For backward compatibility reasons we also need to consider the apply_patches setting though.
+        //   For backward compatibility reasons the apply_patches for pre-release framework reference only applies to the patch portiong of the version,
+        //     the pre-release portion of the version ignores apply_patches and we should roll to the latest (100% backward would roll to closest, but for consistency
+        //     in the new behavior we will roll to latest).
         if ((roll_forward == roll_forward_option::LatestPatch || roll_forward == roll_forward_option::Minor || roll_forward == roll_forward_option::Major)
             && (apply_patches || specified.is_prerelease()))
         {
@@ -181,7 +184,7 @@ namespace
 
         // Multi-level SharedFX lookup will look for the most appropriate version in several locations
         // by following the priority rank below:
-        // .exe directory
+        //  .exe directory
         //  Global .NET directory
         // If it is not activated, then only .exe directory will be considered
 
@@ -200,15 +203,15 @@ namespace
             append_path(&fx_dir, _X("shared"));
             append_path(&fx_dir, fx_ref.get_fx_name().c_str());
 
-            bool do_roll_forward = false;
-            if (!fx_ref.get_use_exact_version())
-            {
-                // If production and no roll forward use given version.
-                do_roll_forward = (*(fx_ref.get_apply_patches()) || fx_ref.get_fx_version_number().is_prerelease()) ||
-                    ((*(fx_ref.get_roll_forward()) != roll_forward_option::LatestPatch) && (*(fx_ref.get_roll_forward()) != roll_forward_option::Disable));
-            }
-
-            if (!do_roll_forward)
+            // Roll forward is disabled when:
+            //   roll_forward is set to Disable
+            //   roll_forward is set to LatestPatch AND
+            //     apply_patches is false AND
+            //     release framework reference (this is for backward compat with pre-release rolling over pre-release portion of version ignoring apply_patches)
+            //   use exact version is set (this is when --fx-version was used on the command line)
+            if ((*(fx_ref.get_roll_forward()) == roll_forward_option::Disable) ||
+                ((*(fx_ref.get_roll_forward()) == roll_forward_option::LatestPatch) && (!*(fx_ref.get_apply_patches()) && !fx_ref.get_fx_version_number().is_prerelease())) ||
+                fx_ref.get_use_exact_version())
             {
                 trace::verbose(_X("Did not roll forward because apply_patches=%d, roll_forward=%d, use_exact_version=%d chose [%s]"),
                     *(fx_ref.get_apply_patches()), *(fx_ref.get_roll_forward()), fx_ref.get_use_exact_version(), fx_ver.c_str());
@@ -276,61 +279,22 @@ namespace
 }
 
 StatusCode fx_resolver_t::soft_roll_forward_helper(
-    const fx_reference_t & so_far_newest_fx_ref,
-    const fx_reference_t & processed_fx_ref,
-    bool newest_is_hard_roll_forward)
+    const fx_reference_t& lower_fx_ref,
+    const fx_reference_t& higher_fx_ref,
+    /*out*/ fx_reference_t& effective_fx_ref,
+    /*out*/ bool& effective_is_different_from_higher)
 {
-    const pal::string_t& fx_name = so_far_newest_fx_ref.get_fx_name();
-    fx_reference_t updated_newest;
-
-    bool newest_needs_update = false;
-    if (so_far_newest_fx_ref.get_fx_version_number() >= processed_fx_ref.get_fx_version_number())
+    if (!lower_fx_ref.is_roll_forward_compatible(higher_fx_ref.get_fx_version_number()))
     {
-        if (!processed_fx_ref.is_roll_forward_compatible(so_far_newest_fx_ref.get_fx_version_number()))
-        {
-            // Error condition - not compatible with the other reference
-            display_incompatible_framework_error(so_far_newest_fx_ref.get_fx_version(), processed_fx_ref);
-            return StatusCode::FrameworkCompatFailure;
-        }
-
-        // No version update since the so_far_newest_fx_ref has higher version than the processed_fx_ref.
-        updated_newest = so_far_newest_fx_ref;
-        newest_needs_update = updated_newest.merge_roll_forward_settings_from(processed_fx_ref);
-
-        display_compatible_framework_trace(so_far_newest_fx_ref.get_fx_version(), processed_fx_ref);
-    }
-    else
-    {
-        if (!so_far_newest_fx_ref.is_roll_forward_compatible(processed_fx_ref.get_fx_version_number()))
-        {
-            // Error condition - not compatible with the other reference
-            display_incompatible_framework_error(processed_fx_ref.get_fx_version(), so_far_newest_fx_ref);
-            return StatusCode::FrameworkCompatFailure;
-        }
-
-        // Update version since the incomming processed_fx_ref has higher version
-        newest_needs_update = true;
-        updated_newest = processed_fx_ref;
-        updated_newest.merge_roll_forward_settings_from(so_far_newest_fx_ref);
-
-        display_compatible_framework_trace(processed_fx_ref.get_fx_version(), so_far_newest_fx_ref);
+        // Error condition - not compatible with the other reference
+        display_incompatible_framework_error(higher_fx_ref.get_fx_version(), lower_fx_ref);
+        return StatusCode::FrameworkCompatFailure;
     }
 
-    if (newest_needs_update)
-    {
-        m_newest_references[fx_name] = updated_newest;
+    effective_fx_ref = fx_reference_t(higher_fx_ref); // copy
+    effective_is_different_from_higher = effective_fx_ref.merge_roll_forward_settings_from(lower_fx_ref);
 
-        if (newest_is_hard_roll_forward)
-        {
-            // Trigger retry even if framework reference is the exact same version, but different roll forward settings.
-            // This is needed since if the "old" settings were for example LatestMinor, 
-            //   the resolution would return the highest available minor. But if we now update it to "new" setting of Minor,
-            //   the resolution should return the closest higher available minor, which can be different.
-            display_retry_framework_trace(so_far_newest_fx_ref, processed_fx_ref);
-            return StatusCode::FrameworkCompatRetry;
-        }
-    }
-
+    display_compatible_framework_trace(higher_fx_ref.get_fx_version(), lower_fx_ref);
     return StatusCode::Success;
 }
 
@@ -340,7 +304,7 @@ StatusCode fx_resolver_t::soft_roll_forward_helper(
 //  - fx_ref
 //      The reference to resolve (the one we're processing).
 //      Passed by-value to avoid side-effects with mutable newest_references and oldest_references.
-//  - newest_is_hard_roll_forward
+//  - fx_is_hard_resolved
 //      true if there is a reference to the framework specified by fx_ref in the newest_references
 //      and that reference is pointing to a physically resolved framework on the disk (so the version in it
 //      actually exists on disk).
@@ -353,10 +317,61 @@ StatusCode fx_resolver_t::soft_roll_forward_helper(
 //      but there's no work to throw away/retry yet.
 StatusCode fx_resolver_t::soft_roll_forward(
     const fx_reference_t fx_ref,
-    bool newest_is_hard_roll_forward)
+    bool fx_is_hard_resolved)
 {
-    /*byval*/ fx_reference_t current_ref = m_newest_references[fx_ref.get_fx_name()];
-    return soft_roll_forward_helper(current_ref, fx_ref, newest_is_hard_roll_forward);
+    const pal::string_t& fx_name = fx_ref.get_fx_name();
+    fx_reference_t current_fx_ref = m_newest_references[fx_name]; // copy
+
+    StatusCode rc = StatusCode::Success;
+
+    fx_reference_t effective_fx_ref;
+    bool effective_is_different_from_current = false;
+
+    if (current_fx_ref.get_fx_version_number() >= fx_ref.get_fx_version_number())
+    {
+        // No version update since the current_fx_ref has higher version than the fx_ref.
+        rc = soft_roll_forward_helper(fx_ref, current_fx_ref, effective_fx_ref, effective_is_different_from_current);
+        if (rc != StatusCode::Success)
+        {
+            return rc;
+        }
+    }
+    else
+    {
+        if (!current_fx_ref.is_roll_forward_compatible(fx_ref.get_fx_version_number()))
+        {
+            // Error condition - not compatible with the other reference
+            display_incompatible_framework_error(fx_ref.get_fx_version(), current_fx_ref);
+            return StatusCode::FrameworkCompatFailure;
+        }
+
+        rc = soft_roll_forward_helper(current_fx_ref, fx_ref, effective_fx_ref, effective_is_different_from_current);
+        if (rc != StatusCode::Success)
+        {
+            return rc;
+        }
+
+        // fx_ref is higher version, so the effective_fx_ref is always different from current
+        // because we take the higher version as the effective.
+        effective_is_different_from_current = true;
+    }
+
+    if (effective_is_different_from_current)
+    {
+        m_newest_references[fx_name] = effective_fx_ref;
+
+        if (fx_is_hard_resolved)
+        {
+            // Trigger retry even if framework reference is the exact same version, but different roll forward settings.
+            // This is needed since if the "old" settings were for example LatestMinor, 
+            //   the resolution would return the highest available minor. But if we now update it to "new" setting of Minor,
+            //   the resolution should return the closest higher available minor, which can be different.
+            display_retry_framework_trace(current_fx_ref, fx_ref);
+            return StatusCode::FrameworkCompatRetry;
+        }
+    }
+
+    return StatusCode::Success;
 }
 
 // Processes one framework's runtime configuration.
@@ -425,7 +440,7 @@ StatusCode fx_resolver_t::read_framework(
             // Perform a "soft" roll-forward meaning we don't read any physical framework folders yet
             // Since we didn't find the framework in the resolved list yet, it's a pure soft roll-forward
             // it's OK to update the newest reference as we haven't processed it yet.
-            rc = soft_roll_forward(fx_ref, /*newest_is_hard_roll_forward*/ false);
+            rc = soft_roll_forward(fx_ref, /*fx_is_hard_resolved*/ false);
             if (rc)
             {
                 break; // Error case
@@ -476,9 +491,9 @@ StatusCode fx_resolver_t::read_framework(
         {
             // Perform a "soft" roll-forward meaning we don't read any physical framework folders yet
             // Note that since we found the framework in the already resolved frameworks
-            // pass a flag which marks the newest resolved framework reference as "hard roll-forward"
+            // pass a flag which marks tells the function tha the framework was already resolved against disk (hard resolved),
             // meaning that if we need to update it, we need to restart the entire process.
-            rc = soft_roll_forward(fx_ref, /*newest_is_hard_roll_forward*/ true);
+            rc = soft_roll_forward(fx_ref, /*fx_is_hard_resolved*/ true);
             if (rc)
             {
                 break; // Error or retry case

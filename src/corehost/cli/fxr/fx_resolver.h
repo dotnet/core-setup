@@ -25,12 +25,13 @@ private:
     fx_resolver_t();
 
     StatusCode soft_roll_forward_helper(
-        const fx_reference_t& newer,
-        const fx_reference_t& older,
-        bool older_is_hard_roll_forward);
+        const fx_reference_t& lower_fx_ref,
+        const fx_reference_t& higher_fx_ref,
+        /*out*/ fx_reference_t& effective_fx_ref,
+        /*out*/ bool& effective_is_different_from_higher);
     StatusCode soft_roll_forward(
-        const fx_reference_t existing_ref,
-        bool current_is_hard_roll_forward);
+        const fx_reference_t fx_ref,
+        bool fx_is_hard_resolved);
     StatusCode read_framework(
         const host_startup_info_t& host_info,
         const fx_reference_t& override_settings,
