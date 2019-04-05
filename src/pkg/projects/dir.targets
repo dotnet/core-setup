@@ -33,7 +33,9 @@
     <ItemGroup>
       <WindowsNativeFile Include="@(File)"
                          Condition="'%(File.Extension)' == '.dll' OR '%(File.Extension)' == '.exe'" />
-      <WindowsSymbolFile Include="@(File -> '%(RootDir)%(Directory)%(Filename).pdb')" />
+      <!-- Don't include *.pdb for export libraries -->
+      <WindowsSymbolFile Include="@(File -> '%(RootDir)%(Directory)%(Filename).pdb')"
+                         Condition="'%(File.Extension)' != '.lib'" />
       <!-- Crossgened files (on windows) have both a *.pdb and a *.ni.pdb symbol file.  Include the *.ni.pdb file as well if it exists. -->
       <WindowsSymbolFile Include="@(File -> '%(RootDir)%(Directory)%(Filename).ni.pdb')" />
       <ExistingWindowsSymbolFile Include="@(WindowsSymbolFile)" Condition="Exists('%(Identity)')" />
@@ -156,12 +158,21 @@
       <Output TaskParameter="TargetOutputs" ItemName="SharedFrameworkRuntimeFiles" />
     </MSBuild>
 
+    <!--
+      Workaround: zero-versioned Microsoft.VisualBasic.dll in non-Windows CoreFX transport package.
+      See https://github.com/dotnet/corefx/issues/36630
+    -->
+    <PropertyGroup Condition="'$(OSGroup)' != 'Windows_NT'">
+      <PermitDllAndExeFilesLackingFileVersion>true</PermitDllAndExeFilesLackingFileVersion>
+    </PropertyGroup>
+
     <GenerateFileVersionProps Files="@(SharedFrameworkRuntimeFiles)"
                               PackageId="$(Id)"
                               PackageVersion="$(Version)"
                               PlatformManifestFile="$(PlatformManifestFile)"
                               PropsFile="$(PropsFile)"
-                              PreferredPackages="$(Id);@(RuntimeDependency)" />
+                              PreferredPackages="$(Id);@(RuntimeDependency)"
+                              PermitDllAndExeFilesLackingFileVersion="$(PermitDllAndExeFilesLackingFileVersion)" />
   </Target>
 
   <Target Name="IncludeFileVersionPropsFile"

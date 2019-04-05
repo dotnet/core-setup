@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 .CaptureStdOut()
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .EnvironmentVariable("DOTNET_ROOT", dotNetRoot)
+                .EnvironmentVariable("DOTNET_ROOT(x86)", dotNetRoot)
                 .Execute();
 
             result.Should().HaveStdErrContaining("Using environment variable");
@@ -90,7 +91,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                     .CaptureStdErr()
                     .CaptureStdOut()
                     .EnvironmentVariable("COREHOST_TRACE", "1")
-                    .EnvironmentVariable("_DOTNET_TEST_SDK_REGISTRY_PATH", regKeyOverride.KeyPath)
+                    .EnvironmentVariable(Constants.TestOnlyEnvironmentVariables.RegistryPath, regKeyOverride.KeyPath)
                     .EnvironmentVariable("TEST_OVERRIDE_PROGRAMFILES", programFilesOverride)
                     .Execute();
             }
