@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithApplyPatches(applyPatches)
                         .Version = versionReference),
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.3", versionReference));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference));
         }
 
         // Soft roll forward from inner framework reference [specified] to app's 6.1.1-preview.0 (defaults)
@@ -308,7 +308,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                             .Version = versionReference);
                 },
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "5.1.3"));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "5.1.1"));
         }
 
         // Soft roll forward inner framework reference (defaults) to inner framework reference with [specified version]
@@ -336,7 +336,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                             .Version = versionReference);
                 },
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.3", versionReference));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference));
         }
 
         // This test does:
