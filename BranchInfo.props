@@ -12,8 +12,8 @@
     <IncludeBuildNumberInPackageVersion Condition="'$(StabilizePackageVersion)' != 'true'">true</IncludeBuildNumberInPackageVersion>
 
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
-    <ReleaseBrandSuffix>Preview 5</ReleaseBrandSuffix>
-    <Channel>master</Channel>
+    <ReleaseBrandSuffix>Preview 4</ReleaseBrandSuffix>
+    <Channel>release/3.0</Channel>
     <ContainerName>dotnet</ContainerName>
     <ChecksumContainerName>$(ContainerName)</ChecksumContainerName>
     <NETCoreAppMaximumVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppMaximumVersion>
