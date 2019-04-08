@@ -66,6 +66,10 @@ private:
     // to fill the "oldest reference" for each resolved framework in the end. It does not affect the behavior
     // of the algorithm.
     fx_name_to_fx_reference_map_t m_oldest_references;
+
+    // This is a cached value of the DOTNET_ROLL_FORWARD_TO_PRERELEASE variable.
+    // If set to true, all versions (including pre-release) are considered even if starting from a release framework reference.
+    bool m_roll_forward_to_prerelease;
 };
 
 #endif // __FX_RESOLVER_H__

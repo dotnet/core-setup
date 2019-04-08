@@ -37,6 +37,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             public const string CommandLineArgument = "--fx-version";
         }
 
+        public static class RollForwardToPreRelease
+        {
+            public const string EnvironmentVariable = "DOTNET_ROLL_FORWARD_TO_PRERELEASE";
+        }
+
         public static class TestOnlyEnvironmentVariables
         {
             public const string RegistryPath = "_DOTNET_TEST_REGISTRY_PATH";

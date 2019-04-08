@@ -116,16 +116,19 @@ namespace
         const pal::string_t& fx_ver,
         const fx_ver_t& specified,
         bool apply_patches,
-        roll_forward_option roll_forward)
+        roll_forward_option roll_forward,
+        bool roll_forward_to_prerelease)
     {
         trace::verbose(
-            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, roll_forward=%d "),
+            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, roll_forward=%d, roll_forward_to_prerelease=%d"),
             fx_ver.c_str(),
             apply_patches,
-            roll_forward);
+            roll_forward,
+            roll_forward_to_prerelease);
 
         // If the desired framework reference is release, then try release-only search first.
-        if (!specified.is_prerelease())
+        // Unles the roll_forward_to_prerelease is in effect, in which case always consider all versions.
+        if (!specified.is_prerelease() && !roll_forward_to_prerelease)
         {
             fx_ver_t best_match_release_only = search_for_best_framework_match(
                 version_list,
@@ -141,7 +144,7 @@ namespace
             }
         }
 
-        // If release-only didn't find anything, or the desired framework reference was pre-release
+        // If release-only didn't find anything, or the desired framework reference was pre-release (or we force pre-release search)
         // do a full search on all versions.
         fx_ver_t best_match = search_for_best_framework_match(
             version_list,
@@ -164,7 +167,8 @@ namespace
     fx_definition_t* resolve_fx(
         const fx_reference_t & fx_ref,
         const pal::string_t & oldest_requested_version,
-        const pal::string_t & dotnet_dir)
+        const pal::string_t & dotnet_dir,
+        bool roll_forward_to_prerelease)
     {
         assert(!fx_ref.get_fx_name().empty());
         assert(!fx_ref.get_fx_version().empty());
@@ -239,7 +243,13 @@ namespace
                     }
                 }
 
-                fx_ver_t resolved_ver = resolve_framework_version(version_list, fx_ver, specified, *(fx_ref.get_apply_patches()), *(fx_ref.get_roll_forward()));
+                fx_ver_t resolved_ver = resolve_framework_version(
+                    version_list, 
+                    fx_ver, 
+                    specified, 
+                    *(fx_ref.get_apply_patches()), 
+                    *(fx_ref.get_roll_forward()),
+                    roll_forward_to_prerelease);
 
                 pal::string_t resolved_ver_str = resolved_ver.as_str();
                 append_path(&fx_dir, resolved_ver_str.c_str());
@@ -252,7 +262,13 @@ namespace
                         std::vector<fx_ver_t> version_list;
                         version_list.push_back(resolved_ver);
                         version_list.push_back(selected_ver);
-                        resolved_ver = resolve_framework_version(version_list, fx_ver, specified, *(fx_ref.get_apply_patches()), *(fx_ref.get_roll_forward()));
+                        resolved_ver = resolve_framework_version(
+                            version_list,
+                            fx_ver,
+                            specified,
+                            *(fx_ref.get_apply_patches()),
+                            *(fx_ref.get_roll_forward()),
+                            roll_forward_to_prerelease);
                     }
 
                     if (resolved_ver != selected_ver)
@@ -449,7 +465,7 @@ StatusCode fx_resolver_t::read_framework(
             fx_reference_t& newest_ref = m_newest_references[fx_name];
 
             // Resolve the framwork against the the existing physical framework folders
-            fx_definition_t* fx = resolve_fx(newest_ref, m_oldest_references[fx_name].get_fx_version(), host_info.dotnet_root);
+            fx_definition_t* fx = resolve_fx(newest_ref, m_oldest_references[fx_name].get_fx_version(), host_info.dotnet_root, m_roll_forward_to_prerelease);
             if (fx == nullptr)
             {
                 display_missing_framework_error(fx_name, newest_ref.get_fx_version(), pal::string_t(), host_info.dotnet_root);
@@ -508,7 +524,14 @@ StatusCode fx_resolver_t::read_framework(
 }
 
 fx_resolver_t::fx_resolver_t()
+    : m_roll_forward_to_prerelease(false)
 {
+    pal::string_t roll_forward_to_prerelease_env;
+    if (pal::getenv(_X("DOTNET_ROLL_FORWARD_TO_PRERELEASE"), &roll_forward_to_prerelease_env))
+    {
+        auto roll_forward_to_prerelease_val = pal::xtoi(roll_forward_to_prerelease_env.c_str());
+        m_roll_forward_to_prerelease = (roll_forward_to_prerelease_val == 1);
+    }
 }
 
 StatusCode fx_resolver_t::resolve_frameworks_for_app(

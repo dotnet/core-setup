@@ -87,17 +87,24 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
         // Soft roll forward from inner framework reference [specified] to  app's 5.1.1 (defaults)
         [Theory]
-        [InlineData("5.4.0", null, "5.4.1")]
-        [InlineData("5.4.0", Constants.RollForwardSetting.Minor, "5.4.1")]
-        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMinor, "5.4.1")]
-        [InlineData("5.4.0", Constants.RollForwardSetting.Major, "5.4.1")]
-        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMajor, "5.4.1")]
-        [InlineData("5.4.1", Constants.RollForwardSetting.Disable, "5.4.1")]
-        [InlineData("6.0.0", Constants.RollForwardSetting.Minor, null)]
-        [InlineData("6.0.0", Constants.RollForwardSetting.Major, null)]
+        [InlineData("5.4.0", null,                                     false, "5.4.1")]
+        [InlineData("5.4.0", Constants.RollForwardSetting.Minor,       false, "5.4.1")]
+        [InlineData("5.4.0", Constants.RollForwardSetting.Minor,       true,  "5.4.1")]
+        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMinor, false, "5.4.1")] // The app's settings (Minor) wins, so effective reference is "5.4.0 Minor"
+        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMinor, true,  "5.4.1")]
+        [InlineData("5.4.0", Constants.RollForwardSetting.Major,       false, "5.4.1")] // The app's settings (Minor) wins, so effective reference is "5.4.0 Minor"
+        [InlineData("5.4.0", Constants.RollForwardSetting.Major,       true,  "5.4.1")]
+        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMajor, false, "5.4.1")] // The app's settings (Minor) wins, so effective reference is "5.4.0 Minor"
+        [InlineData("5.4.0", Constants.RollForwardSetting.LatestMajor, true,  "5.4.1")]
+        [InlineData("5.4.1", Constants.RollForwardSetting.Disable,     false, "5.4.1")]
+        [InlineData("6.0.0", Constants.RollForwardSetting.Minor,       false, null)]
+        [InlineData("6.0.0", Constants.RollForwardSetting.Minor,       true,  null)]
+        [InlineData("6.0.0", Constants.RollForwardSetting.Major,       false, null)]
+        [InlineData("6.0.0", Constants.RollForwardSetting.LatestMajor, false, null)]
         public void SoftRollForward_InnerFrameworkReference_ToLower(
             string versionReference,
             string rollForward,
+            bool rollForwardToPreRelease,
             string resolvedFramework)
         {
             RunTest(
@@ -109,7 +116,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithRollForward(rollForward)
                         .Version = versionReference),
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference),
+                rollForwardToPreRelease);
         }
 
         // Soft roll forward from inner framework reference [specified] to  app's 5.1.1 (defaults)
@@ -142,19 +150,23 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference));
         }
 
-        // Soft roll forward from inner framework reference [specified] to app's 6.0.1-preview.0 (defaults)
+        // Soft roll forward from inner framework reference [specified] to app's 6.1.1-preview.0 (defaults)
         [Theory]
-        [InlineData("6.0.0", null, "6.1.1-preview.1")]
-        [InlineData("6.0.0", Constants.RollForwardSetting.LatestPatch, null)]
-        [InlineData("6.0.0", Constants.RollForwardSetting.Minor, "6.1.1-preview.1")]
-        [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, null)]
-        [InlineData("6.1.1-preview.0", null, "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable, "[not found]")]
-        [InlineData("6.1.1-preview.1", Constants.RollForwardSetting.Disable, "6.1.1-preview.1")]
+        [InlineData("6.0.0",           null,                                     false, "6.1.1-preview.1")]
+        [InlineData("6.0.0",           Constants.RollForwardSetting.LatestPatch, false, null)]
+        [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       false, "6.1.1-preview.1")]
+        [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, null)]
+        [InlineData("6.1.0",           null,                                     false, "6.1.1-preview.1")]
+        [InlineData("6.1.0",           null,                                     true,  "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.0", null,                                     false, "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.0", null,                                     true,  "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable,     false, "[not found]")]
+        [InlineData("6.1.1-preview.1", Constants.RollForwardSetting.Disable,     false, "6.1.1-preview.1")]
         public void SoftRollForward_InnerFrameworkReference_PreRelease(
             string versionReference,
             string rollForward,
+            bool rollForwardToPreRelease,
             string resolvedFramework)
         {
             bool notFound = resolvedFramework == "[not found]";
@@ -177,7 +189,53 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     {
                         commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "6.1.1-preview.0");
                     }
-                });
+                },
+                rollForwardToPreRelease);
+        }
+
+        // Soft roll forward from inner framework reference [specified] to app's 6.1.0 (defaults)
+        [Theory]
+        [InlineData("6.0.0",           null,                                     false, "6.1.0")]
+        [InlineData("6.0.0",           null,                                     true,  "6.1.1-preview.1")]
+        [InlineData("6.0.0",           Constants.RollForwardSetting.LatestPatch, false, null)]
+        [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       false, "6.1.0")]
+        [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       true,  "6.1.1-preview.1")]
+        [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, null)]
+        [InlineData("6.1.0",           null,                                     false, "6.1.0")]
+        [InlineData("6.1.0",           null,                                     true,  "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.0", null,                                     false, "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.0", null,                                     true,  "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable,     false, "[not found]")]
+        [InlineData("6.1.1-preview.1", Constants.RollForwardSetting.Disable,     false, "6.1.1-preview.1")]
+        public void SoftRollForward_InnerFrameworkReference_Release(
+            string versionReference,
+            string rollForward,
+            bool rollForwardToPreRelease,
+            string resolvedFramework)
+        {
+            bool notFound = resolvedFramework == "[not found]";
+            RunTest(
+                runtimeConfig => runtimeConfig
+                    .WithFramework(MicrosoftNETCoreApp, "6.1.0")
+                    .WithFramework(MiddleWare, "2.1.0"),
+                dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
+                    runtimeConfig.GetFramework(MicrosoftNETCoreApp)
+                        .WithRollForward(rollForward)
+                        .Version = versionReference),
+                notFound ? null : resolvedFramework,
+                commandResult =>
+                {
+                    if (notFound)
+                    {
+                        commandResult.Should().Fail().And.DidNotFindCompatibleFrameworkVersion();
+                    }
+                    else
+                    {
+                        commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "6.1.0");
+                    }
+                },
+                rollForwardToPreRelease);
         }
 
         // Soft roll forward from inner framework reference 5.1.1 to app [specified version]
@@ -425,7 +483,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
             Action<DotNetCliExtensions.DotNetCliCustomizer> customizeDotNet = null,
             string resolvedFramework = null,
-            Action<CommandResult> resultValidator = null)
+            Action<CommandResult> resultValidator = null,
+            bool rollForwardToPreRelease = false)
         {
             using (DotNetCliExtensions.DotNetCliCustomizer dotnetCustomizer = SharedState.DotNetWithMultipleFrameworks.Customize())
             {
@@ -434,7 +493,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 RunTest(
                     SharedState.DotNetWithMultipleFrameworks,
                     SharedState.FrameworkReferenceApp,
-                    new TestSettings().WithRuntimeConfigCustomizer(runtimeConfig),
+                    new TestSettings()
+                        .WithRuntimeConfigCustomizer(runtimeConfig)
+                        .WithEnvironment(Constants.RollForwardToPreRelease.EnvironmentVariable, rollForwardToPreRelease ? "1" : "0"),
                     commandResult =>
                     {
                         if (resolvedFramework != null)
@@ -464,6 +525,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .AddMicrosoftNETCoreAppFramework("5.4.1")
                     .AddMicrosoftNETCoreAppFramework("5.6.0")
                     .AddMicrosoftNETCoreAppFramework("6.0.0")
+                    .AddMicrosoftNETCoreAppFramework("6.1.0")
                     .AddMicrosoftNETCoreAppFramework("6.1.1-preview.1")
                     .AddFramework(MiddleWare, "2.1.2", runtimeConfig =>
                         runtimeConfig.WithFramework(MicrosoftNETCoreApp, "5.1.3"))
