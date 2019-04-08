@@ -125,6 +125,7 @@ int run_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const argument
         clr_library_version = resolver.get_coreclr_library_version();
     }
 
+    // Build properties for CoreCLR instantiation
     pal::string_t app_base = resolver.get_app_dir();
     coreclr_properties.add(common_property::TrustedPlatformAssemblies, probe_paths.tpa.c_str());
     coreclr_properties.add(common_property::NativeDllSearchDirectories, probe_paths.native.c_str());

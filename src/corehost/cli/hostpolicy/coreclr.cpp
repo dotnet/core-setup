@@ -257,7 +257,7 @@ bool coreclr_property_bag_t::try_get(const pal::char_t *key, const pal::char_t *
     return false;
 }
 
-void coreclr_property_bag_t::log_properties()
+void coreclr_property_bag_t::log_properties() const
 {
     for (int i = 0; i < count(); ++i)
         trace::verbose(_X("Property %s = %s"), _keys[i].c_str(), _values[i].c_str());

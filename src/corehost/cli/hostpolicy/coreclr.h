@@ -86,7 +86,7 @@ public:
 
     bool try_get(const pal::char_t *key, const pal::char_t **value);
 
-    void log_properties();
+    void log_properties() const;
 
     int count() const;
 

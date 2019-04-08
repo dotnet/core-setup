@@ -29,6 +29,12 @@ namespace
 
     int create_coreclr(const run_context_t &context, const char* app_domain_friendly_name, std::unique_ptr<coreclr_t> &coreclr)
     {
+        // Verbose logging
+        if (trace::is_enabled())
+        {
+            context.coreclr_properties.log_properties();
+        }
+
         std::vector<char> host_path;
         pal::pal_clrstring(context.host_path, &host_path);
 
@@ -74,17 +80,10 @@ int run_as_lib(
             return StatusCode::Success;
         }
 
-        // Build variables for CoreCLR instantiation
         run_context_t context {};
         int rc = context.initialize(hostpolicy_init, args, false /* enable_breadcrumbs */);
         if (rc != StatusCode::Success)
             return rc;
-
-        // Verbose logging
-        if (trace::is_enabled())
-        {
-            context.coreclr_properties.log_properties();
-        }
 
         std::unique_ptr<coreclr_t> coreclr_local;
         rc = create_coreclr(context, "clr_libhost", coreclr_local);
@@ -109,7 +108,6 @@ int run_host_command(
 
     // Breadcrumbs are not enabled for API calls because they do not execute
     // the app and may be re-entry
-    // Build variables for CoreCLR instantiation
     run_context_t context {};
     int rc = context.initialize(hostpolicy_init, args, false /* enable_breadcrumbs */);
     if (rc != StatusCode::Success)
@@ -141,12 +139,6 @@ int run_as_app(
     int rc = context.initialize(g_init, args, true /* enable_breadcrumbs */);
     if (rc != StatusCode::Success)
         return rc;
-
-    // Verbose logging
-    if (trace::is_enabled())
-    {
-        context.coreclr_properties.log_properties();
-    }
 
     std::unique_ptr<coreclr_t> coreclr;
     rc = create_coreclr(context, "clrhost", coreclr);
