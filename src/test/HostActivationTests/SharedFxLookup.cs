@@ -209,27 +209,5 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdErrContaining($"CoreCLR path = '{Path.Combine(sharedFxPath, coreClrLibraryName)}'")
                 .And.HaveStdErrContaining($"The resolved JIT path is '{Path.Combine(sharedFxPath, clrJitLibraryName)}'");
         }
-
-        static private JObject GetAdditionalFramework(string fxName, string fxVersion, bool? applyPatches, int? rollForwardOnNoCandidateFx)
-        {
-            var jobject = new JObject(new JProperty("name", fxName));
-
-            if (fxVersion != null)
-            {
-                jobject.Add(new JProperty("version", fxVersion));
-            }
-
-            if (applyPatches.HasValue)
-            {
-                jobject.Add(new JProperty("applyPatches", applyPatches.Value));
-            }
-
-            if (rollForwardOnNoCandidateFx.HasValue)
-            {
-                jobject.Add(new JProperty("rollForwardOnNoCandidateFx", rollForwardOnNoCandidateFx));
-            }
-
-            return jobject;
-        }
     }
 }
