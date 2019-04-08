@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.3", versionReference));
         }
 
-        // Soft roll forward from inner framework reference [specified] to app's 6.0.1-preview.0 (defaults)
+        // Soft roll forward from inner framework reference [specified] to app's 6.1.1-preview.0 (defaults)
         [Theory]
         [InlineData("6.0.0", null, null, null)]    // Can't roll forward from release to pre-release
         [InlineData("6.0.1-preview.0", null, null, "6.1.1-preview.1")]
