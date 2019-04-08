@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.1.0", 1,    false, "5.1.1")]
         [InlineData("1.0.0", 1,    null,  null)]
         [InlineData("1.0.0", 2,    null,  "5.1.3")]
-        public void SoftRollForward_InnerFrameworkReference_ToHigher(
+        public void SoftRollForward_InnerFrameworkReference_ToLower(
             string versionReference,
             int? rollForwardOnNoCandidateFx,
             bool? applyPatches,
@@ -393,6 +393,34 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .And.RestartedFrameworkResolution("5.1.3", "5.4.1")
                         .And.RestartedFrameworkResolution("5.4.1", "5.6.0")
                         .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.6.0"));
+        }
+
+        [Fact]
+        public void RollForwardOnAllFrameworks()
+        {
+            RunTest(
+                runtimeConfig => runtimeConfig
+                    .WithFramework(MiddleWare, "2.0.0")
+                    .WithFramework(HighWare, "7.0.0")
+                    .WithFramework(MicrosoftNETCoreApp, "5.0.0"),
+                dotnetCustomizer =>
+                {
+                    dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
+                        runtimeConfig.GetFramework(MicrosoftNETCoreApp)
+                            .Version = "5.0.0");
+                    dotnetCustomizer.Framework(HighWare).RuntimeConfig(runtimeConfig =>
+                    {
+                        runtimeConfig.GetFramework(MiddleWare)
+                            .Version = "2.0.0";
+                        runtimeConfig.GetFramework(MicrosoftNETCoreApp)
+                            .Version = "5.0.0";
+                    });
+                },
+                resultValidator: commandResult =>
+                    commandResult.Should().Pass()
+                        .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3")
+                        .And.HaveResolvedFramework(MiddleWare, "2.1.2")
+                        .And.HaveResolvedFramework(HighWare, "7.3.1"));
         }
 
         private void RunTest(
