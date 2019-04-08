@@ -62,7 +62,7 @@
     </Otherwise>
   </Choose>
 
-  <Import Project="packaging-tools\packaging-tools.props" />
+  <Import Project="$(PackagingToolsDir)packaging-tools.props" />
 
   <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.depproj'">
     <!-- we intentionally don't want to produce output -->
@@ -93,6 +93,11 @@
     </File>
     <File Condition="Exists('$(PackageThirdPartyNoticesFile)')"
           Include="$(PackageThirdPartyNoticesFile)" >
+      <SkipPackageFileCheck>true</SkipPackageFileCheck>
+    </File>
+    <!-- Add a marker to help the designer optimize & share .NET Core packages -->
+    <File Condition="'$(IncludeDesignerMarker)' != 'false'"
+          Include="$(MSBuildThisFileDirectory)useSharedDesignerContext.txt">
       <SkipPackageFileCheck>true</SkipPackageFileCheck>
     </File>
 
@@ -131,18 +136,6 @@
 
   <ItemGroup Condition="'$(PackageTargetRuntime)' == '' and '$(HasRuntimePackages)' != 'false'">
     <ProjectReference Include="@(RuntimeProject)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!--
-      Create targeting pack packages/installers. Similar to the runtime package, we only make one
-      Debian or RPM package for all distros of that type.
-    -->
-    <InstallerPackageProject
-      Include="$(MSBuildProjectFullPath)"
-      Condition="
-        '$(FrameworkPackType)' == 'targeting' AND
-        '$(BuildDistroIndependentInstallers)' == 'true'" />
   </ItemGroup>
   
 </Project>
