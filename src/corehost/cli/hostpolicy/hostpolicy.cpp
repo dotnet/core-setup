@@ -14,7 +14,7 @@
 #include <error_codes.h>
 #include "breadcrumbs.h"
 #include <host_startup_info.h>
-#include "run_context.h"
+#include "hostpolicy_context.h"
 
 namespace
 {
@@ -27,7 +27,7 @@ namespace
     std::mutex g_lib_lock;
     std::weak_ptr<coreclr_t> g_lib_coreclr;
 
-    int create_coreclr(const run_context_t &context, const char* app_domain_friendly_name, std::unique_ptr<coreclr_t> &coreclr)
+    int create_coreclr(const hostpolicy_context_t &context, const char* app_domain_friendly_name, std::unique_ptr<coreclr_t> &coreclr)
     {
         // Verbose logging
         if (trace::is_enabled())
@@ -80,7 +80,7 @@ int run_as_lib(
             return StatusCode::Success;
         }
 
-        run_context_t context {};
+        hostpolicy_context_t context {};
         int rc = context.initialize(hostpolicy_init, args, false /* enable_breadcrumbs */);
         if (rc != StatusCode::Success)
             return rc;
@@ -108,7 +108,7 @@ int run_host_command(
 
     // Breadcrumbs are not enabled for API calls because they do not execute
     // the app and may be re-entry
-    run_context_t context {};
+    hostpolicy_context_t context {};
     int rc = context.initialize(hostpolicy_init, args, false /* enable_breadcrumbs */);
     if (rc != StatusCode::Success)
         return rc;
@@ -135,7 +135,7 @@ int run_as_app(
     hostpolicy_init_t &hostpolicy_init,
     const arguments_t &args)
 {
-    run_context_t context {};
+    hostpolicy_context_t context {};
     int rc = context.initialize(g_init, args, true /* enable_breadcrumbs */);
     if (rc != StatusCode::Success)
         return rc;

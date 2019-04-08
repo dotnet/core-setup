@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#ifndef __RUN_CONTEXT_H__
-#define __RUN_CONTEXT_H__
+#ifndef __HOSTPOLICY_CONTEXT_H__
+#define __HOSTPOLICY_CONTEXT_H__
 
 #include <pal.h>
 
@@ -11,7 +11,7 @@
 #include "coreclr.h"
 #include "hostpolicy_init.h"
 
-struct run_context_t
+struct hostpolicy_context_t
 {
 public:
     pal::string_t application;
@@ -27,4 +27,4 @@ public:
     int initialize(hostpolicy_init_t &hostpolicy_init, const arguments_t &args, bool enable_breadcrumbs);
 };
 
-#endif // __RUN_CONTEXT_H__
+#endif // __HOSTPOLICY_CONTEXT_H__
