@@ -41,13 +41,11 @@ NETHOST_API int NETHOST_CALLTYPE get_hostfxr_path(
     size_t len = fxr_path.length();
     size_t required_size = len + 1; // null terminator
 
-    if (buffer == nullptr || *buffer_size < required_size)
-    {
-        *buffer_size = required_size;
-        return StatusCode::HostApiBufferTooSmall;
-    }
-
+    size_t input_buffer_size = *buffer_size;
     *buffer_size = required_size;
+    if (buffer == nullptr || input_buffer_size < required_size)
+        return StatusCode::HostApiBufferTooSmall;
+
     fxr_path.copy(buffer, len);
     buffer[len] = '\0';
     return StatusCode::Success;
