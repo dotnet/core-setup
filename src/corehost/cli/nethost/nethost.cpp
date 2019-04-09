@@ -19,7 +19,7 @@ namespace
 }
 
 NETHOST_API int NETHOST_CALLTYPE get_hostfxr_path(
-    char_t * result_buffer,
+    char_t * buffer,
     size_t * buffer_size,
     const char_t * assembly_path)
 {
@@ -41,14 +41,14 @@ NETHOST_API int NETHOST_CALLTYPE get_hostfxr_path(
     size_t len = fxr_path.length();
     size_t required_size = len + 1; // null terminator
 
-    if (result_buffer == nullptr || *buffer_size < required_size)
+    if (buffer == nullptr || *buffer_size < required_size)
     {
         *buffer_size = required_size;
         return StatusCode::HostApiBufferTooSmall;
     }
 
     *buffer_size = required_size;
-    fxr_path.copy(result_buffer, len);
-    result_buffer[len] = '\0';
+    fxr_path.copy(buffer, len);
+    buffer[len] = '\0';
     return StatusCode::Success;
 }
