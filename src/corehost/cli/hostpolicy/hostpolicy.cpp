@@ -27,7 +27,11 @@ namespace
     std::mutex g_lib_lock;
     std::weak_ptr<coreclr_t> g_lib_coreclr;
 
-    int create_coreclr(const hostpolicy_context_t &context, const char* app_domain_friendly_name, std::unique_ptr<coreclr_t> &coreclr)
+    std::mutex g_context_lock;
+    std::shared_ptr<hostpolicy_context_t> g_context;
+    std::weak_ptr<hostpolicy_context_t> g_context_weak;
+
+    int create_coreclr(const hostpolicy_context_t &context, host_mode_t mode, std::unique_ptr<coreclr_t> &coreclr)
     {
         // Verbose logging
         if (trace::is_enabled())
@@ -37,6 +41,8 @@ namespace
 
         std::vector<char> host_path;
         pal::pal_clrstring(context.host_path, &host_path);
+
+        const char *app_domain_friendly_name = mode == host_mode_t::libhost ? "clr_libhost" : "clrhost";
 
         // Create a CoreCLR instance
         trace::verbose(_X("CoreCLR path = '%s', CoreCLR dir = '%s'"), context.clr_path.c_str(), context.clr_dir.c_str());
@@ -55,11 +61,49 @@ namespace
 
         return StatusCode::Success;
     }
+
+    int get_or_create_hostpolicy_context(
+        hostpolicy_init_t &hostpolicy_init,
+        const arguments_t &args,
+        bool breadcrumbs_enabled,
+        std::shared_ptr<hostpolicy_context_t> &context)
+    {
+        context = g_context_weak.lock();
+        if (context != nullptr)
+        {
+            // [TODO] Validate the current context is acceptable for this request
+            trace::info(_X("Host context has already been initialized"));
+            return StatusCode::Success;
+        }
+
+        {
+            std::lock_guard<std::mutex> lock{ g_context_lock };
+            context = g_context_weak.lock();
+            if (context != nullptr)
+            {
+                trace::info(_X("Host context has already been initialized"));
+                return StatusCode::Success;
+            }
+
+            std::unique_ptr<hostpolicy_context_t> context_local(new hostpolicy_context_t());
+            int rc = context_local->initialize(hostpolicy_init, args, breadcrumbs_enabled);
+            if (rc != StatusCode::Success)
+                return rc;
+
+            assert(g_context == nullptr);
+            g_context = std::move(context_local);
+            g_context_weak = g_context;
+
+        }
+
+        context = g_context;
+        return StatusCode::Success;
+    }
 }
 
-int run_as_lib(
-    hostpolicy_init_t &hostpolicy_init,
-    const arguments_t &args,
+int get_or_create_coreclr(
+    const hostpolicy_context_t &context,
+    host_mode_t mode,
     std::shared_ptr<coreclr_t> &coreclr)
 {
     coreclr = g_lib_coreclr.lock();
@@ -80,13 +124,8 @@ int run_as_lib(
             return StatusCode::Success;
         }
 
-        hostpolicy_context_t context {};
-        int rc = context.initialize(hostpolicy_init, args, false /* enable_breadcrumbs */);
-        if (rc != StatusCode::Success)
-            return rc;
-
         std::unique_ptr<coreclr_t> coreclr_local;
-        rc = create_coreclr(context, "clr_libhost", coreclr_local);
+        int rc = create_coreclr(context, mode, coreclr_local);
         if (rc != StatusCode::Success)
             return rc;
 
@@ -132,48 +171,32 @@ int run_host_command(
 }
 
 int run_as_app(
-    hostpolicy_init_t &hostpolicy_init,
-    const arguments_t &args)
+    const std::shared_ptr<coreclr_t> &coreclr,
+    const hostpolicy_context_t &context,
+    int argc,
+    const pal::char_t **argv)
 {
-    hostpolicy_context_t context {};
-    int rc = context.initialize(g_init, args, true /* enable_breadcrumbs */);
-    if (rc != StatusCode::Success)
-        return rc;
-
-    std::unique_ptr<coreclr_t> coreclr;
-    rc = create_coreclr(context, "clrhost", coreclr);
-    if (rc != StatusCode::Success)
-        return rc;
-
-    assert(g_coreclr == nullptr);
-    g_coreclr = std::move(coreclr);
-
-    {
-        std::lock_guard<std::mutex> lock{ g_lib_lock };
-        g_lib_coreclr = g_coreclr;
-    }
-
     // Initialize clr strings for arguments
-    std::vector<std::vector<char>> argv_strs(args.app_argc);
-    std::vector<const char*> argv(args.app_argc);
-    for (int i = 0; i < args.app_argc; i++)
+    std::vector<std::vector<char>> argv_strs(argc);
+    std::vector<const char*> argv_local(argc);
+    for (int i = 0; i < argc; i++)
     {
-        pal::pal_clrstring(args.app_argv[i], &argv_strs[i]);
-        argv[i] = argv_strs[i].data();
+        pal::pal_clrstring(argv[i], &argv_strs[i]);
+        argv_local[i] = argv_strs[i].data();
     }
 
     if (trace::is_enabled())
     {
         pal::string_t arg_str;
-        for (int i = 0; i < argv.size(); i++)
+        for (int i = 0; i < argv_local.size(); i++)
         {
             pal::string_t cur;
-            pal::clr_palstring(argv[i], &cur);
+            pal::clr_palstring(argv_local[i], &cur);
             arg_str.append(cur);
             arg_str.append(_X(","));
         }
         trace::info(_X("Launch host: %s, app: %s, argc: %d, args: %s"), context.host_path.c_str(),
-            context.application.c_str(), args.app_argc, arg_str.c_str());
+            context.application.c_str(), argc, arg_str.c_str());
     }
 
     std::vector<char> managed_app;
@@ -189,8 +212,8 @@ int run_as_app(
     // Execute the application
     unsigned int exit_code;
     auto hr = g_coreclr->execute_assembly(
-        argv.size(),
-        argv.data(),
+        argv_local.size(),
+        argv_local.data(),
         managed_app.data(),
         &exit_code);
 
@@ -300,7 +323,7 @@ int corehost_main_init(
     arguments_t& args)
 {
     // Take care of arguments
-    if (!hostpolicy_init.host_info.is_valid())
+    if (!hostpolicy_init.host_info.is_valid(hostpolicy_init.host_mode))
     {
         // For backwards compat (older hostfxr), default the host_info
         hostpolicy_init.host_info.parse(argc, argv);
@@ -316,7 +339,27 @@ SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
     if (rc != StatusCode::Success)
         return rc;
 
-    return run_as_app(g_init, args);
+    assert(g_context == nullptr);
+    std::shared_ptr<hostpolicy_context_t> context;
+    rc = get_or_create_hostpolicy_context(g_init, args, true /* breadcrumbs_enabled */, context);
+    if (rc != StatusCode::Success)
+        return rc;
+
+    std::unique_ptr<coreclr_t> coreclr;
+    rc = create_coreclr(*context, g_init.host_mode, coreclr);
+    if (rc != StatusCode::Success)
+        return rc;
+
+    assert(g_coreclr == nullptr);
+    g_coreclr = std::move(coreclr);
+
+    {
+        std::lock_guard<std::mutex> lock{ g_lib_lock };
+        g_lib_coreclr = g_coreclr;
+    }
+
+    rc = run_as_app(g_coreclr, *context, args.app_argc, args.app_argv);
+    return rc;
 }
 
 SHARED_API int corehost_main_with_output_buffer(const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size)
@@ -362,9 +405,39 @@ SHARED_API int corehost_main_with_output_buffer(const int argc, const pal::char_
 int corehost_libhost_init(hostpolicy_init_t &hostpolicy_init, const pal::string_t& location, arguments_t& args)
 {
     // Host info should always be valid in the delegate scenario
-    assert(hostpolicy_init.host_info.is_valid());
+    assert(hostpolicy_init.host_info.is_valid(host_mode_t::libhost));
 
     return corehost_init(hostpolicy_init, 0, nullptr, location, args);
+}
+
+namespace
+{
+    int get_coreclr_delegate(const std::shared_ptr<coreclr_t> &coreclr, coreclr_delegate_type type, void** delegate)
+    {
+        switch (type)
+        {
+        case coreclr_delegate_type::com_activation:
+            return coreclr->create_delegate(
+                "System.Private.CoreLib",
+                "Internal.Runtime.InteropServices.ComActivator",
+                "GetClassFactoryForTypeInternal",
+                delegate);
+        case coreclr_delegate_type::load_in_memory_assembly:
+            return coreclr->create_delegate(
+                "System.Private.CoreLib",
+                "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
+                "LoadInMemoryAssembly",
+                delegate);
+        case coreclr_delegate_type::winrt_activation:
+            return coreclr->create_delegate(
+                "System.Private.CoreLib",
+                "Internal.Runtime.InteropServices.WindowsRuntime.ActivationFactoryLoader",
+                "GetActivationFactory",
+                delegate);
+        default:
+            return StatusCode::LibHostInvalidArgs;
+        }
+    }
 }
 
 SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void** delegate)
@@ -375,35 +448,17 @@ SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void** 
     if (rc != StatusCode::Success)
         return rc;
 
-    std::shared_ptr<coreclr_t> coreclr;
-    rc = run_as_lib(g_init, args, coreclr);
+    std::shared_ptr<hostpolicy_context_t> context;
+    rc = get_or_create_hostpolicy_context(g_init, args, false /* breadcrumbs_enabled */, context);
     if (rc != StatusCode::Success)
         return rc;
 
-    switch (type)
-    {
-    case coreclr_delegate_type::com_activation:
-        return coreclr->create_delegate(
-            "System.Private.CoreLib",
-            "Internal.Runtime.InteropServices.ComActivator",
-            "GetClassFactoryForTypeInternal",
-            delegate);
-    case coreclr_delegate_type::load_in_memory_assembly:
-        return coreclr->create_delegate(
-            "System.Private.CoreLib",
-            "Internal.Runtime.InteropServices.InMemoryAssemblyLoader",
-            "LoadInMemoryAssembly",
-            delegate);
-    case coreclr_delegate_type::winrt_activation:
-        return coreclr->create_delegate(
-            "System.Private.CoreLib",
-            "Internal.Runtime.InteropServices.WindowsRuntime.ActivationFactoryLoader",
-            "GetActivationFactory",
-            delegate
-        );
-    default:
-        return StatusCode::LibHostInvalidArgs;
-    }
+    std::shared_ptr<coreclr_t> coreclr;
+    rc = get_or_create_coreclr(*context, g_init.host_mode, coreclr);
+    if (rc != StatusCode::Success)
+        return rc;
+
+    return get_coreclr_delegate(coreclr, type, delegate);
 }
 
 SHARED_API int corehost_unload()
@@ -441,7 +496,7 @@ SHARED_API int corehost_resolve_component_dependencies(
     // The assumption is that component dependency resolution will only be called
     // when the coreclr is hosted through this hostpolicy and thus it will
     // have already called corehost_main_init.
-    if (!g_init.host_info.is_valid())
+    if (!g_init.host_info.is_valid(g_init.host_mode))
     {
         trace::error(_X("Hostpolicy must be initialized and corehost_main must have been called before calling corehost_resolve_component_dependencies."));
         return StatusCode::CoreHostLibLoadFailure;

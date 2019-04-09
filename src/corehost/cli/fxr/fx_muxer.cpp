@@ -1013,7 +1013,7 @@ int fx_muxer_t::load_runtime_and_get_delegate(
     coreclr_delegate_type delegate_type,
     void** delegate)
 {
-    assert(host_info.is_valid());
+    assert(host_info.is_valid(mode));
 
     // Read config
     fx_definition_vector_t fx_definitions;
