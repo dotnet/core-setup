@@ -230,7 +230,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.NotHaveStdErrContaining("--->");
 
             // With alternative directory separator
-            startupHookVar = $"{Path.AltDirectorySeparatorChar}Assembly";
+            startupHookVar = $".{Path.AltDirectorySeparatorChar}Assembly";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
@@ -263,7 +263,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.NotHaveStdErrContaining("--->");
 
             // With .dll suffix
-            startupHookVar = $"{Path.AltDirectorySeparatorChar}Assembly.DLl";
+            startupHookVar = $".{Path.AltDirectorySeparatorChar}Assembly.DLl";
             dotnet.Exec(appDll)
                 .EnvironmentVariable(startupHookVarName, startupHookVar)
                 .CaptureStdOut()
