@@ -35,14 +35,6 @@
 #define EMBED_HASH_LO_PART_UTF8 "74e592c2fa383d4a3960714caef0c4f2"
 #define EMBED_HASH_FULL_UTF8    (EMBED_HASH_HI_PART_UTF8 EMBED_HASH_LO_PART_UTF8) // NUL terminated
 
-bool is_exe_enabled_for_execution_hack(pal::string_t* app_dll)
-{
-	pal::string_t host_path;
-	pal::get_own_executable_path(&host_path);
-	*app_dll = strip_executable_ext(get_filename(host_path)).append(_X(".dll"));
-	return true;
-}
-
 bool is_exe_enabled_for_execution(pal::string_t* app_dll)
 {
 	constexpr int EMBED_SZ = sizeof(EMBED_HASH_FULL_UTF8) / sizeof(EMBED_HASH_FULL_UTF8[0]);
@@ -102,7 +94,7 @@ int exe_start(const int argc, const pal::char_t* argv[])
 	
 #if FEATURE_APPHOST
     pal::string_t embedded_app_name;
-    if (!is_exe_enabled_for_execution_hack(&embedded_app_name))
+    if (!is_exe_enabled_for_execution(&embedded_app_name))
     {
         trace::error(_X("A fatal error was encountered. This executable was not bound to load a managed DLL."));
         return StatusCode::AppHostExeNotBoundFailure;
@@ -119,7 +111,7 @@ int exe_start(const int argc, const pal::char_t* argv[])
         requires_v2_hostfxr_interface = true;
     }
 
-	bdl_processor_t extractor(host_path);
+	bundle::bundle_runner_t extractor(host_path);
 	StatusCode bundle_status = extractor.extract();
 
 	switch (bundle_status)

@@ -5,97 +5,97 @@
 #ifndef __BDL_MANIFEST_H__
 #define __BDL_MANIFEST_H__
 
-#if FEATURE_APPHOST
-
 #include <cstdint>
 #include <list>
 #include "bdl_file_entry.h"
 
+namespace bundle
+{
+    // Manifest Header contains:
+    // Fixed size thunk (represened by manifest_header_inner_t)
+    //   - Major Version     
+    //   - Minor Version     
+    //   - Number of embedded files
+    //   - Bundle ID length 
+    // Variable size portion:
+    //   - Bundle ID ("Bundle ID length" bytes)
+
+    struct manifest_header_t
+    {
+    public:
+        manifest_header_t()
+            :m_data(), m_bundle_id()
+        {
+        }
+
+        bool is_valid();
+        static manifest_header_t* read(FILE* stream);
+        const pal::string_t& bundle_id() { return m_bundle_id; }
+        int32_t num_embedded_files() { return m_data.num_embedded_files;  }
+
+    private:
 #pragma pack(push, 1)
+        struct
+        {
+            uint32_t major_version;
+            uint32_t minor_version;
+            int32_t num_embedded_files;
+            int8_t bundle_id_length;
+        } m_data;
+#pragma pack(pop)
+        pal::string_t m_bundle_id;
 
-// Manifest Header contains:
-// Fixed size thunk (represened by manifest_header_inner_t)
-//   - Major Version     
-//   - Minor Version     
-//   - Number of embedded files
-//   - Bundle ID length 
-// Variable size portion:
-//   - Bundle ID ("Bundle ID length" bytes)
+        static const uint32_t m_current_major_version = 0;
+        static const uint32_t m_current_minor_version = 1;
+    };
 
-struct manifest_header_t
-{
-public:
-	struct manifest_header_inner_t
-	{
-		uint32_t major_version;
-		uint32_t minor_version;
-		int32_t num_embedded_files;
-		int8_t bundle_id_length;
-	} data;
-	pal::string_t bundle_id;
-
-	manifest_header_t()
-		:data(), bundle_id()
-	{
-	}
-
-    static manifest_header_t* read(FILE* bundle);
-
-private:
-    bool is_valid();
-
-    static const uint32_t m_current_major_version = 0;
-    static const uint32_t m_current_minor_version = 1;
-};
-
-// Manifest Footer contains:
-//   Manifest header offset
-//   Length-prefixed non-null terminated Bundle Signature ".NetCoreBundle"
-struct manifest_footer_t
-{
-public:
-    int64_t header_offset;
-    uint8_t signature_length;
-    char signature[15];
-
-    manifest_footer_t()
-        :header_offset(0), signature_length(0)
+    // Manifest Footer contains:
+    //   Manifest header offset
+    //   Length-prefixed non-null terminated Bundle Signature ".NetCoreBundle"
+#pragma pack(push, 1)
+    struct manifest_footer_t
     {
-        // The signature string is not null-terminated as read from disk.
-        // We add an additional character for null termination
-        signature[14] = 0;
-    }
+        manifest_footer_t()
+            :m_header_offset(0), m_signature_length(0)
+        {
+            // The signature string is not null-terminated as read from disk.
+            // We add an additional character for null termination
+            m_signature[14] = 0;
+        }
 
-    static manifest_footer_t* read(FILE* bundle);
+        bool is_valid();
+        static manifest_footer_t* read(FILE* stream);
+        int64_t manifest_header_offset() { return m_header_offset; }
+        static size_t num_bytes_read()
+        {
+            return sizeof(manifest_footer_t) - 1;
+        }
 
-    static size_t num_bytes_read()
-    {
-        return sizeof(manifest_footer_t) - 1;
-    }
+    private:
+        int64_t m_header_offset;
+        uint8_t m_signature_length;
+        char m_signature[15];
 
-private:
-    bool is_valid();
+    private:
 
-    static const char* m_expected_signature; 
-};
-
+        static const char* m_expected_signature;
+    };
 #pragma pack(pop)
 
-// Bundle Manifest contains:
-//     Series of file entries (for each embedded file)
 
-class manifest_t
-{
-public:
-    manifest_t()
-        :files()
-    {}
+    // Bundle Manifest contains:
+    //     Series of file entries (for each embedded file)
 
-    std::list<file_entry_t *> files;
+    class manifest_t
+    {
+    public:
+        manifest_t()
+            :files()
+        {}
 
-    static manifest_t* read(FILE *host, int32_t num_files);
-};
+        std::list<file_entry_t*> files;
 
-#endif // FEATURE_APPHOST
-
+        static manifest_t* read(FILE* host, int32_t num_files);
+    };
+}
 #endif // __BDL_MANIFEST_H__

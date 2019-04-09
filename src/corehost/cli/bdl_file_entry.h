@@ -5,55 +5,52 @@
 #ifndef __BDL_FILE_ENTRY_H__
 #define __BDL_FILE_ENTRY_H__
 
-#if FEATURE_APPHOST
-
 #include <cstdint>
 #include "bdl_file_type.h"
 #include "pal.h"
 
-#pragma pack(push, 1)
-
-// FileEntry: Records information about embedded files.
-// 
-// The bundle manifest records the following meta-data for each 
-// file embedded in the bundle:
-// Fixed size portion (represented by file_entry_inner_t)
-//   - Offset     
-//   - Size       
-//   - File Entry Type       
-//   - path-length  (7-bit extension encoding, 1 Byte due to MAX_PATH)
-// Variable Size portion
-//   - relative path  ("path-length" Bytes)
-
-class file_entry_t
+namespace bundle
 {
-public:
-    
-    // The inner structure represents the fields that can be 
-    // read contiguously for every file_entry. 
-    struct file_entry_inner_t
+
+    // FileEntry: Records information about embedded files.
+    // 
+    // The bundle manifest records the following meta-data for each 
+    // file embedded in the bundle:
+    // Fixed size portion (represented by file_entry_inner_t)
+    //   - Offset     
+    //   - Size       
+    //   - File Entry Type       
+    //   - path-length  (7-bit extension encoding, 1 Byte due to MAX_PATH)
+    // Variable Size portion
+    //   - relative path  ("path-length" Bytes)
+
+    class file_entry_t
     {
-        int64_t offset;
-        int64_t size;
-        file_type_t type;
-        int8_t path_length;
-    } data;
-    pal::string_t relative_path; // Path of an embedded file, relative to the extraction directory.
+    public:
 
-	file_entry_t()
-		:data(), relative_path()
-	{
-	}
-
-    static file_entry_t* read(FILE* bundle);
-
-private:
-	static const pal::char_t bundle_dir_separator = '/';
-    bool is_valid();
-};
-
+        // The inner structure represents the fields that can be 
+        // read contiguously for every file_entry. 
+#pragma pack(push, 1)
+        struct
+        {
+            int64_t offset;
+            int64_t size;
+            file_type_t type;
+            int8_t path_length;
+        } data;
 #pragma pack(pop)
+        pal::string_t relative_path; // Path of an embedded file, relative to the extraction directory.
 
-#endif // FEATURE_APPHOST
+        file_entry_t()
+            :data(), relative_path()
+        {
+        }
 
+        static file_entry_t* read(FILE* stream);
+
+    private:
+        static const pal::char_t bundle_dir_separator = '/';
+        bool is_valid();
+    };
+}
 #endif // __BDL_FILE_ENTRY_H__

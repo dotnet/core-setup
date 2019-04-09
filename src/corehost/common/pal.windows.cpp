@@ -423,11 +423,6 @@ bool pal::getenv(const char_t* name, string_t* recv)
     return true;
 }
 
-int pal::get_pid()
-{
-	return GetCurrentProcessId();
-}
-
 int pal::xtoi(const char_t* input)
 {
     return ::_wtoi(input);
@@ -464,8 +459,10 @@ bool pal::get_module_path(dll_t mod, string_t* recv)
 
 bool pal::get_temp_directory(pal::string_t& tmp_dir)
 {
-	pal::getenv(_X("TEMP"), &tmp_dir);
-	return pal::realpath(&tmp_dir);
+    pal::char_t temp_path[MAX_PATH + 1];
+    GetTempPathW(MAX_PATH + 1, temp_path);
+    tmp_dir.assign(temp_path);
+    return pal::realpath(&tmp_dir);
 }
 
 static bool wchar_convert_helper(DWORD code_page, const char* cstr, int len, pal::string_t* out)

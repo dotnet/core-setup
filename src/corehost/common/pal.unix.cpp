@@ -106,11 +106,6 @@ void pal::unload_library(dll_t library)
     }
 }
 
-int pal::get_pid()
-{
-	return getpid();
-}
-
 int pal::xtoi(const char_t* input)
 {
     return atoi(input);
@@ -188,8 +183,8 @@ bool pal::get_default_servicing_directory(string_t* recv)
 
 bool pal::get_temp_directory(pal::string_t& tmp_dir)
 {
-	pal::getenv(_X("TMPDIR"), &tmp_dir);
-	return pal::realpath(&tmp_dir);
+    pal::getenv(_X("TMPDIR"), &tmp_dir);
+    return pal::realpath(&tmp_dir);
 }
 
 bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* recv)

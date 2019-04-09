@@ -138,8 +138,12 @@ namespace pal
     bool pal_clrstring(const pal::string_t& str, std::vector<char>* out);
     bool clr_palstring(const char* cstr, pal::string_t* out);
 
-	inline bool create_directory(const pal::char_t* dir, int mode) { return CreateDirectoryW(dir, NULL) != 0; }
-	inline int rename(const pal::char_t* old_name, const pal::char_t* new_name) { return ::_wrename(old_name, new_name); }
+    inline bool mkdir(const pal::char_t* dir, int mode) { return CreateDirectoryW(dir, NULL) != 0; }
+    inline bool rmdir (const pal::char_t* path) { return RemoveDirectoryW(path) != 0; }
+    inline int rename(const pal::char_t* old_name, const pal::char_t* new_name) { return ::_wrename(old_name, new_name); }
+    inline int remove(const pal::char_t* path) { return ::_wremove(path); }
+    int get_pid() { return GetCurrentProcessId(); }
+
 #else
     #ifdef EXPORT_SHARED_API
         #define SHARED_API extern "C" __attribute__((__visibility__("default")))
@@ -188,18 +192,22 @@ namespace pal
     inline bool pal_clrstring(const pal::string_t& str, std::vector<char>* out) { return pal_utf8string(str, out); }
     inline bool clr_palstring(const char* cstr, pal::string_t* out) { out->assign(cstr); return true; }
 
-	inline bool create_directory(const pal::char_t* dir, int mode) { return mkdir(dir, mode) == 0; }
-	inline int rename(const pal::char_t* old_name, const pal::char_t* new_name) { return ::rename(old_name, new_name); }
+    inline bool mkdir(const pal::char_t* dir, int mode) { return mkdir(dir, mode) == 0; }
+    inline bool rmdir(const pal::char_t* path) { return rmdir(path) == 0; }
+    inline int rename(const pal::char_t* old_name, const pal::char_t* new_name) { return ::rename(old_name, new_name); }
+    inline int remove(const pal::char_t* path) { return ::remove(path); }
+    int get_pid() { return getpid(); }
+
 #endif
 
-	inline int snwprintf(char_t* buffer, size_t count, const char_t* format, ...)
-	{
-		va_list args;
-		va_start(args, format);
-		int ret = str_vprintf(buffer, count, format, args);
-		va_end(args);
-		return ret;
-	}
+    inline int snwprintf(char_t* buffer, size_t count, const char_t* format, ...)
+    {
+        va_list args;
+        va_start(args, format);
+        int ret = str_vprintf(buffer, count, format, args);
+        va_end(args);
+        return ret;
+    }
 
     pal::string_t to_string(int value);
     pal::string_t get_timestamp();
@@ -245,8 +253,7 @@ namespace pal
     bool get_default_breadcrumb_store(string_t* recv);
     bool is_path_rooted(const string_t& path);
 
-	bool get_temp_directory(pal::string_t& tmp_dir);
-	int get_pid();
+    bool get_temp_directory(pal::string_t& tmp_dir);
 
     int xtoi(const char_t* input);
 
