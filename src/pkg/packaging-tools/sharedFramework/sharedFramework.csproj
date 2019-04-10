@@ -6,8 +6,7 @@
   <UsingTask TaskName="ProcessSharedFrameworkDeps" AssemblyFile="$(LocalBuildToolsTaskDir)core-setup.tasks.dll" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
+    <TargetFramework>$(NETCoreAppFramework)</TargetFramework>
     <RuntimeIdentifier>$(PackageRID)</RuntimeIdentifier>
     <PackageId>unused</PackageId>
 
