@@ -131,16 +131,8 @@
       <RuntimeGraphGeneratorRuntime Condition="'$(RuntimeGraphGeneratorRuntime)'==''">linux</RuntimeGraphGeneratorRuntime>
     </PropertyGroup>
 
-    <ItemGroup>
-      <TrimPkgsFromDeps Include="runtime.$(PackageTargetRid).microsoft.netcore.dotnetapphost" />
-      <TrimPkgsFromDeps Include="runtime.$(PackageTargetRid).microsoft.netcore.dotnethostresolver" />
-      <TrimPkgsFromDeps Include="microsoft.netcore.dotnetapphost" />
-      <TrimPkgsFromDeps Include="microsoft.netcore.dotnethostresolver" />
-    </ItemGroup>
-
     <ProcessSharedFrameworkDeps AssetsFilePath="$(SharedFrameworkAssetsFile)"
                                 DepsFilePath="$(SharedFrameworkDepsFile)"
-                                PackagesToRemove="@(TrimPkgsFromDeps)"
                                 Runtime="$(RuntimeGraphGeneratorRuntime)"
                                 BuildToolsTaskDir="$(BuildToolsTaskDir)" />
   </Target>
