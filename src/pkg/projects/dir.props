@@ -95,11 +95,6 @@
           Include="$(PackageThirdPartyNoticesFile)" >
       <SkipPackageFileCheck>true</SkipPackageFileCheck>
     </File>
-    <!-- Add a marker to help the designer optimize & share .NET Core packages -->
-    <File Condition="'$(IncludeDesignerMarker)' != 'false'"
-          Include="$(MSBuildThisFileDirectory)useSharedDesignerContext.txt">
-      <SkipPackageFileCheck>true</SkipPackageFileCheck>
-    </File>
 
     <AdditionalLibPackageExcludes Condition="'$(SymbolFileExtension)' != ''" Include="%2A%2A\%2A$(SymbolFileExtension)" />
     <AdditionalSymbolPackageExcludes Condition="'$(LibraryFileExtension)' != ''" Include="%2A%2A\%2A.a;%2A%2A\%2A$(LibraryFileExtension)" />
