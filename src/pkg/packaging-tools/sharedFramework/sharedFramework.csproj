@@ -19,6 +19,7 @@
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <!-- Only Restore from our built packages -->
     <RestoreSources>$(PackageOutputPath)</RestoreSources>
+    <!-- Ensure only this repo's NuGet.config file is used. -->
     <RestoreConfigFile>$(ProjectDir)NuGet.config</RestoreConfigFile>
     <!-- Use repo-restored packages for platforms and targets dependencies -->
     <RestoreFallbackFolders>$(PackagesDir)</RestoreFallbackFolders>
