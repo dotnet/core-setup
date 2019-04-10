@@ -2,7 +2,7 @@
   <PropertyGroup>
     <MajorVersion>2</MajorVersion>
     <MinorVersion>1</MinorVersion>
-    <PatchVersion>10</PatchVersion>
+    <PatchVersion>11</PatchVersion>
 
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
 
