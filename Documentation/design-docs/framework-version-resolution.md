@@ -267,36 +267,37 @@ To maintain backward compatibility, each framework reference will also have to c
 
 ### Algorithm
 Terminology
-- `config fx references`: framework references for a single `.runtimeconfig.json`, where each reference consists of `name`, `version`, optional `rollForward` and optional `applyPatches`.
-- `newest fx references`: framework references keyed off of framework name that contain the highest framework version requested. It is used to perform "soft" roll-forwards to compatible references of the same framework name without reading the disk or performing excessive re-try (Step 7).
+- `framework reference`: consists of framework `name`, `version`, `rollForward` and optionally `applyPatches`.
+- `config fx references`: `framework references` for a single `.runtimeconfig.json`.
+- `newest fx references`: dictionary of `framework references` keyed off of framework `name` that contain the highest `version` requested and most constrained `rollForward` and `applyPatches`. It is used to perform "soft" roll-forwards to compatible references of the same framework name without reading the disk or performing excessive re-try.
 - `resolved frameworks`: a list of frameworks that have been resolved, meaning a compatible framework was found on disk.
 
 Steps
 1. Determine the `config fx references`:
    * Parse the application's `.runtimeconfig.json` `runtimeOptions.frameworks` section.
-   * Insert each framework reference into the `config fx references`.
-2. For each framework in `config fx references`:
-3. --> If the framework name is not currently in the `newest fx references` list Then add it.
-   * By doing this for all references here, before the next loop, we minimize the number of re-try attempts.
-4. For each framework reference in `config fx references`:
-5. --> If the framework is not in `resolved frameworks` Then resolve the framework reference to the actual framework on disk
-   * If the framework `name` already exists in the `newest fx references` resolve the currently processed reference with the one from the `newest fx references` (see above for the algorithm).  
+   * Insert each `framework reference` into the `config fx references`.
+2. For each `framework reference` in `config fx references`:
+3. --> If the framework `name` is not currently in the `newest fx references` list Then add it.
+   * By doing this for all `framework references` here, before the next loop, we minimize the number of re-try attempts.
+4. For each `framework reference` in `config fx references`:
+5. --> If the framework's `name` is not in `resolved frameworks` Then resolve the `framework reference` to the actual framework on disk:
+   * If the framework `name` already exists in the `newest fx references` resolve the currently processed `framework reference` with the one from the `newest fx references` (see above for the algorithm). 
    *Term "soft roll-forward" is used for this in the code*
-     * The resolution will always pick the higher `version` and will consolidate the `rollForward` and `applyPatches` settings.
-     * The resolution may fail if it's not possible to roll forward from one reference to the other.
-     * Update the `newest fx references` with the resolved reference.
-   * Probe for the framework on disk  
+     * The resolution will always pick the higher `version` and will consolidate the `rollForward` and `applyPatches` settings to the most constrained.
+     * The resolution may fail if it's not possible to roll forward from one `framework reference` to the other.
+     * Update the `newest fx references` with the resolved `framework reference` (note that this may be a combination of version and settings from the two `framework references` being considered).
+   * Probe for the framework on disk using the whole `framework reference` (which by now is the `framework reference` in `newest fx references`)
    *Term "hard resolve" is used for this in the code*
      * This follows the roll-forward rules as describe above.
    * If success add it to `resolved frameworks`
-     * Parse the `.runtimeconfig.json` of the resolved framework and create a new `config fx references`. Make a recursive call back to Step 2 with this new `config fx references`.
-     * Continue with the next framework reference (Step 4).
-6. --> Else perform a "soft roll-forward" to the framework reference in `newest fx references`.
+     * Parse the `.runtimeconfig.json` of the resolved framework and create a new `config fx references`. Make a recursive call back to Step 2 with these new `config fx references`.
+     * Continue with the next `framework reference` (Step 4).
+6. --> Else perform a "soft roll-forward" to the `framework reference` in `newest fx references`.
    * We may fail here if not compatible.
-   * If the roll-forward results in a different reference than the one in `newest fx references`
-     * Update the reference in `newest fx references`
-     * re-start the algorithm (goto Step 1) with new/clear state except for `newest fx references` so we attempt to use the newer reference next time.
-   * Else (no need to change the newest fx reference) - use the already resolved framework and continue with the next framework reference (Step 4).
+   * If the roll-forward results in a different `framework reference` than the one in `newest fx references`
+     * Update the `framework reference` in `newest fx references`
+     * Re-start the algorithm (goto Step 1) with new/clear state except for `newest fx references` so we attempt to use the newer `framework reference` next time.
+   * Else (no need to change the `newest fx references`) - use the already resolved framework and continue with the next `framework reference` (Step 4).
 
 Notes on this algorithm:
 * This algorithm for resolving the various framework references assumes the **No Downgrading** best practice explained below in order to prevent loading a newer version of a framework than necessary.
