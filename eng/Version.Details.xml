@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview4.19204.7">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-preview5.19210.6">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>dc965e16c4f71163df9de013951c95916992c908</Sha>
+      <Sha>3773daaaba958e65f87e54fc0ec64c4a02282282</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview4.19204.7">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview5.19210.6">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>dc965e16c4f71163df9de013951c95916992c908</Sha>
+      <Sha>3773daaaba958e65f87e54fc0ec64c4a02282282</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Targets" Version="2.0.0" Pinned="true">
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>8321c729934c0f8be754953439b88e6e1c120c24</Sha>
     </Dependency>
-    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19205.1">
+    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19210.1">
       <Uri>https://github.com/dotnet/standard</Uri>
-      <Sha>fbff1a0f87e029f968db2cbb573c8aa1e69705f9</Sha>
+      <Sha>fe384ffaa367f37c0840f4eb4a158e8d8c9b2ab5</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview4-27604-73">
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>991817d90827b206ab25e74e7a5bd326a7e86ad4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.WindowsDesktop.App" Version="3.0.0-preview4-27604-23">
+    <Dependency Name="Microsoft.Private.WindowsDesktop.App" Version="3.0.0-preview5-27610-56">
       <Uri>https://dev.azure.com/devdiv/DevDiv/_git/DotNet-Trusted</Uri>
-      <Sha>c1f224fc82258cafa47be32001e5332db6fbb39a</Sha>
+      <Sha>d5e425a0f801b436444285044394eaed0398dea7</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19204.16">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19209.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>61196044ed70a65c610beb230ac6ea77566668c2</Sha>
+      <Sha>63b76f3f952f821d0a7996427a9f3534f1c25ab7</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
