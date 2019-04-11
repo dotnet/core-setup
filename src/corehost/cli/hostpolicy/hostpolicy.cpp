@@ -29,7 +29,6 @@ namespace
 
     std::mutex g_context_lock;
     std::shared_ptr<hostpolicy_context_t> g_context;
-    std::weak_ptr<hostpolicy_context_t> g_context_weak;
 
     int create_coreclr(const hostpolicy_context_t &context, host_mode_t mode, std::unique_ptr<coreclr_t> &coreclr)
     {
@@ -68,7 +67,8 @@ namespace
         bool breadcrumbs_enabled,
         std::shared_ptr<hostpolicy_context_t> &context)
     {
-        context = g_context_weak.lock();
+        std::lock_guard<std::mutex> lock{ g_context_lock };
+        context = g_context;
         if (context != nullptr)
         {
             // [TODO] Validate the current context is acceptable for this request
@@ -76,27 +76,15 @@ namespace
             return StatusCode::Success;
         }
 
-        {
-            std::lock_guard<std::mutex> lock{ g_context_lock };
-            context = g_context_weak.lock();
-            if (context != nullptr)
-            {
-                trace::info(_X("Host context has already been initialized"));
-                return StatusCode::Success;
-            }
+        std::unique_ptr<hostpolicy_context_t> context_local(new hostpolicy_context_t());
+        int rc = context_local->initialize(hostpolicy_init, args, breadcrumbs_enabled);
+        if (rc != StatusCode::Success)
+            return rc;
 
-            std::unique_ptr<hostpolicy_context_t> context_local(new hostpolicy_context_t());
-            int rc = context_local->initialize(hostpolicy_init, args, breadcrumbs_enabled);
-            if (rc != StatusCode::Success)
-                return rc;
-
-            assert(g_context == nullptr);
-            g_context = std::move(context_local);
-            g_context_weak = g_context;
-
-        }
-
+        assert(g_context == nullptr);
+        g_context = std::move(context_local);
         context = g_context;
+
         return StatusCode::Success;
     }
 }
