@@ -580,17 +580,16 @@ int fx_muxer_t::read_config_and_execute(
     if (rc != StatusCode::Success)
         return rc;
 
-    int status;
     if (host_command.size() == 0)
     {
-        status = execute_app(impl_dir, init.get(), new_argc, new_argv);
+        rc = execute_app(impl_dir, init.get(), new_argc, new_argv);
     }
     else
     {
-        status = execute_host_command(impl_dir, init.get(), new_argc, new_argv, out_buffer, buffer_size, required_buffer_size);
+        rc = execute_host_command(impl_dir, init.get(), new_argc, new_argv, out_buffer, buffer_size, required_buffer_size);
     }
 
-    return status;
+    return rc;
 }
 
 /**
