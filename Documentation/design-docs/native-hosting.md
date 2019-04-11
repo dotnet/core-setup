@@ -74,9 +74,9 @@ The binary itself should be signed by Microsoft as there will be no support for 
 ### Locate `hostfxr`
 ``` C++
 int get_hostfxr_path(
-        char_t * result_buffer,
-        size_t * buffer_size,
-        const_t char * assembly_path);
+    char_t * result_buffer,
+    size_t * buffer_size,
+    const_t char * assembly_path);
 ```
 
 This API locates the `hostfxr` and returns its path by calling the `result` function.
@@ -125,12 +125,10 @@ All the "initialize" functions will
 The functions will NOT load the CoreCLR runtime. They just prepare everything to the point where it can be loaded.
 
 The functions return a handle to a new host context:
-* The handle must be closed via `hostfxr_shutdown`.
+* The handle must be closed via `hostfxr_close`.
 * The handle is not thread safe - the consumer should only call functions on it from one thread at a time.
 
 The `hostfxr` will also track active runtime in the process. Due to limitations (and to simplify implementation) this tracking will actually not look at the actual `coreclr` module (or try to communicate with the runtime in any way). Instead `hostfxr` itself will track the host context initialization. The first host context initialization in the process will represent the "loaded runtime". It is only possible to have one "loaded runtime" in the process. Any subsequent host context initialization will just "attach" to the "loaded runtime" instead of creating a new one.
-
-*Note: It is technically possible to initialize host context, and never call any "run" method on it, which would mean the runtime would not get loaded. Trying to initialize a second host context while the first one didn't start the runtime yet will for now be considered illegal. It's a pending issue to solve this problem, as COM activation will probably need to be able to safely initialize/run from multiple threads at a time.*
 
 ``` C
 #define hostfxr_handle = void *;
@@ -164,11 +162,10 @@ When used to execute an app, the `app_path` (or CLI equivalent) will be used to 
 * `argc` and `argv` - the command line - optional, if `argc` is `0` then `argv` is ignored.
 * `app_path` - path to the application (the managed `.dll`) to run. This can be `nullptr` if the app is specified in the command line arguments.
 * `parameters` - additional parameters - see `hostfxr_initialize_parameters` for details. (Could be made optional potentially)
-* `host_context_handle` - output parameter. On success receives an opaque value which identifies the initialized host context. The handle should be closed by calling `hostfxr_shutdown`.
-
+* `host_context_handle` - output parameter. On success receives an opaque value which identifies the initialized host context. The handle should be closed by calling `hostfxr_close`.
 This function can only be called once per-process. It's not supported to run multiple apps in one process (even sequentially).
 
-This function will fail if there already is a CoreCLR running in the process.
+This function will fail if there already is a CoreCLR running in the process as it's not possible to run two app in a single process.
 
 *Note: This is effectively a replacement for `hostfxr_main_startupinfo` and `hostfxr_main`. Currently it is not a goal to fully replace these APIs because they also support SDK commands which are special in lot of ways and don't fit well with the rest of the native hosting. There's no scenario right now which would require the ability to issue SDK commands from a native host. That said nothing in this proposal should block enabling even SDK commands through these APIs.*
 
@@ -184,7 +181,7 @@ int hostfxr_initialize_for_runtime_config(
 This function would load the specified `.runtimeconfig.json`, resolve all frameworks, resolve all the assets from those frameworks and then prepare runtime initialization where the TPA contains only frameworks. Note that this case does NOT consume any `.deps.json` from the app/component (only processes the framework's `.deps.json`). This entry point is intended for `comhost`/`ijwhost`/`nethost` and similar scenarios.
 * `runtime_config_path` - path to the `.runtimeconfig.json` file to process. Unlike with the `hostfxr_initialize_for_app`, any `.deps.json` from the app/component will not be processed by the hosting layers.
 * `parameters` - additional parameters - see `hostfxr_initialize_parameters` for details. (Could be made optional potentially)
-* `host_context_handle` - output parameter. On success receives an opaque value which identifies the initialized host context. The handle should be closed by calling `hostfxr_shutdown`.
+* `host_context_handle` - output parameter. On success receives an opaque value which identifies the initialized host context. The handle should be closed by calling `hostfxr_close`.
 
 This function can be called multiple times in a process.
 * If it's called when no runtime is present, it will run through the steps to "initialize" the runtime (resolving frameworks and so on).
@@ -223,7 +220,7 @@ Returns the value of a runtime property specified by its name.
 * `name` - the name of the runtime property to get. Must not be `nullptr`.
 * `value` - returns a pointer to a buffer with the property value. The buffer is owned by the host context. The caller should make a copy of it if it needs to store it for anything longer than immediate consumption. The lifetime is only guaranteed until any of the below happens:
   * one of the "run" methods is called on the host context
-  * the host context is closed via `hostfxr_shutdown`
+  * the host context is closed via `hostfxr_close`
   * the value of the property is changed via `hostfxr_set_runtime_property_value`
 
 Trying to get a property which doesn't exist is an error and will return an appropriate error code.
@@ -262,7 +259,7 @@ Returns the full set of all runtime properties for the specified host context.
 
 `keys` and `values` store pointers to buffers which are owned by the host context. The caller should make a copy of it if it needs to store it for anything longer than immediate consumption. The lifetime is only guaranteed until any of the below happens:
   * one of the "run" methods is called on the host context
-  * the host context is closed via `hostfxr_shutdown`
+  * the host context is closed via `hostfxr_close`
   * the value or existence of any property is changed via `hostfxr_set_runtime_property_value`
 
 Note that `hostfxr_set_runtime_property_value` can remove or add new properties, so the number of properties returned is only valid as long as no properties were added/removed.
@@ -301,10 +298,67 @@ Initially there might be a limitation of calling this function only once on a gi
 
 ### Cleanup
 ``` C
-int hostfxr_shutdown(const hostfxr_handle host_context_handle);
+int hostfxr_close(const hostfxr_handle host_context_handle);
 ```
 Closes a host context.
 * `host_context_handle` - handle to the initialized host context to close.
+
+
+### Multiple host contexts interactions
+
+It is important to correctly synchronize some of these operations to achieve the desired API behavior as well as thread safety requirements. The following behaviors will be used to achieve this.
+
+#### Terminology
+* `first host context` is the one which is used to load and initialize the CoreCLR runtime in the process. At any given time there can only be one `first host context`.
+* `secondary host context` is any other initialized host context when `first host context` already exists in the process.
+
+#### Synchronization
+* If there's no `first host context` in the process the first call to `hostfxr_initialize_...` will create a new `first host context`. There can only be one `first host context` in existence at any point in time.
+* Calling `hostfxr_initialize...` when `first host context` already exists will always return a `secondary host context`.
+* The `first host context` blocks creation of any other host context until it is used to load and initialize the CoreCLR runtime. This means that `hostfxr_initialize...` and subsequently one of the "run" methods must be called on the `first host context` to unblock creation of `secondary host contexts`.
+* Calling `hostfxr_initialize...` will block until the `first host context` is initialized, a "run" method is called on it and the CoreCLR is loaded and initialized. The `hostfxr_initialize...` will block potentially indefinitely. The method will block very early on, all of the operations done by the initialize will only happen once it's unblocked.
+* `first host context` can fail to initialize the runtime (or anywhere up to that point). If this happens, it's marked as failed and is not considered a `first host context` anymore. This unblocks the potentially waiting `hostfxr_initialize...` calls. In this case the first `hostfxr_initialize...` after the failure will create a new `first host context`.
+* `first host context` can be closed using `hostfxr_close` before it is used to initialize the CoreCLR runtime. This is similar to the failure above, the host context is marked as "closed/failed" and is not considered `first host context` anymore. This unblocks any waiting `hostfxr_initialize...` calls.
+* Once the `first host context` successfully initialized the CoreCLR runtime it is permanently marked as "successful" and will remain the `first host context` for the lifetime of the process. Such host context can (and should) be closed via the `hostfxr_close` when not used anymore, but internally it will remain active.
+
+#### Invalid usage
+* It is invalid to initialize a host context via `hostfxr_initialize...` and then never call `hostfxr_close` on it. Initialized but not closed host context is abandoned. Abandoned `first host context` will cause infinitely blocking of any future `hostfxr_initialize...` calls.
+
+#### Important scenarios
+The above behaviors should make sure that some important scenarios are possible and work reliably.
+
+One such scenario is a COM host on multiple threads. The app is not running any .NET Core yet (no CoreCLR loaded). On two threads in parallel COM activation is invoked which leads to two invocations into the `comhost` to active .NET Core objects. The `comhost` will use the `hostfxr_initialize...` and `hostfxr_get_runtime_delegate` APIs on two threads in parallel then. Only one of them can load and initialize the runtime (and also perform full framework resolution and determine the framework versions and assemblies to load). The other has to become a `secondary host context` and try to conform to the first one. The above behavior of `hostfxr_initialize...` blocking until the `first host context` is done initializing the runtime will make sure of the correct behavior in this case.
+
+At the same time it gives the native app (`comhost` in this case) the ability to query and modify runtime properties in between the `hostfxr_initialize...` and `hostfxr_get_runtime_delegate` calls on the `first host context`.
+
+
+### Support for older versions
+
+Since `hostfxr` and the other components of hosting layers are versioned independently there are several interesting cases of version mismatches:
+
+#### muxer/`apphost` versus `hostfxr`
+For muxer it should almost always match, but `apphost` can be different. That is, it's perfectly valid to use older 2.* `apphost` with a new 3.0 `hostfxr`. The opposite should be rare, but in theory can happen as well. To keep the code simple both muxer and `apphost` will keep using the existing 2.* APIs on `hostfxr` even in situation where both are 3.0 and thus could start using the new APIs.
+
+`hostfxr` must be backward compatible and support 2.* APIs.
+
+Potentially we could switch just `apphost` to use the new APIs (since it doesn't have the same compatibility burden as the muxer), but it's probably safer to not do that.
+
+#### `hostfxr` versus `hostpolicy`
+It should really only happen that `hostfxr` is equal or newer than `hostpolicy`. The opposite should be very rare. In any case `hostpolicy` should support existing 2.* APIs and thus the rare case will keep working anyway.
+
+The interesting case is 3.0 `hostfxr` using 2.* `hostpolicy`. This will be very common, basically any 2.* app running on a machine with 3.0 installed will be in that situation. This case has two sub-cases:
+* `hostfxr` is invoked using one of the 2.* APIs. In this case the simple solution is to keep using the 2.* `hostpolicy` APIs always.
+* `hostfxr` is invoked using one of the new 3.0 APIs (like `hostfxr_initialize...`). In this case it's not possible to completely support the new APIs, since they require new functionality from `hostpolicy`. For now the `hostfxr` should simple fail.  
+It is in theory possible ot support some kind of emulation mode where for some scenarios the new APIs would work even with old `hostpolicy`, but for simplicity it's better to start with just failing.
+
+#### Implementation of existing 2.* APIs in `hostfxr`
+The existing 2.* APIs in `hostfxr` could switch to internally use the new functionality and in turn use the new 3.0 `hostpolicy` APIs. The tricky bit here is scenario like this:
+* 3.0 App is started via `apphost` or muxer which as mentioned above will keep on using the 2.* `hostfxr` APIs. This will load CoreCLR into the process.
+* COM component is activated in the same process. This will go through the new 3.0 `hostfxr` APIs, and to work correctly will require the internal representation of the `first host context`.
+
+If the 2.* `hostfxr` APIs would continue to use the old 2.* `hostpolicy` APIs even if `hostpolicy` is new, then the above scenario will be hard to achieve as there will be no `first host context`. `hostpolicy` could somehow "emulate" the `first host context`, but without `hostpolicy` cooperation this would be hard.
+
+On the other hand switching to use the new `hostpolicy` APIs even in 2.* `hostfxr` APIs is risky for backward compatibility. This will have to be decided during implementation.
 
 
 ### Samples
@@ -334,14 +388,14 @@ if (hostfxr_get_runtime_property(host_context_handle, "TEST_PROPERTY", nullptr, 
 
 hostfxr_run_app(host_context_handle);
 
-hostfxr_shutdown(host_context_handle);
+hostfxr_close(host_context_handle);
 ```
 
 ## Impact on hosting components
 
 The exact impact on the `hostfxr`/`hostpolicy` interface needs to be investigated. The assumption is that new APIs will have to be added to `hostpolicy` to implement the proposed functionality.
 
-Part if this investigation will also be compatibility behavior. Currently "any" version of `hostfxr` needs to be able to use "any" version of `hostpolicy`. But the proposed functionality will need both new `hostfxr` and new `hostpolicy` to work. It is likely the proposed APIs will fail if the app resolves to a framework with old `hostpolicy` without the necessary new APIs. Part of the investigation will be if it's feasible to try to emulate the new APIs on top of the existing behavior, so that native host doesn't have to support two sets of APIs to be able to work with older applications.
+Part if this investigation will also be compatibility behavior. Currently "any" version of `hostfxr` needs to be able to use "any" version of `hostpolicy`. But the proposed functionality will need both new `hostfxr` and new `hostpolicy` to work. It is likely the proposed APIs will fail if the app resolves to a framework with old `hostpolicy` without the necessary new APIs. Part of the investigation will be if it's feasible to use the new `hostpolicy` APIs to implement existing old `hostfxr` APIs.
 
 # Open issues
 * Maybe add `apphost_get_hostfxr_path` on the existing `apphost` - this is to make it even easier to implement custom hosting for entire managed app as the custom host would not need to carry a `nethost` and would get a 100% compatible behavior by using the same `apphost` as the app itself.
