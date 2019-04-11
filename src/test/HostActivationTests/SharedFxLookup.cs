@@ -42,9 +42,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             string baseDir = Path.Combine(artifactsDir, "dotnetSharedFxLookup");
             _baseDir = SharedFramework.CalculateUniqueTestDirectory(baseDir);
 
-            // The three tested locations will be the cwd, the user folder and the exe dir. Both cwd and exe dir
-            // are easily overwritten, so they will be placed inside the multilevel folder. The actual user location will
-            // be used during tests
+            // The two tested locations will be the cwd and the exe dir. Both cwd and exe dir
+            // are easily overwritten, so they will be placed inside the multilevel folder.
             _currentWorkingDir = Path.Combine(_baseDir, "cwd");
             _executableDir = Path.Combine(_baseDir, "exe");
 

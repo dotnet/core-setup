@@ -416,9 +416,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData(0, null, null)]
         [InlineData(0, false, null)]
         [InlineData(1, null, "4.5.2")]
-        [InlineData(1, false, "4.5.2")]  // Rolls to nearest higher even on patches, but not to latest patch.
+        [InlineData(1, false, "4.5.2")]
         [InlineData(2, null, "4.5.2")]
-        [InlineData(2, false, "4.5.2")]  // Rolls to nearest higher even on patches, but not to latest patch.
+        [InlineData(2, false, "4.5.2")]
         public void RollForwardOnMinor_RollOverPreRelease(int? rollForwardOnNoCandidateFx, bool? applyPatches, string resolvedVersion)
         {
             RunTestWithManyVersions(
