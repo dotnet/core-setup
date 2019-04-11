@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.1.0", 1,    false, "5.1.1")]
         [InlineData("1.0.0", 1,    null,  null)]
         [InlineData("1.0.0", 2,    null,  "5.1.3")]
-        public void SoftRollForward_InnerFrameworkReference_ToLower(
+        public void SoftRollForward_InnerFrameworkReference_ToHigher(
             string versionReference,
             int? rollForwardOnNoCandidateFx,
             bool? applyPatches,
