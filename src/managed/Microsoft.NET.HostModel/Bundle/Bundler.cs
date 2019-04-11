@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Reflection.PortableExecutable;
@@ -128,9 +129,7 @@ namespace Microsoft.NET.HostModel.Bundle
         /// Generate a bundle, given the specification of embedded files
         /// </summary>
         /// <param name="fileSpecs">
-        /// An array of tuples representing each file to be embedded:
-        ///   SourcePath: path to the file to be bundled at compile time
-        ///   RelativePath: path where the file is expected at run time, relative to the app DLL.
+        /// An enumeration FileSpecs for the files to be embedded.
         /// </param>
         /// <returns>
         /// The full path the the generated bundle file
@@ -139,7 +138,7 @@ namespace Microsoft.NET.HostModel.Bundle
         /// ArgumentException if input is invalid
         /// IOExceptions and ArgumentExceptions from callees flow to the caller.
         /// </exceptions>
-        public string GenerateBundle((string SourcePath, string RelativePath)[] fileSpecs)
+        public string GenerateBundle(IReadOnlyList<FileSpec> fileSpecs)
         {
             trace.Log($"Bundler version {Version}");
 
@@ -152,7 +151,7 @@ namespace Microsoft.NET.HostModel.Bundle
             string hostSource;
             try
             {
-                hostSource = fileSpecs.Where(x => x.RelativePath.Equals(HostName)).Single().SourcePath;
+                hostSource = fileSpecs.Where(x => x.BundleRelativePath.Equals(HostName)).Single().SourcePath;
             }
             catch (InvalidOperationException)
             {
@@ -172,17 +171,17 @@ namespace Microsoft.NET.HostModel.Bundle
                 // Write the files from the specification into the bundle
                 foreach (var fileSpec in fileSpecs)
                 {
-                    if (!ShouldEmbed(fileSpec.RelativePath))
+                    if (!ShouldEmbed(fileSpec.BundleRelativePath))
                     {
-                        trace.Log($"Skip: {fileSpec.RelativePath}");
+                        trace.Log($"Skip: {fileSpec.BundleRelativePath}");
                         continue;
                     }
 
                     using (FileStream file = File.OpenRead(fileSpec.SourcePath))
                     {
-                        FileType type = InferType(fileSpec.RelativePath, file);
+                        FileType type = InferType(fileSpec.BundleRelativePath, file);
                         long startOffset = AddToBundle(bundle, file, type);
-                        FileEntry entry = new FileEntry(type, fileSpec.RelativePath, startOffset, file.Length);
+                        FileEntry entry = new FileEntry(type, fileSpec.BundleRelativePath, startOffset, file.Length);
                         manifest.Files.Add(entry);
                         trace.Log($"Embed: {entry}");
                     }
@@ -224,14 +223,13 @@ namespace Microsoft.NET.HostModel.Bundle
             // Sort the file names to keep the bundle construction deterministic.
             Array.Sort(sources, StringComparer.Ordinal);
 
-            var fileSpec = new (string SourcePath, string RelativePath)[sources.Length];
-            for(int i=0; i < sources.Length; i++)
+            List<FileSpec> fileSpecs = new List<FileSpec>();
+            foreach(var file in sources)
             {
-                fileSpec[i].SourcePath = sources[i];
-                fileSpec[i].RelativePath = RelativePath(sourceDir, fileSpec[i].SourcePath);
+                fileSpecs.Add(new FileSpec(file, RelativePath(sourceDir, file)));
             }
 
-            return GenerateBundle(fileSpec);
+            return GenerateBundle(fileSpecs);
         }
     }
 }
