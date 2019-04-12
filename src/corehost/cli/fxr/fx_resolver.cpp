@@ -18,13 +18,13 @@ namespace
 
     fx_ver_t search_for_best_framework_match(
         const std::vector<fx_ver_t>& version_list,
-        const pal::string_t& fx_ver,
-        const fx_ver_t& specified,
-        bool apply_patches,
-        roll_forward_option roll_forward,
+        const fx_reference_t& fx_ref,
         bool release_only)
     {
         fx_ver_t best_match_version;
+        roll_forward_option roll_forward = *fx_ref.get_roll_forward();
+        bool apply_patches = *fx_ref.get_apply_patches();
+        const fx_ver_t& fx_ref_version = fx_ref.get_fx_version_number();
 
         if (roll_forward > roll_forward_option::LatestPatch)
         {
@@ -35,23 +35,23 @@ namespace
                 roll_forward,
                 search_for_latest ? _X("latest") : _X("least"),
                 release_only ? _X("release") : _X("release/pre-release"),
-                fx_ver.c_str());
+                fx_ref.get_fx_version().c_str());
 
             for (const auto& ver : version_list)
             {
-                if ((!release_only || !ver.is_prerelease()) && ver >= specified)
+                if ((!release_only || !ver.is_prerelease()) && ver >= fx_ref_version)
                 {
                     if (roll_forward <= roll_forward_option::LatestMinor)
                     {
                         // We only want to roll forward on minor
-                        if (ver.get_major() != specified.get_major())
+                        if (ver.get_major() != fx_ref_version.get_major())
                         {
                             continue;
                         }
 
                         if (roll_forward <= roll_forward_option::LatestPatch)
                         {
-                            if (ver.get_minor() != specified.get_minor())
+                            if (ver.get_minor() != fx_ref_version.get_minor())
                             {
                                 continue;
                             }
@@ -66,7 +66,7 @@ namespace
 
             if (best_match_version == fx_ver_t())
             {
-                trace::verbose(_X("No match greater than or equal to [%s] found."), fx_ver.c_str());
+                trace::verbose(_X("No match greater than or equal to [%s] found."), fx_ref.get_fx_version().c_str());
             }
             else
             {
@@ -82,12 +82,12 @@ namespace
         //     the pre-release portion of the version ignores apply_patches and we should roll to the latest (100% backward would roll to closest, but for consistency
         //     in the new behavior we will roll to latest).
         if ((roll_forward == roll_forward_option::LatestPatch || roll_forward == roll_forward_option::Minor || roll_forward == roll_forward_option::Major)
-            && (apply_patches || specified.is_prerelease()))
+            && (apply_patches || fx_ref_version.is_prerelease()))
         {
             fx_ver_t apply_patch_from_version = best_match_version;
             if (apply_patch_from_version == fx_ver_t())
             {
-                apply_patch_from_version = specified;
+                apply_patch_from_version = fx_ref_version;
             }
 
             trace::verbose(
@@ -114,31 +114,23 @@ namespace
         return best_match_version;
     }
 
-    fx_ver_t resolve_framework_version(
+    fx_ver_t resolve_framework_reference(
         const std::vector<fx_ver_t>& version_list,
-        const pal::string_t& fx_ver,
-        const fx_ver_t& specified,
-        bool apply_patches,
-        roll_forward_option roll_forward,
-        bool roll_forward_to_prerelease)
+        const fx_reference_t& fx_ref)
     {
         trace::verbose(
-            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, roll_forward=%d, roll_forward_to_prerelease=%d"),
-            fx_ver.c_str(),
-            apply_patches,
-            roll_forward,
-            roll_forward_to_prerelease);
+            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, roll_forward=%d, prefer_release=%d"),
+            fx_ref.get_fx_version().c_str(),
+            *fx_ref.get_apply_patches(),
+            *fx_ref.get_roll_forward(),
+            fx_ref.get_prefer_release());
 
-        // If the desired framework reference is release, then try release-only search first.
-        // Unles the roll_forward_to_prerelease is in effect, in which case always consider all versions.
-        if (!specified.is_prerelease() && !roll_forward_to_prerelease)
+        // If the framework reference prefers release, then search for release versions only first.
+        if (fx_ref.get_prefer_release())
         {
             fx_ver_t best_match_release_only = search_for_best_framework_match(
                 version_list,
-                fx_ver,
-                specified,
-                apply_patches,
-                roll_forward,
+                fx_ref,
                 /*release_only*/ true);
 
             if (best_match_release_only != fx_ver_t())
@@ -147,21 +139,18 @@ namespace
             }
         }
 
-        // If release-only didn't find anything, or the desired framework reference was pre-release (or we force pre-release search)
+        // If release-only didn't find anything, or the framework reference has no preference to release,
         // do a full search on all versions.
         fx_ver_t best_match = search_for_best_framework_match(
             version_list,
-            fx_ver,
-            specified,
-            apply_patches,
-            roll_forward,
+            fx_ref,
             /*release_only*/ false);
 
         if (best_match == fx_ver_t())
         {
             // This is not strictly necessary, we just need to return version which doesn't exist.
             // But it's cleaner to return the desider reference then invalid -1.-1.-1 version.
-            best_match = specified;
+            best_match = fx_ref.get_fx_version_number();
         }
 
         return best_match;
@@ -170,24 +159,23 @@ namespace
     fx_definition_t* resolve_fx(
         const fx_reference_t & fx_ref,
         const pal::string_t & oldest_requested_version,
-        const pal::string_t & dotnet_dir,
-        bool roll_forward_to_prerelease)
+        const pal::string_t & dotnet_dir)
     {
+#if DEBUG
         assert(!fx_ref.get_fx_name().empty());
         assert(!fx_ref.get_fx_version().empty());
         assert(fx_ref.get_apply_patches() != nullptr);
         assert(fx_ref.get_roll_forward() != nullptr);
 
+        fx_ver_t _debug_ver;
+        assert(fx_ver_t::parse(fx_ref.get_fx_version(), &_debug_ver, false));
+        assert(_debug_ver == fx_ref.get_fx_version_number());
+#endif // DEBUG
+
         trace::verbose(_X("--- Resolving FX directory, name '%s' version '%s'"),
             fx_ref.get_fx_name().c_str(), fx_ref.get_fx_version().c_str());
 
         const auto fx_ver = fx_ref.get_fx_version();
-        fx_ver_t specified;
-        if (!fx_ver_t::parse(fx_ver, &specified, false))
-        {
-            trace::error(_X("The specified framework version '%s' could not be parsed"), fx_ver.c_str());
-            return nullptr;
-        }
 
         // Multi-level SharedFX lookup will look for the most appropriate version in several locations
         // by following the priority rank below:
@@ -246,13 +234,7 @@ namespace
                     }
                 }
 
-                fx_ver_t resolved_ver = resolve_framework_version(
-                    version_list, 
-                    fx_ver, 
-                    specified, 
-                    *(fx_ref.get_apply_patches()), 
-                    *(fx_ref.get_roll_forward()),
-                    roll_forward_to_prerelease);
+                fx_ver_t resolved_ver = resolve_framework_reference(version_list, fx_ref);
 
                 pal::string_t resolved_ver_str = resolved_ver.as_str();
                 append_path(&fx_dir, resolved_ver_str.c_str());
@@ -265,13 +247,7 @@ namespace
                         std::vector<fx_ver_t> version_list;
                         version_list.push_back(resolved_ver);
                         version_list.push_back(selected_ver);
-                        resolved_ver = resolve_framework_version(
-                            version_list,
-                            fx_ver,
-                            specified,
-                            *(fx_ref.get_apply_patches()),
-                            *(fx_ref.get_roll_forward()),
-                            roll_forward_to_prerelease);
+                        resolved_ver = resolve_framework_reference(version_list, fx_ref);
                     }
 
                     if (resolved_ver != selected_ver)
@@ -461,7 +437,7 @@ StatusCode fx_resolver_t::read_framework(
             fx_reference_t& newest_ref = m_newest_references[fx_name];
 
             // Resolve the framwork against the the existing physical framework folders
-            fx_definition_t* fx = resolve_fx(newest_ref, m_oldest_references[fx_name].get_fx_version(), host_info.dotnet_root, m_roll_forward_to_prerelease);
+            fx_definition_t* fx = resolve_fx(newest_ref, m_oldest_references[fx_name].get_fx_version(), host_info.dotnet_root);
             if (fx == nullptr)
             {
                 display_missing_framework_error(fx_name, newest_ref.get_fx_version(), pal::string_t(), host_info.dotnet_root);
@@ -520,14 +496,7 @@ StatusCode fx_resolver_t::read_framework(
 }
 
 fx_resolver_t::fx_resolver_t()
-    : m_roll_forward_to_prerelease(false)
 {
-    pal::string_t roll_forward_to_prerelease_env;
-    if (pal::getenv(_X("DOTNET_ROLL_FORWARD_TO_PRERELEASE"), &roll_forward_to_prerelease_env))
-    {
-        auto roll_forward_to_prerelease_val = pal::xtoi(roll_forward_to_prerelease_env.c_str());
-        m_roll_forward_to_prerelease = (roll_forward_to_prerelease_val == 1);
-    }
 }
 
 StatusCode fx_resolver_t::resolve_frameworks_for_app(

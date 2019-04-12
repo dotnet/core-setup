@@ -55,6 +55,10 @@ private:
     bool m_is_framework_dependent;
     bool m_valid;
 
+    // Cached value of DOTNET_ROLL_FORWARD_TO_PRERELEASE to avoid testing env. variables too often.
+    // If set to true, all versions (including pre-release) are considered even if starting from a release framework reference.
+    bool m_roll_forward_to_prerelease;
+
 private:
     bool parse_framework(const json_object& fx_obj, fx_reference_t& fx_out);
     bool read_framework_array(web::json::array frameworks);

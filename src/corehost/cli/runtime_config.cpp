@@ -24,7 +24,14 @@ runtime_config_t::runtime_config_t()
     , m_valid(false)
     , m_has_roll_forward_option(false)
     , m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option(false)
+    , m_roll_forward_to_prerelease(false)
 {
+    pal::string_t roll_forward_to_prerelease_env;
+    if (pal::getenv(_X("DOTNET_ROLL_FORWARD_TO_PRERELEASE"), &roll_forward_to_prerelease_env))
+    {
+        auto roll_forward_to_prerelease_val = pal::xtoi(roll_forward_to_prerelease_env.c_str());
+        m_roll_forward_to_prerelease = (roll_forward_to_prerelease_val == 1);
+    }
 }
 
 void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev_path, const fx_reference_t& fx_ref, const fx_reference_t& override_settings)
@@ -184,6 +191,13 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
     if (fx_ver != fx_obj.end())
     {
         fx_out.set_fx_version(fx_ver->second.as_string());
+
+        // Release version should prefer release versions, unless the rollForwardToPrerelease is set
+        // in which case no preference should be applied.
+        if (!fx_out.get_fx_version_number().is_prerelease() && !m_roll_forward_to_prerelease)
+        {
+            fx_out.set_prefer_release(true);
+        }
     }
 
     auto roll_forward = fx_obj.find(_X("rollForward"));

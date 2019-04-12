@@ -152,17 +152,22 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
         // Soft roll forward from inner framework reference [specified] to app's 6.1.1-preview.0 (defaults)
         [Theory]
-        [InlineData("6.0.0",           null,                                     false, "6.1.1-preview.1")]
+        [InlineData("6.0.0-preview.1", null,                                     false, "6.1.1-preview.2")]
+        [InlineData("6.0.0",           null,                                     false, "6.2.1")]
         [InlineData("6.0.0",           Constants.RollForwardSetting.LatestPatch, false, null)]
-        [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       false, "6.1.1-preview.1")]
+        [InlineData("6.0.0-preview.1", Constants.RollForwardSetting.LatestPatch, false, null)]
+        [InlineData("6.0.0-preview.1", Constants.RollForwardSetting.Minor,       false, "6.1.1-preview.2")]
+        [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       false, "6.2.1")]
         [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, null)]
-        [InlineData("6.1.0",           null,                                     false, "6.1.1-preview.1")]
-        [InlineData("6.1.0",           null,                                     true,  "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", null,                                     false, "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", null,                                     true,  "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, "6.1.1-preview.1")]
+        [InlineData("6.1.0-preview.0", null,                                     false, "6.1.1-preview.2")]
+        [InlineData("6.1.0",           null,                                     false, "6.2.1")]
+        [InlineData("6.1.0-preview.0", null,                                     true,  "6.1.1-preview.2")]
+        [InlineData("6.1.0",           null,                                     true,  "6.1.1-preview.2")]
+        [InlineData("6.1.1-preview.0", null,                                     false, "6.1.1-preview.2")]
+        [InlineData("6.1.1-preview.0", null,                                     true,  "6.1.1-preview.2")]
+        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable,     false, "[not found]")]
-        [InlineData("6.1.1-preview.1", Constants.RollForwardSetting.Disable,     false, "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.Disable,     false, "6.1.1-preview.2")]
         public void SoftRollForward_InnerFrameworkReference_PreRelease(
             string versionReference,
             string rollForward,
@@ -196,18 +201,18 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // Soft roll forward from inner framework reference [specified] to app's 6.1.0 (defaults)
         [Theory]
         [InlineData("6.0.0",           null,                                     false, "6.1.0")]
-        [InlineData("6.0.0",           null,                                     true,  "6.1.1-preview.1")]
+        [InlineData("6.0.0",           null,                                     true,  "6.1.1-preview.2")]
         [InlineData("6.0.0",           Constants.RollForwardSetting.LatestPatch, false, null)]
         [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       false, "6.1.0")]
-        [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       true,  "6.1.1-preview.1")]
+        [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       true,  "6.1.1-preview.2")]
         [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, null)]
         [InlineData("6.1.0",           null,                                     false, "6.1.0")]
-        [InlineData("6.1.0",           null,                                     true,  "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", null,                                     false, "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", null,                                     true,  "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, "6.1.1-preview.1")]
+        [InlineData("6.1.0",           null,                                     true,  "6.1.1-preview.2")]
+        [InlineData("6.1.1-preview.0", null,                                     false, "6.2.1")]
+        [InlineData("6.1.1-preview.0", null,                                     true,  "6.1.1-preview.2")]
+        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, false, "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable,     false, "[not found]")]
-        [InlineData("6.1.1-preview.1", Constants.RollForwardSetting.Disable,     false, "6.1.1-preview.1")]
+        [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.Disable,     false, "6.1.1-preview.2")]
         public void SoftRollForward_InnerFrameworkReference_Release(
             string versionReference,
             string rollForward,
@@ -479,6 +484,29 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.6.0"));
         }
 
+        [Theory]
+        [InlineData("6.0.0",           "6.1.1-preview.0", "6.2.1")]           // Release should prefer release even if there's a pre-release in the middle
+        [InlineData("6.1.0",           "6.1.1-preview.0", "6.2.1")]           // Release should prefer release even if there's a pre-release in the middle
+        [InlineData("6.1.1",           "6.1.1-preview.0", "6.2.1")]           // Release should prefer release even if there's a pre-release in the middle
+        [InlineData("6.0.0-preview.1", "6.1.1-preview.0", "6.1.1-preview.2")] // Both pre-relelase, take the closest even if it's pre-release
+        [InlineData("6.1.0-preview.0", "6.1.1",           "6.2.1")]           // Release should prefer release
+        [InlineData("6.1.1-preview.0", "6.1.0",           "6.2.1")]           // Release should prefer release
+        [InlineData("6.1.1-preview.0", "6.1.1",           "6.2.1")]           // Release should prefer release
+        public void PreferReleaseToRelease(string appVersionReference, string frameworkVersionReference, string resolvedFramework)
+        {
+            RunTest(
+                runtimeConfig => runtimeConfig
+                    .WithFramework(MiddleWare, "2.1.2")
+                    .WithFramework(MicrosoftNETCoreApp, appVersionReference),
+                dotnetCustomizer =>
+                {
+                    dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
+                        runtimeConfig.GetFramework(MicrosoftNETCoreApp)
+                            .Version = frameworkVersionReference);
+                },
+                resolvedFramework);
+        }
+
         private void RunTest(
             Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
             Action<DotNetCliExtensions.DotNetCliCustomizer> customizeDotNet = null,
@@ -526,7 +554,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .AddMicrosoftNETCoreAppFramework("5.6.0")
                     .AddMicrosoftNETCoreAppFramework("6.0.0")
                     .AddMicrosoftNETCoreAppFramework("6.1.0")
-                    .AddMicrosoftNETCoreAppFramework("6.1.1-preview.1")
+                    .AddMicrosoftNETCoreAppFramework("6.1.1-preview.2")
+                    .AddMicrosoftNETCoreAppFramework("6.2.1")
                     .AddFramework(MiddleWare, "2.1.2", runtimeConfig =>
                         runtimeConfig.WithFramework(MicrosoftNETCoreApp, "5.1.3"))
                     .AddFramework(AnotherMiddleWare, "3.0.0", runtimeConfig =>

@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // 3.0 change:
         // 2.* - release would never roll forward to pre-release
         // 3.* - release rolls forward to pre-release if there is no available release match
-        [InlineData("6.0.0", null, null, "6.1.1-preview.2")]
+        [InlineData("6.0.0", null, null, "6.2.1")]   // Starting from release version should prefer release version
         [InlineData("6.0.1-preview.0", null, null, "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.1", null, null, "6.1.1-preview.2")]
         [InlineData("6.0.1-preview.0", 0, null, null)]
@@ -473,6 +473,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.6.0")
                     .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.0.0")
                     .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.1.1-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.2.1")
                     .AddFramework(MiddleWare, "2.1.2", runtimeConfig =>
                         runtimeConfig.WithFramework(MicrosoftNETCoreApp, "5.1.3"))
                     .AddFramework(AnotherMiddleWare, "3.0.0", runtimeConfig =>

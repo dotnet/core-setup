@@ -18,6 +18,7 @@ public:
         , apply_patches(false)
         , has_roll_forward(false)
         , roll_forward(roll_forward_option::Disable)
+        , prefer_release(false)
         , use_exact_version(false)
         , fx_name(_X(""))
         , fx_version(_X(""))
@@ -78,6 +79,15 @@ public:
         roll_forward = value;
     }
 
+    const bool get_prefer_release() const
+    {
+        return prefer_release;
+    }
+    void set_prefer_release(bool value)
+    {
+        prefer_release = value;
+    }
+
     // Is the current version compatible with another instance with roll-forward semantics.
     // The other instance must be equal or higher version.
     bool is_compatible_with_higher_version(const fx_reference_t& higher_version_reference) const;
@@ -95,6 +105,10 @@ private:
 
     bool has_roll_forward;
     roll_forward_option roll_forward;
+
+    // This indicates that when resolving the framework reference the search should prefer release version
+    // and only resolve to pre-release if there's no matching release version available.
+    bool prefer_release;
 
     bool use_exact_version;
 

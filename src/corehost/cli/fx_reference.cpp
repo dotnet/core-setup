@@ -112,5 +112,11 @@ bool fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from
         }
     }
 
+    if (from.get_prefer_release() && !get_prefer_release())
+    {
+        set_prefer_release(true);
+        modified = true;
+    }
+
     return modified;
 }
