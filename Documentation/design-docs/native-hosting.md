@@ -163,6 +163,7 @@ When used to execute an app, the `app_path` (or CLI equivalent) will be used to 
 * `app_path` - path to the application (the managed `.dll`) to run. This can be `nullptr` if the app is specified in the command line arguments.
 * `parameters` - additional parameters - see `hostfxr_initialize_parameters` for details. (Could be made optional potentially)
 * `host_context_handle` - output parameter. On success receives an opaque value which identifies the initialized host context. The handle should be closed by calling `hostfxr_close`.
+
 This function can only be called once per-process. It's not supported to run multiple apps in one process (even sequentially).
 
 This function will fail if there already is a CoreCLR running in the process as it's not possible to run two apps in a single process.
@@ -225,7 +226,7 @@ Returns the value of a runtime property specified by its name.
 
 Trying to get a property which doesn't exist is an error and will return an appropriate error code.
 
-We're proposing a fix in `hostpolicy` which will make sure that there are no duplicates possible after initialization (see dotnet/core-setup#5529). With that `hostfxr_get_runtime_property_value` will work always (as there can only be one value).
+We're proposing a fix in `hostpolicy` which will make sure that there are no duplicates possible after initialization (see [dotnet/core-setup#5529](https://github.com/dotnet/core-setup/issues/5529)). With that `hostfxr_get_runtime_property_value` will work always (as there can only be one value).
 
 
 ``` C
@@ -319,10 +320,10 @@ It is important to correctly synchronize some of these operations to achieve the
 * Calling `hostfxr_initialize...` will block until the `first host context` is initialized, a "run" method is called on it and the CoreCLR is loaded and initialized. The `hostfxr_initialize...` will block potentially indefinitely. The method will block very early on. All of the operations done by the initialize will only happen once it's unblocked.
 * `first host context` can fail to initialize the runtime (or anywhere up to that point). If this happens, it's marked as failed and is not considered a `first host context` anymore. This unblocks the potentially waiting `hostfxr_initialize...` calls. In this case the first `hostfxr_initialize...` after the failure will create a new `first host context`.
 * `first host context` can be closed using `hostfxr_close` before it is used to initialize the CoreCLR runtime. This is similar to the failure above, the host context is marked as "closed/failed" and is not considered `first host context` anymore. This unblocks any waiting `hostfxr_initialize...` calls.
-* Once the `first host context` successfully initialized the CoreCLR runtime it is permanently marked as "successful" and will remain the `first host context` for the lifetime of the process. Such host context can (and should) be closed via the `hostfxr_close` when not used anymore, but internally it will remain active.
+* Once the `first host context` successfully initialized the CoreCLR runtime it is permanently marked as "successful" and will remain the `first host context` for the lifetime of the process. Such host context should still be closed once not needed via `hostfxr_close`.
 
 #### Invalid usage
-* It is invalid to initialize a host context via `hostfxr_initialize...` and then never call `hostfxr_close` on it. Initialized but not closed host context is abandoned. Abandoned `first host context` will cause infinitely blocking of any future `hostfxr_initialize...` calls.
+* It is invalid to initialize a host context via `hostfxr_initialize...` and then never call `hostfxr_close` on it. An initialized but not closed host context is considered abandoned. Abandoned `first host context` will cause infinite blocking of any future `hostfxr_initialize...` calls.
 
 #### Important scenarios
 The above behaviors should make sure that some important scenarios are possible and work reliably.
