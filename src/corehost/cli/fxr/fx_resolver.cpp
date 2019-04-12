@@ -10,6 +10,12 @@ namespace
 {
     const int Max_Framework_Resolve_Retries = 100;
 
+    static_assert(roll_forward_option::LatestPatch > roll_forward_option::Disable, "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
+    static_assert(roll_forward_option::Minor > roll_forward_option::LatestPatch, "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
+    static_assert(roll_forward_option::LatestMinor > roll_forward_option::Minor, "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
+    static_assert(roll_forward_option::Major > roll_forward_option::LatestMinor, "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
+    static_assert(roll_forward_option::LatestMajor > roll_forward_option::Major, "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
+
     fx_ver_t search_for_best_framework_match(
         const std::vector<fx_ver_t>& version_list,
         const pal::string_t& fx_ver,
@@ -20,9 +26,6 @@ namespace
     {
         fx_ver_t best_match_version;
 
-        static_assert(roll_forward_option::Disable < roll_forward_option::LatestPatch, "Assuming correct ordering of roll_forward_option values.");
-        static_assert(roll_forward_option::Major > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
-        static_assert(roll_forward_option::LatestMajor > roll_forward_option::LatestMinor, "Assuming correct ordering of roll_forward_option values.");
         if (roll_forward > roll_forward_option::LatestPatch)
         {
             bool search_for_latest = roll_forward == roll_forward_option::LatestMinor || roll_forward == roll_forward_option::LatestMajor;
