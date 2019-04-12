@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
         // Soft roll forward from the inner framework reference [specified] to app's 5.1.1 (defaults)
         // In this case the direct reference from app is first, so the framework reference from app
-        // is actually resolved against the disk - and the resolved framework is than compared to
+        // is actually resolved against the disk - and the resolved framework is then compared to
         // the inner framework reference .
         [Theory]
         [InlineData("5.0.0", Constants.RollForwardSetting.Disable, null)]
