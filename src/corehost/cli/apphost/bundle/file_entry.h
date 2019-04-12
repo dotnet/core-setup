@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#ifndef __BDL_FILE_ENTRY_H__
-#define __BDL_FILE_ENTRY_H__
+#ifndef __FILE_ENTRY_H__
+#define __FILE_ENTRY_H__
 
 #include <cstdint>
-#include "bdl_file_type.h"
+#include "file_type.h"
 #include "pal.h"
 
 namespace bundle
@@ -53,4 +53,4 @@ namespace bundle
         bool is_valid();
     };
 }
-#endif // __BDL_FILE_ENTRY_H__
+#endif // __FILE_ENTRY_H__

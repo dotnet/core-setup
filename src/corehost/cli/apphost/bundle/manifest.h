@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#ifndef __BDL_MANIFEST_H__
-#define __BDL_MANIFEST_H__
+#ifndef __MANIFEST_H__
+#define __MANIFEST_H__
 
 #include <cstdint>
 #include <list>
-#include "bdl_file_entry.h"
+#include "file_entry.h"
 
 namespace bundle
 {
@@ -98,4 +98,4 @@ namespace bundle
         static manifest_t* read(FILE* host, int32_t num_files);
     };
 }
-#endif // __BDL_MANIFEST_H__
+#endif // __MANIFEST_H__

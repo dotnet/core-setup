@@ -12,9 +12,6 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/fxr)
 # CMake does not recommend using globbing since it messes with the freshness checks
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/fxr_resolver.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/bdl_processor.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/bdl_manifest.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/bdl_file_entry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../corehost.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../common/trace.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../common/utils.cpp)

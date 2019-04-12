@@ -142,7 +142,7 @@ namespace pal
     inline bool rmdir (const pal::char_t* path) { return RemoveDirectoryW(path) != 0; }
     inline int rename(const pal::char_t* old_name, const pal::char_t* new_name) { return ::_wrename(old_name, new_name); }
     inline int remove(const pal::char_t* path) { return ::_wremove(path); }
-    int get_pid() { return GetCurrentProcessId(); }
+    inline int get_pid() { return GetCurrentProcessId(); }
 
 #else
     #ifdef EXPORT_SHARED_API
@@ -196,7 +196,7 @@ namespace pal
     inline bool rmdir(const pal::char_t* path) { return rmdir(path) == 0; }
     inline int rename(const pal::char_t* old_name, const pal::char_t* new_name) { return ::rename(old_name, new_name); }
     inline int remove(const pal::char_t* path) { return ::remove(path); }
-    int get_pid() { return getpid(); }
+    inline int get_pid() { return getpid(); }
 
 #endif
 

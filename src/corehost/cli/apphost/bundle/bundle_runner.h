@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#ifndef __BDL_PROCESSOR_H__
-#define __BDL_PROCESSOR_H__
+#ifndef __BUNDLE_RUNNER_H__
+#define __BUNDLE_RUNNER_H__
 
 
 #include <cstdint>
-#include "bdl_manifest.h"
+#include "manifest.h"
 #include "error_codes.h"
 
 namespace bundle
@@ -59,4 +59,4 @@ namespace bundle
 
 }
 
-#endif // __BDL_PROCESSOR_H__
+#endif // __BUNDLE_RUNNER_H__

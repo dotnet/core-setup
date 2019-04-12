@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#ifndef __BDL_FILE_TYPE_H__
-#define __BDL_FILE_TYPE_H__
+#ifndef __FILE_TYPE_H__
+#define __FILE_TYPE_H__
 
 #include <cstdint>
 
@@ -28,4 +28,4 @@ namespace bundle
     };
 }
 
-#endif // __BDL_FILE_TYPE_H__
+#endif // __FILE_TYPE_H__
