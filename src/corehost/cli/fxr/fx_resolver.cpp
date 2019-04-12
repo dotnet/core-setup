@@ -309,7 +309,6 @@ StatusCode fx_resolver_t::soft_roll_forward_helper(
 //      current reference against the frameworks available on disk.
 //      If the current reference on the other hand has not been resolved against the disk yet
 //      then we can safely move it forward to a higher version. It will be resolved against the disk eventually
-//      but there's no work to throw away/retry yet.
 StatusCode fx_resolver_t::soft_roll_forward(
     const fx_reference_t fx_ref,
     bool fx_is_hard_resolved)
