@@ -205,11 +205,10 @@ namespace
             //     release framework reference (this is for backward compat with pre-release rolling over pre-release portion of version ignoring apply_patches)
             //   use exact version is set (this is when --fx-version was used on the command line)
             if ((*(fx_ref.get_roll_forward()) == roll_forward_option::Disable) ||
-                ((*(fx_ref.get_roll_forward()) == roll_forward_option::LatestPatch) && (!*(fx_ref.get_apply_patches()) && !fx_ref.get_fx_version_number().is_prerelease())) ||
-                fx_ref.get_use_exact_version())
+                ((*(fx_ref.get_roll_forward()) == roll_forward_option::LatestPatch) && (!*(fx_ref.get_apply_patches()) && !fx_ref.get_fx_version_number().is_prerelease())))
             {
-                trace::verbose(_X("Did not roll forward because apply_patches=%d, roll_forward=%d, use_exact_version=%d chose [%s]"),
-                    *(fx_ref.get_apply_patches()), *(fx_ref.get_roll_forward()), fx_ref.get_use_exact_version(), fx_ver.c_str());
+                trace::verbose(_X("Did not roll forward because apply_patches=%d, roll_forward=%d chose [%s]"),
+                    *(fx_ref.get_apply_patches()), *(fx_ref.get_roll_forward()), fx_ver.c_str());
 
                 append_path(&fx_dir, fx_ver.c_str());
                 if (pal::directory_exists(fx_dir))
@@ -460,7 +459,7 @@ StatusCode fx_resolver_t::read_framework(
             pal::string_t config_file;
             pal::string_t dev_config_file;
             get_runtime_config_paths(fx->get_dir(), fx_name, &config_file, &dev_config_file);
-            fx->parse_runtime_config(config_file, dev_config_file, newest_ref, override_settings);
+            fx->parse_runtime_config(config_file, dev_config_file, override_settings);
 
             runtime_config_t new_config = fx->get_runtime_config();
             if (!new_config.is_valid())

@@ -16,11 +16,6 @@ bool fx_reference_t::is_compatible_with_higher_version(const fx_reference_t& hig
         return true;
     }
 
-    if (get_use_exact_version())
-    {
-        return false;
-    }
-
     // Verify major roll forward
     if (get_fx_version_number().get_major() != higher_version_reference.get_fx_version_number().get_major()
         && roll_forward < roll_forward_option::Major)

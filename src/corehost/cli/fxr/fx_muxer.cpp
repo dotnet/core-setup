@@ -388,7 +388,7 @@ namespace
             get_runtime_config_paths_from_arg(runtime_config, &config_file, &dev_config_file);
         }
 
-        app.parse_runtime_config(config_file, dev_config_file, fx_reference_t(), override_settings);
+        app.parse_runtime_config(config_file, dev_config_file, override_settings);
         if (!app.get_runtime_config().is_valid())
         {
             trace::error(_X("Invalid runtimeconfig.json [%s] [%s]"), app.get_runtime_config().get_path().c_str(), app.get_runtime_config().get_dev_path().c_str());

@@ -19,7 +19,6 @@ public:
         , has_roll_forward(false)
         , roll_forward(roll_forward_option::Disable)
         , prefer_release(false)
-        , use_exact_version(false)
         , fx_name(_X(""))
         , fx_version(_X(""))
         , fx_version_number()
@@ -58,15 +57,6 @@ public:
     {
         has_apply_patches = true;
         apply_patches = value;
-    }
-
-    const bool get_use_exact_version() const
-    {
-        return use_exact_version;
-    }
-    void set_use_exact_version(bool value)
-    {
-        use_exact_version = value;
     }
 
     const roll_forward_option* get_roll_forward() const
@@ -109,8 +99,6 @@ private:
     // This indicates that when resolving the framework reference the search should prefer release version
     // and only resolve to pre-release if there's no matching release version available.
     bool prefer_release;
-
-    bool use_exact_version;
 
     pal::string_t fx_name;
 

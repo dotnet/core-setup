@@ -34,11 +34,10 @@ runtime_config_t::runtime_config_t()
     }
 }
 
-void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev_path, const fx_reference_t& fx_ref, const fx_reference_t& override_settings)
+void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev_path, const fx_reference_t& override_settings)
 {
     m_path = path;
     m_dev_path = dev_path;
-    m_fx_ref = fx_ref;
     m_fx_overrides = override_settings;
 
     // Step #0: start with the default values
@@ -416,5 +415,4 @@ void runtime_config_t::set_fx_version(pal::string_t version)
     m_frameworks[0].set_fx_version(version);
     m_frameworks[0].set_apply_patches(false);
     m_frameworks[0].set_roll_forward(roll_forward_option::Disable);
-    m_frameworks[0].set_use_exact_version(true);
 }
