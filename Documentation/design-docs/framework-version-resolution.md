@@ -269,7 +269,7 @@ To maintain backward compatibility, each framework reference will also have to c
 Terminology
 - `framework reference`: consists of framework `name`, `version`, `rollForward` and optionally `applyPatches`.
 - `config fx references`: `framework references` for a single `.runtimeconfig.json`.
-- `newest fx references`: dictionary of `framework references` keyed off of framework `name` that contains the highest `version` requested and most constrained `rollForward` and `applyPatches`. It is used to perform "soft" roll-forwards to compatible references of the same framework name without reading the disk or performing excessive re-try.
+- `newest fx references`: dictionary of `framework references` keyed off of framework `name` that contains the highest `version` requested and most constrained `rollForward` and `applyPatches`. It is used to perform "soft roll-forwards" to compatible references of the same framework name without reading the disk or performing excessive re-try.
 - `resolved frameworks`: a list of frameworks that have been resolved, meaning a compatible framework was found on disk.
 
 Steps
@@ -366,7 +366,7 @@ Application
  -> Microsoft.NETCore.App 3.1.0 rollForward=LatestMinor
  -> ASP.NET 3.1.0
 ASP.NET (3.1.0)
- -> Microsoft.NETCore.App 3.1.0 <default> (so rollForward=Minor)
+ -> Microsoft.NETCore.App 3.1.0 <default> (i.e. rollForward=Minor)
 ```
 
 This would resolve `Microsoft.NETCore.App 3.2.0` because the reference from the app with `LatestMinor` is hard resolved first and the reference from `ASP.NET` can soft roll forward to it.
@@ -378,7 +378,7 @@ Application
  -> ASP.NET 3.1.0
  -> Microsoft.NETCore.App 3.1.0 rollForward=LatestMinor
 ASP.NET (3.1.0)
- -> Microsoft.NETCore.App 3.1.0 <default> (so rollForward=Minor)
+ -> Microsoft.NETCore.App 3.1.0 <default> (i.e. rollForward=Minor)
 ```
 
 This one would resolve `Microsoft.NETCore.App 3.1.1` because the reference in `ASP.NET` is hard resolved first (`Minor` will pick the closest available minor version) and the one in the app can soft roll forward to it.
@@ -386,7 +386,7 @@ This one would resolve `Microsoft.NETCore.App 3.1.1` because the reference in `A
 Since the reference in standard framework (`ASP.NET` in this sample) has no settings (defaults) this can be very common. Specifically for COM or other components where we will recommend usage of `LatestMinor` or `LatestMajor` for best compatibility.
 Note that with `LatestMajor` the problem is even worse because depending on the order and available framework the references may actually fail to resolve with the old algorithm.
 
-The fixed algorithm doesn't consider the actual hard resolved framework version when computing the effective framework reference. See the algorithm description above. The outcome is that it will effectively always compute the full effective framework reference before hard resolving it and thus is not affected by ordering. There's a small downside to it, that it may need to retry more often. To avoid unnecessary retries the best practices should be followed, specifically the one about not specifying unnecessary framework references. In the above sample, the app doesn't need to specify a framework reference for `Microsoft.NETCore.App` and so it should not do that.
+The fixed algorithm doesn't consider the actual hard resolved framework version when computing the effective framework reference. See the algorithm description above. The outcome is that it will effectively always compute the full effective framework reference before hard resolving it and thus is not affected by ordering. The downside is that it may need to retry more often. To avoid unnecessary retries the best practices should be followed, specifically the one about not specifying unnecessary framework references. In the above sample, the app doesn't need to specify a framework reference for `Microsoft.NETCore.App` and so it should not do that.
 
 ### Roll on patches-only will now roll from release to pre-release if no release is available
 When `rollForwardOnNoCandidateFx` is disabled (set to `0` which is not the default) the existing behavior is to never roll forward to a pre-release version. If the setting is any other value (Minor/Major) it would roll forward to pre-release version if there's no available matching release version.
