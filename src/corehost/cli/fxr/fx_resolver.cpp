@@ -22,8 +22,8 @@ namespace
         bool release_only)
     {
         fx_ver_t best_match_version;
-        roll_forward_option roll_forward = *fx_ref.get_roll_forward();
-        bool apply_patches = *fx_ref.get_apply_patches();
+        roll_forward_option roll_forward = fx_ref.get_roll_forward();
+        bool apply_patches = fx_ref.get_apply_patches();
         const fx_ver_t& fx_ref_version = fx_ref.get_fx_version_number();
 
         if (roll_forward > roll_forward_option::LatestPatch)
@@ -121,8 +121,8 @@ namespace
         trace::verbose(
             _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, roll_forward=%d, prefer_release=%d"),
             fx_ref.get_fx_version().c_str(),
-            *fx_ref.get_apply_patches(),
-            *fx_ref.get_roll_forward(),
+            fx_ref.get_apply_patches(),
+            fx_ref.get_roll_forward(),
             fx_ref.get_prefer_release());
 
         // If the framework reference prefers release, then search for release versions only first.
@@ -164,8 +164,6 @@ namespace
 #if DEBUG
         assert(!fx_ref.get_fx_name().empty());
         assert(!fx_ref.get_fx_version().empty());
-        assert(fx_ref.get_apply_patches() != nullptr);
-        assert(fx_ref.get_roll_forward() != nullptr);
 
         fx_ver_t _debug_ver;
         assert(fx_ver_t::parse(fx_ref.get_fx_version(), &_debug_ver, false));
@@ -204,11 +202,11 @@ namespace
             //     apply_patches is false AND
             //     release framework reference (this is for backward compat with pre-release rolling over pre-release portion of version ignoring apply_patches)
             //   use exact version is set (this is when --fx-version was used on the command line)
-            if ((*(fx_ref.get_roll_forward()) == roll_forward_option::Disable) ||
-                ((*(fx_ref.get_roll_forward()) == roll_forward_option::LatestPatch) && (!*(fx_ref.get_apply_patches()) && !fx_ref.get_fx_version_number().is_prerelease())))
+            if ((fx_ref.get_roll_forward() == roll_forward_option::Disable) ||
+                ((fx_ref.get_roll_forward() == roll_forward_option::LatestPatch) && (!fx_ref.get_apply_patches() && !fx_ref.get_fx_version_number().is_prerelease())))
             {
                 trace::verbose(_X("Did not roll forward because apply_patches=%d, roll_forward=%d chose [%s]"),
-                    *(fx_ref.get_apply_patches()), *(fx_ref.get_roll_forward()), fx_ver.c_str());
+                    fx_ref.get_apply_patches(), fx_ref.get_roll_forward(), fx_ver.c_str());
 
                 append_path(&fx_dir, fx_ver.c_str());
                 if (pal::directory_exists(fx_dir))
@@ -386,7 +384,7 @@ StatusCode fx_resolver_t::soft_roll_forward(
 //     InvalidConfigFile - reading of a runtime config for some of the processed frameworks has failed.
 StatusCode fx_resolver_t::read_framework(
     const host_startup_info_t & host_info,
-    const fx_reference_t & override_settings,
+    const runtime_config_t::settings_t& override_settings,
     const runtime_config_t & config,
     fx_definition_vector_t & fx_definitions)
 {
@@ -500,7 +498,7 @@ fx_resolver_t::fx_resolver_t()
 
 StatusCode fx_resolver_t::resolve_frameworks_for_app(
     const host_startup_info_t & host_info,
-    const fx_reference_t & override_settings,
+    const runtime_config_t::settings_t& override_settings,
     const runtime_config_t & app_config,
     fx_definition_vector_t & fx_definitions)
 {

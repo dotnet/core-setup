@@ -27,7 +27,7 @@ fx_definition_t::fx_definition_t(
 void fx_definition_t::parse_runtime_config(
     const pal::string_t& path,
     const pal::string_t& dev_path,
-    const fx_reference_t& override_settings
+    const runtime_config_t::settings_t& override_settings
 )
 {
     m_runtime_config.parse(path, dev_path, override_settings);

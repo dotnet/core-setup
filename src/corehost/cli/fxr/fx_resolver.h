@@ -17,7 +17,7 @@ class fx_resolver_t
 public:
     static StatusCode resolve_frameworks_for_app(
         const host_startup_info_t& host_info,
-        const fx_reference_t& override_settings,
+        const runtime_config_t::settings_t& override_settings,
         const runtime_config_t& app_config,
         fx_definition_vector_t& fx_definitions);
 
@@ -34,7 +34,7 @@ private:
         bool fx_is_hard_resolved);
     StatusCode read_framework(
         const host_startup_info_t& host_info,
-        const fx_reference_t& override_settings,
+        const runtime_config_t::settings_t& override_settings,
         const runtime_config_t& config,
         fx_definition_vector_t& fx_definitions);
 

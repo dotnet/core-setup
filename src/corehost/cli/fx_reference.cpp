@@ -60,51 +60,19 @@ bool fx_reference_t::is_compatible_with_higher_version(const fx_reference_t& hig
     return true;
 }
 
-void fx_reference_t::apply_settings_from(const fx_reference_t& from)
-{
-    if (from.get_fx_version().length() > 0)
-    {
-        set_fx_version(from.get_fx_version());
-    }
-
-    const roll_forward_option* from_roll_forward = from.get_roll_forward();
-    if (from_roll_forward != nullptr)
-    {
-        set_roll_forward(*from_roll_forward);
-    }
-
-    const bool* from_apply_patches = from.get_apply_patches();
-    if (from_apply_patches != nullptr)
-    {
-        set_apply_patches(*from_apply_patches);
-    }
-}
-
 bool fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from)
 {
     bool modified = false;
-    const roll_forward_option* from_roll_forward = from.get_roll_forward();
-    if (from_roll_forward != nullptr)
+    if (from.get_roll_forward() < get_roll_forward())
     {
-        const roll_forward_option* to_roll_forward = get_roll_forward();
-        if (to_roll_forward == nullptr ||
-            *from_roll_forward < *to_roll_forward)
-        {
-            set_roll_forward(*from_roll_forward);
-            modified = true;
-        }
+        set_roll_forward(from.get_roll_forward());
+        modified = true;
     }
 
-    const bool* from_apply_patches = from.get_apply_patches();
-    if (from_apply_patches != nullptr)
+    if (get_apply_patches() == true && from.get_apply_patches() == false)
     {
-        const bool* to_apply_patches = get_apply_patches();
-        if (to_apply_patches == nullptr ||
-            (*to_apply_patches == true && *from_apply_patches == false))
-        {
-            set_apply_patches(*from_apply_patches);
-            modified = true;
-        }
+        set_apply_patches(false);
+        modified = true;
     }
 
     if (from.get_prefer_release() && !get_prefer_release())

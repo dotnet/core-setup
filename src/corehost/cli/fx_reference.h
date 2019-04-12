@@ -14,10 +14,8 @@ class fx_reference_t
 {
 public:
     fx_reference_t()
-        : has_apply_patches(false)
-        , apply_patches(false)
-        , has_roll_forward(false)
-        , roll_forward(roll_forward_option::Disable)
+        : apply_patches(true)
+        , roll_forward(roll_forward_option::Minor)
         , prefer_release(false)
         , fx_name(_X(""))
         , fx_version(_X(""))
@@ -49,23 +47,21 @@ public:
         return fx_version_number;
     }
 
-    const bool* get_apply_patches() const
+    const bool get_apply_patches() const
     {
-        return (has_apply_patches ? &apply_patches : nullptr);
+        return apply_patches;
     }
     void set_apply_patches(bool value)
     {
-        has_apply_patches = true;
         apply_patches = value;
     }
 
-    const roll_forward_option* get_roll_forward() const
+    const roll_forward_option get_roll_forward() const
     {
-        return (has_roll_forward ? &roll_forward : nullptr);
+        return roll_forward;
     }
     void set_roll_forward(roll_forward_option value)
     {
-        has_roll_forward = true;
         roll_forward = value;
     }
 
@@ -82,18 +78,13 @@ public:
     // The other instance must be equal or higher version.
     bool is_compatible_with_higher_version(const fx_reference_t& higher_version_reference) const;
 
-    // Copy over any non-null values
-    void apply_settings_from(const fx_reference_t& from);
-
     // Apply the most restrictive settings
     // Returns true if any settings were modified, false if nothing was updated (this has more restrictive settings then from)
     bool merge_roll_forward_settings_from(const fx_reference_t& from);
 
 private:
-    bool has_apply_patches;
     bool apply_patches;
 
-    bool has_roll_forward;
     roll_forward_option roll_forward;
 
     // This indicates that when resolving the framework reference the search should prefer release version

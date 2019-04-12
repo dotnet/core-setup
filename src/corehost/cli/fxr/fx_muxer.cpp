@@ -367,7 +367,7 @@ namespace
         fx_definition_t& app,
         const pal::string_t& app_candidate,
         pal::string_t& runtime_config,
-        const fx_reference_t& override_settings)
+        const runtime_config_t::settings_t& override_settings)
     {
         if (!runtime_config.empty() && !pal::realpath(&runtime_config))
         {
@@ -479,7 +479,7 @@ namespace
             return StatusCode::InvalidArgFailure;
         }
 
-        fx_reference_t override_settings;
+        runtime_config_t::settings_t override_settings;
 
         // `Roll forward` is set to Minor (2) (roll_forward_option::Minor) by default. 
         // For backward compatibility there are two settings:
@@ -510,7 +510,7 @@ namespace
         pal::string_t roll_fwd_on_no_candidate_fx = get_last_known_arg(opts, opts_roll_fwd_on_no_candidate_fx, _X(""));
         if (roll_fwd_on_no_candidate_fx.length() > 0)
         {
-            if (override_settings.get_roll_forward() != nullptr)
+            if (override_settings.has_roll_forward)
             {
                 trace::error(_X("It's invalid to use both '%s' and '%s' command line options."), opts_roll_forward.c_str(), opts_roll_fwd_on_no_candidate_fx.c_str());
                 return StatusCode::InvalidArgFailure;
@@ -748,7 +748,7 @@ namespace
         auto app = new fx_definition_t();
         fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
 
-        fx_reference_t override_settings;
+        runtime_config_t::settings_t override_settings;
         int rc = read_config(*app, host_info.app_path, runtime_config_path, override_settings);
         if (rc != StatusCode::Success)
             return rc;

@@ -17,8 +17,22 @@ typedef web::json::object json_object;
 class runtime_config_t
 {
 public:
+    struct settings_t
+    {
+        settings_t();
+
+        bool has_apply_patches;
+        bool apply_patches;
+        void set_apply_patches(bool value) { has_apply_patches = true; apply_patches = value; }
+
+        bool has_roll_forward;
+        roll_forward_option roll_forward;
+        void set_roll_forward(roll_forward_option value) { has_roll_forward = true; roll_forward = value; }
+    };
+
+public:
     runtime_config_t();
-    void parse(const pal::string_t& path, const pal::string_t& dev_path, const fx_reference_t& override_settings);
+    void parse(const pal::string_t& path, const pal::string_t& dev_path, const settings_t& override_settings);
     bool is_valid() const { return m_valid; }
     const pal::string_t& get_path() const { return m_path; }
     const pal::string_t& get_dev_path() const { return m_dev_path; }
@@ -36,8 +50,8 @@ private:
 
     std::unordered_map<pal::string_t, pal::string_t> m_properties;
     fx_reference_vector_t m_frameworks;
-    fx_reference_t m_fx_defaults;   // the default settings (Steps #1 and #2)
-    fx_reference_t m_fx_overrides;  // the settings that can't be changed (Step #4)
+    settings_t m_default_settings;   // the default settings (Steps #1 and #2)
+    settings_t m_override_settings;  // the settings that can't be changed (Step #4)
     std::vector<std::string> m_prop_keys;
     std::vector<std::string> m_prop_values;
     std::list<pal::string_t> m_probe_paths;
@@ -61,6 +75,5 @@ private:
 private:
     bool parse_framework(const json_object& fx_obj, fx_reference_t& fx_out);
     bool read_framework_array(web::json::array frameworks);
-    static void copy_framework_settings_to(const fx_reference_t& from, fx_reference_t& to);
 };
 #endif // __RUNTIME_CONFIG_H__
