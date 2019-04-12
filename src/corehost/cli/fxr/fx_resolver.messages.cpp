@@ -13,11 +13,11 @@ void fx_resolver_t::display_incompatible_framework_error(
     const pal::string_t& higher,
     const fx_reference_t& lower)
 {
-    trace::error(_X("The specified framework '%s', version '%s', apply_patches=%d, roll_forward=%d cannot roll-forward to the previously referenced version '%s'."),
+    trace::error(_X("The specified framework '%s', version '%s', apply_patches=%d, roll_forward=%s cannot roll-forward to the previously referenced version '%s'."),
         lower.get_fx_name().c_str(),
         lower.get_fx_version().c_str(),
         lower.get_apply_patches(),
-        lower.get_roll_forward(),
+        roll_forward_option_to_string(lower.get_roll_forward()).c_str(),
         higher.c_str());
 }
 
@@ -27,11 +27,11 @@ void fx_resolver_t::display_compatible_framework_trace(
 {
     if (trace::is_enabled())
     {
-        trace::verbose(_X("--- The specified framework '%s', version '%s', apply_patches=%d, roll_forward=%d is compatible with the previously referenced version '%s'."),
+        trace::verbose(_X("--- The specified framework '%s', version '%s', apply_patches=%d, roll_forward=%s is compatible with the previously referenced version '%s'."),
             lower.get_fx_name().c_str(),
             lower.get_fx_version().c_str(),
             lower.get_apply_patches(),
-            lower.get_roll_forward(),
+            roll_forward_option_to_string(lower.get_roll_forward()).c_str(),
             higher.c_str());
     }
 }
@@ -42,12 +42,12 @@ void fx_resolver_t::display_retry_framework_trace(
 {
     if (trace::is_enabled())
     {
-        trace::verbose(_X("--- Restarting all framework resolution because the previously resolved framework '%s', version '%s' must be re-resolved with the new version '%s', apply_patches=%d, roll_forward=%d ."),
+        trace::verbose(_X("--- Restarting all framework resolution because the previously resolved framework '%s', version '%s' must be re-resolved with the new version '%s', apply_patches=%d, roll_forward=%s ."),
             fx_existing.get_fx_name().c_str(),
             fx_existing.get_fx_version().c_str(),
             fx_new.get_fx_version().c_str(),
             fx_new.get_apply_patches(),
-            fx_new.get_roll_forward());
+            roll_forward_option_to_string(fx_new.get_roll_forward()).c_str());
     }
 }
 
@@ -71,13 +71,13 @@ void fx_resolver_t::display_summary_of_frameworks(
                 auto newest_ref = newest_references.find(fx->get_name());
                 assert(newest_ref != newest_references.end());
 
-                trace::verbose(_X("     framework:'%s', lowest requested version='%s', found version='%s', effective reference version='%s' apply_patches=%d, roll_forward=%d, folder=%s"),
+                trace::verbose(_X("     framework:'%s', lowest requested version='%s', found version='%s', effective reference version='%s' apply_patches=%d, roll_forward=%s, folder=%s"),
                     fx->get_name().c_str(),
                     fx->get_requested_version().c_str(),
                     fx->get_found_version().c_str(),
                     newest_ref->second.get_fx_version().c_str(),
                     newest_ref->second.get_apply_patches(),
-                    newest_ref->second.get_roll_forward(),
+                    roll_forward_option_to_string(newest_ref->second.get_roll_forward()).c_str(),
                     fx->get_dir().c_str());
             }
         }

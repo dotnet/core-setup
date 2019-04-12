@@ -119,10 +119,10 @@ namespace
         const fx_reference_t& fx_ref)
     {
         trace::verbose(
-            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, roll_forward=%d, prefer_release=%d"),
+            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, roll_forward=%s, prefer_release=%d"),
             fx_ref.get_fx_version().c_str(),
             fx_ref.get_apply_patches(),
-            fx_ref.get_roll_forward(),
+            roll_forward_option_to_string(fx_ref.get_roll_forward()).c_str(),
             fx_ref.get_prefer_release());
 
         // If the framework reference prefers release, then search for release versions only first.
@@ -205,8 +205,11 @@ namespace
             if ((fx_ref.get_roll_forward() == roll_forward_option::Disable) ||
                 ((fx_ref.get_roll_forward() == roll_forward_option::LatestPatch) && (!fx_ref.get_apply_patches() && !fx_ref.get_fx_version_number().is_prerelease())))
             {
-                trace::verbose(_X("Did not roll forward because apply_patches=%d, roll_forward=%d chose [%s]"),
-                    fx_ref.get_apply_patches(), fx_ref.get_roll_forward(), fx_ver.c_str());
+                trace::verbose(
+                    _X("Did not roll forward because apply_patches=%d, roll_forward=%s chose [%s]"),
+                    fx_ref.get_apply_patches(),
+                    roll_forward_option_to_string(fx_ref.get_roll_forward()).c_str(),
+                    fx_ver.c_str());
 
                 append_path(&fx_dir, fx_ver.c_str());
                 if (pal::directory_exists(fx_dir))

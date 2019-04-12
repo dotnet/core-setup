@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
         public static AndConstraint<CommandResultAssertions> FailedToSoftRollForward(this CommandResultAssertions assertion, string frameworkName, string newVersion, string previousVersion)
         {
-            return assertion.HaveStdErrMatching($".*The specified framework '{frameworkName}', version '{newVersion}', apply_patches=[0-1], roll_forward=[0-2] cannot roll-forward to the previously referenced version '{previousVersion}'.*");
+            return assertion.HaveStdErrMatching($".*The specified framework '{frameworkName}', version '{newVersion}', apply_patches=[0-1], roll_forward=[^ ]* cannot roll-forward to the previously referenced version '{previousVersion}'.*");
         }
 
         public static AndConstraint<CommandResultAssertions> RestartedFrameworkResolution(this CommandResultAssertions assertion, string resolvedVersion, string newVersion)
