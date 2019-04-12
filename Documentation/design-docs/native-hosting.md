@@ -76,7 +76,7 @@ The binary itself should be signed by Microsoft as there will be no support for 
 int get_hostfxr_path(
     char_t * result_buffer,
     size_t * buffer_size,
-    const_t char * assembly_path);
+    const char_t * assembly_path);
 ```
 
 This API locates the `hostfxr` and returns its path by calling the `result` function.
@@ -85,7 +85,7 @@ This API locates the `hostfxr` and returns its path by calling the `result` func
 * `buffer_size` - On input this points to the size of the `result_buffer` in `char_t` units. On output this points to the number of `char_t` units used from the `result_buffer` (including the null terminator). If `result_buffer` is `nullptr` the input value is ignored and only the minimum required size in `char_t` units is set on output.
 * `assembly_path` - Optional. Path to the component's assembly. Whether or not this is specified determines the behavior for locating the hostfxr library.
   * If `nullptr`, `hostfxr` is located using the environment variable or global registration
-  * If specified, `hostfxr` is located as if the `assembly_path` is and application with `apphost`
+  * If specified, `hostfxr` is located as if the `assembly_path` is an application with `apphost`
 
 `nethost` library uses the `__stdcall` calling convention.
 
@@ -165,7 +165,7 @@ When used to execute an app, the `app_path` (or CLI equivalent) will be used to 
 * `host_context_handle` - output parameter. On success receives an opaque value which identifies the initialized host context. The handle should be closed by calling `hostfxr_close`.
 This function can only be called once per-process. It's not supported to run multiple apps in one process (even sequentially).
 
-This function will fail if there already is a CoreCLR running in the process as it's not possible to run two app in a single process.
+This function will fail if there already is a CoreCLR running in the process as it's not possible to run two apps in a single process.
 
 *Note: This is effectively a replacement for `hostfxr_main_startupinfo` and `hostfxr_main`. Currently it is not a goal to fully replace these APIs because they also support SDK commands which are special in lot of ways and don't fit well with the rest of the native hosting. There's no scenario right now which would require the ability to issue SDK commands from a native host. That said nothing in this proposal should block enabling even SDK commands through these APIs.*
 
@@ -316,7 +316,7 @@ It is important to correctly synchronize some of these operations to achieve the
 * If there's no `first host context` in the process the first call to `hostfxr_initialize_...` will create a new `first host context`. There can only be one `first host context` in existence at any point in time.
 * Calling `hostfxr_initialize...` when `first host context` already exists will always return a `secondary host context`.
 * The `first host context` blocks creation of any other host context until it is used to load and initialize the CoreCLR runtime. This means that `hostfxr_initialize...` and subsequently one of the "run" methods must be called on the `first host context` to unblock creation of `secondary host contexts`.
-* Calling `hostfxr_initialize...` will block until the `first host context` is initialized, a "run" method is called on it and the CoreCLR is loaded and initialized. The `hostfxr_initialize...` will block potentially indefinitely. The method will block very early on, all of the operations done by the initialize will only happen once it's unblocked.
+* Calling `hostfxr_initialize...` will block until the `first host context` is initialized, a "run" method is called on it and the CoreCLR is loaded and initialized. The `hostfxr_initialize...` will block potentially indefinitely. The method will block very early on. All of the operations done by the initialize will only happen once it's unblocked.
 * `first host context` can fail to initialize the runtime (or anywhere up to that point). If this happens, it's marked as failed and is not considered a `first host context` anymore. This unblocks the potentially waiting `hostfxr_initialize...` calls. In this case the first `hostfxr_initialize...` after the failure will create a new `first host context`.
 * `first host context` can be closed using `hostfxr_close` before it is used to initialize the CoreCLR runtime. This is similar to the failure above, the host context is marked as "closed/failed" and is not considered `first host context` anymore. This unblocks any waiting `hostfxr_initialize...` calls.
 * Once the `first host context` successfully initialized the CoreCLR runtime it is permanently marked as "successful" and will remain the `first host context` for the lifetime of the process. Such host context can (and should) be closed via the `hostfxr_close` when not used anymore, but internally it will remain active.
@@ -348,8 +348,8 @@ It should really only happen that `hostfxr` is equal or newer than `hostpolicy`.
 
 The interesting case is 3.0 `hostfxr` using 2.* `hostpolicy`. This will be very common, basically any 2.* app running on a machine with 3.0 installed will be in that situation. This case has two sub-cases:
 * `hostfxr` is invoked using one of the 2.* APIs. In this case the simple solution is to keep using the 2.* `hostpolicy` APIs always.
-* `hostfxr` is invoked using one of the new 3.0 APIs (like `hostfxr_initialize...`). In this case it's not possible to completely support the new APIs, since they require new functionality from `hostpolicy`. For now the `hostfxr` should simple fail.  
-It is in theory possible ot support some kind of emulation mode where for some scenarios the new APIs would work even with old `hostpolicy`, but for simplicity it's better to start with just failing.
+* `hostfxr` is invoked using one of the new 3.0 APIs (like `hostfxr_initialize...`). In this case it's not possible to completely support the new APIs, since they require new functionality from `hostpolicy`. For now the `hostfxr` should simply fail.  
+It is in theory possible to support some kind of emulation mode where for some scenarios the new APIs would work even with old `hostpolicy`, but for simplicity it's better to start with just failing.
 
 #### Implementation of existing 2.* APIs in `hostfxr`
 The existing 2.* APIs in `hostfxr` could switch to internally use the new functionality and in turn use the new 3.0 `hostpolicy` APIs. The tricky bit here is scenario like this:
