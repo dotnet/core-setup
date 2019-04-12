@@ -478,7 +478,7 @@ StatusCode fx_resolver_t::read_framework(
         {
             // Perform a "soft" roll-forward meaning we don't read any physical framework folders yet
             // Note that since we found the framework in the already resolved frameworks
-            // pass a flag which marks tells the function tha the framework was already resolved against disk (hard resolved),
+            // pass a flag which marks tells the function that the framework was already resolved against disk (hard resolved),
             // meaning that if we need to update it, we need to restart the entire process.
             rc = soft_roll_forward(fx_ref, /*fx_is_hard_resolved*/ true);
             if (rc)
