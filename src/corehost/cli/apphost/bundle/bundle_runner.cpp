@@ -9,9 +9,9 @@
 
 using namespace bundle;
 
-void bundle_runner_t::seek(long offset, int origin)
+void bundle_runner_t::seek(FILE* stream, long offset, int origin)
 {
-    if (fseek(m_bundle_stream, offset, origin) != 0)
+    if (fseek(stream, offset, origin) != 0)
     {
         trace::error(_X("Failure processing application bundle; possible file corruption."));
         trace::error(_X("I/O seek failure within the bundle."));
@@ -132,7 +132,7 @@ void bundle_runner_t::reopen_host_for_reading()
 
 void bundle_runner_t::process_manifest_footer(int64_t &header_offset)
 {
-    seek(-manifest_footer_t::num_bytes_read(), SEEK_END);
+    seek(m_bundle_stream, -manifest_footer_t::num_bytes_read(), SEEK_END);
 
     manifest_footer_t* footer = manifest_footer_t::read(m_bundle_stream);
     header_offset = footer->manifest_header_offset();
@@ -140,7 +140,7 @@ void bundle_runner_t::process_manifest_footer(int64_t &header_offset)
 
 void bundle_runner_t::process_manifest_header(int64_t header_offset)
 {
-    seek(header_offset, SEEK_SET);
+    seek(m_bundle_stream, header_offset, SEEK_SET);
 
     manifest_header_t* header = manifest_header_t::read(m_bundle_stream);
 
@@ -223,7 +223,7 @@ void bundle_runner_t::extract_file(file_entry_t *entry)
     uint8_t buffer[buffer_size];
     int64_t file_size = entry->data.size;
 
-    seek(entry->data.offset, SEEK_SET);
+    seek(m_bundle_stream, entry->data.offset, SEEK_SET);
     do {
         int64_t copy_size = (file_size <= buffer_size) ? file_size : buffer_size;
         read(buffer, copy_size, m_bundle_stream);

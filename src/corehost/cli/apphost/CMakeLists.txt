@@ -20,15 +20,17 @@ set(SKIP_VERSIONING 1)
 
 set(SOURCES
     ../fxr/fx_ver.cpp
-    ./bundle/bundle_runner.cpp
-    ./bundle/manifest.cpp
     ./bundle/file_entry.cpp
+    ./bundle/manifest.cpp
+    ./bundle/bundle_runner.cpp
 )
-
-include_directories(./bundle)
 
 set(HEADERS
     ../fxr/fx_ver.h
+    ./bundle/file_type.h
+    ./bundle/file_entry.h
+    ./bundle/manifest.h
+    ./bundle/bundle_runner.h
 )
 
 include(../exe.cmake)

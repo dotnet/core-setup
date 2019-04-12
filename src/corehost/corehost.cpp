@@ -11,7 +11,7 @@
 #include "utils.h"
 
 #if FEATURE_APPHOST
-#include "bundle_runner.h"
+#include "cli/apphost/bundle/bundle_runner.h"
 
 #define CURHOST_TYPE    _X("apphost")
 #define CUREXE_PKG_VER  COMMON_HOST_PKG_VER
@@ -38,7 +38,7 @@
 
 bool is_exe_enabled_for_execution(pal::string_t* app_dll)
 {
-	constexpr int EMBED_SZ = sizeof(EMBED_HASH_FULL_UTF8) / sizeof(EMBED_HASH_FULL_UTF8[0]);
+    constexpr int EMBED_SZ = sizeof(EMBED_HASH_FULL_UTF8) / sizeof(EMBED_HASH_FULL_UTF8[0]);
     constexpr int EMBED_MAX = (EMBED_SZ > 1025 ? EMBED_SZ : 1025); // 1024 DLL name length, 1 NUL
 
     // Contains the embed hash value at compile time or the managed DLL name replaced by "dotnet build".
@@ -92,7 +92,7 @@ int exe_start(const int argc, const pal::char_t* argv[])
     pal::string_t app_path;
     pal::string_t app_root;
     bool requires_v2_hostfxr_interface = false;
-	
+    
 #if FEATURE_APPHOST
     pal::string_t embedded_app_name;
     if (!is_exe_enabled_for_execution(&embedded_app_name))
@@ -112,26 +112,26 @@ int exe_start(const int argc, const pal::char_t* argv[])
         requires_v2_hostfxr_interface = true;
     }
 
-	bundle::bundle_runner_t extractor(host_path);
-	StatusCode bundle_status = extractor.extract();
+    bundle::bundle_runner_t extractor(host_path);
+    StatusCode bundle_status = extractor.extract();
 
-	switch (bundle_status)
-	{
-	case StatusCode::Success:
-		app_path.assign(extractor.get_extraction_dir());
-	    break;
+    switch (bundle_status)
+    {
+    case StatusCode::Success:
+        app_path.assign(extractor.get_extraction_dir());
+        break;
 
-	case StatusCode::AppHostExeNotBundle:
-		app_path.assign(get_directory(host_path));
-		break;
+    case StatusCode::AppHostExeNotBundle:
+        app_path.assign(get_directory(host_path));
+        break;
 
-	case StatusCode::BundleExtractionFailure:
-	default:
-		trace::error(_X("A fatal error was encountered. Could not extract contents of the bundle"));
-		return StatusCode::AppHostExeNotBoundFailure;
-	}
+    case StatusCode::BundleExtractionFailure:
+    default:
+        trace::error(_X("A fatal error was encountered. Could not extract contents of the bundle"));
+        return StatusCode::AppHostExeNotBoundFailure;
+    }
 
-	app_root.assign(app_path);
+    app_root.assign(app_path);
 
     append_path(&app_path, embedded_app_name.c_str());
     if (!pal::realpath(&app_path))

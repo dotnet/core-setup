@@ -10,7 +10,6 @@
 #include <dlfcn.h>
 #include <dirent.h>
 #include <pwd.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <fnmatch.h>
 #include <ctime>

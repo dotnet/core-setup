@@ -459,9 +459,18 @@ bool pal::get_module_path(dll_t mod, string_t* recv)
 
 bool pal::get_temp_directory(pal::string_t& tmp_dir)
 {
-    pal::char_t temp_path[MAX_PATH + 1];
-    GetTempPathW(MAX_PATH + 1, temp_path);
+    const size_t max_len = MAX_PATH + 1;
+    pal::char_t temp_path[max_len];
+
+    size_t len = GetTempPathW(max_len, temp_path);
+    if (len == 0)
+    {
+        return false;
+    }
+
+    assert(len < max_len);
     tmp_dir.assign(temp_path);
+
     return pal::realpath(&tmp_dir);
 }
 

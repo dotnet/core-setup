@@ -36,7 +36,7 @@ namespace bundle
 
     private:
         void reopen_host_for_reading();
-        void seek(long offset, int origin);
+        static void seek(FILE* stream, long offset, int origin);
 
         void process_manifest_footer(int64_t& header_offset);
         void process_manifest_header(int64_t header_offset);
