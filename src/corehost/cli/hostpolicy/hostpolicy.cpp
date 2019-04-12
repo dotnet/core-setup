@@ -27,9 +27,6 @@ namespace
     std::mutex g_lib_lock;
     std::weak_ptr<coreclr_t> g_lib_coreclr;
 
-    std::mutex g_context_lock;
-    std::shared_ptr<hostpolicy_context_t> g_context;
-
     int create_coreclr(const hostpolicy_context_t &context, host_mode_t mode, std::unique_ptr<coreclr_t> &coreclr)
     {
         // Verbose logging
@@ -61,36 +58,27 @@ namespace
         return StatusCode::Success;
     }
 
-    int get_or_create_hostpolicy_context(
+    int create_hostpolicy_context(
         hostpolicy_init_t &hostpolicy_init,
         const arguments_t &args,
         bool breadcrumbs_enabled,
         std::shared_ptr<hostpolicy_context_t> &context)
     {
-        std::lock_guard<std::mutex> lock{ g_context_lock };
-        context = g_context;
-        if (context != nullptr)
-        {
-            // [TODO] Validate the current context is acceptable for this request
-            trace::info(_X("Host context has already been initialized"));
-            return StatusCode::Success;
-        }
 
         std::unique_ptr<hostpolicy_context_t> context_local(new hostpolicy_context_t());
         int rc = context_local->initialize(hostpolicy_init, args, breadcrumbs_enabled);
         if (rc != StatusCode::Success)
             return rc;
 
-        assert(g_context == nullptr);
-        g_context = std::move(context_local);
-        context = g_context;
+        context = std::move(context_local);
 
         return StatusCode::Success;
     }
 }
 
 int get_or_create_coreclr(
-    const hostpolicy_context_t &context,
+    hostpolicy_init_t &hostpolicy_init,
+    const arguments_t &args,
     host_mode_t mode,
     std::shared_ptr<coreclr_t> &coreclr)
 {
@@ -112,8 +100,13 @@ int get_or_create_coreclr(
             return StatusCode::Success;
         }
 
+        hostpolicy_context_t context {};
+        int rc = context.initialize(hostpolicy_init, args, false /* enable_breadcrumbs */);
+        if (rc != StatusCode::Success)
+            return rc;
+
         std::unique_ptr<coreclr_t> coreclr_local;
-        int rc = create_coreclr(context, mode, coreclr_local);
+        rc = create_coreclr(context, mode, coreclr_local);
         if (rc != StatusCode::Success)
             return rc;
 
@@ -327,9 +320,8 @@ SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
     if (rc != StatusCode::Success)
         return rc;
 
-    assert(g_context == nullptr);
     std::shared_ptr<hostpolicy_context_t> context;
-    rc = get_or_create_hostpolicy_context(g_init, args, true /* breadcrumbs_enabled */, context);
+    rc = create_hostpolicy_context(g_init, args, true /* breadcrumbs_enabled */, context);
     if (rc != StatusCode::Success)
         return rc;
 
@@ -436,13 +428,8 @@ SHARED_API int corehost_get_coreclr_delegate(coreclr_delegate_type type, void** 
     if (rc != StatusCode::Success)
         return rc;
 
-    std::shared_ptr<hostpolicy_context_t> context;
-    rc = get_or_create_hostpolicy_context(g_init, args, false /* breadcrumbs_enabled */, context);
-    if (rc != StatusCode::Success)
-        return rc;
-
     std::shared_ptr<coreclr_t> coreclr;
-    rc = get_or_create_coreclr(*context, g_init.host_mode, coreclr);
+    rc = get_or_create_coreclr(g_init, args, g_init.host_mode, coreclr);
     if (rc != StatusCode::Success)
         return rc;
 
