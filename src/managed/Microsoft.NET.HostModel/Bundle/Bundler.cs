@@ -223,7 +223,7 @@ namespace Microsoft.NET.HostModel.Bundle
             // Sort the file names to keep the bundle construction deterministic.
             Array.Sort(sources, StringComparer.Ordinal);
 
-            List<FileSpec> fileSpecs = new List<FileSpec>();
+            List<FileSpec> fileSpecs = new List<FileSpec>(sources.Length);
             foreach(var file in sources)
             {
                 fileSpecs.Add(new FileSpec(file, RelativePath(sourceDir, file)));
