@@ -269,7 +269,7 @@ To maintain backward compatibility, each framework reference will also have to c
 Terminology
 - `framework reference`: consists of framework `name`, `version`, `rollForward` and optionally `applyPatches`.
 - `config fx references`: `framework references` for a single `.runtimeconfig.json`.
-- `newest fx references`: dictionary of `framework references` keyed off of framework `name` that contain the highest `version` requested and most constrained `rollForward` and `applyPatches`. It is used to perform "soft" roll-forwards to compatible references of the same framework name without reading the disk or performing excessive re-try.
+- `newest fx references`: dictionary of `framework references` keyed off of framework `name` that contains the highest `version` requested and most constrained `rollForward` and `applyPatches`. It is used to perform "soft" roll-forwards to compatible references of the same framework name without reading the disk or performing excessive re-try.
 - `resolved frameworks`: a list of frameworks that have been resolved, meaning a compatible framework was found on disk.
 
 Steps
@@ -301,7 +301,7 @@ Steps
 
 Notes on this algorithm:
 * This algorithm for resolving the various framework references assumes the **No Downgrading** best practice explained below in order to prevent loading a newer version of a framework than necessary.
-* Probing for the framework on disk never changes the `newest fx references`. This means that the `newest fx references` contains the latest effect framework reference for each framework without considering what frameworks are actually available. This is very important to avoid ordering issues. (See the **Fixing ordering issues** in the sections below.)
+* Probing for the framework on disk never changes the `newest fx references`. This means that the `newest fx references` contains the latest effective framework reference for each framework without considering what frameworks are actually available. This is very important to avoid ordering issues. (See the **Fixing ordering issues** in the sections below.)
 
 
 ### Best practices for a `.runtimeconfig.json`
