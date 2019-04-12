@@ -287,9 +287,10 @@ int hostfxr_get_runtime_delegate(const hostfxr_handle host_context_handle, hostf
 Starts the runtime and returns a function pointer to specified functionality of the runtime.
 * `host_context_handle` - handle to the initialized host context.
 * `type` - the type of runtime functionality requested
-  * `load_assembly_and_get_function_pointer` - entry point which loads an assembly (with dependencies) and returns function pointer for a specified static method. This is the new way to load managed components by the native host.
+  * `load_assembly_and_get_function_pointer` - entry point which loads an assembly (with dependencies) and returns function pointer for a specified static method. This is the new way to load managed components by the native host. The intent is that the native app will call `hostfxr_get_runtime_delegate(handle, load_assembly_and_get_function_pointer, &helper)` and then use the `helper` to load assembly and get a function pointer to a method. So something like `helper(assembly_path, type_name, method_name, &function_ptr)`. The exact signature and behavior of this runtime helper is TBD.
   * `com_activation` - COM activation entry-point - see [COM activation](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/COM-activation.md) for more details.
   * `load_in_memory_assembly` - IJW entry-point - see [IJW activation](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/IJW-activation.md) for more details.
+  * `winrt_activation` - WinRT activation entry-point - see [WinRT activation](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/WinRT-activation.md) for more details.
 * `delegate` - when successful, the native function pointer to the requested runtime functionality.
 
 Initially the function will only work if `hostfxr_initialize_for_runtime_config` was used to initialize the host context. Later on this could be relaxed to allow being used in combination with `hostfxr_initialize_for_app`.  
