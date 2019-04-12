@@ -29,23 +29,20 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             // once associated changes in SDK repo are checked in.
             string singleFileDir = Path.Combine(fixture.TestProject.ProjectDirectory, "oneExe");
             Directory.CreateDirectory(singleFileDir);
-            string bundleDll = Path.Combine(sharedTestState.RepoDirectories.Artifacts,
-                                            "Microsoft.NET.Build.Bundle",
-                                            "netcoreapp2.0",
-                                            "Microsoft.NET.Build.Bundle.dll");
-            string[] bundleArgs = { "--source", fixture.TestProject.OutputDirectory,
-                                    "--apphost", hostName,
-                                    "--output", singleFileDir };
+            var bundler = new Microsoft.NET.HostModel.Bundle.Bundler(hostName, singleFileDir);
+            string singleFile = bundler.GenerateBundle(fixture.TestProject.OutputDirectory);
 
-            fixture.SdkDotnet.Exec(bundleDll, bundleArgs)
+            // Run the bundled app (extract files)
+            Command.Create(singleFile)
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
                 .Should()
-                .Pass();
+                .Pass()
+                .And
+                .HaveStdOutContaining("Wow! We now say hello to the big world and you.");
 
-            // Run the bundled app
-            string singleFile = Path.Combine(singleFileDir, hostName);
+            // Run the bundled app again (reuse extracted files)
             Command.Create(singleFile)
                 .CaptureStdErr()
                 .CaptureStdOut()
