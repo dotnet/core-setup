@@ -326,6 +326,22 @@ A newer version of a shared framework should keep or increase the version to ano
 By following these best practices we have optimal run-time performance (less processing and probing) and less chance of incompatible framework references.
 
 
+### Scenarios with known issues
+#### `LatestMajor` usage with multiple frameworks
+For example an app which has runtime config like this:
+```
+ASP.NET 3.0 rollForward=LatestMajor
+ThirdPartyFX 1.0 rollForward=LatestMajor
+```
+
+And now assume that both `ASP.NET 3.0` and `ThirdPartyFX 1.0` have references to `Microsoft.NETCore.App 3.0`. And then `ASP.NET 4.0` is released which has a reference to `Microsoft.NETCore.App 4.0`. The above application will break now, since it will pick `ASP.NET 4.0` and thus request `Microsoft.NETCore.App 4.0` but that reference is not compatible with the `Microsoft.NETCoreApp 3.0` reference from `ThirdPartyFX 1.0`.
+
+Right now we don't support 3rd party frameworks and all 1st party framework should ship in sync, so such a situation should not arise. At the same time it will be relatively uncommon to have apps with multiple framework references.
+
+This might be more of an issue for components (COM and such), which we will recommend to use at least `LatestMinor` if not `LatestMajor`. But again it would only happen if the component has references to more than on framework.
+
+
+
 ## Changes to existing apps
 The above proposal will impact behavior of existing apps (because framework resolution is in `hostfxr` which is global on the machine for all frameworks). This is a description of the changes as they apply to apps using either default settings, `rollForwardOnNoCandidateFx` or `applyPatches`.
 
