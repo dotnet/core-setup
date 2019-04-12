@@ -137,20 +137,21 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, "5.1.1", versionReference));
         }
 
-        // Soft roll forward from inner framework reference [specified] to app's 6.1.1-preview.0 (defaults)
+        // Soft roll forward from inner framework reference [specified] to app's 6.1.1-preview.1 (defaults)
         [Theory]
         // 3.0 change:
         // 2.* - release would never roll forward to pre-release
         // 3.* - release rolls forward to pre-release if there is no available release match
-        [InlineData("6.0.0", null, null, "6.1.1-preview.1")]
-        [InlineData("6.0.1-preview.0", null, null, "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", null, null, "6.1.1-preview.1")]
+        [InlineData("6.0.0", null, null, "6.1.1-preview.2")]
+        [InlineData("6.0.1-preview.0", null, null, "6.1.1-preview.2")]
+        [InlineData("6.1.1-preview.1", null, null, "6.1.1-preview.2")]
         [InlineData("6.0.1-preview.0", 0, null, null)]
         [InlineData("6.1.0-preview.0", 0, false, null)]
-        [InlineData("6.1.0-preview.0", 0, null, "6.1.1-preview.1")] // This is effectively a bug, the design was that pre-release should never roll on patches
-        [InlineData("6.1.1-preview.0", 0, null, "6.1.1-preview.1")]
-        [InlineData("6.1.1-preview.0", 0, false, "6.1.1-preview.1")] // applyPatches=false is ignored for pre-release roll
-        [InlineData("6.1.1-preview.1", 0, null, "6.1.1-preview.1")]
+        [InlineData("6.1.0-preview.0", 0, null, "6.1.1-preview.2")]
+        [InlineData("6.1.1-preview.0", 0, false, "6.1.1-preview.2")] // applyPatches=false is ignored for pre-release roll
+        [InlineData("6.1.1-preview.1", 0, null, "6.1.1-preview.2")]
+        [InlineData("6.1.1-preview.1", 0, false, "6.1.1-preview.2")]
+        [InlineData("6.1.1-preview.2", 0, null, "6.1.1-preview.2")]
         public void SoftRollForward_InnerFrameworkReference_PreRelease(
             string versionReference,
             int? rollForwardOnNoCandidateFx,
@@ -159,7 +160,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTest(
                 runtimeConfig => runtimeConfig
-                    .WithFramework(MicrosoftNETCoreApp, "6.1.1-preview.0")
+                    .WithFramework(MicrosoftNETCoreApp, "6.1.1-preview.1")
                     .WithFramework(MiddleWare, "2.1.0"),
                 dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
@@ -167,7 +168,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithApplyPatches(applyPatches)
                         .Version = versionReference),
                 resolvedFramework,
-                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "6.1.1-preview.0"));
+                commandResult => commandResult.Should().Fail().And.FailedToSoftRollForward(MicrosoftNETCoreApp, versionReference, "6.1.1-preview.1"));
         }
 
         // Soft roll forward from inner framework reference 5.1.1 to app [specified version]
@@ -471,7 +472,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.4.1")
                     .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.6.0")
                     .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.0.0")
-                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.1.1-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.1.1-preview.2")
                     .AddFramework(MiddleWare, "2.1.2", runtimeConfig =>
                         runtimeConfig.WithFramework(MicrosoftNETCoreApp, "5.1.3"))
                     .AddFramework(AnotherMiddleWare, "3.0.0", runtimeConfig =>

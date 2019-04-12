@@ -303,7 +303,7 @@ StatusCode fx_resolver_t::soft_roll_forward_helper(
     /*out*/ fx_reference_t& effective_fx_ref,
     /*out*/ bool& effective_is_different_from_higher)
 {
-    if (!lower_fx_ref.is_roll_forward_compatible(higher_fx_ref.get_fx_version_number()))
+    if (!lower_fx_ref.is_compatible_with_higher_version(higher_fx_ref))
     {
         // Error condition - not compatible with the other reference
         display_incompatible_framework_error(higher_fx_ref.get_fx_version(), lower_fx_ref);
@@ -357,13 +357,6 @@ StatusCode fx_resolver_t::soft_roll_forward(
     }
     else
     {
-        if (!current_fx_ref.is_roll_forward_compatible(fx_ref.get_fx_version_number()))
-        {
-            // Error condition - not compatible with the other reference
-            display_incompatible_framework_error(fx_ref.get_fx_version(), current_fx_ref);
-            return StatusCode::FrameworkCompatFailure;
-        }
-
         rc = soft_roll_forward_helper(current_fx_ref, fx_ref, effective_fx_ref, effective_is_different_from_current);
         if (rc != StatusCode::Success)
         {

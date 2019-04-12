@@ -79,7 +79,8 @@ public:
     }
 
     // Is the current version compatible with another instance with roll-forward semantics.
-    bool is_roll_forward_compatible(const fx_ver_t& other) const;
+    // The other instance must be equal or higher version.
+    bool is_compatible_with_higher_version(const fx_reference_t& higher_version_reference) const;
 
     // Copy over any non-null values
     void apply_settings_from(const fx_reference_t& from);

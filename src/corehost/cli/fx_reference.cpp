@@ -7,12 +7,11 @@
 #include "fx_reference.h"
 #include "roll_fwd_on_no_candidate_fx_option.h"
 
-bool fx_reference_t::is_roll_forward_compatible(const fx_ver_t& other) const
+bool fx_reference_t::is_compatible_with_higher_version(const fx_reference_t& higher_version_reference) const
 {
-    // We expect the version to be <=
-    assert(get_fx_version_number() <= other);
+    assert(get_fx_version_number() <= higher_version_reference.get_fx_version_number());
 
-    if (get_fx_version_number() == other)
+    if (get_fx_version_number() == higher_version_reference.get_fx_version_number())
     {
         return true;
     }
@@ -23,43 +22,45 @@ bool fx_reference_t::is_roll_forward_compatible(const fx_ver_t& other) const
     }
 
     // Verify major roll forward
-    if (get_fx_version_number().get_major() != other.get_major()
+    if (get_fx_version_number().get_major() != higher_version_reference.get_fx_version_number().get_major()
         && roll_forward < roll_forward_option::Major)
     {
         return false;
     }
 
     // Verify minor roll forward
-    if (get_fx_version_number().get_minor() != other.get_minor()
+    if (get_fx_version_number().get_minor() != higher_version_reference.get_fx_version_number().get_minor()
         && roll_forward < roll_forward_option::Minor)
     {
         return false;
     }
 
     // Verify patch roll forward
-    // We do not distinguish here whether a previous framework reference found a patch version based on:
-    //  - initial reference matching a patch version,
-    //  - or roll_forward=major\minor finding a compatible patch version as initial framework,
-    //  - or applyPatches=true finding a newer patch version
+    if (get_fx_version_number().get_patch() != higher_version_reference.get_fx_version_number().get_patch()
+        && roll_forward == roll_forward_option::LatestPatch
+        && apply_patches == false)
+    {
+        return false;
+    }
+
+    // In here it means that either everything but pre-release part is the same, or the difference is OK
+    // The roll-forward rules don't affect pre-release roll forward except when
+    //  - rollForward is Disable - in which case no roll forward should occur, and the versions must exactly match
+    //  - rollForward is LatestPatch and applyPatches=false - which would normally mean exactly the same as Disable, but
+    //    for backward compat reasons this is a special case. In this case applyPatches is ignored for pre-release versions.
+    //    So even if pre-release are different, the versions are compatible.
     if (roll_forward == roll_forward_option::Disable)
     {
-        // In this case no roll-forward is allowed, at all.
-        // And we know the versions are different since we compared 100% equality above, so they're not compatible.
-        // The versions could differ in patch or pre-release, in both cases they're not compatible.
+        // We know the versions are different since we compared 100% equality above, so they're not compatible.
+        // In here the versions could differ in patch or pre-release, in both cases they're not compatible.
         return false;
     }
 
-    if (roll_forward == roll_forward_option::LatestPatch &&
-        apply_patches == false &&
-        (!get_fx_version_number().is_prerelease() || get_fx_version_number().get_patch() != other.get_patch()))
-    {
-        // If LatestPatch and applyPatches=false, it is almost the same as Disable.
-        // Special case is pre-release and applyPatches=false, to maintain backward compatibility applyPatches is ignored
-        // on pre-release version for roll forward over pre-release. So in that case allow roll forward if patch versions are the same.
-        return false;
-    }
-
-    // It's OK to roll forward from release to pre-release and vice versa
+    // Concernign pre-release versions
+    //  - Pre-release is allowed to roll to any version (release or pre-release)
+    //  - Release should prefer rolling to release, but is allowed to roll to pre-release if no compatible release is available
+    // This function only compares framework references, it doesn't resolve framework reference to the available framework on disk.
+    // As such it can't implement the "release should prefer release" as that requires the knowledge of all available versions.
 
     return true;
 }
