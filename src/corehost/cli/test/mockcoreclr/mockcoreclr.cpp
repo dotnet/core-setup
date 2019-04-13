@@ -6,6 +6,10 @@
 #include <iostream>
 #include "trace.h"
 
+#define MockLog(string) std::cout << "mock " << string << std::endl;
+#define MockLogArg(arg) std::cout << "mock " << #arg << ":" << arg << std::endl;
+#define MockLogEntry(dict, key, value) std::cout << "mock " << dict << "[" << key << "] = " << value << std::endl;
+
 extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_initialize(
     const char* exePath,
     const char* appDomainFriendlyName,
@@ -15,18 +19,18 @@ extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_initialize(
     coreclr_t::host_handle_t* hostHandle,
     unsigned int* domainId)
 {
-    std::cout << "MockCoreClr::coreclr_initialize(" <<
-        "exePath:" << exePath << ", " <<
-        "appDomainFriendlyName:" << appDomainFriendlyName << ", " <<
-        "propertyCount:" << propertyCount << ", " <<
-        "propertyKeys:" << propertyKeys << ", " <<
-        "propertyValues:" << propertyValues << ", " <<
-        "hostHandle:" << hostHandle << ", " <<
-        "domainId:" << domainId << ")" << std::endl;
+    MockLog("coreclr_initialize() called");
+    MockLogArg(exePath);
+    MockLogArg(appDomainFriendlyName);
+    MockLogArg(propertyCount);
+    MockLogArg(propertyKeys);
+    MockLogArg(propertyValues);
+    MockLogArg(hostHandle);
+    MockLogArg(domainId);
 
     for (int i = 0; i < propertyCount; ++i)
     {
-        std::cout << "MockCoreClr::coreclr_initialize.property[" << propertyKeys[i] << "] = " << propertyValues[i] << std::endl;
+        MockLogEntry("property", propertyKeys[i], propertyValues[i]);
     }
 
     if (hostHandle != nullptr)
@@ -44,9 +48,9 @@ extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_shutdown_2(
     unsigned int domainId,
     int* latchedExitCode)
 {
-    std::cout << "MockCoreClr::coreclr_shutdown_2(" <<
-        "hostHandle:" << hostHandle << ", " <<
-        "domainId:" << domainId << ")" << std::endl;
+    MockLog("coreclr_shutdown_2() called");
+    MockLogArg(hostHandle);
+    MockLogArg(domainId);
 
     if (latchedExitCode != nullptr)
     {
@@ -65,16 +69,16 @@ extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_execute_assembly(
     const char* managedAssemblyPath,
     unsigned int* exitCode)
 {
-    std::cout << "MockCoreClr::coreclr_execute_assembly(" <<
-        "hostHandle:" << hostHandle << ", " <<
-        "domainId:" << domainId << ", " <<
-        "argc:" << argc << ", " <<
-        "argv:" << argv << ", " <<
-        "managedAssemblyPath:" << managedAssemblyPath << ")" << std::endl;
+    MockLog("coreclr_execute_assembly() called");
+    MockLogArg(hostHandle);
+    MockLogArg(domainId);
+    MockLogArg(argc);
+    MockLogArg(argv);
+    MockLogArg(managedAssemblyPath);
 
     for (int i = 0; i < argc; ++i)
     {
-        std::cout << "MockCoreClr::coreclr_execute_assembly.argv[" << i << "] = " << argv[i] << std::endl;
+        MockLogEntry("argv", i, argv[i]);
     }
 
     if (exitCode != nullptr)
@@ -110,18 +114,19 @@ struct MockCoreClrDelegate
 
     void Echo()
     {
+        MockLog("Delegate called");
+
         if (!initialized)
         {
-            std::cout << "Called MockCoreClrDelegate() ERROR unitialized delegate!!!";
+            MockLog("ERROR called unitialized delegate!!!");
             return;
         }
 
-        std::cout << "Called MockCoreClrDelegate(" <<
-            "hostHandle:" << m_hostHandle << ", " <<
-            "domainId:" << m_domainId << ", " <<
-            "m_entryPointAssemblyName:" << m_entryPointAssemblyName << ", " <<
-            "m_entryPointTypeName:" << m_entryPointTypeName << ", " <<
-            "m_entryPointMethodName:" << m_entryPointMethodName << ") " << std::endl;
+        MockLogArg(m_hostHandle);
+        MockLogArg(m_domainId);
+        MockLogArg(m_entryPointAssemblyName);
+        MockLogArg(m_entryPointTypeName);
+        MockLogArg(m_entryPointMethodName);
     }
 };
 
@@ -162,13 +167,13 @@ extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_create_delegate(
     const char* entryPointMethodName,
     void** delegate)
 {
-    std::cout << "MockCoreClr::coreclr_create_delegate(" <<
-        "hostHandle:" << hostHandle << ", " <<
-        "domainId:" << domainId << ", " <<
-        "entryPointAssemblyName:" << entryPointAssemblyName << ", " <<
-        "entryPointTypeName:" << entryPointTypeName << ", " <<
-        "entryPointMethodName:" << entryPointMethodName << ", " <<
-        "delegate:" << delegate << ")" << std::endl;
+    MockLog("coreclr_create_delegate() called");
+    MockLogArg(hostHandle);
+    MockLogArg(domainId);
+    MockLogArg(entryPointAssemblyName);
+    MockLogArg(entryPointTypeName);
+    MockLogArg(entryPointMethodName);
+    MockLogArg(delegate);
 
     static int nextDelegate = 0;
     static CoreClrDelegate delegates[] =
@@ -196,7 +201,7 @@ extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_create_delegate(
     while (delegateIndex >= MaxDelegates)
     {
         delegateIndex -= MaxDelegates;
-        std::cout << "MockCoreClr::coreclr_create_delegate MaxDelegates exceeded recycling older ones" << std::endl;
+        MockLog("MaxDelegates exceeded recycling older ones");
     }
 
     MockCoreClrDelegate delegateState(hostHandle, domainId, entryPointAssemblyName, entryPointTypeName, entryPointMethodName);
