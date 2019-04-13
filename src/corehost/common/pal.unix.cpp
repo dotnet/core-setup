@@ -182,8 +182,30 @@ bool pal::get_default_servicing_directory(string_t* recv)
 
 bool pal::get_temp_directory(pal::string_t& tmp_dir)
 {
-    pal::getenv(_X("TMPDIR"), &tmp_dir);
-    return pal::realpath(&tmp_dir);
+    // First, check for the POSIX standard environment variable
+    if (pal::getenv(_X("TMPDIR"), &tmp_dir))
+    {
+        return pal::realpath(&tmp_dir);
+    }
+
+    // On non-compliant systems (ex: Ubuntu) try /var/tmp or /tmp directories.
+    // /var/tmp is prefered since its contents are expected to survive across
+    // machine reboot.
+    pal::string_t _var_tmp = _X("/var/tmp/");
+    if (pal::realpath(&_var_tmp))
+    {
+        tmp_dir.assign(_var_tmp);
+        return true;
+    }
+
+    pal::string_t _tmp = _X("/tmp/");
+    if (pal::realpath(&_tmp))
+    {
+        tmp_dir.assign(_tmp);
+        return true;
+    }
+
+    return false;
 }
 
 bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* recv)

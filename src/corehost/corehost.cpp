@@ -131,14 +131,14 @@ int exe_start(const int argc, const pal::char_t* argv[])
         return StatusCode::AppHostExeNotBoundFailure;
     }
 
-    app_root.assign(app_path);
-
     append_path(&app_path, embedded_app_name.c_str());
     if (!pal::realpath(&app_path))
     {
         trace::error(_X("The application to execute does not exist: '%s'."), app_path.c_str());
         return StatusCode::LibHostAppRootFindFailure;
     }
+
+    app_root.assign(get_directory(app_path));
 
 #else
     pal::string_t own_name = strip_executable_ext(get_filename(host_path));

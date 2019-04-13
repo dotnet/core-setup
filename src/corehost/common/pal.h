@@ -193,8 +193,8 @@ namespace pal
     inline bool pal_clrstring(const pal::string_t& str, std::vector<char>* out) { return pal_utf8string(str, out); }
     inline bool clr_palstring(const char* cstr, pal::string_t* out) { out->assign(cstr); return true; }
 
-    inline bool mkdir(const pal::char_t* dir, int mode) { return mkdir(dir, mode) == 0; }
-    inline bool rmdir(const pal::char_t* path) { return rmdir(path) == 0; }
+    inline bool mkdir(const pal::char_t* dir, int mode) { return ::mkdir(dir, mode) == 0; }
+    inline bool rmdir(const pal::char_t* path) { return ::rmdir(path) == 0; }
     inline int rename(const pal::char_t* old_name, const pal::char_t* new_name) { return ::rename(old_name, new_name); }
     inline int remove(const pal::char_t* path) { return ::remove(path); }
     inline int get_pid() { return getpid(); }
