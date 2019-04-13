@@ -15,7 +15,7 @@ namespace coreclr_t
 };
 
 // Prototype of the coreclr_initialize function from coreclr.dll
-extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_initialize(
+SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_initialize(
     const char* exePath,
     const char* appDomainFriendlyName,
     int propertyCount,
@@ -25,13 +25,13 @@ extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_initialize(
     unsigned int* domainId);
 
 // Prototype of the coreclr_shutdown function from coreclr.dll
-extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_shutdown_2(
+SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_shutdown_2(
     coreclr_t::host_handle_t hostHandle,
     unsigned int domainId,
     int* latchedExitCode);
 
 // Prototype of the coreclr_execute_assembly function from coreclr.dll
-extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_execute_assembly(
+SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_execute_assembly(
     coreclr_t::host_handle_t hostHandle,
     unsigned int domainId,
     int argc,
@@ -40,7 +40,7 @@ extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_execute_assembly(
     unsigned int* exitCode);
 
 // Prototype of the coreclr_create_delegate function from coreclr.dll
-extern "C" pal::hresult_t STDMETHODCALLTYPE coreclr_create_delegate(
+SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_create_delegate(
     coreclr_t::host_handle_t hostHandle,
     unsigned int domainId,
     const char* entryPointAssemblyName,
