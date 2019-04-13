@@ -4,6 +4,7 @@
 
 using Microsoft.DotNet.Cli.Build;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
@@ -19,6 +20,18 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
     {
         private readonly string _path;
         private readonly RepoDirectoriesProvider _repoDirectories;
+
+        public enum MockType
+        {
+            HostPolicy,
+            CoreClr,
+        };
+
+        private static readonly Dictionary<MockType, List<ValueTuple<string, string>>> _mockTypesDict = new Dictionary<MockType, List<ValueTuple<string, string>>>()
+        {
+            { MockType.HostPolicy, new List<ValueTuple<string, string>>(){ ("hostpolicy","mockhostpolicy") }},
+            { MockType.CoreClr,    new List<ValueTuple<string, string>>(){ ("hostpolicy","hostpolicy"), ("coreclr","mockcoreclr") }},
+        };
 
         public DotNetBuilder(string basePath, string builtDotnet, string name)
         {
@@ -47,21 +60,22 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         /// </summary>
         /// <param name="version">Version to add</param>
         /// <remarks>
-        /// Product runtime binaries are not added. All the added mock framework will contain is a mock version of host policy.
+        /// Product runtime binaries are not added. This is a simple mock.
         /// </remarks>
-        public DotNetBuilder AddMicrosoftNETCoreAppFramework(string version)
+        public DotNetBuilder AddMicrosoftNETCoreAppFramework(string version, MockType mockType = MockType.HostPolicy)
         {
             // ./shared/Microsoft.NETCore.App/<version> - create a mock of the root framework
             string netCoreAppPath = Path.Combine(_path, "shared", "Microsoft.NETCore.App", version);
             Directory.CreateDirectory(netCoreAppPath);
 
-            // ./shared/Microsoft.NETCore.App/<version>/hostpolicy.dll - this is a mock, will not actually load CoreCLR
-            string mockHostPolicyFileName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("mockhostpolicy");
-            File.Copy(
-                Path.Combine(_repoDirectories.Artifacts, "corehost_test", mockHostPolicyFileName),
-                Path.Combine(netCoreAppPath, RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostpolicy")),
-                true);
-
+            foreach ((string destination, string source) in _mockTypesDict[mockType])
+            {
+                string mockHostPolicyFileName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform(source);
+                File.Copy(
+                    Path.Combine(_repoDirectories.Artifacts, "corehost_test", mockHostPolicyFileName),
+                    Path.Combine(netCoreAppPath, RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform(destination)),
+                    true);
+            }
             return this;
         }
 
