@@ -516,7 +516,8 @@ namespace
                 return StatusCode::InvalidArgFailure;
             }
 
-            override_settings.set_roll_fwd_on_no_candidate_fx(static_cast<roll_fwd_on_no_candidate_fx_option>(pal::xtoi(roll_fwd_on_no_candidate_fx.c_str())));
+            auto val = static_cast<roll_fwd_on_no_candidate_fx_option>(pal::xtoi(roll_fwd_on_no_candidate_fx.c_str()));
+            override_settings.set_roll_forward(roll_fwd_on_no_candidate_fx_to_roll_forward(val));
         }
 
         // Read config
