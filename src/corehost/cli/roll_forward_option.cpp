@@ -35,7 +35,7 @@ namespace
         _X("LatestMajor")
     };
 
-    static_assert((sizeof(OptionNameMapping) / sizeof(*OptionNameMapping)) == static_cast<size_t>(roll_forward_option::__Last), "Invalid property count");
+    static_assert((sizeof(OptionNameMapping) / sizeof(*OptionNameMapping)) == static_cast<size_t>(roll_forward_option::__Last), "Invalid option count");
 }
 
 pal::string_t roll_forward_option_to_string(roll_forward_option roll_forward)
@@ -52,7 +52,6 @@ roll_forward_option roll_forward_option_from_string(const pal::string_t& value)
     {
         if (pal::strcasecmp(OptionNameMapping[idx], value.c_str()) == 0)
         {
-            assert(0 <= idx && idx < static_cast<int>(roll_forward_option::__Last));
             return static_cast<roll_forward_option>(idx);
         }
     }

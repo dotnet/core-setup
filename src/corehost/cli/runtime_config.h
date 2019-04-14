@@ -50,8 +50,8 @@ private:
 
     std::unordered_map<pal::string_t, pal::string_t> m_properties;
     fx_reference_vector_t m_frameworks;
-    settings_t m_default_settings;   // the default settings (Steps #1 and #2)
-    settings_t m_override_settings;  // the settings that can't be changed (Step #4)
+    settings_t m_default_settings;   // the default settings (Steps #0 and #1)
+    settings_t m_override_settings;  // the settings that can't be changed (Step #5)
     std::vector<std::string> m_prop_keys;
     std::vector<std::string> m_prop_values;
     std::list<pal::string_t> m_probe_paths;

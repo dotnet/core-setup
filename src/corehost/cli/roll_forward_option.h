@@ -23,7 +23,7 @@ enum class roll_forward_option
     Major = 4,       // Roll forward to closest major.minor and then highest patch
     LatestMajor = 5, // Roll forward to highest major.minor.patch
 
-    __Last // Sentinel value
+    __Last           // Sentinel value
 };
 
 pal::string_t roll_forward_option_to_string(roll_forward_option roll_forward);
