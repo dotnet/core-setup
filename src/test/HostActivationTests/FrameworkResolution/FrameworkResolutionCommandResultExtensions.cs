@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Build.Framework;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 {
@@ -11,6 +12,29 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         public static AndConstraint<CommandResultAssertions> HaveResolvedFramework(this CommandResultAssertions assertion, string name, string version)
         {
             return assertion.HaveStdOutContaining($"mock frameworks: {name} {version}");
+        }
+
+        /// <summary>
+        /// Verifies that the command result either passes with a resolved framework or fails with inability to find compatible framework version.
+        /// </summary>
+        /// <param name="result">The result to verify.</param>
+        /// <param name="resolvedFrameworkName">The name of the framework to verify.</param>
+        /// <param name="resolvedFrameworkVersion">
+        ///     Either null in which case the command result is expected to fail and not find compatible framework version,
+        ///     or the framework versions in which case the command result is expected to succeed and resolve the specified framework version.</param>
+        /// <returns>Constraint</returns>
+        public static AndConstraint<CommandResultAssertions> ShouldHaveResolvedFramework(this CommandResult result, string resolvedFrameworkName, string resolvedFrameworkVersion)
+        {
+            if (resolvedFrameworkName == null || resolvedFrameworkVersion == null)
+            {
+                return result.Should().Fail()
+                    .And.DidNotFindCompatibleFrameworkVersion();
+            }
+            else
+            {
+                return result.Should().Pass()
+                    .And.HaveResolvedFramework(resolvedFrameworkName, resolvedFrameworkVersion);
+            }
         }
 
         public static AndConstraint<CommandResultAssertions> DidNotFindCompatibleFrameworkVersion(this CommandResultAssertions assertion)

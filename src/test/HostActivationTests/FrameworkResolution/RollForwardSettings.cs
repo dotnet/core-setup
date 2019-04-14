@@ -4,7 +4,6 @@
 
 using Microsoft.DotNet.Cli.Build;
 using Microsoft.DotNet.Cli.Build.Framework;
-using System;
 using Xunit;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
@@ -22,22 +21,26 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             SharedState = sharedState;
         }
 
+        // Verifies that default behavior is Minor
         [Fact]
         public void Default()
         {
             RunTest(
-                runtimeConfig => runtimeConfig
-                    .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
-                result => result.Should().Fail()
-                    .And.DidNotFindCompatibleFrameworkVersion());
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MicrosoftNETCoreApp, "4.0.0")))
+                .Should().Fail()
+                .And.DidNotFindCompatibleFrameworkVersion();
 
             RunTest(
-                runtimeConfig => runtimeConfig
-                    .WithFramework(MicrosoftNETCoreApp, "5.0.0"),
-                result => result.Should().Pass()
-                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MicrosoftNETCoreApp, "5.0.0")))
+                .Should().Pass()
+                .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3");
         }
 
+        // Verifies that invalid values is checked in all settings locations
         [Theory]
         [InlineData(SettingLocation.CommandLine)]
         [InlineData(SettingLocation.Environment)]
@@ -49,11 +52,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 new TestSettings()
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
-                    .With(RollForwardSetting(settingLocation, "InvalidValue")),
-                result => result.Should().Fail()
-                    .And.DidNotRecognizeRollForwardValue("InvalidValue"));
+                    .With(RollForwardSetting(settingLocation, "InvalidValue")))
+                .Should().Fail()
+                .And.DidNotRecognizeRollForwardValue("InvalidValue");
         }
 
+        // Verifies that the value ignores casing on command line
         [Theory]
         [InlineData(Constants.RollForwardSetting.Disable)]
         [InlineData(Constants.RollForwardSetting.LatestPatch)]
@@ -63,9 +67,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData(Constants.RollForwardSetting.LatestMajor)]
         public void ValueIgnoresCase_CommandLine(string rollForward)
         {
-            ValueIgnoresCase(SettingLocation.CommandLine, rollForward);
+            ValidateValueIgnoresCase(SettingLocation.CommandLine, rollForward);
         }
 
+        // Verifies that the value ignores casing in env. variable
         [Theory]
         [InlineData(Constants.RollForwardSetting.Disable)]
         [InlineData(Constants.RollForwardSetting.LatestPatch)]
@@ -75,9 +80,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData(Constants.RollForwardSetting.LatestMajor)]
         public void ValueIgnoresCase_Environment(string rollForward)
         {
-            ValueIgnoresCase(SettingLocation.Environment, rollForward);
+            ValidateValueIgnoresCase(SettingLocation.Environment, rollForward);
         }
 
+        // Verifies that the value ignores casing in the runtime options
         [Theory]
         [InlineData(Constants.RollForwardSetting.Disable)]
         [InlineData(Constants.RollForwardSetting.LatestPatch)]
@@ -87,9 +93,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData(Constants.RollForwardSetting.LatestMajor)]
         public void ValueIgnoresCase_RuntimeOptions(string rollForward)
         {
-            ValueIgnoresCase(SettingLocation.RuntimeOptions, rollForward);
+            ValidateValueIgnoresCase(SettingLocation.RuntimeOptions, rollForward);
         }
 
+        // Verifies that the value ignores casing in the framework reference
         [Theory]
         [InlineData(Constants.RollForwardSetting.Disable)]
         [InlineData(Constants.RollForwardSetting.LatestPatch)]
@@ -99,10 +106,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData(Constants.RollForwardSetting.LatestMajor)]
         public void ValueIgnoresCase_FrameworkReference(string rollForward)
         {
-            ValueIgnoresCase(SettingLocation.FrameworkReference, rollForward);
+            ValidateValueIgnoresCase(SettingLocation.FrameworkReference, rollForward);
         }
 
-        private void ValueIgnoresCase(SettingLocation settingLocation, string rollForward)
+        private void ValidateValueIgnoresCase(SettingLocation settingLocation, string rollForward)
         {
             string[] values = new string[]
             {
@@ -117,41 +124,43 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     new TestSettings()
                         .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                             .WithFramework(MicrosoftNETCoreApp, "5.1.3"))
-                        .With(RollForwardSetting(settingLocation, value)),
-                    result => result.Should().Pass()
-                        .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
+                        .With(RollForwardSetting(settingLocation, value)))
+                    .Should().Pass()
+                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3");
             }
         }
 
+        // Verifies that rollForward and rollForwardOnNoCandidateFx can't be used both on a command line
         [Fact]
-        public void CollisionsOnCommandLine()
+        public void CollisionsOnCommandLine_RollForwardOnNoCandidateFx()
         {
             RunTest(
-                runtimeConfig => runtimeConfig.WithFramework(MicrosoftNETCoreApp, "4.0.0"),
-                result => result.Should().Fail()
-                    .And.HaveStdErrContaining(
-                        $"It's invalid to use both '{Constants.RollForwardSetting.CommandLineArgument}' and " +
-                        $"'{Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument}' command line options."),
-                commandLine: new string[] {
-                    Constants.RollForwardSetting.CommandLineArgument, Constants.RollForwardSetting.LatestPatch,
-                    Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument, "2"
-                });
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
+                    .WithCommandLine(Constants.RollForwardSetting.CommandLineArgument, Constants.RollForwardSetting.LatestPatch)
+                    .WithCommandLine(Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument, "2"))
+                .Should().Fail()
+                .And.HaveStdErrContaining(
+                    $"It's invalid to use both '{Constants.RollForwardSetting.CommandLineArgument}' and " +
+                    $"'{Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument}' command line options.");
         }
 
-        [Theory]
-        [InlineData(SettingLocation.RuntimeOptions, SettingLocation.None, SettingLocation.None, true)]
-        [InlineData(SettingLocation.RuntimeOptions, SettingLocation.RuntimeOptions, SettingLocation.None, false)]
-        [InlineData(SettingLocation.RuntimeOptions, SettingLocation.FrameworkReference, SettingLocation.None, false)]
-        [InlineData(SettingLocation.RuntimeOptions, SettingLocation.None, SettingLocation.RuntimeOptions, false)]
-        [InlineData(SettingLocation.RuntimeOptions, SettingLocation.None, SettingLocation.FrameworkReference, false)]
-        [InlineData(SettingLocation.RuntimeOptions, SettingLocation.RuntimeOptions, SettingLocation.RuntimeOptions, false)]
-        [InlineData(SettingLocation.RuntimeOptions, SettingLocation.FrameworkReference, SettingLocation.FrameworkReference, false)]
-        [InlineData(SettingLocation.FrameworkReference, SettingLocation.None, SettingLocation.None, true)]
-        [InlineData(SettingLocation.FrameworkReference, SettingLocation.RuntimeOptions, SettingLocation.None, false)]
-        [InlineData(SettingLocation.FrameworkReference, SettingLocation.FrameworkReference, SettingLocation.None, false)]
-        [InlineData(SettingLocation.FrameworkReference, SettingLocation.None, SettingLocation.RuntimeOptions, false)]
-        [InlineData(SettingLocation.FrameworkReference, SettingLocation.None, SettingLocation.FrameworkReference, false)]
-        [InlineData(SettingLocation.FrameworkReference, SettingLocation.RuntimeOptions, SettingLocation.RuntimeOptions, false)]
+        // Verifies that rollForward can't be used together with rollForwrdOnNoCandidateFx or applyPatches in the same runtime config
+        [Theory] // rollForwardLocation                 rollForwardOnNoCandidateFxLocation  applyPatchesLocation                passes
+        [InlineData(SettingLocation.RuntimeOptions,     SettingLocation.None,               SettingLocation.None,               true )]
+        [InlineData(SettingLocation.RuntimeOptions,     SettingLocation.RuntimeOptions,     SettingLocation.None,               false)]
+        [InlineData(SettingLocation.RuntimeOptions,     SettingLocation.FrameworkReference, SettingLocation.None,               false)]
+        [InlineData(SettingLocation.RuntimeOptions,     SettingLocation.None,               SettingLocation.RuntimeOptions,     false)]
+        [InlineData(SettingLocation.RuntimeOptions,     SettingLocation.None,               SettingLocation.FrameworkReference, false)]
+        [InlineData(SettingLocation.RuntimeOptions,     SettingLocation.RuntimeOptions,     SettingLocation.RuntimeOptions,     false)]
+        [InlineData(SettingLocation.RuntimeOptions,     SettingLocation.FrameworkReference, SettingLocation.FrameworkReference, false)]
+        [InlineData(SettingLocation.FrameworkReference, SettingLocation.None,               SettingLocation.None,               true )]
+        [InlineData(SettingLocation.FrameworkReference, SettingLocation.RuntimeOptions,     SettingLocation.None,               false)]
+        [InlineData(SettingLocation.FrameworkReference, SettingLocation.FrameworkReference, SettingLocation.None,               false)]
+        [InlineData(SettingLocation.FrameworkReference, SettingLocation.None,               SettingLocation.RuntimeOptions,     false)]
+        [InlineData(SettingLocation.FrameworkReference, SettingLocation.None,               SettingLocation.FrameworkReference, false)]
+        [InlineData(SettingLocation.FrameworkReference, SettingLocation.RuntimeOptions,     SettingLocation.RuntimeOptions,     false)]
         [InlineData(SettingLocation.FrameworkReference, SettingLocation.FrameworkReference, SettingLocation.FrameworkReference, false)]
         public void CollisionsInRuntimeConfig(
             SettingLocation rollForwardLocation,
@@ -159,65 +168,93 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             SettingLocation applyPatchesLocation,
             bool passes)
         {
-            RunTest(
+            CommandResult result = RunTest(
                 new TestSettings()
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(MicrosoftNETCoreApp, "5.0.0"))
                     .With(RollForwardSetting(rollForwardLocation, Constants.RollForwardSetting.Minor))
                     .With(RollForwardOnNoCandidateFxSetting(rollForwardOnNoCandidateFxLocation, 1))
-                    .With(ApplyPatchesSetting(applyPatchesLocation, false)),
-                result =>
-                {
-                    if (passes)
-                    {
-                        result.Should().Pass()
-                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3");
-                    }
-                    else
-                    {
-                        result.Should().Fail()
-                        .And.HaveStdErrContaining(
-                            $"It's invalid to use both `{Constants.RollForwardSetting.RuntimeConfigPropertyName}` and one of " +
-                            $"`{Constants.RollForwardOnNoCandidateFxSetting.RuntimeConfigPropertyName}` or " +
-                            $"`{Constants.ApplyPatchesSetting.RuntimeConfigPropertyName}` in the same runtime config.");
-                    }
-                });
+                    .With(ApplyPatchesSetting(applyPatchesLocation, false)));
+
+            if (passes)
+            {
+                result.Should().Pass()
+                      .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3");
+            }
+            else
+            {
+                result.Should().Fail()
+                      .And.HaveStdErrContaining(
+                        $"It's invalid to use both `{Constants.RollForwardSetting.RuntimeConfigPropertyName}` and one of " +
+                        $"`{Constants.RollForwardOnNoCandidateFxSetting.RuntimeConfigPropertyName}` or " +
+                        $"`{Constants.ApplyPatchesSetting.RuntimeConfigPropertyName}` in the same runtime config.");
+            }
         }
 
-        [Fact]
-        public void RuntimeConfigOnly()
+        // Verifies that there's no inheritance between app and framework when applying more relaxed setting in the app
+        [Theory] // settingLocation                     appWins
+        // Command line overrides everything - even inner framework references
+        [InlineData(SettingLocation.CommandLine,        true)]
+        // RuntimeOptions and FrameworkReference settings are not inherited to inner reference
+        [InlineData(SettingLocation.RuntimeOptions,     false)]
+        // RuntimeOptions and FrameworkReference settings are not inherited to inner reference
+        [InlineData(SettingLocation.FrameworkReference, false)]
+        // Since none is specified for the inner reference, environment is used
+        [InlineData(SettingLocation.Environment,        true)]     
+        public void NoInheritance_MoreRelaxed(SettingLocation settingLocation, bool appWins)
         {
             RunTest(
-                runtimeConfig => runtimeConfig
-                    .WithRollForward(Constants.RollForwardSetting.Major)
-                    .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
-                result => result.Should().Pass()
-                    .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3"));
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MiddleWare, "1.0.0"))
+                    .With(RollForwardSetting(settingLocation, Constants.RollForwardSetting.Major, MiddleWare))
+                    .WithDotnetCustomizer(dotnetCustomizer => dotnetCustomizer
+                        .Framework(MiddleWare).RuntimeConfig(runtimeConfig => runtimeConfig
+                            .GetFramework(MicrosoftNETCoreApp).Version = "4.0.0")))
+                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, appWins ? "5.1.3" : null);
         }
 
-        private void RunTest(
-            Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
-            Action<CommandResult> resultAction,
-            string[] commandLine = null)
+        // Verifies that there's no inheritance between app and framework when applying more strict setting in the app
+        [Theory] // settingLocation                     appWins
+        // Command line overrides everything - even inner framework references
+        [InlineData(SettingLocation.CommandLine,        true)]
+        // RuntimeOptions and FrameworkReference settings are not inherited to inner reference
+        [InlineData(SettingLocation.RuntimeOptions,     false)]
+        // RuntimeOptions and FrameworkReference settings are not inherited to inner reference
+        [InlineData(SettingLocation.FrameworkReference, false)]
+        // Since none is specified for the inner reference, environment is used
+        [InlineData(SettingLocation.Environment,        true)]           
+        public void NoInheritance_MoreRestrictive(SettingLocation settingLocation, bool appWins)
         {
             RunTest(
-                SharedState.DotNetWithFrameworks,
-                SharedState.FrameworkReferenceApp,
-                runtimeConfig,
-                resultAction,
-                commandLine: commandLine);
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(new RuntimeConfig.Framework(MiddleWare, "2.1.2")))
+                    .With(RollForwardSetting(settingLocation, Constants.RollForwardSetting.LatestPatch, MiddleWare))
+                    .WithDotnetCustomizer(dotnetCustomizer => dotnetCustomizer
+                        .Framework(MiddleWare).RuntimeConfig(runtimeConfig => runtimeConfig
+                            .GetFramework(MicrosoftNETCoreApp).Version = "5.0.0")))
+                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, appWins ? null : "5.1.3");
         }
 
-        private void RunTest(
-            TestSettings testSettings,
-            Action<CommandResult> resultAction)
+        // Verifies that the setting works in all supported locations
+        [Theory]
+        [InlineData(SettingLocation.CommandLine)]
+        [InlineData(SettingLocation.Environment)]
+        [InlineData(SettingLocation.RuntimeOptions)]
+        [InlineData(SettingLocation.FrameworkReference)]
+        public void AllLocations(SettingLocation location)
         {
             RunTest(
-                SharedState.DotNetWithFrameworks,
-                SharedState.FrameworkReferenceApp,
-                testSettings,
-                resultAction);
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
+                    .With(RollForwardSetting(location, Constants.RollForwardSetting.Major)))
+                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3");
         }
+
+        private CommandResult RunTest(TestSettings testSettings) =>
+            RunTest(SharedState.DotNetWithFrameworks, SharedState.FrameworkReferenceApp, testSettings);
 
         public class SharedTestState : SharedTestStateBase
         {
