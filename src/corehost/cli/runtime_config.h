@@ -58,10 +58,15 @@ private:
 
     pal::string_t m_tfm;
 
-    // These two are used to detect collisions between rollForward and rollForwardOnNoCandidateFx/applyPatches
-    // as it's illegal to combine rollForward with the other two in the same runtime config.
-    bool m_has_roll_forward_option;
-    bool m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option;
+    // This is used to detect cases where rollForward is used together with the obsoleted
+    // rollForwardOnNoCandidateFx/applyPatches.
+    // Flags
+    enum specified_setting
+    {
+        none = 0x0,
+        specified_roll_forward = 0x1,
+        specified_roll_forward_on_no_candidate_fx_or_apply_patched = 0x2
+    } m_specified_settings;
 
     pal::string_t m_dev_path;
     pal::string_t m_path;
@@ -72,8 +77,9 @@ private:
     // If set to true, all versions (including pre-release) are considered even if starting from a release framework reference.
     bool m_roll_forward_to_prerelease;
 
-private:
     bool parse_framework(const json_object& fx_obj, fx_reference_t& fx_out);
     bool read_framework_array(web::json::array frameworks);
+    
+    bool mark_specified_setting(specified_setting setting);
 };
 #endif // __RUNTIME_CONFIG_H__

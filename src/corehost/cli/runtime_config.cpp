@@ -22,8 +22,7 @@
 runtime_config_t::runtime_config_t()
     : m_is_framework_dependent(false)
     , m_valid(false)
-    , m_has_roll_forward_option(false)
-    , m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option(false)
+    , m_specified_settings(none)
     , m_roll_forward_to_prerelease(false)
     , m_default_settings()
     , m_override_settings()
@@ -121,14 +120,21 @@ bool runtime_config_t::parse_opts(const json_value& opts)
             return false;
         }
         m_default_settings.set_roll_forward(val);
-        m_has_roll_forward_option = true;
+
+        if (!mark_specified_setting(specified_roll_forward))
+        {
+            return false;
+        }
     }
 
     auto apply_patches = opts_obj.find(_X("applyPatches"));
     if (apply_patches != opts_obj.end())
     {
         m_default_settings.set_apply_patches(apply_patches->second.as_bool());
-        m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option = true;
+        if (!mark_specified_setting(specified_roll_forward_on_no_candidate_fx_or_apply_patched))
+        {
+            return false;
+        }
     }
 
     auto roll_fwd_on_no_candidate_fx = opts_obj.find(_X("rollForwardOnNoCandidateFx"));
@@ -136,7 +142,10 @@ bool runtime_config_t::parse_opts(const json_value& opts)
     {
         auto val = static_cast<roll_fwd_on_no_candidate_fx_option>(roll_fwd_on_no_candidate_fx->second.as_integer());
         m_default_settings.set_roll_forward(roll_fwd_on_no_candidate_fx_to_roll_forward(val));
-        m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option = true;
+        if (!mark_specified_setting(specified_roll_forward_on_no_candidate_fx_or_apply_patched))
+        {
+            return false;
+        }
     }
 
     auto tfm = opts_obj.find(_X("tfm"));
@@ -171,15 +180,6 @@ bool runtime_config_t::parse_opts(const json_value& opts)
 
             const auto& frameworks_obj = iter->second.as_array();
             rc = read_framework_array(frameworks_obj);
-        }
-    }
-
-    if (rc)
-    {
-        if (m_has_roll_forward_option && m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option)
-        {
-            trace::error(_X("It's invalid to use both `rollForward` and one of `rollForwardOnNoCandidateFx` or `applyPatches` in the same runtime config."));
-            return false;
         }
     }
 
@@ -235,14 +235,20 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
             return false;
         }
         fx_out.set_roll_forward(val);
-        m_has_roll_forward_option = true;
+        if (!mark_specified_setting(specified_roll_forward))
+        {
+            return false;
+        }
     }
 
     auto apply_patches = fx_obj.find(_X("applyPatches"));
     if (apply_patches != fx_obj.end())
     {
         fx_out.set_apply_patches(apply_patches->second.as_bool());
-        m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option = true;
+        if (!mark_specified_setting(specified_roll_forward_on_no_candidate_fx_or_apply_patched))
+        {
+            return false;
+        }
     }
 
     auto roll_fwd_on_no_candidate_fx = fx_obj.find(_X("rollForwardOnNoCandidateFx"));
@@ -250,7 +256,10 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
     {
         auto val = static_cast<roll_fwd_on_no_candidate_fx_option>(roll_fwd_on_no_candidate_fx->second.as_integer());
         fx_out.set_roll_forward(roll_fwd_on_no_candidate_fx_to_roll_forward(val));
-        m_has_roll_forward_on_no_candidate_fx_or_apply_patched_option = true;
+        if (!mark_specified_setting(specified_roll_forward_on_no_candidate_fx_or_apply_patched))
+        {
+            return false;
+        }
     }
 
     // Step #4: apply environment for DOTNET_ROLL_FORWARD
@@ -441,4 +450,17 @@ void runtime_config_t::set_fx_version(pal::string_t version)
     m_frameworks[0].set_fx_version(version);
     m_frameworks[0].set_apply_patches(false);
     m_frameworks[0].set_roll_forward(roll_forward_option::Disable);
+}
+
+bool runtime_config_t::mark_specified_setting(specified_setting setting)
+{
+    // If there's any flag set but the one we're trying to set, it's invalid
+    if (m_specified_settings & ~setting)
+    {
+        trace::error(_X("It's invalid to use both `rollForward` and one of `rollForwardOnNoCandidateFx` or `applyPatches` in the same runtime config."));
+        return false;
+    }
+
+    m_specified_settings = (specified_setting)(m_specified_settings | setting);
+    return true;
 }
