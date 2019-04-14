@@ -3,29 +3,42 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Xunit;
 using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.DotNet.CoreSetup.Test;
 using Microsoft.NET.HostModel.Bundle;
 
-namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
+namespace Microsoft.NET.HostModel.Tests
 {
-    public class BundleAndExtract : IClassFixture<BundleAndExtract.SharedTestState>
+    public class BundleExtractRun : IClassFixture<BundleExtractRun.SharedTestState>
     {
         private SharedTestState sharedTestState;
 
-        public BundleAndExtract(BundleAndExtract.SharedTestState fixture)
+        public BundleExtractRun(BundleExtractRun.SharedTestState fixture)
         {
             sharedTestState = fixture;
         }
 
-        private void Run(TestProjectFixture fixture, string publishDir, string singleFileDir)
+        private static string GetHostName(TestProjectFixture fixture)
         {
-            var dotnet = fixture.SdkDotnet;
-            var hostName = Path.GetFileName(fixture.TestProject.AppExe);
+            return Path.GetFileName(fixture.TestProject.AppExe);
+        }
 
-            // Run the App normally
-            Command.Create(Path.Combine(publishDir, hostName))
+        private static string GetPublishPath(TestProjectFixture fixture)
+        {
+            return Path.Combine(fixture.TestProject.ProjectDirectory, "publish");
+        }
+
+        private static string GetBundlePath(TestProjectFixture fixture)
+        {
+            return Directory.CreateDirectory(Path.Combine(fixture.TestProject.ProjectDirectory, "bundle")).FullName;
+        }
+
+        public void RunTheApp(string path)
+        {
+            Command.Create(path)
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
@@ -33,6 +46,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
                 .Pass()
                 .And
                 .HaveStdOutContaining("Wow! We now say hello to the big world and you.");
+        }
+
+        private void BundleExtractAndRun(TestProjectFixture fixture, string publishDir, string singleFileDir)
+        {
+            var hostName = GetHostName(fixture);
+
+            // Run the App normally
+            RunTheApp(Path.Combine(publishDir, hostName));
 
             // Bundle to a single-file
             Bundler bundler = new Bundler(hostName, singleFileDir);
@@ -43,26 +64,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
             extractor.ExtractFiles();
 
             // Run the extracted app
-            Command.Create(singleFile)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Wow! We now say hello to the big world and you.");
-        }
-
-        private string GetSingleFileDir(TestProjectFixture fixture)
-        {
-            // Create a directory for bundle/extraction output.
-            // This directory shouldn't be within TestProject.OutputDirectory, since the bundler
-            // will (attempt to) embed all files below the TestProject.OutputDirectory tree into one file.
-
-            string singleFileDir = Path.Combine(fixture.TestProject.ProjectDirectory, "oneExe");
-            Directory.CreateDirectory(singleFileDir);
-
-            return singleFileDir;
+            RunTheApp(singleFile);
         }
 
         private string RelativePath(string path)
@@ -77,10 +79,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
             var fixture = sharedTestState.TestFixture
                 .Copy();
 
-            string publishDir = fixture.TestProject.OutputDirectory;
-            string singleFileDir = GetSingleFileDir(fixture);
+            string publishDir = GetPublishPath(fixture);
+            string outputDir = GetBundlePath(fixture);
 
-            Run(fixture, publishDir, singleFileDir);
+            BundleExtractAndRun(fixture, publishDir, outputDir);
         }
 
         [Fact]
@@ -89,10 +91,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
             var fixture = sharedTestState.TestFixture
                 .Copy();
 
-            string publishDir = RelativePath(fixture.TestProject.OutputDirectory);
-            string singleFileDir = RelativePath(GetSingleFileDir(fixture));
+            string publishDir = RelativePath(GetPublishPath(fixture));
+            string outputDir = RelativePath(GetBundlePath(fixture));
 
-            Run(fixture, publishDir, singleFileDir);
+            BundleExtractAndRun(fixture, publishDir, outputDir);
         }
 
         [Fact]
@@ -101,10 +103,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
             var fixture = sharedTestState.TestFixture
                 .Copy();
 
-            string publishDir = RelativePath(fixture.TestProject.OutputDirectory) + Path.DirectorySeparatorChar;
-            string singleFileDir = RelativePath(GetSingleFileDir(fixture)) + Path.DirectorySeparatorChar;
+            string publishDir = RelativePath(GetPublishPath(fixture)) + Path.DirectorySeparatorChar;
+            string outputDir = RelativePath(GetBundlePath(fixture)) + Path.DirectorySeparatorChar;
 
-            Run(fixture, publishDir, singleFileDir);
+            BundleExtractAndRun(fixture, publishDir, outputDir);
         }
 
         public class SharedTestState : IDisposable
@@ -116,10 +118,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.BundleTests.BundleExtract
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                TestFixture = new TestProjectFixture("StandaloneAppWithSubDirs", RepoDirectories);
+                TestFixture = new TestProjectFixture("AppWithSubDirs", RepoDirectories);
                 TestFixture
                     .EnsureRestoredForRid(TestFixture.CurrentRid, RepoDirectories.CorehostPackages)
-                    .PublishProject(runtime: TestFixture.CurrentRid);
+                    .PublishProject(runtime: TestFixture.CurrentRid,
+                                    outputDirectory: GetPublishPath(TestFixture));
             }
 
             public void Dispose()
