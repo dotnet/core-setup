@@ -29,6 +29,8 @@ private:
         const fx_reference_t& higher_fx_ref,
         /*out*/ fx_reference_t& effective_fx_ref,
         /*out*/ bool& effective_is_different_from_higher);
+    void update_newest_references(
+        const runtime_config_t& config);
     StatusCode soft_roll_forward(
         const fx_reference_t fx_ref,
         bool fx_is_hard_resolved);
