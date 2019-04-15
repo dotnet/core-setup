@@ -10,8 +10,6 @@
 
 namespace
 {
-    using DllGetClassObject_fn = HRESULT(STDMETHODCALLTYPE*)(REFCLSID rclsid, REFIID riid, LPVOID *ppv);
-
     class comhost_exports
     {
     public:
@@ -20,14 +18,14 @@ namespace
             if (!pal::load_library(&comhost_path, &_dll))
             {
                 std::cout << "Load library of comhost failed" << std::endl;
-                return;
+                throw StatusCode::CoreHostLibLoadFailure;
             }
 
-            get_class_obj_fn = (DllGetClassObject_fn)pal::get_symbol(_dll, "DllGetClassObject");
+            get_class_obj_fn = (decltype(get_class_obj_fn))pal::get_symbol(_dll, "DllGetClassObject");
             if (get_class_obj_fn == nullptr)
             {
                 std::cout << "Failed to get DllGetClassObject export from comhost" << std::endl;
-                return;
+                throw StatusCode::CoreHostEntryPointFailure;
             }
         }
 
@@ -36,8 +34,7 @@ namespace
             pal::unload_library(_dll);
         }
 
-        DllGetClassObject_fn get_class_obj_fn;
-        bool is_valid() { return _dll != nullptr && get_class_obj_fn != nullptr; }
+        decltype(&DllGetClassObject) get_class_obj_fn;
 
     private:
         pal::dll_t _dll;
@@ -50,8 +47,8 @@ namespace
         if (FAILED(hr))
             return hr;
 
-        IUnknown *instance = nullptr;
-        hr = classFactory->CreateInstance(nullptr, __uuidof(IUnknown), (void**)&instance);
+        IUnknown *instance;
+        hr = classFactory->CreateInstance(nullptr, __uuidof(instance), (void**)&instance);
         classFactory->Release();
         if (FAILED(hr))
             return hr;
@@ -80,8 +77,6 @@ bool comhost_test::synchronous(const pal::string_t &comhost_path, const pal::str
         return false;
 
     comhost_exports comhost(comhost_path);
-    if (!comhost.is_valid())
-        return false;
 
     for (int i = 0; i < count; ++i)
     {
@@ -108,8 +103,6 @@ bool comhost_test::concurrent(const pal::string_t &comhost_path, const pal::stri
         return false;
 
     comhost_exports comhost(comhost_path);
-    if (!comhost.is_valid())
-        return false;
 
     std::vector<std::future<HRESULT>> activations;
     activations.reserve(count);

@@ -24,6 +24,8 @@ set(SOURCES
 if(WIN32)
     list(APPEND SOURCES
         ./comhost_test.cpp)
+
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DELAYLOAD:nethost.dll")
 endif()
 
 include(../testexe.cmake)

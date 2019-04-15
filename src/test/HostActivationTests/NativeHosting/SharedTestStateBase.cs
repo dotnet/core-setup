@@ -21,10 +21,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             string nativeHostName = RuntimeInformationExtensions.GetExeFileNameForCurrentPlatform("nativehost");
             NativeHostPath = Path.Combine(BaseDirectory, nativeHostName);
 
-            // Copy over native host and nethost
+            // Copy over native host
             RepoDirectories = new RepoDirectoriesProvider();
-            string nethostName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("nethost");
-            File.Copy(Path.Combine(RepoDirectories.CorehostPackages, nethostName), Path.Combine(BaseDirectory, nethostName));
             File.Copy(Path.Combine(RepoDirectories.Artifacts, "corehost_test", nativeHostName), NativeHostPath);
         }
 

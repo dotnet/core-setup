@@ -60,12 +60,12 @@ int main(const int argc, const pal::char_t *argv[])
         {
             std::cout << "get_hostfxr_path succeeded" << std::endl;
             std::cout << "hostfxr_path: " << tostr(pal::to_lower(fxr_path)).data() << std::endl;
-            return 0;
+            return EXIT_SUCCESS;
         }
         else
         {
             std::cout << "get_hostfxr_path failed: " << std::hex << std::showbase << res << std::endl;
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 #if defined(_WIN32)
@@ -93,7 +93,7 @@ int main(const int argc, const pal::char_t *argv[])
             success = comhost_test::concurrent(comhost_path, clsid_str, count);
         }
 
-        return success ? 0 : 1;
+        return success ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 #endif
     else
