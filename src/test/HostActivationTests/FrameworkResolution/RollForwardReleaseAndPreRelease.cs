@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 rollForward,
                 applyPatches,
                 rollForwardToPreRelease)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected when starting from 4.1.1 which does exit
@@ -227,7 +227,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.1.0-preview.0",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected when starting from 5.1.0-preview.1 which does exist

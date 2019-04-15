@@ -14,6 +14,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             return assertion.HaveStdOutContaining($"mock frameworks: {name} {version}");
         }
 
+        public static AndConstraint<CommandResultAssertions> ShouldHaveResolvedFramework(this CommandResult result, string resolvedFrameworkName, string resolvedFrameworkVersion)
+        {
+            return result.Should().Pass()
+                .And.HaveResolvedFramework(resolvedFrameworkName, resolvedFrameworkVersion);
+        }
+
         /// <summary>
         /// Verifies that the command result either passes with a resolved framework or fails with inability to find compatible framework version.
         /// </summary>
@@ -23,23 +29,27 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         ///     Either null in which case the command result is expected to fail and not find compatible framework version,
         ///     or the framework versions in which case the command result is expected to succeed and resolve the specified framework version.</param>
         /// <returns>Constraint</returns>
-        public static AndConstraint<CommandResultAssertions> ShouldHaveResolvedFramework(this CommandResult result, string resolvedFrameworkName, string resolvedFrameworkVersion)
+        public static AndConstraint<CommandResultAssertions> ShouldHaveResolvedFrameworkOrFail(this CommandResult result, string resolvedFrameworkName, string resolvedFrameworkVersion)
         {
             if (resolvedFrameworkName == null || resolvedFrameworkVersion == null)
             {
-                return result.Should().Fail()
-                    .And.DidNotFindCompatibleFrameworkVersion();
+                return result.ShouldFailToFindCompatibleFrameworkVersion();
             }
             else
             {
-                return result.Should().Pass()
-                    .And.HaveResolvedFramework(resolvedFrameworkName, resolvedFrameworkVersion);
+                return result.ShouldHaveResolvedFramework(resolvedFrameworkName, resolvedFrameworkVersion);
             }
         }
 
         public static AndConstraint<CommandResultAssertions> DidNotFindCompatibleFrameworkVersion(this CommandResultAssertions assertion)
         {
             return assertion.HaveStdErrContaining("It was not possible to find any compatible framework version");
+        }
+
+        public static AndConstraint<CommandResultAssertions> ShouldFailToFindCompatibleFrameworkVersion(this CommandResult result)
+        {
+            return result.Should().Fail()
+                .And.DidNotFindCompatibleFrameworkVersion();
         }
 
         public static AndConstraint<CommandResultAssertions> FailedToSoftRollForward(this CommandResultAssertions assertion, string frameworkName, string newVersion, string previousVersion)

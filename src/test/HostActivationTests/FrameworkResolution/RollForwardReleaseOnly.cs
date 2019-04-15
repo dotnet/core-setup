@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "2.1.0",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected when starting from 2.1.2 which does exist
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "2.1.2",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected when starting from 2.0.0
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "2.0.0",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected when starting from 1.0.0
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "1.1.0",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verify that rollForward settings will never roll back to lower patch version.
@@ -166,8 +166,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "2.1.4",
                 rollForward,
                 applyPatches)
-                .Should().Fail()
-                .And.DidNotFindCompatibleFrameworkVersion();
+                .ShouldFailToFindCompatibleFrameworkVersion();
         }
 
         // Verify that rollForward settings will never roll back to lower minor version.
@@ -184,8 +183,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "2.5.0",
                 rollForward,
                 applyPatches)
-                .Should().Fail()
-                .And.DidNotFindCompatibleFrameworkVersion();
+                .ShouldFailToFindCompatibleFrameworkVersion();
         }
 
         private CommandResult RunTest(

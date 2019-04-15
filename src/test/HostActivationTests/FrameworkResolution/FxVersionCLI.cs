@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(MicrosoftNETCoreApp, frameworkReferenceVersion))
                     .WithCommandLine(Constants.FxVersion.CommandLineArgument, fxVersion))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Validates that --fx-version ignores any <rollForwardOnNoCandidateFx> or <applyPatches> settings

@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
                     .With(RollForwardOnNoCandidateFxSetting(settingLocation, 0))
                     .WithCommandLine(Constants.RollForwardOnNoCandidateFxSetting.CommandLineArgument, "2"))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, commandLineWins ? "5.1.3" : null);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, commandLineWins ? "5.1.3" : null);
         }
 
         // Verifies that framework reference setting loses only to CLI <settingLocation>
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, "4.0.0")
                             .WithRollForwardOnNoCandidateFx(2)))
                     .With(RollForwardOnNoCandidateFxSetting(settingLocation, 0)))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, frameworkReferenceWins ? "5.1.3" : null);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, frameworkReferenceWins ? "5.1.3" : null);
         }
 
         // Verifies that runtime options setting only wins over env. variable <settingLocation>
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithRollForwardOnNoCandidateFx(2)
                         .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
                     .With(RollForwardOnNoCandidateFxSetting(settingLocation, 0)))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, runtimeOptionWins ? "5.1.3" : null);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, runtimeOptionWins ? "5.1.3" : null);
         }
 
         // Verifies that env. variable loses to any other <settingLocation>
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
                     .With(RollForwardOnNoCandidateFxSetting(settingLocation, 0))
                     .WithEnvironment(Constants.RollForwardOnNoCandidateFxSetting.EnvironmentVariable, "2"))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, envVariableWins ? "5.1.3" : null);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, envVariableWins ? "5.1.3" : null);
         }
 
         // Verifies interaction between variour <settingLocation> and inner framework reference setting
@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         .Framework(MiddleWare).RuntimeConfig(runtimeConfig => runtimeConfig
                             .WithRollForwardOnNoCandidateFx(2)
                             .GetFramework(MicrosoftNETCoreApp).Version = "4.0.0")))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, innerReferenceWins ? "5.1.3" : null);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, innerReferenceWins ? "5.1.3" : null);
         }
 
         // Verifies that there's no inheritance between app and framework when applying more relaxed setting in the app
@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithDotnetCustomizer(dotnetCustomizer => dotnetCustomizer
                         .Framework(MiddleWare).RuntimeConfig(runtimeConfig => runtimeConfig
                             .GetFramework(MicrosoftNETCoreApp).Version = "4.0.0")))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, appWins ? "5.1.3" : null);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, appWins ? "5.1.3" : null);
         }
 
         // Verifies that there's no inheritance between app and framework when applying more strict setting in the app
@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithDotnetCustomizer(dotnetCustomizer => dotnetCustomizer
                         .Framework(MiddleWare).RuntimeConfig(runtimeConfig => runtimeConfig
                             .GetFramework(MicrosoftNETCoreApp).Version = "5.0.0")))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, appWins ? null : "5.1.3");
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, appWins ? null : "5.1.3");
         }
 
         private CommandResult RunTest(TestSettings testSettings) => 

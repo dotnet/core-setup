@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.1.0",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected starting with framework reference
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.0.0",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected starting with framework reference
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "4.0.0",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings won't roll back (on pre-release).
@@ -122,8 +122,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.1.2-preview.3",
                 rollForward,
                 applyPatches)
-                .Should().Fail()
-                .And.DidNotFindCompatibleFrameworkVersion();
+                .ShouldFailToFindCompatibleFrameworkVersion();
         }
 
         // Verifies that rollForward settings won't roll back (on patch).
@@ -140,8 +139,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.1.3-preview.1",
                 rollForward,
                 applyPatches)
-                .Should().Fail()
-                .And.DidNotFindCompatibleFrameworkVersion();
+                .ShouldFailToFindCompatibleFrameworkVersion();
         }
 
         // Verifies that rollForward settings won't roll back (on minor).
@@ -159,8 +157,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.3.0-preview.1",
                 rollForward,
                 applyPatches)
-                .Should().Fail()
-                .And.DidNotFindCompatibleFrameworkVersion();
+                .ShouldFailToFindCompatibleFrameworkVersion();
         }
 
         // Verifies that rollForward settings behave as expected starting with framework reference
@@ -183,7 +180,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.1.2-preview.0",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected starting with framework reference
@@ -206,7 +203,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.1.0-preview.1",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected starting with framework reference
@@ -229,7 +226,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.1.1-preview.1",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected starting with framework reference
@@ -251,7 +248,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "5.0.0-preview.5",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForward settings behave as expected starting with framework reference
@@ -272,7 +269,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 "4.1.0-preview.6",
                 rollForward,
                 applyPatches)
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         private CommandResult RunTest(

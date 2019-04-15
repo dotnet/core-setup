@@ -178,8 +178,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
 
             if (passes)
             {
-                result.Should().Pass()
-                      .And.HaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3");
+                result.ShouldHaveResolvedFramework(MicrosoftNETCoreApp, "5.1.3");
             }
             else
             {
@@ -211,7 +210,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithDotnetCustomizer(dotnetCustomizer => dotnetCustomizer
                         .Framework(MiddleWare).RuntimeConfig(runtimeConfig => runtimeConfig
                             .GetFramework(MicrosoftNETCoreApp).Version = "4.0.0")))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, appWins ? "5.1.3" : null);
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, appWins ? "5.1.3" : null);
         }
 
         // Verifies that there's no inheritance between app and framework when applying more strict setting in the app
@@ -234,7 +233,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithDotnetCustomizer(dotnetCustomizer => dotnetCustomizer
                         .Framework(MiddleWare).RuntimeConfig(runtimeConfig => runtimeConfig
                             .GetFramework(MicrosoftNETCoreApp).Version = "5.0.0")))
-                .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, appWins ? null : "5.1.3");
+                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, appWins ? null : "5.1.3");
         }
 
         // Verifies that the setting works in all supported locations
