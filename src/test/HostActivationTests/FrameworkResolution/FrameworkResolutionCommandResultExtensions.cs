@@ -52,9 +52,30 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 .And.DidNotFindCompatibleFrameworkVersion();
         }
 
-        public static AndConstraint<CommandResultAssertions> FailedToSoftRollForward(this CommandResultAssertions assertion, string frameworkName, string newVersion, string previousVersion)
+        public static AndConstraint<CommandResultAssertions> FailedToReconcileFrameworkReference(
+            this CommandResultAssertions assertion,
+            string frameworkName,
+            string newVersion,
+            string previousVersion)
         {
             return assertion.HaveStdErrMatching($".*The specified framework '{frameworkName}', version '{newVersion}', apply_patches=[0-1], roll_forward=[^ ]* cannot roll-forward to the previously referenced version '{previousVersion}'.*");
+        }
+
+        public static AndConstraint<CommandResultAssertions> ShouldHaveResolvedFrameworkOrFailedToReconcileFrameworkReference(
+            this CommandResult result,
+            string frameworkName,
+            string resolvedVersion,
+            string lowerVersion,
+            string higherVersion)
+        {
+            if (resolvedVersion == null)
+            {
+                return result.Should().Fail().And.FailedToReconcileFrameworkReference(frameworkName, lowerVersion, higherVersion);
+            }
+            else
+            {
+                return result.ShouldHaveResolvedFramework(frameworkName, resolvedVersion);
+            }
         }
 
         public static AndConstraint<CommandResultAssertions> RestartedFrameworkResolution(this CommandResultAssertions assertion, string resolvedVersion, string newVersion)

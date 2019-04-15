@@ -5,7 +5,6 @@
 using Microsoft.DotNet.Cli.Build;
 using Microsoft.DotNet.Cli.Build.Framework;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -14,56 +13,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
     public abstract partial class FrameworkResolutionBase
     {
         protected const string MicrosoftNETCoreApp = "Microsoft.NETCore.App";
-
-        protected void RunTest(
-            DotNetCli dotnet,
-            TestApp app,
-            Func<RuntimeConfig, RuntimeConfig> runtimeConfig,
-            Action<CommandResult> resultAction,
-            IDictionary<string, string> environment = null,
-            string[] commandLine = null,
-            bool multiLevelLookup = false)
-        {
-            RunTest(
-                dotnet,
-                app,
-                new TestSettings()
-                {
-                    RuntimeConfigCustomizer = runtimeConfig,
-                    Environment = environment,
-                    CommandLine = commandLine
-                },
-                resultAction,
-                multiLevelLookup);
-        }
-
-        protected void RunTest(
-            DotNetCli dotnet,
-            TestApp app,
-            TestSettings settings,
-            string resolvedFrameworkName,
-            string resolvedFrameworkVersion,
-            bool multiLevelLookup = false)
-        {
-            RunTest(
-                dotnet,
-                app,
-                settings,
-                result =>
-                {
-                    if (resolvedFrameworkVersion != null)
-                    {
-                        result.Should().Pass()
-                            .And.HaveResolvedFramework(resolvedFrameworkName, resolvedFrameworkVersion);
-                    }
-                    else
-                    {
-                        result.Should().Fail()
-                            .And.DidNotFindCompatibleFrameworkVersion();
-                    }
-                },
-                multiLevelLookup);
-        }
 
         protected CommandResult RunTest(
             DotNetCli dotnet,
