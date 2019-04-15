@@ -129,3 +129,9 @@ const host_interface_t& corehost_init_t::get_host_init_data()
 
     return hi;
 }
+
+void corehost_init_t::get_runtime_properties(std::unordered_map<pal::string_t, pal::string_t> &out_properties)
+{
+    for (int i = 0; i < m_clr_keys.size(); ++i)
+        out_properties[m_clr_keys[i]] = m_clr_values[i];
+}

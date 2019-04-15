@@ -17,6 +17,7 @@ public:
     pal::string_t application;
     pal::string_t clr_dir;
     pal::string_t clr_path;
+    host_mode_t host_mode;
     pal::string_t host_path;
 
     bool breadcrumbs_enabled;

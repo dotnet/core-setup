@@ -18,8 +18,8 @@ namespace fxr_resolver
     pal::string_t dotnet_root_from_fxr_path(const pal::string_t &fxr_path);
 }
 
-template<typename THostNameToAppNameCallback, typename TDelegate>
-int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostNameToAppNameCallback host_path_to_app_path, TDelegate* delegate, pal::string_t* out_app_path = nullptr)
+template<typename THostPathToConfigCallback, typename TDelegate>
+int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallback host_path_to_config_path, TDelegate* delegate)
 {
     pal::dll_t fxr;
 
@@ -56,22 +56,37 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostNameToAppNameCall
 
     // Leak fxr
 
-    auto get_delegate_from_hostfxr = (hostfxr_get_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_runtime_delegate");
-    if (get_delegate_from_hostfxr == nullptr)
+    auto hostfxr_init_context = (hostfxr_initialize_for_runtime_config_fn)pal::get_symbol(fxr, "hostfxr_initialize_for_runtime_config");
+    auto hostfxr_get_delegate = (hostfxr_get_runtime_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_runtime_delegate");
+    auto hostfxr_close = (hostfxr_close_fn)pal::get_symbol(fxr, "hostfxr_close");
+    if (hostfxr_init_context == nullptr || hostfxr_get_delegate == nullptr || hostfxr_close == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
 
-    pal::string_t app_path;
-
-    pal::string_t* app_path_to_use = out_app_path != nullptr ? out_app_path : &app_path;
-
-    pal::hresult_t status = host_path_to_app_path(host_path, app_path_to_use);
+    pal::string_t config_path;
+    pal::hresult_t status = host_path_to_config_path(host_path, &config_path);
 
     if (status != StatusCode::Success)
     {
         return status;
     }
 
-    return get_delegate_from_hostfxr(host_path.c_str(), dotnet_root.c_str(), app_path_to_use->c_str(), type, (void**)delegate);
+    hostfxr_initialize_parameters parameters {
+        sizeof(hostfxr_initialize_parameters),
+        host_path.c_str(),
+        dotnet_root.c_str()
+    };
+
+    hostfxr_handle context;
+    int rc = hostfxr_init_context(config_path.c_str(), &parameters, &context);
+    if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
+        return rc;
+
+    rc = hostfxr_get_delegate(context, type, (void**)delegate);
+
+    int rcClose = hostfxr_close(context);
+    assert(rcClose == StatusCode::Success);
+
+    return rc;
 }
 
 #endif //_COREHOST_CLI_FXR_RESOLVER_H_

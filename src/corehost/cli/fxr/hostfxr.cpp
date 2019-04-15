@@ -13,6 +13,7 @@
 #include "sdk_info.h"
 #include "sdk_resolver.h"
 #include "hostfxr.h"
+#include "host_context.h"
 
 SHARED_API int hostfxr_main_startupinfo(const int argc, const pal::char_t* argv[], const pal::char_t* host_path, const pal::char_t* dotnet_root, const pal::char_t* app_path)
 {
@@ -51,13 +52,13 @@ SHARED_API int hostfxr_main(const int argc, const pal::char_t* argv[])
 //      sub-folders. Pass the directory of a dotnet executable to
 //      mimic how that executable would search in its own directory.
 //      It is also valid to pass nullptr or empty, in which case
-//      multi-level lookup can still search other locations if 
+//      multi-level lookup can still search other locations if
 //      it has not been disabled by the user's environment.
 //
 //    working_dir
 //      The directory where the search for global.json (which can
 //      control the resolved SDK version) starts and proceeds
-//      upwards. 
+//      upwards.
 //
 //    buffer
 //      The buffer where the resolved SDK path will be written.
@@ -156,18 +157,18 @@ typedef void (*hostfxr_resolve_sdk2_result_fn)(
 //      sub-folders. Pass the directory of a dotnet executable to
 //      mimic how that executable would search in its own directory.
 //      It is also valid to pass nullptr or empty, in which case
-//      multi-level lookup can still search other locations if 
+//      multi-level lookup can still search other locations if
 //      it has not been disabled by the user's environment.
 //
 //    working_dir
 //      The directory where the search for global.json (which can
 //      control the resolved SDK version) starts and proceeds
-//      upwards. 
+//      upwards.
 //
 //   flags
 //      Bitwise flags that influence resolution.
 //         disallow_prerelease (0x1)
-//           do not allow resolution to return a prerelease SDK version 
+//           do not allow resolution to return a prerelease SDK version
 //           unless  prerelease version was specified via global.json.
 //
 //   result
@@ -190,7 +191,7 @@ typedef void (*hostfxr_resolve_sdk2_result_fn)(
 // Return value:
 //   0 on success, otherwise failure
 //   0x8000809b - SDK could not be resolved (SdkResolverResolveFailure)
-// 
+//
 // String encoding:
 //   Windows     - UTF-16 (pal::char_t is 2 byte wchar_t)
 //   Unix        - UTF-8  (pal::char_t is 1 byte char)
@@ -219,7 +220,7 @@ SHARED_API int32_t hostfxr_resolve_sdk2(
     pal::string_t global_json_path;
 
     bool success = sdk_resolver_t::resolve_sdk_dotnet_path(
-        exe_dir, 
+        exe_dir,
         working_dir,
         &resolved_sdk_dir,
         (flags & hostfxr_resolve_sdk2_flags_t::disallow_prerelease) != 0,
@@ -240,7 +241,7 @@ SHARED_API int32_t hostfxr_resolve_sdk2(
     }
 
     return success
-        ? StatusCode::Success 
+        ? StatusCode::Success
         : StatusCode::SdkResolverResolveFailure;
 }
 
@@ -303,7 +304,7 @@ SHARED_API int32_t hostfxr_get_available_sdks(
 
         result(sdk_dirs.size(), &sdk_dirs[0]);
     }
-    
+
     return StatusCode::Success;
 }
 
@@ -372,18 +373,18 @@ typedef void(*hostfxr_error_writer_fn)(const pal::char_t* message);
 // Sets a callback which is to be used to write errors to.
 //
 // Parameters:
-//     error_writer 
+//     error_writer
 //         A callback function which will be invoked every time an error is to be reported.
 //         Or nullptr to unregister previously registered callback and return to the default behavior.
 // Return value:
 //     The previously registered callback (which is now unregistered), or nullptr if no previous callback
 //     was registered
-// 
+//
 // The error writer is registered per-thread, so the registration is thread-local. On each thread
 // only one callback can be registered. Subsequent registrations overwrite the previous ones.
-// 
+//
 // By default no callback is registered in which case the errors are written to stderr.
-// 
+//
 // Each call to the error writer is sort of like writing a single line (the EOL character is omitted).
 // Multiple calls to the error writer may occure for one failure.
 //
@@ -396,55 +397,431 @@ SHARED_API hostfxr_error_writer_fn hostfxr_set_error_writer(hostfxr_error_writer
     return trace::set_error_writer(error_writer);
 }
 
-coreclr_delegate_type hostfxr_delegate_to_coreclr_delegate(hostfxr_delegate_type type)
+namespace
 {
-    switch (type)
+    int populate_startup_info(const hostfxr_initialize_parameters *parameters, host_startup_info_t &startup_info)
     {
-    case hostfxr_delegate_type::com_activation:
-        return coreclr_delegate_type::com_activation;
-    case hostfxr_delegate_type::load_in_memory_assembly:
-        return coreclr_delegate_type::load_in_memory_assembly;
-    case hostfxr_delegate_type::winrt_activation:
-        return coreclr_delegate_type::winrt_activation;
+        if (parameters != nullptr)
+        {
+            if (parameters->host_path != nullptr)
+                startup_info.host_path = parameters->host_path;
+
+            if (parameters->dotnet_root != nullptr)
+                startup_info.dotnet_root = parameters->dotnet_root;
+        }
+
+        if (startup_info.host_path.empty())
+        {
+            if (!pal::get_own_executable_path(&startup_info.host_path) || !pal::realpath(&startup_info.host_path))
+            {
+                trace::error(_X("Failed to resolve full path of the current host [%s]"), startup_info.host_path.c_str());
+                return StatusCode::CoreHostCurHostFindFailure;
+            }
+        }
+
+        if (startup_info.dotnet_root.empty())
+        {
+            pal::string_t mod_path;
+            if (!pal::get_own_module_path(&mod_path))
+                return StatusCode::CoreHostCurHostFindFailure;
+
+            pal::string_t fxr_root = get_directory(get_directory(mod_path));
+            startup_info.dotnet_root = get_directory(get_directory(fxr_root));
+            if (!pal::realpath(&startup_info.dotnet_root))
+            {
+                trace::error(_X("Failed to resolve full path of dotnet root [%s]"), startup_info.dotnet_root.c_str());
+                return StatusCode::CoreHostCurHostFindFailure;
+            }
+        }
+
+        return StatusCode::Success;
     }
-    return coreclr_delegate_type::invalid;
+}
+
+//
+// Initializes the hosting components for running an application
+//
+// Parameters:
+//    argc
+//      Number of argv arguments
+//    argv
+//      Arguments for the application. If argc is 0, this is ignored.
+//    app_path
+//      Path to the managed application. If this is nullptr, the first argument in argv is assumed to be
+//      the application path.
+//    parameters
+//      Optional. Additional parameters for initialization
+//    host_context_handle
+//      On success, this will be populated with an opaque value representing the initalized host context
+//
+// Return value:
+//    Success          - Hosting components were successfully initialized
+//    HostInvalidState - Hosting components are already initialized
+//
+// The app_path will be used to find the corresponding .runtimeconfig.json and .deps.json with which to
+// resolve frameworks and dependencies and prepare everything needed to load the runtime.
+//
+// This function does not load the runtime.
+//
+SHARED_API int32_t __cdecl hostfxr_initialize_for_app(
+    int argc,
+    const pal::char_t *argv[],
+    const pal::char_t *app_path,
+    const hostfxr_initialize_parameters * parameters,
+    hostfxr_handle * host_context_handle)
+{
+    if (host_context_handle == nullptr || (argv == nullptr && argc != 0) || (app_path == nullptr && argc == 0))
+        return StatusCode::InvalidArgFailure;
+
+    *host_context_handle = nullptr;
+
+    trace::setup();
+    trace::info(_X("--- Invoked hostfxr_initialize_for_app [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    host_startup_info_t startup_info{};
+    int new_argc;
+    const pal::char_t **new_argv;
+    if (app_path != nullptr)
+    {
+        startup_info.app_path = app_path;
+        new_argc = argc;
+        new_argv = argv;
+    }
+    else
+    {
+        // Take the first argument as the app path
+        startup_info.app_path = argv[0];
+        new_argc = argc-1;
+        new_argv = argc > 0 ? &argv[1] : nullptr;
+    }
+
+    int rc = populate_startup_info(parameters, startup_info);
+    if (rc != StatusCode::Success)
+        return rc;
+
+    return fx_muxer_t::initialize_for_app(
+        startup_info,
+        new_argc,
+        new_argv,
+        host_context_handle);
+}
+
+//
+// Initializes the hosting components using a .runtimeconfig.json file
+//
+// Parameters:
+//    runtime_config_path
+//      Path to the .runtimeconfig.json file
+//    parameters
+//      Optional. Additional parameters for initialization
+//    host_context_handle
+//      On success, this will be populated with an opaque value representing the initalized host context
+//
+// Return value:
+//    Success                     - Hosting components were successfully initialized
+//    CoreHostAlreadyInitialized  - Config is compatible with already initialized hosting components
+// [TODO]
+//    CoreHostIncompatibleConfig  - Config is incompatible with already initialized hosting components
+//    CoreHostDifferentProperties - Config has runtime properties that differ from already initialized hosting components
+//
+// This function will process the .runtimeconfig.json to resolve frameworks and prepare everything needed
+// to load the runtime. It will only process the .deps.json from frameworks (not any app/component that
+// may be next to the .runtimeconfig.json).
+//
+// This function does not load the runtime.
+//
+// If called when the runtime has already been loaded, this function will check if the specified runtime
+// config is compatible with the existing runtime.
+//
+SHARED_API int32_t __cdecl hostfxr_initialize_for_runtime_config(
+    const pal::char_t *runtime_config_path,
+    const hostfxr_initialize_parameters *parameters,
+    hostfxr_handle *host_context_handle)
+{
+    if (runtime_config_path == nullptr || host_context_handle == nullptr)
+        return StatusCode::InvalidArgFailure;
+
+    *host_context_handle = nullptr;
+
+    trace::setup();
+    trace::info(_X("--- Invoked hostfxr_initialize_for_runtime_config [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    host_startup_info_t startup_info{};
+    int rc = populate_startup_info(parameters, startup_info);
+    if (rc != StatusCode::Success)
+        return rc;
+
+    return fx_muxer_t::initialize_for_runtime_config(
+        startup_info,
+        runtime_config_path,
+        host_context_handle);
+}
+
+//
+// Load CoreCLR and run the application for an initialized host context
+//
+// Parameters:
+//     host_context_handle
+//       Handle to the initialized host context
+//
+// Return value:
+//     The error code result.
+//
+// The host_context_handle must have been initialized using hostfxr_initialize_for_app.
+//
+// This function will not return until the managed application exits.
+//
+SHARED_API int32_t __cdecl hostfxr_run_app(const hostfxr_handle host_context_handle)
+{
+    if (host_context_handle == nullptr)
+        return StatusCode::InvalidArgFailure;
+
+    trace::setup();
+    trace::info(_X("--- Invoked hostfxr_run_app [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+    return fx_muxer_t::run_app(context);
+}
+
+namespace
+{
+    coreclr_delegate_type hostfxr_delegate_to_coreclr_delegate(hostfxr_delegate_type type)
+    {
+        switch (type)
+        {
+        case hostfxr_delegate_type::com_activation:
+            return coreclr_delegate_type::com_activation;
+        case hostfxr_delegate_type::load_in_memory_assembly:
+            return coreclr_delegate_type::load_in_memory_assembly;
+        case hostfxr_delegate_type::winrt_activation:
+            return coreclr_delegate_type::winrt_activation;
+        }
+        return coreclr_delegate_type::invalid;
+    }
 }
 
 //
 // Gets a typed delegate from the currently loaded CoreCLR or from a newly created one.
 //
 // Parameters:
-//     libhost_path
-//          Absolute path of the entry hosting library
-//     dotnet_root
-//     app_path
+//     host_context_handle
+//       Handle to the initialized host context
+//     type
+//       Type of runtime delegate requested
 //     delegate
-//          An out parameter that will be assigned the delegate.
+//       An out parameter that will be assigned the delegate.
+//
 // Return value:
 //     The error code result.
 //
-// A new CoreCLR instance will be created or reused if the existing instance can satisfy the configuration
-// requirements supplied by the runtimeconfig.json file.
+// The host_context_handle must have been initialized using hostfxr_initialize_for_runtime_config.
 //
-SHARED_API int32_t hostfxr_get_runtime_delegate(
-    const pal::char_t* host_path,
-    const pal::char_t* dotnet_root,
-    const pal::char_t* app_path,
+SHARED_API int32_t __cdecl hostfxr_get_runtime_delegate(
+    const hostfxr_handle host_context_handle,
     hostfxr_delegate_type type,
-    void** delegate)
+    void **delegate)
 {
-    if (host_path == nullptr || dotnet_root == nullptr || delegate == nullptr)
+    if (host_context_handle == nullptr || delegate == nullptr)
         return StatusCode::InvalidArgFailure;
 
     trace::setup();
-
     trace::info(_X("--- Invoked hostfxr_get_runtime_delegate [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
-    host_startup_info_t startup_info{ host_path, dotnet_root, app_path };
+    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+    return fx_muxer_t::get_runtime_delegate(context, hostfxr_delegate_to_coreclr_delegate(type), delegate);
+}
 
-    return fx_muxer_t::load_runtime_and_get_delegate(
-        startup_info,
-        host_mode_t::libhost,
-        hostfxr_delegate_to_coreclr_delegate(type),
-        delegate);
+//
+// Gets the runtime property value for an initialized host context
+//
+// Parameters:
+//     host_context_handle
+//       Handle to the initialized host context
+//     name
+//       Runtime property name
+//     value
+//       Out parameter. Pointer to a buffer with the property value.
+//
+// Return value:
+//     The error code result.
+//
+// The buffer pointed to by value is owned by the host context. The lifetime of the buffer is only
+// guaranteed until any of the below occur:
+//   - a 'run' method is called for the host context
+//   - properties are changed via hostfxr_set_runtime_property_value
+//   - the host context is closed via 'hostfxr_close'
+//
+// If host_context_handle is nullptr and an active host context exists, this function will get the
+// property value for the active host context.
+//
+SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
+    const hostfxr_handle host_context_handle,
+    const pal::char_t *name,
+    const pal::char_t **value)
+{
+    if (name == nullptr || value == nullptr)
+        return StatusCode::InvalidArgFailure;
+
+    trace::setup();
+    trace::info(_X("--- Invoked hostfxr_get_runtime_property_value [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    if (host_context_handle == nullptr)
+    {
+        // TODO: get property for active context
+        return StatusCode::InvalidArgFailure;
+    }
+
+    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+    if (context->type == host_context_type::invalid)
+        return StatusCode::InvalidArgFailure;
+
+    if (context->type == host_context_type::secondary)
+    {
+        const std::unordered_map<pal::string_t, pal::string_t> &properties = context->config_properties;
+        auto iter = properties.find(name);
+        if (iter == properties.cend())
+            return StatusCode::InvalidArgFailure;
+
+        *value = (*iter).second.c_str();
+        return S_OK;
+    }
+
+    assert(context->type == host_context_type::initialized || context->type == host_context_type::active);
+    const corehost_context_contract contract = context->context_contract;
+    return contract.get_property_value(contract.instance, name, value);
+}
+
+//
+// Sets the value of a runtime property for an initialized host context
+//
+// Parameters:
+//     host_context_handle
+//       Handle to the initialized host context
+//     name
+//       Runtime property name
+//     value
+//       Value to set
+//
+// Return value:
+//     The error code result.
+//
+// Setting properties is only supported for the first host context, before the runtime has been loaded.
+//
+// If the property already exists in the host context, it will be overwritten. If value is nullptr, the
+// property will be removed.
+//
+SHARED_API int32_t __cdecl hostfxr_set_runtime_property_value(
+    const hostfxr_handle host_context_handle,
+    const pal::char_t *name,
+    const pal::char_t *value)
+{
+    if (name == nullptr)
+        return StatusCode::InvalidArgFailure;
+
+    trace::setup();
+    trace::info(_X("--- Invoked hostfxr_set_runtime_property_value [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+    if (context->type != host_context_type::initialized)
+    {
+        trace::error(_X("Setting properties is not allowed once runtime has been loaded."));
+        return StatusCode::InvalidArgFailure;
+    }
+
+    const corehost_context_contract &contract = context->context_contract;
+    return contract.set_property_value(contract.instance, name, value);
+}
+
+//
+// Gets all the runtime properties for an initialized host context
+//
+// Parameters:
+//     host_context_handle
+//       Handle to the initialized host context
+//     count
+//       [in] Size of the keys and values buffers
+//       [out] Number of properties returned (size of keys/values buffers used). If the input value is too
+//             small or keys/values is nullptr, this is populated with the number of available properties
+//     keys
+//       Array of pointers to buffers with runtime property keys
+//     values
+//       Array of pointers to buffers with runtime property values
+//
+// Return value:
+//     The error code result.
+//
+// The buffers pointed to by keys and values are owned by the host context. The lifetime of the buffers is only
+// guaranteed until any of the below occur:
+//   - a 'run' method is called for the host context
+//   - properties are changed via hostfxr_set_runtime_property_value
+//   - the host context is closed via 'hostfxr_close'
+//
+// If host_context_handle is nullptr and an active host context exists, this function will get the
+// properties for the active host context.
+//
+SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
+    const hostfxr_handle host_context_handle,
+    size_t * count,
+    const pal::char_t **keys,
+    const pal::char_t **values)
+{
+    if (count == nullptr)
+        return StatusCode::InvalidArgFailure;
+
+    trace::setup();
+    trace::info(_X("--- Invoked hostfxr_get_runtime_properties [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    if (host_context_handle == nullptr)
+    {
+        // TODO: get properties for active context
+        return StatusCode::InvalidArgFailure;
+    }
+
+    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+    if (context->type == host_context_type::invalid)
+        return StatusCode::InvalidArgFailure;
+
+    if (context->type == host_context_type::secondary)
+    {
+        const std::unordered_map<pal::string_t, pal::string_t> &properties = context->config_properties;
+        size_t actualCount = properties.size();
+        if (*count < actualCount || keys == nullptr || values == nullptr)
+        {
+            *count = actualCount;
+            return StatusCode::HostApiBufferTooSmall;
+        }
+
+        int i = 0;
+        for (const auto& kv : properties)
+        {
+            keys[i] = kv.first.data();
+            values[i] = kv.second.data();
+            ++i;
+        }
+
+        return StatusCode::Success;
+    }
+
+    assert(context->type == host_context_type::initialized || context->type == host_context_type::active);
+    const corehost_context_contract &contract = context->context_contract;
+    return contract.get_properties(contract.instance, count, keys, values);
+}
+
+//
+// Closes an initialized host context
+//
+// Parameters:
+//     host_context_handle
+//       Handle to the initialized host context
+//
+// Return value:
+//     The error code result.
+//
+SHARED_API int32_t __cdecl hostfxr_close(const hostfxr_handle host_context_handle)
+{
+    trace::setup();
+    trace::info(_X("--- Invoked hostfxr_close [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+
+    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+    return fx_muxer_t::close_host_context(context);
 }

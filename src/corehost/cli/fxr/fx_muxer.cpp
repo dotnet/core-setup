@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#include <atomic>
 #include <cassert>
+#include <condition_variable>
 #include <mutex>
 #include <error_codes.h>
 #include <pal.h>
@@ -11,6 +13,7 @@
 
 #include <cpprest/json.h>
 #include "corehost_init.h"
+#include "context_contract.h"
 #include "deps_format.h"
 #include "framework_info.h"
 #include "fx_definition.h"
@@ -26,8 +29,15 @@
 #include "roll_fwd_on_no_candidate_fx_option.h"
 
 using corehost_main_fn = int(*) (const int argc, const pal::char_t* argv[]);
-using corehost_get_delegate_fn = int(*)(coreclr_delegate_type type, void** delegate);
 using corehost_main_with_output_buffer_fn = int(*) (const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size);
+
+namespace
+{
+    std::mutex g_context_lock;
+    std::condition_variable g_context_cv;
+    std::unique_ptr<host_context_t> g_active_host_context;
+    std::atomic<bool> g_context_initializing(false);
+}
 
 template<typename T>
 int load_hostpolicy(
@@ -67,6 +77,13 @@ static int execute_app(
     int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_main", &host_main);
     if (code != StatusCode::Success)
         return code;
+
+    {
+        // Track an empty 'active' context so that host context-based APIs can work properly when
+        // the runtime is loaded through non-host context-based APIs.
+        std::lock_guard<std::mutex> lock{ g_context_lock };
+        g_active_host_context.reset(new host_context_t());
+    }
 
     {
         propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
@@ -480,7 +497,7 @@ namespace
 
         runtime_config_t::settings_t override_settings;
 
-        // `Roll forward` is set to Minor (2) (roll_forward_option::Minor) by default. 
+        // `Roll forward` is set to Minor (2) (roll_forward_option::Minor) by default.
         // For backward compatibility there are two settings:
         //  - rollForward (the new one) which has more possible values
         //  - rollForwardOnNoCandidateFx (the old one) with only 0-Off, 1-Minor, 2-Major
@@ -702,37 +719,6 @@ int fx_muxer_t::execute(
 
 namespace
 {
-    int get_delegate_from_runtime(
-        const pal::string_t& impl_dll_dir,
-        corehost_init_t* init,
-        coreclr_delegate_type type,
-        void** delegate)
-    {
-        pal::dll_t corehost;
-        hostpolicy_contract host_contract{};
-        corehost_get_delegate_fn coreclr_delegate = nullptr;
-
-        int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_get_coreclr_delegate", &coreclr_delegate);
-        if (code != StatusCode::Success)
-        {
-            trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
-            return code;
-        }
-
-        {
-            propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
-
-            const host_interface_t& intf = init->get_host_init_data();
-
-            if ((code = host_contract.load(&intf)) == StatusCode::Success)
-            {
-                code = coreclr_delegate(type, delegate);
-            }
-        }
-
-        return code;
-    }
-
     int get_init_info_for_component(
         const host_startup_info_t &host_info,
         host_mode_t mode,
@@ -777,24 +763,222 @@ namespace
 
         return StatusCode::Success;
     }
+
+    int initialize_context(const pal::string_t impl_dir, hostpolicy_contract &host_contract, const host_interface_t &host_interface, corehost_context_contract *context_contract)
+    {
+        pal::dll_t corehost;
+        int rc = hostpolicy_resolver::load(impl_dir, &corehost, host_contract);
+        if (rc != StatusCode::Success)
+        {
+            trace::error(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, impl_dir.c_str());
+            return rc;
+        }
+
+        if (host_contract.init_context == nullptr)
+        {
+            trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
+            return StatusCode::HostApiUnsupportedVersion;
+        }
+
+        {
+            propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+            if ((rc = host_contract.load(&host_interface)) == StatusCode::Success)
+            {
+                rc = host_contract.init_context(&host_interface, context_contract);
+            }
+        }
+
+        return rc;
+    }
 }
 
-int fx_muxer_t::load_runtime_and_get_delegate(
+int fx_muxer_t::initialize_for_app(
     const host_startup_info_t& host_info,
-    host_mode_t mode,
-    coreclr_delegate_type delegate_type,
-    void** delegate)
+    int argc,
+    const pal::char_t* argv[],
+    void** host_context_handle)
 {
-    assert(host_info.is_valid(mode));
+    {
+        std::unique_lock<std::mutex> lock{ g_context_lock };
+        g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
 
-    pal::string_t runtime_config = _X("");
+        if (g_active_host_context != nullptr)
+            return StatusCode::HostInvalidState;
+
+        g_context_initializing.store(true);
+    }
+
+    host_mode_t mode = host_mode_t::apphost;
+    opt_map_t opts;
+    pal::string_t impl_dir;
+    std::unique_ptr<corehost_init_t> init;
+    int rc = get_init_info_for_app(
+        pal::string_t{} /*host_command*/,
+        host_info,
+        host_info.app_path,
+        opts,
+        mode,
+        impl_dir,
+        init);
+    if (rc != StatusCode::Success)
+        return rc;
+
+    const host_interface_t &intf = init->get_host_init_data();
+    hostpolicy_contract host_contract{};
+    std::unique_ptr<host_context_t> context(new host_context_t());
+    rc = initialize_context(impl_dir, host_contract, intf, &context->context_contract);
+    if (rc != StatusCode::Success)
+        return rc;
+
+    context->type = host_context_type::initialized;
+    context->host_contract = host_contract;
+    context->is_app = true;
+    for (int i = 0; i < argc; ++i)
+        context->argv.push_back(argv[i]);
+
+    *host_context_handle = context.release();
+    return rc;
+}
+
+int fx_muxer_t::initialize_for_runtime_config(
+    const host_startup_info_t& host_info,
+    const pal::char_t * runtime_config_path,
+    void** host_context_handle)
+{
+    bool already_initialized = false;
+    {
+        std::unique_lock<std::mutex> lock{ g_context_lock };
+        g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
+
+        already_initialized = g_active_host_context != nullptr;
+        if (!already_initialized)
+        {
+            g_context_initializing.store(true);
+        }
+        else if (g_active_host_context->type == host_context_type::invalid)
+        {
+            return StatusCode::HostInvalidState;
+        }
+    }
+
+    host_mode_t mode = host_mode_t::libhost;
+    pal::string_t runtime_config = runtime_config_path;
     pal::string_t impl_dir;
     std::unique_ptr<corehost_init_t> init;
     int rc = get_init_info_for_component(host_info, mode, runtime_config, impl_dir, init);
     if (rc != StatusCode::Success)
         return rc;
 
-    rc = get_delegate_from_runtime(impl_dir, init.get(), delegate_type, delegate);
+    const host_interface_t &intf = init->get_host_init_data();
+    hostpolicy_contract host_contract{};
+    std::unique_ptr<host_context_t> context(new host_context_t());
+    rc = initialize_context(impl_dir, host_contract, intf, &context->context_contract);
+    if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
+        return rc;
+
+    context->host_contract = host_contract;
+    context->is_app = false;
+    if (already_initialized || rc == StatusCode::CoreHostAlreadyInitialized)
+    {
+        context->type = host_context_type::secondary;
+        init->get_runtime_properties(context->config_properties);
+    }
+    else
+    {
+        context->type = host_context_type::initialized;
+    }
+
+    *host_context_handle = context.release();
+    return rc;
+}
+
+namespace
+{
+    int load_runtime(host_context_t *context)
+    {
+        assert(context->type == host_context_type::initialized || context->type == host_context_type::active);
+        if (context->type == host_context_type::active)
+            return StatusCode::Success;
+
+        const corehost_context_contract &contract = context->context_contract;
+        int rc = contract.load_runtime(contract.instance);
+
+        // Mark the context as active or invalid
+        context->type = rc == StatusCode::Success ? host_context_type::active : host_context_type::invalid;
+
+        {
+            std::lock_guard<std::mutex> lock{ g_context_lock };
+            g_active_host_context.reset(context);
+            g_context_initializing.store(false);
+        }
+
+        g_context_cv.notify_all();
+        return rc;
+    }
+}
+
+int fx_muxer_t::run_app(host_context_t *context)
+{
+    if (!context->is_app || context->type == host_context_type::invalid)
+        return StatusCode::InvalidArgFailure;
+
+    int argc = context->argv.size();
+    std::vector<const pal::char_t*> argv;
+    argv.reserve(argc);
+    for (const auto& str : context->argv)
+        argv.push_back(str.c_str());
+
+    const corehost_context_contract &contract = context->context_contract;
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(context->host_contract.set_error_writer);
+
+        int rc = load_runtime(context);
+        if (rc != StatusCode::Success)
+            return rc;
+
+        return contract.run_app(contract.instance, argc, argv.data());
+    }
+}
+
+int fx_muxer_t::get_runtime_delegate(host_context_t *context, coreclr_delegate_type type, void **delegate)
+{
+    if (context->is_app || context->type == host_context_type::invalid)
+        return StatusCode::InvalidArgFailure;
+
+    const corehost_context_contract &contract = context->context_contract;
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(context->host_contract.set_error_writer);
+
+        if (context->type != host_context_type::secondary)
+        {
+            int rc = load_runtime(context);
+            if (rc != StatusCode::Success)
+                return rc;
+        }
+
+        return contract.get_runtime_delegate(contract.instance, type, delegate);
+    }
+}
+
+int fx_muxer_t::close_host_context(const host_context_t *context)
+{
+    const hostpolicy_contract &host_contract = context->host_contract;
+    if (host_contract.close_context == nullptr)
+    {
+        trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
+        return StatusCode::HostApiUnsupportedVersion;
+    }
+
+    int rc;
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+        rc = host_contract.close_context(context->context_contract);
+    }
+
+    // Do not delete the active context.
+    if (context->type != host_context_type::active)
+        delete context;
+
     return rc;
 }
 

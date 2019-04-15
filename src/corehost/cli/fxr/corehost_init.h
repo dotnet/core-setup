@@ -47,6 +47,8 @@ public:
         const fx_definition_vector_t& fx_definitions);
 
     const host_interface_t& get_host_init_data();
+
+    void get_runtime_properties(std::unordered_map<pal::string_t, pal::string_t> &out_properties);
 };
 
 #endif // __COREHOST_INIT_H__

@@ -40,5 +40,9 @@ enum StatusCode
     BundleExtractionFailure     = 0x8000809f,
     BundleExtractionIOError     = 0x800080a0,
     LibHostDuplicateProperty    = 0x800080a1,
+    HostApiUnsupportedVersion   = 0x800080a2,
+    HostInvalidState            = 0x800080a3,
+
+    CoreHostAlreadyInitialized  = 0x00000001,
 };
 #endif // __ERROR_CODES_H__
