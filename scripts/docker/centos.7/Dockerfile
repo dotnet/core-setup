@@ -4,7 +4,7 @@
 #
 
 # Dockerfile that creates a container suitable to build dotnet-cli
-FROM centos:7.1.1503
+FROM mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-afc9dca-20190328192013
 
 # Swap the "fakesystemd" package with the real "systemd" package, because fakesystemd conflicts with openssl-devel.
 # The CentOS Docker image uses fakesystemd instead of systemd to reduce disk space.

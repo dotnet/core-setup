@@ -3,7 +3,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-FROM opensuse:42.1
+FROM mcr.microsoft.com/dotnet-buildtools/prereqs:opensuse-42.1-c103199-20180628122439
 
 RUN zypper addrepo http://download.opensuse.org/distribution/leap/42.2/repo/oss/ oss42.2
 
