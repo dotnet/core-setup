@@ -11,10 +11,7 @@ RUN zypper addrepo http://download.opensuse.org/distribution/leap/42.2/repo/oss/
 # this does not include libraries that we need to compile different projects, we'd like
 # them in a different layer.
 RUN zypper -n install -r "oss42.2" \
-              cmake \
-              which \
               gcc \
-              llvm-clang \
               libstdc++-devel \
               tar \
               ncurses-utils \
