@@ -11,14 +11,16 @@ RUN zypper addrepo http://download.opensuse.org/distribution/leap/42.2/repo/oss/
 # this does not include libraries that we need to compile different projects, we'd like
 # them in a different layer.
 RUN zypper -n install -r "oss42.2" \
+              cmake \
+              which \
               gcc \
+              llvm-clang \
               libstdc++-devel \
               tar \
               ncurses-utils \
               curl \
               git \
               sudo && \
-    ln -s /usr/bin/clang++ /usr/bin/clang++-3.5 && \
     zypper clean -a
 
 # Dependencies of CoreCLR and CoreFX.
