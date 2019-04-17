@@ -35,9 +35,9 @@ The proposal is to add a new host library `nethost` which can be used by native 
 ## New host binary for component hosting
 Add new library `nethost` which will act as the easy to use host for loading managed components.
 The library would be a dynamically loaded library (`.dll`, `.so`, `.dylib`). For ease of use there would be a header file for C++ apps as well as `.lib`/`.a` for easy linking.
-Apps using the component hosting functionality would ship this library as part of the app. Unlike the `apphost`, `comhost` and `ijwhost`, the `nethost` will not be directly supported by the .NET Core SDK since it's target usage is not from .NET Core apps.
+Apps using the component hosting functionality would ship this library as part of the app. Unlike the `apphost`, `comhost` and `ijwhost`, the `nethost` will not be directly supported by the .NET Core SDK since its target usage is not from .NET Core apps.
 
-The exact delivery mechanism is TBD (pending investigation), but it probably should include NuGet (for C++ projects) and plain `.zip` (for any consumer). The binary itself should be signed by Microsoft as there will be no support for modifying the binary as part of custom application build (unlike `apphost`).
+The exact delivery mechanism is TBD (pending investigation), but it probably should include NuGet (for C++ projects) and plain `.zip` (for any consumer). The binary itself should be signed by Microsoft as there will be no support for modifying the binary as part of custom application build (unlike `apphost` or `comhost`).
 
 ### Load managed component and get a function pointer
 ``` C++
@@ -56,7 +56,7 @@ This API will
 * Else the CoreCLR is already loaded, in that case validate that required frameworks for the component can be satisfied by the runtime.
   * If the required frameworks are not already present, fail. No support to load additional frameworks for now.
 * Call into the runtime (`System.Private.CoreLib` specifically)
-  * Create a new isolated `AssemblyLoadContext` (possibly reusing for the same components) using the `AssemblyDependencyResolver` with the component's assembly to provide dependency resolution
+  * Create a new isolated [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-3.0) (possibly reusing ALCs to avoid loading the same assembly multiple times) using the [`AssemblyDependencyResolver`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblydependencyresolver?view=netcore-3.0) with the component's assembly to provide dependency resolution
   * Load the component's assembly into it
   * Find the requested `type_name` and `method_name`
   * Return a native callable function pointer to the requested method
