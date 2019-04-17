@@ -112,6 +112,7 @@
       <Platforms Include="SLES 12 (x64)" Abbr="sles-12" />
       <Platforms Include="OpenSUSE 42 (x64)" Abbr="OpenSUSE-42" />
       <Platforms Include="Linux-musl (x64)" Abbr="linux-musl-x64" />
+      <Platforms Include="Linux-musl (arm64)" Abbr="linux-musl-arm64" />
     </ItemGroup>
 
     <RegenerateReadmeTable

@@ -942,4 +942,19 @@ Daily Builds
 [linux-musl-x64-targz-checksum-2.1.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-runtime-latest-linux-musl-x64.tar.gz.sha512
 [linux-musl-x64-symbols-targz-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-runtime-symbols-latest-linux-musl-x64.tar.gz
 
+
+[linux-musl-arm64-badge-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/sharedfx_linux-musl-arm64_Release_version_badge.svg
+[linux-musl-arm64-version-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/latest.version
+[linux-musl-arm64-targz-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-linux-musl-arm64.tar.gz
+[linux-musl-arm64-targz-checksum-master]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-linux-musl-arm64.tar.gz.sha512
+[linux-musl-arm64-nethost-targz-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-nethost-latest-linux-musl-arm64.tar.gz
+[linux-musl-arm64-symbols-targz-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-symbols-latest-linux-musl-arm64.tar.gz
+
+[linux-musl-arm64-badge-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/sharedfx_linux-musl-arm64_Release_version_badge.svg
+[linux-musl-arm64-version-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/latest.version
+[linux-musl-arm64-targz-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-latest-linux-musl-arm64.tar.gz
+[linux-musl-arm64-targz-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-latest-linux-musl-arm64.tar.gz.sha512
+[linux-musl-arm64-nethost-targz-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-nethost-latest-linux-musl-arm64.tar.gz
+[linux-musl-arm64-symbols-targz-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-symbols-latest-linux-musl-arm64.tar.gz
+
 <!-- END links to include in table -->
