@@ -34,6 +34,71 @@ The proposal is to add a new host library `nethost` which can be used by native 
 * *On Linux/macOS - they are `char *` using `UTF8` encoding*
 
 
+### Load managed component and get a function pointer
+This new functionality would let native app load a .NET Core component (and its assemblies) into a process and get a function pointer to a managed method from the component.
+
+Input for this process is:
+* `assembly_path` - the path to the main assembly of the component to load.
+* `type_name` - the fully qualified type name from which to get a method.
+* `method_name` - the name of the method to get from the type and for which to return a function pointer.
+
+Process to load managed component
+* Create a new isolated [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-3.0) (possibly reusing ALCs to avoid loading the same assembly multiple times) using the [`AssemblyDependencyResolver`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblydependencyresolver?view=netcore-3.0) with the component's assembly specified by `assembly_path` to provide dependency resolution.
+* Load the component's main assembly specified by `assembly_path` into it
+* Find the requested `type_name` and `method_name` using reflection
+  * The requested method must be static and there can be only one match (no support for overloading)
+* Return a native callable function pointer to the requested method
+
+
+## Support loading managed components in `hostfxr`
+The low-level APIs for loading managed components are available in `hostfxr`. These provide full control to the native app over the process of loading the CoreCLR and enable loading managed components.
+
+This will be implemented by extending the `hostfxr_get_runtime_delegate` and its `hostfxr_delegate_type` by adding a new enum value `load_assembly_and_get_method`.
+
+The return function pointer to a runtime helper will look like this (the name of the function is not important as it's just a function pointer:
+``` C
+using load_assembly_and_get_method_fn = int (*)(
+    const char_t * assembly_path,
+    const char_t * type_name,
+    const char_t * method_name,
+    void * reserved,
+    void ** function_pointer
+);
+```
+* `assembly_path` - path to the main assembly of the component (the one with `.deps.json` next to it) to load.
+* `type_name` - the name of the type to get the method from. The implementation will probably use something like `Assembly.GetType` so the syntax of the type name should be the same as for that API.
+* `method_name` - the name of the method to return. This must be a static method with only one overload.
+* `reserved` - currently unused and must be `nullptr`. Extensibility point for the future - for example we could eventually support unloadability through this.
+* `function_pointer` - the returned function pointer.
+
+The runtime helper implements the "Process to load managed component" as described above and returns a function pointer to the requested method.
+
+It should be possible to use the runtime helper multiple times to get function pointers to several methods from various types.
+The runtime helper should be thread safe, that is can be called from multiple threads at the same time.
+
+If the runtime is initialized by this function, the default load context will only be populated with framework assemblies (via TPA), none of the component's assemblies will be loaded into the default context.
+
+*As proposed there would be no support for unloading components. For discussion on possible solutions see open issues below.*
+
+### Open questions
+* What type of strings are going to be passed in the `assembly_path`, `type_name` and `method_name`. Should it be `char_t` which would mean `WCHAR` on Windows and `char` on Linux/macOS, or should it be the same for all platforms, so probably UTF8 `char *`? It would be easier for the runtime to take only one type across all platforms. On the other hand the native app would probably prefer the platform specific strings. Especially UTF8 on Windows is relatively tricky to work with in native code.
+* Do we require the method to be `public`? Or do we allow `internal` and/or `private` as well?
+* How exactly do we perform marshaling of parameters for the method? Do we limit method parameters somehow (only primitive types for example)? Can we rely on marshaling attributes and so on? What can interop do and how is it usable?
+* Do we somehow try to limit the types? For example disallow generics? (no real technical reason I can think of... but maybe)
+* Details of error reporting - do we use `HRESULT` or something else? Do we design some additional way to pass detailed error information?
+* How do we define the behavior if the runtime helper is used to load multiple different assemblies? The framework and such is all set in stone, so this is equivalent to using `AssemblyDependencyResolver` and `AssemlyLoadContext.LoadFromAssemblyPath` from managed code. Do we allow this? Describe behavior?
+
+### Sample usage
+The native app might then follow this process:
+* Potentially use `nethost` and its `get_hostfxr_path` to locate and load `hostfxr`.
+* Call `hostfxr_initialize_for_runtime_config` providing the path to the `.runtimeconfig.json` of the component to load.
+* Potentially use other methods on the `hostfxr` to inspect and modify the initialization of the runtime (for example `hostfxr_get_runtime_property`, `hostfxr_set_runtime_property` and so on).
+* Call `hostfxr_get_runtime_delegate` with the `hostfxr_delegate_type::load_assembly_and_get_function_pointer` and getting back a function pointer to the runtime helper of the `load_assembly_and_get_method_fn` type - let's call the returned runtime helper `pfn_load_assembly_and_get_method`.
+* Call the returned runtime helper `pfn_load_assembly_and_get_method` passing the `assembly_path`, `type_name` and `method_name` and getting back a function pointer for the managed method.
+* Closing the host context via `hostfxr_close`.
+
+
+
 ## New host binary for component hosting
 Add new library `nethost` which will act as the easy to use host for loading managed components.
 The library would be a dynamically loaded library (`.dll`, `.so`, `.dylib`). For ease of use there would be a header file for C++ apps as well as `.lib`/`.a` for easy linking.
@@ -43,25 +108,21 @@ The exact delivery mechanism is TBD (pending investigation), but it will include
 
 ### Load managed component and get a function pointer
 ``` C++
-int nethost_load_assembly_method(
+int load_assembly_and_get_method(
         const char_t * assembly_path,
         const char_t * type_name,
         const char_t * method_name,
         const void * reserved,
-        void ** delegate);
+        void ** function_pointer);
 )
 ```
 This API will
-* Locate the assembly using the `assembly_path` and its `.runtimeconfig.json` and determine the frameworks it requires to run. (Note that only framework dependent components will be supported for now).
+* Locate a `.runtimeconfig.json` by looking next to the assembly specified in `assembly_path` and determine the frameworks it requires to run. (Note that only framework dependent components will be supported for now).
 * If the process doesn't have CoreCLR loaded (more specifically `hostpolicy` library)
   * Using the `.runtimeconfig.json` resolve required frameworks (just like if running an application) and load the runtime.
 * Else the CoreCLR is already loaded, in that case validate that required frameworks for the component can be satisfied by the runtime.
   * If the required frameworks are not already present, fail. No support to load additional frameworks for now.
-* Call into the runtime (`System.Private.CoreLib` specifically)
-  * Create a new isolated [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-3.0) (possibly reusing ALCs to avoid loading the same assembly multiple times) using the [`AssemblyDependencyResolver`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblydependencyresolver?view=netcore-3.0) with the component's assembly to provide dependency resolution
-  * Load the component's assembly into it
-  * Find the requested `type_name` and `method_name`
-  * Return a native callable function pointer to the requested method
+* Follow the "Process to load managed component" described above to get a native callable function pointer for the method specified by `assembly_path`, `type_name` and `method_name`.
 
 The `reserved` argument is currently not used and must be set to `nullptr`. It is present to make this API extensible. In a future version we may need to add more parameters to this call in which case this parameter would be a pointer to a `struct` with the additional fields.
 
@@ -69,15 +130,14 @@ If the runtime is initialized by this function, the default load context will on
 
 *As proposed there would be no support for unloading components. For discussion on possible solutions see open issues below.*
 
+Similar open questions as those described in the `hostfxr` API above apply.
+
 
 ## Impact on hosting components
 
-### `hostfxr`
-Extend the `hostfxr_delegate_type` to add the new runtime entry point in `System.Private.CoreLib`.
-
 ### `hostpolicy`
 Impact on `hostpolicy` API is minimal:
-* Implementation of the `nethost_load_assembly_method` will just add a new value to the `coreclr_delegate_type` and the respective managed method in `System.Private.CoreLib`.
+* Add a new value to the `coreclr_delegate_type` and the respective managed method in `System.Private.CoreLib`.
 
 
 # Open issues
