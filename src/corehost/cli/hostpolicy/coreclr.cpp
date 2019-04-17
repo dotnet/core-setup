@@ -210,6 +210,14 @@ namespace
     static_assert((sizeof(PropertyNameMapping) / sizeof(*PropertyNameMapping)) == static_cast<size_t>(common_property::Last), "Invalid property count");
 }
 
+const pal::char_t* coreclr_property_bag_t::common_property_to_string(common_property key)
+{
+    int idx = static_cast<int>(key);
+    assert(0 <= idx && idx < static_cast<int>(common_property::Last));
+
+    return PropertyNameMapping[idx];
+}
+
 coreclr_property_bag_t::coreclr_property_bag_t()
 {
     // Optimize the bag for at least twice as many common properties.
@@ -238,7 +246,7 @@ bool coreclr_property_bag_t::add(const pal::char_t *key, const pal::char_t *valu
     }
     else
     {
-        trace::verbose(_X("Overwritting property %s. New value: %s"), key, value);
+        trace::verbose(_X("Overwriting property %s. New value: '%s'. Old value: '%s'."), key, value, (*iter).second.c_str());
         _properties[key] = value;
         return false;
     }
@@ -258,7 +266,7 @@ bool coreclr_property_bag_t::try_get(const pal::char_t *key, const pal::char_t *
     auto iter = _properties.find(key);
     if (iter == _properties.cend())
         return false;
-    
+
     *value = (*iter).second.c_str();
     return true;
 }

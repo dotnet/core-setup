@@ -75,6 +75,9 @@ enum class common_property
 
 class coreclr_property_bag_t
 {
+public: // static
+    static const pal::char_t* common_property_to_string(common_property key);
+
 public:
     coreclr_property_bag_t();
 
