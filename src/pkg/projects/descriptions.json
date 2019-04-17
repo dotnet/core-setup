@@ -40,7 +40,7 @@
         "CommonTypes": [ ]
     },
     {
-        "Name": "Microsoft.NETCore.App.Insertion",
+        "Name": "Microsoft.NETCore.App.Internal",
         "Description": "Transport package for .NET Core App runtime assets.",
         "CommonTypes": [ ]
     },

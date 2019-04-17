@@ -40,7 +40,7 @@
                  Properties="RestoreGraphProjectInput=$(MSBuildProjectFullPath);
                              DisableImplicitFrameworkReferences=true;
                              RestoreOutputPath=$(_CrossProjFileDir);
-                             StorePackageName=Microsoft.NETCore.App.Insertion;
+                             StorePackageName=Microsoft.NETCore.App.Internal;
                              StorePackageVersion=$(RuntimeFrameworkVersion);"/>
 
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
