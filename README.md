@@ -495,6 +495,51 @@ Daily Builds
 [ubuntu-18.04-sharedfx-checksum-2.1.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-runtime-latest-x64.deb.sha512
 
 
+[ubuntu-19.04-badge-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/sharedfx_ubuntu.19.04-x64_Release_version_badge.svg
+[ubuntu-19.04-version-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/latest.version
+[ubuntu-19.04-host-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-host-latest-x64.deb
+[ubuntu-19.04-runtime-deps-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-deps-latest-ubuntu.19.04-x64.deb
+[ubuntu-19.04-runtime-deps-checksum-master]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-deps-latest-ubuntu.19.04-x64.deb.sha512
+[ubuntu-19.04-host-checksum-master]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/master/dotnet-host-latest-x64.deb.sha512
+[ubuntu-19.04-hostfxr-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-hostfxr-latest-x64.deb
+[ubuntu-19.04-hostfxr-checksum-master]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/master/dotnet-hostfxr-latest-x64.deb.sha512
+[ubuntu-19.04-sharedfx-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-x64.deb
+[ubuntu-19.04-sharedfx-checksum-master]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-x64.deb.sha512
+
+[ubuntu-19.04-badge-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/sharedfx_ubuntu.19.04-x64_Release_version_badge.svg
+[ubuntu-19.04-version-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/latest.version
+[ubuntu-19.04-host-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-host-latest-x64.deb
+[ubuntu-19.04-runtime-deps-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-deps-latest-ubuntu.19.04-x64.deb
+[ubuntu-19.04-runtime-deps-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-deps-latest-ubuntu.19.04-x64.deb.sha512
+[ubuntu-19.04-host-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-host-latest-x64.deb.sha512
+[ubuntu-19.04-hostfxr-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-hostfxr-latest-x64.deb
+[ubuntu-19.04-hostfxr-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-hostfxr-latest-x64.deb.sha512
+[ubuntu-19.04-sharedfx-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-latest-x64.deb
+[ubuntu-19.04-sharedfx-checksum-3.0.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-latest-x64.deb.sha512
+
+[ubuntu-19.04-badge-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/sharedfx_ubuntu.19.04-x64_Release_version_badge.svg
+[ubuntu-19.04-version-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/latest.version
+[ubuntu-19.04-host-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/dotnet-host-latest-x64.deb
+[ubuntu-19.04-runtime-deps-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/dotnet-runtime-deps-latest-ubuntu.19.04-x64.deb
+[ubuntu-19.04-runtime-deps-checksum-2.2.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.2/dotnet-runtime-deps-latest-ubuntu.19.04-x64.deb.sha512
+[ubuntu-19.04-host-checksum-2.2.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.2/dotnet-host-latest-x64.deb.sha512
+[ubuntu-19.04-hostfxr-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/dotnet-hostfxr-latest-x64.deb
+[ubuntu-19.04-hostfxr-checksum-2.2.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.2/dotnet-hostfxr-latest-x64.deb.sha512
+[ubuntu-19.04-sharedfx-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/dotnet-runtime-latest-x64.deb
+[ubuntu-19.04-sharedfx-checksum-2.2.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.2/dotnet-runtime-latest-x64.deb.sha512
+
+[ubuntu-19.04-badge-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/sharedfx_ubuntu.19.04-x64_Release_version_badge.svg
+[ubuntu-19.04-version-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/latest.version
+[ubuntu-19.04-host-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-host-latest-x64.deb
+[ubuntu-19.04-runtime-deps-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-runtime-deps-latest-ubuntu.19.04-x64.deb
+[ubuntu-19.04-runtime-deps-checksum-2.1.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-runtime-deps-latest-ubuntu.19.04-x64.deb.sha512
+[ubuntu-19.04-host-checksum-2.1.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-host-latest-x64.deb.sha512
+[ubuntu-19.04-hostfxr-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-hostfxr-latest-x64.deb
+[ubuntu-19.04-hostfxr-checksum-2.1.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-hostfxr-latest-x64.deb.sha512
+[ubuntu-19.04-sharedfx-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-runtime-latest-x64.deb
+[ubuntu-19.04-sharedfx-checksum-2.1.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-runtime-latest-x64.deb.sha512
+
+
 [debian-8.2-badge-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/sharedfx_debian.8-x64_Release_version_badge.svg
 [debian-8.2-version-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/latest.version
 [debian-8.2-runtime-deps-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-deps-latest-debian.8-x64.deb
