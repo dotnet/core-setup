@@ -160,6 +160,24 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 .ShouldFailToFindCompatibleFrameworkVersion();
         }
 
+        // Verifies that rollForward settings won't roll back (on major).
+        // Starting from 7.1.0-preview.1 which is higher than any available version.
+        [Theory] // rollForward                               applyPatches
+        [InlineData(Constants.RollForwardSetting.Disable,     null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData(Constants.RollForwardSetting.Minor,       null)]
+        [InlineData(Constants.RollForwardSetting.Minor,       false)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false)]
+        public void NeverRollBackOnMajor_PreReleaseOnly(string rollForward, bool? applyPatches)
+        {
+            RunTest(
+                "7.1.0-preview.1",
+                rollForward,
+                applyPatches)
+                .ShouldFailToFindCompatibleFrameworkVersion();
+        }
+
         // Verifies that rollForward settings behave as expected starting with framework reference
         // pre-release version 5.1.2-preview.0 and rolling forward to pre-release versions only with available
         // versions starting with 5.1.2-preview.1. So roll over pre-release version.

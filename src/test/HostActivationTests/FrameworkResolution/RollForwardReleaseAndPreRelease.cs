@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // 4.1.2
         // 4.1.3-preview.1
 
-        // Verifies that rollForward settings behave as expected when starting from 4.1.0 which doesn't exit
+        // Verifies that rollForward settings behave as expected when starting from 4.1.0 which doesn't exist
         // to other available 4.1.* versions (both release and pre-release). So roll forward on patch version.
         // Also verifying behavior when DOTNET_ROLL_FORWARD_TO_PRERELEASE is set.
         [Theory] // rollForward                               applyPatches rollForwardToPreRelease resolvedFramework

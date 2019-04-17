@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 .ShouldHaveResolvedFramework(MicrosoftNETCoreApp, "2.1.3");
         }
 
-        // Verifies that rollForward settings behave as expected when starting from 2.1.0 which doesn't exit
+        // Verifies that rollForward settings behave as expected when starting from 2.1.0 which doesn't exist
         // to other available 2.1.* versions. So roll forward on patch version.
         [Theory] // rollForward                               applyPatches resolvedFramework
         [InlineData(Constants.RollForwardSetting.Disable,     null,        null)]
@@ -181,6 +181,23 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         {
             RunTest(
                 "2.5.0",
+                rollForward,
+                applyPatches)
+                .ShouldFailToFindCompatibleFrameworkVersion();
+        }
+
+        // Verify that rollForward settings will never roll back to lower major version.
+        [Theory] // rollForward                               applyPatches
+        [InlineData(Constants.RollForwardSetting.Disable,     null)]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData(Constants.RollForwardSetting.Minor,       null)]
+        [InlineData(Constants.RollForwardSetting.Minor,       false)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, null)]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, false)]
+        public void NeverRollBackOnMajor_ReleaseOnly(string rollForward, bool? applyPatches)
+        {
+            RunTest(
+                "4.1.0",
                 rollForward,
                 applyPatches)
                 .ShouldFailToFindCompatibleFrameworkVersion();

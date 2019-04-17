@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         // Verify that inner framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>)
-        // is correctly reconciled with app's framework reference 5.1.1 <defaults>. App fx reference is higher.
+        // is correctly reconciled with app's framework reference 5.1.1 (defaults = RollForward:Minor). App fx reference is higher.
         [Theory] // fxRefVersion  rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
         [InlineData("5.0.0",      0,                          null,         null)]
         [InlineData("5.1.0",      0,                          null,         "5.1.3")]
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         // Verify that inner framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>)
-        // is correctly reconciled with app's framework reference 5.1.1 <defaults>. App fx reference is higher.
+        // is correctly reconciled with app's framework reference 5.1.1 (defaults = RollForward:Minor). App fx reference is higher.
         // In this case the direct reference from app is first, so the framework reference from app
         // is actually resolved against the disk - and the resolved framework is than compared to
         // the inner framework reference (potentially causing re-resolution).
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         // Verify that inner framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>)
-        // is correctly reconciled with app's framework reference 5.1.1 <defaults>. App fx reference is lower.
+        // is correctly reconciled with app's framework reference 5.1.1 (defaults = RollForward:Minor). App fx reference is lower.
         [Theory] // fxRefVersion  rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
         [InlineData("5.4.0",      null,                       null,         "5.4.1")]
         [InlineData("6.0.0",      null,                       null,         null)]
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         // Verify that inner framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>)
-        // is correctly reconciled with app's framework reference 5.1.1 <defaults>. App fx reference is lower.
+        // is correctly reconciled with app's framework reference 5.1.1 (defaults = RollForward:Minor). App fx reference is lower.
         // In this case the direct reference from app is first, so the framework reference from app
         // is actually resolved against the disk - and the resolved framework is than compared to
         // the inner framework reference (potentially causing re-resolution).
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         // Verify that inner framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>)
-        // is correctly reconciled with app's framework reference 5.1.1 <defaults>. App fx reference is higher.
+        // is correctly reconciled with app's framework reference 5.1.1 (defaults = RollForward:Minor). App fx reference is higher.
         // 3.0 change:
         // 2.* - release would never roll forward to pre-release
         // 3.* - release rolls forward to pre-release if there is no available release match
@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     MicrosoftNETCoreApp, resolvedFramework, versionReference, "6.1.1-preview.1");
         }
 
-        // Verify that inner framework reference 5.1.1 <defaults>
+        // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
         // is correctly reconciled with app's framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>).
         // App fx reference is lower.
         [Theory] // fxRefVersion  rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
@@ -239,7 +239,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     MicrosoftNETCoreApp, resolvedFramework, versionReference, "5.1.1");
         }
 
-        // Verify that inner framework reference 5.1.1 <defaults>
+        // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
         // is correctly reconciled with app's framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>).
         // App fx reference is lower.
         // In this case the direct reference from app is first, so the framework reference from app
@@ -277,7 +277,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
         }
 
-        // Verify that inner framework reference 5.1.1 <defaults>
+        // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
         // is correctly reconciled with app's framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>).
         // App fx reference is higher.
         [Theory] // fxRefVersion  rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
@@ -302,7 +302,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     MicrosoftNETCoreApp, resolvedFramework, "5.1.1", versionReference);
         }
 
-        // Verify that inner framework reference 5.1.1 <defaults>
+        // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
         // is correctly reconciled with app's framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>).
         // App fx reference is higher.
         // In this case the direct reference from app is first, so the framework reference from app
@@ -330,7 +330,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     MicrosoftNETCoreApp, resolvedFramework, "5.1.1", versionReference);
         }
 
-        // Verify that inner framework reference 5.1.1 <defaults>
+        // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
         // is correctly reconciled with another's framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>).
         // The higher framework has fx reference with higher version.
         [Theory] // fxRefVersion  rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
@@ -365,7 +365,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     MicrosoftNETCoreApp, resolvedFramework, versionReference, "5.1.1");
         }
 
-        // Verify that inner framework reference 5.1.1 <defaults>
+        // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
         // is correctly reconciled with another's framework reference (<fxRefVersion>, <rollForwardOnNoCandidateFx>, <applyPatches>).
         // The higher framework has fx reference with lower version.
         [Theory] // fxRefVersion  rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
