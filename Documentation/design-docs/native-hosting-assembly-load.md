@@ -22,6 +22,7 @@ In .NET Core 3.0 the hosting layer (see [here](https://github.com/dotnet/core-se
 * The `apphost` (`.exe` which is part of the app)
 * The `comhost` (`.dll` which is part of the app and acts as COM server)
 * The `ijwhost` (`.dll` consumed via `.lib` used by IJW assemblies)
+* The `winrthost` (`.dll` which is part of the app and acts as WinRT server)
 
 Every one of these hosts serve different scenario and expose different APIs. The one thing they have in common is that their main purpose is to find the right `hostfxr`, load it and call into it to execute the desired scenario. For the most part all these hosts are basically just wrappers around functionality provided by `hostfxr`.
 
@@ -35,7 +36,7 @@ The proposal is to add a new host library `nethost` which can be used by native 
 ## New host binary for component hosting
 Add new library `nethost` which will act as the easy to use host for loading managed components.
 The library would be a dynamically loaded library (`.dll`, `.so`, `.dylib`). For ease of use there would be a header file for C++ apps as well as `.lib`/`.a` for easy linking.
-Apps using the component hosting functionality would ship this library as part of the app. Unlike the `apphost`, `comhost` and `ijwhost`, the `nethost` will not be directly supported by the .NET Core SDK since its target usage is not from .NET Core apps.
+Apps using the component hosting functionality would ship this library as part of the app. Unlike the `apphost`, `comhost`, `ijwhost` and `winrthost`, the `nethost` will not be directly supported by the .NET Core SDK since its target usage is not from .NET Core apps.
 
 The exact delivery mechanism is TBD (pending investigation), but it probably should include NuGet (for C++ projects) and plain `.zip` (for any consumer). The binary itself should be signed by Microsoft as there will be no support for modifying the binary as part of custom application build (unlike `apphost` or `comhost`).
 
@@ -84,6 +85,5 @@ Currently there's no way to unload the runtime itself (and we don't have any pla
   * What happens with the returned function pointers - unloading the underlying code would lead to these function pointers to become invalid, likely causing undefined behavior when used.
   * How to handle sharing - for performance and functionality reasons it would make a lot of sense to not load the same assembly twice - basically if the component loading API is used twice on the same assembly, the assembly is loaded only once and two separate function pointers are returned. Unloading may introduce unexpected failure modes.
 * Future interop considerations
-  * .NET Core WinRT components - we believe that this is very similar to `comhost` and thus should work with the current design
   * `NativeCallableAttribute` (DLL_EXPORT implemented in managed) - we believe that on Windows this would be close to `ijwhost` and on Linux/macOS we should be able to create something which uses `nethost`.
   * The proposed `nethost` API only supports calling static managed methods. If the use case requires exposing objects/interfaces some amount of infra work is needed to expose those on top of the proposed API.
