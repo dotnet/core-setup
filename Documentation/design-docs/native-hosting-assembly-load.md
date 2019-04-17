@@ -13,16 +13,17 @@ Native app which wants to load managed assembly and call into it for some functi
 
 
 ## Existing support
-[COM Activation](COM-activation.md) allows native apps to effectively load managed components (assemblies), but it requires the use of COM activation APIs and general COM related registration and setup.
+[COM Activation](COM-activation.md) allows native apps to effectively load managed components (assemblies), but it requires the use of COM activation APIs and general COM related registration and setup. This is Windows only.
+[WinRT Activation](WinRT-activation.md) also allows native apps to effectively load managed components, but it's tied to WinRT and only supports loading WinRT components (`.winmd`). This is Windows only.
 
 
 ## High-level proposal
 In .NET Core 3.0 the hosting layer (see [here](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/host-components.md)) ships with several hosts. These are binaries which act as the entry points to the .NET Core hosting/runtime:
 * The "muxer" (`dotnet.exe`)
 * The `apphost` (`.exe` which is part of the app)
-* The `comhost` (`.dll` which is part of the app and acts as COM server)
-* The `ijwhost` (`.dll` consumed via `.lib` used by IJW assemblies)
-* The `winrthost` (`.dll` which is part of the app and acts as WinRT server)
+* The `comhost` (`.dll` which is part of the app and acts as COM server) - Windows only
+* The `ijwhost` (`.dll` consumed via `.lib` used by IJW assemblies) - Windows only
+* The `winrthost` (`.dll` which is part of the app and acts as WinRT server) - Windows only
 
 Every one of these hosts serve different scenario and expose different APIs. The one thing they have in common is that their main purpose is to find the right `hostfxr`, load it and call into it to execute the desired scenario. For the most part all these hosts are basically just wrappers around functionality provided by `hostfxr`.
 
@@ -38,7 +39,7 @@ Add new library `nethost` which will act as the easy to use host for loading man
 The library would be a dynamically loaded library (`.dll`, `.so`, `.dylib`). For ease of use there would be a header file for C++ apps as well as `.lib`/`.a` for easy linking.
 Apps using the component hosting functionality would ship this library as part of the app. Unlike the `apphost`, `comhost`, `ijwhost` and `winrthost`, the `nethost` will not be directly supported by the .NET Core SDK since its target usage is not from .NET Core apps.
 
-The exact delivery mechanism is TBD (pending investigation), but it probably should include NuGet (for C++ projects) and plain `.zip` (for any consumer). The binary itself should be signed by Microsoft as there will be no support for modifying the binary as part of custom application build (unlike `apphost` or `comhost`).
+The exact delivery mechanism is TBD (pending investigation), but it will include plain `.zip` (for any consumer) and potentially NuGet. The binary itself should be signed by Microsoft as there will be no support for modifying the binary as part of custom application build (unlike `apphost` or `comhost`).
 
 ### Load managed component and get a function pointer
 ``` C++
@@ -64,7 +65,7 @@ This API will
 
 The `reserved` argument is currently not used and must be set to `nullptr`. It is present to make this API extensible. In a future version we may need to add more parameters to this call in which case this parameter would be a pointer to a `struct` with the additional fields.
 
-If the runtime is initialized by this function, it will only be populated with framework assemblies (its TPA), none of the component's assemblies will be loaded into the default context.
+If the runtime is initialized by this function, the default load context will only be populated with framework assemblies (via TPA), none of the component's assemblies will be loaded into the default context.
 
 *As proposed there would be no support for unloading components. For discussion on possible solutions see open issues below.*
 
@@ -72,11 +73,12 @@ If the runtime is initialized by this function, it will only be populated with f
 ## Impact on hosting components
 
 ### `hostfxr`
-Extend the `hostfxr_delegate_type` (soon to be introduced with the `ijwhost`) to add the new runtime entry point in `System.Private.CoreLib` - name is TBD.
+Extend the `hostfxr_delegate_type` to add the new runtime entry point in `System.Private.CoreLib`.
 
 ### `hostpolicy`
 Impact on `hostpolicy` API is minimal:
-* Implementation of the `nethost_load_assembly_method` will just add a new value to the `coreclr_delegate_type` (soon to be introduced with the `ijwhost`) and the respective managed method in `System.Private.CoreLib`.
+* Implementation of the `nethost_load_assembly_method` will just add a new value to the `coreclr_delegate_type` and the respective managed method in `System.Private.CoreLib`.
+
 
 # Open issues
 * Support unloading of managed components  
