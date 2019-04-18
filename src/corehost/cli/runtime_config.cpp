@@ -20,12 +20,12 @@
 // 5) Apply the overrides (from command line or other)
 
 runtime_config_t::runtime_config_t()
-    : m_is_framework_dependent(false)
-    , m_valid(false)
-    , m_specified_settings(none)
-    , m_roll_forward_to_prerelease(false)
-    , m_default_settings()
+    : m_default_settings()
     , m_override_settings()
+    , m_specified_settings(none)
+    , m_is_framework_dependent(false)
+    , m_valid(false)
+    , m_roll_forward_to_prerelease(false)
 {
     pal::string_t roll_forward_to_prerelease_env;
     if (pal::getenv(_X("DOTNET_ROLL_FORWARD_TO_PRERELEASE"), &roll_forward_to_prerelease_env))
