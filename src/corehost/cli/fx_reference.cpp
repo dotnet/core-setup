@@ -60,26 +60,20 @@ bool fx_reference_t::is_compatible_with_higher_version(const fx_reference_t& hig
     return true;
 }
 
-bool fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from)
+void fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from)
 {
-    bool modified = false;
     if (from.get_roll_forward() < get_roll_forward())
     {
         set_roll_forward(from.get_roll_forward());
-        modified = true;
     }
 
     if (get_apply_patches() == true && from.get_apply_patches() == false)
     {
         set_apply_patches(false);
-        modified = true;
     }
 
     if (from.get_prefer_release() && !get_prefer_release())
     {
         set_prefer_release(true);
-        modified = true;
     }
-
-    return modified;
 }

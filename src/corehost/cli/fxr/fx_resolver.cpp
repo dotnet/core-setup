@@ -289,11 +289,10 @@ namespace
     }
 }
 
-StatusCode fx_resolver_t::soft_roll_forward_helper(
+StatusCode fx_resolver_t::reconcile_fx_references_helper(
     const fx_reference_t& lower_fx_ref,
     const fx_reference_t& higher_fx_ref,
-    /*out*/ fx_reference_t& effective_fx_ref,
-    /*out*/ bool& effective_is_different_from_higher)
+    /*out*/ fx_reference_t& effective_fx_ref)
 {
     if (!lower_fx_ref.is_compatible_with_higher_version(higher_fx_ref))
     {
@@ -303,78 +302,37 @@ StatusCode fx_resolver_t::soft_roll_forward_helper(
     }
 
     effective_fx_ref = fx_reference_t(higher_fx_ref); // copy
-    effective_is_different_from_higher = effective_fx_ref.merge_roll_forward_settings_from(lower_fx_ref);
+    effective_fx_ref.merge_roll_forward_settings_from(lower_fx_ref);
 
     display_compatible_framework_trace(higher_fx_ref.get_fx_version(), lower_fx_ref);
     return StatusCode::Success;
 }
 
-// Performs a "soft" roll-forward meaning we don't read any physical framework folders
-// and just check if the lower_fx_ref reference is compatible with the higher_fx_ref reference
-// with respect to roll-forward/apply-patches.
-//  - fx_ref
-//      The reference to resolve (the one we're processing).
-//      Passed by-value to avoid side-effects with mutable newest_references and oldest_references.
-//  - fx_is_hard_resolved
-//      true if there is a reference to the framework specified by fx_ref in the newest_references
-//      and that reference is pointing to a physically resolved framework on the disk (so the version in it
-//      actually exists on disk).
-//      This is used to restart the framework resolution if the soft-roll-forward results in updating
-//      the m_newest_references for the processed framework with a higher version. In that case
-//      it is necessary to throw away the results of the previous disk resolution and resolve the new
-//      current reference against the frameworks available on disk.
-//      If the current reference on the other hand has not been resolved against the disk yet
-//      then we can safely move it forward to a higher version. It will be resolved against the disk eventually
-StatusCode fx_resolver_t::soft_roll_forward(
-    const fx_reference_t fx_ref,
-    bool fx_is_hard_resolved)
+// Reconciles two framework references into a new effective framework reference
+// This process is sometimes also called "soft roll forward" (soft as in no IO)
+// - fx_ref_a - one of the framework references to reconcile
+// - fx_ref_b - the other framework reference to reconcile
+// - effective_fx_ref - the resulting effective framework reference
+//
+// The function will
+//   - Validate that the two references are compatible, of not it returns appropriate error code
+//   - Pick the higher version from the two references and use that in the effective reference
+//   - Merge roll forward settings and use the result in the effective reference
+StatusCode fx_resolver_t::reconcile_fx_references(
+    const fx_reference_t& fx_ref_a,
+    const fx_reference_t& fx_ref_b,
+    /*out*/ fx_reference_t& effective_fx_ref)
 {
-    const pal::string_t& fx_name = fx_ref.get_fx_name();
-    fx_reference_t current_fx_ref = m_newest_references[fx_name]; // copy
-
-    StatusCode rc = StatusCode::Success;
-
-    fx_reference_t effective_fx_ref;
-    bool effective_is_different_from_current = false;
-
-    if (current_fx_ref.get_fx_version_number() >= fx_ref.get_fx_version_number())
+    // The function is split into the helper because the various tracing messages
+    // make more sense if they're always written with higher/lower versions ordered in particular way.
+    if (fx_ref_a.get_fx_version_number() >= fx_ref_b.get_fx_version_number())
     {
-        // No version update since the current_fx_ref has higher version than the fx_ref.
-        rc = soft_roll_forward_helper(fx_ref, current_fx_ref, effective_fx_ref, effective_is_different_from_current);
-        if (rc != StatusCode::Success)
-        {
-            return rc;
-        }
+        return reconcile_fx_references_helper(fx_ref_b, fx_ref_a, effective_fx_ref);
     }
     else
     {
-        rc = soft_roll_forward_helper(current_fx_ref, fx_ref, effective_fx_ref, effective_is_different_from_current);
-        if (rc != StatusCode::Success)
-        {
-            return rc;
-        }
-
-        // fx_ref is higher version, so the effective_fx_ref is always different from current
-        // because we take the higher version as the effective.
-        effective_is_different_from_current = true;
+        return reconcile_fx_references_helper(fx_ref_a, fx_ref_b, effective_fx_ref);
     }
-
-    if (effective_is_different_from_current)
-    {
-        m_newest_references[fx_name] = effective_fx_ref;
-
-        if (fx_is_hard_resolved)
-        {
-            // Trigger retry even if framework reference is the exact same version, but different roll forward settings.
-            // This is needed since if the "old" settings were for example LatestMinor, 
-            //   the resolution would return the highest available minor. But if we now update it to "new" setting of Minor,
-            //   the resolution should return the closest higher available minor, which can be different.
-            display_retry_framework_trace(current_fx_ref, fx_ref);
-            return StatusCode::FrameworkCompatRetry;
-        }
-    }
-
-    return StatusCode::Success;
 }
 
 void fx_resolver_t::update_newest_references(
@@ -384,17 +342,17 @@ void fx_resolver_t::update_newest_references(
     for (const fx_reference_t& fx_ref : config.get_frameworks())
     {
         const pal::string_t& fx_name = fx_ref.get_fx_name();
-        auto temp_ref = m_newest_references.find(fx_name);
-        if (temp_ref == m_newest_references.end())
+        auto temp_ref = m_effective_fx_references.find(fx_name);
+        if (temp_ref == m_effective_fx_references.end())
         {
-            m_newest_references.insert({ fx_name, fx_ref });
-            m_oldest_references.insert({ fx_name, fx_ref });
+            m_effective_fx_references.insert({ fx_name, fx_ref });
+            m_oldest_fx_references.insert({ fx_name, fx_ref });
         }
         else
         {
-            if (fx_ref.get_fx_version_number() < m_oldest_references[fx_name].get_fx_version_number())
+            if (fx_ref.get_fx_version_number() < m_oldest_fx_references[fx_name].get_fx_version_number())
             {
-                m_oldest_references[fx_name] = fx_ref;
+                m_oldest_fx_references[fx_name] = fx_ref;
             }
         }
     }
@@ -438,6 +396,8 @@ StatusCode fx_resolver_t::read_framework(
     for (const fx_reference_t& fx_ref : config.get_frameworks())
     {
         const pal::string_t& fx_name = fx_ref.get_fx_name();
+        const fx_reference_t& current_effective_fx_ref = m_effective_fx_references[fx_name];
+        fx_reference_t new_effective_fx_ref;
 
         auto existing_framework = std::find_if(
             fx_definitions.begin(),
@@ -446,33 +406,34 @@ StatusCode fx_resolver_t::read_framework(
 
         if (existing_framework == fx_definitions.end())
         {
-            // Perform a "soft" roll-forward meaning we don't read any physical framework folders yet
-            // Since we didn't find the framework in the resolved list yet, it's a pure soft roll-forward
-            // it's OK to update the newest reference as we haven't processed it yet.
-            rc = soft_roll_forward(fx_ref, /*fx_is_hard_resolved*/ false);
+            // Reconcile the framework reference with the most up to date so far we have for the framework.
+            // This does not read any physical framework folders yet.
+            // Since we didn't find the framework in the resolved list yet, it's OK to update the effective reference 
+            // as we haven't processed it yet.
+            rc = reconcile_fx_references(fx_ref, current_effective_fx_ref, new_effective_fx_ref);
             if (rc)
             {
                 break; // Error case
             }
 
-            fx_reference_t& newest_ref = m_newest_references[fx_name];
+            m_effective_fx_references[fx_name] = new_effective_fx_ref;
 
-            // Resolve the framwork reference against the the existing physical framework folders
-            fx_definition_t* fx = resolve_framework_reference(newest_ref, m_oldest_references[fx_name].get_fx_version(), host_info.dotnet_root);
+            // Resolve the effective framework reference against the the existing physical framework folders
+            fx_definition_t* fx = resolve_framework_reference(new_effective_fx_ref, m_oldest_fx_references[fx_name].get_fx_version(), host_info.dotnet_root);
             if (fx == nullptr)
             {
-                display_missing_framework_error(fx_name, newest_ref.get_fx_version(), pal::string_t(), host_info.dotnet_root);
+                display_missing_framework_error(fx_name, new_effective_fx_ref.get_fx_version(), pal::string_t(), host_info.dotnet_root);
                 return FrameworkMissingFailure;
             }
 
-            // Do NOT update the newest reference to have the same version as the resolved framework.
+            // Do NOT update the effective reference to have the same version as the resolved framework.
             // This could prevent correct resolution in some cases.
             // For example if the resolution starts with reference "2.1.0 LatestMajor" the resolution could
             // return "3.0.0". If later on we find another reference "2.1.0 Minor", while the two references are compatible
             // we would not be able to resolve it, since we would compare "2.1.0 Minor" with "3.0.0 LatestMajor" which are
             // not compatible.
-            // So instead leave the newest reference as is. If the above situation occurs, the soft roll forward
-            // will change the newest from "2.1.0 LatestMajor" to "2.1.0 Minor" and restart the framework resolution process.
+            // So instead leave the effective reference as is. If the above situation occurs, the reference reconciliation
+            // will change the effective reference from "2.1.0 LatestMajor" to "2.1.0 Minor" and restart the framework resolution process.
             // So during the second run we will resolve for example "2.2.0" which will be compatible with both framework references.
 
             fx_definitions.push_back(std::unique_ptr<fx_definition_t>(fx));
@@ -498,14 +459,22 @@ StatusCode fx_resolver_t::read_framework(
         }
         else
         {
-            // Perform a "soft" roll-forward meaning we don't read any physical framework folders yet
+            // Reconcile the framework reference with the most up to date so far we have for the framework.
             // Note that since we found the framework in the already resolved frameworks
-            // pass a flag which marks tells the function that the framework was already resolved against disk (hard resolved),
-            // meaning that if we need to update it, we need to restart the entire process.
-            rc = soft_roll_forward(fx_ref, /*fx_is_hard_resolved*/ true);
+            // any update to the effective framework reference needs to restart the resolution process
+            // so that we re-resolve the framework against disk.
+            rc = reconcile_fx_references(fx_ref, current_effective_fx_ref, new_effective_fx_ref);
             if (rc)
             {
-                break; // Error or retry case
+                break; // Error case
+            }
+
+            if (new_effective_fx_ref != current_effective_fx_ref)
+            {
+                display_retry_framework_trace(current_effective_fx_ref, fx_ref);
+
+                m_effective_fx_references[fx_name] = new_effective_fx_ref;
+                return StatusCode::FrameworkCompatRetry;
             }
 
             // Success but move it to the back (without calling dtors) so that lower-level frameworks come last including Microsoft.NetCore.App
@@ -541,7 +510,7 @@ StatusCode fx_resolver_t::resolve_frameworks_for_app(
 
     if (rc == StatusCode::Success)
     {
-        display_summary_of_frameworks(fx_definitions, resolver.m_newest_references);
+        display_summary_of_frameworks(fx_definitions, resolver.m_effective_fx_references);
     }
 
     return rc;

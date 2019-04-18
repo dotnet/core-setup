@@ -78,9 +78,23 @@ public:
     // The other instance must be equal or higher version.
     bool is_compatible_with_higher_version(const fx_reference_t& higher_version_reference) const;
 
-    // Apply the most restrictive settings
-    // Returns true if any settings were modified, false if nothing was updated (this has more restrictive settings then from)
-    bool merge_roll_forward_settings_from(const fx_reference_t& from);
+    // Merge roll forward settings for two framework references
+    void merge_roll_forward_settings_from(const fx_reference_t& from);
+
+    bool operator==(const fx_reference_t& other)
+    {
+        return
+            fx_name == other.fx_name &&
+            fx_version == other.fx_version &&
+            apply_patches == other.apply_patches &&
+            roll_forward == other.roll_forward &&
+            prefer_release == other.prefer_release;
+    }
+
+    bool operator!=(const fx_reference_t& other)
+    {
+        return !(*this == other);
+    }
 
 private:
     bool apply_patches;
