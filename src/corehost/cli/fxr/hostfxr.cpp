@@ -839,6 +839,9 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
 //
 SHARED_API int32_t __cdecl hostfxr_close(const hostfxr_handle host_context_handle)
 {
+    if (host_context_handle == nullptr)
+        return StatusCode::InvalidArgFailure;
+
     trace::setup();
     trace::info(_X("--- Invoked hostfxr_close [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 

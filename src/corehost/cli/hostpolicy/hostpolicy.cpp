@@ -93,7 +93,15 @@ namespace
         std::unique_ptr<hostpolicy_context_t> context_local(new hostpolicy_context_t());
         int rc = context_local->initialize(hostpolicy_init, args, breadcrumbs_enabled);
         if (rc != StatusCode::Success)
+        {
+            {
+                std::lock_guard<std::mutex> lock{ g_context_lock };
+                g_context_initializing.store(false);
+            }
+
+            g_context_cv.notify_all();
             return rc;
+        }
 
         *context = context_local.release();
         return StatusCode::Success;
@@ -597,6 +605,14 @@ SHARED_API int __cdecl corehost_close_context(corehost_context_contract context_
 
 SHARED_API int corehost_unload()
 {
+    std::lock_guard<std::mutex> lock{ g_lib_lock };
+    if (g_coreclr != nullptr)
+        return StatusCode::Success;
+
+    // Allow re-initializing if runtime has not been loaded
+    std::lock_guard<std::mutex> init_lock{ g_init_lock };
+    g_init_done = false;
+
     return StatusCode::Success;
 }
 

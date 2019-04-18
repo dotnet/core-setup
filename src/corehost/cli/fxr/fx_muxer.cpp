@@ -70,6 +70,16 @@ static int execute_app(
     const int argc,
     const pal::char_t* argv[])
 {
+    {
+        std::unique_lock<std::mutex> lock{ g_context_lock };
+        g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
+
+        if (g_active_host_context != nullptr)
+            return StatusCode::HostInvalidState;
+
+        g_context_initializing.store(true);
+    }
+
     pal::dll_t corehost;
     hostpolicy_contract host_contract{};
     corehost_main_fn host_main = nullptr;
@@ -82,7 +92,9 @@ static int execute_app(
         // Track an empty 'active' context so that host context-based APIs can work properly when
         // the runtime is loaded through non-host context-based APIs.
         std::lock_guard<std::mutex> lock{ g_context_lock };
+        assert(g_active_host_context == nullptr);
         g_active_host_context.reset(new host_context_t());
+        g_context_initializing.store(false);
     }
 
     {
@@ -96,6 +108,7 @@ static int execute_app(
         }
     }
 
+    g_context_cv.notify_all();
     return code;
 }
 
@@ -790,6 +803,19 @@ namespace
 
         return rc;
     }
+
+    void handle_initialize_failure(hostpolicy_contract *hostpolicy_contract = nullptr)
+    {
+        {
+            std::lock_guard<std::mutex> lock{ g_context_lock };
+            g_context_initializing.store(false);
+        }
+
+        if (hostpolicy_contract != nullptr && hostpolicy_contract->unload != nullptr)
+            hostpolicy_contract->unload();
+
+        g_context_cv.notify_all();
+    }
 }
 
 int fx_muxer_t::initialize_for_app(
@@ -803,7 +829,10 @@ int fx_muxer_t::initialize_for_app(
         g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
 
         if (g_active_host_context != nullptr)
+        {
+            trace::error(_X("Hosting components are already initialized. Re-initialization for an app is not allowed."));
             return StatusCode::HostInvalidState;
+        }
 
         g_context_initializing.store(true);
     }
@@ -821,15 +850,22 @@ int fx_muxer_t::initialize_for_app(
         impl_dir,
         init);
     if (rc != StatusCode::Success)
+    {
+        handle_initialize_failure();
         return rc;
+    }
 
     const host_interface_t &intf = init->get_host_init_data();
     hostpolicy_contract host_contract{};
     std::unique_ptr<host_context_t> context(new host_context_t());
     rc = initialize_context(impl_dir, host_contract, intf, &context->context_contract);
     if (rc != StatusCode::Success)
+    {
+        handle_initialize_failure(&host_contract);
         return rc;
+    }
 
+    trace::verbose(_X("Initialized context for app: %s"), host_info.app_path.c_str());
     context->type = host_context_type::initialized;
     context->host_contract = host_contract;
     context->is_app = true;
@@ -867,24 +903,37 @@ int fx_muxer_t::initialize_for_runtime_config(
     std::unique_ptr<corehost_init_t> init;
     int rc = get_init_info_for_component(host_info, mode, runtime_config, impl_dir, init);
     if (rc != StatusCode::Success)
+    {
+        if (!already_initialized)
+            handle_initialize_failure();
+
         return rc;
+    }
 
     const host_interface_t &intf = init->get_host_init_data();
     hostpolicy_contract host_contract{};
     std::unique_ptr<host_context_t> context(new host_context_t());
     rc = initialize_context(impl_dir, host_contract, intf, &context->context_contract);
+    already_initialized |= rc == StatusCode::CoreHostAlreadyInitialized;
     if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
+    {
+        if (!already_initialized)
+            handle_initialize_failure(&host_contract);
+
         return rc;
+    }
 
     context->host_contract = host_contract;
     context->is_app = false;
-    if (already_initialized || rc == StatusCode::CoreHostAlreadyInitialized)
+    if (already_initialized)
     {
+        trace::verbose(_X("Initialized secondary context for config: %s"), runtime_config_path);
         context->type = host_context_type::secondary;
         init->get_runtime_properties(context->config_properties);
     }
     else
     {
+        trace::verbose(_X("Initialized context for config: %s"), runtime_config_path);
         context->type = host_context_type::initialized;
     }
 
@@ -908,6 +957,7 @@ namespace
 
         {
             std::lock_guard<std::mutex> lock{ g_context_lock };
+            assert(g_active_host_context == nullptr);
             g_active_host_context.reset(context);
             g_context_initializing.store(false);
         }
@@ -982,8 +1032,11 @@ int fx_muxer_t::close_host_context(const host_context_t *context)
     }
 
     // Do not delete the active context.
-    if (context->type != host_context_type::active)
-        delete context;
+    {
+        std::lock_guard<std::mutex> lock{ g_context_lock };
+        if (context != g_active_host_context.get())
+            delete context;
+    }
 
     return rc;
 }
