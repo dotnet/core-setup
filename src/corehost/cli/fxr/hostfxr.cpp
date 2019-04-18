@@ -665,13 +665,23 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
     trace::setup();
     trace::info(_X("--- Invoked hostfxr_get_runtime_property_value [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
+    const host_context_t *context;
     if (host_context_handle == nullptr)
     {
-        // TODO: get property for active context
-        return StatusCode::InvalidArgFailure;
+        const host_context_t *context_maybe = fx_muxer_t::get_active_host_context();
+        if (context_maybe == nullptr || context_maybe->type != host_context_type::active)
+        {
+            trace::error(_X("Hosting components context has not been initialized. Cannot get runtime properties."));
+            return StatusCode::HostInvalidState;
+        }
+
+        context = context_maybe;
+    }
+    else
+    {
+        context = static_cast<const host_context_t*>(host_context_handle);
     }
 
-    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
     if (context->type == host_context_type::invalid)
         return StatusCode::InvalidArgFailure;
 
@@ -715,7 +725,7 @@ SHARED_API int32_t __cdecl hostfxr_set_runtime_property_value(
     const pal::char_t *name,
     const pal::char_t *value)
 {
-    if (name == nullptr)
+    if (host_context_handle == nullptr || name == nullptr)
         return StatusCode::InvalidArgFailure;
 
     trace::setup();
@@ -771,13 +781,23 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
     trace::setup();
     trace::info(_X("--- Invoked hostfxr_get_runtime_properties [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
+    const host_context_t *context;
     if (host_context_handle == nullptr)
     {
-        // TODO: get properties for active context
-        return StatusCode::InvalidArgFailure;
+        const host_context_t *context_maybe = fx_muxer_t::get_active_host_context();
+        if (context_maybe == nullptr || context_maybe->type != host_context_type::active)
+        {
+            trace::error(_X("Hosting components context has not been initialized. Cannot get runtime properties."));
+            return StatusCode::HostInvalidState;
+        }
+
+        context = context_maybe;
+    }
+    else
+    {
+        context = static_cast<const host_context_t*>(host_context_handle);
     }
 
-    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
     if (context->type == host_context_type::invalid)
         return StatusCode::InvalidArgFailure;
 

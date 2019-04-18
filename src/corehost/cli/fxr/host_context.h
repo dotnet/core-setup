@@ -12,6 +12,7 @@
 
 enum class host_context_type
 {
+    empty,        // Not populated, cannot be used for context-based operations
     initialized,  // Created, but not active (runtime not loaded)
     active,       // Runtime loaded for this context
     secondary,    // Created after runtime was loaded using another context
@@ -29,6 +30,10 @@ struct host_context_t
     std::vector<pal::string_t> argv;
 
     std::unordered_map<pal::string_t, pal::string_t> config_properties;
+
+    host_context_t()
+        : type { host_context_type::empty }
+    { }
 };
 
 #endif // __HOST_CONTEXT_H__

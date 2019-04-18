@@ -35,7 +35,7 @@ namespace
 {
     std::mutex g_context_lock;
     std::condition_variable g_context_cv;
-    std::unique_ptr<host_context_t> g_active_host_context;
+    std::unique_ptr<const host_context_t> g_active_host_context;
     std::atomic<bool> g_context_initializing(false);
 }
 
@@ -958,6 +958,12 @@ int fx_muxer_t::get_runtime_delegate(host_context_t *context, coreclr_delegate_t
 
         return contract.get_runtime_delegate(contract.instance, type, delegate);
     }
+}
+
+const host_context_t* fx_muxer_t::get_active_host_context()
+{
+    std::lock_guard<std::mutex> lock{ g_context_lock };
+    return g_active_host_context.get();
 }
 
 int fx_muxer_t::close_host_context(const host_context_t *context)
