@@ -74,9 +74,8 @@ public:
         prefer_release = value;
     }
 
-    // Is the current version compatible with another instance with roll-forward semantics.
-    // The other instance must be equal or higher version.
-    bool is_compatible_with_higher_version(const fx_reference_t& higher_version_reference) const;
+    // Is the current version compatible with the specified equal or higher version.
+    bool is_compatible_with_higher_version(const fx_ver_t& higher_version) const;
 
     // Merge roll forward settings for two framework references
     void merge_roll_forward_settings_from(const fx_reference_t& from);

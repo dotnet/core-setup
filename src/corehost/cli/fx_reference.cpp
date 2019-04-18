@@ -7,31 +7,31 @@
 #include "fx_reference.h"
 #include "roll_fwd_on_no_candidate_fx_option.h"
 
-bool fx_reference_t::is_compatible_with_higher_version(const fx_reference_t& higher_version_reference) const
+bool fx_reference_t::is_compatible_with_higher_version(const fx_ver_t& higher_version) const
 {
-    assert(get_fx_version_number() <= higher_version_reference.get_fx_version_number());
+    assert(get_fx_version_number() <= higher_version);
 
-    if (get_fx_version_number() == higher_version_reference.get_fx_version_number())
+    if (get_fx_version_number() == higher_version)
     {
         return true;
     }
 
     // Verify major roll forward
-    if (get_fx_version_number().get_major() != higher_version_reference.get_fx_version_number().get_major()
+    if (get_fx_version_number().get_major() != higher_version.get_major()
         && roll_forward < roll_forward_option::Major)
     {
         return false;
     }
 
     // Verify minor roll forward
-    if (get_fx_version_number().get_minor() != higher_version_reference.get_fx_version_number().get_minor()
+    if (get_fx_version_number().get_minor() != higher_version.get_minor()
         && roll_forward < roll_forward_option::Minor)
     {
         return false;
     }
 
     // Verify patch roll forward
-    if (get_fx_version_number().get_patch() != higher_version_reference.get_fx_version_number().get_patch()
+    if (get_fx_version_number().get_patch() != higher_version.get_patch()
         && roll_forward == roll_forward_option::LatestPatch
         && apply_patches == false)
     {
