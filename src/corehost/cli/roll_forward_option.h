@@ -8,7 +8,7 @@
 // Specifies the roll forward option value
 // High-level notes on roll forward algorithm
 //  - Try to use the version which the app asked for. If not possible try to use the closest higher version (unless modified via settings)
-//  - Always pick the latest patch for servicing/secutiry
+//  - Always pick the latest patch for servicing/security
 //  - Allow customization of the behavior via rollForward setting
 //  - Backward compatible with deprecated settings rollForwardOnNoCandidateFx and applyPatches
 enum class roll_forward_option

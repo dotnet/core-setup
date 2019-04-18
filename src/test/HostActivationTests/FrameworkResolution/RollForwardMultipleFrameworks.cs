@@ -60,7 +60,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
         [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     null)]
         [InlineData("5.1.1",      Constants.RollForwardSetting.Disable,     "5.1.1")]
-        [InlineData("5.1.3",      Constants.RollForwardSetting.Disable,     "5.1.3")]
         [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, null)]
         [InlineData("5.1.0",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
@@ -98,7 +97,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
         [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     null)]
         [InlineData("5.1.1",      Constants.RollForwardSetting.Disable,     "5.1.1")]
-        [InlineData("5.1.3",      Constants.RollForwardSetting.Disable,     "5.1.3")]
         [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, null)]
         [InlineData("5.1.0",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
@@ -133,6 +131,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // Also validates that since all relevant available versions are release, 
         // the DOTNET_ROLL_FORWARD_TO_PRERELEASE has no effect on the result.
         [Theory] // fxRefVersion  rollForward                               rollForwadToPreRelease resolvedFramework
+        [InlineData("5.1.3",      Constants.RollForwardSetting.Disable,     false,                 "5.1.3")]
         [InlineData("5.4.0",      null,                                     false,                 "5.4.1")]
         [InlineData("5.4.0",      Constants.RollForwardSetting.Minor,       false,                 "5.4.1")]
         [InlineData("5.4.0",      Constants.RollForwardSetting.Minor,       true,                  "5.4.1")]
@@ -185,6 +184,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // is actually resolved against the disk - and the resolved framework is than compared to
         // the inner framework reference (potentially causing re-resolution).
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
+        [InlineData("5.1.3",      Constants.RollForwardSetting.Disable,     "5.1.3")]
         [InlineData("5.4.0",      null,                                     "5.4.1")]
         [InlineData("5.4.0",      Constants.RollForwardSetting.Minor,       "5.4.1")]
         [InlineData("5.4.0",      Constants.RollForwardSetting.LatestMinor, "5.4.1")]
@@ -494,7 +494,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
-        // is correctly reconciled with another framwork's framework reference (<fxRefVersion>, <rollForward>).
+        // is correctly reconciled with another framework's framework reference (<fxRefVersion>, <rollForward>).
         // The higher framework has fx reference with higher version.
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
         [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     null)]
@@ -534,7 +534,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         }
 
         // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
-        // is correctly reconciled with another framwork's framework reference (<fxRefVersion>, <rollForward>).
+        // is correctly reconciled with another framework's framework reference (<fxRefVersion>, <rollForward>).
         // The higher framework has fx reference with lower version.
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
         [InlineData("5.1.3",      Constants.RollForwardSetting.Disable,     "5.1.3")]

@@ -86,7 +86,7 @@ namespace
         // For Major and Minor, we need to look for latest patch as the above would have found the lowest patch (as it looks for lowest version as a whole).
         // For LatestPatch we haven't found any version yet, so simply find the latest patch.
         //   For backward compatibility reasons we also need to consider the apply_patches setting though.
-        //   For backward compatibility reasons the apply_patches for pre-release framework reference only applies to the patch portiong of the version,
+        //   For backward compatibility reasons the apply_patches for pre-release framework reference only applies to the patch portion of the version,
         //     the pre-release portion of the version ignores apply_patches and we should roll to the latest (100% backward would roll to closest, but for consistency
         //     in the new behavior we will roll to latest).
         if ((fx_ref.get_roll_forward() == roll_forward_option::LatestPatch || 
@@ -175,6 +175,11 @@ namespace
             // This is not strictly necessary, we just need to return version which doesn't exist.
             // But it's cleaner to return the desider reference then invalid -1.-1.-1 version.
             best_match = fx_ref.get_fx_version_number();
+            trace::verbose(_X("Framework reference didn't resolve to any available version."));
+        }
+        else
+        {
+            trace::verbose(_X("Framework reference resolved to version '%s'.", best_match.as_str().c_str()));
         }
 
         return best_match;
@@ -294,7 +299,7 @@ StatusCode fx_resolver_t::reconcile_fx_references_helper(
     const fx_reference_t& higher_fx_ref,
     /*out*/ fx_reference_t& effective_fx_ref)
 {
-    if (!lower_fx_ref.is_compatible_with_higher_version(higher_fx_ref))
+    if (!lower_fx_ref.is_compatible_with_higher_version(higher_fx_ref.get_fx_version_number()))
     {
         // Error condition - not compatible with the other reference
         display_incompatible_framework_error(higher_fx_ref.get_fx_version(), lower_fx_ref);
@@ -338,7 +343,7 @@ StatusCode fx_resolver_t::reconcile_fx_references(
 void fx_resolver_t::update_newest_references(
     const runtime_config_t& config)
 {
-    // Loop through each reference and update the list of newest references before we resolve_fx.
+    // Loop through each reference and update the list of newest references before we resolve_framework_reference.
     for (const fx_reference_t& fx_ref : config.get_frameworks())
     {
         const pal::string_t& fx_name = fx_ref.get_fx_name();

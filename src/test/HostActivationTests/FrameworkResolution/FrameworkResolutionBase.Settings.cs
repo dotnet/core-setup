@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                         return rc;
                     });
                 default:
-                    throw new Exception($"RollFowardOnNoCandidateFx doesn't support setting location {location}.");
+                    throw new Exception($"RollForwardOnNoCandidateFx doesn't support setting location {location}.");
             }
         }
 

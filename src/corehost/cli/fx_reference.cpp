@@ -51,7 +51,7 @@ bool fx_reference_t::is_compatible_with_higher_version(const fx_ver_t& higher_ve
         return false;
     }
 
-    // Concernign pre-release versions
+    // Concerning pre-release versions
     //  - Pre-release is allowed to roll to any version (release or pre-release)
     //  - Release should prefer rolling to release, but is allowed to roll to pre-release if no compatible release is available
     // This function only compares framework references, it doesn't resolve framework reference to the available framework on disk.
