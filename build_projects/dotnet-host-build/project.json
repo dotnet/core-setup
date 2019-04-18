@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "NETStandard.Library": "1.6.1",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.11",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.13",
     "Microsoft.NETCore.Platforms": "1.1.2",
     "Microsoft.NETCore.Targets": "1.1.4", 
     "System.Net.Http": "4.3.4",

@@ -7,7 +7,7 @@
   "dependencies": {
     "NETStandard.Library": "1.6.1",
     "Microsoft.CSharp": "4.3.0",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.13-servicing-27612-03",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.1.13",
     "Microsoft.NETCore.Platforms": "1.1.2",
     "Microsoft.NETCore.Targets": "1.1.4", 
     "System.Runtime.Serialization.Primitives": "4.3.0",
