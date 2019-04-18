@@ -8,11 +8,11 @@ The .NET Core default hosting setup consists of several components which are des
 * `apphost` (executable) - which is used to give app an actual executable which can be run directly. The executable will be named using the application name. The advantage of having an app-local executable is that it can be customized for each app (not just the name, but icon, OS behavior and so on).
 * `comhost` (library) - which is used to enable COM server hosting. Component which wants to expose COM server objects will be built with this dynamic library in its output. The `comhost` then acts as the main entry point for the OS.
 * `ijwhost` (library) - which is used to enable loading of IJW assemblies. The library exposes functionality needed by the C++ compiler to generate mixed mode assemblies.
-* `winrthost` (library) - which is used to enable WinRT component hosting. Components which wants to be a WinRT component will be built with this library in its output. The `winrthost` then acts as the main entry point for the OS (very similar to `comhost`).
+* `winrthost` (library) - which is used to enable WinRT component hosting. Any component which wants to be a WinRT component will be built with this library in its output. The `winrthost` then acts as the main entry point for the OS (very similar to `comhost`).
 * `nethost` (library) - which is used by native apps (any app which is not .NET Core) to load .NET Core code dynamically.
 
-The entry-point typically does just one thing, it finds the `hostfxr` library and passes control to it. It also exposes the right entry points for its purpose (so the "main" for `dotnet` and `apphost`, the COM exports for `comhost` and so on).
-* `dotnet` host - `hostfxr` is obtained from the `./host/fxr<highestversion>` folder (relative to the location of the `dotnet` host).
+The entry-point typically does just one thing: it finds the `hostfxr` library and passes control to it. It also exposes the right entry points for its purpose (so the "main" for `dotnet` and `apphost`, the COM exports for `comhost` and so on).
+* `dotnet` host - `hostfxr` is obtained from the `./host/fxr/<highestversion>` folder (relative to the location of the `dotnet` host).
 * `apphost`, `comhost` and the others - `hostfxr` is located using this process:
     1. The app's folder is searched first. This is either the folder where the entry-point host lives or in case of `apphost` it is the path it has embedded in it as the app path.
     1. If the `DOTNET_ROOT` environment variable is defined, that path is searched
@@ -25,7 +25,7 @@ The host FXR library reads the `.runtimeconfig.json` of the app (and all it's de
 
 In most cases the latest available version of `hostfxr` is used. Self-contained apps use `hostfxr` from the app folder.
 
-The main reason to split the entry-point host and the `hostfxr` is to allow for servicing the logic in `hostfxr` without the need to stop all instances of the executable host currently running. In case of `apphost` and all the library hosts, servicing the entry-point host is basically impossible as they are part of the application itself.
+The main reason to split the entry-point host and the `hostfxr` is to allow for servicing the logic in `hostfxr` without the need to stop all instances of the executable host currently running. In the case of `apphost` and all the library hosts, servicing the entry-point host is impossible as they are part of the application itself.
 
 ## Host Policy
 The host policy library implements all the policies to actually load the runtime, apply configuration, resolve all app's dependencies and calls the runtime to run the app or load the required component.
