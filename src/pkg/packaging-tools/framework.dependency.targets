@@ -90,17 +90,48 @@
   -->
   <Target Name="DetermineRuntimeDependencies" />
 
-  <!-- get paths from packages that are needed for cross-gen and other includes,
-       only relevant for runtime-specific builds -->
-  <Target Name="GetPackagePaths" Condition="'$(NuGetRuntimeIdentifier)' != ''" DependsOnTargets="ResolveNuGetPackages">
-    <ItemGroup  Condition="'$(NuGetRuntimeIdentifier)' != ''">
-      <_runtimeCLR Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.FileName)%(ReferenceCopyLocalPaths.Extension)' == '$(LibraryFilePrefix)coreclr$(LibraryFileExtension)'" />
-      <_runtimeCoreLib Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.FileName)%(ReferenceCopyLocalPaths.Extension)' == 'System.Private.CoreLib.dll'" />
-      <_runtimeJIT Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.FileName)%(ReferenceCopyLocalPaths.Extension)' == '$(LibraryFilePrefix)clrjit$(LibraryFileExtension)'" />
-      <_fxSystemRuntime Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.FileName)%(ReferenceCopyLocalPaths.Extension)' == 'System.Runtime.dll'" />
+  <Target Name="AddCrossgenToolPackageReferences"
+          BeforeTargets="CollectPackageReferences">
+    <ItemGroup>
+      <CrossgenToolPackageReference Include="Microsoft.Private.CoreFx.NETCoreApp" Version="$(MicrosoftPrivateCoreFxNETCoreAppPackageVersion)" />
+      <CrossgenToolPackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR" Version="$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)" />
+      <CrossgenToolPackageReference Include="Microsoft.DiaSymReader.Native" Version="$(MicrosoftDiaSymReaderNativePackageVersion)" />
+      <CrossgenToolPackageReference Include="$(MicrosoftTargetingPackPrivateWinRTPackage)" Version="$(MicrosoftTargetingPackPrivateWinRTPackageVersion)" />
 
-      <!-- Find Windows.winmd in package cache to allow ExcludeAssets=All. -->
-      <_windowsWinMD Include="$(PackagesDir)$(MicrosoftTargetingPackPrivateWinRTPackage.ToLowerInvariant())/$(MicrosoftTargetingPackPrivateWinRTPackageVersion)/**/Windows.winmd" />
+      <!--
+        If any tool packages are missing, add them with ExcludeAssets=All. Be careful not to modify
+        existing PackageReferences.
+      -->
+      <PackageReference
+        Include="@(CrossgenToolPackageReference)"
+        Exclude="@(PackageReference)"
+        ExcludeAssets="All"/>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    Get paths from packages that are needed for crossgen. Only relevant for runtime-specific builds.
+  -->
+  <Target Name="GetCrossgenPackagePaths"
+          Condition="'$(NuGetRuntimeIdentifier)' != ''"
+          DependsOnTargets="ResolveNuGetPackages">
+    <PropertyGroup>
+      <_runtimePackageId>transport.runtime.$(NuGetRuntimeIdentifier).$(MicrosoftNETCoreRuntimeCoreCLRPackage.ToLowerInvariant())</_runtimePackageId>
+      <_runtimePackageVersion>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</_runtimePackageVersion>
+
+      <_runtimePackageDir>$(PackagesDir)$(_runtimePackageId)/$(_runtimePackageVersion)/</_runtimePackageDir>
+      <_jitPackageDir>$(PackagesDir)transport.runtime.$(NuGetRuntimeIdentifier).microsoft.netcore.jit/$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)/</_jitPackageDir>
+      <_corefxPackageDir>$(PackagesDir)runtime.$(NuGetRuntimeIdentifier).$(MicrosoftPrivateCoreFxNETCoreAppPackage.ToLowerInvariant())/$(MicrosoftPrivateCoreFxNETCoreAppPackageVersion)/</_corefxPackageDir>
+      <_winmdPackageDir>$(PackagesDir)$(MicrosoftTargetingPackPrivateWinRTPackage.ToLowerInvariant())/$(MicrosoftTargetingPackPrivateWinRTPackageVersion)/</_winmdPackageDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <!-- Find crossgen tool assets in package cache to allow ExcludeAssets=All. -->
+      <_runtimeCLR Include="$(_runtimePackageDir)**/$(LibraryFilePrefix)coreclr$(LibraryFileExtension)" />
+      <_runtimeCoreLib Include="$(_runtimePackageDir)**/native/System.Private.CoreLib.dll" />
+      <_runtimeJIT Include="$(_jitPackageDir)**/$(LibraryFilePrefix)clrjit$(LibraryFileExtension)" />
+      <_fxSystemRuntime Include="$(_corefxPackageDir)**/System.Runtime.dll" />
+      <_windowsWinMD Include="$(_winmdPackageDir)**/Windows.winmd" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -110,11 +141,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'@(_runtimeCLR)' != ''">
-      <_runtimePackageId>%(_runtimeCLR.NuGetPackageId)</_runtimePackageId>
-      <_runtimePackageVersion>%(_runtimeCLR.NuGetPackageVersion)</_runtimePackageVersion>
-      <_runtimePackagePath>$(PackagesDir)/$(_runtimePackageId.ToLowerInvariant())/$(_runtimePackageVersion)</_runtimePackagePath>
-
-      <_crossGenPath>$(_runtimePackagePath)/tools$(_crossDir)/crossgen$(ApplicationFileExtension)</_crossGenPath>
+      <_crossGenPath>$(_runtimePackageDir)tools$(_crossDir)/crossgen$(ApplicationFileExtension)</_crossGenPath>
       <_runtimeDirectory>%(_runtimeCLR.RootDir)%(_runtimeCLR.Directory)</_runtimeDirectory>
     </PropertyGroup>
 
@@ -123,11 +150,8 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'@(_runtimeJIT)' != ''">
-      <_jitPackageId>%(_runtimeJIT.NuGetPackageId)</_jitPackageId>
-      <_jitPackageVersion>%(_runtimeJIT.NuGetPackageVersion)</_jitPackageVersion>
-      <_jitPackagePath>$(PackagesDir)/$(_jitPackageId.ToLowerInvariant())/$(_jitPackageVersion)</_jitPackagePath>
       <_jitPath>%(_runtimeJIT.FullPath)</_jitPath>
-      <_jitPath Condition="'$(_crossDir)' != ''">$(_jitPackagePath)/runtimes$(_crossDir)/native/$(LibraryFilePrefix)clrjit$(LibraryFileExtension)</_jitPath>
+      <_jitPath Condition="'$(_crossDir)' != ''">$(_jitPackageDir)runtimes$(_crossDir)/native/$(LibraryFilePrefix)clrjit$(LibraryFileExtension)</_jitPath>
     </PropertyGroup>
 
     <PropertyGroup Condition="'@(_fxSystemRuntime)' != ''">
@@ -139,7 +163,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-      <_requiredProperty Include="_runtimePackagePath;_coreLibDirectory;_crossGenPath;_jitPath;_fxLibDirectory;_windowsWinMDDirectory" />
+      <_requiredProperty Include="_runtimePackageDir;_coreLibDirectory;_crossGenPath;_jitPath;_fxLibDirectory;_windowsWinMDDirectory" />
     </ItemGroup>
 
     <Message Text="%(_requiredProperty.Identity): $(%(_requiredProperty.Identity))" />
@@ -148,7 +172,11 @@
   </Target>
 
   <!-- Prepares all items for cross-gen and replaces package file items with their cross-gen'ed equivalents -->
-  <Target Name="PrepareForCrossGen" Condition="'$(NuGetRuntimeIdentifier)' != '' AND '$(DisableCrossgen)' != 'true'" DependsOnTargets="GetFilesFromPackages">
+  <Target Name="PrepareForCrossGen"
+          Condition="'$(NuGetRuntimeIdentifier)' != '' AND '$(DisableCrossgen)' != 'true'"
+          DependsOnTargets="
+            GetCrossgenPackagePaths;
+            GetFilesFromPackages">
     <PropertyGroup>
       <_crossGenIntermediatePath>$(IntermediateOutputPath)/crossgen</_crossGenIntermediatePath>
     </PropertyGroup>
@@ -158,8 +186,19 @@
     <ItemGroup>
       <!-- Exclude run crossgen on System.Runtime.WindowsRuntime for non-Windows due to System.Runtime.WindowsRuntime.dll for non-Windows only throw NotSupported Exception  -->
       <!-- Also crossgen on non-windows doesn't support -Platform_Winmd_Paths -->
-      <_filesToCrossGen Include="@(FilesToPackage)"
-                        Condition="'%(FilesToPackage.IsNative)' != 'true' AND '%(FileName)' != 'System.Private.CoreLib' AND '%(FileName)' != 'mscorlib' AND '%(Extension)' == '.dll' AND ('%(FileName)' != 'System.Runtime.WindowsRuntime' Or '$(OsEnvironment)'=='Windows_NT')">
+      <!-- Exclude crossgen for resource DLLs in 'cs/', 'de/', ... subdirectories. -->
+      <_filesToCrossGen
+        Include="@(FilesToPackage)"
+        Condition="
+          '%(FilesToPackage.IsNative)' != 'true' AND
+          '%(FileName)' != 'System.Private.CoreLib' AND
+          '%(FileName)' != 'mscorlib' AND
+          '%(Extension)' == '.dll' AND
+          '%(FilesToPackage.DestinationSubDirectory)' == '' AND
+          (
+            '%(FileName)' != 'System.Runtime.WindowsRuntime' Or
+            '$(OsEnvironment)'=='Windows_NT'
+          )">
         <CrossGenedDirectory>$(CrossGenOutputPath)/%(TargetPath)/</CrossGenedDirectory>
         <CrossGenedPath>$(CrossGenOutputPath)/%(TargetPath)/%(FileName)%(Extension)</CrossGenedPath>
         <CrossGenSymbolSemaphorePath>$(_crossGenIntermediatePath)/%(FileName).symbol.semaphore</CrossGenSymbolSemaphorePath>
@@ -172,12 +211,17 @@
     </ItemGroup>
 
     <ItemGroup>
+      <!--
+        The following path must be passed to crossgen to locate all dependencies. Include it first
+        so in case of conflicts, DLLs are found in the framework being crossgenned.
+      -->
+      <_crossgenPlatformDirectories Include="%(_filesToCrossGen.RootDir)%(_filesToCrossGen.Directory)" />
       <!-- the following path *must* be passed to crossgen as it has the CoreLib.ni.dll, it will not use the IL copy. -->
       <_crossgenPlatformDirectories Include="$(_runtimeDirectory)" />
       <!-- the following need not be passed to crossgen but we do so to be safe. -->
       <_crossgenPlatformDirectories Include="$(_coreLibDirectory)" />
-      <!-- the following path must be passed to crossgen to locate all dependencies. -->
-      <_crossgenPlatformDirectories Include="%(_filesToCrossGen.RootDir)%(_filesToCrossGen.Directory)" />
+      <!-- The following is necessary to crossgen WindowsDesktop. For NETCoreApp it's automatic because we're crossgenning CoreFX bits. -->
+      <_crossgenPlatformDirectories Include="$(_fxLibDirectory)" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -224,7 +268,10 @@
     <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('%(_filesToCrossGen.CrossGenedPath)'))" />
     <WriteLinesToFile File="$(_crossGenResponseFile)" Lines="@(_crossGenArgs)" Overwrite="true" />
 
-    <Exec Command="$(_crossGenPath) @$(_crossGenResponseFile)" WorkingDirectory="$(_clrDirectory)" EnvironmentVariables="COMPlus_PartialNGen=$(_partialCrossgenFlag)" />
+    <Exec
+      Command="$(_crossGenPath) @$(_crossGenResponseFile)"
+      WorkingDirectory="$(_clrDirectory)"
+      EnvironmentVariables="COMPlus_PartialNGen=$(_partialCrossgenFlag)" />
   </Target>
 
   <Target Name="CreateCrossGenSymbols"
@@ -248,11 +295,15 @@
       <_crossGenSymbolsArgs Include="%(_filesToCrossGen.CrossGenedPath)" />
     </ItemGroup>
 
+    <MakeDir Directories="$(_crossGenIntermediatePath)" />
     <WriteLinesToFile File="$(_crossGenSymbolsResponseFile)" Lines="@(_crossGenSymbolsArgs)" Overwrite="true" />
 
     <MakeDir Directories="$(_crossGenSymbolsOutputDirectory)" />
 
-    <Exec Command="$(_crossGenPath) @$(_crossGenSymbolsResponseFile)" WorkingDirectory="$(_clrDirectory)" EnvironmentVariables="COMPlus_PartialNGen=0" />
+    <Exec
+      Command="$(_crossGenPath) @$(_crossGenSymbolsResponseFile)"
+      WorkingDirectory="$(_clrDirectory)"
+      EnvironmentVariables="COMPlus_PartialNGen=0" />
 
     <Touch Files="%(_filesToCrossGen.CrossGenSymbolSemaphorePath)" AlwaysCreate="true" />
   </Target>
@@ -274,8 +325,7 @@
 
   <Target Name="GetRuntimeFilesToPackage"
           BeforeTargets="GetFilesToPackage"
-          DependsOnTargets="GetRuntimeFilesFromPackages;PrepareForCrossGen;GetCrossGenSymbolsFiles">
-  </Target>
+          DependsOnTargets="PrepareForCrossGen;GetCrossGenSymbolsFiles" />
 
   <!-- Target overrides (can't be shared with pkgproj) -->
 

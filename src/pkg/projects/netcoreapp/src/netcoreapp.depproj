@@ -7,27 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Private.CoreFx.NETCoreApp">
-      <Version>$(MicrosoftPrivateCoreFxNETCoreAppPackageVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR">
-      <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.DiaSymReader.Native">
-      <Version>$(MicrosoftDiaSymReaderNativePackageVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NETCore.Platforms">
-      <Version>$(MicrosoftNETCorePlatformsPackageVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NETCore.Targets">
-      <Version>$(MicrosoftNETCoreTargetsPackageVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="NETStandard.Library">
-      <Version>$(NETStandardLibraryPackageVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="$(MicrosoftTargetingPackPrivateWinRTPackage)" ExcludeAssets="All">
-      <Version>$(MicrosoftTargetingPackPrivateWinRTPackageVersion)</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.Private.CoreFx.NETCoreApp" Version="$(MicrosoftPrivateCoreFxNETCoreAppPackageVersion)" />
+    <PackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR" Version="$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)" />
+    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="$(MicrosoftDiaSymReaderNativePackageVersion)" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="$(MicrosoftNETCorePlatformsPackageVersion)" />
+    <PackageReference Include="Microsoft.NETCore.Targets" Version="$(MicrosoftNETCoreTargetsPackageVersion)" />
+    <PackageReference Include="NETStandard.Library" Version="$(NETStandardLibraryPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(NuGetRuntimeIdentifier)' == ''">
@@ -38,6 +23,12 @@
     <DependenciesToPackage Include="Microsoft.NETCore.Targets" />
   </ItemGroup>
 
+  <!-- get paths from packages that are needed for cross-gen and other includes,
+       only relevant for runtime-specific builds -->
+  <Target Name="GetPackagePaths"
+          Condition="'$(NuGetRuntimeIdentifier)' != ''"
+          DependsOnTargets="GetCrossgenPackagePaths" />
+
   <Target Name="GetDependencyVersionFiles" DependsOnTargets="GetPackagePaths;ResolveNuGetPackages">
     <ItemGroup>
       <_coreFxVersionFile
@@ -45,7 +36,7 @@
         Condition="$([System.String]::new('%(Reference.Identity)').ToLowerInvariant().Contains('system.runtime.dll'))"
         Name="corefx" />
       <_coreClrVersionFile
-        Include="$(_runtimePackagePath)/version.txt"
+        Include="$(_runtimePackageDir)version.txt"
         Condition="'$(NuGetRuntimeIdentifier)' != ''"
         Name="coreclr" />
 
@@ -62,9 +53,11 @@
   </Target>
 
   <!-- Fetches all the runtime items from the packages that we want to redist -->
-  <Target Name="GetRuntimeFilesFromPackages" DependsOnTargets="GetPackagePaths">
+  <Target Name="GetRuntimeFilesFromPackages"
+          BeforeTargets="GetRuntimeFilesToPackage"
+          DependsOnTargets="GetCrossgenPackagePaths">
     <ItemGroup Condition="'$(NuGetRuntimeIdentifier)' != ''">
-      <_ToolsToPackage Include="$(_runtimePackagePath)/tools/**/*.*"/>
+      <_ToolsToPackage Include="$(_runtimePackageDir)tools/**/*.*"/>
       <FilesToPackage Include="@(_ToolsToPackage)">
         <NuGetPackageId>$(_runtimePackageId)</NuGetPackageId>
         <TargetPath>tools/%(RecursiveDir)</TargetPath>
