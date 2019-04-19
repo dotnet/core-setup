@@ -62,9 +62,28 @@ bool fx_reference_t::is_compatible_with_higher_version(const fx_ver_t& higher_ve
 
 void fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from)
 {
+    // In general lower value roll_forward should win, with one exception
+    // If Major and LatestMinor is merged, the result should be Minor for now.
+    //   - this is the conservative approach where the most strict behavior is taken
+    //       Major means "closest available version and allow roll over major"
+    //       LatestMinor means "latest available version and allow roll over minor"
+    //       So the most restrictive merge would be "closest available version and allow roll over minor"
+    //       which is exactly what Minor does.
+    // All other combinations are already following the same logic.
+
     if (from.get_roll_forward() < get_roll_forward())
     {
-        set_roll_forward(from.get_roll_forward());
+        roll_forward_option effective_roll_forward = from.get_roll_forward();
+        if (from.get_roll_forward() == roll_forward_option::LatestMinor && get_roll_forward() == roll_forward_option::Major)
+        {
+            effective_roll_forward = roll_forward_option::Minor;
+        }
+
+        set_roll_forward(effective_roll_forward);
+    }
+    else if (from.get_roll_forward() == roll_forward_option::Major && get_roll_forward() == roll_forward_option::LatestMinor)
+    {
+        set_roll_forward(roll_forward_option::Minor);
     }
 
     if (get_apply_patches() == true && from.get_apply_patches() == false)
