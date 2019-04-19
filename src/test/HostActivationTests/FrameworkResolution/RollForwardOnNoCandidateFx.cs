@@ -33,11 +33,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             public SharedTestState()
             {
                 DotNetWithOneFramework = DotNet("WithOneFramework")
-                    .AddMicrosoftNETCoreAppFramework("5.1.3")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.3")
                     .Build();
 
                 DotNetWithPreReleaseFramework = DotNet("WithPreReleaseFramework")
-                    .AddMicrosoftNETCoreAppFramework("5.1.3-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.3-preview.2")
                     .Build();
 
                 DotNetWithManyVersions = DotNet("WithManyVersions")

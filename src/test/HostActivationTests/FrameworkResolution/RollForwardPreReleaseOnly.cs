@@ -33,14 +33,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             public SharedTestState()
             {
                 DotNetWithNETCoreAppPreRelease = DotNet("DotNetWithNETCoreAppPreRelease")
-                    .AddMicrosoftNETCoreAppFramework("5.1.1-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("5.1.2-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("5.1.2-preview.2")
-                    .AddMicrosoftNETCoreAppFramework("5.2.0-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("5.2.1-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("5.2.1-preview.2")
-                    .AddMicrosoftNETCoreAppFramework("6.1.0-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("6.1.0-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.1-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.2-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.2-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.2.0-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.2.1-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.2.1-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.1.0-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.1.0-preview.2")
                     .Build();
 
                 FrameworkReferenceApp = CreateFrameworkReferenceApp();

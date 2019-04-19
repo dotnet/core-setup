@@ -33,12 +33,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             public SharedTestState()
             {
                 DotNetWithNETCoreAppRelease = DotNet("DotNetWithNETCoreAppRelease")
-                    .AddMicrosoftNETCoreAppFramework("2.1.2")
-                    .AddMicrosoftNETCoreAppFramework("2.1.3")
-                    .AddMicrosoftNETCoreAppFramework("2.4.0")
-                    .AddMicrosoftNETCoreAppFramework("2.4.1")
-                    .AddMicrosoftNETCoreAppFramework("3.1.1")
-                    .AddMicrosoftNETCoreAppFramework("3.1.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("2.1.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("2.1.3")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("2.4.0")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("2.4.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("3.1.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("3.1.2")
                     .Build();
 
                 FrameworkReferenceApp = CreateFrameworkReferenceApp();

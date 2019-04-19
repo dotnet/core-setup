@@ -34,26 +34,26 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             {
                 DotNetWithNETCoreAppReleaseAndPreRelease = DotNet("DotNetWithNETCoreAppReleaseAndPreRelease")
 
-                    .AddMicrosoftNETCoreAppFramework("4.1.0-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("4.1.0-preview.2")
-                    .AddMicrosoftNETCoreAppFramework("4.1.1")
-                    .AddMicrosoftNETCoreAppFramework("4.1.2-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("4.1.2")
-                    .AddMicrosoftNETCoreAppFramework("4.1.3-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.1.0-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.1.0-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.1.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.1.2-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.1.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.1.3-preview.1")
 
-                    .AddMicrosoftNETCoreAppFramework("4.5.1-preview.2")
-                    .AddMicrosoftNETCoreAppFramework("4.5.2-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.5.1-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.5.2-preview.1")
 
-                    .AddMicrosoftNETCoreAppFramework("5.1.0-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("5.1.1")
-                    .AddMicrosoftNETCoreAppFramework("5.1.2-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("5.1.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.0-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.2-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.2")
 
-                    .AddMicrosoftNETCoreAppFramework("5.5.1-preview.2")
-                    .AddMicrosoftNETCoreAppFramework("5.5.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.5.1-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.5.2")
 
-                    .AddMicrosoftNETCoreAppFramework("6.0.1")
-                    .AddMicrosoftNETCoreAppFramework("6.0.2-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.0.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.0.2-preview.1")
 
                     .Build();
 
