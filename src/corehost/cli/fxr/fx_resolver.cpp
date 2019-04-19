@@ -179,7 +179,7 @@ namespace
         }
         else
         {
-            trace::verbose(_X("Framework reference resolved to version '%s'.", best_match.as_str().c_str()));
+            trace::verbose(_X("Framework reference resolved to version '%s'."), best_match.as_str().c_str());
         }
 
         return best_match;
