@@ -210,7 +210,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithDotnetCustomizer(dotnetCustomizer => dotnetCustomizer
                         .Framework(MiddleWare).RuntimeConfig(runtimeConfig => runtimeConfig
                             .GetFramework(MicrosoftNETCoreApp).Version = "4.0.0")))
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, appWins ? "5.1.3" : null);
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, appWins ? "5.1.3" : null);
         }
 
         // Verifies that there's no inheritance between app and framework when applying more strict setting in the app
@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithDotnetCustomizer(dotnetCustomizer => dotnetCustomizer
                         .Framework(MiddleWare).RuntimeConfig(runtimeConfig => runtimeConfig
                             .GetFramework(MicrosoftNETCoreApp).Version = "5.0.0")))
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, appWins ? null : "5.1.3");
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, appWins ? null : "5.1.3");
         }
 
         // Verifies that the setting works in all supported locations

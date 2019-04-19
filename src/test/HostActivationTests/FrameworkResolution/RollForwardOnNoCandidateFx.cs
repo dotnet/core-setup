@@ -431,7 +431,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "4.1.1"))
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll
@@ -439,8 +439,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory] // rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
         [InlineData(null,                       null,         "4.1.2")]
         [InlineData(null,                       false,        "4.1.1")]
-        [InlineData(0,                          null,         null)]
-        [InlineData(0,                          false,        null)]
+        [InlineData(0,                          null,         ResolvedFramework.NotFound)]
+        [InlineData(0,                          false,        ResolvedFramework.NotFound)]
         [InlineData(1,                          null,         "4.1.2")]
         [InlineData(1,                          false,        "4.1.1")]  // Rolls to nearest higher even on patches, but not to latest patch.
         [InlineData(2,                          null,         "4.1.2")]
@@ -455,7 +455,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "4.0.0"))
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll
@@ -463,8 +463,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory] // rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
         [InlineData(null,                       null,         "4.5.2")]
         [InlineData(null,                       false,        "4.5.2")]
-        [InlineData(0,                          null,         null)]
-        [InlineData(0,                          false,        null)]
+        [InlineData(0,                          null,         ResolvedFramework.NotFound)]
+        [InlineData(0,                          false,        ResolvedFramework.NotFound)]
         [InlineData(1,                          null,         "4.5.2")]
         [InlineData(1,                          false,        "4.5.2")]
         [InlineData(2,                          null,         "4.5.2")]
@@ -479,18 +479,18 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "4.4.0"))
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll
         // from a release version 3.0.0 to the closest release major version with the latest patch.
         [Theory] // rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
-        [InlineData(null,                       null,         null)]
-        [InlineData(null,                       false,        null)]
-        [InlineData(0,                          null,         null)]
-        [InlineData(0,                          false,        null)]
-        [InlineData(1,                          null,         null)]
-        [InlineData(1,                          false,        null)]
+        [InlineData(null,                       null,         ResolvedFramework.NotFound)]
+        [InlineData(null,                       false,        ResolvedFramework.NotFound)]
+        [InlineData(0,                          null,         ResolvedFramework.NotFound)]
+        [InlineData(0,                          false,        ResolvedFramework.NotFound)]
+        [InlineData(1,                          null,         ResolvedFramework.NotFound)]
+        [InlineData(1,                          false,        ResolvedFramework.NotFound)]
         [InlineData(2,                          null,         "4.1.2")]
         [InlineData(2,                          false,        "4.1.1")]  // Rolls to nearest higher even on patches, but not to latest patch.
         public void RollForwardOnMajor_PicksLatestReleasePatch(
@@ -503,7 +503,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "3.0.0"))
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll
@@ -514,7 +514,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // This is a different behavior in 3.0. In 2.* the app would fail in this case as it was explicitly disallowed
         // to roll forward from release to pre-release when rollForwardOnNoCandidateFx=0 (and only then).
         [InlineData(0,                          null,         "5.1.4-preview.1")]
-        [InlineData(0,                          false,        null)]
+        [InlineData(0,                          false,        ResolvedFramework.NotFound)]
         [InlineData(1,                          null,         "5.1.4-preview.1")]
         [InlineData(1,                          false,        "5.1.3-preview.1")]  // Rolls to nearest higher even on patches, but not to latest patch.
         [InlineData(2,                          null,         "6.1.1")]   // Not really testing the pre-release roll forward, but valid test anyway
@@ -529,7 +529,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.2"))
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll
@@ -537,8 +537,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory] // rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
         [InlineData(null,                       null,         "5.1.4-preview.1")]
         [InlineData(null,                       false,        "5.1.3-preview.1")]
-        [InlineData(0,                          null,         null)]
-        [InlineData(0,                          false,        null)]
+        [InlineData(0,                          null,         ResolvedFramework.NotFound)]
+        [InlineData(0,                          false,        ResolvedFramework.NotFound)]
         [InlineData(1,                          null,         "5.1.4-preview.1")]
         [InlineData(1,                          false,        "5.1.3-preview.1")]   // Rolls to nearest higher even on patches, but not to latest patch.
         [InlineData(2,                          null,         "6.1.1")]   // Not really testing the pre-release roll forward, but valid test anyway
@@ -553,18 +553,18 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "5.0.0"))
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll
         // from a release version 6.2.0 to the closest major and latest patch pre-release version (since there's no release available)
         [Theory] // rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
-        [InlineData(null,                       null,         null)]
-        [InlineData(null,                       false,        null)]
-        [InlineData(0,                          null,         null)]
-        [InlineData(0,                          false,        null)]
-        [InlineData(1,                          null,         null)]
-        [InlineData(1,                          false,        null)]
+        [InlineData(null,                       null,         ResolvedFramework.NotFound)]
+        [InlineData(null,                       false,        ResolvedFramework.NotFound)]
+        [InlineData(0,                          null,         ResolvedFramework.NotFound)]
+        [InlineData(0,                          false,        ResolvedFramework.NotFound)]
+        [InlineData(1,                          null,         ResolvedFramework.NotFound)]
+        [InlineData(1,                          false,        ResolvedFramework.NotFound)]
         [InlineData(2,                          null,         "7.1.2-preview.1")]
         [InlineData(2,                          false,        "7.1.1-preview.1")]    // Rolls to nearest higher even on patches, but not to latest patch.
         public void RollForwardToPreReleaseOnMajor_FromRelease(
@@ -577,7 +577,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "6.2.0"))
-               .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+               .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll
@@ -589,7 +589,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // This is a different behavior in 3.0. In 2.* the app would fail in this case as it was explicitly disallowed
         // to roll forward from release to pre-release when rollForwardOnNoCandidateFx=0 (and only then).
         [InlineData(0,                          null,         "5.2.3-preview.2")]
-        [InlineData(0,                          false,        null)]
+        [InlineData(0,                          false,        ResolvedFramework.NotFound)]
         [InlineData(1,                          null,         "5.2.3-preview.2")]   // Rolls to latest patch - including latest pre-release
         [InlineData(1,                          false,        "5.2.3-preview.1")]  // Rolls to nearest higher even on patches, but not to latest patch.
         [InlineData(2,                          null,         "6.1.1")]   // Not really testing the pre-release roll forward, but valid test anyway
@@ -604,7 +604,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "5.2.2"))
-               .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+               .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll
@@ -614,7 +614,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData(null,                       null,         "2.3.2")]
         [InlineData(null,                       false,        "2.3.2")]
         [InlineData(0,                          null,         "2.3.2")]  // Pre-release is ignored, roll forward to latest release patch
-        [InlineData(0,                          false,        null)]    // No exact match available
+        [InlineData(0,                          false,        ResolvedFramework.NotFound)] // No exact match available
         [InlineData(1,                          null,         "2.3.2")]
         [InlineData(1,                          false,        "2.3.2")] // Pre-release is ignored, roll forward to closest release available
         [InlineData(2,                          null,         "2.3.2")]
@@ -629,7 +629,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "2.3.0"))
-               .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+               .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll
@@ -639,7 +639,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // 3.* - Pre-release uses normal roll forward rules, including rolling over minor/patches and obeying settings.
         [Theory] // rollForwardOnNoCandidateFx  applyPatches  resolvedFramework
         [InlineData(null,                       null,         "5.1.4-preview.1")]
-        [InlineData(0,                          false,        null)]  // Roll-forward fully disabled
+        [InlineData(0,                          false,        ResolvedFramework.NotFound)]  // Roll-forward fully disabled
         [InlineData(1,                          null,         "5.1.4-preview.1")]
         [InlineData(2,                          null,         "5.1.4-preview.1")]
         public void RollForwardToPreRelease_FromDifferentPreRelease(
@@ -652,7 +652,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.1-preview.1"))
-               .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+               .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verifies that rollForwardOnNoCandidateFx and applyPatches settings correctly roll

@@ -14,6 +14,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
     {
         protected const string MicrosoftNETCoreApp = "Microsoft.NETCore.App";
 
+        public static class ResolvedFramework
+        {
+            public const string NotFound = "[not found]";
+            public const string FailedToReconcile = "[failed to reconcile]";
+        }
+
         protected CommandResult RunTest(
             DotNetCli dotnet,
             TestApp app,

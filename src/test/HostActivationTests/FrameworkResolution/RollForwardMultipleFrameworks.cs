@@ -58,9 +58,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // Verify that inner framework reference (<fxRefVersion>, <rollForward>)
         // is correctly reconciled with app's framework reference 5.1.1 (defaults = RollForward:Minor). App fx reference is higher.
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
-        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     ResolvedFramework.FailedToReconcile)]
         [InlineData("5.1.1",      Constants.RollForwardSetting.Disable,     "5.1.1")]
-        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, ResolvedFramework.FailedToReconcile)]
         [InlineData("5.1.0",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.0.0",      null,                                     "5.1.3")]
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.1.1",      Constants.RollForwardSetting.Minor,       "5.1.3")]
         [InlineData("5.0.0",      Constants.RollForwardSetting.LatestMinor, "5.1.3")] // The app reference which is Minor wins
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestMinor, "5.1.3")] // The app reference which is Minor wins
-        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       null)]
+        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.FailedToReconcile)]
         [InlineData("1.0.0",      Constants.RollForwardSetting.Major,       "5.1.3")] // The app reference which is Minor wins
         [InlineData("1.0.0",      Constants.RollForwardSetting.LatestMajor, "5.1.3")] // The app reference which is Minor wins
         public void ReconcileFrameworkReferences_InnerFrameworkReference_ToHigher(
@@ -95,9 +95,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // is actually resolved against the disk - and the resolved framework is than compared to
         // the inner framework reference (potentially causing re-resolution).
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
-        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     ResolvedFramework.FailedToReconcile)]
         [InlineData("5.1.1",      Constants.RollForwardSetting.Disable,     "5.1.1")]
-        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, ResolvedFramework.FailedToReconcile)]
         [InlineData("5.1.0",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.0.0",      null,                                     "5.1.3")]
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.1.1",      Constants.RollForwardSetting.Minor,       "5.1.3")]
         [InlineData("5.0.0",      Constants.RollForwardSetting.LatestMinor, "5.1.3")] // The app reference which is Minor wins
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestMinor, "5.1.3")] // The app reference which is Minor wins
-        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       null)]
+        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.FailedToReconcile)]
         [InlineData("1.0.0",      Constants.RollForwardSetting.Major,       "5.1.3")] // The app reference which is Minor wins
         [InlineData("1.0.0",      Constants.RollForwardSetting.LatestMajor, "5.1.3")] // The app reference which is Minor wins
         public void ReconcileFrameworkReferences_InnerFrameworkReference_ToHigher_HardResolve(
@@ -142,22 +142,22 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.4.0",      Constants.RollForwardSetting.LatestMajor, false,                 "5.4.1")] // The app's settings (Minor) wins, so effective reference is "5.4.0 Minor"
         [InlineData("5.4.0",      Constants.RollForwardSetting.LatestMajor, true,                  "5.4.1")]
         [InlineData("5.4.1",      Constants.RollForwardSetting.Disable,     false,                 "5.4.1")]
-        [InlineData("5.7.0",      Constants.RollForwardSetting.Minor,       false,                 "[not found]")]
-        [InlineData("5.7.0",      Constants.RollForwardSetting.Minor,       true,                  "[not found]")]
-        [InlineData("5.7.0",      Constants.RollForwardSetting.LatestMinor, false,                 "[not found]")]
-        [InlineData("5.7.0",      Constants.RollForwardSetting.Major,       false,                 "[not found]")]
-        [InlineData("5.7.0",      Constants.RollForwardSetting.LatestMajor, false,                 "[not found]")]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       false,                 null)]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       true,                  null)]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       false,                 null)]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.LatestMajor, false,                 null)]
+        [InlineData("5.7.0",      Constants.RollForwardSetting.Minor,       false,                 ResolvedFramework.NotFound)]
+        [InlineData("5.7.0",      Constants.RollForwardSetting.Minor,       true,                  ResolvedFramework.NotFound)]
+        [InlineData("5.7.0",      Constants.RollForwardSetting.LatestMinor, false,                 ResolvedFramework.NotFound)]
+        [InlineData("5.7.0",      Constants.RollForwardSetting.Major,       false,                 ResolvedFramework.NotFound)]
+        [InlineData("5.7.0",      Constants.RollForwardSetting.LatestMajor, false,                 ResolvedFramework.NotFound)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       false,                 ResolvedFramework.FailedToReconcile)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       true,                  ResolvedFramework.FailedToReconcile)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       false,                 ResolvedFramework.FailedToReconcile)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.LatestMajor, false,                 ResolvedFramework.FailedToReconcile)]
         public void ReconcileFrameworkReferences_InnerFrameworkReference_ToLower(
             string versionReference,
             string rollForward,
             bool rollForwardToPreRelease,
             string resolvedFramework)
         {
-            CommandResult result = RunTest(
+            RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MiddleWare, "2.1.0")
                     .WithFramework(MicrosoftNETCoreApp, "5.1.1"),
@@ -165,17 +165,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForward(rollForward)
                         .Version = versionReference),
-                rollForwardToPreRelease);
-
-            if (resolvedFramework == "[not found]")
-            {
-                result.ShouldFailToFindCompatibleFrameworkVersion();
-            }
-            else
-            {
-                result.ShouldHaveResolvedFrameworkOrFailedToReconcileFrameworkReference(
+                rollForwardToPreRelease)
+                .ShouldHaveResolvedFrameworkOrFail(
                     MicrosoftNETCoreApp, resolvedFramework, "5.1.1", versionReference);
-            }
         }
 
         // Verify that inner framework reference (<fxRefVersion>, <rollForward>)
@@ -191,35 +183,27 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.4.0",      Constants.RollForwardSetting.Major,       "5.4.1")]
         [InlineData("5.4.0",      Constants.RollForwardSetting.LatestMajor, "5.4.1")]
         [InlineData("5.4.1",      Constants.RollForwardSetting.Disable,     "5.4.1")]
-        [InlineData("5.7.0",      Constants.RollForwardSetting.Minor,       "[not found]")]
-        [InlineData("5.7.0",      Constants.RollForwardSetting.LatestMinor, "[not found]")]
-        [InlineData("5.7.0",      Constants.RollForwardSetting.Major,       "[not found]")]
-        [InlineData("5.7.0",      Constants.RollForwardSetting.LatestMajor, "[not found]")]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       null)]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       null)]
+        [InlineData("5.7.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.NotFound)]
+        [InlineData("5.7.0",      Constants.RollForwardSetting.LatestMinor, ResolvedFramework.NotFound)]
+        [InlineData("5.7.0",      Constants.RollForwardSetting.Major,       ResolvedFramework.NotFound)]
+        [InlineData("5.7.0",      Constants.RollForwardSetting.LatestMajor, ResolvedFramework.NotFound)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.FailedToReconcile)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       ResolvedFramework.FailedToReconcile)]
         public void ReconcileFrameworkReferences_InnerFrameworkReference_ToLower_HardResolve(
             string versionReference,
             string rollForward,
             string resolvedFramework)
         {
-            CommandResult result = RunTest(
+            RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "5.1.1")
                     .WithFramework(MiddleWare, "2.1.0"),
                 dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForward(rollForward)
-                        .Version = versionReference));
-
-            if (resolvedFramework == "[not found]")
-            {
-                result.ShouldFailToFindCompatibleFrameworkVersion();
-            }
-            else
-            {
-                result.ShouldHaveResolvedFrameworkOrFailedToReconcileFrameworkReference(
+                        .Version = versionReference))
+                .ShouldHaveResolvedFrameworkOrFail(
                     MicrosoftNETCoreApp, resolvedFramework, "5.1.1", versionReference);
-            }
         }
 
         // Verify that inner framework reference (<fxRefVersion>, <rollForward>)
@@ -228,11 +212,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory] // fxRefVersion       rollForward                               rollForwadToPreRelease resolvedFramework
         [InlineData("6.0.0-preview.1", null,                                     false,                 "6.1.1-preview.2")]
         [InlineData("6.0.0",           null,                                     false,                 "6.2.1")]
-        [InlineData("6.0.0",           Constants.RollForwardSetting.LatestPatch, false,                 null)]
-        [InlineData("6.0.0-preview.1", Constants.RollForwardSetting.LatestPatch, false,                 null)]
+        [InlineData("6.0.0",           Constants.RollForwardSetting.LatestPatch, false,                 ResolvedFramework.FailedToReconcile)]
+        [InlineData("6.0.0-preview.1", Constants.RollForwardSetting.LatestPatch, false,                 ResolvedFramework.FailedToReconcile)]
         [InlineData("6.0.0-preview.1", Constants.RollForwardSetting.Minor,       false,                 "6.1.1-preview.2")]
         [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       false,                 "6.2.1")]
-        [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, false,                 null)]
+        [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, false,                 ResolvedFramework.FailedToReconcile)]
         [InlineData("6.1.0-preview.0", null,                                     false,                 "6.1.1-preview.2")]
         [InlineData("6.1.0-preview.0", null,                                     true,                  "6.1.1-preview.2")]
         [InlineData("6.1.0",           null,                                     false,                 "6.2.1")]
@@ -240,7 +224,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("6.1.1-preview.0", null,                                     false,                 "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.0", null,                                     true,                  "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, false,                 "6.1.1-preview.2")]
-        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable,     false,                 "[not found]")]
+        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable,     false,                 ResolvedFramework.NotFound)]
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.Disable,     false,                 "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.Disable,     true,                  "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.LatestPatch, false,                 "6.1.1-preview.2")]
@@ -255,7 +239,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.Major,       true,                  "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.LatestMajor, false,                 "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.LatestMajor, true,                  "6.1.1-preview.2")]
-        [InlineData("6.2.1-preview.1", Constants.RollForwardSetting.Disable,     false,                 "[not found]")]
+        [InlineData("6.2.1-preview.1", Constants.RollForwardSetting.Disable,     false,                 ResolvedFramework.NotFound)]
         [InlineData("6.2.1-preview.1", Constants.RollForwardSetting.LatestPatch, false,                 "6.2.1")]
         [InlineData("6.2.1-preview.1", null,                                     false,                 "6.2.1")]
         [InlineData("6.2.1-preview.1", Constants.RollForwardSetting.Minor,       false,                 "6.2.1")]
@@ -268,7 +252,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             bool rollForwardToPreRelease,
             string resolvedFramework)
         {
-            CommandResult result = RunTest(
+            RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "6.1.1-preview.0")
                     .WithFramework(MiddleWare, "2.1.0"),
@@ -276,17 +260,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForward(rollForward)
                         .Version = versionReference),
-                rollForwardToPreRelease);
-
-            if (resolvedFramework == "[not found]")
-            {
-                result.ShouldFailToFindCompatibleFrameworkVersion();
-            }
-            else
-            {
-                result.ShouldHaveResolvedFrameworkOrFailedToReconcileFrameworkReference(
+                rollForwardToPreRelease).ShouldHaveResolvedFrameworkOrFail(
                     MicrosoftNETCoreApp, resolvedFramework, versionReference, "6.1.1-preview.0");
-            }
         }
 
         // Verify that inner framework reference (<fxRefVersion>, <rollForward>)
@@ -295,15 +270,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Theory] // fxRefVersion       rollForward                               rollForwadToPreRelease resolvedFramework
         [InlineData("6.0.0",           null,                                     false,                 "6.1.0")]
         [InlineData("6.0.0",           null,                                     true,                  "6.1.1-preview.2")]
-        [InlineData("6.0.0",           Constants.RollForwardSetting.LatestPatch, false,                 null)]
+        [InlineData("6.0.0",           Constants.RollForwardSetting.LatestPatch, false,                 ResolvedFramework.FailedToReconcile)]
         [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       false,                 "6.1.0")]
         [InlineData("6.0.0",           Constants.RollForwardSetting.Minor,       true,                  "6.1.1-preview.2")]
-        [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, false,                 null)]
+        [InlineData("6.0.1-preview.0", Constants.RollForwardSetting.LatestPatch, false,                 ResolvedFramework.FailedToReconcile)]
         [InlineData("6.1.0",           null,                                     false,                 "6.1.0")]
         [InlineData("6.1.0",           null,                                     true,                  "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.0", null,                                     false,                 "6.2.1")]
         [InlineData("6.1.1-preview.0", null,                                     true,                  "6.1.1-preview.2")]
-        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable,     false,                 "[not found]")]
+        [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.Disable,     false,                 ResolvedFramework.NotFound)]
         [InlineData("6.1.1-preview.0", Constants.RollForwardSetting.LatestPatch, false,                 "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.Disable,     false,                 "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.Disable,     true,                  "6.1.1-preview.2")]
@@ -319,7 +294,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.Major,       true,                  "6.1.1-preview.2")]
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.LatestMajor, false,                 "6.2.1")]
         [InlineData("6.1.1-preview.2", Constants.RollForwardSetting.LatestMajor, true,                  "6.1.1-preview.2")]
-        [InlineData("6.2.1-preview.1", Constants.RollForwardSetting.Disable,     false,                 "[not found]")]
+        [InlineData("6.2.1-preview.1", Constants.RollForwardSetting.Disable,     false,                 ResolvedFramework.NotFound)]
         [InlineData("6.2.1-preview.1", Constants.RollForwardSetting.LatestPatch, false,                 "6.2.1")]
         [InlineData("6.2.1-preview.1", null,                                     false,                 "6.2.1")]
         [InlineData("6.2.1-preview.1", Constants.RollForwardSetting.Minor,       false,                 "6.2.1")]
@@ -332,7 +307,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             bool rollForwardToPreRelease,
             string resolvedFramework)
         {
-            CommandResult result = RunTest(
+            RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(MicrosoftNETCoreApp, "6.1.0")
                     .WithFramework(MiddleWare, "2.1.0"),
@@ -340,27 +315,19 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForward(rollForward)
                         .Version = versionReference),
-                rollForwardToPreRelease);
-
-            if (resolvedFramework == "[not found]")
-            {
-                result.ShouldFailToFindCompatibleFrameworkVersion();
-            }
-            else
-            {
-                result.ShouldHaveResolvedFrameworkOrFailedToReconcileFrameworkReference(
+                rollForwardToPreRelease)
+                .ShouldHaveResolvedFrameworkOrFail(
                     MicrosoftNETCoreApp, resolvedFramework, versionReference, "6.1.0");
-            }
         }
 
         // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
         // is correctly reconciled with app's framework reference (<fxRefVersion>, <rollForward>).
         // App fx reference is lower.
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
-        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     ResolvedFramework.FailedToReconcile)]
         [InlineData("5.1.1",      Constants.RollForwardSetting.Disable,     "5.1.1")]
         [InlineData("5.1.3",      Constants.RollForwardSetting.Disable,     "5.1.3")]
-        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, ResolvedFramework.FailedToReconcile)]
         [InlineData("5.1.0",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.0.0",      null,                                     "5.1.3")]
@@ -369,7 +336,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.1.1",      Constants.RollForwardSetting.Minor,       "5.1.3")]
         [InlineData("5.0.0",      Constants.RollForwardSetting.LatestMinor, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestMinor, "5.1.3")]
-        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       null)]
+        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.FailedToReconcile)]
         [InlineData("1.0.0",      Constants.RollForwardSetting.Major,       "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.Major,       "5.1.3")]
         [InlineData("1.0.0",      Constants.RollForwardSetting.LatestMajor, "5.1.3")]
@@ -398,10 +365,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // is actually resolved against the disk - and the resolved framework is than compared to
         // the inner framework reference (potentially causing re-resolution).
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
-        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     ResolvedFramework.NotFound)]
         [InlineData("5.1.1",      Constants.RollForwardSetting.Disable,     "5.1.1")]
         [InlineData("5.1.3",      Constants.RollForwardSetting.Disable,     "5.1.3")]
-        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, ResolvedFramework.NotFound)]
         [InlineData("5.1.0",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.0.0",      null,                                     "5.1.3")]
@@ -410,7 +377,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.1.1",      Constants.RollForwardSetting.Minor,       "5.1.3")]
         [InlineData("5.0.0",      Constants.RollForwardSetting.LatestMinor, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestMinor, "5.1.3")]
-        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       null)]
+        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.NotFound)]
         [InlineData("1.0.0",      Constants.RollForwardSetting.Major,       "5.1.3")]
         [InlineData("1.0.0",      Constants.RollForwardSetting.LatestMajor, "5.1.3")]
         public void ReconcileFrameworkReferences_AppFrameworkReference_ToLower_HardResolve(
@@ -429,7 +396,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 // Note that in this case (since the app reference is first) if the app's framework reference
                 // can't be resolved against the available frameworks, the error is actually a regular
                 // "can't find framework" and not a framework reconcile event.
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Verify that inner framework reference 5.1.1 (defaults = RollForward:Minor)
@@ -442,8 +409,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.4.0",      Constants.RollForwardSetting.Major,       "5.4.1")]
         [InlineData("5.4.0",      Constants.RollForwardSetting.LatestMajor, "5.4.1")]
         [InlineData("5.4.1",      Constants.RollForwardSetting.Disable,     "5.4.1")]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       null)]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       null)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.FailedToReconcile)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       ResolvedFramework.FailedToReconcile)]
         public void ReconcileFrameworkReferences_AppFrameworkReference_ToHigher(
             string versionReference,
             string rollForward,
@@ -474,8 +441,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.4.0",      Constants.RollForwardSetting.Major,       "5.4.1")]
         [InlineData("5.4.0",      Constants.RollForwardSetting.LatestMajor, "5.4.1")]
         [InlineData("5.4.1",      Constants.RollForwardSetting.Disable,     "5.4.1")]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       null)]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       null)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.FailedToReconcile)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       ResolvedFramework.FailedToReconcile)]
         public void ReconcileFrameworkReferences_AppFrameworkReference_ToHigher_HardResolve(
             string versionReference,
             string rollForward,
@@ -497,9 +464,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // is correctly reconciled with another framework's framework reference (<fxRefVersion>, <rollForward>).
         // The higher framework has fx reference with higher version.
         [Theory] // fxRefVersion  rollForward                               resolvedFramework
-        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.Disable,     ResolvedFramework.FailedToReconcile)]
         [InlineData("5.1.1",      Constants.RollForwardSetting.Disable,     "5.1.1")]
-        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestPatch, ResolvedFramework.FailedToReconcile)]
         [InlineData("5.1.0",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestPatch, "5.1.3")]
         [InlineData("5.0.0",      null,                                     "5.1.3")]
@@ -508,7 +475,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.1.1",      Constants.RollForwardSetting.Minor,       "5.1.3")]
         [InlineData("5.0.0",      Constants.RollForwardSetting.LatestMinor, "5.1.3")]
         [InlineData("5.1.1",      Constants.RollForwardSetting.LatestMinor, "5.1.3")]
-        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       null)]
+        [InlineData("1.0.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.FailedToReconcile)]
         [InlineData("1.0.0",      Constants.RollForwardSetting.Major,       "5.1.3")]
         [InlineData("1.0.0",      Constants.RollForwardSetting.LatestMajor, "5.1.3")]
         public void ReconcileFrameworkReferences_InnerToInnerFrameworkReference_ToLower(
@@ -544,8 +511,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("5.4.0",      Constants.RollForwardSetting.Major,       "5.4.1")]
         [InlineData("5.4.0",      Constants.RollForwardSetting.LatestMajor, "5.4.1")]
         [InlineData("5.4.1",      Constants.RollForwardSetting.Disable,     "5.4.1")]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       null)]
-        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       null)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Minor,       ResolvedFramework.FailedToReconcile)]
+        [InlineData("6.0.0",      Constants.RollForwardSetting.Major,       ResolvedFramework.FailedToReconcile)]
         public void ReconcileFrameworkReferences_InnerToInnerFrameworkReference_ToHigher(
             string versionReference,
             string rollForward,
@@ -660,16 +627,16 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // This is mostly a collection of interesting cases as testing the full matrix is prohibitively large
         [Theory] // appRefVersion appRollForward                            fxRefVersion fxRollForward                             resolvedFramework
         // Disable + anything -> Disable
-        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.Disable,     null)]
-        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.LatestPatch, null)]
-        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.Minor,       null)]
-        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.LatestMinor, null)]
-        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.Major,       null)]
-        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.LatestMajor, null)]
+        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.Disable,     ResolvedFramework.NotFound)]
+        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.LatestPatch, ResolvedFramework.NotFound)]
+        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.Minor,       ResolvedFramework.NotFound)]
+        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.LatestMinor, ResolvedFramework.NotFound)]
+        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.Major,       ResolvedFramework.NotFound)]
+        [InlineData("5.1.0",      Constants.RollForwardSetting.Disable,     "5.1.0",     Constants.RollForwardSetting.LatestMajor, ResolvedFramework.NotFound)]
         // Default - should apply normal Minor semantics
         [InlineData("5.0.0",      null,                                     "5.0.0",     null,                                     "5.1.3")]
         // Default + LatestPatch -> LatestPatch
-        [InlineData("5.0.0",      null,                                     "5.0.0",     Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData("5.0.0",      null,                                     "5.0.0",     Constants.RollForwardSetting.LatestPatch, ResolvedFramework.NotFound)]
         // Default + LatestMinor -> Minor
         [InlineData("5.0.0",      null,                                     "5.0.0",     Constants.RollForwardSetting.LatestMinor, "5.1.3")]
         // Default + Major -> Minor
@@ -683,13 +650,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         // LatestMajor + Major -> Major
         [InlineData("4.0.0",      Constants.RollForwardSetting.LatestMajor, "4.0.0",     Constants.RollForwardSetting.Major,       "5.1.3")]
         // LatestMajor + Minor -> Minor
-        [InlineData("4.0.0",      Constants.RollForwardSetting.LatestMajor, "4.0.0",     Constants.RollForwardSetting.Minor,       null)]
+        [InlineData("4.0.0",      Constants.RollForwardSetting.LatestMajor, "4.0.0",     Constants.RollForwardSetting.Minor,       ResolvedFramework.NotFound)]
         // LatestMinor + LatestPatch -> LatestPatch
         [InlineData("5.1.0",      Constants.RollForwardSetting.LatestMinor, "5.1.0",     Constants.RollForwardSetting.LatestPatch, "5.1.3")]
-        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestMinor, "5.0.0",     Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestMinor, "5.0.0",     Constants.RollForwardSetting.LatestPatch, ResolvedFramework.NotFound)]
         // LatestMajor + LatestPatch -> LatestPatch
         [InlineData("5.1.0",      Constants.RollForwardSetting.LatestMajor, "5.1.0",     Constants.RollForwardSetting.LatestPatch, "5.1.3")]
-        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestMajor, "5.0.0",     Constants.RollForwardSetting.LatestPatch, null)]
+        [InlineData("5.0.0",      Constants.RollForwardSetting.LatestMajor, "5.0.0",     Constants.RollForwardSetting.LatestPatch, ResolvedFramework.NotFound)]
         public void ReconcileFrameworkReferences_MergeRollForward(
             string appVersionReference,
             string appRollForward,
@@ -697,7 +664,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             string fxRollForward,
             string resolvedFramework)
         {
-            CommandResult result = RunTest(
+            RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, appVersionReference)
                         .WithRollForward(appRollForward))
@@ -705,18 +672,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForward(fxRollForward)
-                        .Version = fxVersionReference));
+                        .Version = fxVersionReference))
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
 
-            if (resolvedFramework == null)
-            {
-                result.ShouldFailToFindCompatibleFrameworkVersion();
-            }
-            else
-            {
-                result.ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
-            }
-
-            result = RunTest(
+            RunTest(
                 runtimeConfig => runtimeConfig
                     .WithFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, fxVersionReference)
                         .WithRollForward(fxRollForward))
@@ -724,16 +683,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForward(appRollForward)
-                        .Version = appVersionReference));
-
-            if (resolvedFramework == null)
-            {
-                result.ShouldFailToFindCompatibleFrameworkVersion();
-            }
-            else
-            {
-                result.ShouldHaveResolvedFramework(MicrosoftNETCoreApp, resolvedFramework);
-            }
+                        .Version = appVersionReference))
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         private CommandResult RunTest(

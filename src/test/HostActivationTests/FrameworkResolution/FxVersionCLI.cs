@@ -29,8 +29,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData("2.5.4", "2.5.5",          "2.5.5")]
         [InlineData("2.5.5", "2.5.5",          "2.5.5")]
         [InlineData("2.5.5", "2.5.4",          "2.5.4")]
-        [InlineData("2.5.5", "2.5.3",          null   )]
-        [InlineData("2.5.5", "2.5.5-preview1", null   )]
+        [InlineData("2.5.5", "2.5.3",          ResolvedFramework.NotFound)]
+        [InlineData("2.5.5", "2.5.5-preview1", ResolvedFramework.NotFound)]
         public void OverridesFrameworkReferences(string frameworkReferenceVersion, string fxVersion, string resolvedFramework)
         {
             RunTest(
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(MicrosoftNETCoreApp, frameworkReferenceVersion))
                     .WithCommandLine(Constants.FxVersion.CommandLineArgument, fxVersion))
-                .ShouldHaveResolvedFrameworkOrFail(MicrosoftNETCoreApp, resolvedFramework);
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
         // Validates that --fx-version ignores any <rollForwardOnNoCandidateFx> or <applyPatches> settings

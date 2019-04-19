@@ -29,9 +29,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         ///     Either null in which case the command result is expected to fail and not find compatible framework version,
         ///     or the framework versions in which case the command result is expected to succeed and resolve the specified framework version.</param>
         /// <returns>Constraint</returns>
-        public static AndConstraint<CommandResultAssertions> ShouldHaveResolvedFrameworkOrFail(this CommandResult result, string resolvedFrameworkName, string resolvedFrameworkVersion)
+        public static AndConstraint<CommandResultAssertions> ShouldHaveResolvedFrameworkOrFailToFind(this CommandResult result, string resolvedFrameworkName, string resolvedFrameworkVersion)
         {
-            if (resolvedFrameworkName == null || resolvedFrameworkVersion == null)
+            if (resolvedFrameworkName == null || resolvedFrameworkVersion == null || 
+                resolvedFrameworkVersion == FrameworkResolutionBase.ResolvedFramework.NotFound)
             {
                 return result.ShouldFailToFindCompatibleFrameworkVersion();
             }
@@ -68,9 +69,30 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             string lowerVersion,
             string higherVersion)
         {
-            if (resolvedVersion == null)
+            if (resolvedVersion == null || resolvedVersion == FrameworkResolutionBase.ResolvedFramework.FailedToReconcile)
             {
                 return result.Should().Fail().And.FailedToReconcileFrameworkReference(frameworkName, lowerVersion, higherVersion);
+            }
+            else
+            {
+                return result.ShouldHaveResolvedFramework(frameworkName, resolvedVersion);
+            }
+        }
+
+        public static AndConstraint<CommandResultAssertions> ShouldHaveResolvedFrameworkOrFail(
+            this CommandResult result,
+            string frameworkName,
+            string resolvedVersion,
+            string lowerVersion,
+            string higherVersion)
+        {
+            if (resolvedVersion == FrameworkResolutionBase.ResolvedFramework.FailedToReconcile)
+            {
+                return result.Should().Fail().And.FailedToReconcileFrameworkReference(frameworkName, lowerVersion, higherVersion);
+            }
+            else if (resolvedVersion == FrameworkResolutionBase.ResolvedFramework.NotFound)
+            {
+                return result.ShouldFailToFindCompatibleFrameworkVersion();
             }
             else
             {
