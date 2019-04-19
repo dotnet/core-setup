@@ -29,7 +29,7 @@ parameters:
 
 steps:
   - powershell: 'powershell "$env:BUILD_SOURCESDIRECTORY\eng\common\msbuild.ps1 $env:BUILD_SOURCESDIRECTORY\eng\common\helixpublish.proj /restore /t:Test /bl:$env:BUILD_SOURCESDIRECTORY\artifacts\log\$env:BuildConfig\SendToHelix.binlog"'
-    displayName: ${{ parameters.DisplayNamePrefix }} (Windows)
+    displayName: Send job to Helix (Windows)
     env:
       BuildConfig: $(_BuildConfig)
       HelixSource: ${{ parameters.HelixSource }}
@@ -58,7 +58,7 @@ steps:
     condition: and(${{ parameters.condition }}, eq(variables['Agent.Os'], 'Windows_NT'))
     continueOnError: ${{ parameters.continueOnError }}
   - script: $BUILD_SOURCESDIRECTORY/eng/common/msbuild.sh $BUILD_SOURCESDIRECTORY/eng/common/helixpublish.proj /restore /t:Test /bl:$BUILD_SOURCESDIRECTORY/artifacts/log/$BuildConfig/SendToHelix.binlog
-    displayName: ${{ parameters.DisplayNamePrefix }} (Unix)
+    displayName: Send job to Helix (Unix)
     env:
       BuildConfig: $(_BuildConfig)
       HelixSource: ${{ parameters.HelixSource }}
