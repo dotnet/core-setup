@@ -184,9 +184,15 @@
     <Exec Command="chmod u+x $(_crossGenPath)"
           Condition="'$(OSGroup)' != 'Windows_NT'" />
     <ItemGroup>
-      <!-- Exclude run crossgen on System.Runtime.WindowsRuntime for non-Windows due to System.Runtime.WindowsRuntime.dll for non-Windows only throw NotSupported Exception  -->
-      <!-- Also crossgen on non-windows doesn't support -Platform_Winmd_Paths -->
-      <!-- Exclude crossgen for resource DLLs in 'cs/', 'de/', ... subdirectories. -->
+      <!--
+        Skip crossgen for some files, including:
+
+        System.Runtime.WindowsRuntime. Windows.winmd is required to crossgen this assembly, but
+        Xplat crossgen doesn't accept -Platform_Winmd_Paths. This is fine because
+        System.Runtime.WindowsRuntime is only supported on Windows.
+
+        Resource DLLs in 'cs/', 'de/', ... subdirectories.
+      -->
       <_filesToCrossGen
         Include="@(FilesToPackage)"
         Condition="
