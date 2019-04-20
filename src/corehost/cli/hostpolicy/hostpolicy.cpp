@@ -22,10 +22,10 @@ namespace
     bool g_init_done;
     hostpolicy_init_t g_init;
 
-    std::unique_ptr<coreclr_t> g_coreclr;
+    std::shared_ptr<coreclr_t> g_coreclr;
 
     std::mutex g_lib_lock;
-    coreclr_t *g_lib_coreclr;
+    std::weak_ptr<coreclr_t> g_lib_coreclr;
 
     int create_coreclr(const hostpolicy_context_t &context, host_mode_t mode, std::unique_ptr<coreclr_t> &coreclr)
     {
@@ -82,8 +82,8 @@ int get_or_create_coreclr(
     host_mode_t mode,
     std::shared_ptr<coreclr_t> &coreclr)
 {
-    *coreclr = g_lib_coreclr;
-    if (*coreclr != nullptr)
+    coreclr = g_lib_coreclr.lock();
+    if (coreclr != nullptr)
     {
         // [TODO] Validate the current CLR instance is acceptable for this request
 
@@ -93,8 +93,8 @@ int get_or_create_coreclr(
 
     {
         std::lock_guard<std::mutex> lock{ g_lib_lock };
-        *coreclr = g_lib_coreclr;
-        if (*coreclr != nullptr)
+        coreclr = g_lib_coreclr.lock();
+        if (coreclr != nullptr)
         {
             trace::info(_X("Using existing CoreClr instance"));
             return StatusCode::Success;
@@ -112,10 +112,10 @@ int get_or_create_coreclr(
 
         assert(g_coreclr == nullptr);
         g_coreclr = std::move(coreclr_local);
-        g_lib_coreclr = g_coreclr.get();
+        g_lib_coreclr = g_coreclr;
     }
 
-    *coreclr = g_lib_coreclr;
+    coreclr = g_coreclr;
     return StatusCode::Success;
 }
 
@@ -505,7 +505,7 @@ SHARED_API int corehost_resolve_component_dependencies(
     // Call parse_runtime_config since it initializes the defaults for various settings
     // but we don't have any .runtimeconfig.json for the component, so pass in empty paths.
     // Empty paths is a valid case and the method will simply skip parsing anything.
-    app->parse_runtime_config(pal::string_t(), pal::string_t(), fx_reference_t(), fx_reference_t());
+    app->parse_runtime_config(pal::string_t(), pal::string_t(), runtime_config_t::settings_t());
     if (!app->get_runtime_config().is_valid())
     {
         // This should really never happen, but fail gracefully if it does anyway.
