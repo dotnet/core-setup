@@ -17,9 +17,9 @@
       <Uri>https://github.com/dotnet/standard</Uri>
       <Sha>e61d710f1ddc3786937911a4422134fff05f463e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview5-27622-72">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview4-27622-73">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>fc6dd7009fb953d43d0912ad0755d5566868047a</Sha>
+      <Sha>8651946d4a4379ec0b2d189d64562686ca7bdb90</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Private.WindowsDesktop.App" Version="3.0.0-preview5-27622-34">
       <Uri>https://dev.azure.com/devdiv/DevDiv/_git/DotNet-Trusted</Uri>
