@@ -12,8 +12,8 @@
 #include <utils.h>
 
 #include <cpprest/json.h>
+#include <corehost_context_contract.h>
 #include "corehost_init.h"
-#include "context_contract.h"
 #include "deps_format.h"
 #include "framework_info.h"
 #include "fx_definition.h"

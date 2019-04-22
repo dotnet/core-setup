@@ -56,10 +56,10 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
 
     // Leak fxr
 
-    auto hostfxr_init_context = (hostfxr_initialize_for_runtime_config_fn)pal::get_symbol(fxr, "hostfxr_initialize_for_runtime_config");
-    auto hostfxr_get_delegate = (hostfxr_get_runtime_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_runtime_delegate");
+    auto hostfxr_initialize_for_runtime_config = (hostfxr_initialize_for_runtime_config_fn)pal::get_symbol(fxr, "hostfxr_initialize_for_runtime_config");
+    auto hostfxr_get_runtime_delegate = (hostfxr_get_runtime_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_runtime_delegate");
     auto hostfxr_close = (hostfxr_close_fn)pal::get_symbol(fxr, "hostfxr_close");
-    if (hostfxr_init_context == nullptr || hostfxr_get_delegate == nullptr || hostfxr_close == nullptr)
+    if (hostfxr_initialize_for_runtime_config == nullptr || hostfxr_get_runtime_delegate == nullptr || hostfxr_close == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
 
     pal::string_t config_path;
@@ -77,11 +77,11 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
     };
 
     hostfxr_handle context;
-    int rc = hostfxr_init_context(config_path.c_str(), &parameters, &context);
+    int rc = hostfxr_initialize_for_runtime_config(config_path.c_str(), &parameters, &context);
     if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
         return rc;
 
-    rc = hostfxr_get_delegate(context, type, (void**)delegate);
+    rc = hostfxr_get_runtime_delegate(context, type, (void**)delegate);
 
     int rcClose = hostfxr_close(context);
     assert(rcClose == StatusCode::Success);

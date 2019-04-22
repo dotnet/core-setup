@@ -8,7 +8,7 @@ class fx_definition_t;
 struct fx_ver_t;
 struct host_startup_info_t;
 
-#include <context_contract.h>
+#include <corehost_context_contract.h>
 #include "error_codes.h"
 #include "fx_definition.h"
 #include "host_context.h"

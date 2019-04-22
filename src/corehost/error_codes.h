@@ -6,7 +6,11 @@
 #define __ERROR_CODES_H__
 enum StatusCode
 {
+    // Success
     Success                     = 0,
+    CoreHostAlreadyInitialized  = 0x00000001,
+
+    // Failure
     InvalidArgFailure           = 0x80008081,
     CoreHostLibLoadFailure      = 0x80008082,
     CoreHostLibMissingFailure   = 0x80008083,
@@ -43,7 +47,5 @@ enum StatusCode
     HostApiUnsupportedVersion   = 0x800080a2,
     HostInvalidState            = 0x800080a3,
     HostPropertyNotFound        = 0x800080a4,
-
-    CoreHostAlreadyInitialized  = 0x00000001,
 };
 #endif // __ERROR_CODES_H__

@@ -468,7 +468,7 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_app(
     const pal::char_t *argv[],
     const pal::char_t *app_path,
     const hostfxr_initialize_parameters * parameters,
-    hostfxr_handle * host_context_handle)
+    /*out*/ hostfxr_handle * host_context_handle)
 {
     if (host_context_handle == nullptr || (argv == nullptr && argc != 0) || (app_path == nullptr && argc == 0))
         return StatusCode::InvalidArgFailure;
@@ -536,7 +536,7 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_app(
 SHARED_API int32_t __cdecl hostfxr_initialize_for_runtime_config(
     const pal::char_t *runtime_config_path,
     const hostfxr_initialize_parameters *parameters,
-    hostfxr_handle *host_context_handle)
+    /*out*/ hostfxr_handle *host_context_handle)
 {
     if (runtime_config_path == nullptr || host_context_handle == nullptr)
         return StatusCode::InvalidArgFailure;
@@ -619,7 +619,7 @@ namespace
 SHARED_API int32_t __cdecl hostfxr_get_runtime_delegate(
     const hostfxr_handle host_context_handle,
     hostfxr_delegate_type type,
-    void **delegate)
+    /*out*/ void **delegate)
 {
     if (host_context_handle == nullptr || delegate == nullptr)
         return StatusCode::InvalidArgFailure;
@@ -657,7 +657,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_delegate(
 SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
     const hostfxr_handle host_context_handle,
     const pal::char_t *name,
-    const pal::char_t **value)
+    /*out*/ const pal::char_t **value)
 {
     if (name == nullptr || value == nullptr)
         return StatusCode::InvalidArgFailure;
@@ -771,9 +771,9 @@ SHARED_API int32_t __cdecl hostfxr_set_runtime_property_value(
 //
 SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
     const hostfxr_handle host_context_handle,
-    size_t * count,
-    const pal::char_t **keys,
-    const pal::char_t **values)
+    /*inout*/ size_t * count,
+    /*out*/ const pal::char_t **keys,
+    /*out*/ const pal::char_t **values)
 {
     if (count == nullptr)
         return StatusCode::InvalidArgFailure;

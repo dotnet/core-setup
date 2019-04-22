@@ -7,7 +7,7 @@
 
 #include <pal.h>
 
-#include <context_contract.h>
+#include <corehost_context_contract.h>
 #include "hostpolicy_resolver.h"
 
 enum class host_context_type

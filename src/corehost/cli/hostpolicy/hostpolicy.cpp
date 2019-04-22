@@ -16,7 +16,7 @@
 #include <error_codes.h>
 #include "breadcrumbs.h"
 #include <host_startup_info.h>
-#include <context_contract.h>
+#include <corehost_context_contract.h>
 #include "hostpolicy_context.h"
 
 namespace
@@ -566,7 +566,7 @@ namespace
     }
 }
 
-SHARED_API int __cdecl corehost_initialize_context(const host_interface_t *init, corehost_context_contract *context_contract)
+SHARED_API int __cdecl corehost_initialize_context(const host_interface_t *init, /*out*/ corehost_context_contract *context_contract)
 {
     if (init == nullptr || context_contract == nullptr)
         return StatusCode::InvalidArgFailure;

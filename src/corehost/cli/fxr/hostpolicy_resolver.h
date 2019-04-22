@@ -8,7 +8,7 @@
 #include <fx_definition.h>
 #include <host_interface.h>
 #include <error_codes.h>
-#include <context_contract.h>
+#include <corehost_context_contract.h>
 
 using corehost_load_fn = int(*) (const host_interface_t* init);
 using corehost_unload_fn = int(*) ();

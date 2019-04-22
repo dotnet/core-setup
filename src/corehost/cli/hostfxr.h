@@ -46,31 +46,31 @@ using hostfxr_initialize_for_app_fn = int32_t(__cdecl *)(
     const pal::char_t *argv[],
     const pal::char_t *app_path,
     const hostfxr_initialize_parameters *parameters,
-    hostfxr_handle *host_context_handle);
+    /*out*/ hostfxr_handle *host_context_handle);
 using hostfxr_initialize_for_runtime_config_fn = int32_t(__cdecl *)(
     const pal::char_t *runtime_config_path,
     const hostfxr_initialize_parameters*parameters,
-    hostfxr_handle *host_context_handle);
+    /*out*/ hostfxr_handle *host_context_handle);
 
 using hostfxr_get_runtime_property_value_fn = int32_t(__cdecl *)(
     const hostfxr_handle host_context_handle,
     const pal::char_t *name,
-    const pal::char_t **value);
+    /*out*/ const pal::char_t **value);
 using hostfxr_set_runtime_property_value_fn = int32_t(__cdecl *)(
     const hostfxr_handle host_context_handle,
     const pal::char_t *name,
     const pal::char_t *value);
 using hostfxr_get_runtime_properties_fn = int32_t(__cdecl *)(
     const hostfxr_handle host_context_handle,
-    size_t * count,
-    const pal::char_t **keys,
-    const pal::char_t **values);
+    /*inout*/ size_t * count,
+    /*out*/ const pal::char_t **keys,
+    /*out*/ const pal::char_t **values);
 
 using hostfxr_run_app_fn = int32_t(__cdecl *)(const hostfxr_handle host_context_handle);
 using hostfxr_get_runtime_delegate_fn = int32_t(__cdecl *)(
     const hostfxr_handle host_context_handle,
     hostfxr_delegate_type type,
-    void **delegate);
+    /*out*/ void **delegate);
 
 using hostfxr_close_fn = int32_t(__cdecl *)(const hostfxr_handle host_context_handle);
 
