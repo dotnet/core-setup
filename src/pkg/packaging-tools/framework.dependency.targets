@@ -331,7 +331,10 @@
 
   <Target Name="GetRuntimeFilesToPackage"
           BeforeTargets="GetFilesToPackage"
-          DependsOnTargets="PrepareForCrossGen;GetCrossGenSymbolsFiles" />
+          DependsOnTargets="GetRuntimeFilesFromPackages;PrepareForCrossGen;GetCrossGenSymbolsFiles" />
+
+  <!-- Stub target to override if a depproj wants to package some runtime files. -->
+  <Target Name="GetRuntimeFilesFromPackages" />
 
   <!-- Target overrides (can't be shared with pkgproj) -->
 
