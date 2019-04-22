@@ -11,6 +11,10 @@
 
 namespace
 {
+    const char *app_log_prefix = "[APP] ";
+    const char *config_log_prefix = "[CONFIG] ";
+    const char *secondary_log_prefix = "[SECONDARY] ";
+
     std::vector<char> to_str(const pal::string_t &value)
     {
         std::vector<char> vect;
@@ -92,7 +96,8 @@ namespace
             }
             else
             {
-                std::cout << log_prefix << "hostfxr_get_runtime_property_value failed for property: " << to_str(key).data() << std::endl;
+                std::cout << log_prefix << "hostfxr_get_runtime_property_value failed for property: " << to_str(key).data()
+                    << " - " << std::hex << std::showbase << rc << std::endl;
             }
         }
     }
@@ -116,7 +121,7 @@ namespace
             }
             else
             {
-                std::cout << log_prefix << "hostfxr_get_runtime_property_value failed for property: " << to_str(key).data()
+                std::cout << log_prefix << "hostfxr_set_runtime_property_value failed for property: " << to_str(key).data()
                     << " - " << std::hex << std::showbase << rc << std::endl;
             }
         }
@@ -140,7 +145,7 @@ namespace
 
         if (rc != StatusCode::Success)
         {
-            std::cout << log_prefix << "hostfxr_get_runtime_properties failed: "
+            std::cout << log_prefix << "hostfxr_get_runtime_properties failed - "
                 << std::hex << std::showbase << rc << std::endl;
             return;
         }
@@ -174,6 +179,12 @@ namespace
                 break;
             case host_context_test::check_properties::get_all:
                 get_properties(hostfxr, handle, log_prefix);
+                break;
+            case host_context_test::check_properties::get_active:
+                get_property_value(hostfxr, nullptr, key_count, keys, log_prefix);
+                break;
+            case host_context_test::check_properties::get_all_active:
+                get_properties(hostfxr, nullptr, log_prefix);
                 break;
             case host_context_test::check_properties::none:
             default:
@@ -230,6 +241,14 @@ host_context_test::check_properties host_context_test::check_properties_from_str
     {
         return host_context_test::check_properties::get_all;
     }
+    else if (pal::strcmp(str, _X("get_active")) == 0)
+    {
+        return host_context_test::check_properties::get_active;
+    }
+    else if (pal::strcmp(str, _X("get_all_active")) == 0)
+    {
+        return host_context_test::check_properties::get_all_active;
+    }
 
     return host_context_test::check_properties::none;
 }
@@ -251,7 +270,7 @@ bool host_context_test::app(
         return false;
     }
 
-    inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, "app - ");
+    inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, app_log_prefix);
 
     rc = hostfxr.run_app(handle);
     if (rc != StatusCode::Success)
@@ -273,7 +292,7 @@ bool host_context_test::config(
 {
     hostfxr_exports hostfxr { hostfxr_path };
 
-    return config_test(hostfxr, check_properties, config_path, argc, argv, "config - ");
+    return config_test(hostfxr, check_properties, config_path, argc, argv, config_log_prefix);
 }
 
 bool host_context_test::config_multiple(
@@ -286,10 +305,40 @@ bool host_context_test::config_multiple(
 {
     hostfxr_exports hostfxr { hostfxr_path };
 
-    if (!config_test(hostfxr, check_properties, config_path, argc, argv, "config - "))
+    if (!config_test(hostfxr, check_properties, config_path, argc, argv, config_log_prefix))
         return false;
 
-    return config_test(hostfxr, check_properties, secondary_config_path, argc, argv, "secondary config - ");
+    return config_test(hostfxr, check_properties, secondary_config_path, argc, argv, secondary_log_prefix);
+}
+
+namespace
+{
+    class block_mock_execute_assembly
+    {
+    public:
+        block_mock_execute_assembly()
+        {
+            if (pal::getenv(_X("TEST_BLOCK_MOCK_EXECUTE_ASSEMBLY"), &_path))
+                pal::touch_file(_path);
+        }
+
+        ~block_mock_execute_assembly()
+        {
+            unblock();
+        }
+
+        void unblock()
+        {
+            if (_path.empty())
+                return;
+
+            pal::remove(_path.c_str());
+            _path.clear();
+        }
+
+    private:
+        pal::string_t _path;
+    };
 }
 
 bool host_context_test::mixed(
@@ -310,7 +359,9 @@ bool host_context_test::mixed(
         return false;
     }
 
-    inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, "app - ");
+    inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, app_log_prefix);
+
+    block_mock_execute_assembly block_mock;
 
     auto run_app = [&]{
         int rc = hostfxr.run_app(handle);
@@ -323,7 +374,8 @@ bool host_context_test::mixed(
     };
     std::thread app_start = std::thread(run_app);
 
-    bool success = config_test(hostfxr, check_properties, config_path, argc, argv, "config - ");
+    bool success = config_test(hostfxr, check_properties, config_path, argc, argv, secondary_log_prefix);
+    block_mock.unblock();
     app_start.join();
     return success;
 }

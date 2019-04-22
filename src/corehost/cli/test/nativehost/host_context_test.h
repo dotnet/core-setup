@@ -15,7 +15,9 @@ namespace host_context_test
         get,
         set,
         remove,
-        get_all
+        get_all,
+        get_active,
+        get_all_active
     };
 
     check_properties check_properties_from_string(const pal::char_t *str);
