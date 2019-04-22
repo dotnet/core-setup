@@ -7,6 +7,11 @@
     <BuildTargetPath>build/$(NETCoreAppFramework)</BuildTargetPath>
     <PlatformManifestTargetPath>$(BuildTargetPath)</PlatformManifestTargetPath>
     <FileVersionPropsTargetPath>$(BuildTargetPath)</FileVersionPropsTargetPath>
+
+    <GenerateRuntimeGraph>true</GenerateRuntimeGraph>
+
+    <!-- NETCoreApp sfx is still built by old tooling. Switchover is pending validation. -->
+    <GenerateSharedFramework>false</GenerateSharedFramework>
   </PropertyGroup>
 
   <!-- Identity / Reference package content -->

@@ -9,10 +9,7 @@
 #include <cassert>
 #include <dlfcn.h>
 #include <dirent.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <pwd.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <fnmatch.h>
 #include <ctime>
@@ -183,16 +180,32 @@ bool pal::get_default_servicing_directory(string_t* recv)
     return true;
 }
 
-static
-bool is_executable(const pal::string_t& file_path)
+bool pal::get_temp_directory(pal::string_t& tmp_dir)
 {
-    struct stat st;
-    if (::stat(file_path.c_str(), &st) < 0)
+    // First, check for the POSIX standard environment variable
+    if (pal::getenv(_X("TMPDIR"), &tmp_dir))
     {
-        return false;
+        return pal::realpath(&tmp_dir);
     }
 
-    return ((st.st_mode & S_IEXEC) != 0);
+    // On non-compliant systems (ex: Ubuntu) try /var/tmp or /tmp directories.
+    // /var/tmp is prefered since its contents are expected to survive across
+    // machine reboot.
+    pal::string_t _var_tmp = _X("/var/tmp/");
+    if (pal::realpath(&_var_tmp))
+    {
+        tmp_dir.assign(_var_tmp);
+        return true;
+    }
+
+    pal::string_t _tmp = _X("/tmp/");
+    if (pal::realpath(&_tmp))
+    {
+        tmp_dir.assign(_tmp);
+        return true;
+    }
+
+    return false;
 }
 
 bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* recv)
@@ -647,6 +660,8 @@ static void readdir(const pal::string_t& path, const pal::string_t& pattern, boo
                 files.push_back(filepath);
             }
         }
+
+        closedir(dir);
     }
 }
 

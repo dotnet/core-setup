@@ -1,0 +1,66 @@
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <InstallerSourceIntermediateOutputDir>$(BaseIntermediateOutputPath)$(InstallerSourceOSPlatformConfig)\$(MSBuildProjectName)\</InstallerSourceIntermediateOutputDir>
+  </PropertyGroup>
+
+  <!-- Detect framework pack suffix and apply defaults. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Ref'))">
+    <FrameworkPackType>targeting</FrameworkPackType>
+
+    <!-- Include the platform manifest in the data dir. -->
+    <PlatformManifestTargetPath>data/PlatformManifest.txt</PlatformManifestTargetPath>
+    <FrameworkListTargetPath>data/</FrameworkListTargetPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Host'))">
+    <FrameworkPackType>apphost</FrameworkPackType>
+
+    <!-- AppHost packs are only per-RID, e.g. 'Microsoft.NETCore.App.Host.win-x64'. -->
+    <BuildRidSpecificPacks>true</BuildRidSpecificPacks>
+    <BuildLineupPackage>false</BuildLineupPackage>
+
+    <!--
+      Use generic package description: packaging tasks don't handle RID suffix nicely and expect an
+      individual description for each RID.
+    -->
+    <UseRuntimePackageDescription>true</UseRuntimePackageDescription>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(FrameworkPackType)' != ''">
+    <Version>$(ProductVersion)</Version>
+    <PackageType>DotnetPlatform</PackageType>
+
+    <!--
+      Prevent 'runtime.<rid>.Microsoft.<framework>.App.Ref' packages from being built, and disable
+      the runtime.json and lineup package infrastructure. Packs are either RID-agnostic or use
+      convention-based runtime packages, not runtime.json with a lineup package.
+    -->
+    <BuildRuntimePackages>false</BuildRuntimePackages>
+    <IncludeRuntimeJson>false</IncludeRuntimeJson>
+    <IsLineupPackage>false</IsLineupPackage>
+
+    <!-- Remove package dependencies. -->
+    <ExcludeLineupReference>true</ExcludeLineupReference>
+    <PackProjectDependencies>false</PackProjectDependencies>
+
+    <!-- Location to lay out pack contents, and where to grab bits to create installers. -->
+    <PackLayoutDir>$(InstallerSourceIntermediateOutputDir)layout/$(FrameworkPackType)/</PackLayoutDir>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SharedFrameworkLayoutDir>$(InstallerSourceIntermediateOutputDir)sharedFxLayout/</SharedFrameworkLayoutDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsFrameworkPackage)' == 'true'">
+    <Version>$(ProductVersion)</Version>
+    <OmitDependencies>true</OmitDependencies>
+    <SkipValidatePackage>true</SkipValidatePackage>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(InstallerFileNameWithoutExtension)' != '' AND '$(GenerateMSI)' == 'true'">
+    <OutputType>Package</OutputType>
+    <OutputName>$(InstallerFileNameWithoutExtension)</OutputName>
+  </PropertyGroup>
+
+</Project>

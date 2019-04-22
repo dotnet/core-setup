@@ -347,6 +347,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         //  - Microsoft.NETCore.App 4.1.2
         //  - Microsoft.NETCore.App 4.1.3-preview.1
         //  - Microsoft.NETCore.App 4.2.1
+        //  - Microsoft.NETCore.App 4.5.1-preview.1
+        //  - Microsoft.NETCore.App 4.5.2
         //  - Microsoft.NETCore.App 5.1.3-preview.1
         //  - Microsoft.NETCore.App 5.1.3-preview.2
         //  - Microsoft.NETCore.App 5.1.4-preview.1
@@ -393,6 +395,37 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
                     .WithApplyPatches(applyPatches)
                     .WithFramework(MicrosoftNETCoreApp, "4.0.0"),
+                commandResult =>
+                {
+                    if (resolvedVersion != null)
+                    {
+                        commandResult.Should().Pass()
+                            .And.HaveResolvedFramework(MicrosoftNETCoreApp, resolvedVersion);
+                    }
+                    else
+                    {
+                        commandResult.Should().Fail()
+                            .And.DidNotFindCompatibleFrameworkVersion();
+                    }
+                });
+        }
+
+        [Theory]
+        [InlineData(null, null, "4.5.2")]
+        [InlineData(null, false, "4.5.2")]
+        [InlineData(0, null, null)]
+        [InlineData(0, false, null)]
+        [InlineData(1, null, "4.5.2")]
+        [InlineData(1, false, "4.5.2")]
+        [InlineData(2, null, "4.5.2")]
+        [InlineData(2, false, "4.5.2")]
+        public void RollForwardOnMinor_RollOverPreRelease(int? rollForwardOnNoCandidateFx, bool? applyPatches, string resolvedVersion)
+        {
+            RunTestWithManyVersions(
+                runtimeConfig => runtimeConfig
+                    .WithRollForwardOnNoCandidateFx(rollForwardOnNoCandidateFx)
+                    .WithApplyPatches(applyPatches)
+                    .WithFramework(MicrosoftNETCoreApp, "4.4.0"),
                 commandResult =>
                 {
                     if (resolvedVersion != null)
@@ -718,29 +751,31 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             public SharedTestState()
             {
                 DotNetWithOneFramework = DotNet("WithOneFramework")
-                    .AddMicrosoftNETCoreAppFramework("5.1.3")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.3")
                     .Build();
 
                 DotNetWithPreReleaseFramework = DotNet("WithPreReleaseFramework")
-                    .AddMicrosoftNETCoreAppFramework("5.1.3-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.3-preview.2")
                     .Build();
 
                 DotNetWithManyVersions = DotNet("WithManyVersions")
-                    .AddMicrosoftNETCoreAppFramework("2.3.1-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("2.3.2")
-                    .AddMicrosoftNETCoreAppFramework("4.1.1")
-                    .AddMicrosoftNETCoreAppFramework("4.1.2")
-                    .AddMicrosoftNETCoreAppFramework("4.1.3-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("4.2.1")
-                    .AddMicrosoftNETCoreAppFramework("5.1.3-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("5.1.3-preview.2")
-                    .AddMicrosoftNETCoreAppFramework("5.1.4-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("5.2.3-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("5.2.3-preview.2")
-                    .AddMicrosoftNETCoreAppFramework("6.1.1")
-                    .AddMicrosoftNETCoreAppFramework("6.1.2-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("7.1.1-preview.1")
-                    .AddMicrosoftNETCoreAppFramework("7.1.2-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("2.3.1-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("2.3.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.1.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.1.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.1.3-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.2.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.5.1-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("4.5.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.3-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.3-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.1.4-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.2.3-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("5.2.3-preview.2")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.1.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("6.1.2-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("7.1.1-preview.1")
+                    .AddMicrosoftNETCoreAppFrameworkMockHostPolicy("7.1.2-preview.1")
                     .Build();
 
                 FrameworkReferenceApp = CreateFrameworkReferenceApp();

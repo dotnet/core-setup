@@ -6,14 +6,14 @@
 #include <utils.h>
 
 arguments_t::arguments_t()
-    : managed_application(_X(""))
-    , host_mode(host_mode_t::invalid)
+    : host_mode(host_mode_t::invalid)
     , host_path(_X(""))
     , app_root(_X(""))
+    , deps_path(_X(""))
+    , core_servicing(_X(""))
+    , managed_application(_X(""))
     , app_argc(0)
     , app_argv(nullptr)
-    , core_servicing(_X(""))
-    , deps_path(_X(""))
 {
 }
 
@@ -22,7 +22,6 @@ arguments_t::arguments_t()
  * Setup the shared store directories.
  *
  *  o %DOTNET_SHARED_STORE% -- multiple delimited paths
- *  o $HOME/.dotnet/{x86|x64}/store/arch/tfm or %USERPROFILE%\.dotnet\{x86|x64}\store\<arch>\<tfm>
  *  o dotnet.exe relative shared store\<arch>\<tfm>
  *  o Global location
  *      Windows: C:\Program Files (x86) or
