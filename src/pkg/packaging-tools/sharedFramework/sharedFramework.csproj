@@ -148,6 +148,13 @@
       <ToDelete Include="$(PublishDir)$(LibPrefix)comhost$(LibSuffix)" />
       <ToDelete Include="$(PublishDir)$(LibPrefix)hostfxr$(LibSuffix)" />
       <ToDelete Include="$(PublishDir)$(LibPrefix)ijwhost$(LibSuffix)" />
+      <!--
+        On Windows, LibSuffix is .dll (for dynamic libraries), but for this particular file, we also
+        build a .lib (static library). Make sure neither is included.
+
+        We only build this library on Windows, so other static library formats don't need to be
+        handled yet.
+      -->
       <ToDelete Include="$(PublishDir)$(LibPrefix)ijwhost.lib" />
     </ItemGroup>
 
