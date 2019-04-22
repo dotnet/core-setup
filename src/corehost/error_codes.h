@@ -42,6 +42,7 @@ enum StatusCode
     LibHostDuplicateProperty    = 0x800080a1,
     HostApiUnsupportedVersion   = 0x800080a2,
     HostInvalidState            = 0x800080a3,
+    HostPropertyNotFound        = 0x800080a4,
 
     CoreHostAlreadyInitialized  = 0x00000001,
 };

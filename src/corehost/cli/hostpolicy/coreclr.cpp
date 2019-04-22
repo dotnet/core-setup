@@ -280,6 +280,7 @@ void coreclr_property_bag_t::remove(const pal::char_t *key)
     if (iter == _properties.cend())
         return;
 
+    trace::verbose(_X("Removing property %s. Old value: '%s'."), key, (*iter).second.c_str());
     _properties.erase(iter);
 }
 

@@ -690,7 +690,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
         const std::unordered_map<pal::string_t, pal::string_t> &properties = context->config_properties;
         auto iter = properties.find(name);
         if (iter == properties.cend())
-            return StatusCode::InvalidArgFailure;
+            return StatusCode::HostPropertyNotFound;
 
         *value = (*iter).second.c_str();
         return S_OK;

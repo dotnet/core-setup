@@ -510,7 +510,7 @@ namespace
 
         hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
         if (!context->coreclr_properties.try_get(key, value))
-            return StatusCode::InvalidArgFailure;
+            return StatusCode::HostPropertyNotFound;
 
         return StatusCode::Success;
     }
