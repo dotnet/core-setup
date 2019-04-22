@@ -276,7 +276,7 @@
     <SymbolPackageOutputPath Condition="'$(SymbolPackageOutputPath)'==''">$(PackageOutputPath)</SymbolPackageOutputPath>
     <PackageSymbolsBinDir Condition="'$(PackageSymbolsBinDir)' == ''">$(PackagesBasePath)symbols/</PackageSymbolsBinDir>
 
-    <!-- Use / instead of \: used directly by WiX which doesn't accept trailing \. -->
+    <!-- Use '/' instead of '\': used directly by WiX which doesn't accept trailing '\'. -->
     <SharedFrameworkPublishDir>$(IntermediateOutputRootPath)sharedFrameworkPublish/</SharedFrameworkPublishDir>
     <SharedFrameworkPublishSymbolsDir>$(IntermediateOutputRootPath)sharedFrameworkPublish.symbols\</SharedFrameworkPublishSymbolsDir>
   </PropertyGroup>
