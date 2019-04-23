@@ -14,11 +14,11 @@
           Condition="'$(BuildDebPackage)'=='true'" />
 
   <Target Name="GenerateRuntimeDebs" 
-          DependsOnTargets="GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb"
+          DependsOnTargets="GenerateSharedHostDeb;GenerateHostFxrDeb;GenerateSharedFrameworkDeb;GenerateRuntimeDependenciesDeb"
           Condition="'$(BuildRuntimeDebs)' == 'true'" />
 
   <Target Name="BuildDebs"
-          DependsOnTargets="InitializeDotnetDebTool;GenerateRuntimeDebs;GenerateRuntimeDependenciesDeb"
+          DependsOnTargets="InitializeDotnetDebTool;GenerateRuntimeDebs"
           Condition="'$(BuildDebPackage)'=='true' and '$(DebuildPresent)' == 'true'" />
 
   <Target Name="GenerateSharedHostDeb">
@@ -271,7 +271,7 @@
       <DebPackageName>$(RuntimeDependenciesDebPkgName)</DebPackageName>
       <DebPackageVersion>$(RuntimeDepsDebPackageVersion)</DebPackageVersion>
       <DebFile>$(DotnetRuntimeDependenciesPackageInstallerFile)</DebFile>
-      <ConfigJsonName>dotnet-runtime-deps-debian_config_$(OutputRid).json</ConfigJsonName>
+      <ConfigJsonName>dotnet-runtime-deps-debian_config.json</ConfigJsonName>
       <ConfigJsonFile>$(debPackaginfConfigPath)$(ConfigJsonName)</ConfigJsonFile>
       <debIntermediatesDir>$(PackagesIntermediateDir)$(DebPackageName)/$(DebPackageVersion)</debIntermediatesDir>
     </PropertyGroup>
