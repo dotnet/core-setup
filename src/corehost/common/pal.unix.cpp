@@ -37,7 +37,7 @@ pal::string_t pal::to_lower(const pal::string_t& in)
 
 pal::string_t pal::get_timestamp()
 {
-    std::time_t t = std::time(0);
+    std::time_t t = std::time(nullptr);
     const std::size_t elems = 100;
     char_t buf[elems];
     std::strftime(buf, elems, _X("%c %Z"), std::gmtime(&t));
@@ -347,7 +347,7 @@ pal::string_t pal::get_current_os_rid_platform()
     //
     // Needless to say, this will need to be updated if OSX RID were to become 11.* ever.
     size_t size = sizeof(str);
-    int ret = sysctlbyname("kern.osrelease", str, &size, NULL, 0);
+    int ret = sysctlbyname("kern.osrelease", str, &size, nullptr, 0);
     if (ret == 0)
     {
         std::string release(str, size);

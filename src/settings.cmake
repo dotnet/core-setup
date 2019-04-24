@@ -234,7 +234,6 @@ else()
     add_compile_options(-Wno-used-but-marked-unused)
     add_compile_options(-Wno-vla)
     add_compile_options(-Wno-weak-vtables)
-    add_compile_options(-Wno-zero-as-null-pointer-constant)
 endif()
 
 # Older CMake doesn't support CMAKE_CXX_STANDARD and GCC/Clang need a switch to enable C++ 11
