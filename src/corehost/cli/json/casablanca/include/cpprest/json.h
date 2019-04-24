@@ -1471,6 +1471,8 @@ public:
         protected:
             _Value() {}
 
+            _Value(const _Value& other) {}
+
             virtual void format(std::basic_string<char>& stream) const
             {
                 stream.append("null");
