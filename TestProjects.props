@@ -1,4 +1,3 @@
 <Project>
   <Import Project="BranchInfo.props" />
-  <Import Project="src\test\Assets\TestProjects\MNADeprecationWorkaround.props" />
 </Project>
