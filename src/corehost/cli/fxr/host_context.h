@@ -8,6 +8,7 @@
 #include <pal.h>
 
 #include <corehost_context_contract.h>
+#include "corehost_init.h"
 #include <hostfxr.h>
 #include "hostpolicy_resolver.h"
 
@@ -23,21 +24,35 @@ enum class host_context_type
 struct host_context_t
 {
 public: // static
+    static int create(
+        const hostpolicy_contract_t &hostpolicy_contract,
+        corehost_init_t &init,
+        /*out*/ std::unique_ptr<host_context_t> &context);
+    static int create_secondary(
+        const hostpolicy_contract_t &hostpolicy_contract,
+        corehost_init_t &init,
+        /*out*/ std::unique_ptr<host_context_t> &context);
     static host_context_t* from_handle(const hostfxr_handle handle, bool allow_invalid_type = false);
 
 public:
     int32_t marker; // used as an indication for validity
 
     host_context_type type;
-    hostpolicy_contract host_contract;
-    corehost_context_contract context_contract;
+    const hostpolicy_contract_t hostpolicy_contract;
+    const corehost_context_contract hostpolicy_context_contract;
 
+    // Whether or not the context was initialized for an app. argv will be empty for non-app contexts.
     bool is_app;
     std::vector<pal::string_t> argv;
 
+    // Config properties for secondary contexts
     std::unordered_map<pal::string_t, pal::string_t> config_properties;
 
-    host_context_t();
+    host_context_t(
+        host_context_type type,
+        const hostpolicy_contract_t &hostpolicy_contract,
+        const corehost_context_contract &hostpolicy_context_contract);
+
     void close();
 };
 

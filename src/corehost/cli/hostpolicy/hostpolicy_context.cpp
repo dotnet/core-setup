@@ -23,13 +23,16 @@ namespace
 hostpolicy_context_t* hostpolicy_context_t::from_handle(const context_handle handle)
 {
     if (handle == nullptr)
+    {
+        trace::error(_X("Hostpolicy context handle should not be null"));
         return nullptr;
-    
+    }
+
     hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(handle);
     int32_t marker = context->marker;
     if (marker == valid_hostpolicy_context_marker)
         return context;
-    
+
     if (marker == closed_hostpolicy_context_marker)
     {
         trace::error(_X("Hostpolicy context has already been closed"));

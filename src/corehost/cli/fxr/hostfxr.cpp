@@ -692,7 +692,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
     }
 
     assert(context->type == host_context_type::initialized || context->type == host_context_type::active);
-    const corehost_context_contract contract = context->context_contract;
+    const corehost_context_contract &contract = context->hostpolicy_context_contract;
     return contract.get_property_value(contract.handle, name, value);
 }
 
@@ -735,7 +735,7 @@ SHARED_API int32_t __cdecl hostfxr_set_runtime_property_value(
         return StatusCode::InvalidArgFailure;
     }
 
-    const corehost_context_contract &contract = context->context_contract;
+    const corehost_context_contract &contract = context->hostpolicy_context_contract;
     return contract.set_property_value(contract.handle, name, value);
 }
 
@@ -818,7 +818,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
     }
 
     assert(context->type == host_context_type::initialized || context->type == host_context_type::active);
-    const corehost_context_contract &contract = context->context_contract;
+    const corehost_context_contract &contract = context->hostpolicy_context_contract;
     return contract.get_properties(contract.handle, count, keys, values);
 }
 

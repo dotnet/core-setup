@@ -17,7 +17,7 @@ using corehost_set_error_writer_fn = corehost_error_writer_fn(*) (corehost_error
 using corehost_initialize_context_fn = int(*)(const host_interface_t* init, corehost_context_contract* handle);
 using corehost_close_context_fn = int(*)(const corehost_context_contract handle);
 
-struct hostpolicy_contract
+struct hostpolicy_contract_t
 {
     // Required API contracts
     corehost_load_fn load;
@@ -34,7 +34,7 @@ namespace hostpolicy_resolver
     int load(
         const pal::string_t& lib_dir,
         pal::dll_t* h_host,
-        hostpolicy_contract &host_contract);
+        hostpolicy_contract_t &hostpolicy_contract);
     bool try_get_dir(
         host_mode_t mode,
         const pal::string_t& dotnet_root,

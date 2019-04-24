@@ -15,7 +15,7 @@ namespace
 {
     std::mutex g_hostpolicy_lock;
     pal::dll_t g_hostpolicy;
-    hostpolicy_contract g_hostpolicy_contract;
+    hostpolicy_contract_t g_hostpolicy_contract;
 
     /**
     * Resolve the hostpolicy version from deps.
@@ -190,7 +190,7 @@ namespace
 int hostpolicy_resolver::load(
     const pal::string_t& lib_dir,
     pal::dll_t* h_host,
-    hostpolicy_contract &host_contract)
+    hostpolicy_contract_t &hostpolicy_contract)
 {
     std::lock_guard<std::mutex> lock{ g_hostpolicy_lock };
     if (g_hostpolicy == nullptr)
@@ -227,7 +227,7 @@ int hostpolicy_resolver::load(
 
     // Return global values
     *h_host = g_hostpolicy;
-    host_contract = g_hostpolicy_contract;
+    hostpolicy_contract = g_hostpolicy_contract;
 
     return StatusCode::Success;
 }

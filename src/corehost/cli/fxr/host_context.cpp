@@ -9,20 +9,83 @@ namespace
 {
     const int32_t valid_host_context_marker = 0xabababab;
     const int32_t closed_host_context_marker = 0xcdcdcdcd;
+
+    int create_context_common(
+        const hostpolicy_contract_t &hostpolicy_contract,
+        const host_interface_t &host_interface,
+        bool already_loaded,
+        /*out*/ corehost_context_contract *hostpolicy_context_contract)
+    {
+        if (hostpolicy_contract.init_context == nullptr)
+        {
+            trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
+            return StatusCode::HostApiUnsupportedVersion;
+        }
+
+        int rc = StatusCode::Success;
+        {
+            propagate_error_writer_t propagate_error_writer_to_corehost(hostpolicy_contract.set_error_writer);
+            if (!already_loaded)
+                rc = hostpolicy_contract.load(&host_interface);
+
+            if (rc == StatusCode::Success)
+            {
+                rc = hostpolicy_contract.init_context(&host_interface, hostpolicy_context_contract);
+            }
+        }
+
+        return rc;
+    }
+}
+
+int host_context_t::create(
+    const hostpolicy_contract_t &hostpolicy_contract,
+    corehost_init_t &init,
+    /*out*/ std::unique_ptr<host_context_t> &context)
+{
+    const host_interface_t &host_interface = init.get_host_init_data();
+    corehost_context_contract hostpolicy_context_contract;
+    int rc = create_context_common(hostpolicy_contract, host_interface, /*already_loaded*/ false, &hostpolicy_context_contract);
+    if (rc == StatusCode::Success)
+    {
+        std::unique_ptr<host_context_t> context_local(new host_context_t(host_context_type::initialized, hostpolicy_contract, hostpolicy_context_contract));
+        context = std::move(context_local);
+    }
+
+    return rc;
+}
+
+int host_context_t::create_secondary(
+    const hostpolicy_contract_t &hostpolicy_contract,
+    corehost_init_t &init,
+    /*out*/ std::unique_ptr<host_context_t> &context)
+{
+    const host_interface_t &host_interface = init.get_host_init_data();
+    corehost_context_contract hostpolicy_context_contract;
+    int rc = create_context_common(hostpolicy_contract, host_interface, /*already_loaded*/ true, &hostpolicy_context_contract);
+    if (rc == StatusCode::CoreHostAlreadyInitialized)
+    {
+        std::unique_ptr<host_context_t> context_local(new host_context_t(host_context_type::secondary, hostpolicy_contract, hostpolicy_context_contract));
+        init.get_runtime_properties(context_local->config_properties);
+        context = std::move(context_local);
+    }
+
+    assert(rc != StatusCode::Success);
+    return rc;
 }
 
 host_context_t* host_context_t::from_handle(const hostfxr_handle handle, bool allow_invalid_type)
 {
     if (handle == nullptr)
         return nullptr;
-    
+
     host_context_t *context = static_cast<host_context_t*>(handle);
     int32_t marker = context->marker;
     if (marker == valid_host_context_marker)
     {
         if (allow_invalid_type || context->type != host_context_type::invalid)
             return context;
-        
+
         trace::error(_X("Host context is in an invalid state"));
     }
     else if (marker == closed_host_context_marker)
@@ -37,9 +100,14 @@ host_context_t* host_context_t::from_handle(const hostfxr_handle handle, bool al
     return nullptr;
 }
 
-host_context_t::host_context_t()
+host_context_t::host_context_t(
+    host_context_type type,
+    const hostpolicy_contract_t &hostpolicy_contract,
+    const corehost_context_contract &hostpolicy_context_contract)
     : marker { valid_host_context_marker }
-    , type { host_context_type::empty }
+    , type { type }
+    , hostpolicy_contract { hostpolicy_contract }
+    , hostpolicy_context_contract { hostpolicy_context_contract }
 { }
 
 void host_context_t::close()

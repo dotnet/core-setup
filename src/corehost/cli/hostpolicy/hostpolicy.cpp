@@ -25,10 +25,19 @@ namespace
     bool g_init_done;
     hostpolicy_init_t g_init;
 
+    // hostpolicy tracks the context used to load and initialize coreclr. This is the first context that
+    // is successfully created and used to load the runtime. There can only be one hostpolicy context.
     std::mutex g_context_lock;
-    std::condition_variable g_context_cv;
+
+    // Tracks the hostpolicy context. This is the context that was used to load and initialize coreclr.
+    // It will only be set once coreclr is loaded and initialized. Once set, it should not be changed.
     std::unique_ptr<hostpolicy_context_t> g_context;
+
+    // Tracks whether the hostpolicy context is initializing (from creation of the first context to loading coreclr).
+    // Attempts to get/create a context should block if the first context is initializing (i.e. this is true).
+    // The condition variable is used to block on and signal changes to this state.
     std::atomic<bool> g_context_initializing(false);
+    std::condition_variable g_context_cv;
 
     int create_coreclr(hostpolicy_context_t *context)
     {

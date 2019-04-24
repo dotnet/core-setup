@@ -33,23 +33,35 @@ using corehost_main_with_output_buffer_fn = int(*) (const int argc, const pal::c
 
 namespace
 {
+    // hostfxr tracks the context used to load hostpolicy and coreclr as the active host context. This is the first
+    // context that is successfully created and used to load the runtime. There can only be one active context.
+    // Secondary contexts can only be created once the first context has fully initialized and been used to load the
+    // runtime. Any calls to initialize another context while the runtime has not yet been loaded by the first context
+    // will block until the first context loads the runtime (or fails).
     std::mutex g_context_lock;
-    std::condition_variable g_context_cv;
+
+    // Tracks the active host context. This is the context that was used to load and initialize hostpolicy and coreclr.
+    // It will only be set once both hostpolicy and coreclr are loaded and initialized. Once set, it should not be changed.
     std::unique_ptr<const host_context_t> g_active_host_context;
+
+    // Tracks whether the host context is initializing (from creation of the first context to loading the runtime).
+    // Initialization of other contexts should block if the first context is initializing (i.e. this is true).
+    // The condition variable is used to block on and signal changes to this state.
     std::atomic<bool> g_context_initializing(false);
+    std::condition_variable g_context_cv;
 }
 
 template<typename T>
 int load_hostpolicy(
     const pal::string_t& lib_dir,
     pal::dll_t* h_host,
-    hostpolicy_contract &host_contract,
+    hostpolicy_contract_t &hostpolicy_contract,
     const char *main_entry_symbol,
     T* main_fn)
 {
     assert(main_entry_symbol != nullptr && main_fn != nullptr);
 
-    int rc = hostpolicy_resolver::load(lib_dir, h_host, host_contract);
+    int rc = hostpolicy_resolver::load(lib_dir, h_host, hostpolicy_contract);
     if (rc != StatusCode::Success)
     {
         trace::error(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, lib_dir.c_str());
@@ -75,16 +87,19 @@ static int execute_app(
         g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
 
         if (g_active_host_context != nullptr)
+        {
+            trace::error(_X("Hosting components are already initialized. Re-initialization to execute an app is not allowed."));
             return StatusCode::HostInvalidState;
+        }
 
         g_context_initializing.store(true);
     }
 
     pal::dll_t corehost;
-    hostpolicy_contract host_contract{};
+    hostpolicy_contract_t hostpolicy_contract{};
     corehost_main_fn host_main = nullptr;
 
-    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_main", &host_main);
+    int code = load_hostpolicy(impl_dll_dir, &corehost, hostpolicy_contract, "corehost_main", &host_main);
     if (code != StatusCode::Success)
         return code;
 
@@ -93,20 +108,20 @@ static int execute_app(
         // the runtime is loaded through non-host context-based APIs.
         std::lock_guard<std::mutex> lock{ g_context_lock };
         assert(g_active_host_context == nullptr);
-        g_active_host_context.reset(new host_context_t());
+        g_active_host_context.reset(new host_context_t(host_context_type::empty, hostpolicy_contract, {}));
         g_context_initializing.store(false);
     }
 
     g_context_cv.notify_all();
 
     {
-        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+        propagate_error_writer_t propagate_error_writer_to_corehost(hostpolicy_contract.set_error_writer);
 
         const host_interface_t& intf = init->get_host_init_data();
-        if ((code = host_contract.load(&intf)) == StatusCode::Success)
+        if ((code = hostpolicy_contract.load(&intf)) == StatusCode::Success)
         {
             code = host_main(argc, argv);
-            (void)host_contract.unload();
+            (void)hostpolicy_contract.unload();
         }
     }
 
@@ -123,21 +138,21 @@ static int execute_host_command(
     int32_t* required_buffer_size)
 {
     pal::dll_t corehost;
-    hostpolicy_contract host_contract{};
+    hostpolicy_contract_t hostpolicy_contract{};
     corehost_main_with_output_buffer_fn host_main = nullptr;
 
-    int code = load_hostpolicy(impl_dll_dir, &corehost, host_contract, "corehost_main_with_output_buffer", &host_main);
+    int code = load_hostpolicy(impl_dll_dir, &corehost, hostpolicy_contract, "corehost_main_with_output_buffer", &host_main);
     if (code != StatusCode::Success)
         return code;
 
     {
-        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
+        propagate_error_writer_t propagate_error_writer_to_corehost(hostpolicy_contract.set_error_writer);
 
         const host_interface_t& intf = init->get_host_init_data();
-        if ((code = host_contract.load(&intf)) == StatusCode::Success)
+        if ((code = hostpolicy_contract.load(&intf)) == StatusCode::Success)
         {
             code = host_main(argc, argv, result_buffer, buffer_size, required_buffer_size);
-            (void)host_contract.unload();
+            (void)hostpolicy_contract.unload();
         }
     }
 
@@ -489,8 +504,8 @@ namespace
         const pal::string_t &app_candidate,
         const opt_map_t &opts,
         host_mode_t mode,
-        pal::string_t &impl_dir,
-        std::unique_ptr<corehost_init_t> &init)
+        /*out*/ pal::string_t &hostpolicy_dir,
+        /*out*/ std::unique_ptr<corehost_init_t> &init)
     {
         pal::string_t opts_fx_version = _X("--fx-version");
         pal::string_t opts_roll_forward = _X("--roll-forward");
@@ -603,7 +618,7 @@ namespace
         trace::verbose(_X("Executing as a %s app as per config file [%s]"),
             (is_framework_dependent ? _X("framework-dependent") : _X("self-contained")), app_config.get_path().c_str());
 
-        if (!hostpolicy_resolver::try_get_dir(mode, host_info.dotnet_root, fx_definitions, app_candidate, deps_file, probe_realpaths, &impl_dir))
+        if (!hostpolicy_resolver::try_get_dir(mode, host_info.dotnet_root, fx_definitions, app_candidate, deps_file, probe_realpaths, &hostpolicy_dir))
         {
             return CoreHostLibMissingFailure;
         }
@@ -626,7 +641,7 @@ int fx_muxer_t::read_config_and_execute(
     int32_t buffer_size,
     int32_t* required_buffer_size)
 {
-    pal::string_t impl_dir;
+    pal::string_t hostpolicy_dir;
     std::unique_ptr<corehost_init_t> init;
     int rc = get_init_info_for_app(
         host_command,
@@ -634,18 +649,18 @@ int fx_muxer_t::read_config_and_execute(
         app_candidate,
         opts,
         mode,
-        impl_dir,
+        hostpolicy_dir,
         init);
     if (rc != StatusCode::Success)
         return rc;
 
     if (host_command.size() == 0)
     {
-        rc = execute_app(impl_dir, init.get(), new_argc, new_argv);
+        rc = execute_app(hostpolicy_dir, init.get(), new_argc, new_argv);
     }
     else
     {
-        rc = execute_host_command(impl_dir, init.get(), new_argc, new_argv, out_buffer, buffer_size, required_buffer_size);
+        rc = execute_host_command(hostpolicy_dir, init.get(), new_argc, new_argv, out_buffer, buffer_size, required_buffer_size);
     }
 
     return rc;
@@ -737,8 +752,8 @@ namespace
         const host_startup_info_t &host_info,
         host_mode_t mode,
         pal::string_t &runtime_config_path,
-        pal::string_t &impl_dir,
-        std::unique_ptr<corehost_init_t> &init)
+        /*out*/ pal::string_t &hostpolicy_dir,
+        /*out*/ std::unique_ptr<corehost_init_t> &init)
     {
         // Read config
         fx_definition_vector_t fx_definitions;
@@ -767,7 +782,7 @@ namespace
             (is_framework_dependent ? _X("framework-dependent") : _X("self-contained")), app_config.get_path().c_str());
 
         pal::string_t deps_file;
-        if (!hostpolicy_resolver::try_get_dir(mode, host_info.dotnet_root, fx_definitions, host_info.app_path, deps_file, probe_realpaths, &impl_dir))
+        if (!hostpolicy_resolver::try_get_dir(mode, host_info.dotnet_root, fx_definitions, host_info.app_path, deps_file, probe_realpaths, &hostpolicy_dir))
         {
             return StatusCode::CoreHostLibMissingFailure;
         }
@@ -778,34 +793,7 @@ namespace
         return StatusCode::Success;
     }
 
-    int initialize_context(const pal::string_t impl_dir, hostpolicy_contract &host_contract, const host_interface_t &host_interface, corehost_context_contract *context_contract)
-    {
-        pal::dll_t corehost;
-        int rc = hostpolicy_resolver::load(impl_dir, &corehost, host_contract);
-        if (rc != StatusCode::Success)
-        {
-            trace::error(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, impl_dir.c_str());
-            return rc;
-        }
-
-        if (host_contract.init_context == nullptr)
-        {
-            trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
-            return StatusCode::HostApiUnsupportedVersion;
-        }
-
-        {
-            propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
-            if ((rc = host_contract.load(&host_interface)) == StatusCode::Success)
-            {
-                rc = host_contract.init_context(&host_interface, context_contract);
-            }
-        }
-
-        return rc;
-    }
-
-    void handle_initialize_failure(hostpolicy_contract *hostpolicy_contract = nullptr)
+    void handle_initialize_failure(hostpolicy_contract_t *hostpolicy_contract = nullptr)
     {
         {
             std::lock_guard<std::mutex> lock{ g_context_lock };
@@ -816,6 +804,29 @@ namespace
             hostpolicy_contract->unload();
 
         g_context_cv.notify_all();
+    }
+
+    int initialize_context(
+        const pal::string_t hostpolicy_dir,
+        corehost_init_t &init,
+        /*out*/ std::unique_ptr<host_context_t> &context)
+    {
+        pal::dll_t corehost;
+        hostpolicy_contract_t hostpolicy_contract{};
+        int rc = hostpolicy_resolver::load(hostpolicy_dir, &corehost, hostpolicy_contract);
+        if (rc != StatusCode::Success)
+        {
+            trace::error(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, hostpolicy_dir.c_str());
+            return rc;
+        }
+
+        const host_interface_t &host_interface = init.get_host_init_data();
+        corehost_context_contract hostpolicy_context_contract;
+        rc = host_context_t::create(hostpolicy_contract, init, context);
+        if (rc != StatusCode::Success)
+            handle_initialize_failure(&hostpolicy_contract);
+
+        return rc;
     }
 }
 
@@ -840,7 +851,7 @@ int fx_muxer_t::initialize_for_app(
 
     host_mode_t mode = host_mode_t::apphost;
     opt_map_t opts;
-    pal::string_t impl_dir;
+    pal::string_t hostpolicy_dir;
     std::unique_ptr<corehost_init_t> init;
     int rc = get_init_info_for_app(
         pal::string_t{} /*host_command*/,
@@ -848,7 +859,7 @@ int fx_muxer_t::initialize_for_app(
         host_info.app_path,
         opts,
         mode,
-        impl_dir,
+        hostpolicy_dir,
         init);
     if (rc != StatusCode::Success)
     {
@@ -856,23 +867,19 @@ int fx_muxer_t::initialize_for_app(
         return rc;
     }
 
-    const host_interface_t &intf = init->get_host_init_data();
-    hostpolicy_contract host_contract{};
-    std::unique_ptr<host_context_t> context(new host_context_t());
-    rc = initialize_context(impl_dir, host_contract, intf, &context->context_contract);
+    std::unique_ptr<host_context_t> context;
+    rc = initialize_context(hostpolicy_dir, *init, context);
     if (rc != StatusCode::Success)
     {
-        handle_initialize_failure(&host_contract);
+        trace::error(_X("Failed to initialize context for app: %s. Error code: 0x%x"), host_info.app_path.c_str(), rc);
         return rc;
     }
 
-    trace::verbose(_X("Initialized context for app: %s"), host_info.app_path.c_str());
-    context->type = host_context_type::initialized;
-    context->host_contract = host_contract;
     context->is_app = true;
     for (int i = 0; i < argc; ++i)
         context->argv.push_back(argv[i]);
 
+    trace::verbose(_X("Initialized context for app: %s"), host_info.app_path.c_str());
     *host_context_handle = context.release();
     return rc;
 }
@@ -882,27 +889,28 @@ int fx_muxer_t::initialize_for_runtime_config(
     const pal::char_t * runtime_config_path,
     void** host_context_handle)
 {
-    bool already_initialized = false;
+    const host_context_t *existing_context;
     {
         std::unique_lock<std::mutex> lock{ g_context_lock };
         g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
 
-        already_initialized = g_active_host_context != nullptr;
-        if (!already_initialized)
+        existing_context = g_active_host_context.get();
+        if (existing_context == nullptr)
         {
             g_context_initializing.store(true);
         }
-        else if (g_active_host_context->type == host_context_type::invalid)
+        else if (existing_context->type == host_context_type::invalid)
         {
             return StatusCode::HostInvalidState;
         }
     }
 
+    bool already_initialized = existing_context != nullptr;
     host_mode_t mode = host_mode_t::libhost;
     pal::string_t runtime_config = runtime_config_path;
-    pal::string_t impl_dir;
+    pal::string_t hostpolicy_dir;
     std::unique_ptr<corehost_init_t> init;
-    int rc = get_init_info_for_component(host_info, mode, runtime_config, impl_dir, init);
+    int rc = get_init_info_for_component(host_info, mode, runtime_config, hostpolicy_dir, init);
     if (rc != StatusCode::Success)
     {
         if (!already_initialized)
@@ -911,33 +919,25 @@ int fx_muxer_t::initialize_for_runtime_config(
         return rc;
     }
 
-    const host_interface_t &intf = init->get_host_init_data();
-    hostpolicy_contract host_contract{};
-    std::unique_ptr<host_context_t> context(new host_context_t());
-    rc = initialize_context(impl_dir, host_contract, intf, &context->context_contract);
-    already_initialized |= rc == StatusCode::CoreHostAlreadyInitialized;
-    if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
-    {
-        if (!already_initialized)
-            handle_initialize_failure(&host_contract);
-
-        return rc;
-    }
-
-    context->host_contract = host_contract;
-    context->is_app = false;
+    std::unique_ptr<host_context_t> context;
     if (already_initialized)
     {
-        trace::verbose(_X("Initialized secondary context for config: %s"), runtime_config_path);
-        context->type = host_context_type::secondary;
-        init->get_runtime_properties(context->config_properties);
+        rc = host_context_t::create_secondary(existing_context->hostpolicy_contract, *init, context);
     }
     else
     {
-        trace::verbose(_X("Initialized context for config: %s"), runtime_config_path);
-        context->type = host_context_type::initialized;
+        rc = initialize_context(hostpolicy_dir, *init, context);
     }
 
+    if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
+    {
+        trace::error(_X("Failed to initialize context for config: %s. Error code: 0x%x"), runtime_config_path, rc);
+        return rc;
+    }
+
+    context->is_app = false;
+
+    trace::verbose(_X("Initialized %s for config: %s"), already_initialized ? _X("secondary context") : _X("context"), runtime_config_path);
     *host_context_handle = context.release();
     return rc;
 }
@@ -950,7 +950,7 @@ namespace
         if (context->type == host_context_type::active)
             return StatusCode::Success;
 
-        const corehost_context_contract &contract = context->context_contract;
+        const corehost_context_contract &contract = context->hostpolicy_context_contract;
         int rc = contract.load_runtime(contract.handle);
 
         // Mark the context as active or invalid
@@ -979,9 +979,9 @@ int fx_muxer_t::run_app(host_context_t *context)
     for (const auto& str : context->argv)
         argv.push_back(str.c_str());
 
-    const corehost_context_contract &contract = context->context_contract;
+    const corehost_context_contract &contract = context->hostpolicy_context_contract;
     {
-        propagate_error_writer_t propagate_error_writer_to_corehost(context->host_contract.set_error_writer);
+        propagate_error_writer_t propagate_error_writer_to_corehost(context->hostpolicy_contract.set_error_writer);
 
         int rc = load_runtime(context);
         if (rc != StatusCode::Success)
@@ -996,9 +996,9 @@ int fx_muxer_t::get_runtime_delegate(host_context_t *context, coreclr_delegate_t
     if (context->is_app)
         return StatusCode::InvalidArgFailure;
 
-    const corehost_context_contract &contract = context->context_contract;
+    const corehost_context_contract &contract = context->hostpolicy_context_contract;
     {
-        propagate_error_writer_t propagate_error_writer_to_corehost(context->host_contract.set_error_writer);
+        propagate_error_writer_t propagate_error_writer_to_corehost(context->hostpolicy_contract.set_error_writer);
 
         if (context->type != host_context_type::secondary)
         {
@@ -1019,8 +1019,8 @@ const host_context_t* fx_muxer_t::get_active_host_context()
 
 int fx_muxer_t::close_host_context(host_context_t *context)
 {
-    const hostpolicy_contract &host_contract = context->host_contract;
-    if (host_contract.close_context == nullptr)
+    const hostpolicy_contract_t &hostpolicy_contract = context->hostpolicy_contract;
+    if (hostpolicy_contract.close_context == nullptr)
     {
         trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
         return StatusCode::HostApiUnsupportedVersion;
@@ -1030,8 +1030,8 @@ int fx_muxer_t::close_host_context(host_context_t *context)
     context->close();
     if (context->type != host_context_type::secondary)
     {
-        propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
-        rc = host_contract.close_context(context->context_contract);
+        propagate_error_writer_t propagate_error_writer_to_corehost(hostpolicy_contract.set_error_writer);
+        rc = hostpolicy_contract.close_context(context->hostpolicy_context_contract);
     }
 
     // Do not delete the active context.
