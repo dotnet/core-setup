@@ -951,7 +951,7 @@ namespace
             return StatusCode::Success;
 
         const corehost_context_contract &contract = context->context_contract;
-        int rc = contract.load_runtime(contract.instance);
+        int rc = contract.load_runtime(contract.handle);
 
         // Mark the context as active or invalid
         context->type = rc == StatusCode::Success ? host_context_type::active : host_context_type::invalid;
@@ -987,7 +987,7 @@ int fx_muxer_t::run_app(host_context_t *context)
         if (rc != StatusCode::Success)
             return rc;
 
-        return contract.run_app(contract.instance, argc, argv.data());
+        return contract.run_app(contract.handle, argc, argv.data());
     }
 }
 
@@ -1007,7 +1007,7 @@ int fx_muxer_t::get_runtime_delegate(host_context_t *context, coreclr_delegate_t
                 return rc;
         }
 
-        return contract.get_runtime_delegate(contract.instance, type, delegate);
+        return contract.get_runtime_delegate(contract.handle, type, delegate);
     }
 }
 

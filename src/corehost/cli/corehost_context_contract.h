@@ -20,28 +20,28 @@ enum class coreclr_delegate_type
 struct corehost_context_contract
 {
     size_t version;
-    context_handle instance;
+    context_handle handle;
     int (__cdecl *get_property_value)(
-        const context_handle instance,
+        const context_handle handle,
         const pal::char_t* key,
         /*out*/ const pal::char_t** value);
     int (__cdecl *set_property_value)(
-        const context_handle instance,
+        const context_handle handle,
         const pal::char_t* key,
         const pal::char_t* value);
     int (__cdecl *get_properties)(
-        const context_handle instance,
+        const context_handle handle,
         /*inout*/ size_t *count,
         /*out*/ const pal::char_t** keys,
         /*out*/ const pal::char_t** values);
     int (__cdecl *load_runtime)(
-        const context_handle instance);
+        const context_handle handle);
     int (__cdecl *run_app)(
-        const context_handle instance,
+        const context_handle handle,
         const int argc,
         const pal::char_t* argv[]);
     int (__cdecl *get_runtime_delegate)(
-        const context_handle instance,
+        const context_handle handle,
         coreclr_delegate_type type,
         /*out*/ void** delegate);
 };

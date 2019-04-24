@@ -15,11 +15,18 @@
 #include "hostfxr.h"
 #include "host_context.h"
 
+namespace
+{
+    void trace_hostfxr_entry_point(const pal::char_t *entry_point)
+    {
+        trace::setup();
+        trace::info(_X("--- Invoked %s [commit hash: %s]"), entry_point, _STRINGIFY(REPO_COMMIT_HASH));
+    }
+}
+
 SHARED_API int hostfxr_main_startupinfo(const int argc, const pal::char_t* argv[], const pal::char_t* host_path, const pal::char_t* dotnet_root, const pal::char_t* app_path)
 {
-    trace::setup();
-
-    trace::info(_X("--- Invoked hostfxr v2 [commit hash: %s] main"), _STRINGIFY(REPO_COMMIT_HASH));
+    trace_hostfxr_entry_point(_X("hostfxr_main_startupinfo"));
 
     host_startup_info_t startup_info(host_path, dotnet_root, app_path);
 
@@ -28,9 +35,7 @@ SHARED_API int hostfxr_main_startupinfo(const int argc, const pal::char_t* argv[
 
 SHARED_API int hostfxr_main(const int argc, const pal::char_t* argv[])
 {
-    trace::setup();
-
-    trace::info(_X("--- Invoked hostfxr [commit hash: %s] main"), _STRINGIFY(REPO_COMMIT_HASH));
+    trace_hostfxr_entry_point(_X("hostfxr_main"));
 
     host_startup_info_t startup_info;
     startup_info.parse(argc, argv);
@@ -87,9 +92,7 @@ SHARED_API int32_t hostfxr_resolve_sdk(
     pal::char_t buffer[],
     int32_t buffer_size)
 {
-    trace::setup();
-
-    trace::info(_X("--- Invoked hostfxr [commit hash: %s] hostfxr_resolve_sdk"), _STRINGIFY(REPO_COMMIT_HASH));
+    trace_hostfxr_entry_point(_X("hostfxr_resolve_sdk"));
 
     if (buffer_size < 0 || (buffer_size > 0 && buffer == nullptr))
     {
@@ -202,9 +205,7 @@ SHARED_API int32_t hostfxr_resolve_sdk2(
     int32_t flags,
     hostfxr_resolve_sdk2_result_fn result)
 {
-    trace::setup();
-
-    trace::info(_X("--- Invoked hostfxr [commit hash: %s] hostfxr_resolve_sdk2"), _STRINGIFY(REPO_COMMIT_HASH));
+    trace_hostfxr_entry_point(_X("hostfxr_resolve_sdk2"));
 
     if (exe_dir == nullptr)
     {
@@ -276,9 +277,7 @@ SHARED_API int32_t hostfxr_get_available_sdks(
     const pal::char_t* exe_dir,
     hostfxr_get_available_sdks_result_fn result)
 {
-    trace::setup();
-
-    trace::info(_X("--- Invoked hostfxr [commit hash: %s] hostfxr_get_available_sdks"), _STRINGIFY(REPO_COMMIT_HASH));
+    trace_hostfxr_entry_point(_X("hostfxr_get_available_sdks"));
 
     if (exe_dir == nullptr)
     {
@@ -350,9 +349,7 @@ SHARED_API int32_t hostfxr_get_available_sdks(
 //
 SHARED_API int32_t hostfxr_get_native_search_directories(const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size)
 {
-    trace::setup();
-
-    trace::info(_X("--- Invoked hostfxr_get_native_search_directories [commit hash: %s] main"), _STRINGIFY(REPO_COMMIT_HASH));
+    trace_hostfxr_entry_point(_X("hostfxr_get_native_search_directories"));
 
     if (buffer_size < 0 || (buffer_size > 0 && buffer == nullptr) || required_buffer_size == nullptr)
     {
@@ -470,13 +467,12 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_app(
     const hostfxr_initialize_parameters * parameters,
     /*out*/ hostfxr_handle * host_context_handle)
 {
+    trace_hostfxr_entry_point(_X("hostfxr_initialize_for_app"));
+
     if (host_context_handle == nullptr || (argv == nullptr && argc != 0) || (app_path == nullptr && argc == 0))
         return StatusCode::InvalidArgFailure;
 
     *host_context_handle = nullptr;
-
-    trace::setup();
-    trace::info(_X("--- Invoked hostfxr_initialize_for_app [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
     host_startup_info_t startup_info{};
     int new_argc;
@@ -538,13 +534,12 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_runtime_config(
     const hostfxr_initialize_parameters *parameters,
     /*out*/ hostfxr_handle *host_context_handle)
 {
+    trace_hostfxr_entry_point(_X("hostfxr_initialize_for_runtime_config"));
+
     if (runtime_config_path == nullptr || host_context_handle == nullptr)
         return StatusCode::InvalidArgFailure;
 
     *host_context_handle = nullptr;
-
-    trace::setup();
-    trace::info(_X("--- Invoked hostfxr_initialize_for_runtime_config [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
     host_startup_info_t startup_info{};
     int rc = populate_startup_info(parameters, startup_info);
@@ -573,8 +568,7 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_runtime_config(
 //
 SHARED_API int32_t __cdecl hostfxr_run_app(const hostfxr_handle host_context_handle)
 {
-    trace::setup();
-    trace::info(_X("--- Invoked hostfxr_run_app [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+    trace_hostfxr_entry_point(_X("hostfxr_run_app"));
 
     host_context_t *context = host_context_t::from_handle(host_context_handle);
     if (context == nullptr)
@@ -621,11 +615,10 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_delegate(
     hostfxr_delegate_type type,
     /*out*/ void **delegate)
 {
+    trace_hostfxr_entry_point(_X("hostfxr_get_runtime_delegate"));
+
     if (delegate == nullptr)
         return StatusCode::InvalidArgFailure;
-
-    trace::setup();
-    trace::info(_X("--- Invoked hostfxr_get_runtime_delegate [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
    host_context_t *context = host_context_t::from_handle(host_context_handle);
     if (context == nullptr)
@@ -662,11 +655,10 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
     const pal::char_t *name,
     /*out*/ const pal::char_t **value)
 {
+    trace_hostfxr_entry_point(_X("hostfxr_get_runtime_property_value"));
+
     if (name == nullptr || value == nullptr)
         return StatusCode::InvalidArgFailure;
-
-    trace::setup();
-    trace::info(_X("--- Invoked hostfxr_get_runtime_property_value [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
     const host_context_t *context;
     if (host_context_handle == nullptr)
@@ -701,7 +693,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
 
     assert(context->type == host_context_type::initialized || context->type == host_context_type::active);
     const corehost_context_contract contract = context->context_contract;
-    return contract.get_property_value(contract.instance, name, value);
+    return contract.get_property_value(contract.handle, name, value);
 }
 
 //
@@ -728,11 +720,10 @@ SHARED_API int32_t __cdecl hostfxr_set_runtime_property_value(
     const pal::char_t *name,
     const pal::char_t *value)
 {
+    trace_hostfxr_entry_point(_X("hostfxr_set_runtime_property_value"));
+
     if (name == nullptr)
         return StatusCode::InvalidArgFailure;
-
-    trace::setup();
-    trace::info(_X("--- Invoked hostfxr_set_runtime_property_value [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
    host_context_t *context = host_context_t::from_handle(host_context_handle);
     if (context == nullptr)
@@ -745,7 +736,7 @@ SHARED_API int32_t __cdecl hostfxr_set_runtime_property_value(
     }
 
     const corehost_context_contract &contract = context->context_contract;
-    return contract.set_property_value(contract.instance, name, value);
+    return contract.set_property_value(contract.handle, name, value);
 }
 
 //
@@ -781,11 +772,10 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
     /*out*/ const pal::char_t **keys,
     /*out*/ const pal::char_t **values)
 {
+    trace_hostfxr_entry_point(_X("hostfxr_get_runtime_properties"));
+
     if (count == nullptr)
         return StatusCode::InvalidArgFailure;
-
-    trace::setup();
-    trace::info(_X("--- Invoked hostfxr_get_runtime_properties [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
     const host_context_t *context;
     if (host_context_handle == nullptr)
@@ -829,7 +819,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
 
     assert(context->type == host_context_type::initialized || context->type == host_context_type::active);
     const corehost_context_contract &contract = context->context_contract;
-    return contract.get_properties(contract.instance, count, keys, values);
+    return contract.get_properties(contract.handle, count, keys, values);
 }
 
 //
@@ -844,8 +834,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
 //
 SHARED_API int32_t __cdecl hostfxr_close(const hostfxr_handle host_context_handle)
 {
-    trace::setup();
-    trace::info(_X("--- Invoked hostfxr_close [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
+    trace_hostfxr_entry_point(_X("hostfxr_close"));
 
     // Allow contexts with a type of invalid as we still need to clean them up
     host_context_t *context = host_context_t::from_handle(host_context_handle, /*allow_invalid_type*/ true);

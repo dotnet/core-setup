@@ -562,7 +562,7 @@ SHARED_API int __cdecl corehost_initialize_context(const host_interface_t *init,
         return rc;
 
     context_contract->version = sizeof(corehost_context_contract);
-    context_contract->instance = rc == StatusCode::CoreHostAlreadyInitialized ? nullptr : context;
+    context_contract->handle = rc == StatusCode::CoreHostAlreadyInitialized ? nullptr : context;
     context_contract->get_property_value = get_property;
     context_contract->set_property_value = set_property;
     context_contract->get_properties = get_properties;
@@ -575,7 +575,7 @@ SHARED_API int __cdecl corehost_initialize_context(const host_interface_t *init,
 
 SHARED_API int __cdecl corehost_close_context(corehost_context_contract context_contract)
 {
-    hostpolicy_context_t *context = hostpolicy_context_t::from_handle(context_contract.instance);
+    hostpolicy_context_t *context = hostpolicy_context_t::from_handle(context_contract.handle);
     if (context == nullptr)
         return StatusCode::InvalidArgFailure;
 
