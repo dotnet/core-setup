@@ -8,6 +8,7 @@
 #include <pal.h>
 
 #include <corehost_context_contract.h>
+#include <hostfxr.h>
 #include "hostpolicy_resolver.h"
 
 enum class host_context_type
@@ -21,8 +22,13 @@ enum class host_context_type
 
 struct host_context_t
 {
-    host_context_type type;
+public: // static
+    static host_context_t* from_handle(const hostfxr_handle handle, bool allow_invalid_type = false);
 
+public:
+    int32_t marker; // used as an indication for validity
+
+    host_context_type type;
     hostpolicy_contract host_contract;
     corehost_context_contract context_contract;
 
@@ -31,9 +37,8 @@ struct host_context_t
 
     std::unordered_map<pal::string_t, pal::string_t> config_properties;
 
-    host_context_t()
-        : type { host_context_type::empty }
-    { }
+    host_context_t();
+    void close();
 };
 
 #endif // __HOST_CONTEXT_H__

@@ -31,6 +31,7 @@ set(SOURCES
     ./fx_resolver.cpp
     ./fx_resolver.messages.cpp
     ./framework_info.cpp
+    ./host_context.cpp
     ./hostpolicy_resolver.cpp
     ./sdk_info.cpp
     ./sdk_resolver.cpp
@@ -52,6 +53,7 @@ set(HEADERS
     ./fx_muxer.h
     ./fx_resolver.h
     ./framework_info.h
+    ./host_context.h
     ./hostpolicy_resolver.h
     ./sdk_info.h
     ./sdk_resolver.h

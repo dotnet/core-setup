@@ -389,24 +389,24 @@ int corehost_libhost_init(hostpolicy_init_t &hostpolicy_init, const pal::string_
 
 namespace
 {
-    int load_runtime_for_context(const context_handle instance)
+    int load_runtime_for_context(const context_handle handle)
     {
-        if (instance == nullptr)
+        hostpolicy_context_t *context = hostpolicy_context_t::from_handle(handle);
+        if (context == nullptr)
             return StatusCode::InvalidArgFailure;
 
-        hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
         return create_coreclr(context);
     }
 
     int run_app_for_context(
-        const context_handle instance,
+        const context_handle handle,
         const int argc,
         const pal::char_t *argv[])
     {
-        if (instance == nullptr)
+        hostpolicy_context_t *context = hostpolicy_context_t::from_handle(handle);
+        if (context == nullptr)
             return StatusCode::InvalidArgFailure;
 
-        hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
         if (context->coreclr == nullptr)
         {
             trace::error(_X("CoreClr must be loaded before running a app"));
@@ -417,7 +417,7 @@ namespace
     }
 
     int get_delegate_for_context(
-        const context_handle instance,
+        const context_handle handle,
         coreclr_delegate_type type,
         void **delegate)
     {
@@ -425,7 +425,7 @@ namespace
             return StatusCode::InvalidArgFailure;
 
         hostpolicy_context_t *context;
-        if (instance == nullptr)
+        if (handle == nullptr)
         {
             std::lock_guard<std::mutex> lock{ g_context_lock };
             if (g_context == nullptr || g_context->coreclr == nullptr)
@@ -435,7 +435,9 @@ namespace
         }
         else
         {
-            context = static_cast<hostpolicy_context_t*>(instance);
+            context = hostpolicy_context_t::from_handle(handle);
+            if (context == nullptr)
+                return StatusCode::InvalidArgFailure;
         }
 
         if (context->coreclr == nullptr)
@@ -471,14 +473,17 @@ namespace
     }
 
     int get_property(
-        const context_handle instance,
+        const context_handle handle,
         const pal::char_t *key,
         const pal::char_t **value)
     {
-        if (instance == nullptr || key == nullptr)
+        if (key == nullptr)
             return StatusCode::InvalidArgFailure;
 
-        hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
+        hostpolicy_context_t *context = hostpolicy_context_t::from_handle(handle);
+        if (context == nullptr)
+            return StatusCode::InvalidArgFailure;
+
         if (!context->coreclr_properties.try_get(key, value))
             return StatusCode::HostPropertyNotFound;
 
@@ -486,14 +491,17 @@ namespace
     }
 
     int set_property(
-        const context_handle instance,
+        const context_handle handle,
         const pal::char_t *key,
         const pal::char_t *value)
     {
-        if (instance == nullptr || key == nullptr)
+        if (key == nullptr)
             return StatusCode::InvalidArgFailure;
 
-        hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
+        hostpolicy_context_t *context = hostpolicy_context_t::from_handle(handle);
+        if (context == nullptr)
+            return StatusCode::InvalidArgFailure;
+
         if (value != nullptr)
         {
             context->coreclr_properties.add(key, value);
@@ -507,17 +515,19 @@ namespace
     }
 
     int get_properties(
-        const context_handle instance,
+        const context_handle handle,
         size_t * count,
         const pal::char_t **keys,
         const pal::char_t **values)
     {
-        if (instance == nullptr || count == nullptr)
+        if (count == nullptr)
             return StatusCode::InvalidArgFailure;
 
-        hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
-        size_t actualCount = context->coreclr_properties.count();
+        hostpolicy_context_t *context = hostpolicy_context_t::from_handle(handle);
+        if (context == nullptr)
+            return StatusCode::InvalidArgFailure;
 
+        size_t actualCount = context->coreclr_properties.count();
         size_t input_count = *count;
         *count = actualCount;
         if (input_count < actualCount || keys == nullptr || values == nullptr)
@@ -565,10 +575,18 @@ SHARED_API int __cdecl corehost_initialize_context(const host_interface_t *init,
 
 SHARED_API int __cdecl corehost_close_context(corehost_context_contract context_contract)
 {
-    hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(context_contract.instance);
+    hostpolicy_context_t *context = hostpolicy_context_t::from_handle(context_contract.instance);
+    if (context == nullptr)
+        return StatusCode::InvalidArgFailure;
+
+    // Do not delete the active context or mark it as closed so that inspection of
+    // the active context is still allowed
     std::lock_guard<std::mutex> context_lock{ g_context_lock };
     if (context != g_context.get())
+    {
+        context->close();
         delete context;
+    }
 
     return StatusCode::Success;
 }

@@ -41,7 +41,7 @@ public:
         coreclr_delegate_type delegate_type,
         void** delegate);
     static const host_context_t* get_active_host_context();
-    static int close_host_context(const host_context_t *context);
+    static int close_host_context(host_context_t *context);
 private:
     static int parse_args(
         const host_startup_info_t& host_info,

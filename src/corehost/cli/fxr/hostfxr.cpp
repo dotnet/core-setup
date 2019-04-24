@@ -573,13 +573,13 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_runtime_config(
 //
 SHARED_API int32_t __cdecl hostfxr_run_app(const hostfxr_handle host_context_handle)
 {
-    if (host_context_handle == nullptr)
-        return StatusCode::InvalidArgFailure;
-
     trace::setup();
     trace::info(_X("--- Invoked hostfxr_run_app [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
-    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+    host_context_t *context = host_context_t::from_handle(host_context_handle);
+    if (context == nullptr)
+        return StatusCode::InvalidArgFailure;
+
     return fx_muxer_t::run_app(context);
 }
 
@@ -621,13 +621,16 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_delegate(
     hostfxr_delegate_type type,
     /*out*/ void **delegate)
 {
-    if (host_context_handle == nullptr || delegate == nullptr)
+    if (delegate == nullptr)
         return StatusCode::InvalidArgFailure;
 
     trace::setup();
     trace::info(_X("--- Invoked hostfxr_get_runtime_delegate [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
-    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+   host_context_t *context = host_context_t::from_handle(host_context_handle);
+    if (context == nullptr)
+        return StatusCode::InvalidArgFailure;
+
     return fx_muxer_t::get_runtime_delegate(context, hostfxr_delegate_to_coreclr_delegate(type), delegate);
 }
 
@@ -679,11 +682,11 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
     }
     else
     {
-        context = static_cast<const host_context_t*>(host_context_handle);
+        context = host_context_t::from_handle(host_context_handle);
+        if (context == nullptr)
+            return StatusCode::InvalidArgFailure;
     }
 
-    if (context->type == host_context_type::invalid)
-        return StatusCode::InvalidArgFailure;
 
     if (context->type == host_context_type::secondary)
     {
@@ -725,13 +728,16 @@ SHARED_API int32_t __cdecl hostfxr_set_runtime_property_value(
     const pal::char_t *name,
     const pal::char_t *value)
 {
-    if (host_context_handle == nullptr || name == nullptr)
+    if (name == nullptr)
         return StatusCode::InvalidArgFailure;
 
     trace::setup();
     trace::info(_X("--- Invoked hostfxr_set_runtime_property_value [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
-    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+   host_context_t *context = host_context_t::from_handle(host_context_handle);
+    if (context == nullptr)
+        return StatusCode::InvalidArgFailure;
+
     if (context->type != host_context_type::initialized)
     {
         trace::error(_X("Setting properties is not allowed once runtime has been loaded."));
@@ -795,11 +801,10 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
     }
     else
     {
-        context = static_cast<const host_context_t*>(host_context_handle);
+        context = host_context_t::from_handle(host_context_handle);
+        if (context == nullptr)
+            return StatusCode::InvalidArgFailure;
     }
-
-    if (context->type == host_context_type::invalid)
-        return StatusCode::InvalidArgFailure;
 
     if (context->type == host_context_type::secondary)
     {
@@ -839,12 +844,13 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
 //
 SHARED_API int32_t __cdecl hostfxr_close(const hostfxr_handle host_context_handle)
 {
-    if (host_context_handle == nullptr)
-        return StatusCode::InvalidArgFailure;
-
     trace::setup();
     trace::info(_X("--- Invoked hostfxr_close [commit hash: %s]"), _STRINGIFY(REPO_COMMIT_HASH));
 
-    host_context_t *context = static_cast<host_context_t*>(host_context_handle);
+    // Allow contexts with a type of invalid as we still need to clean them up
+    host_context_t *context = host_context_t::from_handle(host_context_handle, /*allow_invalid_type*/ true);
+    if (context == nullptr)
+        return StatusCode::InvalidArgFailure;
+
     return fx_muxer_t::close_host_context(context);
 }

@@ -97,6 +97,8 @@ static int execute_app(
         g_context_initializing.store(false);
     }
 
+    g_context_cv.notify_all();
+
     {
         propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
 
@@ -108,7 +110,6 @@ static int execute_app(
         }
     }
 
-    g_context_cv.notify_all();
     return code;
 }
 
@@ -969,7 +970,7 @@ namespace
 
 int fx_muxer_t::run_app(host_context_t *context)
 {
-    if (!context->is_app || context->type == host_context_type::invalid)
+    if (!context->is_app)
         return StatusCode::InvalidArgFailure;
 
     int argc = context->argv.size();
@@ -992,7 +993,7 @@ int fx_muxer_t::run_app(host_context_t *context)
 
 int fx_muxer_t::get_runtime_delegate(host_context_t *context, coreclr_delegate_type type, void **delegate)
 {
-    if (context->is_app || context->type == host_context_type::invalid)
+    if (context->is_app)
         return StatusCode::InvalidArgFailure;
 
     const corehost_context_contract &contract = context->context_contract;
@@ -1016,7 +1017,7 @@ const host_context_t* fx_muxer_t::get_active_host_context()
     return g_active_host_context.get();
 }
 
-int fx_muxer_t::close_host_context(const host_context_t *context)
+int fx_muxer_t::close_host_context(host_context_t *context)
 {
     const hostpolicy_contract &host_contract = context->host_contract;
     if (host_contract.close_context == nullptr)
@@ -1025,7 +1026,9 @@ int fx_muxer_t::close_host_context(const host_context_t *context)
         return StatusCode::HostApiUnsupportedVersion;
     }
 
-    int rc;
+    int rc = StatusCode::Success;
+    context->close();
+    if (context->type != host_context_type::secondary)
     {
         propagate_error_writer_t propagate_error_writer_to_corehost(host_contract.set_error_writer);
         rc = host_contract.close_context(context->context_contract);

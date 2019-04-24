@@ -10,6 +10,9 @@
 
 namespace
 {
+    const int32_t valid_hostpolicy_context_marker = 0xabababab;
+    const int32_t closed_hostpolicy_context_marker = 0xcdcdcdcd;
+
     void log_duplicate_property_error(const pal::char_t *property_key)
     {
         trace::error(_X("Duplicate runtime property found: %s"), property_key);
@@ -17,8 +20,31 @@ namespace
     }
 }
 
+hostpolicy_context_t* hostpolicy_context_t::from_handle(const context_handle handle)
+{
+    if (handle == nullptr)
+        return nullptr;
+    
+    hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(handle);
+    int32_t marker = context->marker;
+    if (marker == valid_hostpolicy_context_marker)
+        return context;
+    
+    if (marker == closed_hostpolicy_context_marker)
+    {
+        trace::error(_X("Hostpolicy context has already been closed"));
+    }
+    else
+    {
+        trace::error(_X("Invalid hostpolicy context handle marker: 0x%x"), marker);
+    }
+
+    return nullptr;
+}
+
 int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const arguments_t &args, bool enable_breadcrumbs)
 {
+    marker = valid_hostpolicy_context_marker;
     application = args.managed_application;
     host_mode = hostpolicy_init.host_mode;
     host_path = args.host_path;
@@ -199,4 +225,9 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
     }
 
     return StatusCode::Success;
+}
+
+void hostpolicy_context_t::close()
+{
+    marker = closed_hostpolicy_context_marker;
 }
