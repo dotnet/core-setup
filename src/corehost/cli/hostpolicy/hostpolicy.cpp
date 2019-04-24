@@ -25,45 +25,59 @@ namespace
     bool g_init_done;
     hostpolicy_init_t g_init;
 
-    std::shared_ptr<coreclr_t> g_coreclr;
-
-    std::mutex g_lib_lock;
-    std::weak_ptr<coreclr_t> g_lib_coreclr;
-
     std::mutex g_context_lock;
     std::condition_variable g_context_cv;
     std::unique_ptr<hostpolicy_context_t> g_context;
     std::atomic<bool> g_context_initializing(false);
 
-    int create_coreclr(const hostpolicy_context_t &context, std::unique_ptr<coreclr_t> &coreclr)
+    int create_coreclr(hostpolicy_context_t *context)
     {
-        // Verbose logging
-        if (trace::is_enabled())
+        assert(context != nullptr);
+        if (context->coreclr != nullptr)
+            return StatusCode::Success;
+
+        int rc;
         {
-            context.coreclr_properties.log_properties();
+            std::lock_guard<std::mutex> context_lock { g_context_lock };
+            if (g_context != nullptr)
+            {
+                trace::error(_X("CoreClr has already been loaded for a different context"));
+                return StatusCode::HostInvalidState;
+            }
+
+            // Verbose logging
+            if (trace::is_enabled())
+                context->coreclr_properties.log_properties();
+
+            std::vector<char> host_path;
+            pal::pal_clrstring(context->host_path, &host_path);
+            const char *app_domain_friendly_name = context->host_mode == host_mode_t::libhost ? "clr_libhost" : "clrhost";
+
+            // Create a CoreCLR instance
+            trace::verbose(_X("CoreCLR path = '%s', CoreCLR dir = '%s'"), context->clr_path.c_str(), context->clr_dir.c_str());
+            auto hr = coreclr_t::create(
+                context->clr_dir,
+                host_path.data(),
+                app_domain_friendly_name,
+                context->coreclr_properties,
+                context->coreclr);
+
+            if (!SUCCEEDED(hr))
+            {
+                trace::error(_X("Failed to create CoreCLR, HRESULT: 0x%X"), hr);
+                rc = StatusCode::CoreClrInitFailure;
+            }
+            else
+            {
+                g_context.reset(context);
+                rc = StatusCode::Success;
+            }
+
+            g_context_initializing.store(false);
         }
 
-        std::vector<char> host_path;
-        pal::pal_clrstring(context.host_path, &host_path);
-
-        const char *app_domain_friendly_name = context.host_mode == host_mode_t::libhost ? "clr_libhost" : "clrhost";
-
-        // Create a CoreCLR instance
-        trace::verbose(_X("CoreCLR path = '%s', CoreCLR dir = '%s'"), context.clr_path.c_str(), context.clr_dir.c_str());
-        auto hr = coreclr_t::create(
-            context.clr_dir,
-            host_path.data(),
-            app_domain_friendly_name,
-            context.coreclr_properties,
-            coreclr);
-
-        if (!SUCCEEDED(hr))
-        {
-            trace::error(_X("Failed to create CoreCLR, HRESULT: 0x%X"), hr);
-            return StatusCode::CoreClrInitFailure;
-        }
-
-        return StatusCode::Success;
+        g_context_cv.notify_all();
+        return rc;
     }
 
     int get_or_create_hostpolicy_context(
@@ -86,6 +100,7 @@ namespace
         {
             // [TODO] Validate the current context is acceptable for this request
             trace::info(_X("Host context has already been initialized"));
+            assert(existing_context->coreclr != nullptr);
             *context = existing_context;
             return StatusCode::CoreHostAlreadyInitialized;
         }
@@ -106,55 +121,6 @@ namespace
         *context = context_local.release();
         return StatusCode::Success;
     }
-}
-
-int get_or_create_coreclr(
-    hostpolicy_context_t *context,
-    std::shared_ptr<coreclr_t> &coreclr)
-{
-    assert(context != nullptr);
-    coreclr = g_lib_coreclr.lock();
-    if (coreclr != nullptr)
-    {
-        // [TODO] Validate the current CLR instance is acceptable for this request
-
-        trace::info(_X("Using existing CoreClr instance"));
-        return StatusCode::Success;
-    }
-
-    {
-        std::lock_guard<std::mutex> lock{ g_lib_lock };
-        coreclr = g_lib_coreclr.lock();
-        if (coreclr != nullptr)
-        {
-            trace::info(_X("Using existing CoreClr instance"));
-            return StatusCode::Success;
-        }
-
-        std::unique_ptr<coreclr_t> coreclr_local;
-        int rc = create_coreclr(*context, coreclr_local);
-
-        {
-            std::lock_guard<std::mutex> context_lock { g_context_lock };
-            if (rc == StatusCode::Success)
-                g_context.reset(context);
-
-            g_context_initializing.store(false);
-        }
-
-        g_context_cv.notify_all();
-
-        if (rc != StatusCode::Success)
-            return rc;
-
-        assert(g_coreclr == nullptr);
-        g_coreclr = std::move(coreclr_local);
-        g_lib_coreclr = g_coreclr;
-
-    }
-
-    coreclr = g_coreclr;
-    return StatusCode::Success;
 }
 
 int run_host_command(
@@ -190,11 +156,12 @@ int run_host_command(
 }
 
 int run_as_app(
-    const std::shared_ptr<coreclr_t> &coreclr,
     const hostpolicy_context_t &context,
     int argc,
     const pal::char_t **argv)
 {
+    assert(context.coreclr != nullptr);
+
     // Initialize clr strings for arguments
     std::vector<std::vector<char>> argv_strs(argc);
     std::vector<const char*> argv_local(argc);
@@ -230,7 +197,7 @@ int run_as_app(
 
     // Execute the application
     unsigned int exit_code;
-    auto hr = g_coreclr->execute_assembly(
+    auto hr = context.coreclr->execute_assembly(
         argv_local.size(),
         argv_local.data(),
         managed_app.data(),
@@ -245,7 +212,7 @@ int run_as_app(
     trace::info(_X("Execute managed assembly exit code: 0x%X"), exit_code);
 
     // Shut down the CoreCLR
-    hr = g_coreclr->shutdown((int*)&exit_code);
+    hr = context.coreclr->shutdown((int*)&exit_code);
     if (!SUCCEEDED(hr))
     {
         trace::warning(_X("Failed to shut down CoreCLR, HRESULT: 0x%X"), hr);
@@ -364,12 +331,11 @@ SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
     if (rc != StatusCode::Success)
         return rc;
 
-    std::shared_ptr<coreclr_t> coreclr;
-    rc = get_or_create_coreclr(context, coreclr);
+    rc = create_coreclr(context);
     if (rc != StatusCode::Success)
         return rc;
 
-    rc = run_as_app(coreclr, *context, args.app_argc, args.app_argv);
+    rc = run_as_app(*context, args.app_argc, args.app_argv);
     return rc;
 }
 
@@ -429,8 +395,7 @@ namespace
             return StatusCode::InvalidArgFailure;
 
         hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
-        std::shared_ptr<coreclr_t> coreclr;
-        return get_or_create_coreclr(context, coreclr);
+        return create_coreclr(context);
     }
 
     int run_app_for_context(
@@ -442,12 +407,13 @@ namespace
             return StatusCode::InvalidArgFailure;
 
         hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
-        std::shared_ptr<coreclr_t> coreclr;
-        int rc = get_or_create_coreclr(context, coreclr);
-        if (rc != StatusCode::Success)
-            return rc;
+        if (context->coreclr == nullptr)
+        {
+            trace::error(_X("CoreClr must be loaded before running a app"));
+            return StatusCode::HostInvalidState;
+        }
 
-        return run_as_app(coreclr, *context, argc, argv);
+        return run_as_app(*context, argc, argv);
     }
 
     int get_delegate_for_context(
@@ -458,23 +424,27 @@ namespace
         if (delegate == nullptr)
             return StatusCode::InvalidArgFailure;
 
-        std::shared_ptr<coreclr_t> coreclr;
+        hostpolicy_context_t *context;
         if (instance == nullptr)
         {
-            // Allow 'attach' to existing coreclr
-            std::lock_guard<std::mutex> lock{ g_lib_lock };
-            coreclr = g_coreclr;
-            if (coreclr == nullptr)
+            std::lock_guard<std::mutex> lock{ g_context_lock };
+            if (g_context == nullptr || g_context->coreclr == nullptr)
                 return StatusCode::HostInvalidState;
+
+            context = g_context.get();
         }
         else
         {
-            hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
-            int rc = get_or_create_coreclr(context, coreclr);
-            if (rc != StatusCode::Success)
-                return rc;
+            context = static_cast<hostpolicy_context_t*>(instance);
         }
 
+        if (context->coreclr == nullptr)
+        {
+            trace::error(_X("CoreClr must be loaded before getting a delegate"));
+            return StatusCode::HostInvalidState;
+        }
+
+        coreclr_t *coreclr = context->coreclr.get();
         switch (type)
         {
         case coreclr_delegate_type::com_activation:
@@ -547,11 +517,11 @@ namespace
 
         hostpolicy_context_t *context = static_cast<hostpolicy_context_t*>(instance);
         size_t actualCount = context->coreclr_properties.count();
-        if (*count < actualCount || keys == nullptr || values == nullptr)
-        {
-            *count = actualCount;
+
+        size_t input_count = *count;
+        *count = actualCount;
+        if (input_count < actualCount || keys == nullptr || values == nullptr)
             return StatusCode::HostApiBufferTooSmall;
-        }
 
         int index = 0;
         std::function<void (const pal::string_t &,const pal::string_t &)> callback = [&] (const pal::string_t& key, const pal::string_t& value)
@@ -605,8 +575,8 @@ SHARED_API int __cdecl corehost_close_context(corehost_context_contract context_
 
 SHARED_API int corehost_unload()
 {
-    std::lock_guard<std::mutex> lock{ g_lib_lock };
-    if (g_coreclr != nullptr)
+    std::lock_guard<std::mutex> lock{ g_context_lock };
+    if (g_context != nullptr)
         return StatusCode::Success;
 
     // Allow re-initializing if runtime has not been loaded

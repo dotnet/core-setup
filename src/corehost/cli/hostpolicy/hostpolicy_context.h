@@ -25,6 +25,8 @@ public:
 
     coreclr_property_bag_t coreclr_properties;
 
+    std::unique_ptr<coreclr_t> coreclr;
+
     int initialize(hostpolicy_init_t &hostpolicy_init, const arguments_t &args, bool enable_breadcrumbs);
 };
 
