@@ -83,6 +83,8 @@ public:
           m_currentParsingDepth(0)
     { }
 
+    virtual ~JSON_Parser() { }
+
     struct Location
     {
         size_t m_line;
