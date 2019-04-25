@@ -64,7 +64,6 @@ bool hostpolicy_init_t::init(host_interface_t* input, hostpolicy_init_t* init)
         fx_requested_ver = input->fx_ver;
     }
 
-    int fx_count = 0;
     if (input->version_lo >= offsetof(host_interface_t, fx_names) + sizeof(input->fx_names))
     {
         int fx_count = input->fx_names.len;

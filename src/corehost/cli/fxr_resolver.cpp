@@ -133,7 +133,6 @@ bool fxr_resolver::try_get_path(const pal::string_t& root_path, pal::string_t* o
 
 bool fxr_resolver::try_get_existing_fxr(pal::dll_t *out_fxr, pal::string_t *out_fxr_path)
 {
-    pal::dll_t fxr;
     if (!pal::get_loaded_library(LIBFXR_NAME, "hostfxr_main", out_fxr, out_fxr_path))
         return false;
 
