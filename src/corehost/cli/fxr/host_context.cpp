@@ -16,7 +16,7 @@ namespace
         bool already_loaded,
         /*out*/ corehost_context_contract *hostpolicy_context_contract)
     {
-        if (hostpolicy_contract.init_context == nullptr)
+        if (hostpolicy_contract.initialize == nullptr)
         {
             trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
             return StatusCode::HostApiUnsupportedVersion;
@@ -30,7 +30,7 @@ namespace
 
             if (rc == StatusCode::Success)
             {
-                rc = hostpolicy_contract.init_context(&host_interface, hostpolicy_context_contract);
+                rc = hostpolicy_contract.initialize(&host_interface, hostpolicy_context_contract);
             }
         }
 

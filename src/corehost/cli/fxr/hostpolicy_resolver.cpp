@@ -215,14 +215,12 @@ int hostpolicy_resolver::load(
             return StatusCode::CoreHostEntryPointFailure;
 
         g_hostpolicy_contract.set_error_writer = (corehost_set_error_writer_fn)pal::get_symbol(g_hostpolicy, "corehost_set_error_writer");
-        g_hostpolicy_contract.init_context = (corehost_initialize_context_fn)pal::get_symbol(g_hostpolicy, "corehost_initialize_context");
-        g_hostpolicy_contract.close_context = (corehost_close_context_fn)pal::get_symbol(g_hostpolicy, "corehost_close_context");
+        g_hostpolicy_contract.initialize = (corehost_initialize_fn)pal::get_symbol(g_hostpolicy, "corehost_initialize");
 
-        // It's possible to not have corehost_set_error_writer, corehost_initialize_context, and
-        // corehost_close_context. These were introduced in 3.0 so 2.0 hostpolicy would not have
-        // the export. In this case we will not propagate the error writer and errors will still
-        // be reported to stderr. Callers are responsible for checking that the function pointers
-        // are not null before using them.
+        // It's possible to not have corehost_set_error_writer and corehost_initialize. These were
+        // introduced in 3.0, so 2.0 hostpolicy would not have the exports. In this case, we will
+        // not propagate the error writer and errors will still be reported to stderr. Callers are
+        // responsible for checking that the function pointers are not null before using them.
     }
 
     // Return global values

@@ -14,8 +14,7 @@ using corehost_load_fn = int(*) (const host_interface_t* init);
 using corehost_unload_fn = int(*) ();
 using corehost_error_writer_fn = void(*) (const pal::char_t* message);
 using corehost_set_error_writer_fn = corehost_error_writer_fn(*) (corehost_error_writer_fn error_writer);
-using corehost_initialize_context_fn = int(*)(const host_interface_t* init, corehost_context_contract* handle);
-using corehost_close_context_fn = int(*)(const corehost_context_contract handle);
+using corehost_initialize_fn = int(*)(const host_interface_t* init, corehost_context_contract* handle);
 
 struct hostpolicy_contract_t
 {
@@ -25,8 +24,7 @@ struct hostpolicy_contract_t
 
     // 3.0+ contracts
     corehost_set_error_writer_fn set_error_writer;
-    corehost_initialize_context_fn init_context;
-    corehost_close_context_fn close_context;
+    corehost_initialize_fn initialize;
 };
 
 namespace hostpolicy_resolver

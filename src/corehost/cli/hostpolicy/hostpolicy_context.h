@@ -14,11 +14,7 @@
 
 struct hostpolicy_context_t
 {
-public: // static
-    static hostpolicy_context_t* from_handle(const context_handle handle);
-
 public:
-    int32_t marker; // used as an indication for validity
     pal::string_t application;
     pal::string_t clr_dir;
     pal::string_t clr_path;
@@ -33,7 +29,6 @@ public:
     std::unique_ptr<coreclr_t> coreclr;
 
     int initialize(hostpolicy_init_t &hostpolicy_init, const arguments_t &args, bool enable_breadcrumbs);
-    void close();
 };
 
 #endif // __HOSTPOLICY_CONTEXT_H__

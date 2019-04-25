@@ -951,7 +951,7 @@ namespace
             return StatusCode::Success;
 
         const corehost_context_contract &contract = context->hostpolicy_context_contract;
-        int rc = contract.load_runtime(contract.handle);
+        int rc = contract.load_runtime();
 
         // Mark the context as active or invalid
         context->type = rc == StatusCode::Success ? host_context_type::active : host_context_type::invalid;
@@ -987,7 +987,7 @@ int fx_muxer_t::run_app(host_context_t *context)
         if (rc != StatusCode::Success)
             return rc;
 
-        return contract.run_app(contract.handle, argc, argv.data());
+        return contract.run_app(argc, argv.data());
     }
 }
 
@@ -1007,7 +1007,7 @@ int fx_muxer_t::get_runtime_delegate(host_context_t *context, coreclr_delegate_t
                 return rc;
         }
 
-        return contract.get_runtime_delegate(contract.handle, type, delegate);
+        return contract.get_runtime_delegate(type, delegate);
     }
 }
 
@@ -1019,20 +1019,7 @@ const host_context_t* fx_muxer_t::get_active_host_context()
 
 int fx_muxer_t::close_host_context(host_context_t *context)
 {
-    const hostpolicy_contract_t &hostpolicy_contract = context->hostpolicy_contract;
-    if (hostpolicy_contract.close_context == nullptr)
-    {
-        trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
-        return StatusCode::HostApiUnsupportedVersion;
-    }
-
-    int rc = StatusCode::Success;
     context->close();
-    if (context->type != host_context_type::secondary)
-    {
-        propagate_error_writer_t propagate_error_writer_to_corehost(hostpolicy_contract.set_error_writer);
-        rc = hostpolicy_contract.close_context(context->hostpolicy_context_contract);
-    }
 
     // Do not delete the active context.
     {
@@ -1041,7 +1028,7 @@ int fx_muxer_t::close_host_context(host_context_t *context)
             delete context;
     }
 
-    return rc;
+    return StatusCode::Success;
 }
 
 int fx_muxer_t::handle_exec(
