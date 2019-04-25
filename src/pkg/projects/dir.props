@@ -120,6 +120,10 @@
     <BuildRID Include="@(_buildingOnRID)"/>
   </ItemGroup>
 
+  <PropertyGroup>
+    <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(MSBuildProjectFullPath)</RuntimeProjectFile>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(HasRuntimePackages)' != 'false'">
     <_project Include="@(BuildRID)">
       <Platform Condition="'%(Platform)' == ''">x64</Platform>
@@ -128,7 +132,7 @@
       <AdditionalProperties>PackageTargetRuntime=%(BuildRID);NuGetRuntimeIdentifier=%(BuildRID);Platform=%(Platform)</AdditionalProperties>
     </_project>
 
-    <RuntimeProject Include="@(_project->'$(MSBuildProjectFullPath)')" />
+    <RuntimeProject Include="@(_project->'$(RuntimeProjectFile)')" />
 
     <!--
       Pack projects need package IDs like "Microsoft.NETCore.App.Host.Runtime.<rid>". The package
@@ -140,7 +144,7 @@
       undesired 'runtime.<rid>.' prefix to the package ID.
     -->
     <RidSpecificPackProject
-      Include="@(_project->'$(MSBuildProjectFullPath)')"
+      Include="@(_project->'$(RuntimeProjectFile)')"
       BaseId="$(MSBuildProjectName).%(BuildRID)"
       AdditionalProperties="%(AdditionalProperties);BaseId=%(BaseId);IdPrefix=" />
   </ItemGroup>
