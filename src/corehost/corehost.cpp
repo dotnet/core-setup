@@ -10,7 +10,7 @@
 #include "trace.h"
 #include "utils.h"
 
-#if FEATURE_APPHOST
+#if defined(FEATURE_APPHOST)
 #include "cli/apphost/bundle/bundle_runner.h"
 
 #define CURHOST_TYPE    _X("apphost")
@@ -72,7 +72,7 @@ bool is_exe_enabled_for_execution(pal::string_t* app_dll)
     trace::info(_X("The managed DLL bound to this executable is: '%s'"), app_dll->c_str());
     return true;
 }
-#elif !FEATURE_LIBHOST
+#elif !defined(FEATURE_LIBHOST)
 #define CURHOST_TYPE    _X("dotnet")
 #define CUREXE_PKG_VER  HOST_PKG_VER
 #define CURHOST_EXE
@@ -93,7 +93,7 @@ int exe_start(const int argc, const pal::char_t* argv[])
     pal::string_t app_root;
     bool requires_v2_hostfxr_interface = false;
     
-#if FEATURE_APPHOST
+#if defined(FEATURE_APPHOST)
     pal::string_t embedded_app_name;
     if (!is_exe_enabled_for_execution(&embedded_app_name))
     {
