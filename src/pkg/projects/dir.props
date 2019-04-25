@@ -121,6 +121,10 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <!--
+      By default, lineup and runtime packages are built by the same project. Allow overriding so
+      a project can depend on another to produce runtime packages with a different base ID.
+    -->
     <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(MSBuildProjectFullPath)</RuntimeProjectFile>
   </PropertyGroup>
 
