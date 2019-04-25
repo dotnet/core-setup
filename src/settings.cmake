@@ -223,6 +223,7 @@ else()
     add_compile_options(-Wno-unused-parameter)
     add_compile_options(-Wno-unused-variable)
     add_compile_options(-Wno-vla)
+    add_compile_options(-Wno-vla-extension)
     add_compile_options(-Wno-weak-vtables)
 endif()
 
