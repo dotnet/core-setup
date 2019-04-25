@@ -84,7 +84,7 @@ void bundle_runner_t::read_string(pal::string_t &str, size_t size, FILE* stream)
     uint8_t *buffer = new uint8_t[size + 1]; 
     read(buffer, size, stream);
     buffer[size] = 0; // null-terminator
-    pal::clr_palstring((const char*)buffer, &str);
+    pal::clr_palstring(reinterpret_cast<const char*>(buffer), &str);
 }
 
 static bool has_dirs_in_path(const pal::string_t& path)

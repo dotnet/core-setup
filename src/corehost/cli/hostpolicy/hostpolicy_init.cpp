@@ -42,7 +42,7 @@ bool hostpolicy_init_t::init(host_interface_t* input, hostpolicy_init_t* init)
 
         init->patch_roll_forward = input->patch_roll_forward;
         init->prerelease_roll_forward = input->prerelease_roll_forward;
-        init->host_mode = (host_mode_t)input->host_mode;
+        init->host_mode = static_cast<host_mode_t>(input->host_mode);
     }
     else
     {

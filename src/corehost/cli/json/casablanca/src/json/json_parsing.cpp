@@ -377,7 +377,7 @@ inline bool JSON_Parser<CharType>::ParseInt64(CharType first, uint64_t& value)
     auto ch = PeekCharacter();
     while (ch >= '0' && ch <= '9')
     {
-        unsigned int next_digit = (unsigned int)(ch - '0');
+        unsigned int next_digit = static_cast<unsigned int>(ch - '0');
         if (value > (ULLONG_MAX / 10) || (value == ULLONG_MAX/10 && next_digit > ULLONG_MAX%10))
             return false;
 
@@ -493,7 +493,7 @@ bool JSON_Parser<CharType>::CompleteNumberLiteral(CharType first, Token &token)
     ::std::vector<CharType> buf(::std::numeric_limits<uint64_t>::digits10 + 5);
     int count = print_llu(buf.data(), buf.size(), val64);
     _ASSERTE(count >= 0);
-    _ASSERTE((size_t)count < buf.size());
+    _ASSERTE(static_cast<size_t>(count) < buf.size());
     // Resize to cut off the null terminator
     buf.resize(count);
 
@@ -897,7 +897,7 @@ try_again:
     case '}':
     case ']':
         {
-            if((signed int)(--m_currentParsingDepth) < 0)
+            if(static_cast<signed int>(--m_currentParsingDepth) < 0)
             {
                 SetErrorCode(result, json_error::mismatched_brances);
                 break;

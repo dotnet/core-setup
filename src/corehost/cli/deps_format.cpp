@@ -106,7 +106,7 @@ void deps_json_t::reconcile_libraries_with_targets(
                 entry.library_path = library_path;
                 entry.library_hash_path = library_hash_path;
                 entry.runtime_store_manifest_list = runtime_store_manifest_list;
-                entry.asset_type = (deps_entry_t::asset_types) i;
+                entry.asset_type = static_cast<deps_entry_t::asset_types>(i);
                 entry.is_serviceable = serviceable;
                 entry.is_rid_specific = rid_specific;
                 entry.deps_file = deps_file;

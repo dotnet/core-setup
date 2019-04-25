@@ -143,12 +143,12 @@ pal::string_t get_directory(const pal::string_t& path)
         return ret + DIR_SEPARATOR;
     }
 
-    int pos = (int) path_sep;
+    int pos = static_cast<int>(path_sep);
     while (pos >= 0 && ret[pos] == DIR_SEPARATOR)
     {
         pos--;
     }
-    return ret.substr(0, (size_t)pos + 1) + DIR_SEPARATOR;
+    return ret.substr(0, static_cast<size_t>(pos) + 1) + DIR_SEPARATOR;
 }
 
 void remove_trailing_dir_seperator(pal::string_t* dir)
@@ -268,7 +268,7 @@ bool skip_utf8_bom(pal::istream_t* stream)
     }
 
     unsigned char bytes[3];
-    stream->read((char*) bytes, 3);
+    stream->read(reinterpret_cast<char*>(bytes), 3);
     if ((stream->gcount() < 3) ||
             (bytes[1] != 0xBB) || 
             (bytes[2] != 0xBF))
@@ -404,7 +404,7 @@ bool try_stou(const pal::string_t& str, unsigned* num)
     {
         return false;
     }
-    *num = (unsigned)std::stoul(str);
+    *num = std::stoul(str);
     return true;
 }
 

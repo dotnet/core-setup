@@ -207,7 +207,7 @@ int run_as_app(
     trace::info(_X("Execute managed assembly exit code: 0x%X"), exit_code);
 
     // Shut down the CoreCLR
-    hr = g_coreclr->shutdown((int*)&exit_code);
+    hr = g_coreclr->shutdown(reinterpret_cast<int*>(&exit_code));
     if (!SUCCEEDED(hr))
     {
         trace::warning(_X("Failed to shut down CoreCLR, HRESULT: 0x%X"), hr);

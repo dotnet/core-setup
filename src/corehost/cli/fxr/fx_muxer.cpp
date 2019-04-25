@@ -47,7 +47,7 @@ int load_hostpolicy(
     }
 
     // Obtain entrypoint symbol
-    *main_fn = (T)pal::get_symbol(*h_host, main_entry_symbol);
+    *main_fn = reinterpret_cast<T>(pal::get_symbol(*h_host, main_entry_symbol));
     if (*main_fn == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
 
