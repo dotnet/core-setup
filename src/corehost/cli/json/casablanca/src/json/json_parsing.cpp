@@ -576,7 +576,7 @@ bool JSON_Parser<CharType>::CompleteNumberLiteral(CharType first, Token &token)
             // Not expected number character?
             break;
         }
-    };
+    }
 
     buf.push_back('\0');
     token.double_val = anystod(buf.data());
