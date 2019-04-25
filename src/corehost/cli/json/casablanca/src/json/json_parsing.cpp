@@ -412,19 +412,19 @@ namespace
         return _wcstod_l(str, nullptr, utility::details::scoped_c_thread_locale::c_locale());
     }
 #else
-    static int __attribute__((__unused__)) print_llu(char* ptr, size_t n, unsigned long long val64)
+    static int print_llu(char* ptr, size_t n, unsigned long long val64)
     {
         return snprintf(ptr, n, "%llu", val64);
     }
-    static int __attribute__((__unused__)) print_llu(char* ptr, size_t n, unsigned long val64)
+    static int print_llu(char* ptr, size_t n, unsigned long val64)
     {
         return snprintf(ptr, n, "%lu", val64);
     }
-    static double __attribute__((__unused__)) anystod(const char* str)
+    static double anystod(const char* str)
     {
         return strtod(str, nullptr);
     }
-    static double __attribute__((__unused__)) anystod(const wchar_t* str)
+    static double anystod(const wchar_t* str)
     {
         return wcstod(str, nullptr);
     }
