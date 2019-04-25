@@ -139,7 +139,7 @@ typedef void (*CoreClrDelegate)();
 
 const int MaxDelegates = 16;
 
-MockCoreClrDelegate DelegateState[MaxDelegates];
+static MockCoreClrDelegate DelegateState[MaxDelegates];
 
 #define DelegateFunction(index)\
 void Delegate_ ## index() { DelegateState[index].Echo(); }
