@@ -84,7 +84,7 @@ void deps_json_t::reconcile_libraries_with_targets(
         pal::string_t library_hash_path = get_optional_path(properties, _X("hashPath"));
         pal::string_t runtime_store_manifest_list = get_optional_path(properties, _X("runtimeStoreManifestName"));
 
-        for (int i = 0; i < deps_entry_t::s_known_asset_types.size(); ++i)
+        for (size_t i = 0; i < deps_entry_t::s_known_asset_types.size(); ++i)
         {
             bool rid_specific = false;
             for (const auto& asset : get_assets_fn(library.first, i, &rid_specific))
@@ -231,7 +231,7 @@ bool deps_json_t::process_runtime_targets(const json_value& json, const pal::str
         for (const auto& file : files)
         {
             const auto& type = file.second.at(_X("assetType")).as_string();
-            for (int i = 0; i < deps_entry_t::s_known_asset_types.size(); ++i)
+            for (size_t i = 0; i < deps_entry_t::s_known_asset_types.size(); ++i)
             {
                 if (pal::strcasecmp(type.c_str(), deps_entry_t::s_known_asset_types[i]) == 0)
                 {
@@ -282,7 +282,7 @@ bool deps_json_t::process_targets(const json_value& json, const pal::string_t& t
     for (const auto& package : json.at(_X("targets")).at(target_name).as_object())
     {
         const auto& asset_types = package.second.as_object();
-        for (int i = 0; i < deps_entry_t::s_known_asset_types.size(); ++i)
+        for (size_t i = 0; i < deps_entry_t::s_known_asset_types.size(); ++i)
         {
             auto iter = asset_types.find(deps_entry_t::s_known_asset_types[i]);
             if (iter != asset_types.end())

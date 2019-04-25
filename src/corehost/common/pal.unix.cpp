@@ -318,7 +318,7 @@ bool pal::get_default_installation_dir(pal::string_t* recv)
 pal::string_t trim_quotes(pal::string_t stringToCleanup)
 {
     pal::char_t quote_array[2] = {'\"', '\''};
-    for(int index = 0; index < sizeof(quote_array)/sizeof(quote_array[0]); index++)
+    for(size_t index = 0; index < sizeof(quote_array)/sizeof(quote_array[0]); index++)
     {
         size_t pos = stringToCleanup.find(quote_array[index]);
         while(pos != std::string::npos)

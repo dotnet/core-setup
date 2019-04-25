@@ -161,7 +161,7 @@ void remove_trailing_dir_seperator(pal::string_t* dir)
 
 void replace_char(pal::string_t* path, pal::char_t match, pal::char_t repl)
 {
-	int pos = 0;
+	size_t pos = 0;
     while ((pos = path->find(match, pos)) != pal::string_t::npos)
     {
         (*path)[pos] = repl;
@@ -170,7 +170,7 @@ void replace_char(pal::string_t* path, pal::char_t match, pal::char_t repl)
 
 pal::string_t get_replaced_char(const pal::string_t& path, pal::char_t match, pal::char_t repl)
 {
-	int pos = path.find(match);
+	size_t pos = path.find(match);
     if (pos == pal::string_t::npos)
     {
         return path;

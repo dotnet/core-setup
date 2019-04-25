@@ -257,7 +257,7 @@ FILE* bundle_runner_t::create_extraction_file(const pal::string_t& relative_path
 void bundle_runner_t::extract_file(file_entry_t *entry)
 {
     FILE* file = create_extraction_file(entry->relative_path());
-    const size_t buffer_size = 8 * 1024; // Copy the file in 8KB chunks
+    const int64_t buffer_size = 8 * 1024; // Copy the file in 8KB chunks
     uint8_t buffer[buffer_size];
     int64_t file_size = entry->size();
 
