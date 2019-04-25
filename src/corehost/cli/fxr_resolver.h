@@ -14,6 +14,7 @@
 namespace fxr_resolver
 {
     bool try_get_path(const pal::string_t& root_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path);
+    bool try_get_existing_fxr(pal::dll_t *out_fxr, pal::string_t *out_fxr_path);
 }
 
 template<typename THostNameToAppNameCallback, typename TDelegate>
@@ -30,18 +31,35 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostNameToAppNameCall
 
     pal::string_t dotnet_root;
     pal::string_t fxr_path;
-    if (!fxr_resolver::try_get_path(get_directory(host_path), &dotnet_root, &fxr_path))
+    if (fxr_resolver::try_get_existing_fxr(&fxr, &fxr_path))
     {
-        return StatusCode::CoreHostLibMissingFailure;
-    }
+        if (coreclr_exists_in_dir(fxr_path))
+        {
+            dotnet_root = get_directory(fxr_path);
+        }
+        else
+        {
+            pal::string_t fxr_root = get_directory(get_directory(fxr_path));
+            dotnet_root = get_directory(get_directory(fxr_root));
+        }
 
-    // Load library
-    if (!pal::load_library(&fxr_path, &fxr))
+        trace::verbose(_X("The library %s was already loaded. Reusing the previously loaded library [%s]."), LIBFXR_NAME, fxr_path.c_str());
+    }
+    else
     {
-        trace::error(_X("The library %s was found, but loading it from %s failed"), LIBFXR_NAME, fxr_path.c_str());
-        trace::error(_X("  - Installing .NET Core prerequisites might help resolve this problem."));
-        trace::error(_X("     %s"), DOTNET_CORE_INSTALL_PREREQUISITES_URL);
-        return StatusCode::CoreHostLibLoadFailure;
+        if (!fxr_resolver::try_get_path(get_directory(host_path), &dotnet_root, &fxr_path))
+        {
+            return StatusCode::CoreHostLibMissingFailure;
+        }
+
+        // Load library
+        if (!pal::load_library(&fxr_path, &fxr))
+        {
+            trace::error(_X("The library %s was found, but loading it from %s failed"), LIBFXR_NAME, fxr_path.c_str());
+            trace::error(_X("  - Installing .NET Core prerequisites might help resolve this problem."));
+            trace::error(_X("     %s"), DOTNET_CORE_INSTALL_PREREQUISITES_URL);
+            return StatusCode::CoreHostLibLoadFailure;
+        }
     }
 
     // Leak fxr
@@ -60,7 +78,7 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostNameToAppNameCall
     {
         return status;
     }
-    
+
     return get_delegate_from_hostfxr(host_path.c_str(), dotnet_root.c_str(), app_path_to_use->c_str(), type, (void**)delegate);
 }
 
