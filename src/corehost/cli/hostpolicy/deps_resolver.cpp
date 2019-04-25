@@ -833,7 +833,7 @@ bool deps_resolver_t::resolve_probe_dirs(
     for (const auto& additional_deps : m_additional_deps)
     {
         const auto additional_deps_entries = additional_deps->get_entries(asset_type);
-        for (const auto entry : additional_deps_entries)
+        for (const auto& entry : additional_deps_entries)
         {
             if (!add_package_cache_entry(entry, m_app_dir, 0))
             {
