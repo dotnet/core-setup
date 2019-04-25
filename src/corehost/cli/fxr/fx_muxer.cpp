@@ -673,7 +673,7 @@ int fx_muxer_t::execute(
         {
             result = parse_args(host_info, 1, argc, argv, false, mode, &new_argoff, app_candidate, opts); // arg offset 1 for dotnet
 
-            if (result == AppArgNotRunnable)
+            if (static_cast<StatusCode>(result) == AppArgNotRunnable)
             {
                 return handle_cli(host_info, argc, argv);
             }

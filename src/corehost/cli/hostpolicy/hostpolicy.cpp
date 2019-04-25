@@ -169,7 +169,7 @@ int run_as_app(
     if (trace::is_enabled())
     {
         pal::string_t arg_str;
-        for (int i = 0; i < argv_local.size(); i++)
+        for (size_t i = 0; i < argv_local.size(); i++)
         {
             pal::string_t cur;
             pal::clr_palstring(argv_local[i], &cur);

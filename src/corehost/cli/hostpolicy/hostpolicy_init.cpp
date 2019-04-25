@@ -66,7 +66,7 @@ bool hostpolicy_init_t::init(host_interface_t* input, hostpolicy_init_t* init)
 
     if (input->version_lo >= offsetof(host_interface_t, fx_names) + sizeof(input->fx_names))
     {
-        int fx_count = input->fx_names.len;
+        size_t fx_count = input->fx_names.len;
         assert(fx_count > 0);
         assert(fx_count == input->fx_dirs.len);
         assert(fx_count == input->fx_requested_versions.len);
@@ -83,7 +83,7 @@ bool hostpolicy_init_t::init(host_interface_t* input, hostpolicy_init_t* init)
         make_palstr_arr(input->fx_found_versions.len, input->fx_found_versions.arr, &fx_found_versions);
 
         init->fx_definitions.reserve(fx_count);
-        for (int i = 0; i < fx_count; ++i)
+        for (size_t i = 0; i < fx_count; ++i)
         {
             auto fx = new fx_definition_t(fx_names[i], fx_dirs[i], fx_requested_versions[i], fx_found_versions[i]);
             init->fx_definitions.push_back(std::unique_ptr<fx_definition_t>(fx));
