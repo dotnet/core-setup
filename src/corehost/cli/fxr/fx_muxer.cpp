@@ -760,34 +760,67 @@ namespace
         auto app = new fx_definition_t();
         fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
 
-        runtime_config_t::settings_t override_settings;
+        const runtime_config_t::settings_t override_settings;
         int rc = read_config(*app, host_info.app_path, runtime_config_path, override_settings);
         if (rc != StatusCode::Success)
             return rc;
 
-        runtime_config_t app_config = app->get_runtime_config();
+        const runtime_config_t app_config = app->get_runtime_config();
         bool is_framework_dependent = app_config.get_is_framework_dependent();
         if (is_framework_dependent)
         {
             rc = fx_resolver_t::resolve_frameworks_for_app(host_info, override_settings, app_config, fx_definitions);
             if (rc != StatusCode::Success)
-            {
                 return rc;
-            }
         }
 
-        std::vector<pal::string_t> probe_realpaths = get_probe_realpaths(fx_definitions, std::vector<pal::string_t>() /* specified_probing_paths */);
+        const std::vector<pal::string_t> probe_realpaths = get_probe_realpaths(fx_definitions, std::vector<pal::string_t>() /* specified_probing_paths */);
 
         trace::verbose(_X("Libhost loading occurring as a %s app as per config file [%s]"),
             (is_framework_dependent ? _X("framework-dependent") : _X("self-contained")), app_config.get_path().c_str());
 
-        pal::string_t deps_file;
+        const pal::string_t deps_file;
         if (!hostpolicy_resolver::try_get_dir(mode, host_info.dotnet_root, fx_definitions, host_info.app_path, deps_file, probe_realpaths, &hostpolicy_dir))
         {
             return StatusCode::CoreHostLibMissingFailure;
         }
 
-        pal::string_t additional_deps_serialized;
+        const pal::string_t additional_deps_serialized;
+        init.reset(new corehost_init_t(pal::string_t{}, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions));
+
+        return StatusCode::Success;
+    }
+
+    int get_init_info_for_secondary_component(
+        const host_startup_info_t &host_info,
+        host_mode_t mode,
+        pal::string_t &runtime_config_path,
+        const host_context_t *existing_context,
+        /*out*/ std::unique_ptr<corehost_init_t> &init)
+    {
+        // Read config
+        fx_definition_vector_t fx_definitions;
+        auto app = new fx_definition_t();
+        fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
+
+        const runtime_config_t::settings_t override_settings;
+        int rc = read_config(*app, host_info.app_path, runtime_config_path, override_settings);
+        if (rc != StatusCode::Success)
+            return rc;
+
+        const runtime_config_t app_config = app->get_runtime_config();
+        bool is_framework_dependent = app_config.get_is_framework_dependent();
+        if (!app_config.get_is_framework_dependent())
+        {
+            trace::error(_X("Initialization for self-contained components is not supported"));
+            return StatusCode::InvalidConfigFile;
+        }
+
+        // [TODO] Validate the current context is acceptable for this request (frameworks)
+
+        const pal::string_t deps_file;
+        const pal::string_t additional_deps_serialized;
+        const std::vector<pal::string_t> probe_realpaths;
         init.reset(new corehost_init_t(pal::string_t{}, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions));
 
         return StatusCode::Success;
@@ -906,26 +939,30 @@ int fx_muxer_t::initialize_for_runtime_config(
     }
 
     bool already_initialized = existing_context != nullptr;
+
+    int rc;
     host_mode_t mode = host_mode_t::libhost;
     pal::string_t runtime_config = runtime_config_path;
-    pal::string_t hostpolicy_dir;
     std::unique_ptr<corehost_init_t> init;
-    int rc = get_init_info_for_component(host_info, mode, runtime_config, hostpolicy_dir, init);
-    if (rc != StatusCode::Success)
-    {
-        if (!already_initialized)
-            handle_initialize_failure();
-
-        return rc;
-    }
-
     std::unique_ptr<host_context_t> context;
     if (already_initialized)
     {
+        rc = get_init_info_for_secondary_component(host_info, mode, runtime_config, existing_context, init);
+        if (rc != StatusCode::Success)
+            return rc;
+
         rc = host_context_t::create_secondary(existing_context->hostpolicy_contract, *init, context);
     }
     else
     {
+        pal::string_t hostpolicy_dir;
+        rc = get_init_info_for_component(host_info, mode, runtime_config, hostpolicy_dir, init);
+        if (rc != StatusCode::Success)
+        {
+            handle_initialize_failure();
+            return rc;
+        }
+
         rc = initialize_context(hostpolicy_dir, *init, context);
     }
 

@@ -21,6 +21,9 @@
 
 namespace
 {
+    // Initialization information set through corehost_load. All other entry points assume this has already
+    // been set and use it to perform the requested operation. Note that this being initialized does not
+    // indicate that the runtime is loaded or that the runtime will be loaded (e.g. host commands).
     std::mutex g_init_lock;
     bool g_init_done;
     hostpolicy_init_t g_init;
@@ -30,8 +33,8 @@ namespace
     std::mutex g_context_lock;
 
     // Tracks the hostpolicy context. This is the context that will be used to load and initialize coreclr.
-    // It will only be set once a context is initialized and updated to hold coreclr once the runtime is
-    // loaded. Once set, it should not be unset.
+    // It will be set once a context is initialized and updated to hold coreclr once the runtime is loaded.
+    // Once set, it should not be unset.
     std::unique_ptr<hostpolicy_context_t> g_context;
 
     // Tracks whether the hostpolicy context is initializing (from start of creation of the first context
@@ -528,6 +531,31 @@ namespace
     }
 }
 
+// Initializes hostpolicy. Calculates everything required to start the runtime and creates a context to track
+// that information
+//
+// Parameters:
+//    init
+//      struct containing information about the initialization request. If hostpolicy is not yet initialized
+//      this is ignored. If hostpolicy is already initialized, this function will check this struct for
+//      compatibility with the way in which hostpolicy was previously initialized.
+//    context_contract
+//      [out] If initialization is successful, populated with a contract for performing operations on hostpolicy
+//
+// Return value:
+//    Success                     - Initialization was succesful
+//    CoreHostAlreadyInitialized  - Request is compatible with already initialized hostpolicy
+// [TODO]
+//    CoreHostDifferentProperties - Request has runtime properties that differ from already initialized hostpolicy
+//
+// This function does not load the runtime
+//
+// If a previous request to initialize hostpolicy was made, but the runtime not yet loaded, this function will
+// block until the runtime is loaded.
+//
+// This function assumes corehost_load has already been called. It uses the init information set through that
+// call - not the struct passed into this function - to create a context.
+//
 SHARED_API int __cdecl corehost_initialize(const host_interface_t *init, /*out*/ corehost_context_contract *context_contract)
 {
     if (init == nullptr || context_contract == nullptr)
@@ -544,7 +572,7 @@ SHARED_API int __cdecl corehost_initialize(const host_interface_t *init, /*out*/
 
     if (rc == StatusCode::CoreHostAlreadyInitialized)
     {
-        // [TODO] Validate the current context is acceptable for this request
+        // [TODO] Compare the current context with this request (properties)
     }
 
     context_contract->version = sizeof(corehost_context_contract);
