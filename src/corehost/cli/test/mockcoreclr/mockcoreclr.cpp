@@ -35,7 +35,7 @@ SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_initialize(
 
     if (hostHandle != nullptr)
     {
-        *hostHandle = reinterpret_cast<coreclr_t::host_handle_t*>(0xdeadbeef);
+        *hostHandle = reinterpret_cast<coreclr_t::host_handle_t>(0xdeadbeef);
     }
 
     return StatusCode::Success;
