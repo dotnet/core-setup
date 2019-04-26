@@ -42,11 +42,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             public const string EnvironmentVariable = "DOTNET_ROLL_FORWARD_TO_PRERELEASE";
         }
 
-        public static class TestOnlyFile
-        {
-            public const string FileName = "_dotnet_test_only_enabled";
-        }
-
         public static class TestOnlyEnvironmentVariables
         {
             public const string DefaultInstallPath = "_DOTNET_TEST_DEFAULT_INSTALL_PATH";
