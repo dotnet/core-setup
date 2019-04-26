@@ -42,10 +42,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             public const string EnvironmentVariable = "DOTNET_ROLL_FORWARD_TO_PRERELEASE";
         }
 
+        public static class TestOnlyFile
+        {
+            public const string FileName = "_dotnet_test_only_enabled";
+        }
+
         public static class TestOnlyEnvironmentVariables
         {
+            public const string DefaultInstallPath = "_DOTNET_TEST_DEFAULT_INSTALL_PATH";
             public const string RegistryPath = "_DOTNET_TEST_REGISTRY_PATH";
             public const string GloballyRegisteredPath = "_DOTNET_TEST_GLOBALLY_REGISTERED_PATH";
+            public const string InstallLocationFilePath = "_DOTNET_TEST_INSTALL_LOCATION_FILE_PATH";
         }
     }
 }
