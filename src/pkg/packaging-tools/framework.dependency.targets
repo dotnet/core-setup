@@ -198,6 +198,7 @@
         Condition="
           '%(FilesToPackage.IsNative)' != 'true' AND
           '%(FileName)' != 'System.Private.CoreLib' AND
+          '%(FileName)' != 'System.Windows.Forms' AND
           '%(FileName)' != 'mscorlib' AND
           '%(Extension)' == '.dll' AND
           '%(FilesToPackage.DestinationSubDirectory)' == '' AND
@@ -209,6 +210,10 @@
         <CrossGenedPath>$(CrossGenOutputPath)/%(TargetPath)/%(FileName)%(Extension)</CrossGenedPath>
         <CrossGenSymbolSemaphorePath>$(_crossGenIntermediatePath)/%(FileName).symbol.semaphore</CrossGenSymbolSemaphorePath>
       </_filesToCrossGen>
+
+      <WinFormsPlatformDirectory
+        Include="%(FilesToPackage.RootDir)%(FilesToPackage.Directory)"
+        Condition="'%(FilesToPackage.FileName)' == 'System.Windows.Forms'" />
 
       <FilesToPackage Remove="@(_filesToCrossGen)" />
 
@@ -222,6 +227,8 @@
         so in case of conflicts, DLLs are found in the framework being crossgenned.
       -->
       <_crossgenPlatformDirectories Include="%(_filesToCrossGen.RootDir)%(_filesToCrossGen.Directory)" />
+      <!-- We need to include System.Windows.Forms as a platform assembly even if we don't crossgen it.-->
+      <_crossgenPlatformDirectories Include="@(WinFormsPlatformDirectory)" />
       <!-- the following path *must* be passed to crossgen as it has the CoreLib.ni.dll, it will not use the IL copy. -->
       <_crossgenPlatformDirectories Include="$(_runtimeDirectory)" />
       <!-- the following need not be passed to crossgen but we do so to be safe. -->
@@ -285,16 +292,25 @@
           DependsOnTargets="CreateCrossGenImages"
           Inputs="%(_filesToCrossGen.CrossGenedPath)"
           Outputs="%(_filesToCrossGen.CrossGenSymbolSemaphorePath)">
+    <ItemGroup>
+      <_crossgenSymbolsPlatformDirectories Include="%(_filesToCrossGen.CrossGenedDirectory)" />
+      <_crossgenSymbolsPlatformDirectories Include="@(WinFormsPlatformDirectory)" />
+      <_crossgenSymbolsPlatformDirectories Include="$(_coreLibDirectory)" />
+      <_crossgenSymbolsPlatformDirectories Include="$(_fxLibDirectory)" />
+    </ItemGroup>
+
     <PropertyGroup>
       <_crossGenSymbolsResponseFile>$(_crossGenIntermediatePath)/%(_filesToCrossGen.FileName).symbols.rsp</_crossGenSymbolsResponseFile>
       <_crossGenSymbolsOptionName Condition="'$(OS)' == 'Windows_NT'">CreatePDB</_crossGenSymbolsOptionName>
       <_crossGenSymbolsOptionName Condition="'$(_crossGenSymbolsOptionName)' == ''">CreatePerfMap</_crossGenSymbolsOptionName>
       <_crossGenSymbolsOutputDirectory>$(CrossGenSymbolsOutputPath)/%(_filesToCrossGen.TargetPath)</_crossGenSymbolsOutputDirectory>
+
+      <_crossgenSymbolsPlatformAssemblies>@(_crossgenSymbolsPlatformDirectories->'%(Identity)', '$(_pathSeparatorEscaped)')</_crossgenSymbolsPlatformAssemblies>
     </PropertyGroup>
 
     <ItemGroup>
       <_crossGenSymbolsArgs Include="-readytorun" />
-      <_crossGenSymbolsArgs Include="-platform_assemblies_paths %(_filesToCrossGen.CrossGenedDirectory)$(_pathSeparatorEscaped)$(_coreLibDirectory)$(_pathSeparatorEscaped)$(_fxLibDirectory)" />
+      <_crossGenSymbolsArgs Include="-platform_assemblies_paths $(_crossgenSymbolsPlatformAssemblies)" />
       <_crossGenSymbolsArgs Include="-Platform_Winmd_Paths $(_windowsWinMDDirectory)" Condition="'$(OsEnvironment)'=='Windows_NT'"/>
       <_crossGenSymbolsArgs Include="-$(_crossGenSymbolsOptionName)" />
       <_crossGenSymbolsArgs Include="$(_crossGenSymbolsOutputDirectory)" />
