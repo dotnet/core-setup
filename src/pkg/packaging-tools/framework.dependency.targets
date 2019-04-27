@@ -192,6 +192,8 @@
         System.Runtime.WindowsRuntime is only supported on Windows.
 
         Resource DLLs in 'cs/', 'de/', ... subdirectories.
+
+        System.Windows.Forms. If crossgen'd, the Win32Manifest resource can't be found.
       -->
       <_filesToCrossGen
         Include="@(FilesToPackage)"
@@ -211,6 +213,10 @@
         <CrossGenSymbolSemaphorePath>$(_crossGenIntermediatePath)/%(FileName).symbol.semaphore</CrossGenSymbolSemaphorePath>
       </_filesToCrossGen>
 
+      <!--
+        We need to include System.Windows.Forms as a platform assembly even if we don't crossgen it,
+        in some cases.
+      -->
       <WinFormsPlatformDirectory
         Include="%(FilesToPackage.RootDir)%(FilesToPackage.Directory)"
         Condition="'%(FilesToPackage.FileName)' == 'System.Windows.Forms'" />
@@ -227,8 +233,6 @@
         so in case of conflicts, DLLs are found in the framework being crossgenned.
       -->
       <_crossgenPlatformDirectories Include="%(_filesToCrossGen.RootDir)%(_filesToCrossGen.Directory)" />
-      <!-- We need to include System.Windows.Forms as a platform assembly even if we don't crossgen it.-->
-      <_crossgenPlatformDirectories Include="@(WinFormsPlatformDirectory)" />
       <!-- the following path *must* be passed to crossgen as it has the CoreLib.ni.dll, it will not use the IL copy. -->
       <_crossgenPlatformDirectories Include="$(_runtimeDirectory)" />
       <!-- the following need not be passed to crossgen but we do so to be safe. -->
