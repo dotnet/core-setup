@@ -13,6 +13,7 @@ namespace
     int create_context_common(
         const hostpolicy_contract_t &hostpolicy_contract,
         const host_interface_t &host_interface,
+        int32_t initialization_options,
         bool already_loaded,
         /*out*/ corehost_context_contract *hostpolicy_context_contract)
     {
@@ -30,7 +31,7 @@ namespace
 
             if (rc == StatusCode::Success)
             {
-                rc = hostpolicy_contract.initialize(&host_interface, hostpolicy_context_contract);
+                rc = hostpolicy_contract.initialize(&host_interface, initialization_options, hostpolicy_context_contract);
             }
         }
 
@@ -41,11 +42,12 @@ namespace
 int host_context_t::create(
     const hostpolicy_contract_t &hostpolicy_contract,
     corehost_init_t &init,
+    int32_t initialization_options,
     /*out*/ std::unique_ptr<host_context_t> &context)
 {
     const host_interface_t &host_interface = init.get_host_init_data();
     corehost_context_contract hostpolicy_context_contract;
-    int rc = create_context_common(hostpolicy_contract, host_interface, /*already_loaded*/ false, &hostpolicy_context_contract);
+    int rc = create_context_common(hostpolicy_contract, host_interface, initialization_options, /*already_loaded*/ false, &hostpolicy_context_contract);
     if (rc == StatusCode::Success)
     {
         std::unique_ptr<host_context_t> context_local(new host_context_t(host_context_type::initialized, hostpolicy_contract, hostpolicy_context_contract));
@@ -58,11 +60,12 @@ int host_context_t::create(
 int host_context_t::create_secondary(
     const hostpolicy_contract_t &hostpolicy_contract,
     corehost_init_t &init,
+    int32_t initialization_options,
     /*out*/ std::unique_ptr<host_context_t> &context)
 {
     const host_interface_t &host_interface = init.get_host_init_data();
     corehost_context_contract hostpolicy_context_contract;
-    int rc = create_context_common(hostpolicy_contract, host_interface, /*already_loaded*/ true, &hostpolicy_context_contract);
+    int rc = create_context_common(hostpolicy_contract, host_interface, initialization_options, /*already_loaded*/ true, &hostpolicy_context_contract);
     if (rc == StatusCode::CoreHostAlreadyInitialized)
     {
         std::unique_ptr<host_context_t> context_local(new host_context_t(host_context_type::secondary, hostpolicy_contract, hostpolicy_context_contract));

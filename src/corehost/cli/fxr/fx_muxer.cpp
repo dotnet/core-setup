@@ -842,6 +842,7 @@ namespace
     int initialize_context(
         const pal::string_t hostpolicy_dir,
         corehost_init_t &init,
+        int32_t initialize_options,
         /*out*/ std::unique_ptr<host_context_t> &context)
     {
         pal::dll_t corehost;
@@ -855,7 +856,7 @@ namespace
 
         const host_interface_t &host_interface = init.get_host_init_data();
         corehost_context_contract hostpolicy_context_contract;
-        rc = host_context_t::create(hostpolicy_contract, init, context);
+        rc = host_context_t::create(hostpolicy_contract, init, initialize_options, context);
         if (rc != StatusCode::Success)
             handle_initialize_failure(&hostpolicy_contract);
 
@@ -901,7 +902,7 @@ int fx_muxer_t::initialize_for_app(
     }
 
     std::unique_ptr<host_context_t> context;
-    rc = initialize_context(hostpolicy_dir, *init, context);
+    rc = initialize_context(hostpolicy_dir, *init, intialization_options_t::none, context);
     if (rc != StatusCode::Success)
     {
         trace::error(_X("Failed to initialize context for app: %s. Error code: 0x%x"), host_info.app_path.c_str(), rc);
@@ -922,6 +923,7 @@ int fx_muxer_t::initialize_for_runtime_config(
     const pal::char_t * runtime_config_path,
     void** host_context_handle)
 {
+    int32_t initialization_options = intialization_options_t::none;
     const host_context_t *existing_context;
     {
         std::unique_lock<std::mutex> lock{ g_context_lock };
@@ -935,6 +937,10 @@ int fx_muxer_t::initialize_for_runtime_config(
         else if (existing_context->type == host_context_type::invalid)
         {
             return StatusCode::HostInvalidState;
+        }
+        else if (existing_context->type == host_context_type::empty)
+        {
+            initialization_options |= intialization_options_t::wait_for_initialized;
         }
     }
 
@@ -951,7 +957,7 @@ int fx_muxer_t::initialize_for_runtime_config(
         if (rc != StatusCode::Success)
             return rc;
 
-        rc = host_context_t::create_secondary(existing_context->hostpolicy_contract, *init, context);
+        rc = host_context_t::create_secondary(existing_context->hostpolicy_contract, *init, initialization_options, context);
     }
     else
     {
@@ -963,7 +969,7 @@ int fx_muxer_t::initialize_for_runtime_config(
             return rc;
         }
 
-        rc = initialize_context(hostpolicy_dir, *init, context);
+        rc = initialize_context(hostpolicy_dir, *init, initialization_options, context);
     }
 
     if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)

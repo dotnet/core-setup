@@ -115,6 +115,8 @@ namespace
             g_context_initializing.store(true);
         }
 
+        g_context_cv.notify_all();
+
         std::unique_ptr<hostpolicy_context_t> context_local(new hostpolicy_context_t());
         int rc = context_local->initialize(hostpolicy_init, args, breadcrumbs_enabled);
         if (rc != StatusCode::Success)
@@ -539,8 +541,10 @@ namespace
 //      struct containing information about the initialization request. If hostpolicy is not yet initialized
 //      this is ignored. If hostpolicy is already initialized, this function will check this struct for
 //      compatibility with the way in which hostpolicy was previously initialized.
+//    options
+//      initialization options
 //    context_contract
-//      [out] If initialization is successful, populated with a contract for performing operations on hostpolicy
+//      [out] if initialization is successful, populated with a contract for performing operations on hostpolicy
 //
 // Return value:
 //    Success                     - Initialization was succesful
@@ -556,19 +560,52 @@ namespace
 // This function assumes corehost_load has already been called. It uses the init information set through that
 // call - not the struct passed into this function - to create a context.
 //
-SHARED_API int __cdecl corehost_initialize(const host_interface_t *init, /*out*/ corehost_context_contract *context_contract)
+SHARED_API int __cdecl corehost_initialize(const host_interface_t *init, int32_t options, /*out*/ corehost_context_contract *context_contract)
 {
     if (init == nullptr || context_contract == nullptr)
         return StatusCode::InvalidArgFailure;
+
+    bool wait_for_initialized = (options & intialization_options_t::wait_for_initialized) != 0;
+    if (wait_for_initialized)
+    {
+        trace::verbose(_X("Initialization option to wait for initialize request is set"));
+        std::unique_lock<std::mutex> lock{ g_context_lock };
+        bool alrleady_initializing = g_context_initializing.load();
+
+        // If we are not already initializing or done initializing, wait until another context initialization has started
+        if (g_context == nullptr && !alrleady_initializing)
+        {
+            trace::info(_X("Waiting for another request to initialize hostpolicy"));
+            g_context_cv.wait(lock, [&] { return g_context_initializing.load(); });
+        }
+    }
 
     arguments_t args;
     int rc = corehost_libhost_init(g_init, _X("corehost_initialize"), args);
     if (rc != StatusCode::Success)
         return rc;
 
-    rc = create_hostpolicy_context(g_init, args, g_init.host_mode != host_mode_t::libhost);
-    if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
-        return rc;
+    if (wait_for_initialized)
+    {
+        // Wait for context initialization to complete
+        std::unique_lock<std::mutex> lock{ g_context_lock };
+        g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
+
+        const hostpolicy_context_t *existing_context = g_context.get();
+        if (existing_context == nullptr || existing_context->coreclr == nullptr)
+        {
+            trace::info(_X("Option to wait for initialize request was set, but that request did not result in initialization"));
+            return StatusCode::HostInvalidState;
+        }
+
+        rc = StatusCode::CoreHostAlreadyInitialized;
+    }
+    else
+    {
+        rc = create_hostpolicy_context(g_init, args, g_init.host_mode != host_mode_t::libhost);
+        if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
+            return rc;
+    }
 
     if (rc == StatusCode::CoreHostAlreadyInitialized)
     {

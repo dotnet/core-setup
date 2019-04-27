@@ -9,6 +9,12 @@
 
 typedef void* context_handle;
 
+enum intialization_options_t : int32_t
+{
+    none = 0x0,
+    wait_for_initialized = 0x1,  // Wait until initialization through a differnt request is completed
+};
+
 enum class coreclr_delegate_type
 {
     invalid,
