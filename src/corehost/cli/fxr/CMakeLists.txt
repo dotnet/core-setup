@@ -38,6 +38,7 @@ set(SOURCES
 )
 
 set(HEADERS
+    ../corehost_context_contract.h
     ../deps_format.h
     ../deps_entry.h
     ../host_startup_info.h

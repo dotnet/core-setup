@@ -32,9 +32,9 @@ namespace
     // is successfully created and used to load the runtime. There can only be one hostpolicy context.
     std::mutex g_context_lock;
 
-    // Tracks the hostpolicy context. This is the context that will be used to load and initialize coreclr.
-    // It will be set once a context is initialized and updated to hold coreclr once the runtime is loaded.
-    // Once set, it should not be unset.
+    // Tracks the hostpolicy context. This is the one and only hostpolicy context. It represents the information
+    // that hostpolicy will use or has already used to load and initialize coreclr. It will be set once a context
+    //is initialized and updated to hold coreclr once the runtime is loaded.
     std::unique_ptr<hostpolicy_context_t> g_context;
 
     // Tracks whether the hostpolicy context is initializing (from start of creation of the first context
@@ -313,7 +313,7 @@ SHARED_API int corehost_load(host_interface_t* init)
 }
 
 int corehost_init(
-    hostpolicy_init_t &hostpolicy_init,
+    const hostpolicy_init_t &hostpolicy_init,
     const int argc,
     const pal::char_t* argv[],
     const pal::string_t& location,
@@ -421,7 +421,7 @@ SHARED_API int corehost_main_with_output_buffer(const int argc, const pal::char_
     return rc;
 }
 
-int corehost_libhost_init(hostpolicy_init_t &hostpolicy_init, const pal::string_t& location, arguments_t& args)
+int corehost_libhost_init(const hostpolicy_init_t &hostpolicy_init, const pal::string_t& location, arguments_t& args)
 {
     // Host info should always be valid in the delegate scenario
     assert(hostpolicy_init.host_info.is_valid(host_mode_t::libhost));
@@ -554,7 +554,7 @@ namespace
 //
 // This function does not load the runtime
 //
-// If a previous request to initialize hostpolicy was made, but the runtime not yet loaded, this function will
+// If a previous request to initialize hostpolicy was made, but the runtime was not yet loaded, this function will
 // block until the runtime is loaded.
 //
 // This function assumes corehost_load has already been called. It uses the init information set through that
@@ -570,16 +570,18 @@ SHARED_API int __cdecl corehost_initialize(const host_interface_t *init, int32_t
     {
         trace::verbose(_X("Initialization option to wait for initialize request is set"));
         std::unique_lock<std::mutex> lock{ g_context_lock };
-        bool alrleady_initializing = g_context_initializing.load();
+        bool already_initializing = g_context_initializing.load();
 
         // If we are not already initializing or done initializing, wait until another context initialization has started
-        if (g_context == nullptr && !alrleady_initializing)
+        if (g_context == nullptr && !already_initializing)
         {
             trace::info(_X("Waiting for another request to initialize hostpolicy"));
             g_context_cv.wait(lock, [&] { return g_context_initializing.load(); });
         }
     }
 
+    // Trace entry point information and initialize args using previously set init information.
+    // This function does not modify any global state.
     arguments_t args;
     int rc = corehost_libhost_init(g_init, _X("corehost_initialize"), args);
     if (rc != StatusCode::Success)

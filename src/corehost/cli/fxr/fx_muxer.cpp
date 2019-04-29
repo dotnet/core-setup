@@ -121,7 +121,9 @@ static int execute_app(
 
     {
         // Track an empty 'active' context so that host context-based APIs can work properly when
-        // the runtime is loaded through non-host context-based APIs.
+        // the runtime is loaded through non-host context-based APIs. Once set, the context is never
+        // unset. This means that if any error occurs after this point (e.g. with loading the runtime),
+        // the process will be in a corrupted state and loading the runtime again will not be allowed.
         std::lock_guard<std::mutex> lock{ g_context_lock };
         assert(g_active_host_context == nullptr);
         g_active_host_context.reset(new host_context_t(host_context_type::empty, hostpolicy_contract, {}));

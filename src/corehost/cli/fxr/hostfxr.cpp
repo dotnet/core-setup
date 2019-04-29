@@ -422,8 +422,7 @@ namespace
             if (!pal::get_own_module_path(&mod_path))
                 return StatusCode::CoreHostCurHostFindFailure;
 
-            pal::string_t fxr_root = get_directory(get_directory(mod_path));
-            startup_info.dotnet_root = get_directory(get_directory(fxr_root));
+            startup_info.dotnet_root = get_dotnet_root_from_fxr_path(mod_path);
             if (!pal::realpath(&startup_info.dotnet_root))
             {
                 trace::error(_X("Failed to resolve full path of dotnet root [%s]"), startup_info.dotnet_root.c_str());
