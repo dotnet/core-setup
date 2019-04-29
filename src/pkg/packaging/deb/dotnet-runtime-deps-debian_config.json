@@ -35,8 +35,8 @@
         "liblttng-ust0":{},
         "libstdc++6":{},
         "zlib1g":{},
-        "libssl1.0.0" : {},
-        "libicu60": {} 
+        "%SSL_DEPENDENCY_LIST%" : {},
+        "%LIBICU_DEPENDENCY_LIST%": {} 
     },
 
     "debian_ignored_dependencies" : [
