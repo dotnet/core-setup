@@ -625,11 +625,18 @@ SHARED_API int __cdecl corehost_initialize(const host_interface_t *init, int32_t
 
 SHARED_API int corehost_unload()
 {
-    std::lock_guard<std::mutex> lock{ g_context_lock };
-    if (g_context != nullptr)
-        return StatusCode::Success;
+    {
+        std::lock_guard<std::mutex> lock{ g_context_lock };
+        if (g_context != nullptr && g_context->coreclr != nullptr)
+            return StatusCode::Success;
 
-    // Allow re-initializing if runtime has not been loaded
+        // Allow re-initializing if runtime has not been loaded
+        g_context.reset();
+        g_context_initializing.store(false);
+    }
+
+    g_context_cv.notify_all();
+
     std::lock_guard<std::mutex> init_lock{ g_init_lock };
     g_init_done = false;
 

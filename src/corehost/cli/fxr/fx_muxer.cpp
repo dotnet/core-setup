@@ -49,6 +49,19 @@ namespace
     // The condition variable is used to block on and signal changes to this state.
     std::atomic<bool> g_context_initializing(false);
     std::condition_variable g_context_cv;
+
+    void handle_initialize_failure_or_abort(const hostpolicy_contract_t *hostpolicy_contract = nullptr)
+    {
+        {
+            std::lock_guard<std::mutex> lock{ g_context_lock };
+            g_context_initializing.store(false);
+        }
+
+        if (hostpolicy_contract != nullptr && hostpolicy_contract->unload != nullptr)
+            hostpolicy_contract->unload();
+
+        g_context_cv.notify_all();
+    }
 }
 
 template<typename T>
@@ -101,7 +114,10 @@ static int execute_app(
 
     int code = load_hostpolicy(impl_dll_dir, &corehost, hostpolicy_contract, "corehost_main", &host_main);
     if (code != StatusCode::Success)
+    {
+        handle_initialize_failure_or_abort();
         return code;
+    }
 
     {
         // Track an empty 'active' context so that host context-based APIs can work properly when
@@ -826,19 +842,6 @@ namespace
         return StatusCode::Success;
     }
 
-    void handle_initialize_failure(hostpolicy_contract_t *hostpolicy_contract = nullptr)
-    {
-        {
-            std::lock_guard<std::mutex> lock{ g_context_lock };
-            g_context_initializing.store(false);
-        }
-
-        if (hostpolicy_contract != nullptr && hostpolicy_contract->unload != nullptr)
-            hostpolicy_contract->unload();
-
-        g_context_cv.notify_all();
-    }
-
     int initialize_context(
         const pal::string_t hostpolicy_dir,
         corehost_init_t &init,
@@ -851,14 +854,16 @@ namespace
         if (rc != StatusCode::Success)
         {
             trace::error(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, hostpolicy_dir.c_str());
-            return rc;
+        }
+        else
+        {
+            const host_interface_t &host_interface = init.get_host_init_data();
+            corehost_context_contract hostpolicy_context_contract;
+            rc = host_context_t::create(hostpolicy_contract, init, initialize_options, context);
         }
 
-        const host_interface_t &host_interface = init.get_host_init_data();
-        corehost_context_contract hostpolicy_context_contract;
-        rc = host_context_t::create(hostpolicy_contract, init, initialize_options, context);
         if (rc != StatusCode::Success)
-            handle_initialize_failure(&hostpolicy_contract);
+            handle_initialize_failure_or_abort(&hostpolicy_contract);
 
         return rc;
     }
@@ -897,7 +902,7 @@ int fx_muxer_t::initialize_for_app(
         init);
     if (rc != StatusCode::Success)
     {
-        handle_initialize_failure();
+        handle_initialize_failure_or_abort();
         return rc;
     }
 
@@ -965,7 +970,7 @@ int fx_muxer_t::initialize_for_runtime_config(
         rc = get_init_info_for_component(host_info, mode, runtime_config, hostpolicy_dir, init);
         if (rc != StatusCode::Success)
         {
-            handle_initialize_failure();
+            handle_initialize_failure_or_abort();
             return rc;
         }
 
@@ -1062,6 +1067,13 @@ const host_context_t* fx_muxer_t::get_active_host_context()
 
 int fx_muxer_t::close_host_context(host_context_t *context)
 {
+    if (context->type == host_context_type::initialized)
+    {
+        // The first context is being closed without being used to start the runtime
+        assert(g_active_host_context == nullptr);
+        handle_initialize_failure_or_abort(&context->hostpolicy_contract);
+    }
+
     context->close();
 
     // Do not delete the active context.
