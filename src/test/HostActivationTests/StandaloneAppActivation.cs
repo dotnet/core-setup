@@ -320,16 +320,22 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [DllImport("user32.dll")]
         private static extern bool EnumThreadWindows(int dwThreadId, EnumThreadWindowsDelegate plfn, IntPtr lParam);
 
-        private IntPtr WaitForPopupFromProcess(Process process, int timeout = 5000)
+        private IntPtr WaitForPopupFromProcess(Process process, int timeout = 30000)
         {
             IntPtr windowHandle = IntPtr.Zero;
+            StringBuilder diagMessages = new StringBuilder();
             while (timeout > 0)
             {
                 foreach (ProcessThread thread in process.Threads)
                 {
                     // Note we take the last window we find - there really should only be one at most anyway.
                     EnumThreadWindows(thread.Id,
-                        (hWnd, lParam) => { windowHandle = hWnd; return true; }, IntPtr.Zero);
+                        (hWnd, lParam) => {
+                            diagMessages.AppendLine($"Callback for a window {hWnd} on thread {thread.Id}.");
+                            windowHandle = hWnd;
+                            return true;
+                        },
+                        IntPtr.Zero);
                 }
 
                 if (windowHandle != IntPtr.Zero)
@@ -341,6 +347,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 timeout -= 100;
             }
 
+            Assert.True(
+                windowHandle != IntPtr.Zero,
+                $"Waited {timeout} milliseconds for the popup window on process {process.Id}, but none was found." +
+                $"{Environment.NewLine}{diagMessages.ToString()}");
             return windowHandle;
         }
 #else
