@@ -12,7 +12,8 @@ namespace
 
     int create_context_common(
         const hostpolicy_contract_t &hostpolicy_contract,
-        const host_interface_t &host_interface,
+        const host_interface_t *host_interface,
+        const corehost_initialize_request_t *init_request,
         int32_t initialization_options,
         bool already_loaded,
         /*out*/ corehost_context_contract *hostpolicy_context_contract)
@@ -27,11 +28,14 @@ namespace
         {
             propagate_error_writer_t propagate_error_writer_to_corehost(hostpolicy_contract.set_error_writer);
             if (!already_loaded)
-                rc = hostpolicy_contract.load(&host_interface);
+            {
+                assert (host_interface != nullptr);
+                rc = hostpolicy_contract.load(host_interface);
+            }
 
             if (rc == StatusCode::Success)
             {
-                rc = hostpolicy_contract.initialize(&host_interface, initialization_options, hostpolicy_context_contract);
+                rc = hostpolicy_contract.initialize(init_request, initialization_options, hostpolicy_context_contract);
             }
         }
 
@@ -47,7 +51,7 @@ int host_context_t::create(
 {
     const host_interface_t &host_interface = init.get_host_init_data();
     corehost_context_contract hostpolicy_context_contract;
-    int rc = create_context_common(hostpolicy_contract, host_interface, initialization_options, /*already_loaded*/ false, &hostpolicy_context_contract);
+    int rc = create_context_common(hostpolicy_contract, &host_interface, nullptr, initialization_options, /*already_loaded*/ false, &hostpolicy_context_contract);
     if (rc == StatusCode::Success)
     {
         std::unique_ptr<host_context_t> context_local(new host_context_t(host_context_type::initialized, hostpolicy_contract, hostpolicy_context_contract));
@@ -59,17 +63,31 @@ int host_context_t::create(
 
 int host_context_t::create_secondary(
     const hostpolicy_contract_t &hostpolicy_contract,
-    corehost_init_t &init,
+    std::unordered_map<pal::string_t, pal::string_t> &config_properties,
     int32_t initialization_options,
     /*out*/ std::unique_ptr<host_context_t> &context)
 {
-    const host_interface_t &host_interface = init.get_host_init_data();
+    std::vector<const pal::char_t*> config_keys;
+    std::vector<const pal::char_t*> config_values;
+    for (auto &kv : config_properties)
+    {
+        config_keys.push_back(kv.first.c_str());
+        config_values.push_back(kv.second.c_str());
+    }
+
+    corehost_initialize_request_t init_request;
+    init_request.version = sizeof(corehost_initialize_request_t);
+    init_request.config_keys.len = config_keys.size();
+    init_request.config_keys.arr = config_keys.data();
+    init_request.config_values.len = config_values.size();
+    init_request.config_values.arr = config_values.data();
+
     corehost_context_contract hostpolicy_context_contract;
-    int rc = create_context_common(hostpolicy_contract, host_interface, initialization_options, /*already_loaded*/ true, &hostpolicy_context_contract);
+    int rc = create_context_common(hostpolicy_contract, nullptr, &init_request, initialization_options, /*already_loaded*/ true, &hostpolicy_context_contract);
     if (rc == StatusCode::CoreHostAlreadyInitialized)
     {
         std::unique_ptr<host_context_t> context_local(new host_context_t(host_context_type::secondary, hostpolicy_contract, hostpolicy_context_contract));
-        init.get_runtime_properties(context_local->config_properties);
+        context_local->config_properties = config_properties;
         context = std::move(context_local);
     }
 

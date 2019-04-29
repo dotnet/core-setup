@@ -537,10 +537,11 @@ namespace
 // that information
 //
 // Parameters:
-//    init
-//      struct containing information about the initialization request. If hostpolicy is not yet initialized
-//      this is ignored. If hostpolicy is already initialized, this function will check this struct for
-//      compatibility with the way in which hostpolicy was previously initialized.
+//    init_request
+//      struct containing information about the initialization request. If hostpolicy is not yet initialized,
+//      this is expected to be nullptr. If hostpolicy is already initialized, this should not be nullptr and
+//      this function will use the struct to check for compatibility with the way in which hostpolicy was
+//      previously initialized.
 //    options
 //      initialization options
 //    context_contract
@@ -560,23 +561,47 @@ namespace
 // This function assumes corehost_load has already been called. It uses the init information set through that
 // call - not the struct passed into this function - to create a context.
 //
-SHARED_API int __cdecl corehost_initialize(const host_interface_t *init, int32_t options, /*out*/ corehost_context_contract *context_contract)
+SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *init_request, int32_t options, /*out*/ corehost_context_contract *context_contract)
 {
-    if (init == nullptr || context_contract == nullptr)
+    if (context_contract == nullptr)
         return StatusCode::InvalidArgFailure;
 
     bool wait_for_initialized = (options & intialization_options_t::wait_for_initialized) != 0;
-    if (wait_for_initialized)
-    {
-        trace::verbose(_X("Initialization option to wait for initialize request is set"));
-        std::unique_lock<std::mutex> lock{ g_context_lock };
-        bool already_initializing = g_context_initializing.load();
 
-        // If we are not already initializing or done initializing, wait until another context initialization has started
-        if (g_context == nullptr && !already_initializing)
+    {
+        std::unique_lock<std::mutex> lock { g_context_lock };
+        bool already_initializing = g_context_initializing.load();
+        bool already_initialized = g_context.get() != nullptr;
+
+        if (wait_for_initialized)
         {
-            trace::info(_X("Waiting for another request to initialize hostpolicy"));
-            g_context_cv.wait(lock, [&] { return g_context_initializing.load(); });
+            trace::verbose(_X("Initialization option to wait for initialize request is set"));
+            if (init_request == nullptr)
+            {
+                trace::error(_X("Initialization request is expected to be non-null when waiting for initialize request option is set"));
+                return StatusCode::InvalidArgFailure;
+            }
+
+            // If we are not already initializing or done initializing, wait until another context initialization has started
+            if (!already_initialized && !already_initializing)
+            {
+                trace::info(_X("Waiting for another request to initialize hostpolicy"));
+                g_context_cv.wait(lock, [&] { return g_context_initializing.load(); });
+            }
+        }
+        else
+        {
+            if (init_request != nullptr && !already_initialized && !already_initializing)
+            {
+                trace::error(_X("Initialization request is expected to be null for the first initialization request"));
+                return StatusCode::InvalidArgFailure;
+            }
+
+            if (init_request == nullptr && (already_initializing || already_initialized))
+            {
+                trace::error(_X("Initialization request is expected to be non-null for requests other than the first one"));
+                return StatusCode::InvalidArgFailure;
+            }
         }
     }
 

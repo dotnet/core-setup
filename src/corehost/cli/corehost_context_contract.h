@@ -5,9 +5,20 @@
 #ifndef __COREHOST_CONTEXT_CONTRACT_H__
 #define __COREHOST_CONTEXT_CONTRACT_H__
 
+#include "host_interface.h"
 #include <pal.h>
 
-typedef void* context_handle;
+#pragma pack(push, _HOST_INTERFACE_PACK)
+struct corehost_initialize_request_t
+{
+    size_t version;
+    strarr_t config_keys;
+    strarr_t config_values;
+};
+#pragma pack(pop)
+static_assert(offsetof(corehost_initialize_request_t, version) == 0 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_initialize_request_t, config_keys) == 1 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_initialize_request_t, config_values) == 3 * sizeof(size_t), "Struct offset breaks backwards compatibility");
 
 enum intialization_options_t : int32_t
 {

@@ -814,19 +814,16 @@ namespace
         host_mode_t mode,
         pal::string_t &runtime_config_path,
         const host_context_t *existing_context,
-        /*out*/ std::unique_ptr<corehost_init_t> &init)
+        /*out*/ std::unordered_map<pal::string_t, pal::string_t> &config_properties)
     {
         // Read config
-        fx_definition_vector_t fx_definitions;
-        auto app = new fx_definition_t();
-        fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
-
+        fx_definition_t app;
         const runtime_config_t::settings_t override_settings;
-        int rc = read_config(*app, host_info.app_path, runtime_config_path, override_settings);
+        int rc = read_config(app, host_info.app_path, runtime_config_path, override_settings);
         if (rc != StatusCode::Success)
             return rc;
 
-        const runtime_config_t app_config = app->get_runtime_config();
+        const runtime_config_t app_config = app.get_runtime_config();
         bool is_framework_dependent = app_config.get_is_framework_dependent();
         if (!app_config.get_is_framework_dependent())
         {
@@ -836,11 +833,7 @@ namespace
 
         // [TODO] Validate the current context is acceptable for this request (frameworks)
 
-        const pal::string_t deps_file;
-        const pal::string_t additional_deps_serialized;
-        const std::vector<pal::string_t> probe_realpaths;
-        init.reset(new corehost_init_t(pal::string_t{}, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions));
-
+        app_config.combine_properties(config_properties);
         return StatusCode::Success;
     }
 
@@ -956,19 +949,20 @@ int fx_muxer_t::initialize_for_runtime_config(
     int rc;
     host_mode_t mode = host_mode_t::libhost;
     pal::string_t runtime_config = runtime_config_path;
-    std::unique_ptr<corehost_init_t> init;
     std::unique_ptr<host_context_t> context;
     if (already_initialized)
     {
-        rc = get_init_info_for_secondary_component(host_info, mode, runtime_config, existing_context, init);
+        std::unordered_map<pal::string_t, pal::string_t> config_properties;
+        rc = get_init_info_for_secondary_component(host_info, mode, runtime_config, existing_context, config_properties);
         if (rc != StatusCode::Success)
             return rc;
 
-        rc = host_context_t::create_secondary(existing_context->hostpolicy_contract, *init, initialization_options, context);
+        rc = host_context_t::create_secondary(existing_context->hostpolicy_contract, config_properties, initialization_options, context);
     }
     else
     {
         pal::string_t hostpolicy_dir;
+        std::unique_ptr<corehost_init_t> init;
         rc = get_init_info_for_component(host_info, mode, runtime_config, hostpolicy_dir, init);
         if (rc != StatusCode::Success)
         {
