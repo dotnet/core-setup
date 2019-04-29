@@ -15,6 +15,7 @@ namespace fxr_resolver
 {
     bool try_get_path(const pal::string_t& root_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path);
     bool try_get_existing_fxr(pal::dll_t *out_fxr, pal::string_t *out_fxr_path);
+    pal::string_t dotnet_root_from_fxr_path(const pal::string_t &fxr_path);
 }
 
 template<typename THostNameToAppNameCallback, typename TDelegate>
@@ -33,16 +34,7 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostNameToAppNameCall
     pal::string_t fxr_path;
     if (fxr_resolver::try_get_existing_fxr(&fxr, &fxr_path))
     {
-        if (coreclr_exists_in_dir(fxr_path))
-        {
-            dotnet_root = get_directory(fxr_path);
-        }
-        else
-        {
-            pal::string_t fxr_root = get_directory(get_directory(fxr_path));
-            dotnet_root = get_directory(get_directory(fxr_root));
-        }
-
+        dotnet_root = fxr_resolver::dotnet_root_from_fxr_path(fxr_path);
         trace::verbose(_X("The library %s was already loaded. Reusing the previously loaded library [%s]."), LIBFXR_NAME, fxr_path.c_str());
     }
     else
