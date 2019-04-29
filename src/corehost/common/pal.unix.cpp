@@ -95,7 +95,7 @@ namespace
             if (sscanf(line, "%*p-%*p %*[-rwxsp] %*p %*[:0-9a-f] %*d %s\n", buf) == 1)
             {
                 path_local = buf;
-                size_t pos = path_local.find(DIR_SEPARATOR);
+                size_t pos = path_local.rfind(DIR_SEPARATOR);
                 if (pos == std::string::npos)
                     continue;
 
