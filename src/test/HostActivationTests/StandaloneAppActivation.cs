@@ -324,7 +324,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         {
             IntPtr windowHandle = IntPtr.Zero;
             StringBuilder diagMessages = new StringBuilder();
-            while (timeout > 0)
+
+            int longTimeout = timeout * 3;
+            int timeRemaining = longTimeout;
+            while (timeRemaining > 0)
             {
                 foreach (ProcessThread thread in process.Threads)
                 {
@@ -344,13 +347,19 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 }
 
                 Thread.Sleep(100);
-                timeout -= 100;
+                timeRemaining -= 100;
             }
 
             Assert.True(
                 windowHandle != IntPtr.Zero,
-                $"Waited {timeout} milliseconds for the popup window on process {process.Id}, but none was found." +
+                $"Waited {longTimeout} milliseconds for the popup window on process {process.Id}, but none was found." +
                 $"{Environment.NewLine}{diagMessages.ToString()}");
+
+            Assert.True(
+                timeRemaining > (longTimeout - timeout),
+                $"Waited {longTimeout - timeRemaining} milliseconds for the popup window on process {process.Id}. " +
+                $"It did show and was detected as HWND {windowHandle}, but it took too long. Consider extending the timeout period for this test.");
+
             return windowHandle;
         }
 #else
