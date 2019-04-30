@@ -29,4 +29,12 @@ enum class roll_forward_option
 pal::string_t roll_forward_option_to_string(roll_forward_option roll_forward);
 roll_forward_option roll_forward_option_from_string(const pal::string_t& value);
 
+enum class version_range_option
+{
+    exact = 0,
+    patch = 1,
+    minor = 2,
+    major = 3
+};
+
 #endif // __ROLL_FORWARD_OPTION_H_

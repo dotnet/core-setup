@@ -23,14 +23,12 @@ namespace
     {
         fx_ver_t best_match_version;
 
-        if (fx_ref.get_roll_forward() > roll_forward_option::LatestPatch)
+        if (fx_ref.get_version_range() > version_range_option::patch)
         {
-            bool search_for_latest = fx_ref.get_roll_forward() == roll_forward_option::LatestMinor || fx_ref.get_roll_forward() == roll_forward_option::LatestMajor;
-
             trace::verbose(
-                _X("'Roll forward' enabled with value [%d]. Looking for the %s %s greater than or equal version to [%s]"),
-                fx_ref.get_roll_forward(),
-                search_for_latest ? _X("latest") : _X("least"),
+                _X("'Roll forward' enabled with version range [%d]. Looking for the %s %s greater than or equal version to [%s]"),
+                fx_ref.get_version_range(), // TODO - to string
+                fx_ref.get_roll_to_highest_version() ? _X("highest") : _X("lowest"),
                 release_only ? _X("release") : _X("release/pre-release"),
                 fx_ref.get_fx_version().c_str());
 
@@ -38,25 +36,15 @@ namespace
             {
                 if ((!release_only || !ver.is_prerelease()) && ver >= fx_ref.get_fx_version_number())
                 {
-                    if (fx_ref.get_roll_forward() <= roll_forward_option::LatestMinor)
+                    if (fx_ref.get_version_range() <= version_range_option::minor &&
+                        ver.get_major() != fx_ref.get_fx_version_number().get_major())
                     {
-                        if (ver.get_major() != fx_ref.get_fx_version_number().get_major())
-                        {
-                            continue;
-                        }
-
-                        if (fx_ref.get_roll_forward() <= roll_forward_option::LatestPatch)
-                        {
-                            if (ver.get_minor() != fx_ref.get_fx_version_number().get_minor())
-                            {
-                                continue;
-                            }
-                        }
+                        continue;
                     }
 
                     best_match_version = (best_match_version == fx_ver_t())
                         ? ver
-                        : (search_for_latest ? std::max(best_match_version, ver) : std::min(best_match_version, ver));
+                        : (fx_ref.get_roll_to_highest_version() ? std::max(best_match_version, ver) : std::min(best_match_version, ver));
                 }
             }
 
@@ -89,9 +77,7 @@ namespace
         //   For backward compatibility reasons the apply_patches for pre-release framework reference only applies to the patch portion of the version,
         //     the pre-release portion of the version ignores apply_patches and we should roll to the latest (100% backward would roll to closest, but for consistency
         //     in the new behavior we will roll to latest).
-        if ((fx_ref.get_roll_forward() == roll_forward_option::LatestPatch ||
-             fx_ref.get_roll_forward() == roll_forward_option::Minor ||
-             fx_ref.get_roll_forward() == roll_forward_option::Major)
+        if ((fx_ref.get_version_range() >= version_range_option::patch && !fx_ref.get_roll_to_highest_version())
             && (fx_ref.get_apply_patches() || fx_ref.get_fx_version_number().is_prerelease()))
         {
             fx_ver_t apply_patch_from_version = start_with_version;
@@ -143,10 +129,11 @@ namespace
         const fx_reference_t& fx_ref)
     {
         trace::verbose(
-            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, roll_forward=%s, prefer_release=%d"),
+            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, version_range=%d, roll_to_highest_version=%d, prefer_release=%d"),
             fx_ref.get_fx_version().c_str(),
             fx_ref.get_apply_patches(),
-            roll_forward_option_to_string(fx_ref.get_roll_forward()).c_str(),
+            fx_ref.get_version_range(), // TODO -> to string
+            fx_ref.get_roll_to_highest_version(),
             fx_ref.get_prefer_release());
 
         // If the framework reference prefers release, then search for release versions only first.
@@ -223,13 +210,13 @@ namespace
             //     apply_patches is false AND
             //     release framework reference (this is for backward compat with pre-release rolling over pre-release portion of version ignoring apply_patches)
             //   use exact version is set (this is when --fx-version was used on the command line)
-            if ((fx_ref.get_roll_forward() == roll_forward_option::Disable) ||
-                ((fx_ref.get_roll_forward() == roll_forward_option::LatestPatch) && (!fx_ref.get_apply_patches() && !fx_ref.get_fx_version_number().is_prerelease())))
+            if ((fx_ref.get_version_range() == version_range_option::exact) ||
+                ((fx_ref.get_version_range() == version_range_option::patch) && (!fx_ref.get_apply_patches() && !fx_ref.get_fx_version_number().is_prerelease())))
             {
                 trace::verbose(
-                    _X("Did not roll forward because apply_patches=%d, roll_forward=%s chose [%s]"),
+                    _X("Did not roll forward because apply_patches=%d, version_range=%d chose [%s]"),
                     fx_ref.get_apply_patches(),
-                    roll_forward_option_to_string(fx_ref.get_roll_forward()).c_str(),
+                    fx_ref.get_version_range(), // TODO -> to string
                     fx_ref.get_fx_version().c_str());
 
                 append_path(&fx_dir, fx_ref.get_fx_version().c_str());

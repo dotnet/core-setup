@@ -15,7 +15,8 @@ class fx_reference_t
 public:
     fx_reference_t()
         : apply_patches(true)
-        , roll_forward(roll_forward_option::Minor)
+        , version_range(version_range_option::minor)
+        , roll_to_highest_version(false)
         , prefer_release(false)
         , fx_name(_X(""))
         , fx_version(_X(""))
@@ -56,13 +57,53 @@ public:
         apply_patches = value;
     }
 
-    roll_forward_option get_roll_forward() const
+    version_range_option get_version_range() const
     {
-        return roll_forward;
+        return version_range;
     }
+    void set_version_range(version_range_option value)
+    {
+        version_range = value;
+    }
+
     void set_roll_forward(roll_forward_option value)
     {
-        roll_forward = value;
+        switch (value)
+        {
+        case roll_forward_option::Disable:
+            version_range = version_range_option::exact;
+            roll_to_highest_version = false;
+            break;
+        case roll_forward_option::LatestPatch:
+            version_range = version_range_option::patch;
+            roll_to_highest_version = false;
+            break;
+        case roll_forward_option::Minor:
+            version_range = version_range_option::minor;
+            roll_to_highest_version = false;
+            break;
+        case roll_forward_option::LatestMinor:
+            version_range = version_range_option::minor;
+            roll_to_highest_version = true;
+            break;
+        case roll_forward_option::Major:
+            version_range = version_range_option::major;
+            roll_to_highest_version = false;
+            break;
+        case roll_forward_option::LatestMajor:
+            version_range = version_range_option::major;
+            roll_to_highest_version = true;
+            break;
+        }
+    }
+
+    bool get_roll_to_highest_version() const
+    {
+        return roll_to_highest_version;
+    }
+    void set_roll_to_highest_version(bool value)
+    {
+        roll_to_highest_version = value;
     }
 
     bool get_prefer_release() const
@@ -86,7 +127,8 @@ public:
             fx_name == other.fx_name &&
             fx_version == other.fx_version &&
             apply_patches == other.apply_patches &&
-            roll_forward == other.roll_forward &&
+            version_range == other.version_range &&
+            roll_to_highest_version == other.roll_to_highest_version &&
             prefer_release == other.prefer_release;
     }
 
@@ -98,7 +140,8 @@ public:
 private:
     bool apply_patches;
 
-    roll_forward_option roll_forward;
+    version_range_option version_range;
+    bool roll_to_highest_version;
 
     // This indicates that when resolving the framework reference the search should prefer release version
     // and only resolve to pre-release if there's no matching release version available.
