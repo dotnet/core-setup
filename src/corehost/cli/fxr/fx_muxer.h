@@ -30,11 +30,11 @@ public:
         const host_startup_info_t& host_info,
         int argc,
         const pal::char_t* argv[],
-        void** host_context_handle);
+        hostfxr_handle *host_context_handle);
     static int initialize_for_runtime_config(
         const host_startup_info_t& host_info,
         const pal::char_t * runtime_config_path,
-        void** host_context_handle);
+        hostfxr_handle *host_context_handle);
     static int run_app(host_context_t *context);
     static int get_runtime_delegate(
         host_context_t *context,

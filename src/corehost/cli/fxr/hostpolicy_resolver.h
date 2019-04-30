@@ -31,7 +31,7 @@ namespace hostpolicy_resolver
 {
     int load(
         const pal::string_t& lib_dir,
-        pal::dll_t* h_host,
+        pal::dll_t* dll,
         hostpolicy_contract_t &hostpolicy_contract);
     bool try_get_dir(
         host_mode_t mode,

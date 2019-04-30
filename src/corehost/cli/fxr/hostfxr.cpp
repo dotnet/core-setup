@@ -560,7 +560,7 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_runtime_config(
 //       Handle to the initialized host context
 //
 // Return value:
-//     The error code result.
+//     If the app was successfully run, the exit code of the application. Otherwise, the error code result.
 //
 // The host_context_handle must have been initialized using hostfxr_initialize_for_app.
 //
@@ -620,7 +620,9 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_delegate(
     if (delegate == nullptr)
         return StatusCode::InvalidArgFailure;
 
-   host_context_t *context = host_context_t::from_handle(host_context_handle);
+    *delegate = nullptr;
+
+    host_context_t *context = host_context_t::from_handle(host_context_handle);
     if (context == nullptr)
         return StatusCode::InvalidArgFailure;
 
@@ -688,7 +690,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
             return StatusCode::HostPropertyNotFound;
 
         *value = (*iter).second.c_str();
-        return S_OK;
+        return StatusCode::Success;
     }
 
     assert(context->type == host_context_type::initialized || context->type == host_context_type::active);
@@ -725,7 +727,7 @@ SHARED_API int32_t __cdecl hostfxr_set_runtime_property_value(
     if (name == nullptr)
         return StatusCode::InvalidArgFailure;
 
-   host_context_t *context = host_context_t::from_handle(host_context_handle);
+    host_context_t *context = host_context_t::from_handle(host_context_handle);
     if (context == nullptr)
         return StatusCode::InvalidArgFailure;
 
@@ -800,11 +802,10 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
     {
         const std::unordered_map<pal::string_t, pal::string_t> &properties = context->config_properties;
         size_t actualCount = properties.size();
-        if (*count < actualCount || keys == nullptr || values == nullptr)
-        {
-            *count = actualCount;
+        size_t input_count = *count;
+        *count = actualCount;
+        if (input_count < actualCount || keys == nullptr || values == nullptr)
             return StatusCode::HostApiBufferTooSmall;
-        }
 
         int i = 0;
         for (const auto& kv : properties)

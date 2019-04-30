@@ -42,25 +42,29 @@ namespace
 
     // Tracks the active host context. This is the context that was used to load and initialize hostpolicy and coreclr.
     // It will only be set once both hostpolicy and coreclr are loaded and initialized. Once set, it should not be changed.
+    // This will remain set even if the context is closed through hostfxr_close. Since the context represents the active
+    // CoreCLR runtime and the active runtime cannot be unloaded, the active context is never unset.
     std::unique_ptr<const host_context_t> g_active_host_context;
 
-    // Tracks whether the host context is initializing (from creation of the first context to loading the runtime).
+    // Tracks whether the first host context is initializing (from creation of the first context to loading the runtime).
     // Initialization of other contexts should block if the first context is initializing (i.e. this is true).
     // The condition variable is used to block on and signal changes to this state.
     std::atomic<bool> g_context_initializing(false);
-    std::condition_variable g_context_cv;
+    std::condition_variable g_context_initializing_cv;
 
     void handle_initialize_failure_or_abort(const hostpolicy_contract_t *hostpolicy_contract = nullptr)
     {
         {
             std::lock_guard<std::mutex> lock{ g_context_lock };
+            assert(g_context_initializing.load());
+            assert(g_active_host_context == nullptr);
             g_context_initializing.store(false);
         }
 
         if (hostpolicy_contract != nullptr && hostpolicy_contract->unload != nullptr)
             hostpolicy_contract->unload();
 
-        g_context_cv.notify_all();
+        g_context_initializing_cv.notify_all();
     }
 }
 
@@ -97,7 +101,7 @@ static int execute_app(
 {
     {
         std::unique_lock<std::mutex> lock{ g_context_lock };
-        g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
+        g_context_initializing_cv.wait(lock, [] { return !g_context_initializing.load(); });
 
         if (g_active_host_context != nullptr)
         {
@@ -108,11 +112,11 @@ static int execute_app(
         g_context_initializing.store(true);
     }
 
-    pal::dll_t corehost;
+    pal::dll_t hostpolicy_dll;
     hostpolicy_contract_t hostpolicy_contract{};
     corehost_main_fn host_main = nullptr;
 
-    int code = load_hostpolicy(impl_dll_dir, &corehost, hostpolicy_contract, "corehost_main", &host_main);
+    int code = load_hostpolicy(impl_dll_dir, &hostpolicy_dll, hostpolicy_contract, "corehost_main", &host_main);
     if (code != StatusCode::Success)
     {
         handle_initialize_failure_or_abort();
@@ -130,7 +134,7 @@ static int execute_app(
         g_context_initializing.store(false);
     }
 
-    g_context_cv.notify_all();
+    g_context_initializing_cv.notify_all();
 
     {
         propagate_error_writer_t propagate_error_writer_to_corehost(hostpolicy_contract.set_error_writer);
@@ -862,14 +866,14 @@ namespace
 }
 
 int fx_muxer_t::initialize_for_app(
-    const host_startup_info_t& host_info,
+    const host_startup_info_t &host_info,
     int argc,
     const pal::char_t* argv[],
-    void** host_context_handle)
+    hostfxr_handle *host_context_handle)
 {
     {
         std::unique_lock<std::mutex> lock{ g_context_lock };
-        g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
+        g_context_initializing_cv.wait(lock, [] { return !g_context_initializing.load(); });
 
         if (g_active_host_context != nullptr)
         {
@@ -916,15 +920,15 @@ int fx_muxer_t::initialize_for_app(
 }
 
 int fx_muxer_t::initialize_for_runtime_config(
-    const host_startup_info_t& host_info,
-    const pal::char_t * runtime_config_path,
-    void** host_context_handle)
+    const host_startup_info_t &host_info,
+    const pal::char_t *runtime_config_path,
+    hostfxr_handle *host_context_handle)
 {
     int32_t initialization_options = intialization_options_t::none;
     const host_context_t *existing_context;
     {
         std::unique_lock<std::mutex> lock{ g_context_lock };
-        g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
+        g_context_initializing_cv.wait(lock, [] { return !g_context_initializing.load(); });
 
         existing_context = g_active_host_context.get();
         if (existing_context == nullptr)
@@ -1004,7 +1008,7 @@ namespace
             g_context_initializing.store(false);
         }
 
-        g_context_cv.notify_all();
+        g_context_initializing_cv.notify_all();
         return rc;
     }
 }

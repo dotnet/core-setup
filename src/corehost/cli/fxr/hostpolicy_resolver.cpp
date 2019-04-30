@@ -16,6 +16,7 @@ namespace
     std::mutex g_hostpolicy_lock;
     pal::dll_t g_hostpolicy;
     hostpolicy_contract_t g_hostpolicy_contract;
+    pal::string_t g_hostpolicy_dir;
 
     /**
     * Resolve the hostpolicy version from deps.
@@ -189,7 +190,7 @@ namespace
 
 int hostpolicy_resolver::load(
     const pal::string_t& lib_dir,
-    pal::dll_t* h_host,
+    pal::dll_t* dll,
     hostpolicy_contract_t &hostpolicy_contract)
 {
     std::lock_guard<std::mutex> lock{ g_hostpolicy_lock };
@@ -221,10 +222,17 @@ int hostpolicy_resolver::load(
         // introduced in 3.0, so 2.0 hostpolicy would not have the exports. In this case, we will
         // not propagate the error writer and errors will still be reported to stderr. Callers are
         // responsible for checking that the function pointers are not null before using them.
+
+        g_hostpolicy_dir = lib_dir;
+    }
+    else
+    {
+        if (!pal::are_paths_equal_with_normalized_casing(g_hostpolicy_dir, lib_dir))
+            trace::warning(_X("The library %s was already loaded from [%s]. Reusing the existing library for the request to load from [%s]"), LIBHOSTPOLICY_NAME, g_hostpolicy_dir.c_str(), lib_dir.c_str());
     }
 
     // Return global values
-    *h_host = g_hostpolicy;
+    *dll = g_hostpolicy;
     hostpolicy_contract = g_hostpolicy_contract;
 
     return StatusCode::Success;

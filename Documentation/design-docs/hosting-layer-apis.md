@@ -20,7 +20,9 @@ int hostfxr_main(const int argc, const char_t *argv[])
 Run an application.
 * `argc` / `argv` - command-line arguments
 
-This function does not return until the application completes execution.
+This function does not return until the application completes execution. It will shutdown CoreCLR after the application executes.
+
+If the application is successfully executed, this value will return the exit code of the application. Otherwise, it will return an error code indicating the failure.
 
 ### .NET Core 2.0+
 
@@ -51,7 +53,9 @@ Run an application.
 * `dotnet_root` - path to the .NET Core installation root
 * `app_path` - path to the application to run
 
-This function does not return until the application completes execution.
+This function does not return until the application completes execution. It will shutdown CoreCLR after the application executes.
+
+If the application is successfully executed, this value will return the exit code of the application. Otherwise, it will return an error code indicating the failure.
 
 ``` C
 enum hostfxr_resolve_sdk2_flags_t
@@ -222,6 +226,8 @@ Run the application specified by `hostfxr_initialize_for_app`.
 
 This function does not return until the application completes execution. It will shutdown CoreCLR after the application executes.
 
+If the application is successfully executed, this value will return the exit code of the application. Otherwise, it will return an error code indicating the failure.
+
 See [Native hosting](native-hosting.md#runtime-properties)
 
 ``` C
@@ -265,6 +271,8 @@ Run an application.
 * `argc` / `argv` - command-line arguments
 
 This function does not return until the application completes execution. It will shutdown CoreCLR after the application executes.
+
+If the application is successfully executed, this value will return the exit code of the application. Otherwise, it will return an error code indicating the failure.
 
 ``` C
 int corehost_unload()
@@ -372,9 +380,17 @@ Contract for performing operations on an initialized hostpolicy.
   * `delegate` - function pointer to the requested runtime functionality
 
 ``` C
-int corehost_initialize(const host_interface_t *init, corehost_context_contract *context_contract)
+enum intialization_options_t
+{
+    none = 0x0,
+    wait_for_initialized = 0x1,
+};
+
+int corehost_initialize(const corehost_initialize_request_t *init_request, int32_t options, corehost_context_contract *context_contract)
 ```
 
 Initializes the host context. This calculates everything required to start CoreCLR (but does not actually do so).
-* `init` - struct defining how the host context should be initialized. If the host context is already initialized, this function will check if `init` is compatible with the active context.
+* `init_request` - struct containing information about the initialization request. If hostpolicy is not yet initialized, this is expected to be nullptr. If hostpolicy is already initialized, this should not be nullptr and this function will use the struct to check for compatibility with the way in which hostpolicy was previously initialized.
+* `options` - initialization options
+  * `wait_for_initialized` - wait until initialization through a different request is completed
 * `context_contract` - if initialization is successful, this is populated with the contract for operating on the initialized host context.

@@ -8,22 +8,10 @@
 #include "host_interface.h"
 #include <pal.h>
 
-#pragma pack(push, _HOST_INTERFACE_PACK)
-struct corehost_initialize_request_t
-{
-    size_t version;
-    strarr_t config_keys;
-    strarr_t config_values;
-};
-#pragma pack(pop)
-static_assert(offsetof(corehost_initialize_request_t, version) == 0 * sizeof(size_t), "Struct offset breaks backwards compatibility");
-static_assert(offsetof(corehost_initialize_request_t, config_keys) == 1 * sizeof(size_t), "Struct offset breaks backwards compatibility");
-static_assert(offsetof(corehost_initialize_request_t, config_values) == 3 * sizeof(size_t), "Struct offset breaks backwards compatibility");
-
 enum intialization_options_t : int32_t
 {
     none = 0x0,
-    wait_for_initialized = 0x1,  // Wait until initialization through a differnt request is completed
+    wait_for_initialized = 0x1,  // Wait until initialization through a different request is completed
 };
 
 enum class coreclr_delegate_type
@@ -33,6 +21,17 @@ enum class coreclr_delegate_type
     load_in_memory_assembly,
     winrt_activation
 };
+
+#pragma pack(push, _HOST_INTERFACE_PACK)
+struct corehost_initialize_request_t
+{
+    size_t version;
+    strarr_t config_keys;
+    strarr_t config_values;
+};
+static_assert(offsetof(corehost_initialize_request_t, version) == 0 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_initialize_request_t, config_keys) == 1 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_initialize_request_t, config_values) == 3 * sizeof(size_t), "Struct offset breaks backwards compatibility");
 
 struct corehost_context_contract
 {
@@ -55,5 +54,13 @@ struct corehost_context_contract
         coreclr_delegate_type type,
         /*out*/ void** delegate);
 };
+static_assert(offsetof(corehost_context_contract, version) == 0 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_context_contract, get_property_value) == 1 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_context_contract, set_property_value) == 2 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_context_contract, get_properties) == 3 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_context_contract, load_runtime) == 4 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_context_contract, run_app) == 5 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+static_assert(offsetof(corehost_context_contract, get_runtime_delegate) == 6 * sizeof(size_t), "Struct offset breaks backwards compatibility");
+#pragma pack(pop)
 
 #endif // __COREHOST_CONTEXT_CONTRACT_H__
