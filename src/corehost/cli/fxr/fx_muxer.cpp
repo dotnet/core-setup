@@ -824,7 +824,6 @@ namespace
             return rc;
 
         const runtime_config_t app_config = app.get_runtime_config();
-        bool is_framework_dependent = app_config.get_is_framework_dependent();
         if (!app_config.get_is_framework_dependent())
         {
             trace::error(_X("Initialization for self-contained components is not supported"));
@@ -852,8 +851,6 @@ namespace
         }
         else
         {
-            const host_interface_t &host_interface = init.get_host_init_data();
-            corehost_context_contract hostpolicy_context_contract;
             rc = host_context_t::create(hostpolicy_contract, init, initialize_options, context);
         }
 

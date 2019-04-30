@@ -83,7 +83,11 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
     rc = hostfxr_get_runtime_delegate(context, type, reinterpret_cast<void**>(delegate));
 
     int rcClose = hostfxr_close(context);
-    assert(rcClose == StatusCode::Success);
+    if (rcClose != StatusCode::Success)
+    {
+        assert(false && "Failed to close host context");
+        trace::verbose(_X("Failed to close host context: 0x%x"), rcClose);
+    }
 
     return rc;
 }
