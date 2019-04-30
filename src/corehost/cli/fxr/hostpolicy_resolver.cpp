@@ -209,13 +209,13 @@ int hostpolicy_resolver::load(
         }
 
         // Obtain entrypoint symbols
-        g_hostpolicy_contract.load = (corehost_load_fn)pal::get_symbol(g_hostpolicy, "corehost_load");
-        g_hostpolicy_contract.unload = (corehost_unload_fn)pal::get_symbol(g_hostpolicy, "corehost_unload");
+        g_hostpolicy_contract.load = reinterpret_cast<corehost_load_fn>(pal::get_symbol(g_hostpolicy, "corehost_load"));
+        g_hostpolicy_contract.unload = reinterpret_cast<corehost_unload_fn>(pal::get_symbol(g_hostpolicy, "corehost_unload"));
         if ((g_hostpolicy_contract.load == nullptr) || (g_hostpolicy_contract.unload == nullptr))
             return StatusCode::CoreHostEntryPointFailure;
 
-        g_hostpolicy_contract.set_error_writer = (corehost_set_error_writer_fn)pal::get_symbol(g_hostpolicy, "corehost_set_error_writer");
-        g_hostpolicy_contract.initialize = (corehost_initialize_fn)pal::get_symbol(g_hostpolicy, "corehost_initialize");
+        g_hostpolicy_contract.set_error_writer = reinterpret_cast<corehost_set_error_writer_fn>(pal::get_symbol(g_hostpolicy, "corehost_set_error_writer"));
+        g_hostpolicy_contract.initialize = reinterpret_cast<corehost_initialize_fn>(pal::get_symbol(g_hostpolicy, "corehost_initialize"));
 
         // It's possible to not have corehost_set_error_writer and corehost_initialize. These were
         // introduced in 3.0, so 2.0 hostpolicy would not have the exports. In this case, we will

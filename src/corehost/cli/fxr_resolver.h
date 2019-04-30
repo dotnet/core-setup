@@ -55,9 +55,9 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
 
     // Leak fxr
 
-    auto hostfxr_initialize_for_runtime_config = (hostfxr_initialize_for_runtime_config_fn)pal::get_symbol(fxr, "hostfxr_initialize_for_runtime_config");
-    auto hostfxr_get_runtime_delegate = (hostfxr_get_runtime_delegate_fn)pal::get_symbol(fxr, "hostfxr_get_runtime_delegate");
-    auto hostfxr_close = (hostfxr_close_fn)pal::get_symbol(fxr, "hostfxr_close");
+    auto hostfxr_initialize_for_runtime_config = reinterpret_cast<hostfxr_initialize_for_runtime_config_fn>(pal::get_symbol(fxr, "hostfxr_initialize_for_runtime_config"));
+    auto hostfxr_get_runtime_delegate = reinterpret_cast<hostfxr_get_runtime_delegate_fn>(pal::get_symbol(fxr, "hostfxr_get_runtime_delegate"));
+    auto hostfxr_close = reinterpret_cast<hostfxr_close_fn>(pal::get_symbol(fxr, "hostfxr_close"));
     if (hostfxr_initialize_for_runtime_config == nullptr || hostfxr_get_runtime_delegate == nullptr || hostfxr_close == nullptr)
         return StatusCode::CoreHostEntryPointFailure;
 
@@ -80,7 +80,7 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
     if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
         return rc;
 
-    rc = hostfxr_get_runtime_delegate(context, type, (void**)delegate);
+    rc = hostfxr_get_runtime_delegate(context, type, reinterpret_cast<void**>(delegate));
 
     int rcClose = hostfxr_close(context);
     assert(rcClose == StatusCode::Success);
