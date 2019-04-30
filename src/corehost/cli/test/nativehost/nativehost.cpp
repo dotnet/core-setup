@@ -84,7 +84,7 @@ int main(const int argc, const pal::char_t *argv[])
     }
     else if (pal::strcmp(command, _X("host_context")) == 0)
     {
-        // args: ... <scenario> <check_properties> <hostfxr_path> <app_or_config_path>
+        // args: ... <scenario> <check_properties> <hostfxr_path> <app_or_config_path> [<remaining_args>]
         const int min_argc = 6;
         if (argc < min_argc)
         {
@@ -96,7 +96,8 @@ int main(const int argc, const pal::char_t *argv[])
         const pal::char_t *check_properties_str = argv[3];
         const pal::string_t hostfxr_path = argv[4];
         const pal::char_t *app_or_config_path = argv[5];
-        
+
+        // Remaining args used as property names to get/set as well as arguments for the app
         int remaining_argc = argc - min_argc;
         const pal::char_t **remaining_argv = nullptr;
         if (argc > min_argc)
@@ -115,6 +116,7 @@ int main(const int argc, const pal::char_t *argv[])
         }
         else if (pal::strcmp(scenario, _X("config_multiple")) == 0)
         {
+            // args: ... <scenario> <check_properties> <hostfxr_path> <config_path> <secondary_config_path>
             if (argc < min_argc + 1)
             {
                 std::cerr << "Invalid arguments" << std::endl;
@@ -129,6 +131,7 @@ int main(const int argc, const pal::char_t *argv[])
         }
         else if (pal::strcmp(scenario, _X("mixed")) == 0)
         {
+            // args: ... <scenario> <check_properties> <hostfxr_path> <app_path> <config_path>
             if (argc < min_argc + 1)
             {
                 std::cerr << "Invalid arguments" << std::endl;
