@@ -21,6 +21,10 @@ public:
         const runtime_config_t& app_config,
         fx_definition_vector_t& fx_definitions);
 
+    static bool is_config_compatible_with_frameworks(
+        const runtime_config_t& config,
+        const std::unordered_map<pal::string_t, const fx_ver_t> &existing_framework_versions_by_name);
+
 private:
     fx_resolver_t();
 

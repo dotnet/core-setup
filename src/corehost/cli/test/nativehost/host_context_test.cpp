@@ -8,6 +8,7 @@
 #include <future>
 #include <hostfxr.h>
 #include "host_context_test.h"
+#include <utils.h>
 
 namespace
 {
@@ -30,6 +31,8 @@ namespace
 
         hostfxr_close_fn close;
 
+        hostfxr_main_startupinfo_fn main_startupinfo;
+
     public:
         hostfxr_exports(const pal::string_t &hostfxr_path)
         {
@@ -51,10 +54,13 @@ namespace
 
             close = (hostfxr_close_fn)pal::get_symbol(_dll, "hostfxr_close");
 
+            main_startupinfo = (hostfxr_main_startupinfo_fn)pal::get_symbol(_dll, "hostfxr_main_startupinfo");
+
             if (init_app == nullptr || run_app == nullptr
                 || init_config == nullptr || get_delegate == nullptr
                 || get_prop_value == nullptr || set_prop_value == nullptr
-                || get_properties == nullptr || close == nullptr)
+                || get_properties == nullptr || close == nullptr
+                || main_startupinfo == nullptr)
             {
                 std::cout << "Failed to get hostfxr entry points" << std::endl;
                 throw StatusCode::CoreHostEntryPointFailure;
@@ -200,11 +206,13 @@ namespace
     {
         hostfxr_handle handle;
         int rc = hostfxr.init_config(config_path, nullptr, &handle);
-        if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
+        if (!STATUS_CODE_SUCCEEDED(rc))
         {
             test_output << log_prefix << _X("hostfxr_initialize_for_runtime_config failed: ") << std::hex << std::showbase << rc << std::endl;
             return false;
         }
+
+        test_output << log_prefix << _X("hostfxr_initialize_for_runtime_config succeeded: ") << std::hex << std::showbase << rc << std::endl;
 
         inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, log_prefix, test_output);
 
@@ -340,6 +348,18 @@ namespace
     private:
         pal::string_t _path;
     };
+
+    void wait_for_signal_mock_execute_assembly()
+    {
+        pal::string_t path;
+        if (!pal::getenv(_X("TEST_SIGNAL_MOCK_EXECUTE_ASSEMBLY"), &path))
+            return;
+
+        while (!pal::file_exists(path))
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
 }
 
 bool host_context_test::mixed(
@@ -376,6 +396,48 @@ bool host_context_test::mixed(
             run_app_output << _X("hostfxr_close failed: ") << std::hex << std::showbase << rc  << std::endl;
     };
     std::thread app_start = std::thread(run_app);
+
+    bool success = config_test(hostfxr, check_properties, config_path, argc, argv, secondary_log_prefix, test_output);
+    block_mock.unblock();
+    app_start.join();
+    test_output << run_app_output.str();
+    return success;
+}
+
+bool host_context_test::non_context_mixed(
+    check_properties check_properties,
+    const pal::string_t &hostfxr_path,
+    const pal::char_t *app_path,
+    const pal::char_t *config_path,
+    int argc,
+    const pal::char_t *argv[],
+    pal::stringstream_t &test_output)
+{
+    hostfxr_exports hostfxr { hostfxr_path };
+
+    pal::string_t host_path;
+    if (!pal::get_own_executable_path(&host_path) || !pal::realpath(&host_path))
+    {
+        trace::error(_X("Failed to resolve full path of the current executable [%s]"), host_path.c_str());
+        return false;
+    }
+
+    block_mock_execute_assembly block_mock;
+
+    std::vector<const pal::char_t*> argv_local;
+    argv_local.push_back(app_path);
+    for (int i = 0; i < argc; ++i)
+        argv_local.push_back(argv[i]);
+
+    pal::stringstream_t run_app_output;
+    auto run_app = [&]{
+        int rc = hostfxr.main_startupinfo(argv_local.size(), argv_local.data(), host_path.c_str(), get_dotnet_root_from_fxr_path(hostfxr_path).c_str(), app_path);
+        if (rc != StatusCode::Success)
+            run_app_output << _X("hostfxr_main_startupinfo failed: ") << std::hex << std::showbase << rc << std::endl;
+    };
+    std::thread app_start = std::thread(run_app);
+
+    wait_for_signal_mock_execute_assembly();
 
     bool success = config_test(hostfxr, check_properties, config_path, argc, argv, secondary_log_prefix, test_output);
     block_mock.unblock();

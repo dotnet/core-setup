@@ -516,7 +516,6 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_app(
 // Return value:
 //    Success                     - Hosting components were successfully initialized
 //    CoreHostAlreadyInitialized  - Config is compatible with already initialized hosting components
-// [TODO]
 //    CoreHostIncompatibleConfig  - Config is incompatible with already initialized hosting components
 //    CoreHostDifferentProperties - Config has runtime properties that differ from already initialized hosting components
 //

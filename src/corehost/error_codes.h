@@ -4,11 +4,15 @@
 
 #ifndef __ERROR_CODES_H__
 #define __ERROR_CODES_H__
+
+#define STATUS_CODE_SUCCEEDED(status_code) ((status_code) >= 0)
+
 enum StatusCode
 {
     // Success
     Success                     = 0,
     CoreHostAlreadyInitialized  = 0x00000001,
+    CoreHostDifferentProperties = 0x00000002,
 
     // Failure
     InvalidArgFailure           = 0x80008081,
@@ -47,5 +51,6 @@ enum StatusCode
     HostApiUnsupportedVersion   = 0x800080a2,
     HostInvalidState            = 0x800080a3,
     HostPropertyNotFound        = 0x800080a4,
+    CoreHostIncompatibleConfig  = 0x800080a5,
 };
 #endif // __ERROR_CODES_H__

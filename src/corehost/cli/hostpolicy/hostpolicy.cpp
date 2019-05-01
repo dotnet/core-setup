@@ -531,6 +531,41 @@ namespace
 
         return StatusCode::Success;
     }
+
+    bool matches_existing_properties(const corehost_initialize_request_t *init_request)
+    {
+        const hostpolicy_context_t *context = get_hostpolicy_context(/*require_runtime*/ true);
+        assert(context != nullptr);
+
+        bool hasDifferentProperties = false;
+        const coreclr_property_bag_t &properties = context->coreclr_properties;
+        size_t len = init_request->config_keys.len;
+        for (size_t i = 0; i < len; ++i)
+        {
+            const pal::char_t *key = init_request->config_keys.arr[i];
+            const pal::char_t *value = init_request->config_values.arr[i];
+
+            const pal::char_t *existingValue;
+            if (properties.try_get(key, &existingValue))
+            {
+                if (pal::strcmp(existingValue, value) != 0)
+                {
+                    trace::warning(_X("The property [%s] has a different value [%s] from that in the previously loaded runtime [%s]"), key, value, existingValue);
+                    hasDifferentProperties = true;
+                }
+            }
+            else
+            {
+                trace::warning(_X("The property [%s] is not present in the previously loaded runtime."), key);
+                hasDifferentProperties = true;
+            }
+        }
+
+        if (len > 0 && !hasDifferentProperties)
+            trace::info(_X("All specified properties match those in the previously loaded runtime"));
+
+        return !hasDifferentProperties;
+    }
 }
 
 // Initializes hostpolicy. Calculates everything required to start the runtime and creates a context to track
@@ -550,7 +585,6 @@ namespace
 // Return value:
 //    Success                     - Initialization was succesful
 //    CoreHostAlreadyInitialized  - Request is compatible with already initialized hostpolicy
-// [TODO]
 //    CoreHostDifferentProperties - Request has runtime properties that differ from already initialized hostpolicy
 //
 // This function does not load the runtime
@@ -636,7 +670,13 @@ SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *
 
     if (rc == StatusCode::CoreHostAlreadyInitialized)
     {
-        // [TODO] Compare the current context with this request (properties)
+        assert(init_request != nullptr
+            && init_request->version >= offsetof(corehost_initialize_request_t, config_values) + sizeof(init_request->config_values)
+            && init_request->config_keys.len == init_request->config_values.len);
+
+        // Compare the current context with this request (properties)
+        if (!matches_existing_properties(init_request))
+            rc = StatusCode::CoreHostDifferentProperties;
     }
 
     context_contract->version = sizeof(corehost_context_contract);
