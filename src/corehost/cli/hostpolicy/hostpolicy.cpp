@@ -34,7 +34,7 @@ namespace
 
     // Tracks the hostpolicy context. This is the one and only hostpolicy context. It represents the information
     // that hostpolicy will use or has already used to load and initialize coreclr. It will be set once a context
-    //is initialized and updated to hold coreclr once the runtime is loaded.
+    // is initialized and updated to hold coreclr once the runtime is loaded.
     std::unique_ptr<hostpolicy_context_t> g_context;
 
     // Tracks whether the hostpolicy context is initializing (from start of creation of the first context
@@ -42,7 +42,7 @@ namespace
     // Attempts to get/create a context should block if the first context is initializing (i.e. this is true).
     // The condition variable is used to block on and signal changes to this state.
     std::atomic<bool> g_context_initializing(false);
-    std::condition_variable g_context_cv;
+    std::condition_variable g_context_initializing_cv;
 
     int create_coreclr()
     {
@@ -91,7 +91,7 @@ namespace
             g_context_initializing.store(false);
         }
 
-        g_context_cv.notify_all();
+        g_context_initializing_cv.notify_all();
         return rc;
     }
 
@@ -102,7 +102,7 @@ namespace
     {
         {
             std::unique_lock<std::mutex> lock{ g_context_lock };
-            g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
+            g_context_initializing_cv.wait(lock, [] { return !g_context_initializing.load(); });
 
             const hostpolicy_context_t *existing_context = g_context.get();
             if (existing_context != nullptr)
@@ -115,7 +115,7 @@ namespace
             g_context_initializing.store(true);
         }
 
-        g_context_cv.notify_all();
+        g_context_initializing_cv.notify_all();
 
         std::unique_ptr<hostpolicy_context_t> context_local(new hostpolicy_context_t());
         int rc = context_local->initialize(hostpolicy_init, args, breadcrumbs_enabled);
@@ -126,7 +126,7 @@ namespace
                 g_context_initializing.store(false);
             }
 
-            g_context_cv.notify_all();
+            g_context_initializing_cv.notify_all();
             return rc;
         }
 
@@ -586,7 +586,7 @@ SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *
             if (!already_initialized && !already_initializing)
             {
                 trace::info(_X("Waiting for another request to initialize hostpolicy"));
-                g_context_cv.wait(lock, [&] { return g_context_initializing.load(); });
+                g_context_initializing_cv.wait(lock, [&] { return g_context_initializing.load(); });
             }
         }
         else
@@ -616,7 +616,7 @@ SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *
     {
         // Wait for context initialization to complete
         std::unique_lock<std::mutex> lock{ g_context_lock };
-        g_context_cv.wait(lock, [] { return !g_context_initializing.load(); });
+        g_context_initializing_cv.wait(lock, [] { return !g_context_initializing.load(); });
 
         const hostpolicy_context_t *existing_context = g_context.get();
         if (existing_context == nullptr || existing_context->coreclr == nullptr)
@@ -662,7 +662,7 @@ SHARED_API int corehost_unload()
         g_context_initializing.store(false);
     }
 
-    g_context_cv.notify_all();
+    g_context_initializing_cv.notify_all();
 
     std::lock_guard<std::mutex> init_lock{ g_init_lock };
     g_init_done = false;

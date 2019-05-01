@@ -123,6 +123,8 @@ static int execute_app(
         return code;
     }
 
+    // Leak hostpolicy - just as we do not unload coreclr, we do not unload hostpolicy
+
     {
         // Track an empty 'active' context so that host context-based APIs can work properly when
         // the runtime is loaded through non-host context-based APIs. Once set, the context is never
@@ -159,13 +161,15 @@ static int execute_host_command(
     int32_t buffer_size,
     int32_t* required_buffer_size)
 {
-    pal::dll_t corehost;
+    pal::dll_t hostpolicy_dll;
     hostpolicy_contract_t hostpolicy_contract{};
     corehost_main_with_output_buffer_fn host_main = nullptr;
 
-    int code = load_hostpolicy(impl_dll_dir, &corehost, hostpolicy_contract, "corehost_main_with_output_buffer", &host_main);
+    int code = load_hostpolicy(impl_dll_dir, &hostpolicy_dll, hostpolicy_contract, "corehost_main_with_output_buffer", &host_main);
     if (code != StatusCode::Success)
         return code;
+
+    // Leak hostpolicy - just as we do not unload coreclr, we do not unload hostpolicy
 
     {
         propagate_error_writer_t propagate_error_writer_to_corehost(hostpolicy_contract.set_error_writer);
@@ -846,9 +850,9 @@ namespace
         int32_t initialize_options,
         /*out*/ std::unique_ptr<host_context_t> &context)
     {
-        pal::dll_t corehost;
+        pal::dll_t hostpolicy_dll;
         hostpolicy_contract_t hostpolicy_contract{};
-        int rc = hostpolicy_resolver::load(hostpolicy_dir, &corehost, hostpolicy_contract);
+        int rc = hostpolicy_resolver::load(hostpolicy_dir, &hostpolicy_dll, hostpolicy_contract);
         if (rc != StatusCode::Success)
         {
             trace::error(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, hostpolicy_dir.c_str());
@@ -857,6 +861,8 @@ namespace
         {
             rc = host_context_t::create(hostpolicy_contract, init, initialize_options, context);
         }
+
+        // Leak hostpolicy - just as we do not unload coreclr, we do not unload hostpolicy
 
         if (rc != StatusCode::Success)
             handle_initialize_failure_or_abort(&hostpolicy_contract);

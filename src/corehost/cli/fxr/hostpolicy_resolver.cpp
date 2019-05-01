@@ -203,6 +203,7 @@ int hostpolicy_resolver::load(
         }
 
         // Load library
+        // We expect to leak hostpolicy - just as we do not unload coreclr, we do not unload hostpolicy
         if (!pal::load_library(&host_path, &g_hostpolicy))
         {
             trace::info(_X("Load library of %s failed"), host_path.c_str());
