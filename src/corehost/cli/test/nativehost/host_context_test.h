@@ -27,25 +27,29 @@ namespace host_context_test
         const pal::string_t &hostfxr_path,
         const pal::char_t *app_path,
         int argc,
-        const pal::char_t *argv[]);
+        const pal::char_t *argv[],
+        pal::stringstream_t &test_output);
     bool config(
         check_properties scenario,
         const pal::string_t &hostfxr_path,
         const pal::char_t *config_path,
         int argc,
-        const pal::char_t *argv[]);
+        const pal::char_t *argv[],
+        pal::stringstream_t &test_output);
     bool config_multiple(
         check_properties scenario,
         const pal::string_t &hostfxr_path,
         const pal::char_t *config_path,
         const pal::char_t *secondary_config_path,
         int argc,
-        const pal::char_t *argv[]);
+        const pal::char_t *argv[],
+        pal::stringstream_t &test_output);
     bool mixed(
         check_properties scenario,
         const pal::string_t &hostfxr_path,
         const pal::char_t *app_path,
         const pal::char_t *config_path,
         int argc,
-        const pal::char_t *argv[]);
+        const pal::char_t *argv[],
+        pal::stringstream_t &test_output);
 }

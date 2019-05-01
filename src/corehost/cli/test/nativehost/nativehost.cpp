@@ -105,14 +105,15 @@ int main(const int argc, const pal::char_t *argv[])
 
         auto check_properties = host_context_test::check_properties_from_string(check_properties_str);
 
+        pal::stringstream_t test_output;
         bool success = false;
         if (pal::strcmp(scenario, _X("app")) == 0)
         {
-            success = host_context_test::app(check_properties, hostfxr_path, app_or_config_path, remaining_argc, remaining_argv);
+            success = host_context_test::app(check_properties, hostfxr_path, app_or_config_path, remaining_argc, remaining_argv, test_output);
         }
         else if (pal::strcmp(scenario, _X("config")) == 0)
         {
-            success = host_context_test::config(check_properties, hostfxr_path, app_or_config_path, remaining_argc, remaining_argv);
+            success = host_context_test::config(check_properties, hostfxr_path, app_or_config_path, remaining_argc, remaining_argv, test_output);
         }
         else if (pal::strcmp(scenario, _X("config_multiple")) == 0)
         {
@@ -127,7 +128,7 @@ int main(const int argc, const pal::char_t *argv[])
             --remaining_argc;
             ++remaining_argv;
 
-            success = host_context_test::config_multiple(check_properties, hostfxr_path, app_or_config_path, secondary_config_path, remaining_argc, remaining_argv);
+            success = host_context_test::config_multiple(check_properties, hostfxr_path, app_or_config_path, secondary_config_path, remaining_argc, remaining_argv, test_output);
         }
         else if (pal::strcmp(scenario, _X("mixed")) == 0)
         {
@@ -142,9 +143,10 @@ int main(const int argc, const pal::char_t *argv[])
             --remaining_argc;
             ++remaining_argv;
 
-            success = host_context_test::mixed(check_properties, hostfxr_path, app_or_config_path, config_path, remaining_argc, remaining_argv);
+            success = host_context_test::mixed(check_properties, hostfxr_path, app_or_config_path, config_path, remaining_argc, remaining_argv, test_output);
         }
 
+        std::cout << tostr(test_output.str()).data() << std::endl;
         return success ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 #if defined(_WIN32)

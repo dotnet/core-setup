@@ -11,16 +11,9 @@
 
 namespace
 {
-    const char *app_log_prefix = "[APP] ";
-    const char *config_log_prefix = "[CONFIG] ";
-    const char *secondary_log_prefix = "[SECONDARY] ";
-
-    std::vector<char> to_str(const pal::string_t &value)
-    {
-        std::vector<char> vect;
-        pal::pal_utf8string(value, &vect);
-        return vect;
-    }
+    const pal::char_t *app_log_prefix = _X("[APP] ");
+    const pal::char_t *config_log_prefix = _X("[CONFIG] ");
+    const pal::char_t *secondary_log_prefix = _X("[SECONDARY] ");
 
     class hostfxr_exports
     {
@@ -82,7 +75,8 @@ namespace
         hostfxr_handle handle,
         int property_count,
         const pal::char_t *property_keys[],
-        const char *log_prefix)
+        const pal::char_t *log_prefix,
+        pal::stringstream_t &test_output)
     {
         for (int i = 0; i < property_count; ++i)
         {
@@ -91,13 +85,13 @@ namespace
             int rc = hostfxr.get_prop_value(handle, key, &value);
             if (rc == StatusCode::Success)
             {
-                std::cout << log_prefix << "hostfxr_get_runtime_property_value succeeded for property: "
-                    << to_str(key).data() << "=" << to_str(value).data() << std::endl;
+                test_output << log_prefix << _X("hostfxr_get_runtime_property_value succeeded for property: ")
+                    << key << _X("=") << value << std::endl;
             }
             else
             {
-                std::cout << log_prefix << "hostfxr_get_runtime_property_value failed for property: " << to_str(key).data()
-                    << " - " << std::hex << std::showbase << rc << std::endl;
+                test_output << log_prefix << _X("hostfxr_get_runtime_property_value failed for property: ") << key
+                    << _X(" - ") << std::hex << std::showbase << rc << std::endl;
             }
         }
     }
@@ -108,7 +102,8 @@ namespace
         int property_count,
         const pal::char_t *property_keys[],
         bool remove,
-        const char *log_prefix)
+        const pal::char_t *log_prefix,
+        pal::stringstream_t &test_output)
     {
         for (int i = 0; i < property_count; ++i)
         {
@@ -117,12 +112,12 @@ namespace
             int rc = hostfxr.set_prop_value(handle, key, value);
             if (rc == StatusCode::Success)
             {
-                std::cout << log_prefix << "hostfxr_set_runtime_property_value succeeded for property: " << to_str(key).data() << std::endl;
+                test_output << log_prefix << _X("hostfxr_set_runtime_property_value succeeded for property: ") << key << std::endl;
             }
             else
             {
-                std::cout << log_prefix << "hostfxr_set_runtime_property_value failed for property: " << to_str(key).data()
-                    << " - " << std::hex << std::showbase << rc << std::endl;
+                test_output << log_prefix << _X("hostfxr_set_runtime_property_value failed for property: ") << key
+                    << _X(" - ") << std::hex << std::showbase << rc << std::endl;
             }
         }
     }
@@ -130,7 +125,8 @@ namespace
     void get_properties(
         const hostfxr_exports &hostfxr,
         hostfxr_handle handle,
-        const char *log_prefix)
+        const pal::char_t *log_prefix,
+        pal::stringstream_t &test_output)
     {
         size_t count = 0;
         std::vector<const pal::char_t*> keys;
@@ -145,16 +141,16 @@ namespace
 
         if (rc != StatusCode::Success)
         {
-            std::cout << log_prefix << "hostfxr_get_runtime_properties failed - "
+            test_output << log_prefix << _X("hostfxr_get_runtime_properties failed - ")
                 << std::hex << std::showbase << rc << std::endl;
             return;
         }
 
-        std::cout << log_prefix << "hostfxr_get_runtime_properties succeeded." << std::endl;
+        test_output << log_prefix << _X("hostfxr_get_runtime_properties succeeded.") << std::endl;
         for (size_t i = 0; i < keys.size(); ++i)
         {
-            std::cout << log_prefix << "hostfxr_get_runtime_properties: "
-                << to_str(keys[i]).data() << "=" << to_str(values[i]).data() << std::endl;
+            test_output << log_prefix << _X("hostfxr_get_runtime_properties: ")
+                << keys[i] << _X("=") << values[i] << std::endl;
         }
     }
 
@@ -164,27 +160,28 @@ namespace
         hostfxr_handle handle,
         int key_count,
         const pal::char_t *keys[],
-        const char *log_prefix)
+        const pal::char_t *log_prefix,
+        pal::stringstream_t &test_output)
     {
         switch (scenario)
         {
             case host_context_test::check_properties::get:
-                get_property_value(hostfxr, handle, key_count, keys, log_prefix);
+                get_property_value(hostfxr, handle, key_count, keys, log_prefix, test_output);
                 break;
             case host_context_test::check_properties::set:
-                set_property_value(hostfxr, handle, key_count, keys, false /*remove*/, log_prefix);
+                set_property_value(hostfxr, handle, key_count, keys, false /*remove*/, log_prefix, test_output);
                 break;
             case host_context_test::check_properties::remove:
-                set_property_value(hostfxr, handle, key_count, keys, true /*remove*/, log_prefix);
+                set_property_value(hostfxr, handle, key_count, keys, true /*remove*/, log_prefix, test_output);
                 break;
             case host_context_test::check_properties::get_all:
-                get_properties(hostfxr, handle, log_prefix);
+                get_properties(hostfxr, handle, log_prefix, test_output);
                 break;
             case host_context_test::check_properties::get_active:
-                get_property_value(hostfxr, nullptr, key_count, keys, log_prefix);
+                get_property_value(hostfxr, nullptr, key_count, keys, log_prefix, test_output);
                 break;
             case host_context_test::check_properties::get_all_active:
-                get_properties(hostfxr, nullptr, log_prefix);
+                get_properties(hostfxr, nullptr, log_prefix, test_output);
                 break;
             case host_context_test::check_properties::none:
             default:
@@ -198,26 +195,27 @@ namespace
         const pal::char_t *config_path,
         int argc,
         const pal::char_t *argv[],
-        const char *log_prefix)
+        const pal::char_t *log_prefix,
+        pal::stringstream_t &test_output)
     {
         hostfxr_handle handle;
         int rc = hostfxr.init_config(config_path, nullptr, &handle);
         if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
         {
-            std::cout << log_prefix << "hostfxr_initialize_for_runtime_config failed: " << std::hex << std::showbase << rc << std::endl;
+            test_output << log_prefix << _X("hostfxr_initialize_for_runtime_config failed: ") << std::hex << std::showbase << rc << std::endl;
             return false;
         }
 
-        inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, log_prefix);
+        inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, log_prefix, test_output);
 
         void *delegate;
         rc = hostfxr.get_delegate(handle, hostfxr_delegate_type::com_activation, &delegate);
         if (rc != StatusCode::Success)
-            std::cout << log_prefix << "hostfxr_get_runtime_delegate failed: " << std::hex << std::showbase << rc << std::endl;
+            test_output << log_prefix << _X("hostfxr_get_runtime_delegate failed: ") << std::hex << std::showbase << rc << std::endl;
 
         int rcClose = hostfxr.close(handle);
         if (rcClose != StatusCode::Success)
-            std::cout << log_prefix << "hostfxr_close failed: " << std::hex << std::showbase << rc  << std::endl;
+            test_output << log_prefix << _X("hostfxr_close failed: ") << std::hex << std::showbase << rc  << std::endl;
 
         return rc == StatusCode::Success && rcClose == StatusCode::Success;
     }
@@ -258,7 +256,8 @@ bool host_context_test::app(
     const pal::string_t &hostfxr_path,
     const pal::char_t *app_path,
     int argc,
-    const pal::char_t *argv[])
+    const pal::char_t *argv[],
+    pal::stringstream_t &test_output)
 {
     hostfxr_exports hostfxr { hostfxr_path };
 
@@ -266,19 +265,19 @@ bool host_context_test::app(
     int rc = hostfxr.init_app(argc, argv, app_path, nullptr, &handle);
     if (rc != StatusCode::Success)
     {
-        std::cout << "hostfxr_initialize_for_app failed: " << std::hex << std::showbase << rc << std::endl;
+        test_output << _X("hostfxr_initialize_for_app failed: ") << std::hex << std::showbase << rc << std::endl;
         return false;
     }
 
-    inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, app_log_prefix);
+    inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, app_log_prefix, test_output);
 
     rc = hostfxr.run_app(handle);
     if (rc != StatusCode::Success)
-        std::cout << "hostfxr_run_app failed: " << std::hex << std::showbase << rc << std::endl;
+        test_output << _X("hostfxr_run_app failed: ") << std::hex << std::showbase << rc << std::endl;
 
     int rcClose = hostfxr.close(handle);
     if (rcClose != StatusCode::Success)
-        std::cout << "hostfxr_close failed: " << std::hex << std::showbase << rc  << std::endl;
+        test_output << _X("hostfxr_close failed: ") << std::hex << std::showbase << rc  << std::endl;
 
     return rc == StatusCode::Success && rcClose == StatusCode::Success;
 }
@@ -288,11 +287,12 @@ bool host_context_test::config(
     const pal::string_t &hostfxr_path,
     const pal::char_t *config_path,
     int argc,
-    const pal::char_t *argv[])
+    const pal::char_t *argv[],
+    pal::stringstream_t &test_output)
 {
     hostfxr_exports hostfxr { hostfxr_path };
 
-    return config_test(hostfxr, check_properties, config_path, argc, argv, config_log_prefix);
+    return config_test(hostfxr, check_properties, config_path, argc, argv, config_log_prefix, test_output);
 }
 
 bool host_context_test::config_multiple(
@@ -301,14 +301,15 @@ bool host_context_test::config_multiple(
     const pal::char_t *config_path,
     const pal::char_t *secondary_config_path,
     int argc,
-    const pal::char_t *argv[])
+    const pal::char_t *argv[],
+    pal::stringstream_t &test_output)
 {
     hostfxr_exports hostfxr { hostfxr_path };
 
-    if (!config_test(hostfxr, check_properties, config_path, argc, argv, config_log_prefix))
+    if (!config_test(hostfxr, check_properties, config_path, argc, argv, config_log_prefix, test_output))
         return false;
 
-    return config_test(hostfxr, check_properties, secondary_config_path, argc, argv, secondary_log_prefix);
+    return config_test(hostfxr, check_properties, secondary_config_path, argc, argv, secondary_log_prefix, test_output);
 }
 
 namespace
@@ -347,7 +348,8 @@ bool host_context_test::mixed(
     const pal::char_t *app_path,
     const pal::char_t *config_path,
     int argc,
-    const pal::char_t *argv[])
+    const pal::char_t *argv[],
+    pal::stringstream_t &test_output)
 {
     hostfxr_exports hostfxr { hostfxr_path };
 
@@ -355,27 +357,29 @@ bool host_context_test::mixed(
     int rc = hostfxr.init_app(argc, argv, app_path, nullptr, &handle);
     if (rc != StatusCode::Success)
     {
-        std::cout << "hostfxr_initialize_for_app failed: " << std::hex << std::showbase << rc << std::endl;
+        test_output << _X("hostfxr_initialize_for_app failed: ") << std::hex << std::showbase << rc << std::endl;
         return false;
     }
 
-    inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, app_log_prefix);
+    inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, app_log_prefix, test_output);
 
     block_mock_execute_assembly block_mock;
 
+    pal::stringstream_t run_app_output;
     auto run_app = [&]{
         int rc = hostfxr.run_app(handle);
         if (rc != StatusCode::Success)
-            std::cout << "hostfxr_run_app failed: " << std::hex << std::showbase << rc << std::endl;
+            run_app_output << _X("hostfxr_run_app failed: ") << std::hex << std::showbase << rc << std::endl;
 
         int rcClose = hostfxr.close(handle);
         if (rcClose != StatusCode::Success)
-            std::cout << "hostfxr_close failed: " << std::hex << std::showbase << rc  << std::endl;
+            run_app_output << _X("hostfxr_close failed: ") << std::hex << std::showbase << rc  << std::endl;
     };
     std::thread app_start = std::thread(run_app);
 
-    bool success = config_test(hostfxr, check_properties, config_path, argc, argv, secondary_log_prefix);
+    bool success = config_test(hostfxr, check_properties, config_path, argc, argv, secondary_log_prefix, test_output);
     block_mock.unblock();
     app_start.join();
+    test_output << run_app_output.str();
     return success;
 }
