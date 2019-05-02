@@ -144,7 +144,7 @@ namespace Microsoft.NET.HostModel.Bundle
         {
             trace.Log($"Bundler version {Version}");
 
-            if(fileSpecs.Where(x => !x.IsValid()).Count() != 0)
+            if (fileSpecs.Any(x => !x.IsValid()))
             {
                 throw new ArgumentException("Invalid input specification: Found entry with empty source-path or bundle-relative-path.");
             }

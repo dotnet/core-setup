@@ -153,7 +153,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             public void Dispose()
             {
-                //TestFixture.Dispose();
+                TestFixture.Dispose();
             }
         }
     }

@@ -242,7 +242,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
             DotNetCli dotnet = null,
             string runtime = null,
             string framework = null,
-            string selfContained=null,
+            string selfContained = null,
             string outputDirectory = null)
         {
             dotnet = dotnet ?? SdkDotnet;

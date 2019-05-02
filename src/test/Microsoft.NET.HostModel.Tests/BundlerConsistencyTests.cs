@@ -38,8 +38,7 @@ namespace Microsoft.NET.HostModel.Tests
         [Fact]
         public void TestWithEmptySpecFails()
         {
-            var fixture = sharedTestState.TestFixture
-                .Copy();
+            var fixture = sharedTestState.TestFixture.Copy();
 
             var hostName = GetHostName(fixture);
             var bundleDir = GetBundleDir(fixture);
@@ -61,8 +60,7 @@ namespace Microsoft.NET.HostModel.Tests
         [Fact]
         public void TestWithoutSpecifyingHostFails()
         {
-            var fixture = sharedTestState.TestFixture
-                .Copy();
+            var fixture = sharedTestState.TestFixture.Copy();
 
             var hostName = GetHostName(fixture);
             var appName = Path.GetFileNameWithoutExtension(hostName);
@@ -84,8 +82,7 @@ namespace Microsoft.NET.HostModel.Tests
         [Theory]
         public void TestFilesNotBundled(bool embedPDBs)
         {
-            var fixture = sharedTestState.TestFixture
-                .Copy();
+            var fixture = sharedTestState.TestFixture.Copy();
 
             var hostName = GetHostName(fixture);
             var appName = Path.GetFileNameWithoutExtension(hostName);
@@ -112,8 +109,7 @@ namespace Microsoft.NET.HostModel.Tests
         [Fact]
         public void ExtractingANonBundleFails()
         {
-            var fixture = sharedTestState.TestFixture
-                .Copy();
+            var fixture = sharedTestState.TestFixture.Copy();
 
             var hostName = GetHostName(fixture);
             var hostExe = Path.Combine(GetPublishPath(fixture), hostName);
@@ -126,8 +122,7 @@ namespace Microsoft.NET.HostModel.Tests
         [Fact]
         public void AllBundledFilesAreExtracted()
         {
-            var fixture = sharedTestState.TestFixture
-                .Copy();
+            var fixture = sharedTestState.TestFixture.Copy();
 
             var hostName = GetHostName(fixture);
             var bundleDir = GetBundleDir(fixture);

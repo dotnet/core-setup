@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
         // Bundle to a single-file
         // This step should be removed in favor of publishing with /p:PublishSingleFile=true
-        // once associated changes in SDK repo are checked in.
+        // once core-setup tests use 3.0 SDK 
         string BundleApp(TestProjectFixture fixture)
         {
             var hostName = GetHostName(fixture);

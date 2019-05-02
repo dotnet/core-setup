@@ -76,8 +76,7 @@ namespace Microsoft.NET.HostModel.Tests
         [Fact]
         public void TestWithAbsolutePaths()
         {
-            var fixture = sharedTestState.TestFixture
-                .Copy();
+            var fixture = sharedTestState.TestFixture.Copy();
 
             string publishDir = GetPublishPath(fixture);
             string outputDir = GetBundlePath(fixture);
@@ -88,8 +87,7 @@ namespace Microsoft.NET.HostModel.Tests
         [Fact]
         public void TestWithRelativePaths()
         {
-            var fixture = sharedTestState.TestFixture
-                .Copy();
+            var fixture = sharedTestState.TestFixture.Copy();
 
             string publishDir = RelativePath(GetPublishPath(fixture));
             string outputDir = RelativePath(GetBundlePath(fixture));
@@ -100,8 +98,7 @@ namespace Microsoft.NET.HostModel.Tests
         [Fact]
         public void TestWithRelativePathsDirSeparator()
         {
-            var fixture = sharedTestState.TestFixture
-                .Copy();
+            var fixture = sharedTestState.TestFixture.Copy();
 
             string publishDir = RelativePath(GetPublishPath(fixture)) + Path.DirectorySeparatorChar;
             string outputDir = RelativePath(GetBundlePath(fixture)) + Path.DirectorySeparatorChar;
