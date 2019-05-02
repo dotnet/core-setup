@@ -792,18 +792,19 @@ namespace
             return rc;
 
         const runtime_config_t app_config = app->get_runtime_config();
-        bool is_framework_dependent = app_config.get_is_framework_dependent();
-        if (is_framework_dependent)
+        if (!app_config.get_is_framework_dependent())
         {
-            rc = fx_resolver_t::resolve_frameworks_for_app(host_info, override_settings, app_config, fx_definitions);
-            if (rc != StatusCode::Success)
-                return rc;
+            trace::error(_X("Initialization for self-contained components is not supported"));
+            return StatusCode::InvalidConfigFile;
         }
+
+        rc = fx_resolver_t::resolve_frameworks_for_app(host_info, override_settings, app_config, fx_definitions);
+        if (rc != StatusCode::Success)
+            return rc;
 
         const std::vector<pal::string_t> probe_realpaths = get_probe_realpaths(fx_definitions, std::vector<pal::string_t>() /* specified_probing_paths */);
 
-        trace::verbose(_X("Libhost loading occurring as a %s app as per config file [%s]"),
-            (is_framework_dependent ? _X("framework-dependent") : _X("self-contained")), app_config.get_path().c_str());
+        trace::verbose(_X("Libhost loading occurring for a framework-dependent component per config file [%s]"), app_config.get_path().c_str());
 
         const pal::string_t deps_file;
         if (!hostpolicy_resolver::try_get_dir(mode, host_info.dotnet_root, fx_definitions, host_info.app_path, deps_file, probe_realpaths, &hostpolicy_dir))
