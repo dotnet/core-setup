@@ -260,7 +260,7 @@ jobs:
         _BuildConfig: Release
   pool:
     name: NetCorePublic-Pool
-    queue: buildpool.ubuntu.1604.amd64
+    queue: buildpool.ubuntu.1604.amd64.open
   steps:
   - checkout: self
     clean: true
