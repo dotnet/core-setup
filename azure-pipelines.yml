@@ -1,5 +1,3 @@
-variables:
-
 trigger:
 - release/2.1
 
@@ -18,20 +16,20 @@ jobs:
   - task: CopyFiles@2
     inputs:
       contents: |
-      'Bin/*/packages/*.tar.gz'
-      'Bin/*/corehost/*.tar.gz'
-      'Bin/*/packages/*.zip'
-      'Bin/*/corehost/*.zip'
-      'Bin/*/packages/*.deb'
-      'Bin/*/corehost/*.deb'
-      'Bin/*/packages/*.msi'
-      'Bin/*/corehost/*.msi'
-      'Bin/*/packages/*.pkg'
-      'Bin/*/corehost/*.pkg'
-      'Bin/*/packages/*.exe'
-      'Bin/*/corehost/*.exe'
-      'Bin/*/packages/*.nupkg'
-      'Bin/*/corehost/*.nupkg'
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
       targetFolder: $(Build.ArtifactStagingDirectory)
   - task: PublishBuildArtifacts@1
     inputs:
@@ -54,20 +52,20 @@ jobs:
   - task: CopyFiles@2
     inputs:
       contents: |
-      'Bin/*/packages/*.tar.gz'
-      'Bin/*/corehost/*.tar.gz'
-      'Bin/*/packages/*.zip'
-      'Bin/*/corehost/*.zip'
-      'Bin/*/packages/*.deb'
-      'Bin/*/corehost/*.deb'
-      'Bin/*/packages/*.msi'
-      'Bin/*/corehost/*.msi'
-      'Bin/*/packages/*.pkg'
-      'Bin/*/corehost/*.pkg'
-      'Bin/*/packages/*.exe'
-      'Bin/*/corehost/*.exe'
-      'Bin/*/packages/*.nupkg'
-      'Bin/*/corehost/*.nupkg'
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
       targetFolder: $(Build.ArtifactStagingDirectory)
   - task: PublishBuildArtifacts@1
     inputs:
@@ -85,20 +83,20 @@ jobs:
   - task: CopyFiles@2
     inputs:
       contents: |
-      'Bin/*/packages/*.tar.gz'
-      'Bin/*/corehost/*.tar.gz'
-      'Bin/*/packages/*.zip'
-      'Bin/*/corehost/*.zip'
-      'Bin/*/packages/*.deb'
-      'Bin/*/corehost/*.deb'
-      'Bin/*/packages/*.msi'
-      'Bin/*/corehost/*.msi'
-      'Bin/*/packages/*.pkg'
-      'Bin/*/corehost/*.pkg'
-      'Bin/*/packages/*.exe'
-      'Bin/*/corehost/*.exe'
-      'Bin/*/packages/*.nupkg'
-      'Bin/*/corehost/*.nupkg'
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
       targetFolder: $(Build.ArtifactStagingDirectory)
   - task: PublishBuildArtifacts@1
     inputs:
@@ -116,20 +114,20 @@ jobs:
   - task: CopyFiles@2
     inputs:
       contents: |
-      'Bin/*/packages/*.tar.gz'
-      'Bin/*/corehost/*.tar.gz'
-      'Bin/*/packages/*.zip'
-      'Bin/*/corehost/*.zip'
-      'Bin/*/packages/*.deb'
-      'Bin/*/corehost/*.deb'
-      'Bin/*/packages/*.msi'
-      'Bin/*/corehost/*.msi'
-      'Bin/*/packages/*.pkg'
-      'Bin/*/corehost/*.pkg'
-      'Bin/*/packages/*.exe'
-      'Bin/*/corehost/*.exe'
-      'Bin/*/packages/*.nupkg'
-      'Bin/*/corehost/*.nupkg'
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
       targetFolder: $(Build.ArtifactStagingDirectory)
   - task: PublishBuildArtifacts@1
     inputs:
@@ -152,20 +150,20 @@ jobs:
   - task: CopyFiles@2
     inputs:
       contents: |
-      'Bin/*/packages/*.tar.gz'
-      'Bin/*/corehost/*.tar.gz'
-      'Bin/*/packages/*.zip'
-      'Bin/*/corehost/*.zip'
-      'Bin/*/packages/*.deb'
-      'Bin/*/corehost/*.deb'
-      'Bin/*/packages/*.msi'
-      'Bin/*/corehost/*.msi'
-      'Bin/*/packages/*.pkg'
-      'Bin/*/corehost/*.pkg'
-      'Bin/*/packages/*.exe'
-      'Bin/*/corehost/*.exe'
-      'Bin/*/packages/*.nupkg'
-      'Bin/*/corehost/*.nupkg'
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
       targetFolder: $(Build.ArtifactStagingDirectory)
   - task: PublishBuildArtifacts@1
     inputs:
@@ -188,20 +186,20 @@ jobs:
   - task: CopyFiles@2
     inputs:
       contents: |
-      'Bin/*/packages/*.tar.gz'
-      'Bin/*/corehost/*.tar.gz'
-      'Bin/*/packages/*.zip'
-      'Bin/*/corehost/*.zip'
-      'Bin/*/packages/*.deb'
-      'Bin/*/corehost/*.deb'
-      'Bin/*/packages/*.msi'
-      'Bin/*/corehost/*.msi'
-      'Bin/*/packages/*.pkg'
-      'Bin/*/corehost/*.pkg'
-      'Bin/*/packages/*.exe'
-      'Bin/*/corehost/*.exe'
-      'Bin/*/packages/*.nupkg'
-      'Bin/*/corehost/*.nupkg'
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
       targetFolder: $(Build.ArtifactStagingDirectory)
   - task: PublishBuildArtifacts@1
     inputs:
@@ -219,20 +217,20 @@ jobs:
   - task: CopyFiles@2
     inputs:
       contents: |
-      'Bin/*/packages/*.tar.gz'
-      'Bin/*/corehost/*.tar.gz'
-      'Bin/*/packages/*.zip'
-      'Bin/*/corehost/*.zip'
-      'Bin/*/packages/*.deb'
-      'Bin/*/corehost/*.deb'
-      'Bin/*/packages/*.msi'
-      'Bin/*/corehost/*.msi'
-      'Bin/*/packages/*.pkg'
-      'Bin/*/corehost/*.pkg'
-      'Bin/*/packages/*.exe'
-      'Bin/*/corehost/*.exe'
-      'Bin/*/packages/*.nupkg'
-      'Bin/*/corehost/*.nupkg'
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
       targetFolder: $(Build.ArtifactStagingDirectory)
   - task: PublishBuildArtifacts@1
     inputs:
@@ -255,20 +253,20 @@ jobs:
   - task: CopyFiles@2
     inputs:
       contents: |
-      'Bin/*/packages/*.tar.gz'
-      'Bin/*/corehost/*.tar.gz'
-      'Bin/*/packages/*.zip'
-      'Bin/*/corehost/*.zip'
-      'Bin/*/packages/*.deb'
-      'Bin/*/corehost/*.deb'
-      'Bin/*/packages/*.msi'
-      'Bin/*/corehost/*.msi'
-      'Bin/*/packages/*.pkg'
-      'Bin/*/corehost/*.pkg'
-      'Bin/*/packages/*.exe'
-      'Bin/*/corehost/*.exe'
-      'Bin/*/packages/*.nupkg'
-      'Bin/*/corehost/*.nupkg'
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
       targetFolder: $(Build.ArtifactStagingDirectory)
   - task: PublishBuildArtifacts@1
     inputs:
