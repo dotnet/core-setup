@@ -1,8 +1,15 @@
 trigger:
 - release/2.1
+- release/2.1
 
 pr:
 - release/2.1
+- release/2.2
+
+resources:
+  containers:
+  - container: MuslContainer
+    image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-3148f11-20171119021156
 
 jobs:
 - job: debug_windows_nt_arm
@@ -206,37 +213,6 @@ jobs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)'
       artifactName: release_osx_x64
 
-- job: release_tizen_armel
-  displayName: Tizen armel Release Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - checkout: self
-    clean: true
-  - script: docker run -e ROOTFS_DIR=/crossrootfs/armel.tizen.build --name ubuntu-16.04-cross-e435274-20180426002255-tizen-rootfs-5.0m1 --rm -v $(Build.SourcesDirectory):/src/core-setup -w=/src/core-setup tizendotnet/dotnet-buildtools-prereqs:ubuntu-16.04-cross-e435274-20180426002255-tizen-rootfs-5.0m1 ./build.sh -ConfigurationGroup=Release -TargetArchitecture=armel -strip-symbols -SkipTests=true -DisableCrossgen=true -PortableBuild=false -CrossBuild=true -- /p:OverridePackageSource=https:%2F%2Ftizen.myget.org/F/dotnet-core/api/v3/index.json /p:OutputRid=tizen.5.0.0-armel
-  - task: CopyFiles@2
-    inputs:
-      contents: |
-        'Bin/*/packages/*.tar.gz'
-        'Bin/*/corehost/*.tar.gz'
-        'Bin/*/packages/*.zip'
-        'Bin/*/corehost/*.zip'
-        'Bin/*/packages/*.deb'
-        'Bin/*/corehost/*.deb'
-        'Bin/*/packages/*.msi'
-        'Bin/*/corehost/*.msi'
-        'Bin/*/packages/*.pkg'
-        'Bin/*/corehost/*.pkg'
-        'Bin/*/packages/*.exe'
-        'Bin/*/corehost/*.exe'
-        'Bin/*/packages/*.nupkg'
-        'Bin/*/corehost/*.nupkg'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: release_tizen_armel
-
 - job: release_windows_nt_x64
   displayName: Windows_NT x64 Release Build
   pool:
@@ -272,3 +248,41 @@ jobs:
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)'
       artifactName: release_windows_nt_x64
+      
+- job: linux_musl_x64
+  displayName: Linux Musl x64
+  container: MuslContainer
+  strategy:
+    matrix:
+      Debug:
+        _BuildConfig: Debug
+      Release:
+        _BuildConfig: Release
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build.sh -ConfigurationGroup=$(_BuildConfig) -TargetArchitecture=x64 -PortableBuild=false -strip-symbols -SkipTests=false -- /p:OutputRid=linux-musl-x64
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: linux_musl_x64
