@@ -188,23 +188,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             }
         }
 
-        [Fact]
-        public void TestOnlyProductBehaviorDisabledByDefault()
-        {
-            // This is using one of the test-only product behaviors, the ability to redirect default install path
-            // but that's just a sample - the goal of the test is to verify that when not explicitly enabled
-            // test-only product behaviors are not working.
-            Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath}")
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable( // Test-only redirection, this should not kick in
-                    Constants.TestOnlyEnvironmentVariables.DefaultInstallPath,
-                    sharedState.ValidInstallRoot)
-                .Execute()
-                .Should().NotHaveStdErrContaining(sharedState.ValidInstallRoot);
-        }
-
         public class SharedTestState : SharedTestStateBase
         {
             public string HostFxrPath { get; }
