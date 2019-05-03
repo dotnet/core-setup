@@ -245,10 +245,16 @@ namespace pal
     bool get_current_module(dll_t *mod);
     bool getenv(const char_t* name, string_t* recv);
     bool get_default_servicing_directory(string_t* recv);
-    
-    bool get_global_dotnet_dirs(std::vector<pal::string_t>* recv);
+
+    // Returns the globally registered install location (if any)
     bool get_dotnet_self_registered_dir(pal::string_t* recv);
+
+    // Returns the default install location for a given platform
     bool get_default_installation_dir(pal::string_t* recv);
+
+    // Returns the global locations to search for SDK/Frameworks - used when multi-level lookup is enabled
+    bool get_global_dotnet_dirs(std::vector<pal::string_t>* recv);
+
     bool get_default_breadcrumb_store(string_t* recv);
     bool is_path_rooted(const string_t& path);
 
