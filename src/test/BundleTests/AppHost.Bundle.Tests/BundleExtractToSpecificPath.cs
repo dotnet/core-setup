@@ -4,12 +4,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Threading;
 using Xunit;
 using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.DotNet.CoreSetup.Test;
+using BundleTests.Helpers;
 
-namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
+namespace AppHost.Bundle.Tests
 {
     public class BundleExtractToSpecificPath : IClassFixture<BundleExtractToSpecificPath.SharedTestState>
     {
@@ -20,57 +23,36 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             sharedTestState = fixture;
         }
 
-        private static string GetHostName(TestProjectFixture fixture)
-        {
-            return Path.GetFileName(fixture.TestProject.AppExe);
-        }
-
-        private static string GetPublishPath(TestProjectFixture fixture)
-        {
-            return Path.Combine(fixture.TestProject.ProjectDirectory, "publish");
-        }
-
-        private static DirectoryInfo GetBundleDir(TestProjectFixture fixture)
-        {
-            return Directory.CreateDirectory(Path.Combine(fixture.TestProject.ProjectDirectory, "bundle"));
-        }
-
-        private static DirectoryInfo GetExtractDir(TestProjectFixture fixture)
-        {
-            return Directory.CreateDirectory(Path.Combine(fixture.TestProject.ProjectDirectory, "extract"));
-        }
-
         [Fact]
         private void Bundle_Extraction_To_Specific_Path_Succeeds()
         {
             var fixture = sharedTestState.TestFixture.Copy();
-            var hostName = GetHostName(fixture);
+            var hostName = BundleHelper.GetHostName(fixture);
             var appName = Path.GetFileNameWithoutExtension(hostName);
-            string publishPath = GetPublishPath(fixture);
+            string publishPath = BundleHelper.GetPublishPath(fixture);
 
             // Publish the bundle
-            var bundleDir = GetBundleDir(fixture);
+            var bundleDir = BundleHelper.GetBundleDir(fixture);
             var bundler = new Microsoft.NET.HostModel.Bundle.Bundler(hostName, bundleDir.FullName);
             string singleFile = bundler.GenerateBundle(publishPath);
 
             // Compute bundled files
-            var bundledFiles = new List<string>(bundler.BundleManifest.Files.Count);
-            bundler.BundleManifest.Files.ForEach(file => bundledFiles.Add(file.RelativePath));
+            var bundledFiles = bundler.BundleManifest.Files.Select(file => file.RelativePath).ToList();
 
             // Verify expected files in the bundle directory
             bundleDir.Should().HaveFile(hostName);
             bundleDir.Should().NotHaveFiles(bundledFiles);
 
             // Create a directory for extraction.
-            var extractBaseDir = GetExtractDir(fixture);
+            var extractBaseDir = BundleHelper.GetExtractDir(fixture);
             extractBaseDir.Should().NotHaveDirectory(appName);
 
-            // Run the bunded app for the first time, and extract files to 
+            // Run the bundled app for the first time, and extract files to 
             // $DOTNET_BUNDLE_EXTRACT_BASE_DIR/<app>/bundle-id
-            Environment.SetEnvironmentVariable("DOTNET_BUNDLE_EXTRACT_BASE_DIR", extractBaseDir.FullName);
             Command.Create(singleFile)
                 .CaptureStdErr()
                 .CaptureStdOut()
+                .EnvironmentVariable(BundleHelper.DotnetBundleExtractBaseEnvVariable, extractBaseDir.FullName)
                 .Execute()
                 .Should()
                 .Pass()
@@ -87,24 +69,24 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         private void Bundle_extraction_is_reused()
         {
             var fixture = sharedTestState.TestFixture.Copy();
-            var hostName = GetHostName(fixture);
+            var hostName = BundleHelper.GetHostName(fixture);
             var appName = Path.GetFileNameWithoutExtension(hostName);
-            string publishPath = GetPublishPath(fixture);
+            string publishPath = BundleHelper.GetPublishPath(fixture);
 
             // Publish the bundle
-            var bundleDir = GetBundleDir(fixture);
+            var bundleDir = BundleHelper.GetBundleDir(fixture);
             var bundler = new Microsoft.NET.HostModel.Bundle.Bundler(hostName, bundleDir.FullName);
             string singleFile = bundler.GenerateBundle(publishPath);
 
             // Create a directory for extraction.
-            var extractBaseDir = GetExtractDir(fixture);
+            var extractBaseDir = BundleHelper.GetExtractDir(fixture);
 
             // Run the bunded app for the first time, and extract files to 
             // $DOTNET_BUNDLE_EXTRACT_BASE_DIR/<app>/bundle-id
-            Environment.SetEnvironmentVariable("DOTNET_BUNDLE_EXTRACT_BASE_DIR", extractBaseDir.FullName);
             Command.Create(singleFile)
                 .CaptureStdErr()
                 .CaptureStdOut()
+                .EnvironmentVariable(BundleHelper.DotnetBundleExtractBaseEnvVariable, extractBaseDir.FullName)
                 .Execute()
                 .Should()
                 .Pass()
@@ -126,6 +108,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             Command.Create(singleFile)
                 .CaptureStdErr()
                 .CaptureStdOut()
+                .EnvironmentVariable(BundleHelper.DotnetBundleExtractBaseEnvVariable, extractBaseDir.FullName)
                 .Execute()
                 .Should()
                 .Pass()
@@ -148,7 +131,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 TestFixture
                     .EnsureRestoredForRid(TestFixture.CurrentRid, RepoDirectories.CorehostPackages)
                     .PublishProject(runtime: TestFixture.CurrentRid, 
-                                    outputDirectory: GetPublishPath(TestFixture));
+                                    outputDirectory: BundleHelper.GetPublishPath(TestFixture));
             }
 
             public void Dispose()

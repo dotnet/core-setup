@@ -269,7 +269,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 publishArgs.Add($"/p:NETCoreAppFramework={framework}");
             }
 
-            if(selfContained != null)
+            if (selfContained != null)
             {
                 publishArgs.Add("--self-contained");
                 publishArgs.Add(selfContained);

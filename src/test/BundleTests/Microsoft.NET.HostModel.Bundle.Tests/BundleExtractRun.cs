@@ -3,12 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Xunit;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.CoreSetup.Test;
 using Microsoft.NET.HostModel.Bundle;
+using BundleTests.Helpers;
 
 namespace Microsoft.NET.HostModel.Tests
 {
@@ -19,21 +19,6 @@ namespace Microsoft.NET.HostModel.Tests
         public BundleExtractRun(BundleExtractRun.SharedTestState fixture)
         {
             sharedTestState = fixture;
-        }
-
-        private static string GetHostName(TestProjectFixture fixture)
-        {
-            return Path.GetFileName(fixture.TestProject.AppExe);
-        }
-
-        private static string GetPublishPath(TestProjectFixture fixture)
-        {
-            return Path.Combine(fixture.TestProject.ProjectDirectory, "publish");
-        }
-
-        private static string GetBundlePath(TestProjectFixture fixture)
-        {
-            return Directory.CreateDirectory(Path.Combine(fixture.TestProject.ProjectDirectory, "bundle")).FullName;
         }
 
         public void RunTheApp(string path)
@@ -50,7 +35,7 @@ namespace Microsoft.NET.HostModel.Tests
 
         private void BundleExtractAndRun(TestProjectFixture fixture, string publishDir, string singleFileDir)
         {
-            var hostName = GetHostName(fixture);
+            var hostName = BundleHelper.GetHostName(fixture);
 
             // Run the App normally
             RunTheApp(Path.Combine(publishDir, hostName));
@@ -78,8 +63,8 @@ namespace Microsoft.NET.HostModel.Tests
         {
             var fixture = sharedTestState.TestFixture.Copy();
 
-            string publishDir = GetPublishPath(fixture);
-            string outputDir = GetBundlePath(fixture);
+            string publishDir = BundleHelper.GetPublishPath(fixture);
+            string outputDir = BundleHelper.GetBundleDir(fixture).FullName;
 
             BundleExtractAndRun(fixture, publishDir, outputDir);
         }
@@ -89,8 +74,8 @@ namespace Microsoft.NET.HostModel.Tests
         {
             var fixture = sharedTestState.TestFixture.Copy();
 
-            string publishDir = RelativePath(GetPublishPath(fixture));
-            string outputDir = RelativePath(GetBundlePath(fixture));
+            string publishDir = RelativePath(BundleHelper.GetPublishPath(fixture));
+            string outputDir = RelativePath(BundleHelper.GetBundleDir(fixture).FullName);
 
             BundleExtractAndRun(fixture, publishDir, outputDir);
         }
@@ -100,8 +85,8 @@ namespace Microsoft.NET.HostModel.Tests
         {
             var fixture = sharedTestState.TestFixture.Copy();
 
-            string publishDir = RelativePath(GetPublishPath(fixture)) + Path.DirectorySeparatorChar;
-            string outputDir = RelativePath(GetBundlePath(fixture)) + Path.DirectorySeparatorChar;
+            string publishDir = RelativePath(BundleHelper.GetPublishPath(fixture)) + Path.DirectorySeparatorChar;
+            string outputDir = RelativePath(BundleHelper.GetBundleDir(fixture).FullName) + Path.DirectorySeparatorChar;
 
             BundleExtractAndRun(fixture, publishDir, outputDir);
         }
@@ -119,7 +104,7 @@ namespace Microsoft.NET.HostModel.Tests
                 TestFixture
                     .EnsureRestoredForRid(TestFixture.CurrentRid, RepoDirectories.CorehostPackages)
                     .PublishProject(runtime: TestFixture.CurrentRid,
-                                    outputDirectory: GetPublishPath(TestFixture));
+                                    outputDirectory: BundleHelper.GetPublishPath(TestFixture));
             }
 
             public void Dispose()

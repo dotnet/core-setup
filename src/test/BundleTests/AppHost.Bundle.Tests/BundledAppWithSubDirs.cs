@@ -3,11 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.IO;
 using Xunit;
 using Microsoft.DotNet.Cli.Build.Framework;
+using BundleTests.Helpers;
+using Microsoft.DotNet.CoreSetup.Test;
 
-namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
+namespace AppHost.Bundle.Tests
 {
     public class BundledAppWithSubDirs : IClassFixture<BundledAppWithSubDirs.SharedTestState>
     {
@@ -16,35 +17,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         public BundledAppWithSubDirs(SharedTestState fixture)
         {
             sharedTestState = fixture;
-        }
-
-        private static string GetHostName(TestProjectFixture fixture)
-        {
-            return Path.GetFileName(fixture.TestProject.AppExe);
-        }
-
-        private static string GetPublishPath(TestProjectFixture fixture)
-        {
-            return Path.Combine(fixture.TestProject.ProjectDirectory, "publish");
-        }
-
-        private static DirectoryInfo GetBundleDir(TestProjectFixture fixture)
-        {
-            return Directory.CreateDirectory(Path.Combine(fixture.TestProject.ProjectDirectory, "bundle"));
-        }
-
-        // Bundle to a single-file
-        // This step should be removed in favor of publishing with /p:PublishSingleFile=true
-        // once core-setup tests use 3.0 SDK 
-        string BundleApp(TestProjectFixture fixture)
-        {
-            var hostName = GetHostName(fixture);
-            string publishPath = GetPublishPath(fixture);
-            var bundleDir = GetBundleDir(fixture);
-
-            var bundler = new Microsoft.NET.HostModel.Bundle.Bundler(hostName, bundleDir.FullName);
-            string singleFile = bundler.GenerateBundle(publishPath);
-            return singleFile;
         }
 
         private void RunTheApp(string path)
@@ -63,7 +35,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         private void Bundled_Framework_dependent_App_Run_Succeeds()
         {
             var fixture = sharedTestState.TestFrameworkDependentFixture.Copy();
-            var singleFile = BundleApp(fixture);
+            var singleFile = BundleHelper.BundleApp(fixture);
 
             // Run the bundled app (extract files)
             RunTheApp(singleFile);
@@ -76,7 +48,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         private void Bundled_Self_Contained_App_Run_Succeeds()
         {
             var fixture = sharedTestState.TestSelfContainedFixture.Copy();
-            var singleFile = BundleApp(fixture);
+            var singleFile = BundleHelper.BundleApp(fixture);
 
             // Run the bundled app (extract files)
             RunTheApp(singleFile);
@@ -99,13 +71,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 TestFrameworkDependentFixture
                     .EnsureRestoredForRid(TestFrameworkDependentFixture.CurrentRid, RepoDirectories.CorehostPackages)
                     .PublishProject(runtime: TestFrameworkDependentFixture.CurrentRid,
-                                    outputDirectory: GetPublishPath(TestFrameworkDependentFixture));
+                                    outputDirectory: BundleHelper.GetPublishPath(TestFrameworkDependentFixture));
 
                 TestSelfContainedFixture = new TestProjectFixture("AppWithSubDirs", RepoDirectories);
                 TestSelfContainedFixture
                     .EnsureRestoredForRid(TestSelfContainedFixture.CurrentRid, RepoDirectories.CorehostPackages)
                     .PublishProject(runtime: TestSelfContainedFixture.CurrentRid,
-                                    outputDirectory: GetPublishPath(TestSelfContainedFixture));
+                                    outputDirectory: BundleHelper.GetPublishPath(TestSelfContainedFixture));
             }
 
             public void Dispose()

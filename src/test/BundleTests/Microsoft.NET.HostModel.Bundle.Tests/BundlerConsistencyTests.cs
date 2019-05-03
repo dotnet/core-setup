@@ -8,6 +8,7 @@ using System.IO;
 using Xunit;
 using Microsoft.DotNet.CoreSetup.Test;
 using Microsoft.NET.HostModel.Bundle;
+using BundleTests.Helpers;
 
 namespace Microsoft.NET.HostModel.Tests
 {
@@ -20,28 +21,13 @@ namespace Microsoft.NET.HostModel.Tests
             sharedTestState = fixture;
         }
 
-        private static string GetHostName(TestProjectFixture fixture)
-        {
-            return Path.GetFileName(fixture.TestProject.AppExe);
-        }
-
-        private static string GetPublishPath(TestProjectFixture fixture)
-        {
-            return Path.Combine(fixture.TestProject.ProjectDirectory, "publish");
-        }
-
-        private static DirectoryInfo GetBundleDir(TestProjectFixture fixture)
-        {
-            return Directory.CreateDirectory(Path.Combine(fixture.TestProject.ProjectDirectory, "bundle"));
-        }
-
         [Fact]
         public void TestWithEmptySpecFails()
         {
             var fixture = sharedTestState.TestFixture.Copy();
 
-            var hostName = GetHostName(fixture);
-            var bundleDir = GetBundleDir(fixture);
+            var hostName = BundleHelper.GetHostName(fixture);
+            var bundleDir = BundleHelper.GetBundleDir(fixture);
             Bundler bundler = new Bundler(hostName, bundleDir.FullName);
 
             FileSpec[][] invalidSpecs =
@@ -62,10 +48,10 @@ namespace Microsoft.NET.HostModel.Tests
         {
             var fixture = sharedTestState.TestFixture.Copy();
 
-            var hostName = GetHostName(fixture);
+            var hostName = BundleHelper.GetHostName(fixture);
             var appName = Path.GetFileNameWithoutExtension(hostName);
-            string publishPath = GetPublishPath(fixture);
-            var bundleDir = GetBundleDir(fixture);
+            string publishPath = BundleHelper.GetPublishPath(fixture);
+            var bundleDir = BundleHelper.GetBundleDir(fixture);
 
             // Generate a file specification without the apphost
             var fileSpecs = new List<FileSpec>();
@@ -84,10 +70,10 @@ namespace Microsoft.NET.HostModel.Tests
         {
             var fixture = sharedTestState.TestFixture.Copy();
 
-            var hostName = GetHostName(fixture);
+            var hostName = BundleHelper.GetHostName(fixture);
             var appName = Path.GetFileNameWithoutExtension(hostName);
-            string publishPath = GetPublishPath(fixture);
-            var bundleDir = GetBundleDir(fixture);
+            string publishPath = BundleHelper.GetPublishPath(fixture);
+            var bundleDir = BundleHelper.GetBundleDir(fixture);
             
             // Make up a app.runtimeconfig.dev.json file in the publish directory.
             File.Copy(Path.Combine(publishPath, $"{appName}.runtimeconfig.json"), 
@@ -111,10 +97,10 @@ namespace Microsoft.NET.HostModel.Tests
         {
             var fixture = sharedTestState.TestFixture.Copy();
 
-            var hostName = GetHostName(fixture);
-            var hostExe = Path.Combine(GetPublishPath(fixture), hostName);
+            var hostName = BundleHelper.GetHostName(fixture);
+            var hostExe = Path.Combine(BundleHelper.GetPublishPath(fixture), hostName);
 
-            var bundleDir = GetBundleDir(fixture);
+            var bundleDir = BundleHelper.GetBundleDir(fixture);
             Extractor extractor = new Extractor(hostExe, "extract");
             Assert.Throws<BundleException>(() => extractor.ExtractFiles());
         }
@@ -124,11 +110,11 @@ namespace Microsoft.NET.HostModel.Tests
         {
             var fixture = sharedTestState.TestFixture.Copy();
 
-            var hostName = GetHostName(fixture);
-            var bundleDir = GetBundleDir(fixture);
+            var hostName = BundleHelper.GetHostName(fixture);
+            var bundleDir = BundleHelper.GetBundleDir(fixture);
 
             var bundler = new Bundler(hostName, bundleDir.FullName);
-            string singleFile = bundler.GenerateBundle(GetPublishPath(fixture));
+            string singleFile = bundler.GenerateBundle(BundleHelper.GetPublishPath(fixture));
 
             var expectedFiles = new List<string>(bundler.BundleManifest.Files.Count);
             expectedFiles.Add(hostName);
@@ -151,7 +137,7 @@ namespace Microsoft.NET.HostModel.Tests
                 TestFixture
                     .EnsureRestoredForRid(TestFixture.CurrentRid, RepoDirectories.CorehostPackages)
                     .PublishProject(runtime: TestFixture.CurrentRid,
-                                    outputDirectory: GetPublishPath(TestFixture));
+                                    outputDirectory: BundleHelper.GetPublishPath(TestFixture));
             }
 
             public void Dispose()
