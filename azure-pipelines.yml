@@ -259,7 +259,8 @@ jobs:
       Release:
         _BuildConfig: Release
   pool:
-    vmImage: ubuntu-16.04
+    name: NetCoreInternal-Pool
+    queue: buildpool.ubuntu.1604.amd64
   steps:
   - checkout: self
     clean: true
