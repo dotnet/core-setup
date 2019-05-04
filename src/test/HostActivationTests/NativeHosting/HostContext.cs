@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
 {
-    public class HostContext : IClassFixture<HostContext.SharedTestState>
+    public partial class HostContext : IClassFixture<HostContext.SharedTestState>
     {
         public class Scenario
         {
@@ -46,8 +46,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         private const int HostInvalidState = unchecked((int)0x800080a3);
         private const int HostPropertyNotFound = unchecked((int)0x800080a4);
         private const int CoreHostIncompatibleConfig = unchecked((int)0x800080a5);
-        private const int CoreHostAlreadyInitialized = 0x00000001;
-        private const int CoreHostDifferentProperties = 0x00000002;
+        private const int Success_HostAlreadyInitialized = 0x00000001;
+        private const int Success_DifferentRuntimeProperties = 0x00000002;
 
         private readonly SharedTestState sharedState;
 
@@ -62,6 +62,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         [InlineData(CheckProperties.Set)]
         [InlineData(CheckProperties.Remove)]
         [InlineData(CheckProperties.GetAll)]
+        [InlineData(CheckProperties.GetActive)]
+        [InlineData(CheckProperties.GetAllActive)]
         public void RunApp(string checkProperties)
         {
             string newPropertyName = "HOST_TEST_PROPERTY";
@@ -100,6 +102,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         [InlineData(CheckProperties.Set)]
         [InlineData(CheckProperties.Remove)]
         [InlineData(CheckProperties.GetAll)]
+        [InlineData(CheckProperties.GetActive)]
+        [InlineData(CheckProperties.GetAllActive)]
         public void GetDelegate(string checkProperties)
         {
             string newPropertyName = "HOST_TEST_PROPERTY";
@@ -123,7 +127,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
 
             result.Should().Pass()
                 .And.InitializeContextForConfig(sharedState.RuntimeConfigPath)
-                .And.CreateDelegateMock();
+                .And.CreateDelegateMock_COM();
 
             CheckPropertiesValidation propertyValidation = new CheckPropertiesValidation(checkProperties, LogPrefix.Config, SharedTestState.ConfigPropertyName, SharedTestState.ConfigPropertyValue);
             propertyValidation.ValidateActiveContext(result, newPropertyName);
@@ -160,8 +164,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
 
             result.Should().Pass()
                 .And.InitializeContextForConfig(sharedState.RuntimeConfigPath)
-                .And.InitializeSecondaryContext(sharedState.SecondaryRuntimeConfigPath, CoreHostDifferentProperties)
-                .And.CreateDelegateMock();
+                .And.InitializeSecondaryContext(sharedState.SecondaryRuntimeConfigPath, Success_DifferentRuntimeProperties)
+                .And.CreateDelegateMock_COM()
+                .And.CreateDelegateMock_InMemoryAssembly();
 
             CheckPropertiesValidation propertyValidation = new CheckPropertiesValidation(checkProperties, LogPrefix.Config, SharedTestState.ConfigPropertyName, SharedTestState.ConfigPropertyValue);
             propertyValidation.ValidateActiveContext(result, SharedTestState.SecondaryConfigPropertyName);
@@ -214,8 +219,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
 
             result.Should().Pass()
                 .And.ExecuteAssemblyMock(sharedState.AppPath, appArgs)
-                .And.InitializeSecondaryContext(sharedState.RuntimeConfigPath, CoreHostDifferentProperties)
-                .And.CreateDelegateMock();
+                .And.InitializeSecondaryContext(sharedState.RuntimeConfigPath, Success_DifferentRuntimeProperties)
+                .And.CreateDelegateMock_InMemoryAssembly();
 
             CheckPropertiesValidation propertyValidation = new CheckPropertiesValidation(checkProperties, LogPrefix.App, SharedTestState.AppPropertyName, SharedTestState.AppPropertyValue);
             if (scenario == Scenario.Mixed)
@@ -228,27 +233,45 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         }
 
         [Theory]
-        [InlineData(Scenario.ConfigMultiple,  Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMinor, false)]
-        [InlineData(Scenario.ConfigMultiple,  Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMajor, true)]
-        [InlineData(Scenario.ConfigMultiple,  Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestPatch, false)]
-        [InlineData(Scenario.ConfigMultiple,  Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMinor, true)]
-        [InlineData(Scenario.ConfigMultiple,  Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMajor, true)]
-        [InlineData(Scenario.ConfigMultiple,  Constants.MicrosoftNETCoreApp, "3.1.0", Constants.RollForwardSetting.LatestMinor, false)]
-        [InlineData(Scenario.ConfigMultiple,  "UnknownFramework",            "2.2.0", null,                                     null)]
-        [InlineData(Scenario.Mixed,           Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMinor, false)]
-        [InlineData(Scenario.Mixed,           Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMajor, true)]
-        [InlineData(Scenario.Mixed,           Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestPatch, false)]
-        [InlineData(Scenario.Mixed,           Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMinor, true)]
-        [InlineData(Scenario.Mixed,           Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMajor, true)]
-        [InlineData(Scenario.Mixed,           Constants.MicrosoftNETCoreApp, "3.1.0", Constants.RollForwardSetting.LatestMinor, false)]
-        [InlineData(Scenario.Mixed,           "UnknownFramework",            "2.2.0", null,                                     null)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestPatch, false)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.Minor, false)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMinor, false)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.Major, true)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMajor, true)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestPatch, false)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.Minor, true)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMinor, true)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.Major, true)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMajor, true)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "2.2.0", Constants.RollForwardSetting.Disable, true)]
+        [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "3.1.0", Constants.RollForwardSetting.LatestMinor, false)]
+        [InlineData(Scenario.ConfigMultiple, "UnknownFramework", "2.2.0", null, null)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestPatch, false)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.Minor, false)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMinor, false)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.Major, true)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMajor, true)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestPatch, false)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.Minor, true)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMinor, true)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.Major, true)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMajor, true)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "2.2.0", Constants.RollForwardSetting.Disable, true)]
+        [InlineData(Scenario.Mixed, Constants.MicrosoftNETCoreApp, "3.1.0", Constants.RollForwardSetting.LatestMinor, false)]
+        [InlineData(Scenario.Mixed, "UnknownFramework", "2.2.0", null, null)]
+        [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestPatch, false)]
+        [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.Minor, false)]
         [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMinor, false)]
+        [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.Major, true)]
         [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestMajor, true)]
         [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestPatch, false)]
+        [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.Minor, true)]
         [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMinor, true)]
+        [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.Major, true)]
         [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "2.1.0", Constants.RollForwardSetting.LatestMajor, true)]
+        [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "2.2.0", Constants.RollForwardSetting.Disable, true)]
         [InlineData(Scenario.NonContextMixed, Constants.MicrosoftNETCoreApp, "3.1.0", Constants.RollForwardSetting.LatestMinor, false)]
-        [InlineData(Scenario.NonContextMixed, "UnknownFramework",            "2.2.0", null,                                     null)]
+        [InlineData(Scenario.NonContextMixed, "UnknownFramework", "2.2.0", null, null)]
         public void CompatibilityCheck_Frameworks(string scenario, string frameworkName, string version, string rollForward, bool? isCompatibleVersion)
         {
             if (scenario != Scenario.ConfigMultiple && scenario != Scenario.Mixed && scenario != Scenario.NonContextMixed)
@@ -294,7 +317,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 case Scenario.ConfigMultiple:
                     result.Should()
                         .InitializeContextForConfig(appOrConfigPath)
-                        .And.CreateDelegateMock();
+                        .And.CreateDelegateMock_COM();
                     break;
                 case Scenario.Mixed:
                     result.Should()
@@ -312,7 +335,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 if (isCompatibleVersion.Value)
                 {
                     result.Should().Pass()
-                        .And.InitializeSecondaryContext(frameworkCompatConfig, CoreHostAlreadyInitialized);
+                        .And.InitializeSecondaryContext(frameworkCompatConfig, Success_HostAlreadyInitialized)
+                        .And.CreateDelegateMock_InMemoryAssembly();
                 }
                 else
                 {
@@ -330,27 +354,31 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         }
 
         [Theory]
-        [InlineData(Scenario.ConfigMultiple,  SharedTestState.ConfigPropertyName, SharedTestState.ConfigPropertyValue,   SharedTestState.ConfigPropertyValue)]
-        [InlineData(Scenario.ConfigMultiple,  SharedTestState.ConfigPropertyName, "NEW_PROPERTY_VALUE",                  SharedTestState.ConfigPropertyValue)]
-        [InlineData(Scenario.ConfigMultiple,  "NEW_PROPERTY_NAME",                "NEW_PROPERTY_VALUE",                  null)]
-        [InlineData(Scenario.Mixed,           SharedTestState.AppPropertyName,    SharedTestState.AppPropertyValue,      SharedTestState.AppPropertyValue)]
-        [InlineData(Scenario.Mixed,           SharedTestState.AppPropertyName,    "NEW_PROPERTY_VALUE",                  SharedTestState.AppPropertyValue)]
-        [InlineData(Scenario.Mixed,           "NEW_PROPERTY_NAME",                "NEW_PROPERTY_VALUE",                  null)]
-        [InlineData(Scenario.NonContextMixed, SharedTestState.AppPropertyName,    SharedTestState.AppPropertyValue,      SharedTestState.AppPropertyValue)]
-        [InlineData(Scenario.NonContextMixed, SharedTestState.AppPropertyName,    "NEW_PROPERTY_VALUE",                  SharedTestState.AppPropertyValue)]
-        [InlineData(Scenario.NonContextMixed, "NEW_PROPERTY_NAME",                "NEW_PROPERTY_VALUE",                  null)]
-        public void CompatibilityCheck_Properties(string scenario, string propertyName, string propertyValue, string existingValue)
+        [MemberData(nameof(GetPropertyCompatibilityTestData), parameters: new object[] { Scenario.ConfigMultiple, false })]
+        [MemberData(nameof(GetPropertyCompatibilityTestData), parameters: new object[] { Scenario.ConfigMultiple, true })]
+        [MemberData(nameof(GetPropertyCompatibilityTestData), parameters: new object[] { Scenario.Mixed, false })]
+        [MemberData(nameof(GetPropertyCompatibilityTestData), parameters: new object[] { Scenario.Mixed, true })]
+        [MemberData(nameof(GetPropertyCompatibilityTestData), parameters: new object[] { Scenario.NonContextMixed, false })]
+        [MemberData(nameof(GetPropertyCompatibilityTestData), parameters: new object[] { Scenario.NonContextMixed, true })]
+        public void CompatibilityCheck_Properties(string scenario, bool hasMultipleProperties, PropertyTestData[] properties)
         {
             if (scenario != Scenario.ConfigMultiple && scenario != Scenario.Mixed && scenario != Scenario.NonContextMixed)
                 throw new Exception($"Unexpected scenario: {scenario}");
 
             string propertyCompatConfig = Path.Combine(sharedState.BaseDirectory, "propertyCompat.runtimeconfig.json");
-            RuntimeConfig.FromFile(propertyCompatConfig)
-                .WithFramework(new RuntimeConfig.Framework(Constants.MicrosoftNETCoreApp, SharedTestState.NetCoreAppVersion))
-                .WithProperty(propertyName, propertyValue)
-                .Save();
+            var config = RuntimeConfig.FromFile(propertyCompatConfig)
+                .WithFramework(new RuntimeConfig.Framework(Constants.MicrosoftNETCoreApp, SharedTestState.NetCoreAppVersion));
 
-            string appOrConfigPath = scenario == Scenario.ConfigMultiple ? sharedState.RuntimeConfigPath : sharedState.AppPath;
+            foreach (var kv in properties)
+            {
+                config.WithProperty(kv.Name, kv.NewValue);
+            }
+
+            config.Save();
+
+            string appOrConfigPath = scenario == Scenario.ConfigMultiple
+                ? hasMultipleProperties ? sharedState.RuntimeConfigPath_MultiProperty : sharedState.RuntimeConfigPath
+                : hasMultipleProperties ? sharedState.AppPath_MultiProperty : sharedState.AppPath;
             string[] args =
             {
                 HostContextArg,
@@ -379,13 +407,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 File.Delete(propertyCompatConfig);
             }
 
-            result.Should().Pass();
+            result.Should().Pass()
+                .And.CreateDelegateMock_InMemoryAssembly();
+
             switch (scenario)
             {
                 case Scenario.ConfigMultiple:
                     result.Should()
                         .InitializeContextForConfig(appOrConfigPath)
-                        .And.CreateDelegateMock();
+                        .And.CreateDelegateMock_COM();
                     break;
                 case Scenario.Mixed:
                     result.Should()
@@ -398,23 +428,39 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                     break;
             }
 
-            if (existingValue == null)
+            bool shouldHaveDifferentProperties = false;
+            foreach(var prop in properties)
             {
-                result.Should()
-                    .InitializeSecondaryContext(propertyCompatConfig, CoreHostDifferentProperties)
-                    .And.HaveStdErrContaining($"The property [{propertyName}] is not present in the previously loaded runtime");
+                if (prop.ExistingValue == null)
+                {
+                    shouldHaveDifferentProperties = true;
+                    result.Should()
+                        .HaveStdErrContaining($"The property [{prop.Name}] is not present in the previously loaded runtime");
+                }
+                else if (!prop.ExistingValue.Equals(prop.NewValue))
+                {
+                    shouldHaveDifferentProperties = true;
+                    result.Should()
+                        .InitializeSecondaryContext(propertyCompatConfig, Success_DifferentRuntimeProperties)
+                        .And.HaveStdErrContaining($"The property [{prop.Name}] has a different value [{prop.NewValue}] from that in the previously loaded runtime [{prop.ExistingValue}]");
+                }
             }
-            else if (existingValue.Equals(propertyValue))
+
+            if (shouldHaveDifferentProperties)
             {
                 result.Should()
-                    .InitializeSecondaryContext(propertyCompatConfig, CoreHostAlreadyInitialized)
-                    .And.HaveStdErrContaining("All specified properties match those in the previously loaded runtime");
+                    .InitializeSecondaryContext(propertyCompatConfig, Success_DifferentRuntimeProperties);
             }
             else
             {
                 result.Should()
-                    .InitializeSecondaryContext(propertyCompatConfig, CoreHostDifferentProperties)
-                    .And.HaveStdErrContaining($"The property [{propertyName}] has a different value [{propertyValue}] from that in the previously loaded runtime [{existingValue}]");
+                    .InitializeSecondaryContext(propertyCompatConfig, Success_HostAlreadyInitialized);
+
+                if (properties.Length > 0)
+                {
+                    result.Should()
+                        .HaveStdErrContaining("All specified properties match those in the previously loaded runtime");
+                }
             }
         }
 
@@ -534,11 +580,20 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             public string RuntimeConfigPath { get; }
             public string SecondaryRuntimeConfigPath { get; }
 
+            public string AppPath_MultiProperty { get; }
+            public string RuntimeConfigPath_MultiProperty { get; }
+
             public const string AppPropertyName = "APP_TEST_PROPERTY";
             public const string AppPropertyValue = "VALUE_FROM_APP";
 
+            public const string AppMultiPropertyName = "APP_TEST_PROPERTY_2";
+            public const string AppMultiPropertyValue = "VALUE_FROM_APP_2";
+
             public const string ConfigPropertyName = "CONFIG_TEST_PROPERTY";
             public const string ConfigPropertyValue = "VALUE_FROM_CONFIG";
+
+            public const string ConfigMultiPropertyName = "CONFIG_TEST_PROPERTY_2";
+            public const string ConfigMultiPropertyValue = "VALUE_FROM_CONFIG_2";
 
             public const string SecondaryConfigPropertyName = "SECONDARY_CONFIG_TEST_PROPERTY";
             public const string SecondaryConfigPropertyValue = "VALUE_FROM_SECONDARY_CONFIG";
@@ -566,12 +621,28 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                     .WithProperty(AppPropertyName, AppPropertyValue)
                     .Save();
 
+                AppPath_MultiProperty = Path.Combine(appDir, "App_MultiProperty.dll");
+                File.WriteAllText(AppPath_MultiProperty, string.Empty);
+
+                RuntimeConfig.FromFile(Path.Combine(appDir, "App_MultiProperty.runtimeconfig.json"))
+                    .WithFramework(new RuntimeConfig.Framework(Constants.MicrosoftNETCoreApp, NetCoreAppVersion))
+                    .WithProperty(AppPropertyName, AppPropertyValue)
+                    .WithProperty(AppMultiPropertyName, AppMultiPropertyValue)
+                    .Save();
+
                 string configDir = Path.Combine(BaseDirectory, "config");
                 Directory.CreateDirectory(configDir);
                 RuntimeConfigPath = Path.Combine(configDir, "Component.runtimeconfig.json");
                 RuntimeConfig.FromFile(RuntimeConfigPath)
                     .WithFramework(new RuntimeConfig.Framework(Constants.MicrosoftNETCoreApp, NetCoreAppVersion))
                     .WithProperty(ConfigPropertyName, ConfigPropertyValue)
+                    .Save();
+
+                RuntimeConfigPath_MultiProperty = Path.Combine(configDir, "Component_MultiProperty.runtimeconfig.json");
+                RuntimeConfig.FromFile(RuntimeConfigPath_MultiProperty)
+                    .WithFramework(new RuntimeConfig.Framework(Constants.MicrosoftNETCoreApp, NetCoreAppVersion))
+                    .WithProperty(ConfigPropertyName, ConfigPropertyValue)
+                    .WithProperty(ConfigMultiPropertyName, ConfigMultiPropertyValue)
                     .Save();
 
                 string secondaryDir = Path.Combine(BaseDirectory, "secondary");

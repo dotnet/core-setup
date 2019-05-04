@@ -30,6 +30,22 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 .And.HaveStdOutContaining("mock coreclr_create_delegate() called");
         }
 
+        public static AndConstraint<CommandResultAssertions> CreateDelegateMock_COM(this CommandResultAssertions assertion)
+        {
+            return assertion.CreateDelegateMock()
+                .And.HaveStdOutContaining("mock entryPointAssemblyName:System.Private.CoreLib")
+                .And.HaveStdOutContaining("mock entryPointTypeName:Internal.Runtime.InteropServices.ComActivator")
+                .And.HaveStdOutContaining("mock entryPointMethodName:GetClassFactoryForTypeInternal");
+        }
+
+        public static AndConstraint<CommandResultAssertions> CreateDelegateMock_InMemoryAssembly(this CommandResultAssertions assertion)
+        {
+            return assertion.CreateDelegateMock()
+                .And.HaveStdOutContaining("mock entryPointAssemblyName:System.Private.CoreLib")
+                .And.HaveStdOutContaining("mock entryPointTypeName:Internal.Runtime.InteropServices.InMemoryAssemblyLoader")
+                .And.HaveStdOutContaining("mock entryPointMethodName:LoadInMemoryAssembly");
+        }
+
         public static AndConstraint<CommandResultAssertions> HavePropertyMock(this CommandResultAssertions assertion, string name, string value)
         {
             return assertion.HaveStdOutContaining($"mock property[{name}] = {value}");

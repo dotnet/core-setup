@@ -16,6 +16,9 @@ namespace
     const pal::char_t *config_log_prefix = _X("[CONFIG] ");
     const pal::char_t *secondary_log_prefix = _X("[SECONDARY] ");
 
+    const hostfxr_delegate_type first_delegate_type = hostfxr_delegate_type::com_activation;
+    const hostfxr_delegate_type secondary_delegate_type = hostfxr_delegate_type::load_in_memory_assembly;
+
     class hostfxr_exports
     {
     public:
@@ -201,6 +204,7 @@ namespace
         const pal::char_t *config_path,
         int argc,
         const pal::char_t *argv[],
+        hostfxr_delegate_type delegate_type,
         const pal::char_t *log_prefix,
         pal::stringstream_t &test_output)
     {
@@ -217,7 +221,7 @@ namespace
         inspect_modify_properties(check_properties, hostfxr, handle, argc, argv, log_prefix, test_output);
 
         void *delegate;
-        rc = hostfxr.get_delegate(handle, hostfxr_delegate_type::com_activation, &delegate);
+        rc = hostfxr.get_delegate(handle, delegate_type, &delegate);
         if (rc != StatusCode::Success)
             test_output << log_prefix << _X("hostfxr_get_runtime_delegate failed: ") << std::hex << std::showbase << rc << std::endl;
 
@@ -300,7 +304,7 @@ bool host_context_test::config(
 {
     hostfxr_exports hostfxr { hostfxr_path };
 
-    return config_test(hostfxr, check_properties, config_path, argc, argv, config_log_prefix, test_output);
+    return config_test(hostfxr, check_properties, config_path, argc, argv, first_delegate_type, config_log_prefix, test_output);
 }
 
 bool host_context_test::config_multiple(
@@ -314,10 +318,10 @@ bool host_context_test::config_multiple(
 {
     hostfxr_exports hostfxr { hostfxr_path };
 
-    if (!config_test(hostfxr, check_properties, config_path, argc, argv, config_log_prefix, test_output))
+    if (!config_test(hostfxr, check_properties, config_path, argc, argv, first_delegate_type, config_log_prefix, test_output))
         return false;
 
-    return config_test(hostfxr, check_properties, secondary_config_path, argc, argv, secondary_log_prefix, test_output);
+    return config_test(hostfxr, check_properties, secondary_config_path, argc, argv, secondary_delegate_type, secondary_log_prefix, test_output);
 }
 
 namespace
@@ -397,7 +401,7 @@ bool host_context_test::mixed(
     };
     std::thread app_start = std::thread(run_app);
 
-    bool success = config_test(hostfxr, check_properties, config_path, argc, argv, secondary_log_prefix, test_output);
+    bool success = config_test(hostfxr, check_properties, config_path, argc, argv, secondary_delegate_type, secondary_log_prefix, test_output);
     block_mock.unblock();
     app_start.join();
     test_output << run_app_output.str();
@@ -439,7 +443,7 @@ bool host_context_test::non_context_mixed(
 
     wait_for_signal_mock_execute_assembly();
 
-    bool success = config_test(hostfxr, check_properties, config_path, argc, argv, secondary_log_prefix, test_output);
+    bool success = config_test(hostfxr, check_properties, config_path, argc, argv, secondary_delegate_type, secondary_log_prefix, test_output);
     block_mock.unblock();
     app_start.join();
     test_output << run_app_output.str();
