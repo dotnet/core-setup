@@ -477,7 +477,7 @@ bool test_only_getenv(const pal::char_t* name, pal::string_t* recv)
     //  - Default value is 'd' (stands for disabled) - test only behavior is disabled
     //  - To enable test-only behaviors set it to 'e' (stands for enabled)
     constexpr size_t EMBED_SIZE = sizeof(TEST_ONLY_MARKER) / sizeof(TEST_ONLY_MARKER[0]);
-    static char embed[EMBED_SIZE] = TEST_ONLY_MARKER;
+    volatile static char embed[EMBED_SIZE] = TEST_ONLY_MARKER;
 
     if (embed[0] != 'e')
     {
