@@ -532,7 +532,7 @@ bool fx_resolver_t::is_config_compatible_with_frameworks(
         auto iter = existing_framework_versions_by_name.find(fx_name);
         if (iter == existing_framework_versions_by_name.cend())
         {
-            trace::error(_X("The specified framework '%s' is not present in the previously loaded runtime."), fx_name.c_str());
+            display_missing_loaded_framework_error(fx_name);
             return false;
         }
 
@@ -541,13 +541,7 @@ bool fx_resolver_t::is_config_compatible_with_frameworks(
         if (existing_version < fx_ref.get_fx_version_number()
             || !fx_ref.is_compatible_with_higher_version(existing_version))
         {
-            trace::error(_X("The specified framework '%s', version '%s', apply_patches=%d, roll_forward=%s is incompatible with the previously loaded version '%s'."),
-                fx_name.c_str(),
-                fx_ref.get_fx_version().c_str(),
-                fx_ref.get_apply_patches(),
-                roll_forward_option_to_string(fx_ref.get_roll_forward()).c_str(),
-                existing_version.as_str().c_str());
-
+            display_incompatible_loaded_framework_error(existing_version.as_str(), fx_ref);
             return false;
         }
 

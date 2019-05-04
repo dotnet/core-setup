@@ -109,7 +109,7 @@ namespace
             {
                 trace::info(_X("Host context has already been initialized"));
                 assert(existing_context->coreclr != nullptr);
-                return StatusCode::CoreHostAlreadyInitialized;
+                return StatusCode::Success_HostAlreadyInitialized;
             }
 
             g_context_initializing.store(true);
@@ -583,9 +583,9 @@ namespace
 //      [out] if initialization is successful, populated with a contract for performing operations on hostpolicy
 //
 // Return value:
-//    Success                     - Initialization was succesful
-//    CoreHostAlreadyInitialized  - Request is compatible with already initialized hostpolicy
-//    CoreHostDifferentProperties - Request has runtime properties that differ from already initialized hostpolicy
+//    Success                            - Initialization was succesful
+//    Success_HostAlreadyInitialized     - Request is compatible with already initialized hostpolicy
+//    Success_DifferentRuntimeProperties - Request has runtime properties that differ from already initialized hostpolicy
 //
 // This function does not load the runtime
 //
@@ -594,6 +594,10 @@ namespace
 //
 // This function assumes corehost_load has already been called. It uses the init information set through that
 // call - not the struct passed into this function - to create a context.
+//
+// Both Success_HostAlreadyInitialized and Success_DifferentRuntimeProperties codes are considered successful
+// initializations. In the case of Success_DifferentRuntimeProperties, it is left to the consumer to verify that
+// the difference in properties is acceptable.
 //
 SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *init_request, int32_t options, /*out*/ corehost_context_contract *context_contract)
 {
@@ -659,16 +663,16 @@ SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *
             return StatusCode::HostInvalidState;
         }
 
-        rc = StatusCode::CoreHostAlreadyInitialized;
+        rc = StatusCode::Success_HostAlreadyInitialized;
     }
     else
     {
         rc = create_hostpolicy_context(g_init, args, g_init.host_mode != host_mode_t::libhost);
-        if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
+        if (rc != StatusCode::Success && rc != StatusCode::Success_HostAlreadyInitialized)
             return rc;
     }
 
-    if (rc == StatusCode::CoreHostAlreadyInitialized)
+    if (rc == StatusCode::Success_HostAlreadyInitialized)
     {
         assert(init_request != nullptr
             && init_request->version >= offsetof(corehost_initialize_request_t, config_values) + sizeof(init_request->config_values)
@@ -676,7 +680,7 @@ SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *
 
         // Compare the current context with this request (properties)
         if (!matches_existing_properties(init_request))
-            rc = StatusCode::CoreHostDifferentProperties;
+            rc = StatusCode::Success_DifferentRuntimeProperties;
     }
 
     context_contract->version = sizeof(corehost_context_contract);
