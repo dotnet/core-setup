@@ -46,10 +46,11 @@ namespace Microsoft.DotNet.CoreSetup.Test
             if (!Directory.Exists(containingDirectory))
             {
                 Directory.CreateDirectory(containingDirectory);
-                if (!File.Exists(backupFile))
-                {
-                    File.Copy(path, backupFile);
-                }
+            }
+
+            if (!File.Exists(backupFile))
+            {
+                File.Copy(path, backupFile);
             }
         }
 
