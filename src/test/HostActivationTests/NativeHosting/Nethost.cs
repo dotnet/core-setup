@@ -193,6 +193,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         {
             // Intentionally not enabling test-only behavior. This test validates that even if the test-oly env. variable is set
             // it will not take effect on its own by default.
+            // To make sure the test is reliable, copy the product binary again into the test folder where we run it from.
+            // This is to make sure that we're using the unmodified product binary. If some previous test
+            // enabled test-only product behavior on the binary and didn't correctly cleanup, this test would fail.
+            File.Copy(
+                Path.Combine(sharedState.RepoDirectories.CorehostPackages, RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("nethost")),
+                sharedState.NethostPath,
+                overwrite: true);
+
             Command.Create(sharedState.NativeHostPath, GetHostFxrPath)
                 .CaptureStdErr()
                 .CaptureStdOut()
