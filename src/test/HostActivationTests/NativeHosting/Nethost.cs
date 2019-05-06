@@ -188,6 +188,20 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             }
         }
 
+        [Fact]
+        public void TestOnlyDisabledByDefault()
+        {
+            // Intentionally not enabling test-only behavior. This test validates that even if the test-oly env. variable is set
+            // it will not take effect on its own by default.
+            Command.Create(sharedState.NativeHostPath, GetHostFxrPath)
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .EnvironmentVariable(Constants.TestOnlyEnvironmentVariables.GloballyRegisteredPath, sharedState.ValidInstallRoot)
+                .Execute()
+                .Should().NotHaveStdErrContaining($"Using global installation location [{sharedState.ValidInstallRoot}] as runtime location.");
+        }
+
         public class SharedTestState : SharedTestStateBase
         {
             public string HostFxrPath { get; }

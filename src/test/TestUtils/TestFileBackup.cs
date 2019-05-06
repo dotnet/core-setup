@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
         void Backup(string path);
     }
 
-    public class TestFileBackup : ITestFileBackup
+    public class TestFileBackup : ITestFileBackup, IDisposable
     {
         private readonly string _basePath;
         private readonly string _backupPath;

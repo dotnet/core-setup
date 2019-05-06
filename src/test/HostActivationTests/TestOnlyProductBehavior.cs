@@ -49,6 +49,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                     OriginalTestOnlyMarker,
                     EnabledTestOnlyMarker,
                     terminateWithNul: false);
+                returnDisposable = backup;
+                backup = null;
             }
             finally
             {
