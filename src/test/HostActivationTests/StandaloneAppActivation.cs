@@ -333,6 +333,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             MarkAppHostAsGUI(appExe);
 
             Command command = Command.Create(appExe)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdOut()
                 .CaptureStdErr()
                 .EnvironmentVariable(Constants.DisableGuiErrors.EnvironmentVariable, "1")
                 .Start();
