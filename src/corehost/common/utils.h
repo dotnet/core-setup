@@ -68,8 +68,8 @@ void get_runtime_config_paths(const pal::string_t& path, const pal::string_t& na
 pal::string_t get_dotnet_root_from_fxr_path(const pal::string_t &fxr_path);
 
 // Retrieves environment variable which is only used for testing.
-// This will only work if there's also a _dotnet_test_only_enabled file next to the current module
-// (which means next to dotnet.exe, apphost.exe, hostfxr.dll and so on, whichever is being tested)
+// This will return the value of the variable only if the product binary is stamped
+// with test-only marker.
 bool test_only_getenv(const pal::char_t* name, pal::string_t* recv);
 
 // Helper class to make it easy to propagate error writer to the hostpolicy
