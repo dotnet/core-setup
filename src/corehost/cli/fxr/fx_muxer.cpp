@@ -1072,15 +1072,18 @@ const host_context_t* fx_muxer_t::get_active_host_context()
     if (g_active_host_context == nullptr)
         return nullptr;
 
-    if (g_active_host_context->type != host_context_type::empty)
+    if (g_active_host_context->type == host_context_type::active)
         return g_active_host_context.get();
+
+    if (g_active_host_context->type != host_context_type::empty)
+        return nullptr;
 
     // Try to populate the contract for the 'empty' active context (i.e. created through non-context-based APIs)
     const hostpolicy_contract_t &hostpolicy_contract = g_active_host_context->hostpolicy_contract;
     if (hostpolicy_contract.initialize == nullptr)
     {
         trace::warning(_X("Getting the contract for the initialized hostpolicy is only supprted for .NET Core 3.0 or a higher version."));
-        return g_active_host_context.get();
+        return nullptr;
     }
 
     corehost_context_contract hostpolicy_context_contract;
@@ -1089,8 +1092,8 @@ const host_context_t* fx_muxer_t::get_active_host_context()
         int rc = hostpolicy_contract.initialize(nullptr, intialization_options_t::get_contract, &hostpolicy_context_contract);
         if (rc != StatusCode::Success)
         {
-            trace::warning(_X("Failed to get contract for existing initialized hostpolicy: 0x%x"), rc);
-            return g_active_host_context.get();
+            trace::error(_X("Failed to get contract for existing initialized hostpolicy: 0x%x"), rc);
+            return nullptr;
         }
     }
 
