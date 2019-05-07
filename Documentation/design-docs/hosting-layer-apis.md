@@ -386,9 +386,9 @@ enum intialization_options_t
 int corehost_initialize(const corehost_initialize_request_t *init_request, int32_t options, corehost_context_contract *context_contract)
 ```
 
-Initialize hostpolicy. This calculates everything required to start CoreCLR (but does not actually do so).
+Initialize hostpolicy. This calculates everything required to start or attach to CoreCLR (but does not actually do so).
 * `init_request` - struct containing information about the initialization request. If hostpolicy is not yet initialized, this is expected to be nullptr. If hostpolicy is already initialized, this should not be nullptr and this function will use the struct to check for compatibility with the way in which hostpolicy was previously initialized.
 * `options` - initialization options
   * `wait_for_initialized` - wait until initialization through a different request is completed
-  * `get_contract` - get the contract for the initialized hostpolicy
+  * `get_contract` - get the contract for already initialized hostpolicy
 * `context_contract` - if initialization is successful, this is populated with the contract for operating on the initialized hostpolicy.
