@@ -9,7 +9,7 @@ pr:
 resources:
   containers:
   - container: MuslContainer
-    image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-3148f11-20171119021156
+    image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-WithNode-f4d3fe3-20181213005010
 
 jobs:
 - job: debug_windows_nt_arm
