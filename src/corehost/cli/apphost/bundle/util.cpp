@@ -7,17 +7,7 @@
 
 using namespace bundle;
 
-void util_t::seek(FILE* stream, long offset, int origin)
-{
-    if (fseek(stream, offset, origin) != 0)
-    {
-        trace::error(_X("Failure processing application bundle; possible file corruption."));
-        trace::error(_X("I/O seek failure within the bundle."));
-        throw StatusCode::BundleExtractionIOError;
-    }
-}
-
-void util_t::write(const void* buf, size_t size, FILE *stream)
+void util_t::write(const void* buf, size_t size, FILE* stream)
 {
     if (fwrite(buf, 1, size, stream) != size)
     {
@@ -27,22 +17,12 @@ void util_t::write(const void* buf, size_t size, FILE *stream)
     }
 }
 
-void util_t::read(void* buf, size_t size, FILE* stream)
-{
-    if (fread(buf, 1, size, stream) != size)
-    {
-        trace::error(_X("Failure processing application bundle; possible file corruption."));
-        trace::error(_X("I/O failure reading contents of the bundle."));
-        throw StatusCode::BundleExtractionIOError;
-    }
-}
-
-static bool util_t::has_dirs_in_path(const pal::string_t& path)
+bool util_t::has_dirs_in_path(const pal::string_t& path)
 {
     return path.find_last_of(DIR_SEPARATOR) != pal::string_t::npos;
 }
 
-static void util_t::create_directory_tree(const pal::string_t &path)
+void util_t::create_directory_tree(const pal::string_t &path)
 {
     if (path.empty())
     {
@@ -73,7 +53,7 @@ static void util_t::create_directory_tree(const pal::string_t &path)
     }
 }
 
-static void util_t::remove_directory_tree(const pal::string_t& path)
+void util_t::remove_directory_tree(const pal::string_t& path)
 {
     if (path.empty())
     {
@@ -105,3 +85,18 @@ static void util_t::remove_directory_tree(const pal::string_t& path)
     }
 }
 
+// Fixup a path to have current platform's directory separator.
+void util_t::fixup_path_separator(const pal::string_t& path)
+{
+    const pal::char_t bundle_dir_separator = '/';
+
+    if (bundle_dir_separator != DIR_SEPARATOR)
+    {
+        for (size_t pos = path.find(bundle_dir_separator);
+            pos != pal::string_t::npos;
+            pos = path.find(bundle_dir_separator, pos))
+        {
+            path[pos] = DIR_SEPARATOR;
+        }
+    }
+}

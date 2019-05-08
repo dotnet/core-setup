@@ -5,11 +5,8 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
- #include <cstdint>
-#include "pal.h"
-#include "trace.h"
-#include "utils.h"
-#include "reader.h"
+#include <cstdint>
+
 namespace bundle
 {
     class util_t
@@ -18,8 +15,9 @@ namespace bundle
         static bool has_dirs_in_path(const pal::string_t &path);
         static void remove_directory_tree(const pal::string_t &path);
         static void create_directory_tree(const pal::string_t &path);
+        static void fixup_path_separator(const pal::string_t& path);
         static void write(const void* buf, size_t size, FILE* stream);
     };
 }
 
-#endif // __BUNDLE_RUNNER_H__
+#endif // __UTIL_H__

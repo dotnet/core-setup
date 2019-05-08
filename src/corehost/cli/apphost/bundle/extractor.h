@@ -22,22 +22,22 @@ namespace bundle
         }
 
         pal::string_t& extraction_dir();
+        bool can_reuse_extraction();
+        void begin();
+        void extract(const file_entry_t& entry, reader_t& reader);
+        void commit();
 
     private:
-
         void determine_extraction_dir();
-        void create_working_extraction_dir();
-        bool can_reuse_extraction();
+        void determine_working_extraction_dir();
 
         FILE* create_extraction_file(const pal::string_t& relative_path);
-        void extract_file(const file_entry_t& entry);
 
         pal::string_t m_bundle_id;
         pal::string_t m_bundle_path;
         pal::string_t m_extraction_dir;
         pal::string_t m_working_extraction_dir;
     };
-
 }
 
 #endif // __EXTRACTOR_H__
