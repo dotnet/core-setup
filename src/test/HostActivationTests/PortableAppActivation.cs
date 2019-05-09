@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdOutContaining("Hello World");
         }
 
-        [Fact]
+//        [Fact]
         public void Muxer_Activation_With_Templated_AdditionalProbingPath_Succeeds()
         {
             var fixture = sharedTestState.PortableAppFixture_Built
