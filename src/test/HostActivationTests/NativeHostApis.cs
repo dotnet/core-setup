@@ -133,9 +133,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
         private class SdkResolutionFixture
         {
+            private readonly string _builtDotnet;
             private readonly TestProjectFixture _fixture;
 
-            public DotNetCli Dotnet => _fixture.BuiltDotnet;
+            public DotNetCli Dotnet { get; }
             public string AppDll => _fixture.TestProject.AppDll;
             public string ExeDir => Path.Combine(_fixture.TestProject.ProjectDirectory, "ed");
             public string ProgramFiles => Path.Combine(ExeDir, "pf");
@@ -151,6 +152,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             public SdkResolutionFixture(SharedTestState state)
             {
+                _builtDotnet = Path.Combine(TestArtifact.TestArtifactsPath, "sharedFrameworkPublish");
+                Dotnet = new DotNetCli(_builtDotnet);
+
                 _fixture = state.HostApiInvokerAppFixture.Copy();
 
                 Directory.CreateDirectory(WorkingDir);

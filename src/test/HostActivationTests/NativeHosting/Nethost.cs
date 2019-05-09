@@ -191,7 +191,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         [Fact]
         public void TestOnlyDisabledByDefault()
         {
-            // Intentionally not enabling test-only behavior. This test validates that even if the test-oly env. variable is set
+            // Intentionally not enabling test-only behavior. This test validates that even if the test-only env. variable is set
             // it will not take effect on its own by default.
             // To make sure the test is reliable, copy the product binary again into the test folder where we run it from.
             // This is to make sure that we're using the unmodified product binary. If some previous test
