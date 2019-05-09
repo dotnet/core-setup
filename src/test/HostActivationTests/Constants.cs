@@ -6,6 +6,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 {
     internal static class Constants
     {
+        public const string MicrosoftNETCoreApp = "Microsoft.NETCore.App";
+
         public static class ApplyPatchesSetting
         {
             public const string RuntimeConfigPropertyName = "applyPatches";
@@ -40,6 +42,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         public static class RollForwardToPreRelease
         {
             public const string EnvironmentVariable = "DOTNET_ROLL_FORWARD_TO_PRERELEASE";
+        }
+
+        public static class DisableGuiErrors
+        {
+            public const string EnvironmentVariable = "DOTNET_DISABLE_GUI_ERRORS";
         }
 
         public static class TestOnlyEnvironmentVariables

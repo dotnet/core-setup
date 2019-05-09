@@ -41,11 +41,14 @@ public:
 
     host_context_type type;
     const hostpolicy_contract_t hostpolicy_contract;
-    const corehost_context_contract hostpolicy_context_contract;
+    corehost_context_contract hostpolicy_context_contract;
 
     // Whether or not the context was initialized for an app. argv will be empty for non-app contexts.
     bool is_app;
     std::vector<pal::string_t> argv;
+
+    // Frameworks used for active context
+    std::unordered_map<pal::string_t, const fx_ver_t> fx_versions_by_name;
 
     // Config properties for secondary contexts
     std::unordered_map<pal::string_t, pal::string_t> config_properties;

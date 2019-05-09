@@ -44,7 +44,7 @@ namespace
     // It will only be set once both hostpolicy and coreclr are loaded and initialized. Once set, it should not be changed.
     // This will remain set even if the context is closed through hostfxr_close. Since the context represents the active
     // CoreCLR runtime and the active runtime cannot be unloaded, the active context is never unset.
-    std::unique_ptr<const host_context_t> g_active_host_context;
+    std::unique_ptr<host_context_t> g_active_host_context;
 
     // Tracks whether the first host context is initializing (from creation of the first context to loading the runtime).
     // Initialization of other contexts should block if the first context is initializing (i.e. this is true).
@@ -133,6 +133,7 @@ static int execute_app(
         std::lock_guard<std::mutex> lock{ g_context_lock };
         assert(g_active_host_context == nullptr);
         g_active_host_context.reset(new host_context_t(host_context_type::empty, hostpolicy_contract, {}));
+        init->get_found_fx_versions(g_active_host_context->fx_versions_by_name);
         g_context_initializing.store(false);
     }
 
@@ -839,7 +840,9 @@ namespace
             return StatusCode::InvalidConfigFile;
         }
 
-        // [TODO] Validate the current context is acceptable for this request (frameworks)
+        // Validate the current context is acceptable for this request (frameworks)
+        if (!fx_resolver_t::is_config_compatible_with_frameworks(app_config, existing_context->fx_versions_by_name))
+            return StatusCode::CoreHostIncompatibleConfig;
 
         app_config.combine_properties(config_properties);
         return StatusCode::Success;
@@ -981,7 +984,7 @@ int fx_muxer_t::initialize_for_runtime_config(
         rc = initialize_context(hostpolicy_dir, *init, initialization_options, context);
     }
 
-    if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
+    if (!STATUS_CODE_SUCCEEDED(rc))
     {
         trace::error(_X("Failed to initialize context for config: %s. Error code: 0x%x"), runtime_config_path, rc);
         return rc;
@@ -1066,6 +1069,37 @@ int fx_muxer_t::get_runtime_delegate(host_context_t *context, coreclr_delegate_t
 const host_context_t* fx_muxer_t::get_active_host_context()
 {
     std::lock_guard<std::mutex> lock{ g_context_lock };
+    if (g_active_host_context == nullptr)
+        return nullptr;
+
+    if (g_active_host_context->type == host_context_type::active)
+        return g_active_host_context.get();
+
+    if (g_active_host_context->type != host_context_type::empty)
+        return nullptr;
+
+    // Try to populate the contract for the 'empty' active context (i.e. created through non-context-based APIs)
+    const hostpolicy_contract_t &hostpolicy_contract = g_active_host_context->hostpolicy_contract;
+    if (hostpolicy_contract.initialize == nullptr)
+    {
+        trace::warning(_X("Getting the contract for the initialized hostpolicy is only supprted for .NET Core 3.0 or a higher version."));
+        return nullptr;
+    }
+
+    corehost_context_contract hostpolicy_context_contract;
+    {
+        propagate_error_writer_t propagate_error_writer_to_corehost(hostpolicy_contract.set_error_writer);
+        int rc = hostpolicy_contract.initialize(nullptr, intialization_options_t::get_contract, &hostpolicy_context_contract);
+        if (rc != StatusCode::Success)
+        {
+            trace::error(_X("Failed to get contract for existing initialized hostpolicy: 0x%x"), rc);
+            return nullptr;
+        }
+    }
+
+    // Set the hostpolicy context contract on the active host context and mark it as active
+    g_active_host_context->hostpolicy_context_contract = hostpolicy_context_contract;
+    g_active_host_context->type = host_context_type::active;
     return g_active_host_context.get();
 }
 

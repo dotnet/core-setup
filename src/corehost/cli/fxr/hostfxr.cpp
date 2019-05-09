@@ -514,11 +514,10 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_app(
 //      On success, this will be populated with an opaque value representing the initalized host context
 //
 // Return value:
-//    Success                     - Hosting components were successfully initialized
-//    CoreHostAlreadyInitialized  - Config is compatible with already initialized hosting components
-// [TODO]
-//    CoreHostIncompatibleConfig  - Config is incompatible with already initialized hosting components
-//    CoreHostDifferentProperties - Config has runtime properties that differ from already initialized hosting components
+//    Success                            - Hosting components were successfully initialized
+//    Success_HostAlreadyInitialized     - Config is compatible with already initialized hosting components
+//    Success_DifferentRuntimeProperties - Config has runtime properties that differ from already initialized hosting components
+//    CoreHostIncompatibleConfig         - Config is incompatible with already initialized hosting components
 //
 // This function will process the .runtimeconfig.json to resolve frameworks and prepare everything needed
 // to load the runtime. It will only process the .deps.json from frameworks (not any app/component that
@@ -528,6 +527,10 @@ SHARED_API int32_t __cdecl hostfxr_initialize_for_app(
 //
 // If called when the runtime has already been loaded, this function will check if the specified runtime
 // config is compatible with the existing runtime.
+//
+// Both Success_HostAlreadyInitialized and Success_DifferentRuntimeProperties codes are considered successful
+// initializations. In the case of Success_DifferentRuntimeProperties, it is left to the consumer to verify that
+// the difference in properties is acceptable.
 //
 SHARED_API int32_t __cdecl hostfxr_initialize_for_runtime_config(
     const pal::char_t *runtime_config_path,
@@ -666,7 +669,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_property_value(
     if (host_context_handle == nullptr)
     {
         const host_context_t *context_maybe = fx_muxer_t::get_active_host_context();
-        if (context_maybe == nullptr || context_maybe->type != host_context_type::active)
+        if (context_maybe == nullptr)
         {
             trace::error(_X("Hosting components context has not been initialized. Cannot get runtime properties."));
             return StatusCode::HostInvalidState;
@@ -783,7 +786,7 @@ SHARED_API int32_t __cdecl hostfxr_get_runtime_properties(
     if (host_context_handle == nullptr)
     {
         const host_context_t *context_maybe = fx_muxer_t::get_active_host_context();
-        if (context_maybe == nullptr || context_maybe->type != host_context_type::active)
+        if (context_maybe == nullptr)
         {
             trace::error(_X("Hosting components context has not been initialized. Cannot get runtime properties."));
             return StatusCode::HostInvalidState;

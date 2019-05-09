@@ -109,7 +109,7 @@ namespace
             {
                 trace::info(_X("Host context has already been initialized"));
                 assert(existing_context->coreclr != nullptr);
-                return StatusCode::CoreHostAlreadyInitialized;
+                return StatusCode::Success_HostAlreadyInitialized;
             }
 
             g_context_initializing.store(true);
@@ -531,6 +531,41 @@ namespace
 
         return StatusCode::Success;
     }
+
+    bool matches_existing_properties(const corehost_initialize_request_t *init_request)
+    {
+        const hostpolicy_context_t *context = get_hostpolicy_context(/*require_runtime*/ true);
+        assert(context != nullptr);
+
+        bool hasDifferentProperties = false;
+        const coreclr_property_bag_t &properties = context->coreclr_properties;
+        size_t len = init_request->config_keys.len;
+        for (size_t i = 0; i < len; ++i)
+        {
+            const pal::char_t *key = init_request->config_keys.arr[i];
+            const pal::char_t *value = init_request->config_values.arr[i];
+
+            const pal::char_t *existingValue;
+            if (properties.try_get(key, &existingValue))
+            {
+                if (pal::strcmp(existingValue, value) != 0)
+                {
+                    trace::warning(_X("The property [%s] has a different value [%s] from that in the previously loaded runtime [%s]"), key, value, existingValue);
+                    hasDifferentProperties = true;
+                }
+            }
+            else
+            {
+                trace::warning(_X("The property [%s] is not present in the previously loaded runtime."), key);
+                hasDifferentProperties = true;
+            }
+        }
+
+        if (len > 0 && !hasDifferentProperties)
+            trace::info(_X("All specified properties match those in the previously loaded runtime"));
+
+        return !hasDifferentProperties;
+    }
 }
 
 // Initializes hostpolicy. Calculates everything required to start the runtime and creates a context to track
@@ -548,10 +583,9 @@ namespace
 //      [out] if initialization is successful, populated with a contract for performing operations on hostpolicy
 //
 // Return value:
-//    Success                     - Initialization was succesful
-//    CoreHostAlreadyInitialized  - Request is compatible with already initialized hostpolicy
-// [TODO]
-//    CoreHostDifferentProperties - Request has runtime properties that differ from already initialized hostpolicy
+//    Success                            - Initialization was succesful
+//    Success_HostAlreadyInitialized     - Request is compatible with already initialized hostpolicy
+//    Success_DifferentRuntimeProperties - Request has runtime properties that differ from already initialized hostpolicy
 //
 // This function does not load the runtime
 //
@@ -561,13 +595,32 @@ namespace
 // This function assumes corehost_load has already been called. It uses the init information set through that
 // call - not the struct passed into this function - to create a context.
 //
+// Both Success_HostAlreadyInitialized and Success_DifferentRuntimeProperties codes are considered successful
+// initializations. In the case of Success_DifferentRuntimeProperties, it is left to the consumer to verify that
+// the difference in properties is acceptable.
+//
 SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *init_request, int32_t options, /*out*/ corehost_context_contract *context_contract)
 {
     if (context_contract == nullptr)
         return StatusCode::InvalidArgFailure;
 
     bool wait_for_initialized = (options & intialization_options_t::wait_for_initialized) != 0;
+    bool get_contract = (options & intialization_options_t::get_contract) != 0;
+    if (wait_for_initialized && get_contract)
+    {
+        trace::error(_X("Specifying both initialization options for wait_for_initialized and get_contract is not allowed"));
+        return StatusCode::InvalidArgFailure;
+    }
 
+    if (get_contract)
+    {
+        if (init_request != nullptr)
+        {
+            trace::error(_X("Initialization request is expected to be null when getting the already initialized contract"));
+            return StatusCode::InvalidArgFailure;
+        }
+    }
+    else
     {
         std::unique_lock<std::mutex> lock { g_context_lock };
         bool already_initializing = g_context_initializing.load();
@@ -625,18 +678,35 @@ SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *
             return StatusCode::HostInvalidState;
         }
 
-        rc = StatusCode::CoreHostAlreadyInitialized;
+        rc = StatusCode::Success_HostAlreadyInitialized;
+    }
+    else if (get_contract)
+    {
+        const hostpolicy_context_t *context = get_hostpolicy_context(/*require_runtime*/ true);
+        if (context == nullptr)
+        {
+            trace::error(_X("Option to get the contract for the initialized hostpolicy was set, but hostpolicy has not been initialized"));
+            return StatusCode::HostInvalidState;
+        }
+
+        rc = StatusCode::Success;
     }
     else
     {
         rc = create_hostpolicy_context(g_init, args, g_init.host_mode != host_mode_t::libhost);
-        if (rc != StatusCode::Success && rc != StatusCode::CoreHostAlreadyInitialized)
+        if (rc != StatusCode::Success && rc != StatusCode::Success_HostAlreadyInitialized)
             return rc;
     }
 
-    if (rc == StatusCode::CoreHostAlreadyInitialized)
+    if (rc == StatusCode::Success_HostAlreadyInitialized)
     {
-        // [TODO] Compare the current context with this request (properties)
+        assert(init_request != nullptr
+            && init_request->version >= offsetof(corehost_initialize_request_t, config_values) + sizeof(init_request->config_values)
+            && init_request->config_keys.len == init_request->config_values.len);
+
+        // Compare the current context with this request (properties)
+        if (!matches_existing_properties(init_request))
+            rc = StatusCode::Success_DifferentRuntimeProperties;
     }
 
     context_contract->version = sizeof(corehost_context_contract);
