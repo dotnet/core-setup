@@ -123,5 +123,5 @@ bool comhost_test::concurrent(const pal::string_t &comhost_path, const pal::stri
     }
 
     std::cout << ss.str();
-    return true;
+    return succeeded;
 }
