@@ -9,8 +9,8 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>935d9e2438e6d704226572d805d2f3a2651ae73c</CoreFxCurrentRef>
-    <CoreClrCurrentRef>935d9e2438e6d704226572d805d2f3a2651ae73c</CoreClrCurrentRef>
+    <CoreFxCurrentRef>eaad8dfebf7aba22e41df2d528157b4e285e2a23</CoreFxCurrentRef>
+    <CoreClrCurrentRef>eaad8dfebf7aba22e41df2d528157b4e285e2a23</CoreClrCurrentRef>
     <StandardCurrentRef>eff554f39ee29c9f2b470bf7755b83ceaaf2b1a1</StandardCurrentRef>
     <BuildToolsCurrentRef>45c30fde407691b1c530f1d80e1030f65947128b</BuildToolsCurrentRef>
   </PropertyGroup>
@@ -18,8 +18,8 @@
   <PropertyGroup>
     <MicrosoftNETCorePlatformsPackageVersion>2.1.4</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>2.0.0</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-servicing-27514-02</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.10-servicing-27514-02</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.5.0-servicing-27617-02</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.11-servicing-27617-04</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <NETStandardLibraryPackageVersion>2.0.3</NETStandardLibraryPackageVersion>
     <MicrosoftDiaSymReaderNativePackageVersion>1.7.0</MicrosoftDiaSymReaderNativePackageVersion>
   </PropertyGroup>
