@@ -1,0 +1,289 @@
+trigger:
+- release/2.1
+- release/2.1
+
+pr:
+- release/2.1
+- release/2.2
+
+resources:
+  containers:
+  - container: MuslContainer
+    image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-WithNode-f4d3fe3-20181213005010
+
+jobs:
+- job: debug_windows_nt_arm
+  displayName: Windows_NT arm Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: .\build.cmd -ConfigurationGroup=Debug -TargetArchitecture=arm -SkipTests=true
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: debug_windows_nt_arm
+
+- job: debug_windows_nt_x86
+  displayName: Windows_NT x86 Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: .\build.cmd -ConfigurationGroup=Debug -TargetArchitecture=x86
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*-testResults.trx'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: debug_windows_nt_x86
+
+- job: release_linux_arm
+  displayName: Linux arm Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+    clean: true
+  - script: docker run -e ROOTFS_DIR=/crossrootfs/arm --name ubuntu-14.04-cross-e435274-20180323032140 --rm -v $(Build.SourcesDirectory):/src/core-setup -w=/src/core-setup microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-e435274-20180323032140 ./build.sh -ConfigurationGroup=Release -TargetArchitecture=arm -strip-symbols -SkipTests=true -CrossBuild=true
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: release_linux_arm
+
+- job: release_linux_arm64
+  displayName: Linux arm64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+    clean: true
+  - script: docker run -e ROOTFS_DIR=/crossrootfs/arm64 --name ubuntu-16.04-cross-arm64-a3ae44b-20180316023254 --rm -v $(Build.SourcesDirectory):/src/core-setup -w=/src/core-setup microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180316023254 ./build.sh -ConfigurationGroup=Release -TargetArchitecture=arm64 -strip-symbols -SkipTests=true -CrossBuild=true
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: release_linux_arm64
+
+- job: release_linux_x64
+  displayName: Linux x64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build.sh -ConfigurationGroup=Release -TargetArchitecture=x64 -strip-symbols
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*-testResults.trx'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: release_linux_x64
+
+- job: release_osx_x64
+  displayName: OSX x64 Release Build
+  pool:
+    vmImage: macOS-10.13
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build.sh -ConfigurationGroup=Release -TargetArchitecture=x64 -strip-symbols
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*-testResults.trx'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: release_osx_x64
+
+- job: release_windows_nt_x64
+  displayName: Windows_NT x64 Release Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: .\build.cmd -ConfigurationGroup=Release -TargetArchitecture=x64
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '**/*-testResults.trx'
+    condition: always()
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: release_windows_nt_x64
+      
+- job: linux_musl_x64
+  displayName: Linux Musl x64
+  container: MuslContainer
+  strategy:
+    matrix:
+      Debug:
+        _BuildConfig: Debug
+      Release:
+        _BuildConfig: Release
+  pool:
+    name: NetCorePublic-Pool
+    queue: buildpool.ubuntu.1604.amd64.open
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./build.sh -ConfigurationGroup=$(_BuildConfig) -TargetArchitecture=x64 -PortableBuild=false -strip-symbols -SkipTests=false -- /p:OutputRid=linux-musl-x64
+  - task: CopyFiles@2
+    inputs:
+      contents: |
+        'Bin/*/packages/*.tar.gz'
+        'Bin/*/corehost/*.tar.gz'
+        'Bin/*/packages/*.zip'
+        'Bin/*/corehost/*.zip'
+        'Bin/*/packages/*.deb'
+        'Bin/*/corehost/*.deb'
+        'Bin/*/packages/*.msi'
+        'Bin/*/corehost/*.msi'
+        'Bin/*/packages/*.pkg'
+        'Bin/*/corehost/*.pkg'
+        'Bin/*/packages/*.exe'
+        'Bin/*/corehost/*.exe'
+        'Bin/*/packages/*.nupkg'
+        'Bin/*/corehost/*.nupkg'
+      targetFolder: $(Build.ArtifactStagingDirectory)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: linux_musl_x64
