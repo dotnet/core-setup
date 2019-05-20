@@ -60,4 +60,10 @@ namespace host_context_test
         int argc,
         const pal::char_t *argv[],
         pal::stringstream_t &test_output);
+    bool component_create_native_delegate_test(
+        const pal::string_t &hostfxr_path,
+        const pal::char_t *config_path,
+        int argc,
+        const pal::char_t *argv[],
+        pal::stringstream_t &test_output);
 }

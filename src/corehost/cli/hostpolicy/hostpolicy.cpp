@@ -473,6 +473,12 @@ namespace
                 "Internal.Runtime.InteropServices.ComActivator",
                 "UnregisterClassForTypeInternal",
                 delegate);
+        case coreclr_delegate_type::component_create_native_delegate:
+            return coreclr->create_delegate(
+                "System.Private.CoreLib",
+                "Internal.Runtime.InteropServices.ComponentActivator",
+                "CreateNativeDelegate",
+                delegate);
         default:
             return StatusCode::LibHostInvalidArgs;
         }

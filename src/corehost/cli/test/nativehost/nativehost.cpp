@@ -150,6 +150,38 @@ int main(const int argc, const pal::char_t *argv[])
 
             success = host_context_test::non_context_mixed(check_properties, hostfxr_path, app_or_config_path, config_path, remaining_argc, remaining_argv, test_output);
         }
+        else
+        {
+            std::cerr << "Invalid scenario" << std::endl;
+            return -1;
+        }
+
+        std::cout << tostr(test_output.str()).data() << std::endl;
+        return success ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+    else if (pal::strcmp(command, _X("component_create_native_delegate")) == 0)
+    {
+        // args: ... <hostfxr_path> <app_or_config_path> [<remaining_args>]
+        const int min_argc = 4;
+        if (argc != min_argc + 3)
+        {
+            std::cerr << "Invalid arguments" << std::endl;
+            return -1;
+        }
+
+        const pal::string_t hostfxr_path = argv[2];
+        const pal::char_t *app_or_config_path = argv[3];
+
+        // Remaining args used as property names to get/set as well as arguments for the app
+        int remaining_argc = argc - min_argc;
+        const pal::char_t **remaining_argv = nullptr;
+        if (argc > min_argc)
+            remaining_argv = &argv[min_argc];
+
+        pal::stringstream_t test_output;
+        bool success = false;
+
+        success = host_context_test::component_create_native_delegate_test(hostfxr_path, app_or_config_path, remaining_argc, remaining_argv, test_output);
 
         std::cout << tostr(test_output.str()).data() << std::endl;
         return success ? EXIT_SUCCESS : EXIT_FAILURE;

@@ -596,6 +596,8 @@ namespace
             return coreclr_delegate_type::com_register;
         case hostfxr_delegate_type::com_unregister:
             return coreclr_delegate_type::com_unregister;
+        case hostfxr_delegate_type::component_create_native_delegate:
+            return coreclr_delegate_type::component_create_native_delegate;
         }
         return coreclr_delegate_type::invalid;
     }
