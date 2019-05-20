@@ -40,7 +40,7 @@
     <!-- wpf -->
     <MicrosoftDotNetWpfGitHubPackageVersion>4.8.0-preview6.19268.4</MicrosoftDotNetWpfGitHubPackageVersion>
     <!-- wpf-int -->
-    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-preview6.19269.4</MicrosoftDotNetWpfDncEngPackageVersion>
+    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-preview6.19270.4</MicrosoftDotNetWpfDncEngPackageVersion>
     <!-- Not auto-updated. -->
     <MicrosoftBclJsonSourcesPackageVersion>4.6.0-preview.19072.2</MicrosoftBclJsonSourcesPackageVersion>
   </PropertyGroup>
