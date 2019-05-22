@@ -11,12 +11,26 @@
 
 typedef std::unordered_map<pal::string_t, std::vector<pal::string_t>> opt_map_t;
 
+enum class known_options
+{
+    additional_probing_path,
+    deps_file,
+    runtime_config,
+    fx_version,
+    roll_forward,
+    additional_deps,
+    roll_forward_on_no_candidate_fx,
+
+    __last // Sentinel value
+};
+
 namespace command_line
 {
     pal::string_t get_last_known_arg(
         const opt_map_t& opts,
-        const pal::string_t& opt_key,
+        known_options opt,
         const pal::string_t& de_fault);
+    const pal::string_t& get_option_flag(known_options opt);
 
     // Returns '0' on success, 'AppArgNotRunnable' if should be routed to CLI, otherwise error code.
     int parse_args_for_mode(

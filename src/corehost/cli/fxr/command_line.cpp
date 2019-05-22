@@ -14,11 +14,22 @@ namespace
 {
     struct host_option
     {
-        pal::string_t option;
-        pal::string_t argument;
-        pal::string_t description;
-        bool framework_dependent;
+        const pal::string_t option;
+        const pal::string_t argument;
+        const pal::string_t description;
     };
+
+    const host_option KnownHostOptions[] =
+    {
+        { _X("--additionalprobingpath"), _X("<path>"), _X("Path containing probing policy and assemblies to probe for.") },
+        { _X("--depsfile"), _X("<path>"), _X("Path to <application>.deps.json file.") },
+        { _X("--runtimeconfig"), _X("<path>"), _X("Path to <application>.runtimeconfig.json file.") },
+        { _X("--fx-version"), _X("<version>"), _X("Version of the installed Shared Framework to use to run the application.") },
+        { _X("--roll-forward"), _X("<value>"), _X("Roll forward to framework version (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable)") },
+        { _X("--additional-deps"), _X("<path>"), _X("Path to additional deps.json file.") },
+        { _X("--roll-forward-on-no-candidate-fx"), _X("<n>"), _X("<obsolete>") }
+    };
+    static_assert((sizeof(KnownHostOptions) / sizeof(*KnownHostOptions)) == static_cast<size_t>(known_options::__last), "Invalid host option count");
 
     bool is_sdk_dir_present(const pal::string_t& dotnet_root)
     {
@@ -27,36 +38,43 @@ namespace
         return pal::directory_exists(sdk_path);
     }
 
-    std::vector<host_option> get_known_opts(bool exec_mode, host_mode_t mode, bool for_cli_usage = false)
+    std::vector<known_options> get_known_opts(bool exec_mode, host_mode_t mode, bool for_cli_usage = false)
     {
-        std::vector<host_option> known_opts = { { _X("--additionalprobingpath"), _X("<path>"), _X("Path containing probing policy and assemblies to probe for.") } };
+        std::vector<known_options> known_opts = { known_options::additional_probing_path };
         if (for_cli_usage || exec_mode || mode == host_mode_t::split_fx || mode == host_mode_t::apphost)
         {
-            known_opts.push_back({ _X("--depsfile"), _X("<path>"), _X("Path to <application>.deps.json file.")});
-            known_opts.push_back({ _X("--runtimeconfig"), _X("<path>"), _X("Path to <application>.runtimeconfig.json file.")});
+            known_opts.push_back(known_options::deps_file);
+            known_opts.push_back(known_options::runtime_config);
         }
 
         if (for_cli_usage || mode == host_mode_t::muxer || mode == host_mode_t::apphost)
         {
             // If mode=host_mode_t::apphost, these are only used when the app is framework-dependent.
-            known_opts.push_back({ _X("--fx-version"), _X("<version>"), _X("Version of the installed Shared Framework to use to run the application.") });
-            known_opts.push_back({ _X("--roll-forward"), _X("<value>"), _X("Roll forward to framework version (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable)") });
-            known_opts.push_back({ _X("--additional-deps"), _X("<path>"), _X("Path to additional deps.json file.") });
+            known_opts.push_back(known_options::fx_version);
+            known_opts.push_back(known_options::roll_forward);
+            known_opts.push_back(known_options::additional_deps);
 
             if (!for_cli_usage)
             {
                 // Intentionally leave this one out of for_cli_usage since we don't want to show it in command line help (it's deprecated).
-                known_opts.push_back({ _X("--roll-forward-on-no-candidate-fx"), _X("<n>"), _X("<obsolete>") });
+                known_opts.push_back(known_options::roll_forward_on_no_candidate_fx);
             }
         }
 
         return known_opts;
     }
 
+    const host_option& get_host_option(known_options opt)
+    {
+        int idx = static_cast<int>(opt);
+        assert(0 <= idx && idx < static_cast<int>(known_options::__last));
+        return KnownHostOptions[idx];
+    }
+
     bool parse_known_args(
         const int argc,
         const pal::char_t* argv[],
-        const std::vector<host_option>& known_opts,
+        const std::vector<known_options>& known_opts,
         // Although multimap would provide this functionality the order of kv, values are
         // not preserved in C++ < C++0x
         opt_map_t* opts,
@@ -68,8 +86,8 @@ namespace
             pal::string_t arg = argv[arg_i];
             pal::string_t arg_lower = pal::to_lower(arg);
             if (std::find_if(known_opts.begin(), known_opts.end(),
-                [&](const host_option& hostoption) { return arg_lower == hostoption.option; })
-                == known_opts.end())
+                [&](const known_options &opt) { return arg_lower == get_host_option(opt).option; })
+                == known_opts.cend())
             {
                 // Unknown argument.
                 break;
@@ -104,15 +122,16 @@ namespace
         /*out*/ pal::string_t &app_candidate,
         /*out*/ opt_map_t &opts)
     {
-        std::vector<host_option> known_opts = get_known_opts(exec_mode, mode);
+        std::vector<known_options> known_opts = get_known_opts(exec_mode, mode);
 
         // Parse the known arguments if any.
         int num_parsed = 0;
         if (!parse_known_args(argc - argoff, &argv[argoff], known_opts, &opts, &num_parsed))
         {
             trace::error(_X("Failed to parse supported options or their values:"));
-            for (const auto& arg : known_opts)
+            for (const auto& opt : known_opts)
             {
+                const host_option &arg = get_host_option(opt);
                 trace::error(_X("  %-37s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
             }
             return StatusCode::InvalidArgFailure;
@@ -178,16 +197,22 @@ namespace
 }
 
 pal::string_t command_line::get_last_known_arg(
-    const opt_map_t& opts,
-    const pal::string_t& opt_key,
-    const pal::string_t& de_fault)
+    const opt_map_t &opts,
+    known_options opt,
+    const pal::string_t &default_value)
 {
+    const pal::string_t& opt_key = get_option_flag(opt);
     if (opts.count(opt_key))
     {
         const auto& val = opts.find(opt_key)->second;
         return val[val.size() - 1];
     }
-    return de_fault;
+    return default_value;
+}
+
+const pal::string_t& command_line::get_option_flag(known_options opt)
+{
+    return get_host_option(opt).option;
 }
 
 int command_line::parse_args_for_mode(
@@ -281,7 +306,7 @@ void command_line::print_muxer_info(const pal::string_t &dotnet_root)
 
 void command_line::print_muxer_usage(bool is_sdk_present)
 {
-    std::vector<host_option> known_opts = get_known_opts(true, host_mode_t::invalid, /*for_cli_usage*/ true);
+    std::vector<known_options> known_opts = get_known_opts(true, host_mode_t::invalid, /*for_cli_usage*/ true);
 
     if (!is_sdk_present)
     {
@@ -294,8 +319,9 @@ void command_line::print_muxer_usage(bool is_sdk_present)
     trace::println();
     trace::println(_X("host-options:"));
 
-    for (const auto& arg : known_opts)
+    for (const auto& opt : known_opts)
     {
+        const host_option &arg = get_host_option(opt);
         trace::println(_X("  %-30s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
     }
     trace::println(_X("  --list-runtimes                 Display the installed runtimes"));
