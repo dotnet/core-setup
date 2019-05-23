@@ -232,55 +232,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             propertyValidation.ValidateSecondaryContext(result, SharedTestState.ConfigPropertyName, SharedTestState.ConfigPropertyValue);
         }
 
-#if Broken_TestComponentActivationDelegate
-        // This test is broken
-        // Test is written assuming a full runtime, but this test uses mockcoreclr
-        // Even with that there is something else wrong too
-        // For some reason the typeof(HostContext).AssemblyQualifiedName is not being found...
-
-        public static int ComponentEntryPoint(IntPtr arg, int size)
-        {
-            Console.WriteLine($"Called ComponentEntryPoint({arg.ToString()}, {size})");
-
-            return size >> 1;
-        }
-
-        [Theory]
-        [InlineData(true,  true,  true,  true )]
-        [InlineData(false, true,  true,  false)]
-        [InlineData(true,  false, true,  false)]
-        [InlineData(true,  true,  false, false)]
-        public void TestComponentActivationDelegate(bool validPath, bool validType, bool validMethod, bool pass)
-        {
-            string[] args =
-            {
-                "component_create_native_delegate",
-                sharedState.HostFxrPath,
-                sharedState.RuntimeConfigPath,
-                validPath ? typeof(HostContext).Assembly.Location : "BadPath...",
-                validType ? typeof(HostContext).AssemblyQualifiedName : "Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting.BadType",
-                validMethod ? nameof(ComponentEntryPoint) : "BadMethod",
-            };
-            CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
-                .Execute();
-
-            if (pass)
-            {
-                result.Should().Pass()
-                    .And.HaveStdOutContaining("Called ComponentEntryPoint(");
-            }
-            else
-            {
-                result.Should().Fail();
-            }
-        }
-#endif // Broken_TestComponentActivationDelegate
-
         [Theory]
         [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.LatestPatch, false)]
         [InlineData(Scenario.ConfigMultiple, Constants.MicrosoftNETCoreApp, "1.1.0", Constants.RollForwardSetting.Minor, false)]
