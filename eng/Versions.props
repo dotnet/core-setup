@@ -9,7 +9,7 @@
   <PropertyGroup>
     <!-- corefx -->
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview6.19270.15</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreTargetsPackageVersion>2.0.0</MicrosoftNETCoreTargetsPackageVersion>
+    <MicrosoftNETCoreTargetsPackageVersion>3.0.0-preview6.19270.15</MicrosoftNETCoreTargetsPackageVersion>
     <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-preview6.19270.15</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftWin32RegistryVersion>4.6.0-preview6.19270.15</MicrosoftWin32RegistryVersion>
     <MicrosoftWin32SystemEventsVersion>4.6.0-preview6.19270.15</MicrosoftWin32SystemEventsVersion>
@@ -32,9 +32,9 @@
     <SystemThreadingAccessControlVersion>4.6.0-preview6.19270.15</SystemThreadingAccessControlVersion>
     <SystemWindowsExtensionsPackageVersion>4.6.0-preview6.19270.15</SystemWindowsExtensionsPackageVersion>
     <!-- standard -->
-    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19270.1</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19273.2</NETStandardLibraryPackageVersion>
     <!-- coreclr -->
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview6-27720-72</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview6-27721-71</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- winforms -->
     <MicrosoftPrivateWinformsPackageVersion>4.8.0-preview6.19272.1</MicrosoftPrivateWinformsPackageVersion>
     <!-- wpf -->
