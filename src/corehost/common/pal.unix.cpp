@@ -626,42 +626,91 @@ bool pal::get_own_executable_path(pal::string_t* recv)
     return false;
 }
 #elif defined(__FreeBSD__)
-bool pal::get_own_executable_path(pal::string_t* recv)
+
+namespace
 {
-    int mib[4];
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PATHNAME;
-    mib[3] = -1;
-    char buf[PATH_MAX];
-    size_t cb = sizeof(buf);
-    int error_code = 0;
-    error_code = sysctl(mib, 4, buf, &cb, NULL, 0);
-    if (error_code == 0)
-    {
-        recv->assign(buf);
-        return true;
+    extern "C" {
+        int main(int argc, char *argv[]);
     }
 
-    // ENOMEM
-    if (error_code == ENOMEM)
+    bool get_executable_path_with_sysctl(pal::string_t* recv)
     {
-        size_t len = sysctl(mib, 4, NULL, NULL, NULL, 0);
-        std::unique_ptr<char[]> buffer (new (std::nothrow) char[len]);
-
-        if (buffer == NULL)
-        {
-            return false;
-        }
-
-        error_code = sysctl(mib, 4, buffer.get(), &len, NULL, 0);
+        int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+        char buf[PATH_MAX];
+        size_t cb = sizeof(buf);
+        int error_code = 0;
+        error_code = pal::sysctl(mib, 4, buf, &cb, NULL, 0);
         if (error_code == 0)
         {
-            recv->assign(buffer.get());
+            recv->assign(buf);
             return true;
         }
+
+        // ENOMEM
+        if (error_code == ENOMEM)
+        {
+            size_t len = pal::sysctl(mib, 4, NULL, NULL, NULL, 0);
+            std::unique_ptr<char[]> buffer (new (std::nothrow) char[len]);
+
+            if (buffer == NULL)
+            {
+                return false;
+            }
+
+            error_code = pal::sysctl(mib, 4, buffer.get(), &len, NULL, 0);
+            if (error_code == 0)
+            {
+                recv->assign(buffer.get());
+                return true;
+            }
+        }
+        return false;
     }
-    return false;
+
+    bool get_executable_path_with_dladdr(pal::string_t *recv)
+    {
+        Dl_info info;
+
+        if (::dladdr((void *)main, &info))
+        {
+            recv->assign(info.dli_fname);
+            return true;
+        }
+
+        return false;
+    }
+}
+
+bool pal::get_own_executable_path(pal::string_t* recv)
+{
+    if (get_executable_path_with_sysctl(recv))
+    {
+        struct stat st;
+
+        if (!stat(recv->c_str(), &st))
+        {
+            if (st.st_nlink == 1)
+            {
+                // Using KERN_PROC_PATHNAME mib to obtain the executable name
+                // in FreeBSD might not return the path to the actual
+                // executable name for the running process if there are
+                // multiple hardlinks to that file.
+                return true;
+            }
+        }
+
+        recv->clear();
+    }
+
+    // dladdr() might fail to obtain information from main() if, for instance,
+    // the executable has been statically-built.
+    //
+    // If this fails, and there are multiple hardlinks to this executable (and
+    // the KERN_PROC_PATHNAME method worked), there's not much else that can be
+    // done to address <https://github.com/dotnet/core-setup/issues/4742>
+    // short of trying to trace back where argv[0] is... but that's not
+    // very reliable.
+    return get_executable_path_with_dladdr(recv);
 }
 #else
 bool pal::get_own_executable_path(pal::string_t* recv)
