@@ -123,7 +123,7 @@ namespace
         return parse_stream(stream);
     }
 
-    bool ensure_binary_unsigned(const pal::string_t &path)
+    bool is_binary_unsigned(const pal::string_t &path)
     {
         // Use the default verifying provider
         GUID policy = WINTRUST_ACTION_GENERIC_VERIFY_V2;
@@ -166,7 +166,11 @@ namespace
             return false;
 
         // The only acceptable error code for indicating not-signed
-        // is going to be the explicit no signature error code.
+        // is going to be the explicit 'no signature' error code.
+        // The 'TRUST_E_NOSIGNATURE' result from the function call
+        // indicates a category of issues rather than 'no signature'.
+        // When the 'TRUST_E_NOSIGNATURE' error code is returned from
+        // 'GetLastError()' the indication is actually 'no signature'.
         return (err == TRUST_E_NOSIGNATURE);
     }
 
@@ -176,7 +180,7 @@ namespace
         if (!pal::get_own_module_path(&this_module))
             return {};
 
-        if (!ensure_binary_unsigned(this_module))
+        if (!is_binary_unsigned(this_module))
         {
             trace::verbose(_X("Binary is signed, disabling loose .clsidmap file discovery"));
             return {};
@@ -185,7 +189,7 @@ namespace
         pal::string_t map_file_name = std::move(this_module);
         map_file_name += _X(".clsidmap");
         if (!pal::file_exists(map_file_name))
-            return{};
+            return {};
 
         pal::ifstream_t file{ map_file_name };
         return parse_stream(file);
