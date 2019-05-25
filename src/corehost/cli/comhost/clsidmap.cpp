@@ -123,26 +123,7 @@ namespace
         return parse_stream(stream);
     }
 
-    clsid_map get_json_map_from_file()
-    {
-        pal::string_t map_file_name;
-        if (pal::get_own_module_path(&map_file_name))
-        {
-            map_file_name += _X(".clsidmap");
-            if (pal::file_exists(map_file_name))
-            {
-                pal::ifstream_t file{ map_file_name };
-                return parse_stream(file);
-            }
-        }
-
-        return{};
-    }
-}
-
-namespace
-{
-    bool ensure_binary_unsigned(_In_z_ LPCWSTR path)
+    bool ensure_binary_unsigned(const pal::string_t &path)
     {
         // Use the default verifying provider
         GUID policy = WINTRUST_ACTION_GENERIC_VERIFY_V2;
@@ -151,7 +132,7 @@ namespace
         // https://docs.microsoft.com/windows/desktop/api/wintrust/ns-wintrust-wintrust_file_info
         WINTRUST_FILE_INFO fileData{};
         fileData.cbStruct = sizeof(WINTRUST_FILE_INFO);
-        fileData.pcwszFilePath = path;
+        fileData.pcwszFilePath = path.c_str();
         fileData.hFile = nullptr;
         fileData.pgKnownSubject = nullptr;
 
@@ -188,6 +169,27 @@ namespace
         // is going to be the explicit no signature error code.
         return (err == TRUST_E_NOSIGNATURE);
     }
+
+    clsid_map get_json_map_from_file()
+    {
+        pal::string_t this_module;
+        if (!pal::get_own_module_path(&this_module))
+            return {};
+
+        if (!ensure_binary_unsigned(this_module))
+        {
+            trace::verbose(_X("Binary is signed, disabling loose .clsidmap file discovery"));
+            return {};
+        }
+
+        pal::string_t map_file_name = std::move(this_module);
+        map_file_name += _X(".clsidmap");
+        if (!pal::file_exists(map_file_name))
+            return{};
+
+        pal::ifstream_t file{ map_file_name };
+        return parse_stream(file);
+    }
 }
 
 clsid_map comhost::get_clsid_map()
@@ -196,7 +198,7 @@ clsid_map comhost::get_clsid_map()
     static bool static_map_set = false;
     static clsid_map static_map{};
 
-    std::lock_guard<pal::mutex_t> lock{static_map_lock};
+    std::lock_guard<pal::mutex_t> lock{ static_map_lock };
     if (static_map_set)
         return static_map;
 
@@ -219,18 +221,9 @@ clsid_map comhost::get_clsid_map()
     {
         trace::verbose(_X("JSON map resource stream not found"));
 
-        pal::string_t this_module;
-        if (!pal::get_own_module_path(&this_module)
-            || !ensure_binary_unsigned(this_module.c_str()))
-        {
-            trace::verbose(_X("Binary is signed, disabling loose .clsidmap file discovery"));
-        }
-        else
-        {
-            mapping = get_json_map_from_file();
-            if (mapping.empty())
-                trace::verbose(_X("JSON map .clsidmap file not found"));
-        }
+        mapping = get_json_map_from_file();
+        if (mapping.empty())
+            trace::verbose(_X("JSON map .clsidmap file not found"));
     }
 
     // Make a copy to retain
