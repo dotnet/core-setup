@@ -9,8 +9,6 @@
 #include <host_startup_info.h>
 #include <pal.h>
 
-typedef std::unordered_map<pal::string_t, std::vector<pal::string_t>> opt_map_t;
-
 enum class known_options
 {
     additional_probing_path,
@@ -24,13 +22,23 @@ enum class known_options
     __last // Sentinel value
 };
 
+struct known_options_hash
+{
+    inline size_t operator()(const known_options& opt) const
+    {
+        return static_cast<size_t>(opt);
+    }
+};
+
+typedef std::unordered_map<known_options, std::vector<pal::string_t>, known_options_hash> opt_map_t;
+
 namespace command_line
 {
-    pal::string_t get_last_known_arg(
+    const pal::string_t& get_option_name(known_options opt);
+    pal::string_t get_option_value(
         const opt_map_t& opts,
         known_options opt,
         const pal::string_t& de_fault);
-    const pal::string_t& get_option_flag(known_options opt);
 
     // Returns '0' on success, 'AppArgNotRunnable' if should be routed to CLI, otherwise error code.
     int parse_args_for_mode(

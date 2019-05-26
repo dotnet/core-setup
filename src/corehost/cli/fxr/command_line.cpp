@@ -40,7 +40,9 @@ namespace
 
     std::vector<known_options> get_known_opts(bool exec_mode, host_mode_t mode, bool for_cli_usage = false)
     {
-        std::vector<known_options> known_opts = { known_options::additional_probing_path };
+        std::vector<known_options> known_opts;
+        known_opts.reserve(static_cast<int>(known_options::__last));
+        known_opts.push_back(known_options::additional_probing_path);
         if (for_cli_usage || exec_mode || mode == host_mode_t::split_fx || mode == host_mode_t::apphost)
         {
             known_opts.push_back(known_options::deps_file);
@@ -85,9 +87,9 @@ namespace
         {
             pal::string_t arg = argv[arg_i];
             pal::string_t arg_lower = pal::to_lower(arg);
-            if (std::find_if(known_opts.begin(), known_opts.end(),
-                [&](const known_options &opt) { return arg_lower == get_host_option(opt).option; })
-                == known_opts.cend())
+            const auto &iter = std::find_if(known_opts.cbegin(), known_opts.cend(),
+                [&](const known_options &opt) { return arg_lower == get_host_option(opt).option; });
+            if (iter == known_opts.cend())
             {
                 // Unknown argument.
                 break;
@@ -100,7 +102,7 @@ namespace
             }
 
             trace::verbose(_X("Parsed known arg %s = %s"), arg.c_str(), argv[arg_i + 1]);
-            (*opts)[arg_lower].push_back(argv[arg_i + 1]);
+            (*opts)[*iter].push_back(argv[arg_i + 1]);
 
             // Increment for both the option and its value.
             arg_i += 2;
@@ -137,11 +139,11 @@ namespace
             return StatusCode::InvalidArgFailure;
         }
 
-        app_candidate = host_info.app_path;
         *new_argoff = argoff + num_parsed;
         bool doesAppExist = false;
         if (mode == host_mode_t::apphost)
         {
+            app_candidate = host_info.app_path;
             doesAppExist = pal::realpath(&app_candidate);
         }
         else
@@ -196,21 +198,20 @@ namespace
     }
 }
 
-pal::string_t command_line::get_last_known_arg(
+pal::string_t command_line::get_option_value(
     const opt_map_t &opts,
     known_options opt,
     const pal::string_t &default_value)
 {
-    const pal::string_t& opt_key = get_option_flag(opt);
-    if (opts.count(opt_key))
+    if (opts.count(opt))
     {
-        const auto& val = opts.find(opt_key)->second;
+        const auto& val = opts.find(opt)->second;
         return val[val.size() - 1];
     }
     return default_value;
 }
 
-const pal::string_t& command_line::get_option_flag(known_options opt)
+const pal::string_t& command_line::get_option_name(known_options opt)
 {
     return get_host_option(opt).option;
 }

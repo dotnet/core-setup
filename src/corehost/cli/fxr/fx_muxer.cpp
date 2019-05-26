@@ -358,9 +358,9 @@ namespace
         /*out*/ pal::string_t &hostpolicy_dir,
         /*out*/ std::unique_ptr<corehost_init_t> &init)
     {
-        pal::string_t runtime_config = command_line::get_last_known_arg(opts, known_options::runtime_config, _X(""));
+        pal::string_t runtime_config = command_line::get_option_value(opts, known_options::runtime_config, _X(""));
 
-        pal::string_t deps_file = command_line::get_last_known_arg(opts, known_options::deps_file, _X(""));
+        pal::string_t deps_file = command_line::get_option_value(opts, known_options::deps_file, _X(""));
         if (!deps_file.empty() && !pal::realpath(&deps_file))
         {
             trace::error(_X("The specified deps.json [%s] does not exist"), deps_file.c_str());
@@ -382,27 +382,27 @@ namespace
         // The conflicts will be resolved by following the priority rank described above (from 1 to 5, lower number wins over higher number).
         // The env var condition is verified in the config file processing
 
-        pal::string_t roll_forward = command_line::get_last_known_arg(opts, known_options::roll_forward, _X(""));
+        pal::string_t roll_forward = command_line::get_option_value(opts, known_options::roll_forward, _X(""));
         if (roll_forward.length() > 0)
         {
             auto val = roll_forward_option_from_string(roll_forward);
             if (val == roll_forward_option::__Last)
             {
-                trace::error(_X("Invalid value for command line argument '%s'"), command_line::get_option_flag(known_options::roll_forward).c_str());
+                trace::error(_X("Invalid value for command line argument '%s'"), command_line::get_option_name(known_options::roll_forward).c_str());
                 return StatusCode::InvalidArgFailure;
             }
 
             override_settings.set_roll_forward(val);
         }
 
-        pal::string_t roll_fwd_on_no_candidate_fx = command_line::get_last_known_arg(opts, known_options::roll_forward_on_no_candidate_fx, _X(""));
+        pal::string_t roll_fwd_on_no_candidate_fx = command_line::get_option_value(opts, known_options::roll_forward_on_no_candidate_fx, _X(""));
         if (roll_fwd_on_no_candidate_fx.length() > 0)
         {
             if (override_settings.has_roll_forward)
             {
                 trace::error(_X("It's invalid to use both '%s' and '%s' command line options."),
-                    command_line::get_option_flag(known_options::roll_forward).c_str(),
-                    command_line::get_option_flag(known_options::roll_forward_on_no_candidate_fx).c_str());
+                    command_line::get_option_name(known_options::roll_forward).c_str(),
+                    command_line::get_option_name(known_options::roll_forward_on_no_candidate_fx).c_str());
                 return StatusCode::InvalidArgFailure;
             }
 
@@ -425,7 +425,7 @@ namespace
         if (is_framework_dependent)
         {
             // Apply the --fx-version option to the first framework
-            pal::string_t fx_version_specified = command_line::get_last_known_arg(opts, known_options::fx_version, _X(""));
+            pal::string_t fx_version_specified = command_line::get_option_value(opts, known_options::fx_version, _X(""));
             if (fx_version_specified.length() > 0)
             {
                 // This will also set roll forward defaults on the ref
@@ -433,7 +433,7 @@ namespace
             }
 
             // Determine additional deps
-            pal::string_t additional_deps = command_line::get_last_known_arg(opts, known_options::additional_deps, _X(""));
+            pal::string_t additional_deps = command_line::get_option_value(opts, known_options::additional_deps, _X(""));
             additional_deps_serialized = additional_deps;
             if (additional_deps_serialized.empty())
             {
@@ -457,7 +457,7 @@ namespace
             }
         }
 
-        const pal::string_t &opts_probe_path = command_line::get_option_flag(known_options::additional_probing_path);
+        const known_options opts_probe_path = known_options::additional_probing_path;
         std::vector<pal::string_t> spec_probe_paths = opts.count(opts_probe_path) ? opts.find(opts_probe_path)->second : std::vector<pal::string_t>();
         std::vector<pal::string_t> probe_realpaths = get_probe_realpaths(fx_definitions, spec_probe_paths);
 
