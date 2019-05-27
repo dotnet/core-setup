@@ -299,6 +299,20 @@ bool pal::get_global_dotnet_dirs(std::vector<pal::string_t>* recv)
     return false;
 }
 
+bool pal::get_dotnet_self_registered_config_location(pal::string_t* recv)
+{
+	*recv = _X("/etc/dotnet/install_location");
+
+	//  ***Used only for testing***
+	pal::string_t environment_install_location_override;
+	if (test_only_getenv(_X("_DOTNET_TEST_INSTALL_LOCATION_FILE_PATH"), &environment_install_location_override))
+	{
+		*recv = environment_install_location_override;
+	}
+
+	return true;
+}
+
 bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
 {
     recv->clear();
@@ -312,14 +326,11 @@ bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
     }
     //  ***************************
 
-    pal::string_t install_location_file_path = _X("/etc/dotnet/install_location");
-
-    //  ***Used only for testing***
-    pal::string_t environment_install_location_override;
-    if (test_only_getenv(_X("_DOTNET_TEST_INSTALL_LOCATION_FILE_PATH"), &environment_install_location_override))
-    {
-        install_location_file_path = environment_install_location_override;
-    }
+    pal::string_t install_location_file_path;
+	if (!get_dotnet_self_registered_config_location(&install_location_file_path))
+	{
+		return false;
+	}
     //  ***************************
 
     trace::verbose(_X("Looking for install_location file in '%s'."), install_location_file_path.c_str());
