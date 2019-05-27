@@ -111,12 +111,12 @@ bool fxr_resolver::try_get_path(const pal::string_t& root_path, pal::string_t* o
 
         trace::error(_X("A fatal error occurred. The required library %s could not be found.\n"
             "If this is a self-contained application, that library should exist in [%s].\n"
-            "If this is a framework-dependent application, install the runtime in the global location [%s] or use the %s environment variable to specify the runtime location %s."),
+            "If this is a framework-dependent application, install the runtime in the global location [%s] or use the %s environment variable to specify the runtime location%s."),
             LIBFXR_NAME,
             root_path.c_str(),
             default_install_location.c_str(),
             dotnet_root_env_var_name.c_str(),
-			self_registered_message);
+			self_registered_message.c_str());
         return false;
     }
 #else // !FEATURE_APPHOST && !FEATURE_LIBHOST
