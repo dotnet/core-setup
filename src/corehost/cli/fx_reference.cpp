@@ -69,7 +69,7 @@ void fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from
 
     if (from.roll_to_highest_version)
     {
-        roll_to_highest_version = roll_to_highest_version;
+        roll_to_highest_version = from.roll_to_highest_version;
     }
 
     if (from.apply_patches == false)

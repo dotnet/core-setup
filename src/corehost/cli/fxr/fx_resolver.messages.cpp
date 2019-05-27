@@ -144,11 +144,11 @@ void fx_resolver_t::display_incompatible_loaded_framework_error(
     const pal::string_t& loaded_version,
     const fx_reference_t& fx_ref)
 {
-    trace::error(_X("The specified framework '%s', version '%s', apply_patches=%d, roll_forward=%s is incompatible with the previously loaded version '%s'."),
+    trace::error(_X("The specified framework '%s', version '%s', apply_patches=%d, version_range=%d is incompatible with the previously loaded version '%s'."),
         fx_ref.get_fx_name().c_str(),
         fx_ref.get_fx_version().c_str(),
         fx_ref.get_apply_patches(),
-        roll_forward_option_to_string(fx_ref.get_roll_forward()).c_str(),
+        fx_ref.get_version_range(), // TODO: String
         loaded_version.c_str());
 }
 
