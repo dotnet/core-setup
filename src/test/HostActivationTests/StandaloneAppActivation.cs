@@ -236,7 +236,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdOutContaining($"Framework Version:{sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
         }
 
-        // [Fact]
+        [Fact]
         public void Running_AppHost_with_GUI_Reports_Errors_In_Window()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -254,12 +254,23 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             UseBuiltAppHost(appExe);
             MarkAppHostAsGUI(appExe);
 
+            string traceFilePath = Path.Combine(Path.GetDirectoryName(appExe), "trace.log");
+            if (File.Exists(traceFilePath))
+            {
+                File.Delete(traceFilePath);
+            }
+
             Command command = Command.Create(appExe)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .EnvironmentVariable("COREHOST_TRACEFILE", traceFilePath)
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Start();
 
             IntPtr windowHandle = WaitForPopupFromProcess(command.Process);
+
+            Console.WriteLine(File.ReadAllText(traceFilePath));
+
             Assert.NotEqual(IntPtr.Zero, windowHandle);
 
             // In theory we should close the window - but it's just easier to kill the process.
