@@ -254,7 +254,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             UseBuiltAppHost(appExe);
             MarkAppHostAsGUI(appExe);
 
-            string traceFilePath = Path.Combine(Path.GetDirectoryName(appExe), "trace.log");
+            string traceFilePath = Path.Combine(Path.GetDirectoryName(appExe), "trace" + Guid.NewGuid().ToString() + ".log");
             if (File.Exists(traceFilePath))
             {
                 File.Delete(traceFilePath);
