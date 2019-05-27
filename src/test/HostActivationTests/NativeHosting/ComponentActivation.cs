@@ -19,11 +19,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             sharedState = sharedTestState;
         }
 
-        [Theory]
-        [InlineData(true,  true,  true)]
-        [InlineData(false, true,  true)]
-        [InlineData(true,  false, true)]
-        [InlineData(true,  true,  false)]
+        //[Theory]
+        //[InlineData(true,  true,  true)]
+        //[InlineData(false, true,  true)]
+        //[InlineData(true,  false, true)]
+        //[InlineData(true,  true,  false)]
         public void CallDelegate(bool validPath, bool validType, bool validMethod)
         {
             var componentProject = sharedState.ComponentWithNoDependenciesFixture.TestProject;
