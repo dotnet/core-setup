@@ -233,7 +233,7 @@ namespace
         return rc == StatusCode::Success && rcClose == StatusCode::Success;
     }
 
-    bool component_create_native_delegate_test(
+    bool load_assembly_and_get_function_pointer(
         const hostfxr_exports &hostfxr,
         const pal::char_t *config_path,
         int argc,
@@ -251,8 +251,8 @@ namespace
 
         test_output << log_prefix << _X("hostfxr_initialize_for_runtime_config succeeded: ") << std::hex << std::showbase << rc << std::endl;
 
-        ComponentCreateNativeDelegate componentCreateNativeDelegate = nullptr;
-        rc = hostfxr.get_delegate(handle, hostfxr_delegate_type::component_create_native_delegate, (void **)&componentCreateNativeDelegate);
+        LoadAssemblyAndGetFunctionPointer delegate = nullptr;
+        rc = hostfxr.get_delegate(handle, hostfxr_delegate_type::load_assembly_and_get_function_pointer, (void **)&delegate);
         if (rc != StatusCode::Success)
         {
             test_output << log_prefix << _X("hostfxr_get_runtime_delegate failed: ") << std::hex << std::showbase << rc << std::endl;
@@ -261,30 +261,30 @@ namespace
         {
             test_output << log_prefix << _X("hostfxr_get_runtime_delegate succeeded: ") << std::hex << std::showbase << rc << std::endl;
 
-            test_output << log_prefix << _X("calling componentCreateNativeDelegate(\"")
+            test_output << log_prefix << _X("calling LoadAssemblyAndGetFunctionPointer(\"")
                 << argv[0] << _X("\", \"")
                 << argv[1] << _X("\", \"")
                 << argv[2] << _X("\", \"")
-                << _X("nullptr, 0, &componentEntryPointDelegate)")
+                << _X("nullptr, nullptr, &componentEntryPointDelegate)")
                 << std::endl;
 
             ComponentEntryPointDelegate componentEntryPointDelegate = nullptr;
-            rc = componentCreateNativeDelegate(argv[0] /* assemblyPathNative  */,
-                                               argv[1] /* typeNameNative */,
-                                               argv[2] /* methodNameNative */,
-                                               nullptr /* delegateTypeNative */,
-                                               0 /* flags */,
-                                               (void **)&componentEntryPointDelegate);
+            rc = delegate(argv[0] /* assemblyPathNative  */,
+                          argv[1] /* typeNameNative */,
+                          argv[2] /* methodNameNative */,
+                          nullptr /* delegateTypeNative */,
+                          nullptr /* reserved */,
+                          (void **)&componentEntryPointDelegate);
 
             if (rc != StatusCode::Success)
             {
-                test_output << log_prefix << _X("componentCreateNativeDelegate failed: ") << std::hex << std::showbase << rc << std::endl;
+                test_output << log_prefix << _X("LoadAssemblyAndGetFunctionPointer failed: ") << std::hex << std::showbase << rc << std::endl;
             }
             else
             {
-                test_output << log_prefix << _X("componentCreateNativeDelegate succeeded: ") << std::hex << std::showbase << rc << std::endl;
+                test_output << log_prefix << _X("LoadAssemblyAndGetFunctionPointer succeeded: ") << std::hex << std::showbase << rc << std::endl;
 
-                int result = componentEntryPointDelegate((void*)0xdeadbeef, 42);
+                int result = componentEntryPointDelegate((void*)(static_cast<size_t>(0xdeadbeef)), 42);
 
                 test_output << log_prefix << _X("componentEntryPointDelegate result: ") << std::hex << std::showbase << result << std::endl;
             }
@@ -515,7 +515,7 @@ bool host_context_test::non_context_mixed(
     return success;
 }
 
-bool host_context_test::component_create_native_delegate_test(
+bool host_context_test::load_assembly_and_get_function_pointer(
     const pal::string_t &hostfxr_path,
     const pal::char_t *config_path,
     int argc,
@@ -524,5 +524,5 @@ bool host_context_test::component_create_native_delegate_test(
 {
     hostfxr_exports hostfxr{ hostfxr_path };
 
-    return component_create_native_delegate_test(hostfxr, config_path, argc, argv, config_log_prefix, test_output);
+    return load_assembly_and_get_function_pointer(hostfxr, config_path, argc, argv, config_log_prefix, test_output);
 }

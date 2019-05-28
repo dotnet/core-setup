@@ -10,8 +10,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
 {
     public partial class ComponentActivation : IClassFixture<ComponentActivation.SharedTestState>
     {
-        private const string CreateNativeDelegateArg = "component_create_native_delegate";
-        
+        private const string ComponentActivationArg = "load_assembly_and_get_function_pointer";
+
         private readonly SharedTestState sharedState;
 
         public ComponentActivation(SharedTestState sharedTestState)
@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             var componentProject = sharedState.ComponentWithNoDependenciesFixture.TestProject;
             string[] args =
             {
-                CreateNativeDelegateArg,
+                ComponentActivationArg,
                 sharedState.HostFxrPath,
                 sharedState.RuntimeConfigPath,
                 validPath ? componentProject.AppDll : "BadPath...",
