@@ -102,12 +102,12 @@ bool fxr_resolver::try_get_path(const pal::string_t& root_path, pal::string_t* o
             pal::get_default_installation_dir(&default_install_location);
         }
 
-		pal::string_t self_registered_config_location;
-		pal::get_dotnet_self_registered_config_location(&self_registered_config_location);
-		pal::string_t self_registered_message =
-			self_registered_config_location.length() > 0 ?
-			pal::string_t(_X(" or register the runtime location in [") + self_registered_config_location + _X("]")) :
-			_X("");
+        pal::string_t self_registered_config_location;
+        pal::get_dotnet_self_registered_config_location(&self_registered_config_location);
+        pal::string_t self_registered_message =
+            self_registered_config_location.length() > 0 ?
+            pal::string_t(_X(" or register the runtime location in [") + self_registered_config_location + _X("]")) :
+            _X("");
 
         trace::error(_X("A fatal error occurred. The required library %s could not be found.\n"
             "If this is a self-contained application, that library should exist in [%s].\n"
@@ -116,7 +116,7 @@ bool fxr_resolver::try_get_path(const pal::string_t& root_path, pal::string_t* o
             root_path.c_str(),
             default_install_location.c_str(),
             dotnet_root_env_var_name.c_str(),
-			self_registered_message.c_str());
+            self_registered_message.c_str());
         return false;
     }
 #else // !FEATURE_APPHOST && !FEATURE_LIBHOST
