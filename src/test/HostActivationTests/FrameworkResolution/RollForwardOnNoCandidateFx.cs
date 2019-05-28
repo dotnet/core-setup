@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .WithApplyPatches(false)
                     .WithFramework(MicrosoftNETCoreApp, "5.1.0"))
                 .Should().Fail()
-                .And.HaveStdErrContaining("Did not roll forward because apply_patches=0, roll_forward=LatestPatch chose [5.1.0]");
+                .And.HaveStdErrContaining("Did not roll forward because apply_patches=0, version_range=1 chose [5.1.0]");
         }
 
         // Verifies that if both rollForwardOnNoCandidateFx=0 and applyPatches=0 there can still resolve exact match

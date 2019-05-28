@@ -77,7 +77,7 @@ namespace
         //   For backward compatibility reasons the apply_patches for pre-release framework reference only applies to the patch portion of the version,
         //     the pre-release portion of the version ignores apply_patches and we should roll to the latest (100% backward would roll to closest, but for consistency
         //     in the new behavior we will roll to latest).
-        if ((fx_ref.get_version_range() >= version_range_option::patch && !fx_ref.get_roll_to_highest_version())
+        if ((fx_ref.get_version_range() >= version_range_option::patch)
             && (fx_ref.get_apply_patches() || fx_ref.get_fx_version_number().is_prerelease()))
         {
             fx_ver_t apply_patch_from_version = start_with_version;
