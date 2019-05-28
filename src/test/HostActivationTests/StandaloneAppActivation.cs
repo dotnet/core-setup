@@ -269,15 +269,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             IntPtr windowHandle = WaitForPopupFromProcess(command.Process);
 
-            Console.WriteLine(File.ReadAllText(traceFilePath));
-
-            Assert.NotEqual(IntPtr.Zero, windowHandle);
-
             // In theory we should close the window - but it's just easier to kill the process.
             // The popup should be the last thing the process does anyway.
             command.Process.Kill();
-
             CommandResult result = command.WaitForExit(true);
+
+            Console.WriteLine(File.ReadAllText(traceFilePath));
+
+            Assert.NotEqual(IntPtr.Zero, windowHandle);
 
             // There should be no output written by the process.
             Assert.Equal(string.Empty, result.StdOut);
