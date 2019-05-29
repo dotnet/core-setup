@@ -15,6 +15,7 @@ enum intialization_options_t : int32_t
     get_contract = 0x2,          // Get the contract for the initialized hostpolicy
 };
 
+// Delegates for these types will have the stdcall calling convention unless otherwise specified
 enum class coreclr_delegate_type
 {
     invalid,
@@ -77,6 +78,6 @@ typedef int (STDMETHODCALLTYPE *LoadAssemblyAndGetFunctionPointer)(
     /*out*/ void **     delegate           /* Pointer where to store the function pointer result */);
 
 /// Signature of delegate returned by LoadAssemblyAndGetFunctionPointer when delegateTypeNative == null (default)
-typedef int (__cdecl *ComponentEntryPointDelegate)(void *arg, int32_t argSize);
+typedef int (STDMETHODCALLTYPE *ComponentEntryPointDelegate)(void *arg, int32_t argSize);
 
 #endif // __COREHOST_CONTEXT_CONTRACT_H__
