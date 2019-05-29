@@ -9,6 +9,7 @@
 #include "pal.h"
 #include "fx_ver.h"
 #include "roll_forward_option.h"
+#include "version_range_option.h"
 
 class fx_reference_t
 {

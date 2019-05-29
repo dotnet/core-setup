@@ -26,8 +26,8 @@ namespace
         if (fx_ref.get_version_range() > version_range_option::patch)
         {
             trace::verbose(
-                _X("'Roll forward' enabled with version range [%d]. Looking for the %s %s greater than or equal version to [%s]"),
-                fx_ref.get_version_range(), // TODO - to string
+                _X("'Roll forward' enabled with version_range [%s]. Looking for the %s %s greater than or equal version to [%s]"),
+                version_range_option_to_string(fx_ref.get_version_range()).c_str(),
                 fx_ref.get_roll_to_highest_version() ? _X("highest") : _X("lowest"),
                 release_only ? _X("release") : _X("release/pre-release"),
                 fx_ref.get_fx_version().c_str());
@@ -129,10 +129,10 @@ namespace
         const fx_reference_t& fx_ref)
     {
         trace::verbose(
-            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, version_range=%d, roll_to_highest_version=%d, prefer_release=%d"),
+            _X("Attempting FX roll forward starting from version='[%s]', apply_patches=%d, version_range=%s, roll_to_highest_version=%d, prefer_release=%d"),
             fx_ref.get_fx_version().c_str(),
             fx_ref.get_apply_patches(),
-            fx_ref.get_version_range(), // TODO -> to string
+            version_range_option_to_string(fx_ref.get_version_range()).c_str(),
             fx_ref.get_roll_to_highest_version(),
             fx_ref.get_prefer_release());
 
@@ -214,9 +214,9 @@ namespace
                 ((fx_ref.get_version_range() == version_range_option::patch) && (!fx_ref.get_apply_patches() && !fx_ref.get_fx_version_number().is_prerelease())))
             {
                 trace::verbose(
-                    _X("Did not roll forward because apply_patches=%d, version_range=%d chose [%s]"),
+                    _X("Did not roll forward because apply_patches=%d, version_range=%s chose [%s]"),
                     fx_ref.get_apply_patches(),
-                    fx_ref.get_version_range(), // TODO -> to string
+                    version_range_option_to_string(fx_ref.get_version_range()).c_str(),
                     fx_ref.get_fx_version().c_str());
 
                 append_path(&fx_dir, fx_ref.get_fx_version().c_str());
