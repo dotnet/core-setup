@@ -68,14 +68,15 @@ static_assert(offsetof(corehost_context_contract, get_runtime_delegate) == 6 * s
 #pragma pack(pop)
 
 /// Signature of delegate returned by coreclr_delegate_type::load_assembly_and_get_function_pointer
-typedef int (__cdecl *LoadAssemblyAndGetFunctionPointer)(const pal::char_t * assemblyPathNative /* Fully qualified path to assembly */,
-                                                     const pal::char_t * typeNameNative     /* Assembly qualified type name */,
-                                                     const pal::char_t * methodNameNative   /* Public static method name compatible with delegateType */,
-                                                     const pal::char_t * delegateTypeNative /* Assembly qualified delegate type name or null */,
-                                                     void *              reserved           /* Extensibility parameter (currently unused and must be 0) */,
-                                                     /*out*/ void **     delegate           /* Pointer where to store the function pointer result */);
+typedef int (STDMETHODCALLTYPE *LoadAssemblyAndGetFunctionPointer)(
+    const pal::char_t * assemblyPathNative /* Fully qualified path to assembly */,
+    const pal::char_t * typeNameNative     /* Assembly qualified type name */,
+    const pal::char_t * methodNameNative   /* Public static method name compatible with delegateType */,
+    const pal::char_t * delegateTypeNative /* Assembly qualified delegate type name or null */,
+    void *              reserved           /* Extensibility parameter (currently unused and must be 0) */,
+    /*out*/ void **     delegate           /* Pointer where to store the function pointer result */);
 
 /// Signature of delegate returned by LoadAssemblyAndGetFunctionPointer when delegateTypeNative == null (default)
-typedef int (__cdecl *ComponentEntryPointDelegate)(void*arg, int32_t argSize);
+typedef int (__cdecl *ComponentEntryPointDelegate)(void *arg, int32_t argSize);
 
 #endif // __COREHOST_CONTEXT_CONTRACT_H__
