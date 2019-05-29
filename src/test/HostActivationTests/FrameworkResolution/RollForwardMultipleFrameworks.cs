@@ -688,6 +688,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
+        // Verify that the "roll to highest version" flag is propagated into inner framework reference.
+        // The app references MiddleWare framework with the specified appRollForward setting
+        // then the MiddleWare framework references Microsoft.NETCore.App with the specified fxRefVersion and fxRollForward.
         [Theory] // appRollForward                            fxRefVersion fxRollForward                             resolvedFramework
         // LatestPatch does not imply roll_to_highest
         [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.1",     Constants.RollForwardSetting.Disable,     "5.1.1")]
@@ -696,6 +699,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.0",     Constants.RollForwardSetting.Minor,       "5.1.3")]
         [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.0",     Constants.RollForwardSetting.Major,       "5.1.3")]
         [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.0",     Constants.RollForwardSetting.LatestMajor, "6.2.1")]
+        // Minor/Major do not imply roll_to_highest
+        [InlineData(Constants.RollForwardSetting.Minor,       "5.1.0",     Constants.RollForwardSetting.Minor,       "5.1.3")]
+        [InlineData(Constants.RollForwardSetting.Major,       "5.1.0",     Constants.RollForwardSetting.Minor,       "5.1.3")]
         // LatestMinor does imply roll_to_highest
         [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.1",     Constants.RollForwardSetting.Disable,     "5.1.1")]
         [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.0",     Constants.RollForwardSetting.LatestPatch, "5.1.3")]
@@ -720,6 +726,43 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForward(fxRollForward)
                         .Version = fxRefVersion))
+                .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
+        }
+
+        // Verify that the "roll to highest version" flag is propagated across multiple layers of framework references.
+        // The app references HighWare framework, which in turn references MiddleWare framework which then references
+        // Microsoft.NETCore.App. Each level specify a roll forward option.
+        [Theory] // appRollForward                            fxRefVersion higherFxRollForward                       lowerFxRollForward                        resolvedFramework
+        [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.0",     Constants.RollForwardSetting.Minor,       Constants.RollForwardSetting.Minor,       "5.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.0",     null,                                     null,                                     "5.6.0")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.0",     Constants.RollForwardSetting.Minor,       Constants.RollForwardSetting.Minor,       "5.6.0")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.0",     Constants.RollForwardSetting.LatestPatch, Constants.RollForwardSetting.LatestPatch, "5.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, "5.1.0",     Constants.RollForwardSetting.Minor,       Constants.RollForwardSetting.Minor,       "5.6.0")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, "5.1.0",     Constants.RollForwardSetting.LatestPatch, Constants.RollForwardSetting.LatestPatch, "5.1.3")]
+        public void PropagateRollToHighestVersionAcrossMultipleFrameworks(
+            string appRollForward,
+            string fxRefVersion,
+            string higherFxRollForward,
+            string lowerFxRollForward,
+            string resolvedFramework)
+        {
+            RunTest(
+                runtimeConfig => runtimeConfig
+                    .WithFramework(new RuntimeConfig.Framework(HighWare, "7.3.1")
+                        .WithRollForward(appRollForward)),
+                dotnetCustomizer =>
+                {
+                    dotnetCustomizer.Framework(HighWare).RuntimeConfig(runtimeConfig =>
+                    {
+                        runtimeConfig.RemoveFramework(MicrosoftNETCoreApp);
+                        runtimeConfig.GetFramework(MiddleWare)
+                            .WithRollForward(higherFxRollForward);
+                    });
+                    dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
+                        runtimeConfig.GetFramework(MicrosoftNETCoreApp)
+                            .WithRollForward(lowerFxRollForward)
+                            .Version = fxRefVersion);
+                })
                 .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
