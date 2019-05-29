@@ -95,7 +95,10 @@ namespace Microsoft.DotNet.CoreSetup.Test
                     try
                     {
                         Directory.Delete(_backupPath, recursive: true);
-                        return;
+                        if (!Directory.Exists(_backupPath))
+                        {
+                            return;
+                        }
                     }
                     catch (IOException ex)
                     {

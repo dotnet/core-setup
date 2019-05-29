@@ -359,6 +359,10 @@ void fx_resolver_t::update_newest_references(
 //     Passed as fx_reference_t for simplicity, the version part of that structure is ignored.
 // - config
 //     Parsed runtime configuration to process.
+// - effective_parent_fx_ref
+//     The framework reference which was used to resolve the framework we're about to read.
+//     Some settings are propagated from the parent framework reference to the processing of the framework itself
+//     so this is used to access those settings.
 // - fx_definitions
 //     List of "hard" resolved frameworks, that is frameworks actually found on the disk.
 //     Frameworks are added to the list as they are resolved.
@@ -377,6 +381,7 @@ StatusCode fx_resolver_t::read_framework(
     const host_startup_info_t & host_info,
     const runtime_config_t::settings_t& override_settings,
     const runtime_config_t & config,
+    const fx_reference_t * effective_parent_fx_ref,
     fx_definition_vector_t & fx_definitions)
 {
     // This reconciles duplicate references to minimize the number of resolve retries.
@@ -385,8 +390,16 @@ StatusCode fx_resolver_t::read_framework(
     StatusCode rc = StatusCode::Success;
 
     // Loop through each reference and resolve the framework
-    for (const fx_reference_t& fx_ref : config.get_frameworks())
+    for (const fx_reference_t& original_fx_ref : config.get_frameworks())
     {
+        fx_reference_t fx_ref = original_fx_ref;
+
+        // Propagate the roll_to_highest_version into all framework references inside the framework
+        if (effective_parent_fx_ref != nullptr && effective_parent_fx_ref->get_roll_to_highest_version())
+        {
+            fx_ref.set_roll_to_highest_version(true);
+        }
+
         const pal::string_t& fx_name = fx_ref.get_fx_name();
         const fx_reference_t& current_effective_fx_ref = m_effective_fx_references[fx_name];
         fx_reference_t new_effective_fx_ref;
@@ -443,7 +456,7 @@ StatusCode fx_resolver_t::read_framework(
                 return StatusCode::InvalidConfigFile;
             }
 
-            rc = read_framework(host_info, override_settings, new_config, fx_definitions);
+            rc = read_framework(host_info, override_settings, new_config, &new_effective_fx_ref, fx_definitions);
             if (rc)
             {
                 break; // Error case
@@ -495,7 +508,7 @@ StatusCode fx_resolver_t::resolve_frameworks_for_app(
     do
     {
         fx_definitions.resize(1); // Erase any existing frameworks for re-try
-        rc = resolver.read_framework(host_info, override_settings, app_config, fx_definitions);
+        rc = resolver.read_framework(host_info, override_settings, app_config, /*effective_parent_fx_ref*/ nullptr,  fx_definitions);
     } while (rc == StatusCode::FrameworkCompatRetry && retry_count++ < Max_Framework_Resolve_Retries);
 
     assert(retry_count < Max_Framework_Resolve_Retries);

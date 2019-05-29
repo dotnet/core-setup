@@ -688,9 +688,29 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
-        [Theory]
-        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.0.0", null, "5.6.0")]
-        public void PropagateRollToLatest(string appRollForward, string fxVersionReference, string fxRollForward, string resolvedFramework)
+        [Theory] // appRollForward                            fxRefVersion fxRollForward                             resolvedFramework
+        // LatestPatch does not imply roll_to_highest
+        [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.1",     Constants.RollForwardSetting.Disable,     "5.1.1")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.0",     Constants.RollForwardSetting.LatestPatch, "5.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.0",     null,                                     "5.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.0",     Constants.RollForwardSetting.Minor,       "5.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.0",     Constants.RollForwardSetting.Major,       "5.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestPatch, "5.1.0",     Constants.RollForwardSetting.LatestMajor, "6.2.1")]
+        // LatestMinor does imply roll_to_highest
+        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.1",     Constants.RollForwardSetting.Disable,     "5.1.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.0",     Constants.RollForwardSetting.LatestPatch, "5.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.0",     null,                                     "5.6.0")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.0",     Constants.RollForwardSetting.Minor,       "5.6.0")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.0",     Constants.RollForwardSetting.Major,       "6.2.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMinor, "5.1.0",     Constants.RollForwardSetting.LatestMajor, "6.2.1")]
+        // LatestMajor does imply roll_to_highest
+        [InlineData(Constants.RollForwardSetting.LatestMajor, "5.1.1",     Constants.RollForwardSetting.Disable,     "5.1.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, "5.1.0",     Constants.RollForwardSetting.LatestPatch, "5.1.3")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, "5.1.0",     null,                                     "5.6.0")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, "5.1.0",     Constants.RollForwardSetting.Minor,       "5.6.0")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, "5.1.0",     Constants.RollForwardSetting.Major,       "6.2.1")]
+        [InlineData(Constants.RollForwardSetting.LatestMajor, "5.1.0",     Constants.RollForwardSetting.LatestMajor, "6.2.1")]
+        public void PropagateRollToHighestVersion(string appRollForward, string fxRefVersion, string fxRollForward, string resolvedFramework)
         {
             RunTest(
                 runtimeConfig => runtimeConfig
@@ -699,7 +719,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 dotnetCustomizer => dotnetCustomizer.Framework(MiddleWare).RuntimeConfig(runtimeConfig =>
                     runtimeConfig.GetFramework(MicrosoftNETCoreApp)
                         .WithRollForward(fxRollForward)
-                        .Version = fxVersionReference))
+                        .Version = fxRefVersion))
                 .ShouldHaveResolvedFrameworkOrFailToFind(MicrosoftNETCoreApp, resolvedFramework);
         }
 
