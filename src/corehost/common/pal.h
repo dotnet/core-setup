@@ -148,7 +148,7 @@ namespace pal
     inline size_t strlen(const char_t* str) { return ::wcslen(str); }
     inline FILE * file_open(const string_t& path, const char_t* mode) { return ::_wfopen(path.c_str(), mode); }
 
-	inline void file_vprintf(FILE* f, const char_t* format, va_list vl) { ::vfwprintf(f, format, vl); ::fputwc(_X('\n'), f); }
+    inline void file_vprintf(FILE* f, const char_t* format, va_list vl) { ::vfwprintf(f, format, vl); ::fputwc(_X('\n'), f); }
     inline void err_fputs(const char_t* message) { ::fputws(message, stderr); ::fputwc(_X('\n'), stderr); }
     inline void out_vprintf(const char_t* format, va_list vl) { ::vfwprintf(stdout, format, vl); ::fputwc(_X('\n'), stdout); }
     inline int str_vprintf(char_t* buffer, size_t count, const char_t* format, va_list vl) { return ::_vsnwprintf(buffer, count, format, vl); }
@@ -253,7 +253,7 @@ namespace pal
         return fallbackRid;
     }
 
-	void* map_file_readonly(const string_t& path, size_t& length);
+    void* map_file_readonly(const string_t& path, size_t& length);
     bool touch_file(const string_t& path);
     bool realpath(string_t* path, bool skip_error_logging = false);
     bool file_exists(const string_t& path);

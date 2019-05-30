@@ -41,7 +41,7 @@ void extractor_t::determine_extraction_dir()
 // m_working_extraction_dir = $DOTNET_BUNDLE_EXTRACT_BASE_DIR/<app>/<proc-id-hex>
 void extractor_t::determine_working_extraction_dir()
 {
-    m_working_extraction_dir = get_directory(m_extraction_dir);
+    m_working_extraction_dir = get_directory(extraction_dir());
     pal::char_t pid[32];
     pal::snwprintf(pid, 32, _X("%x"), pal::get_pid());
     append_path(&m_working_extraction_dir, pid);
