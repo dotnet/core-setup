@@ -157,7 +157,7 @@ Existing behavior is to find a matching framework based on the above rules and t
 * If the above rules find a matching pre-release version of a framework, then automatic roll forward to latest patch is not applied.
 * If the above rules find a matching release version of a framework, automatic roll forward to latest patch is applied.
 
-This is done to adapt to .NET Core's usage of pre-release versions. Per semantic versioning the pre-release part of the version is the least significant, less significant than patch version. So without this modification automatic roll forward to latest patch would mean that the latest available preview would always be selected. .NET Core usage of previews is more akin to major version - each preview release (Preview 1 to Preview 2 for example) can contain changes which are breaking with respect to the previous preview. Also, automatic roll forward to latest pre-release would make it hard to test two preview releases side by side on a single machine.
+This is done to adapt to .NET Core's usage of pre-release versions. Per semantic versioning the pre-release part of the version is the least significant - less significant than patch version. Without this modification, automatic roll forward to latest patch would mean that the latest available preview would always be selected. .NET Core usage of previews is more akin to major version - each preview release (Preview 1 to Preview 2 for example) can contain changes which are breaking with respect to the previous preview. Automatic roll forward to latest pre-release would also make it hard to test two preview releases side by side on a single machine.
 
 ### Proposed new "pre-release" mode
 The above behavior makes sense for most users, but it makes it hard for us to test new versions of frameworks. Let's assume .NET Core 3.0 already shipped and there are apps which target `3.0.0 rollForward = Minor` (the default). The shipped framework is version `3.0.0`. Now the next patch release is being prepared and `3.0.1-preview` is produced. With the proposed (and current) behavior, there's no good way to make the apps use the new preview for testing purposes.
@@ -272,7 +272,7 @@ If there are two references to the same framework name, then the host needs to r
 * Take the more restrictive `version_range` from the two
 * If `roll_forward_to_highest_version` is true on one of the framework references, apply the `true` value to the merged framework reference as well.
 
-The check whether the roll-forward is allowed follows the rules described above in the list of available settings for `rollForward`.
+The check for whether the roll-forward is allowed follows the rules described above in the list of available settings for `rollForward`.
 
 For example:
 In this example the two framework references are for the same framework name.
@@ -335,7 +335,7 @@ Notes on this algorithm:
 When a given framework "F1" ships it should not create a case of having more than one reference to the another framework "F2". The reason is that base frameworks already specify "F2" so there is no reason to re-specify it. However, there are potential valid reasons to re-specify the framework:
 	* To force a newer version of a given framework which is referenced by lower-level frameworks. However assuming first-party frameworks are coordinated, this reason should not exist for first-party `.runtimeconfig.json` files.
 	* To be redundant if there are several "smaller" or "optional" frameworks being used and no guarantee that a base framework will always reference the smaller frameworks over time.
-For first-party frameworks this means that app should only specify the reference to the highest-level framework. For example, the app should reference `Microsoft.AspNet.App` but should not then also specify a reference to `Microsoft.NETCore.App` as that is already implied by the higher level framework.
+For first-party frameworks, this means that the app should only specify the reference to the highest-level framework. For example, the app should reference `Microsoft.AspNet.App` but should not then also specify a reference to `Microsoft.NETCore.App` as that is already implied by the higher level framework.
 
 #### No Circular References
 There should not be any circular dependencies between frameworks.
