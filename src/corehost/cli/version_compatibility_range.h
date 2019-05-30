@@ -6,7 +6,7 @@
 #define __VERSION_RANGE_OPTION_H_
 
 // Defines teh allowed range of versions to consider during roll-forward search
-enum class version_range_option
+enum class version_compatibility_range_t
 {
     exact = 0,  // Only the specified version is allowed
     patch = 1,  // Any equal or higher version with the same major.minor
@@ -16,6 +16,6 @@ enum class version_range_option
     __last      // Sentinel value
 };
 
-pal::string_t version_range_option_to_string(version_range_option value);
+pal::string_t version_compatibility_range_to_string(version_compatibility_range_t value);
 
 #endif // __VERSION_RANGE_OPTION_H_

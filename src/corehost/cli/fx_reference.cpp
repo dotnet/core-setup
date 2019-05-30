@@ -18,21 +18,21 @@ bool fx_reference_t::is_compatible_with_higher_version(const fx_ver_t& higher_ve
 
     // Verify major roll forward
     if (fx_version_number.get_major() != higher_version.get_major()
-        && version_range < version_range_option::major)
+        && version_compatibility_range < version_compatibility_range_t::major)
     {
         return false;
     }
 
     // Verify minor roll forward
     if (fx_version_number.get_minor() != higher_version.get_minor()
-        && version_range < version_range_option::minor)
+        && version_compatibility_range < version_compatibility_range_t::minor)
     {
         return false;
     }
 
     // Verify patch roll forward
     if (get_fx_version_number().get_patch() != higher_version.get_patch()
-        && version_range == version_range_option::patch
+        && version_compatibility_range == version_compatibility_range_t::patch
         && apply_patches == false)
     {
         return false;
@@ -44,7 +44,7 @@ bool fx_reference_t::is_compatible_with_higher_version(const fx_ver_t& higher_ve
     //  - rollForward is LatestPatch and applyPatches=false - which would normally mean exactly the same as Disable, but
     //    for backward compat reasons this is a special case. In this case applyPatches is ignored for pre-release versions.
     //    So even if pre-release are different, the versions are compatible.
-    if (version_range == version_range_option::exact)
+    if (version_compatibility_range == version_compatibility_range_t::exact)
     {
         // We know the versions are different since we compared 100% equality above, so they're not compatible.
         // In here the versions could differ in patch or pre-release, in both cases they're not compatible.
@@ -62,9 +62,9 @@ bool fx_reference_t::is_compatible_with_higher_version(const fx_ver_t& higher_ve
 
 void fx_reference_t::merge_roll_forward_settings_from(const fx_reference_t& from)
 {
-    if (from.version_range < version_range)
+    if (from.version_compatibility_range < version_compatibility_range)
     {
-        version_range = from.version_range;
+        version_compatibility_range = from.version_compatibility_range;
     }
 
     if (from.roll_to_highest_version)

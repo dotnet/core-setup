@@ -33,7 +33,7 @@ set(SOURCES
     ../fx_definition.cpp
     ../fx_reference.cpp
     ../version.cpp
-    ../version_range_option.cpp
+    ../version_compatibility_range.cpp
 )
 
 set(HEADERS
@@ -53,7 +53,7 @@ set(HEADERS
     ../fx_definition.h
     ../fx_reference.h
     ../version.h
-    ../version_range_option.h
+    ../version_compatibility_range.h
 )
 
 include(../lib.cmake)

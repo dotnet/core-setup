@@ -9,14 +9,14 @@
 #include "pal.h"
 #include "fx_ver.h"
 #include "roll_forward_option.h"
-#include "version_range_option.h"
+#include "version_compatibility_range.h"
 
 class fx_reference_t
 {
 public:
     fx_reference_t()
         : apply_patches(true)
-        , version_range(version_range_option::minor)
+        , version_compatibility_range(version_compatibility_range_t::minor)
         , roll_to_highest_version(false)
         , prefer_release(false)
         , fx_name(_X(""))
@@ -58,13 +58,9 @@ public:
         apply_patches = value;
     }
 
-    version_range_option get_version_range() const
+    version_compatibility_range_t get_version_compatibility_range() const
     {
-        return version_range;
-    }
-    void set_version_range(version_range_option value)
-    {
-        version_range = value;
+        return version_compatibility_range;
     }
 
     void set_roll_forward(roll_forward_option value)
@@ -72,28 +68,31 @@ public:
         switch (value)
         {
         case roll_forward_option::Disable:
-            version_range = version_range_option::exact;
+            version_compatibility_range = version_compatibility_range_t::exact;
             roll_to_highest_version = false;
             break;
         case roll_forward_option::LatestPatch:
-            version_range = version_range_option::patch;
+            version_compatibility_range = version_compatibility_range_t::patch;
             roll_to_highest_version = false;
             break;
         case roll_forward_option::Minor:
-            version_range = version_range_option::minor;
+            version_compatibility_range = version_compatibility_range_t::minor;
             roll_to_highest_version = false;
             break;
         case roll_forward_option::LatestMinor:
-            version_range = version_range_option::minor;
+            version_compatibility_range = version_compatibility_range_t::minor;
             roll_to_highest_version = true;
             break;
         case roll_forward_option::Major:
-            version_range = version_range_option::major;
+            version_compatibility_range = version_compatibility_range_t::major;
             roll_to_highest_version = false;
             break;
         case roll_forward_option::LatestMajor:
-            version_range = version_range_option::major;
+            version_compatibility_range = version_compatibility_range_t::major;
             roll_to_highest_version = true;
+            break;
+        case roll_forward_option::__Last:
+            assert(false);
             break;
         }
     }
@@ -128,7 +127,7 @@ public:
             fx_name == other.fx_name &&
             fx_version == other.fx_version &&
             apply_patches == other.apply_patches &&
-            version_range == other.version_range &&
+            version_compatibility_range == other.version_compatibility_range &&
             roll_to_highest_version == other.roll_to_highest_version &&
             prefer_release == other.prefer_release;
     }
@@ -141,7 +140,7 @@ public:
 private:
     bool apply_patches;
 
-    version_range_option version_range;
+    version_compatibility_range_t version_compatibility_range;
     bool roll_to_highest_version;
 
     // This indicates that when resolving the framework reference the search should prefer release version
