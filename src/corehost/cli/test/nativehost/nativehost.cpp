@@ -161,9 +161,9 @@ int main(const int argc, const pal::char_t *argv[])
     }
     else if (pal::strcmp(command, _X("load_assembly_and_get_function_pointer")) == 0)
     {
-        // args: ... <hostfxr_path> <app_or_config_path> [<remaining_args>]
+        // args: ... <hostfxr_path> <app_or_config_path> <assembly_path> <type_name> <method_name> [<assembly_path> <type_name> <method_name>...]
         const int min_argc = 4;
-        if (argc != min_argc + 3)
+        if (argc < min_argc + 3)
         {
             std::cerr << "Invalid arguments" << std::endl;
             return -1;
@@ -172,7 +172,6 @@ int main(const int argc, const pal::char_t *argv[])
         const pal::string_t hostfxr_path = argv[2];
         const pal::char_t *app_or_config_path = argv[3];
 
-        // Remaining args used as property names to get/set as well as arguments for the app
         int remaining_argc = argc - min_argc;
         const pal::char_t **remaining_argv = nullptr;
         if (argc > min_argc)
