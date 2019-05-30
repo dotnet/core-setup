@@ -191,20 +191,13 @@
                    '$(BuildFullPlatformManifest)' == 'true'">true</IncludeAllRuntimePackagesInPlatformManifest>
     </PropertyGroup>
 
-    <!--
-      Set FrameworkListTargetPath to empty string to skip framework list generation. When
-      BuildFullPlatformManifest is set, list generation  attempts to read post-crossgen files from
-      other platforms, which don't exist on the current machine. (Generating the framework list is
-      also not necessary here and a waste of time.)
-    -->
     <MSBuild Projects="@(ProjectReference)"
              Condition="'%(ProjectReference.PackageTargetRuntime)' == '$(PackageRID)' OR
                         '%(ProjectReference.BuidOnRID)' == '$(PackageRID)' OR
                         ('$(IncludeAllRuntimePackagesInPlatformManifest)' == 'true' AND
                          '%(ProjectReference.PackageTargetRuntime)' != '' AND
                          '%(ProjectReference.ExcludeFromPlatformManifest)' != 'true')"
-             Targets="GetPackageFiles"
-             Properties="FrameworkListTargetPath=">
+             Targets="GetPackageFiles">
       <Output TaskParameter="TargetOutputs" ItemName="SharedFrameworkRuntimeFiles" />
     </MSBuild>
 
@@ -250,7 +243,12 @@
   <Target Name="IncludeFrameworkListFile"
           BeforeTargets="GetFiles"
           DependsOnTargets="GetSymbolPackageFiles"
-          Condition="'$(FrameworkListTargetPath)' != ''">
+          Condition="
+            '$(FrameworkListTargetPath)' != '' AND
+            (
+              '$(PackageTargetRuntime)' == '' OR
+              '$(PackageTargetRuntime)' == '$(PackageRID)'
+            )">
     <PropertyGroup>
       <FrameworkListFile>$(IntermediateOutputPath)FrameworkList.xml</FrameworkListFile>
     </PropertyGroup>

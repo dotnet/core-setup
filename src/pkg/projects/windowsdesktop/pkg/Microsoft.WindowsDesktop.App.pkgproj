@@ -8,21 +8,7 @@
     <PlatformManifestTargetPath>$(BuildTargetPath)</PlatformManifestTargetPath>
     <FileVersionPropsTargetPath>$(BuildTargetPath)</FileVersionPropsTargetPath>
 
-    <!--
-      Only try to create the framework list if both:
-
-      - This is a runtime package. Only the runtime package (eventually runtime pack) and targeting
-        pack need this list, not the legacy identity package.
-
-      - The build platform is the same as the target arch. Package validation (currently unique to
-        WindowsDesktop) runs the GetPackageFiles target on each architecture. This causes e.g. an
-        x64 build that targets x86. After the File paths are transformed to find the R2R files (even
-        though crossgen didn't run!), the new paths don't exist, causing failures during
-        CreateFrameworkListFile.
-    -->
-    <FrameworkListTargetPath Condition="
-      '$(PackageTargetRuntime)' != '' AND
-      '$(TargetArchitecture)' == '$(Platform)'">data/</FrameworkListTargetPath>
+    <FrameworkListTargetPath>data/</FrameworkListTargetPath>
 
     <GenerateSharedFramework>true</GenerateSharedFramework>
     <GenerateNetCoreAppRuntimeConfig>true</GenerateNetCoreAppRuntimeConfig>
