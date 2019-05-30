@@ -21,7 +21,7 @@
     <GeneratePkg>false</GeneratePkg>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(PackageTargetRuntime)' == ''">
     <FrameworkListFileProfile Include="Accessibility.dll" Profile="WindowsForms;WPF" />
     <FrameworkListFileProfile Include="D3DCompiler_47_cor3.dll" Profile="WPF" />
     <FrameworkListFileProfile Include="DirectWriteForwarder.dll" Profile="WPF" />
