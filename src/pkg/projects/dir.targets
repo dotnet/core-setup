@@ -191,13 +191,20 @@
                    '$(BuildFullPlatformManifest)' == 'true'">true</IncludeAllRuntimePackagesInPlatformManifest>
     </PropertyGroup>
 
+    <!--
+      Set FrameworkListTargetPath to empty string to skip framework list generation. When
+      BuildFullPlatformManifest is set, list generation  attempts to read post-crossgen files from
+      other platforms, which don't exist on the current machine. (Generating the framework list is
+      also not necessary here and a waste of time.)
+    -->
     <MSBuild Projects="@(ProjectReference)"
              Condition="'%(ProjectReference.PackageTargetRuntime)' == '$(PackageRID)' OR
                         '%(ProjectReference.BuidOnRID)' == '$(PackageRID)' OR
                         ('$(IncludeAllRuntimePackagesInPlatformManifest)' == 'true' AND
                          '%(ProjectReference.PackageTargetRuntime)' != '' AND
                          '%(ProjectReference.ExcludeFromPlatformManifest)' != 'true')"
-             Targets="GetPackageFiles">
+             Targets="GetPackageFiles"
+             Properties="FrameworkListTargetPath=">
       <Output TaskParameter="TargetOutputs" ItemName="SharedFrameworkRuntimeFiles" />
     </MSBuild>
 
