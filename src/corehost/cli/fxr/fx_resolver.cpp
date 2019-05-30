@@ -16,14 +16,14 @@ namespace
     static_assert(roll_forward_option::Major > roll_forward_option::LatestMinor, "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
     static_assert(roll_forward_option::LatestMajor > roll_forward_option::Major, "Code assumes ordering of roll-forward options from least restrictive to most restrictive");
 
-    fx_ver_t search_for_best_framework_major_or_minor_match(
+    fx_ver_t search_for_best_framework_match_without_roll_to_latest_patch(
         const std::vector<fx_ver_t>& version_list,
         const fx_reference_t& fx_ref,
         bool release_only)
     {
         fx_ver_t best_match_version;
 
-        if (fx_ref.get_version_compatibility_range() > version_compatibility_range_t::patch)
+        if (fx_ref.get_version_compatibility_range() >= version_compatibility_range_t::patch)
         {
             trace::verbose(
                 _X("'Roll forward' enabled with version_compatibility_range [%s]. Looking for the %s %s greater than or equal version to [%s]"),
@@ -36,8 +36,22 @@ namespace
             {
                 if ((!release_only || !ver.is_prerelease()) && ver >= fx_ref.get_fx_version_number())
                 {
+                    // Check major version compatibility
                     if (fx_ref.get_version_compatibility_range() <= version_compatibility_range_t::minor &&
                         ver.get_major() != fx_ref.get_fx_version_number().get_major())
+                    {
+                        continue;
+                    }
+
+                    // Check minor version compatibility
+                    // If major.minor is the same but patch differs, only consider the version if apply_patches=true
+                    // If apply_patches=false, then we must not roll to a different patch version. For backward compatibility reasons
+                    //   roll_on_no_candidate_fx=0 && apply_patches=false means no roll forward whatsoever.
+                    // For backward compatibility reasons the apply_patches for pre-release framework reference only applies to the patch portion of the version
+                    //   we can still roll on the pre-release part of the version even if apply_patches=false.
+                    if (fx_ref.get_version_compatibility_range() <= version_compatibility_range_t::patch &&
+                        (ver.get_minor() != fx_ref.get_fx_version_number().get_minor() ||
+                         (!fx_ref.get_apply_patches() && ver.get_patch() != fx_ref.get_fx_version_number().get_patch())))
                     {
                         continue;
                     }
@@ -61,7 +75,7 @@ namespace
         return best_match_version;
     }
 
-    fx_ver_t search_for_latest_patch(
+    fx_ver_t automatic_roll_to_latest_patch(
         const std::vector<fx_ver_t>& version_list,
         const fx_reference_t& fx_ref,
         const fx_ver_t& start_with_version,
@@ -69,19 +83,16 @@ namespace
     {
         fx_ver_t best_match_version = start_with_version;
 
-        // For LatestMinor and LatestMajor the above search should already find the latest patch (it looks for latest version as a whole).
         // For Disable, there's no roll forward (in fact we should not even get here).
-        // For Major and Minor, we need to look for latest patch as the above would have found the lowest patch (as it looks for lowest version as a whole).
-        // For LatestPatch we haven't found any version yet, so simply find the latest patch.
-        //   For backward compatibility reasons we also need to consider the apply_patches setting though.
-        //   For backward compatibility reasons the apply_patches for pre-release framework reference only applies to the patch portion of the version,
-        //     the pre-release portion of the version ignores apply_patches and we should roll to the latest (100% backward would roll to closest, but for consistency
-        //     in the new behavior we will roll to latest).
-        if ((fx_ref.get_version_compatibility_range() >= version_compatibility_range_t::patch)
-            && (fx_ref.get_apply_patches() || fx_ref.get_fx_version_number().is_prerelease()))
+        // For backward compatibility reasons we also need to consider the apply_patches setting
+        // For backward compatibility reasons the apply_patches for pre-release framework reference only applies to the patch portion of the version,
+        //   we can still roll on the pre-release part of the version even if apply_patches=false.
+        // If we've found a pre-release version match, then don't apply automatic roll to latest patch.
+        if (fx_ref.get_version_compatibility_range() >= version_compatibility_range_t::patch &&
+            !best_match_version.is_prerelease())
         {
             fx_ver_t apply_patch_from_version = start_with_version;
-            if (apply_patch_from_version == fx_ver_t())
+            if (apply_patch_from_version.is_empty())
             {
                 apply_patch_from_version = fx_ref.get_fx_version_number();
             }
@@ -115,11 +126,14 @@ namespace
         const fx_reference_t& fx_ref,
         bool release_only)
     {
-        // Roll forward to the best major.minor.* version
-        fx_ver_t best_match_version = search_for_best_framework_major_or_minor_match(version_list, fx_ref, release_only);
+        // Roll forward to the best version match without applying automatic roll forward to latest patch
+        fx_ver_t best_match_version = search_for_best_framework_match_without_roll_to_latest_patch(version_list, fx_ref, release_only);
 
-        // Roll forward to the latest patch for a given major.minor
-        best_match_version = search_for_latest_patch(version_list, fx_ref, best_match_version, release_only);
+        if (!best_match_version.is_empty())
+        {
+            // Apply automatic roll to the latest patch
+            best_match_version = automatic_roll_to_latest_patch(version_list, fx_ref, best_match_version, release_only);
+        }
 
         return best_match_version;
     }
