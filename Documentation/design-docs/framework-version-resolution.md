@@ -152,7 +152,7 @@ One special case which would not work:
 Later on component B is loaded which asks for `3.1.0-preview LatestMajor` (for example the one in active development). This load will fail since `3.0.0` is not enough to run this component.  
 Loading the components in reverse order (B first and then A) will work since the `3.1.0-preview` runtime will be selected.*
 
-Modification to automatic roll forward to latest patch:
+Modification to automatic roll forward to latest patch:  
 Existing behavior is to find a matching framework based on the above rules and then apply roll forward to latest patch (except if `Disable` is specified). The new behavior should be:
 * If the above rules find a matching pre-release version of a framework, then automatic roll forward to latest patch is not applied.
 * If the above rules find a matching release version of a framework, automatic roll forward to latest patch is applied.
@@ -241,52 +241,52 @@ In addition to the above any framework reference with a pre-release version will
 ## Framework resolution
 The above described format and handling of settings on framework references will in the end produce a graph where the application is a node and each dependent framework is also a node. Each edge in the graph is a framework reference which has these attributes:
 * `version` - the minimum version required for the framework
-* `version_range` - specifies the compatibility range for the framework, this can have values
+* `version_compatibility_range` - specifies the compatibility range for the framework, this can have values
   * `exact` - only exact match is allowed
   * `patch` - any higher version with the same `major.minor` is allowed
   * `minor` - any higher version with the same `major` is allowed
   * `major` - any higher version is allowed
-* `roll_to_highest_version` - specifies how the exact version within the allowed `version_range` is selected
+* `roll_to_highest_version` - specifies how the exact version within the allowed `version_compatibility_range` is selected
   * `false` - select the closest higher available version
   * `true` - select the highest available version
 
-Note that roll forward on all `version_range` values except the `exact` will always pick the latest available `patch` version. So `roll_to_highest_version` is ignored for `patch` versions (it's effectively implied to be `true` in that case).
+Note that roll forward on all `version_compatibility_range` values except the `exact` will always pick the latest available `patch` version. So `roll_to_highest_version` is ignored for `patch` versions (it's effectively implied to be `true` in that case). One caveat: to maintain backward compatibility with `rollForwardOnNoCandidateFx` and `applyPatches`, the `patch` version range will not roll forward to latest patch if `applyPatches=false`.
 
-The goal of the framework resolution algorithm is to resolve any potentially conflicting framework references and to find actual available framework on disk which would satisfy the framework references.
+The goal of the framework resolution algorithm is to resolve any potentially conflicting framework references and to find the available framework on disk which would satisfy the framework references.
 
-There's a direct mapping from the `rollForward` setting and the internal representation of the framework references:
+There's a direct mapping from the `rollForward` setting to the internal representation of the framework references:
 
-| `rollForward` maps to | `version_range` | `roll_to_highest_version`                  |
-| --------------------- | --------------- | ------------------------------------------ |
-| `Disable`             | `exact`         | `false`                                    |
-| `LatestPatch`         | `patch`         | `false` (always picks latest patch anyway) | 
-| `Minor`               | `minor`         | `false`                                    |
-| `LatestMinor`         | `minor`         | `true`                                     |
-| `Major`               | `major`         | `false`                                    |
-| `LatestMajor`         | `major`         | `true`                                     |
+| `rollForward`         | `version_compatibility_range` | `roll_to_highest_version`                  |
+| --------------------- | ----------------------------- | ------------------------------------------ |
+| `Disable`             | `exact`                       | `false`                                    |
+| `LatestPatch`         | `patch`                       | `false` (always picks latest patch anyway) | 
+| `Minor`               | `minor`                       | `false`                                    |
+| `LatestMinor`         | `minor`                       | `true`                                     |
+| `Major`               | `major`                       | `false`                                    |
+| `LatestMajor`         | `major`                       | `true`                                     |
 
 ### Framework reference conflict resolution
 If there are two references to the same framework name, then the host needs to resolve the potential conflict. The rules are:
 * Take the higher `version`
 * Validate that the reference with the lower `version` allows roll-forward to the higher version. If not, fail.
-* Take the more restrictive `version_range` from the two
-* If `roll_forward_to_highest_version` is true on one of the framework references, apply the `true` value to the merged framework reference as well.
+* Take the more restrictive `version_compatibility_range` from the two
+* If `roll_to_highest_version` is true on one of the framework references, apply the `true` value to the merged framework reference as well.
 
 The check for whether the roll-forward is allowed follows the rules described above in the list of available settings for `rollForward`.
 
 For example:
 In this example the two framework references are for the same framework name.
 
-| First framework reference | Second framework reference | Resolved framework reference |
-| ------------------------- | -------------------------- | ---------------------------- |
-| `2.1.0 minor`             | `2.2.0 major`              | `2.2.0 minor`                |
-| `2.1.0 minor`             | `3.0.0 minor`              | failure                      |
-| `2.1.0 major highest`     | `3.0.0 minor`              | `3.0.0 minor highest`        |
-| `2.1.0 major highest`     | `3.1.2 exact`              | `3.1.2 exact highest`        |
+| First framework reference                      | Second framework reference | Resolved framework reference               |
+| ---------------------------------------------- | -------------------------- | ------------------------------------------ |
+| `2.1.0 minor`                                  | `2.2.0 major`              | `2.2.0 minor`                              |
+| `2.1.0 minor`                                  | `3.0.0 minor`              | failure                                    |
+| `2.1.0 major roll_to_highest_version=true`     | `3.0.0 minor`              | `3.0.0 minor roll_to_highest_version=true` |
+| `2.1.0 major roll_to_highest_version=true`     | `3.1.2 exact`              | `3.1.2 exact roll_to_highest_version=true` |
 
 To maintain backward compatibility, each framework reference also carries `applyPatches` setting. In case of two references the more restrictive setting value is used. So if one of the two framework references has `applyPatches=false` then the resolved framework reference also has `applyPatches=false`.
 
-The `roll_forward_to_highest_version` flag is propagated into the referenced frameworks. So if the app has a reference like `Microsoft.AspNet.App 3.0.0 minor highest` then all references from the `Microsoft.AspNet.App` framework will have the `highest` flag applied to them as well (regardless of the settings in the framework).
+The `roll_to_highest_version` flag is propagated into the referenced frameworks. So if the app has a reference like `Microsoft.AspNet.App 3.0.0 minor highest` then all references from the `Microsoft.AspNet.App` framework will have the `highest` flag applied to them as well (regardless of the settings in the framework).
 
 ### Algorithm
 Terminology
@@ -300,8 +300,8 @@ Steps
    * Parse the application's `.runtimeconfig.json` `runtimeOptions.frameworks` section.
    * Insert each `framework reference` into the `config fx references`.
 2. For each `framework reference` in `config fx references`:
-   * Apply the recursively passed value of `roll_forward_to_highest_version` to the `framework reference`.
-   * and the apply the below steps:
+   * Apply the recursively passed value of `roll_to_highest_version` to the `framework reference`.
+   * Then apply the below steps:
 3. --> If the framework `name` is not currently in the `effective fx references` list Then add it.
    * By doing this for all `framework references` here, before the next loop, we minimize the number of re-try attempts.
 4. For each `framework reference` in `config fx references`:
@@ -315,7 +315,7 @@ Steps
    *Sometimes this is referred to as "hard-roll-forward".*
      * This follows the roll-forward framework selection rules as describe above.
    * If success add it to `resolved frameworks`
-     * Parse the `.runtimeconfig.json` of the resolved framework and create a new `config fx references`. Make a recursive call back to Step 2 with these new `config fx references`. Pass in the value of the `roll_forward_to_highest_version` from the `framework reference` used to resolve the framework.
+     * Parse the `.runtimeconfig.json` of the resolved framework and create a new `config fx references`. Make a recursive call back to Step 2 with these new `config fx references`. Pass in the value of the `roll_to_highest_version` from the `framework reference` used to resolve the framework.
      * Continue with the next `framework reference` (Step 4).
 6. --> Else perform reconcile the `framework reference` with the one from `effective fx references`.
    * We may fail here if not compatible.
