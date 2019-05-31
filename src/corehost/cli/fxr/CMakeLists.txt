@@ -24,6 +24,8 @@ set(SOURCES
     ../fx_definition.cpp
     ../fx_reference.cpp
     ../version.cpp
+    ../version_compatibility_range.cpp
+    ./command_line.cpp
     ./corehost_init.cpp
     ./hostfxr.cpp
     ./fx_ver.cpp
@@ -31,12 +33,14 @@ set(SOURCES
     ./fx_resolver.cpp
     ./fx_resolver.messages.cpp
     ./framework_info.cpp
+    ./host_context.cpp
     ./hostpolicy_resolver.cpp
     ./sdk_info.cpp
     ./sdk_resolver.cpp
 )
 
 set(HEADERS
+    ../corehost_context_contract.h
     ../deps_format.h
     ../deps_entry.h
     ../host_startup_info.h
@@ -47,11 +51,14 @@ set(HEADERS
     ../roll_forward_option.h
     ../roll_fwd_on_no_candidate_fx_option.h
     ../version.h
+    ../version_compatibility_range.h
+    ./command_line.h
     ./corehost_init.h
     ./fx_ver.h
     ./fx_muxer.h
     ./fx_resolver.h
     ./framework_info.h
+    ./host_context.h
     ./hostpolicy_resolver.h
     ./sdk_info.h
     ./sdk_resolver.h

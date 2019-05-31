@@ -24,8 +24,8 @@ arguments_t::arguments_t()
  *  o %DOTNET_SHARED_STORE% -- multiple delimited paths
  *  o dotnet.exe relative shared store\<arch>\<tfm>
  *  o Global location
- *      Windows: C:\Program Files (x86) or
- *      Unix: directory of dotnet on the path.\<arch>\<tfm>
+ *      Windows: global default location (Program Files) or globally registered location (registry) + store\<arch>\<tfm>
+ *      Linux/macOS: none (no global locations are considered)
  */
 void setup_shared_store_paths(const pal::string_t& tfm, host_mode_t host_mode,const pal::string_t& own_dir, arguments_t* args)
 {
@@ -57,7 +57,7 @@ void setup_shared_store_paths(const pal::string_t& tfm, host_mode_t host_mode,co
 
 bool parse_arguments(
     const hostpolicy_init_t& init,
-    const int argc, const pal::char_t* argv[], 
+    const int argc, const pal::char_t* argv[],
     arguments_t& args)
 {
     pal::string_t managed_application_path;
@@ -116,7 +116,7 @@ bool init_arguments(
     args.additional_deps_serialized = additional_deps_serialized;
 
     args.managed_application = managed_application_path;
-    if (!pal::realpath(&args.managed_application))
+    if (!args.managed_application.empty() && !pal::realpath(&args.managed_application))
     {
         trace::error(_X("Failed to locate managed application [%s]"), args.managed_application.c_str());
         return false;

@@ -37,6 +37,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <libgen.h>
+#include <mutex>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -58,7 +59,7 @@
 // at the time the SharedFX in question was built), we need to use a reasonable fallback RID to allow
 // consuming the native assets.
 //
-// For Windows and OSX, we will maintain the last highest RID-Platform we are known to support for them as the 
+// For Windows and OSX, we will maintain the last highest RID-Platform we are known to support for them as the
 // degree of compat across their respective releases is usually high.
 //
 // We cannot maintain the same (compat) invariant for linux and thus, we will fallback to using lowest RID-Plaform.
@@ -119,6 +120,23 @@ namespace pal
     typedef HMODULE dll_t;
     typedef FARPROC proc_t;
 
+    // Lockable object backed by CRITICAL_SECTION such that it does not pull in ConcRT.
+    class mutex_t
+    {
+    public:
+        mutex_t();
+        ~mutex_t();
+
+        mutex_t(const mutex_t&) = delete;
+        mutex_t& operator=(const mutex_t&) = delete;
+
+        void lock();
+        void unlock();
+
+    private:
+        CRITICAL_SECTION _impl;
+    };
+
     inline string_t exe_suffix() { return _X(".exe"); }
 
     inline int cstrcasecmp(const char* str1, const char* str2) { return ::_stricmp(str1, str2); }
@@ -172,6 +190,7 @@ namespace pal
     typedef int hresult_t;
     typedef void* dll_t;
     typedef void* proc_t;
+    typedef std::mutex mutex_t;
 
     inline string_t exe_suffix() { return _X(""); }
 
@@ -229,7 +248,7 @@ namespace pal
 
         return fallbackRid;
     }
-        
+
     bool touch_file(const pal::string_t& path);
     bool realpath(string_t* path, bool skip_error_logging = false);
     bool file_exists(const string_t& path);
@@ -245,12 +264,18 @@ namespace pal
     bool get_current_module(dll_t *mod);
     bool getenv(const char_t* name, string_t* recv);
     bool get_default_servicing_directory(string_t* recv);
-    
-    //On Linux, there are no global locations
-    //On Windows there will be up to 2 global locations
-    bool get_global_dotnet_dirs(std::vector<pal::string_t>* recv);
+
+    // Returns the globally registered install location (if any)
     bool get_dotnet_self_registered_dir(pal::string_t* recv);
+    // Returns name of the global registry location (for error messages)
+    bool get_dotnet_self_registered_config_location(pal::string_t* recv);
+
+    // Returns the default install location for a given platform
     bool get_default_installation_dir(pal::string_t* recv);
+
+    // Returns the global locations to search for SDK/Frameworks - used when multi-level lookup is enabled
+    bool get_global_dotnet_dirs(std::vector<pal::string_t>* recv);
+
     bool get_default_breadcrumb_store(string_t* recv);
     bool is_path_rooted(const string_t& path);
 
@@ -258,6 +283,7 @@ namespace pal
 
     int xtoi(const char_t* input);
 
+    bool get_loaded_library(const char_t *library_name, const char *symbol_name, /*out*/ dll_t *dll, /*out*/ pal::string_t *path);
     bool load_library(const string_t* path, dll_t* dll);
     proc_t get_symbol(dll_t library, const char* name);
     void unload_library(dll_t library);

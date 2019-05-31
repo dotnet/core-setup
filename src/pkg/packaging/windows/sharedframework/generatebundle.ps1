@@ -38,6 +38,8 @@ function RunCandleForBundle
     $AuthWsxRoot =  Join-Path $PackagingRoot "windows\sharedframework"
     $SharedFrameworkComponentVersion = $SharedFrameworkNugetVersion.Replace('-', '_');
 
+    $LcidList = (Get-ChildItem "$AuthWsxRoot\theme\*\bundle.wxl").Directory.Name -join ';'
+
     .\candle.exe -nologo `
         -dMicrosoftEula="$PackagingRoot\windows\eula.rtf" `
         -dProductMoniker="$ProductMoniker" `
@@ -52,6 +54,7 @@ function RunCandleForBundle
         -dFrameworkComponentVersion="$SharedFrameworkComponentVersion" `
         -dFrameworkUpgradeCode="$SharedFrameworkUpgradeCode" `
         -dTargetArchitecture="$TargetArchitecture" `
+        -dLcidList="$LcidList" `
         -arch "$Architecture" `
         -ext WixBalExtension.dll `
         -ext WixUtilExtension.dll `
@@ -75,6 +78,8 @@ function RunLightForBundle
 
     Write-Host Running light for bundle..
     $AuthWsxRoot =  Join-Path $PackagingRoot "windows\sharedframework"
+
+    Start-Sleep 1
 
     .\light.exe -nologo `
         -cultures:en-us `
@@ -101,6 +106,10 @@ if([string]::IsNullOrEmpty($WixRoot))
 {
     Exit -1
 }
+
+$WixTempPath = Join-Path $WixRoot "wix_temp"
+New-Item -ItemType Directory -Path $WixTempPath -Force | Out-Null
+$env:WIX_TEMP = $WixTempPath
 
 if(-Not (RunCandleForBundle))
 {

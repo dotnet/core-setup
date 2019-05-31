@@ -143,12 +143,12 @@ pal::string_t get_directory(const pal::string_t& path)
         return ret + DIR_SEPARATOR;
     }
 
-    int pos = (int) path_sep;
+    int pos = static_cast<int>(path_sep);
     while (pos >= 0 && ret[pos] == DIR_SEPARATOR)
     {
         pos--;
     }
-    return ret.substr(0, (size_t)pos + 1) + DIR_SEPARATOR;
+    return ret.substr(0, static_cast<size_t>(pos) + 1) + DIR_SEPARATOR;
 }
 
 void remove_trailing_dir_seperator(pal::string_t* dir)
@@ -161,7 +161,7 @@ void remove_trailing_dir_seperator(pal::string_t* dir)
 
 void replace_char(pal::string_t* path, pal::char_t match, pal::char_t repl)
 {
-	int pos = 0;
+	size_t pos = 0;
     while ((pos = path->find(match, pos)) != pal::string_t::npos)
     {
         (*path)[pos] = repl;
@@ -170,7 +170,7 @@ void replace_char(pal::string_t* path, pal::char_t match, pal::char_t repl)
 
 pal::string_t get_replaced_char(const pal::string_t& path, pal::char_t match, pal::char_t repl)
 {
-	int pos = path.find(match);
+	size_t pos = path.find(match);
     if (pos == pal::string_t::npos)
     {
         return path;
@@ -187,70 +187,17 @@ pal::string_t get_replaced_char(const pal::string_t& path, pal::char_t match, pa
 
 const pal::char_t* get_arch()
 {
-#if _TARGET_AMD64_
+#if defined(_TARGET_AMD64_)
     return _X("x64");
-#elif _TARGET_X86_
+#elif defined(_TARGET_X86_)
     return _X("x86");
-#elif _TARGET_ARM_
+#elif defined(_TARGET_ARM_)
     return _X("arm");
-#elif _TARGET_ARM64_
+#elif defined(_TARGET_ARM64_)
     return _X("arm64");
 #else
 #error "Unknown target"
 #endif
-}
-
-pal::string_t get_last_known_arg(
-    const opt_map_t& opts,
-    const pal::string_t& opt_key,
-    const pal::string_t& de_fault)
-{
-    if (opts.count(opt_key))
-    {
-        const auto& val = opts.find(opt_key)->second;
-        return val[val.size() - 1];
-    }
-    return de_fault;
-}
-
-bool parse_known_args(
-    const int argc,
-    const pal::char_t* argv[],
-    const std::vector<host_option>& known_opts,
-    // Although multimap would provide this functionality the order of kv, values are
-    // not preserved in C++ < C++0x
-    opt_map_t* opts,
-    int* num_args)
-{
-    int arg_i = *num_args;
-    while (arg_i < argc)
-    {
-        pal::string_t arg = argv[arg_i];
-        pal::string_t arg_lower = pal::to_lower(arg);
-        if (std::find_if(known_opts.begin(), known_opts.end(),
-            [&](const host_option& hostoption) { return arg_lower == hostoption.option; })
-            == known_opts.end())
-        {
-            // Unknown argument.
-            break;
-        }
-
-        // Known argument, so expect one more arg (value) to be present.
-        if (arg_i + 1 >= argc)
-        {
-            return false;
-        }
-
-        trace::verbose(_X("Parsed known arg %s = %s"), arg.c_str(), argv[arg_i + 1]);
-        (*opts)[arg_lower].push_back(argv[arg_i + 1]);
-
-        // Increment for both the option and its value.
-        arg_i += 2;
-    }
-
-    *num_args = arg_i;
-
-    return true;
 }
 
 // Try to match 0xEF 0xBB 0xBF byte sequence (no endianness here.)
@@ -268,9 +215,9 @@ bool skip_utf8_bom(pal::istream_t* stream)
     }
 
     unsigned char bytes[3];
-    stream->read((char*) bytes, 3);
+    stream->read(reinterpret_cast<char*>(bytes), 3);
     if ((stream->gcount() < 3) ||
-            (bytes[1] != 0xBB) || 
+            (bytes[1] != 0xBB) ||
             (bytes[2] != 0xBF))
     {
         // Reset to 0 if returning false.
@@ -404,7 +351,7 @@ bool try_stou(const pal::string_t& str, unsigned* num)
     {
         return false;
     }
-    *num = (unsigned)std::stoul(str);
+    *num = std::stoul(str);
     return true;
 }
 
@@ -450,4 +397,39 @@ void get_runtime_config_paths(const pal::string_t& path, const pal::string_t& na
     dev_cfg->assign(dev_json_path);
 
     trace::verbose(_X("Runtime config is cfg=%s dev=%s"), json_path.c_str(), dev_json_path.c_str());
+}
+
+pal::string_t get_dotnet_root_from_fxr_path(const pal::string_t &fxr_path)
+{
+    // If coreclr exists next to hostfxr, assume everything is local (e.g. self-contained)
+    pal::string_t fxr_dir = get_directory(fxr_path);
+    if (coreclr_exists_in_dir(fxr_dir))
+        return fxr_dir;
+
+    // Path to hostfxr is: <dotnet_root>/host/fxr/<version>/<hostfxr_file>
+    pal::string_t fxr_root = get_directory(fxr_dir);
+    return get_directory(get_directory(fxr_root));
+}
+
+#define TEST_ONLY_MARKER "d38cc827-e34f-4453-9df4-1e796e9f1d07"
+
+// Retrieves environment variable which is only used for testing.
+// This will return the value of the variable only if the product binary is stamped
+// with test-only marker.
+bool test_only_getenv(const pal::char_t* name, pal::string_t* recv)
+{
+    // This is a static variable which is embeded in the product binary (somewhere).
+    // The marker values is a GUID so that it's unique and can be found by doing a simple search on the file
+    // The first character is used as the decider:
+    //  - Default value is 'd' (stands for disabled) - test only behavior is disabled
+    //  - To enable test-only behaviors set it to 'e' (stands for enabled)
+    constexpr size_t EMBED_SIZE = sizeof(TEST_ONLY_MARKER) / sizeof(TEST_ONLY_MARKER[0]);
+    volatile static char embed[EMBED_SIZE] = TEST_ONLY_MARKER;
+
+    if (embed[0] != 'e')
+    {
+        return false;
+    }
+
+    return pal::getenv(name, recv);
 }

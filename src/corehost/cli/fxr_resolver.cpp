@@ -56,7 +56,9 @@ namespace
 bool fxr_resolver::try_get_path(const pal::string_t& root_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path)
 {
     pal::string_t fxr_dir;
-#if FEATURE_APPHOST || FEATURE_LIBHOST
+#if defined(FEATURE_APPHOST) || defined(FEATURE_LIBHOST)
+    // For apphost and libhost, root_path is expected to be a directory.
+    // For libhost, it may be empty if app-local search is not desired (e.g. com/ijw/winrt hosts, nethost when no assembly path is specified)
     // If a hostfxr exists in root_path, then assume self-contained.
     if (root_path.length() > 0 && library_exists_in_dir(root_path, LIBFXR_NAME, out_fxr_path))
     {
@@ -100,16 +102,26 @@ bool fxr_resolver::try_get_path(const pal::string_t& root_path, pal::string_t* o
             pal::get_default_installation_dir(&default_install_location);
         }
 
+        pal::string_t self_registered_config_location;
+        pal::string_t self_registered_message;
+        if (pal::get_dotnet_self_registered_config_location(&self_registered_config_location))
+        {
+            self_registered_message =
+                pal::string_t(_X(" or register the runtime location in [") + self_registered_config_location + _X("]"));
+        }
+
         trace::error(_X("A fatal error occurred. The required library %s could not be found.\n"
             "If this is a self-contained application, that library should exist in [%s].\n"
-            "If this is a framework-dependent application, install the runtime in the global location [%s] or use the %s environment variable to specify the runtime location."),
+            "If this is a framework-dependent application, install the runtime in the global location [%s] or use the %s environment variable to specify the runtime location%s."),
             LIBFXR_NAME,
             root_path.c_str(),
             default_install_location.c_str(),
-            dotnet_root_env_var_name.c_str());
+            dotnet_root_env_var_name.c_str(),
+            self_registered_message.c_str());
         return false;
     }
 #else // !FEATURE_APPHOST && !FEATURE_LIBHOST
+    // For non-apphost and non-libhost (i.e. muxer), root_path is expected to be the full path to the host
     pal::string_t host_dir;
     host_dir.assign(get_directory(root_path));
 
@@ -128,5 +140,14 @@ bool fxr_resolver::try_get_path(const pal::string_t& root_path, pal::string_t* o
     if (!get_latest_fxr(std::move(fxr_dir), out_fxr_path))
         return false;
 
+    return true;
+}
+
+bool fxr_resolver::try_get_existing_fxr(pal::dll_t *out_fxr, pal::string_t *out_fxr_path)
+{
+    if (!pal::get_loaded_library(LIBFXR_NAME, "hostfxr_main", out_fxr, out_fxr_path))
+        return false;
+
+    trace::verbose(_X("Found previously loaded library %s [%s]."), LIBFXR_NAME, out_fxr_path->c_str());
     return true;
 }

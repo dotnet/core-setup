@@ -84,7 +84,7 @@ void bundle_runner_t::read_string(pal::string_t &str, size_t size, FILE* stream)
     uint8_t *buffer = new uint8_t[size + 1]; 
     read(buffer, size, stream);
     buffer[size] = 0; // null-terminator
-    pal::clr_palstring((const char*)buffer, &str);
+    pal::clr_palstring(reinterpret_cast<const char*>(buffer), &str);
 }
 
 static bool has_dirs_in_path(const pal::string_t& path)
@@ -145,15 +145,13 @@ static void remove_directory_tree(const pal::string_t& path)
     {
         if (!pal::remove(file.c_str()))
         {
-            trace::error(_X("Error removing file [%s]"), file.c_str());
-            throw StatusCode::BundleExtractionIOError;
+            trace::warning(_X("Failed to remove temporary file [%s]."), file.c_str());
         }
     }
 
     if (!pal::rmdir(path.c_str()))
     {
-        trace::error(_X("Error removing directory [%s]"), path.c_str());
-        throw StatusCode::BundleExtractionIOError;
+        trace::warning(_X("Failed to remove temporary directory [%s]."), path.c_str());
     }
 }
 
@@ -168,12 +166,23 @@ void bundle_runner_t::reopen_host_for_reading()
     }
 }
 
-void bundle_runner_t::process_manifest_footer(int64_t &header_offset)
+// Checks if this host binary has a valid bundle signature.
+// If so, it sets header_offset and returns true.
+// If not, returns false.
+bool bundle_runner_t::process_manifest_footer(int64_t &header_offset)
 {
     seek(m_bundle_stream, -manifest_footer_t::num_bytes_read(), SEEK_END);
 
     manifest_footer_t* footer = manifest_footer_t::read(m_bundle_stream);
+
+    if (!footer->is_valid())
+    {
+        trace::info(_X("This executable is not recognized as a .net core bundle."));
+        return false;
+    }
+
     header_offset = footer->manifest_header_offset();
+    return true;
 }
 
 void bundle_runner_t::process_manifest_header(int64_t header_offset)
@@ -257,7 +266,7 @@ FILE* bundle_runner_t::create_extraction_file(const pal::string_t& relative_path
 void bundle_runner_t::extract_file(file_entry_t *entry)
 {
     FILE* file = create_extraction_file(entry->relative_path());
-    const size_t buffer_size = 8 * 1024; // Copy the file in 8KB chunks
+    const int64_t buffer_size = 8 * 1024; // Copy the file in 8KB chunks
     uint8_t buffer[buffer_size];
     int64_t file_size = entry->size();
 
@@ -303,7 +312,11 @@ StatusCode bundle_runner_t::extract()
         //    Bundle Manifest
 
         int64_t manifest_header_offset;
-        process_manifest_footer(manifest_header_offset);
+
+        if (!process_manifest_footer(manifest_header_offset))
+        {
+            return StatusCode::AppHostExeNotBundle;
+        }
         process_manifest_header(manifest_header_offset);
 
         // Determine if embedded files are already extracted, and available for reuse

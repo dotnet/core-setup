@@ -3,12 +3,29 @@
 // See the LICENSE file in the project root for more information.
 
 #include "mockcoreclr.h"
+#include <chrono>
 #include <iostream>
+#include <thread>
 #include "trace.h"
 
-#define MockLog(string) std::cout << "mock " << string << std::endl;
-#define MockLogArg(arg) std::cout << "mock " << #arg << ":" << arg << std::endl;
-#define MockLogEntry(dict, key, value) std::cout << "mock " << dict << "[" << key << "] = " << value << std::endl;
+#define MockLog(string)\
+{\
+    std::stringstream ss;\
+    ss << "mock " << string << std::endl;\
+    std::cout << ss.str();\
+}
+#define MockLogArg(arg)\
+{\
+    std::stringstream ss;\
+    ss << "mock " << #arg << ":" << arg << std::endl;\
+    std::cout << ss.str();\
+}
+#define MockLogEntry(dict, key, value)\
+{\
+    std::stringstream ss;\
+    ss << "mock " << dict << "[" << key << "] = " << value << std::endl;\
+    std::cout << ss.str();\
+}
 
 SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_initialize(
     const char* exePath,
@@ -35,7 +52,7 @@ SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_initialize(
 
     if (hostHandle != nullptr)
     {
-        *hostHandle = (coreclr_t::host_handle_t*) 0xdeadbeef;
+        *hostHandle = reinterpret_cast<coreclr_t::host_handle_t>(static_cast<size_t>(0xdeadbeef));
     }
 
     return StatusCode::Success;
@@ -81,6 +98,22 @@ SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_execute_assembly(
         MockLogEntry("argv", i, argv[i]);
     }
 
+    pal::string_t signalFile;
+    if (pal::getenv(_X("TEST_SIGNAL_MOCK_EXECUTE_ASSEMBLY"), &signalFile))
+        pal::touch_file(signalFile);
+
+    pal::string_t path;
+    if (pal::getenv(_X("TEST_BLOCK_MOCK_EXECUTE_ASSEMBLY"), &path))
+    {
+        while (pal::file_exists(path))
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+
+    if (!signalFile.empty())
+        pal::remove(signalFile.c_str());
+
     if (exitCode != nullptr)
     {
         *exitCode = 0;
@@ -91,7 +124,12 @@ SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_execute_assembly(
 
 struct MockCoreClrDelegate
 {
-    MockCoreClrDelegate() {}
+    MockCoreClrDelegate() :
+    m_hostHandle(nullptr),
+    m_domainId(0),
+    initialized(false)
+    {}
+
     MockCoreClrDelegate(coreclr_t::host_handle_t hostHandle,
                         unsigned int domainId,
                         const char* entryPointAssemblyName,
@@ -134,7 +172,7 @@ typedef void (*CoreClrDelegate)();
 
 const int MaxDelegates = 16;
 
-MockCoreClrDelegate DelegateState[MaxDelegates];
+static MockCoreClrDelegate DelegateState[MaxDelegates];
 
 #define DelegateFunction(index)\
 void Delegate_ ## index() { DelegateState[index].Echo(); }
@@ -208,7 +246,7 @@ SHARED_API pal::hresult_t STDMETHODCALLTYPE coreclr_create_delegate(
 
     DelegateState[delegateIndex] = delegateState;
 
-    *delegate = (void*) delegates[delegateIndex];
+    *delegate = reinterpret_cast<void*>(delegates[delegateIndex]);
 
     return StatusCode::Success;
 }

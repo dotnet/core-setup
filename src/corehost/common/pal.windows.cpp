@@ -104,6 +104,20 @@ bool pal::getcwd(pal::string_t* recv)
     return false;
 }
 
+bool pal::get_loaded_library(
+    const char_t *library_name,
+    const char *symbol_name,
+    /*out*/ dll_t *dll,
+    /*out*/ pal::string_t *path)
+{
+    dll_t dll_maybe = ::GetModuleHandleW(library_name);
+    if (dll_maybe == nullptr)
+        return false;
+
+    *dll = dll_maybe;
+    return pal::get_module_path(*dll, path);
+}
+
 bool pal::load_library(const string_t* in_path, dll_t* dll)
 {
     string_t path = *in_path;
@@ -120,7 +134,7 @@ bool pal::load_library(const string_t* in_path, dll_t* dll)
             return false;
         }
     }
-    
+
     //Adding the assert to ensure relative paths which are not just filenames are not used for LoadLibrary Calls
     assert(!LongFile::IsPathNotFullyQualified(path) || !LongFile::ContainsDirectorySeparator(path));
 
@@ -207,6 +221,15 @@ bool pal::get_default_servicing_directory(string_t* recv)
 
 bool pal::get_default_installation_dir(pal::string_t* recv)
 {
+    //  ***Used only for testing***
+    pal::string_t environmentOverride;
+    if (test_only_getenv(_X("_DOTNET_TEST_DEFAULT_INSTALL_PATH"), &environmentOverride))
+    {
+        recv->assign(environmentOverride);
+        return true;
+    }
+    //  ***************************
+
     pal::char_t* program_files_dir;
     if (pal::is_running_in_wow64())
     {
@@ -227,6 +250,47 @@ bool pal::get_default_installation_dir(pal::string_t* recv)
     return true;
 }
 
+namespace
+{
+    void get_dotnet_install_location_registry_path(HKEY * key_hive, pal::string_t * sub_key, pal::char_t ** value)
+    {
+        *key_hive = HKEY_LOCAL_MACHINE;
+        // The registry search occurs in the 32-bit registry in all cases.
+        pal::string_t dotnet_key_path = pal::string_t(_X("SOFTWARE\\dotnet"));
+
+        pal::string_t environmentRegistryPathOverride;
+        if (test_only_getenv(_X("_DOTNET_TEST_REGISTRY_PATH"), &environmentRegistryPathOverride))
+        {
+            pal::string_t hkcuPrefix = _X("HKEY_CURRENT_USER\\");
+            if (environmentRegistryPathOverride.substr(0, hkcuPrefix.length()) == hkcuPrefix)
+            {
+                *key_hive = HKEY_CURRENT_USER;
+                environmentRegistryPathOverride = environmentRegistryPathOverride.substr(hkcuPrefix.length());
+            }
+
+            dotnet_key_path = environmentRegistryPathOverride;
+        }
+
+        *sub_key = dotnet_key_path + pal::string_t(_X("\\Setup\\InstalledVersions\\")) + get_arch();
+        *value = _X("InstallLocation");
+    }
+}
+
+bool pal::get_dotnet_self_registered_config_location(pal::string_t* recv)
+{
+#if !defined(_TARGET_AMD64_) && !defined(_TARGET_X86_)
+    return false;
+#else
+    HKEY key_hive;
+    pal::string_t sub_key;
+    pal::char_t* value;
+    get_dotnet_install_location_registry_path(&key_hive, &sub_key, &value);
+
+    *recv = (key_hive == HKEY_CURRENT_USER ? _X("HKCU\\") : _X("HKLM\\")) + sub_key + _X("\\") + value;
+    return true;
+#endif
+}
+
 bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
 {
 #if !defined(_TARGET_AMD64_) && !defined(_TARGET_X86_)
@@ -237,33 +301,17 @@ bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
 
     //  ***Used only for testing***
     pal::string_t environmentOverride;
-    if (pal::getenv(_X("_DOTNET_TEST_GLOBALLY_REGISTERED_PATH"), &environmentOverride))
+    if (test_only_getenv(_X("_DOTNET_TEST_GLOBALLY_REGISTERED_PATH"), &environmentOverride))
     {
         recv->assign(environmentOverride);
         return true;
     }
     //  ***************************
 
-    DWORD size = 0;
-    HKEY hkeyHive = HKEY_LOCAL_MACHINE;
-    // The registry search occurs in the 32-bit registry in all cases.
-    pal::string_t dotnet_key_path = pal::string_t(_X("SOFTWARE\\dotnet"));
-
-    pal::string_t environmentRegistryPathOverride;
-    if (pal::getenv(_X("_DOTNET_TEST_REGISTRY_PATH"), &environmentRegistryPathOverride))
-    {
-        pal::string_t hkcuPrefix = _X("HKEY_CURRENT_USER\\");
-        if (environmentRegistryPathOverride.substr(0, hkcuPrefix.length()) == hkcuPrefix)
-        {
-            hkeyHive = HKEY_CURRENT_USER;
-            environmentRegistryPathOverride = environmentRegistryPathOverride.substr(hkcuPrefix.length());
-        }
-
-        dotnet_key_path = environmentRegistryPathOverride;
-    }
-
-    pal::string_t sub_key = dotnet_key_path + pal::string_t(_X("\\Setup\\InstalledVersions\\")) + get_arch();
-    pal::char_t* value = _X("InstallLocation");
+    HKEY hkeyHive;
+    pal::string_t sub_key;
+    pal::char_t* value;
+    get_dotnet_install_location_registry_path(&hkeyHive, &sub_key, &value);
 
     // Must use RegOpenKeyEx to be able to specify KEY_WOW64_32KEY to access the 32-bit registry in all cases.
     // The RegGetValue has this option available only on Win10.
@@ -276,6 +324,7 @@ bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
     }
 
     // Determine the size of the buffer
+    DWORD size = 0;
     result = ::RegGetValueW(hkey, nullptr, value, RRF_RT_REG_SZ, nullptr, nullptr, &size);
     if (result != ERROR_SUCCESS || size == 0)
     {
@@ -329,7 +378,7 @@ typedef NTSTATUS (WINAPI *pFuncRtlGetVersion)(RTL_OSVERSIONINFOW *);
 pal::string_t pal::get_current_os_rid_platform()
 {
     pal::string_t ridOS;
-    
+
     RTL_OSVERSIONINFOW osinfo;
 
     // Init the buffer
@@ -350,7 +399,7 @@ pal::string_t pal::get_current_os_rid_platform()
                 if (osinfo.dwMajorVersion > majorVer)
                 {
                     majorVer = osinfo.dwMajorVersion;
-                    
+
                     // Reset the minor version since we picked a different major version.
                     minorVer = 0;
                 }
@@ -371,7 +420,7 @@ pal::string_t pal::get_current_os_rid_platform()
                             ridOS.append(_X("win8"));
                             break;
                         case 3:
-                        default: 
+                        default:
                             // For unknown version, we will support the highest RID that we know for this major version.
                             ridOS.append(_X("win81"));
                             break;
@@ -386,7 +435,7 @@ pal::string_t pal::get_current_os_rid_platform()
             }
         }
     }
-    
+
     return ridOS;
 }
 
@@ -562,7 +611,7 @@ bool pal::realpath(string_t* path, bool skip_error_logging)
         }
 
         const string_t* prefix = &LongFile::ExtendedPrefix;
-        //Check if the resolved path is a UNC. By default we assume relative path to resolve to disk 
+        //Check if the resolved path is a UNC. By default we assume relative path to resolve to disk
         if (str.compare(0, LongFile::UNCPathPrefix.length(), LongFile::UNCPathPrefix) == 0)
         {
             prefix = &LongFile::UNCExtendedPathPrefix;
@@ -669,4 +718,25 @@ bool pal::are_paths_equal_with_normalized_casing(const string_t& path1, const st
 {
     // On Windows, paths are case-insensitive
     return (strcasecmp(path1.c_str(), path2.c_str()) == 0);
+}
+
+pal::mutex_t::mutex_t()
+    : _impl{ }
+{
+    ::InitializeCriticalSection(&_impl);
+}
+
+pal::mutex_t::~mutex_t()
+{
+    ::DeleteCriticalSection(&_impl);
+}
+
+void pal::mutex_t::lock()
+{
+    ::EnterCriticalSection(&_impl);
+}
+
+void pal::mutex_t::unlock()
+{
+    ::LeaveCriticalSection(&_impl);
 }

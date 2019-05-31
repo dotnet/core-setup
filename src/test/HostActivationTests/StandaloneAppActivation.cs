@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             string appDll = fixture.TestProject.AppDll;
             string appDllName = Path.GetFileName(appDll);
             string relativeDllPath = Path.Combine(relativeNewPath, appDllName);
-            AppHostExtensions.SearchAndReplace(appExe, Encoding.UTF8.GetBytes(appDllName), Encoding.UTF8.GetBytes(relativeDllPath), true);
+            FileUtils.SearchAndReplace(appExe, Encoding.UTF8.GetBytes(appDllName), Encoding.UTF8.GetBytes(relativeDllPath), true);
 
             Command.Create(appExe)
                 .CaptureStdErr()
@@ -314,22 +314,73 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.FileContains(traceFilePath, "This executable is not bound to a managed DLL to execute.");
         }
 
+        [Fact]
+        public void Running_AppHost_with_GUI_Doesnt_Report_Errors_In_Window_When_Disabled()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // GUI app host is only supported on Windows.
+                return;
+            }
+
+            var fixture = sharedTestState.StandaloneAppFixture_Published
+                .Copy();
+
+            string appExe = fixture.TestProject.AppExe;
+
+            // Mark the apphost as GUI, but don't bind it to anything - this will cause it to fail
+            UseBuiltAppHost(appExe);
+            MarkAppHostAsGUI(appExe);
+
+            Command command = Command.Create(appExe)
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .EnvironmentVariable(Constants.DisableGuiErrors.EnvironmentVariable, "1")
+                .Start();
+
+            CommandResult commandResult = command.WaitForExit(fExpectedToFail: false, timeoutMilliseconds: 30000);
+            if (commandResult.ExitCode == -1)
+            {
+                try
+                {
+                    // Try to kill the process - it may be up with a dialog, or have some other issue.
+                    command.Process.Kill();
+                }
+                catch
+                {
+                    // Ignore exceptions, we don't know what's going on with the process.
+                }
+
+                Assert.True(false, "The process failed to exit in the alloted time, it's possible it has a dialog up which should not be there.");
+            }
+        }
+
 #if WINDOWS
         private delegate bool EnumThreadWindowsDelegate(IntPtr hWnd, IntPtr lParam);
 
         [DllImport("user32.dll")]
         private static extern bool EnumThreadWindows(int dwThreadId, EnumThreadWindowsDelegate plfn, IntPtr lParam);
 
-        private IntPtr WaitForPopupFromProcess(Process process, int timeout = 5000)
+        private IntPtr WaitForPopupFromProcess(Process process, int timeout = 30000)
         {
             IntPtr windowHandle = IntPtr.Zero;
-            while (timeout > 0)
+            StringBuilder diagMessages = new StringBuilder();
+
+            int longTimeout = timeout * 3;
+            int timeRemaining = longTimeout;
+            while (timeRemaining > 0)
             {
                 foreach (ProcessThread thread in process.Threads)
                 {
                     // Note we take the last window we find - there really should only be one at most anyway.
                     EnumThreadWindows(thread.Id,
-                        (hWnd, lParam) => { windowHandle = hWnd; return true; }, IntPtr.Zero);
+                        (hWnd, lParam) => {
+                            diagMessages.AppendLine($"Callback for a window {hWnd} on thread {thread.Id}.");
+                            windowHandle = hWnd;
+                            return true;
+                        },
+                        IntPtr.Zero);
                 }
 
                 if (windowHandle != IntPtr.Zero)
@@ -338,8 +389,18 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 }
 
                 Thread.Sleep(100);
-                timeout -= 100;
+                timeRemaining -= 100;
             }
+
+            Assert.True(
+                windowHandle != IntPtr.Zero,
+                $"Waited {longTimeout} milliseconds for the popup window on process {process.Id}, but none was found." +
+                $"{Environment.NewLine}{diagMessages.ToString()}");
+
+            Assert.True(
+                timeRemaining > (longTimeout - timeout),
+                $"Waited {longTimeout - timeRemaining} milliseconds for the popup window on process {process.Id}. " +
+                $"It did show and was detected as HWND {windowHandle}, but it took too long. Consider extending the timeout period for this test.");
 
             return windowHandle;
         }
@@ -372,7 +433,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 // Replace the hash with the managed DLL name.
                 var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes("foobar"));
                 var hashStr = BitConverter.ToString(hash).Replace("-", "").ToLower();
-                AppHostExtensions.SearchAndReplace(appDirHostExe, Encoding.UTF8.GetBytes(hashStr), Encoding.UTF8.GetBytes(appDll), true);
+                FileUtils.SearchAndReplace(appDirHostExe, Encoding.UTF8.GetBytes(hashStr), Encoding.UTF8.GetBytes(appDll), true);
             }
             File.Copy(appDirHostExe, appExe, true);
         }

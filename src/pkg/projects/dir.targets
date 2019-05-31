@@ -20,6 +20,31 @@
   </PropertyGroup>
 
   <!--
+    Remove duplicate files returned by PrereleaseResolveNuGetPackageAssets. The resolve task
+    performs extra detection to pick up a PDB file for any file listed in the assets file. This
+    causes duplicates if the assets file lists PDBs. If foo.dll and foo.pdb exist in the package and
+    both are listed in the assets file, the task finds:
+
+      foo.dll
+      foo.pdb (based on foo.dll entry)
+      foo.pdb
+      foo.pdb (based on foo.pdb entry)
+
+    The duplicates cause package validation failure and must be filtered out.
+  -->
+  <Target Name="RemoveDuplicateResolvedNuGetPackageAssets"
+          AfterTargets="ResolveNuGetPackages">
+    <RemoveDuplicates Inputs="@(ReferenceCopyLocalPaths)">
+      <Output TaskParameter="Filtered" ItemName="FilteredReferenceCopyLocalPaths"/>
+    </RemoveDuplicates>
+
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
+      <ReferenceCopyLocalPaths Include="@(FilteredReferenceCopyLocalPaths)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
     Finds symbol files and injects them into the package build.
   -->
   <Target Name="GetSymbolPackageFiles" BeforeTargets="GetPackageFiles">
@@ -31,11 +56,17 @@
     </ItemGroup>
 
     <ItemGroup>
+      <!-- Normalize file paths up front (preserving metadata) for easier duplicate detection. -->
+      <File NormalizedIdentity="$([MSBuild]::NormalizePath('%(Identity)'))" />
+      <FileNormalized Include="@(File -> '%(NormalizedIdentity)')" RemoveMetadata="NormalizedIdentity" />
+      <File Remove="@(File)" />
+      <File Include="@(FileNormalized)" />
+
       <WindowsNativeFile Include="@(File)"
                          Condition="'%(File.Extension)' == '.dll' OR '%(File.Extension)' == '.exe'" />
-      <!-- Don't include *.pdb for export libraries -->
+      <!-- Don't include *.pdb for export libraries or headers -->
       <WindowsSymbolFile Include="@(File -> '%(RootDir)%(Directory)%(Filename).pdb')"
-                         Condition="'%(File.Extension)' != '.lib'" />
+                         Condition="'%(File.Extension)' != '.lib' AND '%(File.Extension)' != '.h'" />
       <!-- Crossgened files (on windows) have both a *.pdb and a *.ni.pdb symbol file.  Include the *.ni.pdb file as well if it exists. -->
       <WindowsSymbolFile Include="@(File -> '%(RootDir)%(Directory)%(Filename).ni.pdb')" />
       <ExistingWindowsSymbolFile Include="@(WindowsSymbolFile)" Condition="Exists('%(Identity)')" />
@@ -45,9 +76,21 @@
       <NonWindowsSymbolFile Include="@(NonWindowsNativeFile -> '%(Identity)$(SymbolFileExtension)')" />
       <ExistingNonWindowsSymbolFile Include="@(NonWindowsSymbolFile)" Condition="Exists('%(Identity)')" />
 
-      <File Include="@(ExistingWindowsSymbolFile);@(ExistingNonWindowsSymbolFile)">
-        <IsSymbolFile>true</IsSymbolFile>
-      </File>
+      <DiscoveredSymbolFile Include="@(ExistingWindowsSymbolFile);@(ExistingNonWindowsSymbolFile)" />
+    </ItemGroup>
+
+    <!-- Remove any duplicates in symbol files found by the above searches. -->
+    <RemoveDuplicates Inputs="@(DiscoveredSymbolFile)">
+      <Output TaskParameter="Filtered" ItemName="FilteredDiscoveredSymbolFile"/>
+    </RemoveDuplicates>
+
+    <ItemGroup>
+      <!--
+        Discovered symbol files might already be in File, without IsSymbolFile set. Make sure we
+        keep the discovered one and apply IsSymbolFile=true.
+      -->
+      <File Remove="@(FilteredDiscoveredSymbolFile)" />
+      <File Include="@(FilteredDiscoveredSymbolFile)" IsSymbolFile="true" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -199,7 +242,13 @@
 
   <Target Name="IncludeFrameworkListFile"
           BeforeTargets="GetFiles"
-          Condition="'$(PackageTargetRuntime)' == '' AND '$(FrameworkListTargetPath)' != ''">
+          DependsOnTargets="GetSymbolPackageFiles"
+          Condition="
+            '$(FrameworkListTargetPath)' != '' AND
+            (
+              '$(PackageTargetRuntime)' == '' OR
+              '$(PackageTargetRuntime)' == '$(PackageRID)'
+            )">
     <PropertyGroup>
       <FrameworkListFile>$(IntermediateOutputPath)FrameworkList.xml</FrameworkListFile>
     </PropertyGroup>
@@ -217,6 +266,7 @@
 
     <CreateFrameworkListFile
       Files="@(File)"
+      FileProfiles="@(FrameworkListFileProfile)"
       TargetFile="$(FrameworkListFile)"
       TargetFilePrefixes="ref/;runtimes/"
       RootAttributes="@(FrameworkListRootAttributes)" />
