@@ -6,6 +6,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 {
     internal static class Constants
     {
+        public const string MicrosoftNETCoreApp = "Microsoft.NETCore.App";
+
         public static class ApplyPatchesSetting
         {
             public const string RuntimeConfigPropertyName = "applyPatches";
@@ -42,10 +44,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             public const string EnvironmentVariable = "DOTNET_ROLL_FORWARD_TO_PRERELEASE";
         }
 
+        public static class DisableGuiErrors
+        {
+            public const string EnvironmentVariable = "DOTNET_DISABLE_GUI_ERRORS";
+        }
+
         public static class TestOnlyEnvironmentVariables
         {
+            public const string DefaultInstallPath = "_DOTNET_TEST_DEFAULT_INSTALL_PATH";
             public const string RegistryPath = "_DOTNET_TEST_REGISTRY_PATH";
             public const string GloballyRegisteredPath = "_DOTNET_TEST_GLOBALLY_REGISTERED_PATH";
+            public const string InstallLocationFilePath = "_DOTNET_TEST_INSTALL_LOCATION_FILE_PATH";
         }
     }
 }

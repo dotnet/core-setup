@@ -33,6 +33,7 @@ set(SOURCES
     ../fx_definition.cpp
     ../fx_reference.cpp
     ../version.cpp
+    ../version_compatibility_range.cpp
 )
 
 set(HEADERS
@@ -42,6 +43,7 @@ set(HEADERS
     ./deps_resolver.h
     ./hostpolicy_context.h
     ./hostpolicy_init.h
+    ../corehost_context_contract.h
     ../runtime_config.h
     ../json/casablanca/include/cpprest/json.h
     ../fxr/fx_ver.h
@@ -51,6 +53,7 @@ set(HEADERS
     ../fx_definition.h
     ../fx_reference.h
     ../version.h
+    ../version_compatibility_range.h
 )
 
 include(../lib.cmake)
