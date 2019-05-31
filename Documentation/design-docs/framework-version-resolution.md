@@ -422,7 +422,7 @@ The new behavior will be to treat all settings of `rollForwardOnNoCandidateFx` t
 ### Pre-release will roll forward
 The existing behavior is that pre-release only rolls forward to the closest higher pre-release of the same `major.minor.patch`. This also means that if there's an exact match available, pre-release doesn't roll forward. Pre-release also never rolls forward to release.
 
-With the proposed behavior pre-release will be allowed to roll forward to release. If the algorithm looking for closest match finds a pre-release version it will not apply automatic roll to latest patch.
+With the proposed behavior pre-release will be allowed to roll forward to release. If the algorithm looking for closest match finds a pre-release version, it will not apply automatic roll to latest patch.
 For backward compatibility reasons `applyPatches=false` will still allow roll forward over pre-release.
 
 | Reference                                     | Available versions                                | Existing behavior | New behavior      | Notes   |
