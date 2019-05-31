@@ -36,22 +36,8 @@ namespace
             {
                 if ((!release_only || !ver.is_prerelease()) && ver >= fx_ref.get_fx_version_number())
                 {
-                    // Check major version compatibility
-                    if (fx_ref.get_version_compatibility_range() <= version_compatibility_range_t::minor &&
-                        ver.get_major() != fx_ref.get_fx_version_number().get_major())
-                    {
-                        continue;
-                    }
-
-                    // Check minor version compatibility
-                    // If major.minor is the same but patch differs, only consider the version if apply_patches=true
-                    // If apply_patches=false, then we must not roll to a different patch version. For backward compatibility reasons
-                    //   roll_on_no_candidate_fx=0 && apply_patches=false means no roll forward whatsoever.
-                    // For backward compatibility reasons the apply_patches for pre-release framework reference only applies to the patch portion of the version
-                    //   we can still roll on the pre-release part of the version even if apply_patches=false.
-                    if (fx_ref.get_version_compatibility_range() <= version_compatibility_range_t::patch &&
-                        (ver.get_minor() != fx_ref.get_fx_version_number().get_minor() ||
-                         (!fx_ref.get_apply_patches() && ver.get_patch() != fx_ref.get_fx_version_number().get_patch())))
+                    // Ignore incompatible versions
+                    if (!fx_ref.is_compatible_with_higher_version(ver))
                     {
                         continue;
                     }

@@ -51,19 +51,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
             if (!Directory.Exists(_backupPath))
             {
                 Directory.CreateDirectory(_backupPath);
-
-                // StackTrace class is not accessible for some reason
-                string stackTrace;
-                try
-                {
-                    throw new Exception();
-                }
-                catch (Exception e)
-                {
-                    stackTrace = e.ToString();
-                }
-
-                File.WriteAllText(Path.Combine(_backupPath, "_stackTrace.txt"), stackTrace);
+                File.WriteAllText(Path.Combine(_backupPath, "_stackTrace.txt"), Environment.StackTrace);
             }
 
             string backupFile = Path.Combine(_backupPath, path.Substring(_basePath.Length + 1));
@@ -109,7 +97,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
                 }
                 
                 throw new Exception(
-                    $"Failed to delete the backup folder {_backupPath} even after rertries.\r\n"
+                    $"Failed to delete the backup folder {_backupPath} even after retries.\r\n"
                     + (exception == null ? "" : exception.ToString()));
             }
         }

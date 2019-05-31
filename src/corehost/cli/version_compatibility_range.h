@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#ifndef __VERSION_RANGE_OPTION_H_
-#define __VERSION_RANGE_OPTION_H_
+#ifndef __VERSION_COMPATIBILITY_RANGE_H_
+#define __VERSION_COMPATIBILITY_RANGE_H_
 
 // Defines teh allowed range of versions to consider during roll-forward search
 enum class version_compatibility_range_t
@@ -18,4 +18,4 @@ enum class version_compatibility_range_t
 
 pal::string_t version_compatibility_range_to_string(version_compatibility_range_t value);
 
-#endif // __VERSION_RANGE_OPTION_H_
+#endif // __VERSION_COMPATIBILITY_RANGE_H_
