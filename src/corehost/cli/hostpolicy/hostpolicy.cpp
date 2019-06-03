@@ -284,7 +284,7 @@ void trace_hostpolicy_entrypoint_invocation(const pal::string_t& entryPointName)
 // If hostpolicy is already initalized, the library will not be
 // reinitialized.
 //
-SHARED_API int corehost_load(host_interface_t* init)
+SHARED_API int __cdecl corehost_load(host_interface_t* init)
 {
     assert(init != nullptr);
     std::lock_guard<std::mutex> lock{ g_init_lock };
@@ -362,7 +362,7 @@ int corehost_main_init(
     return corehost_init(hostpolicy_init, argc, argv, location, args);
 }
 
-SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
+SHARED_API int __cdecl corehost_main(const int argc, const pal::char_t* argv[])
 {
     arguments_t args;
     int rc = corehost_main_init(g_init, argc, argv, _X("corehost_main"), args);
@@ -381,7 +381,7 @@ SHARED_API int corehost_main(const int argc, const pal::char_t* argv[])
     return run_app(args.app_argc, args.app_argv);
 }
 
-SHARED_API int corehost_main_with_output_buffer(const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size)
+SHARED_API int __cdecl corehost_main_with_output_buffer(const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size)
 {
     arguments_t args;
     int rc = corehost_main_init(g_init, argc, argv, _X("corehost_main_with_output_buffer"), args);
@@ -738,7 +738,7 @@ SHARED_API int __cdecl corehost_initialize(const corehost_initialize_request_t *
     return rc;
 }
 
-SHARED_API int corehost_unload()
+SHARED_API int __cdecl corehost_unload()
 {
     {
         std::lock_guard<std::mutex> lock{ g_context_lock };
@@ -758,12 +758,12 @@ SHARED_API int corehost_unload()
     return StatusCode::Success;
 }
 
-typedef void(*corehost_resolve_component_dependencies_result_fn)(
+typedef void(__cdecl *corehost_resolve_component_dependencies_result_fn)(
     const pal::char_t* assembly_paths,
     const pal::char_t* native_search_paths,
     const pal::char_t* resource_search_paths);
 
-SHARED_API int corehost_resolve_component_dependencies(
+SHARED_API int __cdecl corehost_resolve_component_dependencies(
     const pal::char_t *component_main_assembly_path,
     corehost_resolve_component_dependencies_result_fn result)
 {
@@ -881,7 +881,7 @@ SHARED_API int corehost_resolve_component_dependencies(
 }
 
 
-typedef void(*corehost_error_writer_fn)(const pal::char_t* message);
+typedef void(__cdecl *corehost_error_writer_fn)(const pal::char_t* message);
 
 //
 // Sets a callback which is to be used to write errors to.
@@ -902,7 +902,7 @@ typedef void(*corehost_error_writer_fn)(const pal::char_t* message);
 // Each call to the error writer is sort of like writing a single line (the EOL character is omitted).
 // Multiple calls to the error writer may occure for one failure.
 //
-SHARED_API corehost_error_writer_fn corehost_set_error_writer(corehost_error_writer_fn error_writer)
+SHARED_API corehost_error_writer_fn __cdecl corehost_set_error_writer(corehost_error_writer_fn error_writer)
 {
     return trace::set_error_writer(error_writer);
 }
