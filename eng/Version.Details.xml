@@ -109,9 +109,9 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>7bbb5413e6ab8622da8471555653f1ccf205fcc6</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.0-preview6.19303.32">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.0-preview6.19303.37">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>611c8e0df8fb8129ab8336653a89bb69d7b53c08</Sha>
+      <Sha>f8a1e9ba8233e9ceb150b491b36d66828e6ed268</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
