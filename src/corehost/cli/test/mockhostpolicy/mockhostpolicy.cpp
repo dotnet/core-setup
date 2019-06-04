@@ -7,6 +7,7 @@
 #include "trace.h"
 #include "error_codes.h"
 #include "host_interface.h"
+#include <hostpolicy.h>
 
 std::vector<char> tostr(const pal::char_t* value)
 {
@@ -29,7 +30,7 @@ void print_strarr(const char* prefix, const strarr_t& arr)
     }
 }
 
-SHARED_API int __cdecl corehost_load(host_interface_t* init)
+SHARED_API int HOSTPOLICY_CALLTYPE corehost_load(host_interface_t* init)
 {
     trace::setup();
 
@@ -86,20 +87,19 @@ SHARED_API int __cdecl corehost_load(host_interface_t* init)
     return StatusCode::Success;
 }
 
-SHARED_API int __cdecl corehost_main(const int argc, const pal::char_t* argv[])
+SHARED_API int HOSTPOLICY_CALLTYPE corehost_main(const int argc, const pal::char_t* argv[])
 {
     trace::verbose(_X("--- Invoked hostpolicy mock - corehost_main"));
     return StatusCode::Success;
 }
 
-SHARED_API int __cdecl corehost_unload()
+SHARED_API int HOSTPOLICY_CALLTYPE corehost_unload()
 {
     trace::verbose(_X("--- Invoked hostpolicy mock - corehost_unload"));
     return StatusCode::Success;
 }
 
-using corehost_error_writer_fn = void(*)(const pal::char_t* message);
-SHARED_API corehost_error_writer_fn __cdecl corehost_set_error_writer(corehost_error_writer_fn error_writer)
+SHARED_API corehost_error_writer_fn HOSTPOLICY_CALLTYPE corehost_set_error_writer(corehost_error_writer_fn error_writer)
 {
     trace::verbose(_X("--- Invoked hostpolicy mock - corehost_set_error_writer"));
     return nullptr;
