@@ -585,17 +585,17 @@ namespace
     {
         switch (type)
         {
-        case hostfxr_delegate_type::com_activation:
+        case hostfxr_delegate_type::hdt_com_activation:
             return coreclr_delegate_type::com_activation;
-        case hostfxr_delegate_type::load_in_memory_assembly:
+        case hostfxr_delegate_type::hdt_load_in_memory_assembly:
             return coreclr_delegate_type::load_in_memory_assembly;
-        case hostfxr_delegate_type::winrt_activation:
+        case hostfxr_delegate_type::hdt_winrt_activation:
             return coreclr_delegate_type::winrt_activation;
-        case hostfxr_delegate_type::com_register:
+        case hostfxr_delegate_type::hdt_com_register:
             return coreclr_delegate_type::com_register;
-        case hostfxr_delegate_type::com_unregister:
+        case hostfxr_delegate_type::hdt_com_unregister:
             return coreclr_delegate_type::com_unregister;
-        case hostfxr_delegate_type::load_assembly_and_get_function_pointer:
+        case hostfxr_delegate_type::hdt_load_assembly_and_get_function_pointer:
             return coreclr_delegate_type::load_assembly_and_get_function_pointer;
         }
         return coreclr_delegate_type::invalid;

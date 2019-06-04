@@ -17,8 +17,8 @@ namespace
     const pal::char_t *config_log_prefix = _X("[CONFIG] ");
     const pal::char_t *secondary_log_prefix = _X("[SECONDARY] ");
 
-    const hostfxr_delegate_type first_delegate_type = hostfxr_delegate_type::com_activation;
-    const hostfxr_delegate_type secondary_delegate_type = hostfxr_delegate_type::load_in_memory_assembly;
+    const hostfxr_delegate_type first_delegate_type = hostfxr_delegate_type::hdt_com_activation;
+    const hostfxr_delegate_type secondary_delegate_type = hostfxr_delegate_type::hdt_load_in_memory_assembly;
 
     class hostfxr_exports
     {
@@ -258,7 +258,7 @@ namespace
             const pal::char_t *method_name = argv[i + 2];
 
             LoadAssemblyAndGetFunctionPointer delegate = nullptr;
-            rc = hostfxr.get_delegate(handle, hostfxr_delegate_type::load_assembly_and_get_function_pointer, (void **)&delegate);
+            rc = hostfxr.get_delegate(handle, hostfxr_delegate_type::hdt_load_assembly_and_get_function_pointer, (void **)&delegate);
             if (rc != StatusCode::Success)
             {
                 test_output << log_prefix << _X("hostfxr_get_runtime_delegate failed: ") << std::hex << std::showbase << rc << std::endl;
