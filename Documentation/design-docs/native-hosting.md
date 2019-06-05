@@ -334,7 +334,7 @@ int component_entry_point_fn(void *arg, int32_t arg_size_in_bytes);
 * `reserved` - parameter reserved for future extensibility, currently unused and must be `0`.
 * `delegate` - out parameter which receives the native function pointer to the requested managed method.
 
-It is allowed to call the returned runtime helper many times for different assemblies or just different methods from the same assembly. It is not required to get the helper every time.
+It is allowed to call the returned runtime helper many times for different assemblies or just different methods from the same assembly. It is not required to get the helper every time. The implementation of the helper will cache loaded assemblies, so asking to load the same assembly twice will end up loading it only once and reusing it from that point onward. Ideally components should not take a dependency on this behavior, which means components should not have global state. Global state in components is typically just cause for problems. For example it may create ordering issues or unintended side effects and so on.
 
 The returned native function pointer to managed method has the lifetime of the process and can be used to call the method many times over. Currently there's no way to unload the managed component or otherwise free the native function pointer. Such support may come in future releases.
 
