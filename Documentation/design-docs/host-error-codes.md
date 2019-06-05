@@ -8,27 +8,27 @@ Note that the exit code returned by running an application via `dotnet.exe` or `
 * `Success` (`0`) - Operation was successful.
 
 * `Success_HostAlreadyInitialized` (`0x00000001`) - Initialization was successful, but another host context is already initialized, so the returned context is "secondary". The requested context was otherwise fully compatible with the already initialized context.  
-This is returned by `hostfxr_initialize_for_runtime_config` if it's called for the second time in a given process. Comes from `corehost_initialize` in `hostpolicy`.
+This is returned by `hostfxr_initialize_for_runtime_config` if it's called when the host is already initialized in the process. Comes from `corehost_initialize` in `hostpolicy`.
 
-* `Success_DifferentRuntimeProperties` (`0x00000002`) - Initialization was successful, but another host context is already initialized and it has some runtime properties different from those asked for by the requested context. The requested context specified some runtime properties which are not the same (either in value or in presence) to the already initialized context.
-This is returned by `hostfxr_initialize_for_runtime_config` if it's called for the second time in a given process. Comes from `corehost_initialize` in `hostpolicy`.
+* `Success_DifferentRuntimeProperties` (`0x00000002`) - Initialization was successful, but another host context is already initialized and the requested context specified some runtime properties which are not the same (either in value or in presence) to the already initialized context.
+This is returned by `hostfxr_initialize_for_runtime_config` if it's called when the host is already initialized in the process. Comes from `corehost_initialize` in `hostpolicy`.
 
 
 ### Failure error/exit codes
 
-* `InvalidArgFailure` (`0x80008081`) - One of the specified arguments for the operation is invalid. This is used in a lot of places in the hosting layer.
+* `InvalidArgFailure` (`0x80008081`) - One of the specified arguments for the operation is invalid.
 
 * `CoreHostLibLoadFailure` (`0x80008082`) - There was a failure loading a dependent library. If any of the hosting components calls `LoadLibrary`/`dlopen` on a dependent library and the call fails, this error code is returned. The most common case for this failure is if the dependent library is missing some of its dependencies (for example the necessary CRT is missing on the machine), likely corrupt or incomplete install.  
 This error code is also returned from `corehost_resolve_component_dependencies` if it's called on a `hostpolicy` which has not been initialized via the hosting layer. This would typically happen if `coreclr` is loaded directly without the hosting layer and then `AssemblyDependencyResolver` is used (which is an unsupported scenario).
 
 * `CoreHostLibMissingFailure` (`0x80008083`) - One of the dependent libraries is missing. Typically when the `hostfxr`, `hostpolicy` or `coreclr` dynamic libraries are not present in the expected locations. Probably means corrupted or incomplete installation.
 
-* `CoreHostEntryPointFailure` (`0x80008084`) - One of the dependent libraries is missing a required entry point. For example if 3.0 `hostfxr` is used via the `initialize_for_runtime_config` and the framework resolution logic ends up loading 2.0 `hostpolicy` which doesn't support the new behaviors.
+* `CoreHostEntryPointFailure` (`0x80008084`) - One of the dependent libraries is missing a required entry point.
 
 * `CoreHostCurHostFindFailure` (`0x80008085`) - If the hosting component is trying to use the path to the current module (the hosting component itself) and from it deduce the location of the installation. Either the location of the current module could not be determined (some weird OS call failure) or the location is not in the right place relative to other expected components.  
 For example the `hostfxr` may look at its location and try to deduce the location of the `shared` folder with the framework from it. It assumes the typical install layout on disk. If this doesn't work, this error will be returned.
 
-* `CoreClrResolveFailure` (`0x80008087`) - If the `coreclr` library could not be found. The hosting layer (`hostpolicy`) looks for `coreclr` library either in the app itself (for self-contained) of in the root framework (for framework-dependent). This search can be done purely by looking at disk or more commonly by looking into the respective `.deps.json`. If the `coreclr` library is missing in `.deps.json` or it's there but doesn't exist on disk, this error is returned.
+* `CoreClrResolveFailure` (`0x80008087`) - If the `coreclr` library could not be found. The hosting layer (`hostpolicy`) looks for `coreclr` library either next to the app itself (for self-contained) or in the root framework (for framework-dependent). This search can be done purely by looking at disk or more commonly by looking into the respective `.deps.json`. If the `coreclr` library is missing in `.deps.json` or it's there but doesn't exist on disk, this error is returned.
 
 * `CoreClrBindFailure` (`0x80008088`) - The loaded `coreclr` library doesn't have one of the required entry points.
 
@@ -79,6 +79,7 @@ It would also be used for example if a 32bit 3.0 app is running on a machine whi
 * `HostApiBufferTooSmall` (`0x80008098`) - Returned when the buffer specified to an API is not big enough to fit the requested value. Can be returned from:
   * `hostfxr_get_runtime_properties`
   * `hostfxr_get_native_search_directories`
+  * `get_hostfxr_path`
 
 * `LibHostUnknownCommand` (`0x80008099`) - Returned by `hostpolicy` if the `corehost_main_with_output_buffer` is called with unsupported host command. This error code means there is incompatibility between the `hostfxr` and `hostpolicy`. In reality this should pretty much never happen.
 
