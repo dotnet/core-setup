@@ -22,13 +22,13 @@ typedef int(HOSTPOLICY_CALLTYPE *corehost_unload_fn) ();
 
 typedef int(HOSTPOLICY_CALLTYPE *corehost_main_fn) (
     const int argc,
-    const pal::char_t* argv[]);
+    const pal::char_t **argv);
 typedef int(HOSTPOLICY_CALLTYPE *corehost_main_with_output_buffer_fn) (
     const int argc,
-    const pal::char_t* argv[],
-    pal::char_t buffer[],
+    const pal::char_t **argv,
+    pal::char_t *buffer,
     int32_t buffer_size,
-    int32_t* required_buffer_size);
+    int32_t *required_buffer_size);
 
 typedef void(HOSTPOLICY_CALLTYPE *corehost_error_writer_fn) (const pal::char_t *message);
 typedef corehost_error_writer_fn(HOSTPOLICY_CALLTYPE *corehost_set_error_writer_fn) (corehost_error_writer_fn error_writer);

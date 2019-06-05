@@ -43,22 +43,22 @@ struct corehost_context_contract
 {
     size_t version;
     int (HOSTPOLICY_CALLTYPE *get_property_value)(
-        const pal::char_t* key,
-        /*out*/ const pal::char_t** value);
+        const pal::char_t *key,
+        /*out*/ const pal::char_t **value);
     int (HOSTPOLICY_CALLTYPE *set_property_value)(
-        const pal::char_t* key,
-        const pal::char_t* value);
+        const pal::char_t *key,
+        const pal::char_t *value);
     int (HOSTPOLICY_CALLTYPE *get_properties)(
         /*inout*/ size_t *count,
-        /*out*/ const pal::char_t** keys,
-        /*out*/ const pal::char_t** values);
+        /*out*/ const pal::char_t **keys,
+        /*out*/ const pal::char_t **values);
     int (HOSTPOLICY_CALLTYPE *load_runtime)();
     int (HOSTPOLICY_CALLTYPE *run_app)(
         const int argc,
-        const pal::char_t* argv[]);
+        const pal::char_t **argv);
     int (HOSTPOLICY_CALLTYPE *get_runtime_delegate)(
         coreclr_delegate_type type,
-        /*out*/ void** delegate);
+        /*out*/ void **delegate);
 };
 static_assert(offsetof(corehost_context_contract, version) == 0 * sizeof(size_t), "Struct offset breaks backwards compatibility");
 static_assert(offsetof(corehost_context_contract, get_property_value) == 1 * sizeof(size_t), "Struct offset breaks backwards compatibility");
