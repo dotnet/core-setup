@@ -1,6 +1,6 @@
 # Hosting layer error and exit codes
-This document lists all the values returned as special exit code of running `dotnet.exe` or `apphost` or which are returned by the hosting APIs (`hostfxr`, `hostpolicy` and `nethost`).
-Please note that exit code returned by running an application via `dotnet.exe` or `apphost` can be either one of the below values, or it can be the exit code of the managed application itself.
+This document lists all the values returned as special exit codes when running `dotnet.exe` or `apphost` or returned by the hosting APIs (`hostfxr`, `hostpolicy` and `nethost`).
+Note that the exit code returned by running an application via `dotnet.exe` or `apphost` can either be one of the below values or the exit code of the managed application itself.
 
 
 ### Success error/exit codes
@@ -19,7 +19,7 @@ This is returned by `hostfxr_initialize_for_runtime_config` if it's called for t
 * `InvalidArgFailure` (`0x80008081`) - One of the specified arguments for the operation is invalid. This is used in a lot of places in the hosting layer.
 
 * `CoreHostLibLoadFailure` (`0x80008082`) - There was a failure loading a dependent library. If any of the hosting components calls `LoadLibrary`/`dlopen` on a dependent library and the call fails, this error code is returned. The most common case for this failure is if the dependent library is missing some of its dependencies (for example the necessary CRT is missing on the machine), likely corrupt or incomplete install.  
-This error code is also returned from `corehost_resolve_component_dependencies` if it's called on a `hostpolicy` which has not been initialized via the hosting layer. This would typically happen if `coreclr` is loaded directly without hosting layer and then `AssemblyDependencyResolver` is used (which is unsupported scenario).
+This error code is also returned from `corehost_resolve_component_dependencies` if it's called on a `hostpolicy` which has not been initialized via the hosting layer. This would typically happen if `coreclr` is loaded directly without the hosting layer and then `AssemblyDependencyResolver` is used (which is an unsupported scenario).
 
 * `CoreHostLibMissingFailure` (`0x80008083`) - One of the dependent libraries is missing. Typically when the `hostfxr`, `hostpolicy` or `coreclr` dynamic libraries are not present in the expected locations. Probably means corrupted or incomplete installation.
 
@@ -28,9 +28,9 @@ This error code is also returned from `corehost_resolve_component_dependencies` 
 * `CoreHostCurHostFindFailure` (`0x80008085`) - If the hosting component is trying to use the path to the current module (the hosting component itself) and from it deduce the location of the installation. Either the location of the current module could not be determined (some weird OS call failure) or the location is not in the right place relative to other expected components.  
 For example the `hostfxr` may look at its location and try to deduce the location of the `shared` folder with the framework from it. It assumes the typical install layout on disk. If this doesn't work, this error will be returned.
 
-* `CoreClrResolveFailure` (`0x80008087`) - If the `coreclr` could not be found. The hosting layer (`hostpolicy`) looks for `coreclr` library either in the app itself (for self-contained) of in the root framework (for framework-dependent). This search can be done purely by looking at disk or more commonly by looking into the respective `.deps.json`. If `coreclr` is missing in `.deps.json` or it's there but doesn't exist on disk, this error is returned.
+* `CoreClrResolveFailure` (`0x80008087`) - If the `coreclr` library could not be found. The hosting layer (`hostpolicy`) looks for `coreclr` library either in the app itself (for self-contained) of in the root framework (for framework-dependent). This search can be done purely by looking at disk or more commonly by looking into the respective `.deps.json`. If the `coreclr` library is missing in `.deps.json` or it's there but doesn't exist on disk, this error is returned.
 
-* `CoreClrBindFailure` (`0x80008088`) - The loaded `coreclr` doesn't have one of the required entry points.
+* `CoreClrBindFailure` (`0x80008088`) - The loaded `coreclr` library doesn't have one of the required entry points.
 
 * `CoreClrInitFailure` (`0x80008089`) - The call to `coreclr_initialize` failed. The actual error returned by `coreclr` is reported in the error message.
 
@@ -40,13 +40,13 @@ For example the `hostfxr` may look at its location and try to deduce the locatio
   * One of the frameworks or the app is missing a required `.deps.json` file.
   * One of the `.deps.json` files is invalid (invalid JSON, or missing required properties and so on).
 
-* `ResolverResolveFailure` (`0x8000808c`) - Resolution of dependencies in the `hostpolicy` dependency resolved failed. This can mean many different things, but in general one of the processed `.deps.json` contains entry for a file which could not found, or its resolution failed for some other reason (conflict for example).
+* `ResolverResolveFailure` (`0x8000808c`) - Resolution of dependencies in `hostpolicy` failed. This can mean many different things, but in general one of the processed `.deps.json` contains entry for a file which could not found, or its resolution failed for some other reason (conflict for example).
 
-* `LibHostCurExeFindFailure` (`0x8000808d`) - The hosting layer tries to determine the location of the current executable to deduce the install location in some cases. If this path can't be obtained (OS call fails, or the returned path doesn't exist), this error is returned.
+* `LibHostCurExeFindFailure` (`0x8000808d`) - Failure to determine the location of the current executable. The hosting layer uses the current executable path to deduce the install location in some cases. If this path can't be obtained (OS call fails, or the returned path doesn't exist), this error is returned.
 
 * `LibHostInitFailure` (`0x8000808e`) - Initialization of the `hostpolicy` library failed. The `corehost_load` method takes a structure with lot of initialization parameters. If the version of this structure doesn't match the expected value, this error code is returned. This would in general mean incompatibility between the `hostfxr` and `hostpolicy`, which should really only happen if somehow a newer `hostpolicy` is used by older `hostfxr`. This typically means corrupted installation.
 
-* `LibHostSdkFindFailure` (`0x80008091`) - Failure to find the requested SDK. This happens in the `hostfxr` when an SDK (also called CLI) command is used with `dotnet.exe`. In this case the hosting layer tries to find an installed .NET Core SDK to run the command on. The search is based on deduced install location and on the requested version from potential `global.json` file. If either no matching SDK version can be found, or that version exists, but it's missing the `dotnet.dll` file, this error code is returned.
+* `LibHostSdkFindFailure` (`0x80008091`) - Failure to find the requested SDK. This happens in the `hostfxr` when an SDK (also called CLI) command is used with `dotnet`. In this case the hosting layer tries to find an installed .NET Core SDK to run the command on. The search is based on deduced install location and on the requested version from potential `global.json` file. If either no matching SDK version can be found, or that version exists, but it's missing the `dotnet.dll` file, this error code is returned.
 
 * `LibHostInvalidArgs` (`0x80008092`) - Arguments to `hostpolicy` are invalid. This is used in three unrelated places in the `hostpolicy`, but in all cases it means the component calling `hostpolicy` did something wrong:
   * Command line arguments for the app - the failure would typically mean that wrong argument was passed or such. For example if the application main assembly is not specified on the command line. On its own this should not happen as `hostfxr` should have parsed and validated all command line arguments.
