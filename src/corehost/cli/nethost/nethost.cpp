@@ -18,9 +18,6 @@ namespace
     }
 }
 
-#if defined(_WIN32) && defined(_TARGET_X86_)
-    #pragma comment(linker, "/export:get_hostfxr_path=_get_hostfxr_path@12")
-#endif
 NETHOST_API int NETHOST_CALLTYPE get_hostfxr_path(
     char_t * buffer,
     size_t * buffer_size,
