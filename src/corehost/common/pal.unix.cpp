@@ -265,12 +265,33 @@ bool pal::get_default_servicing_directory(string_t* recv)
     return true;
 }
 
+static bool is_directory(const pal::string_t& path)
+{
+    if (path.empty())
+    {
+        return false;
+    }
+
+    struct stat buffer;
+    while ((stat(path.c_str(), &buffer) == -1) && (errno == EINTR));
+
+    return S_ISDIR(buffer.st_mode);
+}
+
 bool pal::get_temp_directory(pal::string_t& tmp_dir)
 {
     // First, check for the POSIX standard environment variable
-    if (pal::getenv(_X("TMPDIR"), &tmp_dir))
+    pal::string_t _tmpdir;
+    if (pal::getenv(_X("TMPDIR"), &_tmpdir))
     {
-        return pal::realpath(&tmp_dir);
+        if (pal::realpath(&_tmpdir))
+        {
+            if (is_directory(_tmpdir))
+            {
+                tmp_dir.assign(_tmpdir);
+                return true;
+            }
+        }
     }
 
     // On non-compliant systems (ex: Ubuntu) try /var/tmp or /tmp directories.
