@@ -42,21 +42,21 @@ typedef void(HOSTFXR_CALLTYPE *hostfxr_error_writer_fn)(const char_t *message);
 typedef hostfxr_error_writer_fn(HOSTFXR_CALLTYPE *hostfxr_set_error_writer_fn)(hostfxr_error_writer_fn error_writer);
 
 typedef void* hostfxr_handle;
-typedef struct hostfxr_initialize_parameters
+struct hostfxr_initialize_parameters
 {
     size_t size;
     const char_t *host_path;
     const char_t *dotnet_root;
-} hostfxr_initialize_parameters;
+};
 
 typedef int32_t(HOSTFXR_CALLTYPE *hostfxr_initialize_for_dotnet_command_line_fn)(
     int argc,
     const char_t **argv,
-    const hostfxr_initialize_parameters *parameters,
+    const struct hostfxr_initialize_parameters *parameters,
     /*out*/ hostfxr_handle *host_context_handle);
 typedef int32_t(HOSTFXR_CALLTYPE *hostfxr_initialize_for_runtime_config_fn)(
     const char_t *runtime_config_path,
-    const hostfxr_initialize_parameters*parameters,
+    const struct hostfxr_initialize_parameters *parameters,
     /*out*/ hostfxr_handle *host_context_handle);
 
 typedef int32_t(HOSTFXR_CALLTYPE *hostfxr_get_runtime_property_value_fn)(

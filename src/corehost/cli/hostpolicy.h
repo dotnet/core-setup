@@ -5,7 +5,6 @@
 #ifndef __HOSTPOLICY_H__
 #define __HOSTPOLICY_H__
 
-#include "corehost_context_contract.h"
 #include "host_interface.h"
 #include <pal.h>
 
@@ -14,6 +13,9 @@
 #else
     #define HOSTPOLICY_CALLTYPE
 #endif
+
+struct corehost_initialize_request_t;
+struct corehost_context_contract;
 
 typedef int(HOSTPOLICY_CALLTYPE *corehost_load_fn) (const host_interface_t *init);
 typedef int(HOSTPOLICY_CALLTYPE *corehost_unload_fn) ();

@@ -7,6 +7,7 @@
 #include <error_codes.h>
 #include <future>
 #include <hostfxr.h>
+#include <coreclr_delegates.h>
 #include <corehost_context_contract.h>
 #include "host_context_test.h"
 #include <utils.h>
@@ -257,7 +258,7 @@ namespace
             const pal::char_t *type_name = argv[i + 1];
             const pal::char_t *method_name = argv[i + 2];
 
-            LoadAssemblyAndGetFunctionPointer delegate = nullptr;
+            load_assembly_and_get_function_pointer_fn delegate = nullptr;
             rc = hostfxr.get_delegate(handle, hostfxr_delegate_type::hdt_load_assembly_and_get_function_pointer, (void **)&delegate);
             if (rc != StatusCode::Success)
             {
@@ -267,14 +268,14 @@ namespace
             {
                 test_output << log_prefix << _X("hostfxr_get_runtime_delegate succeeded: ") << std::hex << std::showbase << rc << std::endl;
 
-                test_output << log_prefix << _X("calling LoadAssemblyAndGetFunctionPointer(\"")
+                test_output << log_prefix << _X("calling load_assembly_and_get_function_pointer(\"")
                     << assembly_path << _X("\", \"")
                     << type_name << _X("\", \"")
                     << method_name << _X("\", \"")
                     << _X("nullptr, nullptr, &componentEntryPointDelegate)")
                     << std::endl;
 
-                ComponentEntryPointDelegate componentEntryPointDelegate = nullptr;
+                component_entry_point_fn componentEntryPointDelegate = nullptr;
                 rc = delegate(assembly_path,
                               type_name,
                               method_name,
@@ -284,11 +285,11 @@ namespace
 
                 if (rc != StatusCode::Success)
                 {
-                    test_output << log_prefix << _X("LoadAssemblyAndGetFunctionPointer failed: ") << std::hex << std::showbase << rc << std::endl;
+                    test_output << log_prefix << _X("load_assembly_and_get_function_pointer failed: ") << std::hex << std::showbase << rc << std::endl;
                 }
                 else
                 {
-                    test_output << log_prefix << _X("LoadAssemblyAndGetFunctionPointer succeeded: ") << std::hex << std::showbase << rc << std::endl;
+                    test_output << log_prefix << _X("load_assembly_and_get_function_pointer succeeded: ") << std::hex << std::showbase << rc << std::endl;
 
                     int result = componentEntryPointDelegate((void*)(static_cast<size_t>(0xdeadbeef)), 42);
 
