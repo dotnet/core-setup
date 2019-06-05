@@ -27,7 +27,7 @@ namespace
         {
             // Roll to highest version should have no effect on patch compatibility range as that has special rules
             // For release versions we will always roll to latest (that is done in automatic_roll_to_latest_patch)
-            // For pre-release we will only rool to closest available.
+            // For pre-release we will only roll to closest available.
             bool roll_to_highest_version =
                 fx_ref.get_version_compatibility_range() != version_compatibility_range_t::patch
                 && fx_ref.get_roll_to_highest_version();
