@@ -289,7 +289,7 @@ Starts the runtime and returns a function pointer to specified functionality of 
 * `host_context_handle` - handle to the initialized host context.
 * `type` - the type of runtime functionality requested
   * `hdt_load_assembly_and_get_function_pointer` - entry point which loads an assembly (with dependencies) and returns function pointer for a specified static method. See below for details (Loading managed components)
-  * `hdt_com_activation`, `hdt_com_register`, `hdt_com_unregister` - COM activation entry-point - see [COM activation](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/COM-activation.md) for more details.
+  * `hdt_com_activation`, `hdt_com_register`, `hdt_com_unregister` - COM activation entry-points - see [COM activation](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/COM-activation.md) for more details.
   * `hdt_load_in_memory_assembly` - IJW entry-point - see [IJW activation](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/IJW-activation.md) for more details.
   * `hdt_winrt_activation` - WinRT activation entry-point - see [WinRT activation](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/WinRT-activation.md) for more details.
 * `delegate` - when successful, the native function pointer to the requested runtime functionality.
