@@ -110,6 +110,32 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             }
         }
 
+        [Theory]
+        [InlineData("win10-x64", "win/ManagedWin.dll", "native/win-x64")]
+        [InlineData("win10-x86", "win/ManagedWin.dll", "native/win-x86")]
+        [InlineData("linux", "any/ManagedAny.dll", "native/linux")]
+        public void MostSpecificRidAssemblySelectedPerType(string rid, string expectedAssemblyPath, string expectedNativePath)
+        {
+            using (TestApp app = NetCoreAppBuilder.PortableForNETCoreApp(SharedState.FrameworkReferenceApp)
+                .WithProject(p => p
+                    .WithAssemblyGroup(null, g => g.WithMainAssembly())
+                    .WithAssemblyGroup("any", g => g.WithAsset("any/ManagedAny.dll"))
+                    .WithAssemblyGroup("win", g => g.WithAsset("win/ManagedWin.dll"))
+                    .WithNativeLibraryGroup("win-x64", g => g.WithAsset("native/win-x64/n.dll"))
+                    .WithNativeLibraryGroup("win-x86", g => g.WithAsset("native/win-x86/n.dll"))
+                    .WithNativeLibraryGroup("linux", g => g.WithAsset("native/linux/n.so")))
+                .Build())
+            {
+                SharedState.DotNetWithNetCoreApp.Exec(app.AppDll)
+                    .EnableTracingAndCaptureOutputs()
+                    .RuntimeId(rid)
+                    .Execute()
+                    .Should().Pass()
+                    .And.HaveResolvedAssembly(expectedAssemblyPath, app)
+                    .And.HaveResolvedNativeLibraryPath(expectedNativePath, app);
+            }
+        }
+
         public class SharedTestState : SharedTestStateBase
         {
             public TestApp FrameworkReferenceApp { get; }
