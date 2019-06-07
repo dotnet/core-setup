@@ -9,22 +9,5 @@
   <Import Project="..\..\Microsoft.NETCore.DotNetHostPolicy\Microsoft.NETCore.DotNetHostPolicy.props" />
   <Import Project="..\..\Microsoft.NETCore.DotNetHostResolver\Microsoft.NETCore.DotNetHostResolver.props" />
 
-  <!--
-    The shared framework should have createdump for diagnostics, but not self-contained apps. This
-    runtime pack layout tweak ensures it doesn't show up in self-contained apps.
-
-    If a createdump binary is provided by CoreCLR for this platform, move it to the tools dir. It is
-    in the CoreCLR transport package as 'runtime/<rid>/native/createdump' which would be picked up
-    by self-contained publish.
-  -->
-  <Target Name="MoveCreatedumpToToolsDir"
-          BeforeTargets="GetFiles">
-    <ItemGroup>
-      <File
-        Condition="'%(Filename)%(Extension)' == 'createdump'"
-        TargetPath="tools" />
-    </ItemGroup>
-  </Target>
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
