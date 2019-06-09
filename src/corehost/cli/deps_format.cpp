@@ -179,7 +179,7 @@ bool deps_json_t::perform_rid_fallback(rid_specific_assets_t* portable_assets, c
             pal::string_t matched_rid = rid_assets.count(host_rid) ? host_rid : _X("");
             if (matched_rid.empty())
             {
-                auto& rid_fallback_iter = rid_fallback_graph.find(host_rid);
+                auto rid_fallback_iter = rid_fallback_graph.find(host_rid);
                 if (rid_fallback_iter == rid_fallback_graph.end())
                 {
                     trace::warning(_X("The targeted framework does not support the runtime '%s'. Some native libraries from [%s] may fail to load on this platform."), host_rid.c_str(), package.first.c_str());
