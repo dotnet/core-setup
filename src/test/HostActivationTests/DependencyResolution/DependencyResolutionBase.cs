@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
 
         public abstract class SharedTestStateBase : TestArtifact
         {
-            private readonly string _builtDotnet;
+            protected string BuiltDotnetPath { get; }
 
             private static string GetBaseDir(string name)
             {
@@ -23,12 +23,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             public SharedTestStateBase()
                 : base(GetBaseDir("dependencyResolution"), "dependencyResolution")
             {
-                _builtDotnet = Path.Combine(TestArtifactsPath, "sharedFrameworkPublish");
+                BuiltDotnetPath = Path.Combine(TestArtifactsPath, "sharedFrameworkPublish");
             }
 
             public DotNetBuilder DotNet(string name)
             {
-                return new DotNetBuilder(Location, _builtDotnet, name);
+                return new DotNetBuilder(Location, BuiltDotnetPath, name);
             }
 
             public TestApp CreateFrameworkReferenceApp(string fxName, string fxVersion)

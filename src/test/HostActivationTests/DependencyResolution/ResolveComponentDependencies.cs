@@ -6,6 +6,7 @@ using Microsoft.DotNet.Cli.Build.Framework;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
@@ -316,6 +317,59 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                 .And.HaveStdOutContaining($"{componentWithResourcesPrefix}: Failed to locate managed application");
         }
 
+        private const string TestDependencyResolverFx = "Test.DependencyResolver.Fx";
+        private const string TestDependencyResolverFxTestAssembly = "Test.Assembly.DependencyResolver";
+
+        [Theory]
+        [InlineData(null, null, null, null, true)]
+        [InlineData("2.0.0.0", "2.0.0.0", "1.0.0.0", "1.0.0.0", false)]
+        [InlineData("2.0.0.0", "2.0.0.0", "3.0.0.0", "3.0.0.0", true)]
+        public void ComponentWithSameAssemblyAsFramework(string fxAsmVersion, string fxFileVersion, string appAsmVersion, string appFileVersion, bool appWins)
+        {
+            var component = sharedTestState.CreateComponentWithNoDependencies(b => b
+                .WithPackage(TestDependencyResolverFxTestAssembly, "1.0.0", lib => lib
+                    .WithAssemblyGroup(null, g => g
+                        .WithAsset(TestDependencyResolverFxTestAssembly + ".dll", rf => rf
+                            .WithVersion(fxAsmVersion, fxFileVersion)))));
+
+            // The simplest way to setup an assembly in framework we have full control over is to create a custom shared framework
+            // We can't really mock Microsoft.NETCore.App since we need it to run the HostApiInvoker on.
+            string sharedFrameworkPath = Path.Combine(
+                sharedTestState.HostApiInvokerAppFixture.BuiltDotnet.BinPath,
+                "shared",
+                TestDependencyResolverFx,
+                "1.0.0");
+            FileUtils.EnsureDirectoryExists(sharedFrameworkPath);
+
+            using (TestFileBackup backup = new TestFileBackup(sharedTestState.HostApiInvokerAppFixture.TestProject.BuiltApp.Location))
+            using (TestApp testSharedFramework = new TestApp(sharedFrameworkPath, TestDependencyResolverFx))
+            {
+                backup.Backup(sharedTestState.HostApiInvokerAppFixture.TestProject.BuiltApp.RuntimeConfigJson);
+                RuntimeConfig.FromFile(sharedTestState.HostApiInvokerAppFixture.TestProject.BuiltApp.RuntimeConfigJson)
+                    .WithFramework(TestDependencyResolverFx, "1.0.0")
+                    .Save();
+
+                NetCoreAppBuilder.PortableForNETCoreApp(testSharedFramework)
+                    .WithRuntimeConfig(runtimeConfig => runtimeConfig
+                        .WithFramework(MicrosoftNETCoreApp, sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion))
+                    .WithPackage(TestDependencyResolverFxTestAssembly, "1.0.0", b => b
+                        .WithAssemblyGroup(null, g => g
+                            .WithAsset(TestDependencyResolverFxTestAssembly + ".dll", rf => rf
+                                .WithVersion(appAsmVersion, appFileVersion))))
+                    .Build(testSharedFramework);
+
+                string expectedTestAssemblyPath =
+                    Path.Combine(appWins ? component.Location : testSharedFramework.Location, TestDependencyResolverFxTestAssembly + ".dll");
+
+                RunTest(component)
+                    .Should().Pass()
+                    .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
+                    .And.HaveStdOutContaining($"corehost_resolve_component_dependencies assemblies:[" +
+                                              $"{component.AppDll}{Path.PathSeparator}" +
+                                              $"{expectedTestAssemblyPath}{Path.PathSeparator}]");
+            }
+        }
+
         private CommandResult RunTest(TestApp component, Action<Command> commandCustomizer = null)
         {
             return RunTest(component.AppDll, commandCustomizer);
@@ -365,7 +419,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
 
             public SharedTestState()
             {
-                RepoDirectories = new RepoDirectoriesProvider();
+                RepoDirectories = new RepoDirectoriesProvider(builtDotnet: BuiltDotnetPath);
 
                 HostApiInvokerAppFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
                     .EnsureRestored(RepoDirectories.CorehostPackages)
