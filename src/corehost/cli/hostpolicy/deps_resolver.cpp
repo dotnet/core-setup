@@ -115,6 +115,7 @@ void deps_resolver_t::add_tpa_asset(
 void deps_resolver_t::get_dir_assemblies(
     const pal::string_t& dir,
     const pal::string_t& dir_name,
+    int fx_level,
     name_to_resolved_asset_map_t* items)
 {
     version_t empty;
@@ -171,7 +172,7 @@ void deps_resolver_t::get_dir_assemblies(
                 file_path.c_str());
 
             deps_asset_t asset(file_name, file, empty, empty);
-            deps_resolved_asset_t resolved_asset(asset, file_path);
+            deps_resolved_asset_t resolved_asset(asset, file_path, fx_level);
             add_tpa_asset(resolved_asset, items);
         }
     }
@@ -412,7 +413,8 @@ bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool continu
 bool deps_resolver_t::resolve_tpa_list(
         pal::string_t* output,
         std::unordered_set<pal::string_t>* breadcrumb,
-        bool ignore_missing_assemblies)
+        bool ignore_missing_assemblies,
+        int max_fx_level_to_include)
 {
     const std::vector<deps_entry_t> empty(0);
     name_to_resolved_asset_map_t items;
@@ -440,7 +442,7 @@ bool deps_resolver_t::resolve_tpa_list(
         {
             if (probe_deps_entry(entry, deps_dir, fx_level, &resolved_path))
             {
-                deps_resolved_asset_t resolved_asset(entry.asset, resolved_path);
+                deps_resolved_asset_t resolved_asset(entry.asset, resolved_path, fx_level);
                 add_tpa_asset(resolved_asset, &items);
                 return true;
             }
@@ -478,11 +480,15 @@ bool deps_resolver_t::resolve_tpa_list(
                             existing_entry->resolved_path.c_str(), existing_entry->asset.assembly_version.as_str().c_str(), existing_entry->asset.file_version.as_str().c_str(),
                             resolved_path.c_str(), entry.asset.assembly_version.as_str().c_str(), entry.asset.file_version.as_str().c_str());
 
+                        deps_asset_t asset(entry.asset.name, entry.asset.relative_path, entry.asset.assembly_version, entry.asset.file_version);
+
+                        // Use the fx_level of the existing entry - the asset was requested by a higher level framework (or app)
+                        // but now it's being resolved by lower level framework. As such it still belongs to the higher level framework level.
+                        deps_resolved_asset_t resolved_asset(asset, resolved_path, existing_entry->fx_level);
+
                         existing_entry = nullptr;
                         items.erase(existing);
 
-                        deps_asset_t asset(entry.asset.name, entry.asset.relative_path, entry.asset.assembly_version, entry.asset.file_version);
-                        deps_resolved_asset_t resolved_asset(asset, resolved_path);
                         add_tpa_asset(resolved_asset, &items);
                     }
                 }
@@ -507,7 +513,7 @@ bool deps_resolver_t::resolve_tpa_list(
         // TODO: Remove: the deps should contain the managed DLL.
         // Workaround for: csc.deps.json doesn't have the csc.dll
         deps_asset_t asset(get_filename_without_ext(m_managed_app), get_filename(m_managed_app), version_t(), version_t());
-        deps_resolved_asset_t resolved_asset(asset, m_managed_app);
+        deps_resolved_asset_t resolved_asset(asset, m_managed_app, 0);
         add_tpa_asset(resolved_asset, &items);
 
         // Add the app's entries
@@ -526,7 +532,7 @@ bool deps_resolver_t::resolve_tpa_list(
         if (!get_deps().exists())
         {
             // Obtain the local assemblies in the app dir.
-            get_dir_assemblies(m_app_dir, _X("local"), &items);
+            get_dir_assemblies(m_app_dir, _X("local"), 0, &items);
         }
     }
 
@@ -549,6 +555,8 @@ bool deps_resolver_t::resolve_tpa_list(
     }
 
     // Probe FX deps entries after app assemblies are added.
+    // Note that we have to go through all fx levels even if the max_fx_level_to_include is set to something restrictive.
+    // That is because assets from higher levels may be resolved by frameworks on lower levels (or overwritten by them).
     for (size_t i = 1; i < m_fx_definitions.size(); ++i)
     {
         const auto& deps_entries = m_is_framework_dependent ? m_fx_definitions[i]->get_deps().get_entries(deps_entry_t::asset_types::runtime) : empty;
@@ -564,11 +572,14 @@ bool deps_resolver_t::resolve_tpa_list(
     // Convert the paths into a string and return it 
     for (const auto& item : items)
     {
-        // Workaround for CoreFX not being able to resolve sym links.
-        pal::string_t real_asset_path = item.second.resolved_path;
-        pal::realpath(&real_asset_path);
-        output->append(real_asset_path);
-        output->push_back(PATH_SEPARATOR);
+        if (item.second.fx_level <= max_fx_level_to_include)
+        {
+            // Workaround for CoreFX not being able to resolve sym links.
+            pal::string_t real_asset_path = item.second.resolved_path;
+            pal::realpath(&real_asset_path);
+            output->append(real_asset_path);
+            output->push_back(PATH_SEPARATOR);
+        }
     }
 
     return true;
@@ -711,7 +722,7 @@ void deps_resolver_t::resolve_additional_deps(const arguments_t& args, const dep
     }
 }
 
-void deps_resolver_t::get_app_fx_definition_range(fx_definition_vector_t::iterator *begin, fx_definition_vector_t::iterator *end) const
+void deps_resolver_t::get_app_fx_definition_range(fx_definition_const_vector_t::const_iterator *begin, fx_definition_const_vector_t::const_iterator *end) const
 {
     assert(begin != nullptr && end != nullptr);
 
@@ -723,7 +734,7 @@ void deps_resolver_t::get_app_fx_definition_range(fx_definition_vector_t::iterat
     {
         // In a libhost scenario the app definition shouldn't be
         // included in the creation of the application.
-        assert(begin_iter->get() == &get_app(m_fx_definitions));
+        assert(*begin_iter == &get_app(m_fx_definitions));
         ++begin_iter;
     }
 
@@ -736,6 +747,7 @@ void deps_resolver_t::get_app_fx_definition_range(fx_definition_vector_t::iterat
  */
 bool deps_resolver_t::resolve_probe_dirs(
         deps_entry_t::asset_types asset_type,
+        int max_fx_level_to_include,
         pal::string_t* output,
         std::unordered_set<pal::string_t>* breadcrumb)
 {
@@ -843,7 +855,7 @@ bool deps_resolver_t::resolve_probe_dirs(
     }
 
     // Add fx package locations to fx_dir
-    for (size_t i = 1; i < m_fx_definitions.size(); ++i)
+    for (size_t i = 1; i < m_fx_definitions.size() && i <= max_fx_level_to_include; ++i)
     {
         const auto& fx_entries = m_fx_definitions[i]->get_deps().get_entries(asset_type);
 
@@ -869,23 +881,29 @@ bool deps_resolver_t::resolve_probe_dirs(
 //     probe_paths       - Pointer to struct containing fields that will contain
 //                         resolved path ordering.
 //     breadcrumb        - set of breadcrumb paths - or null if no breadcrumbs should be collected.
+//     max_fx_level_to_include   - the maximum framework level for which to include the assets.
+//                                 If this is set to 0, only assets from the app will be returned.
 //     ignore_missing_assemblies - if set to true, resolving TPA assemblies will not fail if an assembly can't be found on disk
 //                                 instead such entry will simply be ignored.
 //
 //
-bool deps_resolver_t::resolve_probe_paths(probe_paths_t* probe_paths, std::unordered_set<pal::string_t>* breadcrumb, bool ignore_missing_assemblies)
+bool deps_resolver_t::resolve_probe_paths(
+    probe_paths_t* probe_paths,
+    std::unordered_set<pal::string_t>* breadcrumb,
+    int max_fx_level_to_include,
+    bool ignore_missing_assemblies)
 {
-    if (!resolve_tpa_list(&probe_paths->tpa, breadcrumb, ignore_missing_assemblies))
+    if (!resolve_tpa_list(&probe_paths->tpa, breadcrumb, ignore_missing_assemblies, max_fx_level_to_include))
     {
         return false;
     }
 
-    if (!resolve_probe_dirs(deps_entry_t::asset_types::native, &probe_paths->native, breadcrumb))
+    if (!resolve_probe_dirs(deps_entry_t::asset_types::native, max_fx_level_to_include, &probe_paths->native, breadcrumb))
     {
         return false;
     }
 
-    if (!resolve_probe_dirs(deps_entry_t::asset_types::resources, &probe_paths->resources, breadcrumb))
+    if (!resolve_probe_dirs(deps_entry_t::asset_types::resources, max_fx_level_to_include, &probe_paths->resources, breadcrumb))
     {
         return false;
     }

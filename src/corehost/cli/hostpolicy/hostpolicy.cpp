@@ -816,15 +816,15 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_resolve_component_dependencies(
     args.trace();
 
     // Initialize the "app" framework definition.
-    auto app = new fx_definition_t();
+    fx_definition_t app;
 
     // For now intentionally don't process .runtimeconfig.json since we don't perform framework resolution.
 
     // Call parse_runtime_config since it initializes the defaults for various settings
     // but we don't have any .runtimeconfig.json for the component, so pass in empty paths.
     // Empty paths is a valid case and the method will simply skip parsing anything.
-    app->parse_runtime_config(pal::string_t(), pal::string_t(), runtime_config_t::settings_t());
-    if (!app->get_runtime_config().is_valid())
+    app.parse_runtime_config(pal::string_t(), pal::string_t(), runtime_config_t::settings_t());
+    if (!app.get_runtime_config().is_valid())
     {
         // This should really never happen, but fail gracefully if it does anyway.
         assert(false);
@@ -832,21 +832,26 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_resolve_component_dependencies(
         return StatusCode::InvalidConfigFile;
     }
 
-    // For components we don't want to resolve anything from the frameworks, since those will be supplied by the app.
-    // So only use the component as the "app" framework.
-    fx_definition_vector_t component_fx_definitions;
-    component_fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
+    // Parse the .deps.json for the component
+    app.set_deps_file(args.deps_path);
+    trace::verbose(_X("Using %s deps file"), app.get_deps_file().c_str());
+    app.parse_deps(get_root_framework(g_init.fx_definitions).get_deps().get_rid_fallback_graph());
 
-    // TODO Review: Since we're only passing the one component framework, the resolver will not consider
-    // frameworks from the app for probing paths. So potential references to paths inside frameworks will not resolve.
+    fx_definition_const_vector_t component_fx_definitions;
+    component_fx_definitions.resize(g_init.fx_definitions.size());
+    component_fx_definitions[0] = &app;
 
-    // The RID graph still has to come from the actuall root framework, so take that from the g_init.fx_definitions
-    // which are the frameworks for the app.
+    // TODO: Self-contained apps - don't have frameworks, so the below will do nothing - and thus we would be missing RID fallback graph
+
+    for (int i = g_init.fx_definitions.size() - 1; i >= 1; i--)
+    {
+        component_fx_definitions[i] = g_init.fx_definitions[i].get();
+    }
+
     deps_resolver_t resolver(
         args,
         component_fx_definitions,
-        &get_root_framework(g_init.fx_definitions).get_deps().get_rid_fallback_graph(),
-        true);
+        /* is_framework_dependent */ true);
 
     pal::string_t resolver_errors;
     if (!resolver.valid(&resolver_errors))
@@ -859,7 +864,7 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_resolve_component_dependencies(
     // doesn't guarantee that they will actually execute.
 
     probe_paths_t probe_paths;
-    if (!resolver.resolve_probe_paths(&probe_paths, nullptr, /* ignore_missing_assemblies */ true))
+    if (!resolver.resolve_probe_paths(&probe_paths, nullptr, /* max_fx_level_to_include */ 0, /* ignore_missing_assemblies */ true))
     {
         return StatusCode::ResolverResolveFailure;
     }

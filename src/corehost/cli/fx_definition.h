@@ -43,13 +43,24 @@ private:
 };
 
 typedef std::vector<std::unique_ptr<fx_definition_t>> fx_definition_vector_t;
+typedef std::vector<const fx_definition_t*> fx_definition_const_vector_t;
 
 static const fx_definition_t& get_root_framework(const fx_definition_vector_t& fx_definitions)
 {
     return *fx_definitions[fx_definitions.size() - 1];
 }
 
+static const fx_definition_t& get_root_framework(const fx_definition_const_vector_t& fx_definitions)
+{
+    return *fx_definitions[fx_definitions.size() - 1];
+}
+
 static const fx_definition_t& get_app(const fx_definition_vector_t& fx_definitions)
+{
+    return *fx_definitions[0];
+}
+
+static const fx_definition_t& get_app(const fx_definition_const_vector_t& fx_definitions)
 {
     return *fx_definitions[0];
 }

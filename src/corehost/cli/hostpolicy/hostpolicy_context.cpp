@@ -28,7 +28,6 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
         {
             args,
             hostpolicy_init.fx_definitions,
-            /* root_framework_rid_fallback_graph */ nullptr, // This means that the fx_definitions contains the root framework
             hostpolicy_init.is_framework_dependent
         };
 
@@ -51,14 +50,22 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
         breadcrumbs.insert(policy_name);
         breadcrumbs.insert(policy_name + _X(",") + policy_version);
 
-        if (!resolver.resolve_probe_paths(&probe_paths, &breadcrumbs))
+        if (!resolver.resolve_probe_paths(
+            &probe_paths, 
+            &breadcrumbs, 
+            /* max_fx_level_to_include */ INT_MAX,
+            /* ignore_missing_assemblies */ false))
         {
             return StatusCode::ResolverResolveFailure;
         }
     }
     else
     {
-        if (!resolver.resolve_probe_paths(&probe_paths, nullptr))
+        if (!resolver.resolve_probe_paths(
+            &probe_paths, 
+            /* breadcrumbs */ nullptr,
+            /* max_fx_level_to_include */ INT_MAX,
+            /* ignore_missing_assemblies */ false))
         {
             return StatusCode::ResolverResolveFailure;
         }
@@ -101,7 +108,7 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
         trace::warning(_X("Could not resolve symlink to CLRJit path '%s'"), probe_paths.clrjit.c_str());
     }
 
-    const fx_definition_vector_t &fx_definitions = resolver.get_fx_definitions();
+    const fx_definition_const_vector_t &fx_definitions = resolver.get_fx_definitions();
 
     pal::string_t fx_deps_str;
     if (resolver.is_framework_dependent())
@@ -110,12 +117,12 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
         fx_deps_str = get_root_framework(fx_definitions).get_deps_file();
     }
 
-    fx_definition_vector_t::iterator fx_begin;
-    fx_definition_vector_t::iterator fx_end;
+    fx_definition_const_vector_t::const_iterator fx_begin;
+    fx_definition_const_vector_t::const_iterator fx_end;
     resolver.get_app_fx_definition_range(&fx_begin, &fx_end);
 
     pal::string_t app_context_deps_str;
-    fx_definition_vector_t::iterator fx_curr = fx_begin;
+    fx_definition_const_vector_t::const_iterator fx_curr = fx_begin;
     while (fx_curr != fx_end)
     {
         if (fx_curr != fx_begin)

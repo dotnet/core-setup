@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                     .Execute()
                     .Should().Pass()
                     .And.HaveResolvedAssembly(includedPath, app)
-                    .And.HaveResolvedAssembly(excludedPath, app);
+                    .And.NotHaveResolvedAssembly(excludedPath, app);
             }
         }
 

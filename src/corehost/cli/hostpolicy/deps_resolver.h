@@ -27,12 +27,14 @@ struct probe_paths_t
 
 struct deps_resolved_asset_t
 {
-    deps_resolved_asset_t(const deps_asset_t& asset, const pal::string_t& resolved_path)
+    deps_resolved_asset_t(const deps_asset_t& asset, const pal::string_t& resolved_path, int fx_level)
         : asset(asset)
-        , resolved_path(resolved_path) { }
+        , resolved_path(resolved_path) 
+        , fx_level(fx_level) { }
 
     deps_asset_t asset;
     pal::string_t resolved_path;
+    int fx_level;
 };
 
 typedef std::unordered_map<pal::string_t, deps_resolved_asset_t> name_to_resolved_asset_map_t;
@@ -40,12 +42,60 @@ typedef std::unordered_map<pal::string_t, deps_resolved_asset_t> name_to_resolve
 class deps_resolver_t
 {
 public:
-    // if root_framework_rid_fallback_graph is specified it is assumed that the fx_definitions
-    // doesn't contain the root framework at all.
     deps_resolver_t(
         const arguments_t& args,
-        fx_definition_vector_t& fx_definitions,
-        const deps_json_t::rid_fallback_graph_t* root_framework_rid_fallback_graph,
+        const fx_definition_vector_t& fx_definitions,
+        bool is_framework_dependent)
+        : m_fx_definitions()
+        , m_app_dir(args.app_root)
+        , m_host_mode(args.host_mode)
+        , m_managed_app(args.managed_application)
+        , m_core_servicing(args.core_servicing)
+        , m_is_framework_dependent(is_framework_dependent)
+    {
+        int lowest_framework = fx_definitions.size() - 1;
+        const deps_json_t::rid_fallback_graph_t& root_framework_rid_fallback_graph = fx_definitions[lowest_framework]->get_deps().get_rid_fallback_graph();
+
+        m_fx_definitions.resize(fx_definitions.size());
+        for (int i = lowest_framework; i >= 0; --i)
+        {
+            if (i == 0)
+            {
+                fx_definitions[i]->set_deps_file(args.deps_path);
+                trace::verbose(_X("Using %s deps file"), fx_definitions[i]->get_deps_file().c_str());
+            }
+            else
+            {
+                pal::string_t fx_deps_file = get_fx_deps(fx_definitions[i]->get_dir(), fx_definitions[i]->get_name());
+                fx_definitions[i]->set_deps_file(fx_deps_file);
+                trace::verbose(_X("Using Fx %s deps file"), fx_deps_file.c_str());
+            }
+
+            if (i == lowest_framework)
+            {
+                fx_definitions[i]->parse_deps();
+            }
+            else
+            {
+                // The rid graph is obtained from the root framework
+                fx_definitions[i]->parse_deps(root_framework_rid_fallback_graph);
+            }
+
+            // We only take the const * for the fx_definition.
+            // Lifetime should still be fine since the deps_resolver_t should only live on stack and thus should have a much shorter
+            // lifetime than the frameworks which are initialized globally.
+            m_fx_definitions[i] = fx_definitions[i].get();
+        }
+
+        resolve_additional_deps(args, root_framework_rid_fallback_graph);
+
+        setup_additional_probes(args.probe_paths);
+        setup_probe_config(args);
+    }
+
+    deps_resolver_t(
+        const arguments_t& args,
+        const fx_definition_const_vector_t& fx_definitions,
         bool is_framework_dependent)
         : m_fx_definitions(fx_definitions)
         , m_app_dir(args.app_root)
@@ -54,40 +104,10 @@ public:
         , m_core_servicing(args.core_servicing)
         , m_is_framework_dependent(is_framework_dependent)
     {
-        int lowest_framework = m_fx_definitions.size() - 1;
-        int root_framework = -1;
-        if (root_framework_rid_fallback_graph == nullptr)
-        {
-            root_framework = lowest_framework;
-            root_framework_rid_fallback_graph = &m_fx_definitions[root_framework]->get_deps().get_rid_fallback_graph();
-        }
+        int lowest_framework = fx_definitions.size() - 1;
+        const deps_json_t::rid_fallback_graph_t& root_framework_rid_fallback_graph = fx_definitions[lowest_framework]->get_deps().get_rid_fallback_graph();
 
-        for (int i = lowest_framework; i >= 0; --i)
-        {
-            if (i == 0)
-            {
-                m_fx_definitions[i]->set_deps_file(args.deps_path);
-                trace::verbose(_X("Using %s deps file"), m_fx_definitions[i]->get_deps_file().c_str());
-            }
-            else
-            {
-                pal::string_t fx_deps_file = get_fx_deps(m_fx_definitions[i]->get_dir(), m_fx_definitions[i]->get_name());
-                m_fx_definitions[i]->set_deps_file(fx_deps_file);
-                trace::verbose(_X("Using Fx %s deps file"), fx_deps_file.c_str());
-            }
-
-            if (i == root_framework)
-            {
-                m_fx_definitions[i]->parse_deps();
-            }
-            else
-            {
-                // The rid graph is obtained from the root framework
-                m_fx_definitions[i]->parse_deps(*root_framework_rid_fallback_graph);
-            }
-        }
-
-        resolve_additional_deps(args, *root_framework_rid_fallback_graph);
+        resolve_additional_deps(args, root_framework_rid_fallback_graph);
 
         setup_additional_probes(args.probe_paths);
         setup_probe_config(args);
@@ -141,7 +161,8 @@ public:
     bool resolve_probe_paths(
         probe_paths_t* probe_paths,
         std::unordered_set<pal::string_t>* breadcrumb,
-        bool ignore_missing_assemblies = false);
+        int max_fx_level_to_include,
+        bool ignore_missing_assemblies);
 
     void init_known_entry_path(
         const deps_entry_t& entry,
@@ -161,9 +182,9 @@ public:
         return get_app(m_fx_definitions).get_deps_file();
     }
 
-    void get_app_fx_definition_range(fx_definition_vector_t::iterator *begin, fx_definition_vector_t::iterator *end) const;
+    void get_app_fx_definition_range(fx_definition_const_vector_t::const_iterator *begin, fx_definition_const_vector_t::const_iterator *end) const;
 
-    const fx_definition_vector_t& get_fx_definitions() const
+    const fx_definition_const_vector_t& get_fx_definitions() const
     {
         return m_fx_definitions;
     }
@@ -203,11 +224,13 @@ private:
     bool resolve_tpa_list(
         pal::string_t* output,
         std::unordered_set<pal::string_t>* breadcrumb,
-        bool ignore_missing_assemblies);
+        bool ignore_missing_assemblies,
+        int max_fx_level_to_include);
 
     // Resolve order for culture and native DLL lookup.
     bool resolve_probe_dirs(
         deps_entry_t::asset_types asset_type,
+        int max_fx_level_to_include,
         pal::string_t* output,
         std::unordered_set<pal::string_t>* breadcrumb);
 
@@ -215,6 +238,7 @@ private:
     void get_dir_assemblies(
         const pal::string_t& dir,
         const pal::string_t& dir_name,
+        int fx_level,
         name_to_resolved_asset_map_t* items);
 
     // Probe entry in probe configurations and deps dir.
@@ -224,7 +248,7 @@ private:
         int fx_level,
         pal::string_t* candidate);
 
-    fx_definition_vector_t& m_fx_definitions;
+    fx_definition_const_vector_t m_fx_definitions;
 
     pal::string_t m_app_dir;
 
