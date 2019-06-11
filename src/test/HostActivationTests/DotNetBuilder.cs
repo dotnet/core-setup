@@ -106,6 +106,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             return this;
         }
 
+        private string AddFramework(string name, string version)
+        {
+            // ./shared/<name>/<version> - create a mock of effectively empty non-root framework
+            string path = Path.Combine(_path, "shared", name, version);
+            Directory.CreateDirectory(path);
+
+            return path;
+        }
+
         /// <summary>
         /// Add a mock framework with the specified framework name and version
         /// </summary>
@@ -120,14 +129,32 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             string version,
             Action<RuntimeConfig> runtimeConfigCustomizer)
         {
-            // ./shared/<name>/<version> - create a mock of effectively empty non-root framework
-            string path = Path.Combine(_path, "shared", name, version);
-            Directory.CreateDirectory(path);
+            string path = AddFramework(name, version);
 
             // ./shared/<name>/<version>/<name>.runtimeconfig.json - runtime config which can be customized
             RuntimeConfig runtimeConfig = new RuntimeConfig(Path.Combine(path, name + ".runtimeconfig.json"));
             runtimeConfigCustomizer(runtimeConfig);
             runtimeConfig.Save();
+
+            return this;
+        }
+
+        /// <summary>
+        /// Add a mock framework with the specified framework name and version
+        /// </summary>
+        /// <param name="name">Framework name</param>
+        /// <param name="version">Framework version</param>
+        /// <param name="customizer">Customization function for the framework</param>
+        public DotNetBuilder AddFramework(
+            string name,
+            string version,
+            Action<NetCoreAppBuilder> customizer)
+        {
+            string path = AddFramework(name, version);
+
+            NetCoreAppBuilder builder = NetCoreAppBuilder.ForNETCoreApp(name, null);
+            customizer?.Invoke(builder);
+            builder.Build(new TestApp(path, name));
 
             return this;
         }

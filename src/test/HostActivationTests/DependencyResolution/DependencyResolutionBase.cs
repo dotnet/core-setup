@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.IO;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
@@ -14,6 +15,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
         {
             protected string BuiltDotnetPath { get; }
 
+            public RepoDirectoriesProvider RepoDirectories { get; }
+
             private static string GetBaseDir(string name)
             {
                 string baseDir = Path.Combine(TestArtifactsPath, name);
@@ -24,6 +27,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                 : base(GetBaseDir("dependencyResolution"), "dependencyResolution")
             {
                 BuiltDotnetPath = Path.Combine(TestArtifactsPath, "sharedFrameworkPublish");
+                RepoDirectories = new RepoDirectoriesProvider(builtDotnet: BuiltDotnetPath);
             }
 
             public DotNetBuilder DotNet(string name)
@@ -34,15 +38,41 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             public TestApp CreateFrameworkReferenceApp(string fxName, string fxVersion)
             {
                 // Prepare the app mock - we're not going to run anything really, so we just need the basic files
-                string testAppDir = Path.Combine(Location, "FrameworkReferenceApp");
-                Directory.CreateDirectory(testAppDir);
-
-                TestApp testApp = new TestApp(testAppDir);
+                TestApp testApp = CreateTestApp(Location, "FrameworkReferenceApp");
                 RuntimeConfig.Path(testApp.RuntimeConfigJson)
                     .WithFramework(fxName, fxVersion)
                     .Save();
 
                 return testApp;
+            }
+
+            protected TestApp CreateTestApp(string location, string name)
+            {
+                TestApp testApp;
+                if (location == null)
+                {
+                    testApp = TestApp.CreateEmpty(name);
+                }
+                else
+                {
+                    string path = Path.Combine(location, name);
+                    FileUtils.EnsureDirectoryExists(path);
+                    testApp = new TestApp(path);
+                }
+
+                RegisterCopy(testApp);
+                return testApp;
+            }
+
+            public TestApp CreateComponentWithNoDependencies(Action<NetCoreAppBuilder> customizer = null, string location = null)
+            {
+                TestApp componentWithNoDependencies = CreateTestApp(location, "ComponentWithNoDependencies");
+                FileUtils.EnsureDirectoryExists(componentWithNoDependencies.Location);
+                NetCoreAppBuilder builder = NetCoreAppBuilder.PortableForNETCoreApp(componentWithNoDependencies)
+                    .WithProject(p => p.WithAssemblyGroup(null, g => g.WithMainAssembly()));
+                customizer?.Invoke(builder);
+
+                return builder.Build(componentWithNoDependencies);
             }
         }
     }

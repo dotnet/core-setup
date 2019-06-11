@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.DotNet.Cli.Build.Framework;
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
@@ -14,7 +12,7 @@ using Xunit.Abstractions;
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
 {
     public class ResolveComponentDependencies : 
-        DependencyResolutionBase,
+        ComponentDependencyResolutionBase,
         IClassFixture<ResolveComponentDependencies.SharedTestState>
     {
         private readonly SharedTestState sharedTestState;
@@ -26,13 +24,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             this.output = output;
         }
 
-        private const string corehost_resolve_component_dependencies = "corehost_resolve_component_dependencies";
-        private const string corehost_resolve_component_dependencies_multithreaded = "corehost_resolve_component_dependencies_multithreaded";
-
         [Fact]
         public void InvalidMainComponentAssemblyPathFails()
         {
-            RunTest(sharedTestState.HostApiInvokerAppFixture.TestProject.AppDll + "_invalid")
+            sharedTestState.RunComponentResolutionTest(sharedTestState.HostApiInvokerAppFixture.TestProject.AppDll + "_invalid")
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Fail[0x80008092]")
                 .And.HaveStdOutContaining("corehost reported errors:")
@@ -47,7 +42,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             // Remove .deps.json
             File.Delete(component.DepsJson);
 
-            RunTest(component)
+            sharedTestState.RunComponentResolutionTest(component)
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
                 .And.HaveStdOutContaining($"corehost_resolve_component_dependencies assemblies:[{component.AppDll}{Path.PathSeparator}]")
@@ -60,7 +55,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
         [Fact]
         public void ComponentWithNoDependencies()
         {
-            RunTest(sharedTestState.ComponentWithNoDependencies)
+            sharedTestState.RunComponentResolutionTest(sharedTestState.ComponentWithNoDependencies)
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
                 .And.HaveStdOutContaining($"corehost_resolve_component_dependencies assemblies:[{sharedTestState.ComponentWithNoDependencies.AppDll}{Path.PathSeparator}]");
@@ -111,7 +106,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                 return;
             }
 
-            RunTest(sharedTestState.ComponentWithDependencies)
+            sharedTestState.RunComponentResolutionTest(sharedTestState.ComponentWithDependencies)
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
                 .And.HaveStdOutContaining(
@@ -133,7 +128,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             // This will cause the resolution to fail
             File.Delete(Path.Combine(component.Location, "ComponentDependency.dll"));
 
-            RunTest(component)
+            sharedTestState.RunComponentResolutionTest(component)
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
                 .And.HaveStdOutContaining(
@@ -150,7 +145,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             // Remove .deps.json
             File.Delete(component.DepsJson);
 
-            RunTest(component)
+            sharedTestState.RunComponentResolutionTest(component)
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
                 .And.HaveStdOutContaining(
@@ -172,7 +167,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             // Since there's no .deps.json - there's no way for the system to know about this dependency and thus should not be reported.
             File.Delete(Path.Combine(component.Location, "ComponentDependency.dll"));
 
-            RunTest(component)
+            sharedTestState.RunComponentResolutionTest(component)
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
                 .And.HaveStdOutContaining(
@@ -192,7 +187,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                     .WithAssemblyGroup(null, g => g
                         .WithAsset("ComponentDependency.notdll"))));
 
-            RunTest(component)
+            sharedTestState.RunComponentResolutionTest(component)
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Fail[0x8000808C]")
                 .And.HaveStdOutContaining("corehost reported errors:")
@@ -214,7 +209,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                 component.DepsJson,
                 File.ReadAllLines(component.DepsJson) + "}");
 
-            RunTest(component)
+            sharedTestState.RunComponentResolutionTest(component)
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Fail[0x8000808B]")
                 .And.HaveStdOutContaining("corehost reported errors:")
@@ -225,7 +220,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
         [Fact]
         public void ComponentWithResourcesShouldReportResourceSearchPaths()
         {
-            RunTest(sharedTestState.ComponentWithResources)
+            sharedTestState.RunComponentResolutionTest(sharedTestState.ComponentWithResources)
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
                 .And.HaveStdOutContaining($"corehost_resolve_component_dependencies resource_search_paths:[" +
@@ -269,7 +264,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             string additionalDepsPath = Path.Combine(Path.GetDirectoryName(component.DepsJson), "__duplicate.deps.json");
             File.Copy(sharedTestState.HostApiInvokerAppFixture.TestProject.DepsJson, additionalDepsPath);
 
-            RunTest(component, command => command
+            sharedTestState.RunComponentResolutionTest(component, command => command
                 .EnvironmentVariable("DOTNET_ADDITIONAL_DEPS", additionalDepsPath))
                 .Should().Pass()
                 .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
@@ -282,7 +277,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             string componentWithNoDependenciesPrefix = Path.GetFileNameWithoutExtension(sharedTestState.ComponentWithNoDependencies.AppDll);
             string componentWithResourcesPrefix = Path.GetFileNameWithoutExtension(sharedTestState.ComponentWithResources.AppDll);
 
-            RunMultiThreadedTest(sharedTestState.ComponentWithNoDependencies, sharedTestState.ComponentWithResources)
+            sharedTestState.RunComponentResolutionMultiThreadedTest(sharedTestState.ComponentWithNoDependencies, sharedTestState.ComponentWithResources)
                 .Should().Pass()
                 .And.HaveStdOutContaining($"{componentWithNoDependenciesPrefix}: corehost_resolve_component_dependencies:Success")
                 .And.HaveStdOutContaining($"{componentWithNoDependenciesPrefix}: corehost_resolve_component_dependencies assemblies:[{sharedTestState.ComponentWithNoDependencies.AppDll}{Path.PathSeparator}]")
@@ -304,7 +299,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                 componentWithNoDependencies.DepsJson,
                 File.ReadAllLines(componentWithNoDependencies.DepsJson) + "}");
 
-            RunMultiThreadedTest(
+            sharedTestState.RunComponentResolutionMultiThreadedTest(
                 componentWithNoDependencies.AppDll,
                 sharedTestState.ComponentWithResources.AppDll + "_invalid")
                 .Should().Pass()
@@ -317,161 +312,19 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                 .And.HaveStdOutContaining($"{componentWithResourcesPrefix}: Failed to locate managed application");
         }
 
-        private const string TestDependencyResolverFx = "Test.DependencyResolver.Fx";
-        private const string TestDependencyResolverFxTestAssembly = "Test.Assembly.DependencyResolver";
-
-        [Theory]
-        [InlineData(null, null, null, null, true)]
-        [InlineData("2.0.0.0", "2.0.0.0", "1.0.0.0", "1.0.0.0", false)]
-        [InlineData("2.0.0.0", "2.0.0.0", "3.0.0.0", "3.0.0.0", true)]
-        public void ComponentWithSameAssemblyAsFramework(string fxAsmVersion, string fxFileVersion, string appAsmVersion, string appFileVersion, bool appWins)
+        public class SharedTestState : ComponentSharedTestStateBase
         {
-            var component = sharedTestState.CreateComponentWithNoDependencies(b => b
-                .WithPackage(TestDependencyResolverFxTestAssembly, "1.0.0", lib => lib
-                    .WithAssemblyGroup(null, g => g
-                        .WithAsset(TestDependencyResolverFxTestAssembly + ".dll", rf => rf
-                            .WithVersion(fxAsmVersion, fxFileVersion)))));
-
-            // The simplest way to setup an assembly in framework we have full control over is to create a custom shared framework
-            // We can't really mock Microsoft.NETCore.App since we need it to run the HostApiInvoker on.
-            string sharedFrameworkPath = Path.Combine(
-                sharedTestState.HostApiInvokerAppFixture.BuiltDotnet.BinPath,
-                "shared",
-                TestDependencyResolverFx,
-                "1.0.0");
-            FileUtils.EnsureDirectoryExists(sharedFrameworkPath);
-
-            using (TestFileBackup backup = new TestFileBackup(sharedTestState.HostApiInvokerAppFixture.TestProject.BuiltApp.Location))
-            using (TestApp testSharedFramework = new TestApp(sharedFrameworkPath, TestDependencyResolverFx))
-            {
-                backup.Backup(sharedTestState.HostApiInvokerAppFixture.TestProject.BuiltApp.RuntimeConfigJson);
-                RuntimeConfig.FromFile(sharedTestState.HostApiInvokerAppFixture.TestProject.BuiltApp.RuntimeConfigJson)
-                    .WithFramework(TestDependencyResolverFx, "1.0.0")
-                    .Save();
-
-                NetCoreAppBuilder.PortableForNETCoreApp(testSharedFramework)
-                    .WithRuntimeConfig(runtimeConfig => runtimeConfig
-                        .WithFramework(MicrosoftNETCoreApp, sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion))
-                    .WithPackage(TestDependencyResolverFxTestAssembly, "1.0.0", b => b
-                        .WithAssemblyGroup(null, g => g
-                            .WithAsset(TestDependencyResolverFxTestAssembly + ".dll", rf => rf
-                                .WithVersion(appAsmVersion, appFileVersion))))
-                    .Build(testSharedFramework);
-
-                string expectedTestAssemblyPath =
-                    Path.Combine(appWins ? component.Location : testSharedFramework.Location, TestDependencyResolverFxTestAssembly + ".dll");
-
-                RunTest(component)
-                    .Should().Pass()
-                    .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Success")
-                    .And.HaveStdOutContaining($"corehost_resolve_component_dependencies assemblies:[" +
-                                              $"{component.AppDll}{Path.PathSeparator}" +
-                                              $"{expectedTestAssemblyPath}{Path.PathSeparator}]");
-            }
-        }
-
-        private CommandResult RunTest(TestApp component, Action<Command> commandCustomizer = null)
-        {
-            return RunTest(component.AppDll, commandCustomizer);
-        }
-
-        private CommandResult RunTest(string componentPath, Action<Command> commandCustomizer = null)
-        {
-            string[] args =
-            {
-                corehost_resolve_component_dependencies,
-                componentPath
-            };
-
-            Command command = sharedTestState.HostApiInvokerAppFixture.BuiltDotnet.Exec(sharedTestState.HostApiInvokerAppFixture.TestProject.AppDll, args)
-                .EnableTracingAndCaptureOutputs();
-            commandCustomizer?.Invoke(command);
-
-            return command.Execute()
-                .StdErrAfter("corehost_resolve_component_dependencies = {");
-        }
-
-        private CommandResult RunMultiThreadedTest(TestApp componentOne, TestApp componentTwo)
-        {
-            return RunMultiThreadedTest(componentOne.AppDll, componentTwo.AppDll);
-        }
-
-        private CommandResult RunMultiThreadedTest(string componentOnePath, string componentTwoPath)
-        {
-            string[] args =
-            {
-                corehost_resolve_component_dependencies_multithreaded,
-                componentOnePath,
-                componentTwoPath
-            };
-            return sharedTestState.HostApiInvokerAppFixture.BuiltDotnet.Exec(sharedTestState.HostApiInvokerAppFixture.TestProject.AppDll, args)
-                .EnableTracingAndCaptureOutputs()
-                .Execute();
-        }
-
-        public class SharedTestState : SharedTestStateBase
-        {
-            public TestProjectFixture HostApiInvokerAppFixture { get; }
             public TestApp ComponentWithNoDependencies { get; }
             public TestApp ComponentWithDependencies { get; }
             public TestApp ComponentWithResources { get; }
-            public RepoDirectoriesProvider RepoDirectories { get; }
 
             public SharedTestState()
             {
-                RepoDirectories = new RepoDirectoriesProvider(builtDotnet: BuiltDotnetPath);
-
-                HostApiInvokerAppFixture = new TestProjectFixture("HostApiInvokerApp", RepoDirectories)
-                    .EnsureRestored(RepoDirectories.CorehostPackages)
-                    .BuildProject();
-
                 ComponentWithNoDependencies = CreateComponentWithNoDependencies(null, Location);
 
                 ComponentWithDependencies = CreateComponentWithDependencies(null, Location);
 
                 ComponentWithResources = CreateComponentWithResources(null, Location);
-
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    // On non-Windows, we can't just P/Invoke to already loaded hostpolicy, so copy it next to the app dll.
-                    var fixture = HostApiInvokerAppFixture;
-                    var hostpolicy = Path.Combine(
-                        fixture.BuiltDotnet.GreatestVersionSharedFxPath,
-                        RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostpolicy"));
-
-                    File.Copy(
-                        hostpolicy,
-                        Path.GetDirectoryName(fixture.TestProject.AppDll));
-                }
-            }
-
-            private TestApp CreateTestApp(string location, string name)
-            {
-                TestApp testApp;
-                if (location == null)
-                {
-                    testApp = TestApp.CreateEmpty(name);
-                }
-                else
-                {
-                    string path = Path.Combine(location, name);
-                    FileUtils.EnsureDirectoryExists(path);
-                    testApp = new TestApp(path);
-                }
-
-                RegisterCopy(testApp);
-                return testApp;
-            }
-
-            public TestApp CreateComponentWithNoDependencies(Action<NetCoreAppBuilder> customizer = null, string location = null)
-            {
-                TestApp componentWithNoDependencies = CreateTestApp(location, "ComponentWithNoDependencies");
-                FileUtils.EnsureDirectoryExists(componentWithNoDependencies.Location);
-                NetCoreAppBuilder builder = NetCoreAppBuilder.PortableForNETCoreApp(componentWithNoDependencies)
-                    .WithProject(p => p.WithAssemblyGroup(null, g => g.WithMainAssembly()));
-                customizer?.Invoke(builder);
-
-                return builder.Build(componentWithNoDependencies);
             }
 
             public TestApp CreateComponentWithDependencies(Action<NetCoreAppBuilder> customizer = null, string location = null)
@@ -510,13 +363,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                 customizer?.Invoke(builder);
 
                 return builder.Build(componentWithResources);
-            }
-
-            public override void Dispose()
-            {
-                base.Dispose();
-
-                HostApiInvokerAppFixture.Dispose();
             }
         }
     }
