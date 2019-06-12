@@ -34,7 +34,7 @@ struct deps_resolved_asset_t
 
     deps_asset_t asset;
     pal::string_t resolved_path;
-    int fx_level;
+    size_t fx_level;
 };
 
 typedef std::unordered_map<pal::string_t, deps_resolved_asset_t> name_to_resolved_asset_map_t;
@@ -161,7 +161,7 @@ public:
     bool resolve_probe_paths(
         probe_paths_t* probe_paths,
         std::unordered_set<pal::string_t>* breadcrumb,
-        int max_fx_level_to_include,
+        size_t max_fx_level_to_include,
         bool ignore_missing_assemblies);
 
     void init_known_entry_path(
@@ -225,12 +225,12 @@ private:
         pal::string_t* output,
         std::unordered_set<pal::string_t>* breadcrumb,
         bool ignore_missing_assemblies,
-        int max_fx_level_to_include);
+        size_t max_fx_level_to_include);
 
     // Resolve order for culture and native DLL lookup.
     bool resolve_probe_dirs(
         deps_entry_t::asset_types asset_type,
-        int max_fx_level_to_include,
+        size_t max_fx_level_to_include,
         pal::string_t* output,
         std::unordered_set<pal::string_t>* breadcrumb);
 
@@ -238,7 +238,7 @@ private:
     void get_dir_assemblies(
         const pal::string_t& dir,
         const pal::string_t& dir_name,
-        int fx_level,
+        size_t fx_level,
         name_to_resolved_asset_map_t* items);
 
     // Probe entry in probe configurations and deps dir.

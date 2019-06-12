@@ -53,7 +53,7 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
         if (!resolver.resolve_probe_paths(
             &probe_paths, 
             &breadcrumbs, 
-            /* max_fx_level_to_include */ INT_MAX,
+            /* max_fx_level_to_include */ std::numeric_limits<size_t>::max(),
             /* ignore_missing_assemblies */ false))
         {
             return StatusCode::ResolverResolveFailure;
@@ -64,7 +64,7 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
         if (!resolver.resolve_probe_paths(
             &probe_paths, 
             /* breadcrumbs */ nullptr,
-            /* max_fx_level_to_include */ INT_MAX,
+            /* max_fx_level_to_include */ std::numeric_limits<size_t>::max(),
             /* ignore_missing_assemblies */ false))
         {
             return StatusCode::ResolverResolveFailure;

@@ -115,7 +115,7 @@ void deps_resolver_t::add_tpa_asset(
 void deps_resolver_t::get_dir_assemblies(
     const pal::string_t& dir,
     const pal::string_t& dir_name,
-    int fx_level,
+    size_t fx_level,
     name_to_resolved_asset_map_t* items)
 {
     version_t empty;
@@ -414,7 +414,7 @@ bool deps_resolver_t::resolve_tpa_list(
         pal::string_t* output,
         std::unordered_set<pal::string_t>* breadcrumb,
         bool ignore_missing_assemblies,
-        int max_fx_level_to_include)
+        size_t max_fx_level_to_include)
 {
     const std::vector<deps_entry_t> empty(0);
     name_to_resolved_asset_map_t items;
@@ -747,7 +747,7 @@ void deps_resolver_t::get_app_fx_definition_range(fx_definition_const_vector_t::
  */
 bool deps_resolver_t::resolve_probe_dirs(
         deps_entry_t::asset_types asset_type,
-        int max_fx_level_to_include,
+        size_t max_fx_level_to_include,
         pal::string_t* output,
         std::unordered_set<pal::string_t>* breadcrumb)
 {
@@ -890,7 +890,7 @@ bool deps_resolver_t::resolve_probe_dirs(
 bool deps_resolver_t::resolve_probe_paths(
     probe_paths_t* probe_paths,
     std::unordered_set<pal::string_t>* breadcrumb,
-    int max_fx_level_to_include,
+    size_t max_fx_level_to_include,
     bool ignore_missing_assemblies)
 {
     if (!resolve_tpa_list(&probe_paths->tpa, breadcrumb, ignore_missing_assemblies, max_fx_level_to_include))
