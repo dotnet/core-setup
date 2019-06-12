@@ -109,6 +109,7 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
     }
 
     const fx_definition_const_vector_t &fx_definitions = resolver.get_fx_definitions();
+    hostpolicy_init.fx_processed_definitions = fx_definitions;
 
     pal::string_t fx_deps_str;
     if (resolver.is_framework_dependent())

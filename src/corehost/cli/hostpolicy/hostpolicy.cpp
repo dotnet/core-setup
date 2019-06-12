@@ -833,19 +833,19 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_resolve_component_dependencies(
     }
 
     // Parse the .deps.json for the component
+    // It's important to use the fx_processed_definitions from g_init as those are const and will not change
+    // as such they are safe to access from multiple threads at the same time.
     app.set_deps_file(args.deps_path);
     trace::verbose(_X("Using %s deps file"), app.get_deps_file().c_str());
-    app.parse_deps(get_root_framework(g_init.fx_definitions).get_deps().get_rid_fallback_graph());
+    app.parse_deps(get_root_framework(g_init.fx_processed_definitions).get_deps().get_rid_fallback_graph());
 
     fx_definition_const_vector_t component_fx_definitions;
-    component_fx_definitions.resize(g_init.fx_definitions.size());
+    component_fx_definitions.resize(g_init.fx_processed_definitions.size());
     component_fx_definitions[0] = &app;
 
-    // TODO: Self-contained apps - don't have frameworks, so the below will do nothing - and thus we would be missing RID fallback graph
-
-    for (int i = g_init.fx_definitions.size() - 1; i >= 1; i--)
+    for (int i = g_init.fx_processed_definitions.size() - 1; i >= 1; i--)
     {
-        component_fx_definitions[i] = g_init.fx_definitions[i].get();
+        component_fx_definitions[i] = g_init.fx_processed_definitions[i];
     }
 
     deps_resolver_t resolver(
@@ -864,7 +864,11 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_resolve_component_dependencies(
     // doesn't guarantee that they will actually execute.
 
     probe_paths_t probe_paths;
-    if (!resolver.resolve_probe_paths(&probe_paths, nullptr, /* ignore_missing_assemblies */ true, /* max_fx_level_to_include */ 0))
+    if (!resolver.resolve_probe_paths(
+        &probe_paths,
+        /* breadcrumb */ nullptr,
+        /* ignore_missing_assemblies */ true,
+        /* max_fx_level_to_include */ 0))  // Only resolve assets from the app/component (fx_level 0).
     {
         return StatusCode::ResolverResolveFailure;
     }

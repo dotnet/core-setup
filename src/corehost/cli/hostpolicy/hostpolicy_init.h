@@ -17,6 +17,7 @@ struct hostpolicy_init_t
     pal::string_t additional_deps_serialized;
     std::vector<pal::string_t> probe_paths;
     fx_definition_vector_t fx_definitions;
+    fx_definition_const_vector_t fx_processed_definitions;
     pal::string_t tfm;
     host_mode_t host_mode;
     bool patch_roll_forward;
