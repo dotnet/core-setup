@@ -161,8 +161,8 @@ public:
     bool resolve_probe_paths(
         probe_paths_t* probe_paths,
         std::unordered_set<pal::string_t>* breadcrumb,
-        size_t max_fx_level_to_include,
-        bool ignore_missing_assemblies);
+        bool ignore_missing_assemblies,
+        size_t max_fx_level_to_include);
 
     void init_known_entry_path(
         const deps_entry_t& entry,
@@ -230,9 +230,9 @@ private:
     // Resolve order for culture and native DLL lookup.
     bool resolve_probe_dirs(
         deps_entry_t::asset_types asset_type,
-        size_t max_fx_level_to_include,
         pal::string_t* output,
-        std::unordered_set<pal::string_t>* breadcrumb);
+        std::unordered_set<pal::string_t>* breadcrumb,
+        size_t max_fx_level_to_include);
 
     // Populate assemblies from the directory.
     void get_dir_assemblies(

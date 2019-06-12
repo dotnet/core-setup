@@ -53,9 +53,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             {
                 string[] args =
                 {
-                corehost_resolve_component_dependencies,
-                componentPath
-            };
+                    corehost_resolve_component_dependencies,
+                    componentPath
+                };
 
                 Command command = HostApiInvokerAppFixture.BuiltDotnet.Exec(HostApiInvokerAppFixture.TestProject.AppDll, args)
                     .EnableTracingAndCaptureOutputs();
@@ -74,10 +74,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             {
                 string[] args =
                 {
-                corehost_resolve_component_dependencies_multithreaded,
-                componentOnePath,
-                componentTwoPath
-            };
+                    corehost_resolve_component_dependencies_multithreaded,
+                    componentOnePath,
+                    componentTwoPath
+                };
+
                 return HostApiInvokerAppFixture.BuiltDotnet.Exec(HostApiInvokerAppFixture.TestProject.AppDll, args)
                     .EnableTracingAndCaptureOutputs()
                     .Execute();

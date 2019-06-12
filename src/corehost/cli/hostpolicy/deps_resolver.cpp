@@ -747,9 +747,9 @@ void deps_resolver_t::get_app_fx_definition_range(fx_definition_const_vector_t::
  */
 bool deps_resolver_t::resolve_probe_dirs(
         deps_entry_t::asset_types asset_type,
-        size_t max_fx_level_to_include,
         pal::string_t* output,
-        std::unordered_set<pal::string_t>* breadcrumb)
+        std::unordered_set<pal::string_t>* breadcrumb,
+        size_t max_fx_level_to_include)
 {
     bool is_resources = asset_type == deps_entry_t::asset_types::resources;
     assert(is_resources || asset_type == deps_entry_t::asset_types::native);
@@ -881,29 +881,29 @@ bool deps_resolver_t::resolve_probe_dirs(
 //     probe_paths       - Pointer to struct containing fields that will contain
 //                         resolved path ordering.
 //     breadcrumb        - set of breadcrumb paths - or null if no breadcrumbs should be collected.
-//     max_fx_level_to_include   - the maximum framework level for which to include the assets.
-//                                 If this is set to 0, only assets from the app will be returned.
 //     ignore_missing_assemblies - if set to true, resolving TPA assemblies will not fail if an assembly can't be found on disk
 //                                 instead such entry will simply be ignored.
+//     max_fx_level_to_include   - the maximum framework level for which to include the assets.
+//                                 If this is set to 0, only assets from the app will be returned.
 //
 //
 bool deps_resolver_t::resolve_probe_paths(
     probe_paths_t* probe_paths,
     std::unordered_set<pal::string_t>* breadcrumb,
-    size_t max_fx_level_to_include,
-    bool ignore_missing_assemblies)
+    bool ignore_missing_assemblies,
+    size_t max_fx_level_to_include)
 {
     if (!resolve_tpa_list(&probe_paths->tpa, breadcrumb, ignore_missing_assemblies, max_fx_level_to_include))
     {
         return false;
     }
 
-    if (!resolve_probe_dirs(deps_entry_t::asset_types::native, max_fx_level_to_include, &probe_paths->native, breadcrumb))
+    if (!resolve_probe_dirs(deps_entry_t::asset_types::native, &probe_paths->native, breadcrumb, max_fx_level_to_include))
     {
         return false;
     }
 
-    if (!resolve_probe_dirs(deps_entry_t::asset_types::resources, max_fx_level_to_include, &probe_paths->resources, breadcrumb))
+    if (!resolve_probe_dirs(deps_entry_t::asset_types::resources, &probe_paths->resources, breadcrumb, max_fx_level_to_include))
     {
         return false;
     }

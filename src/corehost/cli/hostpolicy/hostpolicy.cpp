@@ -864,7 +864,7 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_resolve_component_dependencies(
     // doesn't guarantee that they will actually execute.
 
     probe_paths_t probe_paths;
-    if (!resolver.resolve_probe_paths(&probe_paths, nullptr, /* max_fx_level_to_include */ 0, /* ignore_missing_assemblies */ true))
+    if (!resolver.resolve_probe_paths(&probe_paths, nullptr, /* ignore_missing_assemblies */ true, /* max_fx_level_to_include */ 0))
     {
         return StatusCode::ResolverResolveFailure;
     }
