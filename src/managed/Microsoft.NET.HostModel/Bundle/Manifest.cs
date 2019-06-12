@@ -71,6 +71,22 @@ namespace Microsoft.NET.HostModel.Bundle
             BundleID = bundleID;
         }
 
+        public FileEntry AddEntry(FileEntry entry)
+        {
+            if(Files.Any(file => file.RelativePath.Equals(entry.RelativePath)))
+            {
+                throw new BundleException("Found multiple entries with the same bundle-relative-path");
+            }
+
+            Files.Add(entry);
+            return entry;
+        }
+
+        public FileEntry AddEntry(FileType type, string relativePath, long offset, long size)
+        {
+            return AddEntry(new FileEntry(type, relativePath, offset, size));
+        }
+
         public long Write(BinaryWriter writer)
         {
             long startOffset = writer.BaseStream.Position;
