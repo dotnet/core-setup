@@ -22,6 +22,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
 
         private const string TestDependencyResolverFx = "Test.DependencyResolver.Fx";
         private const string TestVersionsPackage = "Test.Versions.Package";
+
+        // The test framework above has 4 assemblies in it each with different set of assembly and file versions.
+        // The version values are always (if present)
+        // - assembly version: 2.1.1.1
+        // - file version:     3.2.2.2
         private const string TestAssemblyWithNoVersions = "Test.Assembly.NoVersions";
         private const string TestAssemblyWithAssemblyVersion = "Test.Assembly.AssemblyVersion";
         private const string TestAssemblyWithFileVersion = "Test.Assembly.FileVersion";
@@ -30,7 +35,29 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
         [Theory]
         [InlineData(TestAssemblyWithBothVersions, null, null, false)]
         [InlineData(TestAssemblyWithBothVersions, "1.0.0.0", "1.0.0.0", false)]
-        [InlineData(TestAssemblyWithBothVersions, "3.0.0.0", "3.0.0.0", true)]
+        [InlineData(TestAssemblyWithBothVersions, "3.0.0.0", "4.0.0.0", true)]
+        [InlineData(TestAssemblyWithBothVersions, "2.1.1.1", "1.0.0.0", false)]
+        [InlineData(TestAssemblyWithBothVersions, "2.1.1.1", "3.3.0.0", true)]
+        [InlineData(TestAssemblyWithBothVersions, "2.1.1.1", "3.2.2.2", false)] // Lower level framework always wins on equality (this is intentional)
+        [InlineData(TestAssemblyWithBothVersions, null, "4.0.0.0", false)] // The one with version wins
+        [InlineData(TestAssemblyWithBothVersions, null, "2.0.0.0", false)] // The one with version wins
+        [InlineData(TestAssemblyWithBothVersions, "3.0.0.0", null, true)]
+        [InlineData(TestAssemblyWithBothVersions, "2.1.1.1", null, false)]
+        [InlineData(TestAssemblyWithNoVersions, null, null, false)] // No versions are treated as equal (so lower one wins)
+        [InlineData(TestAssemblyWithNoVersions, "1.0.0.0", null, true)]
+        [InlineData(TestAssemblyWithNoVersions, "1.0.0.0", "1.0.0.0", true)]
+        [InlineData(TestAssemblyWithNoVersions, null, "1.0.0.0", true)]
+        [InlineData(TestAssemblyWithAssemblyVersion, null, null, false)]
+        [InlineData(TestAssemblyWithAssemblyVersion, "1.0.0.0", null, false)]
+        [InlineData(TestAssemblyWithAssemblyVersion, null, "1.0.0.0", false)]
+        [InlineData(TestAssemblyWithAssemblyVersion, "3.0.0.0", "1.0.0.0", true)]
+        [InlineData(TestAssemblyWithAssemblyVersion, "2.1.1.1", null, false)]
+        [InlineData(TestAssemblyWithAssemblyVersion, "2.1.1.1", "1.0.0.0", true)]
+        [InlineData(TestAssemblyWithFileVersion, null, null, false)]
+        [InlineData(TestAssemblyWithFileVersion, "1.0.0.0", null, true)]
+        [InlineData(TestAssemblyWithFileVersion, null, "1.0.0.0", false)]
+        [InlineData(TestAssemblyWithFileVersion, null, "4.0.0.0", true)]
+        [InlineData(TestAssemblyWithFileVersion, null, "3.2.2.2", false)]
         public void AppWithSameAssemblyAsFramework(string testAssemblyName, string appAsmVersion, string appFileVersion, bool appWins)
         {
             var app = sharedTestState.CreateTestFrameworkReferenceApp(b => b
@@ -52,7 +79,29 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
         [Theory]
         [InlineData(TestAssemblyWithBothVersions, null, null, false)]
         [InlineData(TestAssemblyWithBothVersions, "1.0.0.0", "1.0.0.0", false)]
-        [InlineData(TestAssemblyWithBothVersions, "3.0.0.0", "3.0.0.0", true)]
+        [InlineData(TestAssemblyWithBothVersions, "3.0.0.0", "4.0.0.0", true)]
+        [InlineData(TestAssemblyWithBothVersions, "2.1.1.1", "1.0.0.0", false)]
+        [InlineData(TestAssemblyWithBothVersions, "2.1.1.1", "3.3.0.0", true)]
+        [InlineData(TestAssemblyWithBothVersions, "2.1.1.1", "3.2.2.2", false)] // Lower level framework always wins on equality (this is intentional)
+        [InlineData(TestAssemblyWithBothVersions, null, "4.0.0.0", false)] // The one with version wins
+        [InlineData(TestAssemblyWithBothVersions, null, "2.0.0.0", false)] // The one with version wins
+        [InlineData(TestAssemblyWithBothVersions, "3.0.0.0", null, true)]
+        [InlineData(TestAssemblyWithBothVersions, "2.1.1.1", null, false)]
+        [InlineData(TestAssemblyWithNoVersions, null, null, false)] // No versions are treated as equal (so lower one wins)
+        [InlineData(TestAssemblyWithNoVersions, "1.0.0.0", null, true)]
+        [InlineData(TestAssemblyWithNoVersions, "1.0.0.0", "1.0.0.0", true)]
+        [InlineData(TestAssemblyWithNoVersions, null, "1.0.0.0", true)]
+        [InlineData(TestAssemblyWithAssemblyVersion, null, null, false)]
+        [InlineData(TestAssemblyWithAssemblyVersion, "1.0.0.0", null, false)]
+        [InlineData(TestAssemblyWithAssemblyVersion, null, "1.0.0.0", false)]
+        [InlineData(TestAssemblyWithAssemblyVersion, "3.0.0.0", "1.0.0.0", true)]
+        [InlineData(TestAssemblyWithAssemblyVersion, "2.1.1.1", null, false)]
+        [InlineData(TestAssemblyWithAssemblyVersion, "2.1.1.1", "1.0.0.0", true)]
+        [InlineData(TestAssemblyWithFileVersion, null, null, false)]
+        [InlineData(TestAssemblyWithFileVersion, "1.0.0.0", null, true)]
+        [InlineData(TestAssemblyWithFileVersion, null, "1.0.0.0", false)]
+        [InlineData(TestAssemblyWithFileVersion, null, "4.0.0.0", true)]
+        [InlineData(TestAssemblyWithFileVersion, null, "3.2.2.2", false)]
         public void ComponentWithSameAssemblyAsFramework(string testAssemblyName, string appAsmVersion, string appFileVersion, bool appWins)
         {
             var component = sharedTestState.CreateComponentWithNoDependencies(b => b
