@@ -105,6 +105,10 @@ namespace pal
 
     #define STDMETHODCALLTYPE __stdcall
 
+    #define COLD_FUNCTION
+    #define NO_INLINE
+    #define PURE_FUNCTION
+
     typedef wchar_t char_t;
     typedef std::wstring string_t;
     typedef std::wstringstream stringstream_t;
@@ -180,6 +184,10 @@ namespace pal
         #include <sys/param.h>
     #endif
     #define STDMETHODCALLTYPE __stdcall
+
+    #define COLD_FUNCTION __attribute__((cold))
+    #define NO_INLINE __attribute__((noinline))
+    #define PURE_FUNCTION __attribute__((pure))
 
     typedef char char_t;
     typedef std::string string_t;
