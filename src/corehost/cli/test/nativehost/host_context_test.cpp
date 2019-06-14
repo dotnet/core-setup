@@ -501,7 +501,7 @@ bool host_context_test::non_context_mixed(
     pal::string_t host_path;
     if (!pal::get_own_executable_path(&host_path) || !pal::realpath(&host_path))
     {
-        trace::error(_X("Failed to resolve full path of the current executable [%s]"), host_path.c_str());
+        TRACE_ERROR(_X("Failed to resolve full path of the current executable [%s]"), host_path.c_str());
         return false;
     }
 

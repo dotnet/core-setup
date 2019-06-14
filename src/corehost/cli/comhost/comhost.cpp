@@ -324,7 +324,7 @@ COM_API HRESULT STDMETHODCALLTYPE DllRegisterServer(void)
     clsid_map map;
     RETURN_HRESULT_IF_EXCEPT(map = comhost::get_clsid_map());
 
-    trace::info(_X("Registering %d CLSIDs"), (int)map.size());
+    TRACE_INFO(_X("Registering %d CLSIDs"), (int)map.size());
 
     HRESULT hr;
     pal::string_t app_path;
@@ -368,7 +368,7 @@ COM_API HRESULT STDMETHODCALLTYPE DllUnregisterServer(void)
     clsid_map map;
     RETURN_HRESULT_IF_EXCEPT(map = comhost::get_clsid_map());
 
-    trace::info(_X("Unregistering %d CLSIDs"), (int)map.size());
+    TRACE_INFO(_X("Unregistering %d CLSIDs"), (int)map.size());
 
     HRESULT hr;
     pal::string_t app_path;

@@ -67,13 +67,13 @@ public:
             if (i == 0)
             {
                 m_fx_definitions[i]->set_deps_file(args.deps_path);
-                trace::verbose(_X("Using %s deps file"), m_fx_definitions[i]->get_deps_file().c_str());
+                TRACE_VERBOSE(_X("Using %s deps file"), m_fx_definitions[i]->get_deps_file().c_str());
             }
             else
             {
                 pal::string_t fx_deps_file = get_fx_deps(m_fx_definitions[i]->get_dir(), m_fx_definitions[i]->get_name());
                 m_fx_definitions[i]->set_deps_file(fx_deps_file);
-                trace::verbose(_X("Using Fx %s deps file"), fx_deps_file.c_str());
+                TRACE_VERBOSE(_X("Using Fx %s deps file"), fx_deps_file.c_str());
             }
 
             if (i == root_framework)

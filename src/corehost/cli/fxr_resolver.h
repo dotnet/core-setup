@@ -25,7 +25,7 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
     pal::string_t host_path;
     if (!pal::get_own_module_path(&host_path) || !pal::realpath(&host_path))
     {
-        trace::error(_X("Failed to resolve full path of the current host module [%s]"), host_path.c_str());
+        TRACE_ERROR(_X("Failed to resolve full path of the current host module [%s]"), host_path.c_str());
         return StatusCode::CoreHostCurHostFindFailure;
     }
 
@@ -34,7 +34,7 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
     if (fxr_resolver::try_get_existing_fxr(&fxr, &fxr_path))
     {
         dotnet_root = get_dotnet_root_from_fxr_path(fxr_path);
-        trace::verbose(_X("The library %s was already loaded. Reusing the previously loaded library [%s]."), LIBFXR_NAME, fxr_path.c_str());
+        TRACE_VERBOSE(_X("The library %s was already loaded. Reusing the previously loaded library [%s]."), LIBFXR_NAME, fxr_path.c_str());
     }
     else
     {
@@ -47,9 +47,9 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
         // Load library
         if (!pal::load_library(&fxr_path, &fxr))
         {
-            trace::error(_X("The library %s was found, but loading it from %s failed"), LIBFXR_NAME, fxr_path.c_str());
-            trace::error(_X("  - Installing .NET Core prerequisites might help resolve this problem."));
-            trace::error(_X("     %s"), DOTNET_CORE_INSTALL_PREREQUISITES_URL);
+            TRACE_ERROR(_X("The library %s was found, but loading it from %s failed"), LIBFXR_NAME, fxr_path.c_str());
+            TRACE_ERROR(_X("  - Installing .NET Core prerequisites might help resolve this problem."));
+            TRACE_ERROR(_X("     %s"), DOTNET_CORE_INSTALL_PREREQUISITES_URL);
             return StatusCode::CoreHostLibLoadFailure;
         }
     }
@@ -87,7 +87,7 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
     if (rcClose != StatusCode::Success)
     {
         assert(false && "Failed to close host context");
-        trace::verbose(_X("Failed to close host context: 0x%x"), rcClose);
+        TRACE_VERBOSE(_X("Failed to close host context: 0x%x"), rcClose);
     }
 
     return rc;

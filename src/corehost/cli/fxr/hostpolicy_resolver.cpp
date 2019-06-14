@@ -24,25 +24,25 @@ namespace
     */
     pal::string_t resolve_hostpolicy_version_from_deps(const pal::string_t& deps_json)
     {
-        trace::verbose(_X("--- Resolving %s version from deps json [%s]"), LIBHOSTPOLICY_NAME, deps_json.c_str());
+        TRACE_VERBOSE(_X("--- Resolving %s version from deps json [%s]"), LIBHOSTPOLICY_NAME, deps_json.c_str());
 
         pal::string_t retval;
         if (!pal::file_exists(deps_json))
         {
-            trace::verbose(_X("Dependency manifest [%s] does not exist"), deps_json.c_str());
+            TRACE_VERBOSE(_X("Dependency manifest [%s] does not exist"), deps_json.c_str());
             return retval;
         }
 
         pal::ifstream_t file(deps_json);
         if (!file.good())
         {
-            trace::verbose(_X("Dependency manifest [%s] could not be opened"), deps_json.c_str());
+            TRACE_VERBOSE(_X("Dependency manifest [%s] could not be opened"), deps_json.c_str());
             return retval;
         }
 
         if (skip_utf8_bom(&file))
         {
-            trace::verbose(_X("UTF-8 BOM skipped while reading [%s]"), deps_json.c_str());
+            TRACE_VERBOSE(_X("UTF-8 BOM skipped while reading [%s]"), deps_json.c_str());
         }
 
         try
@@ -68,9 +68,9 @@ namespace
         {
             pal::string_t jes;
             (void)pal::utf8_palstring(je.what(), &jes);
-            trace::error(_X("A JSON parsing exception occurred in [%s]: %s"), deps_json.c_str(), jes.c_str());
+            TRACE_ERROR(_X("A JSON parsing exception occurred in [%s]: %s"), deps_json.c_str(), jes.c_str());
         }
-        trace::verbose(_X("Resolved version %s from dependency manifest file [%s]"), retval.c_str(), deps_json.c_str());
+        TRACE_VERBOSE(_X("Resolved version %s from dependency manifest file [%s]"), retval.c_str(), deps_json.c_str());
         return retval;
     }
 
@@ -100,14 +100,14 @@ namespace
                                                             // Check if "path" contains the required library.
         if (!library_exists_in_dir(path, LIBHOSTPOLICY_NAME, nullptr))
         {
-            trace::verbose(_X("Did not find %s in directory %s"), LIBHOSTPOLICY_NAME, path.c_str());
+            TRACE_VERBOSE(_X("Did not find %s in directory %s"), LIBHOSTPOLICY_NAME, path.c_str());
             return false;
         }
 
         // "path" contains the directory containing hostpolicy library.
         *candidate = path;
 
-        trace::verbose(_X("Found %s in directory %s"), LIBHOSTPOLICY_NAME, path.c_str());
+        TRACE_VERBOSE(_X("Found %s in directory %s"), LIBHOSTPOLICY_NAME, path.c_str());
         return true;
     }
 
@@ -142,7 +142,7 @@ namespace
         // Check if the package relative directory containing hostpolicy exists.
         for (const auto& probe_path : probe_realpaths)
         {
-            trace::verbose(_X("Considering %s to probe for %s"), probe_path.c_str(), LIBHOSTPOLICY_NAME);
+            TRACE_VERBOSE(_X("Considering %s to probe for %s"), probe_path.c_str(), LIBHOSTPOLICY_NAME);
             if (to_hostpolicy_package_dir(probe_path, version, candidate))
             {
                 return true;
@@ -150,11 +150,11 @@ namespace
         }
 
         // Print detailed message about the file not found in the probe paths.
-        trace::error(_X("Could not find required library %s in %d probing paths:"),
+        TRACE_ERROR(_X("Could not find required library %s in %d probing paths:"),
             LIBHOSTPOLICY_NAME, probe_realpaths.size());
         for (const auto& path : probe_realpaths)
         {
-            trace::error(_X("  %s"), path.c_str());
+            TRACE_ERROR(_X("  %s"), path.c_str());
         }
         return false;
     }
@@ -206,7 +206,7 @@ int hostpolicy_resolver::load(
         // We expect to leak hostpolicy - just as we do not unload coreclr, we do not unload hostpolicy
         if (!pal::load_library(&host_path, &g_hostpolicy))
         {
-            trace::info(_X("Load library of %s failed"), host_path.c_str());
+            TRACE_INFO(_X("Load library of %s failed"), host_path.c_str());
             return StatusCode::CoreHostLibLoadFailure;
         }
 
@@ -229,7 +229,7 @@ int hostpolicy_resolver::load(
     else
     {
         if (!pal::are_paths_equal_with_normalized_casing(g_hostpolicy_dir, lib_dir))
-            trace::warning(_X("The library %s was already loaded from [%s]. Reusing the existing library for the request to load from [%s]"), LIBHOSTPOLICY_NAME, g_hostpolicy_dir.c_str(), lib_dir.c_str());
+            TRACE_WARNING(_X("The library %s was already loaded from [%s]. Reusing the existing library for the request to load from [%s]"), LIBHOSTPOLICY_NAME, g_hostpolicy_dir.c_str(), lib_dir.c_str());
     }
 
     // Return global values
@@ -260,7 +260,7 @@ bool hostpolicy_resolver::try_get_dir(
     pal::string_t version = resolve_hostpolicy_version_from_deps(resolved_deps);
     if (trace::is_enabled() && version.empty() && pal::file_exists(resolved_deps))
     {
-        trace::warning(_X("Dependency manifest %s does not contain an entry for %s"),
+        TRACE_WARNING(_X("Dependency manifest %s does not contain an entry for %s"),
             resolved_deps.c_str(), _STRINGIFY(HOST_POLICY_PKG_NAME));
     }
 
@@ -299,14 +299,14 @@ bool hostpolicy_resolver::try_get_dir(
     }
 
     // Check if hostpolicy exists in "expected" directory.
-    trace::verbose(_X("The expected %s directory is [%s]"), LIBHOSTPOLICY_NAME, expected.c_str());
+    TRACE_VERBOSE(_X("The expected %s directory is [%s]"), LIBHOSTPOLICY_NAME, expected.c_str());
     if (library_exists_in_dir(expected, LIBHOSTPOLICY_NAME, nullptr))
     {
         impl_dir->assign(expected);
         return true;
     }
 
-    trace::verbose(_X("The %s was not found in [%s]"), LIBHOSTPOLICY_NAME, expected.c_str());
+    TRACE_VERBOSE(_X("The %s was not found in [%s]"), LIBHOSTPOLICY_NAME, expected.c_str());
 
     // Start probing for hostpolicy in the specified probe paths.
     pal::string_t candidate;
@@ -317,18 +317,18 @@ bool hostpolicy_resolver::try_get_dir(
     }
 
     // If it still couldn't be found, somebody upstack messed up. Flag an error for the "expected" location.
-    trace::error(_X("A fatal error was encountered. The library '%s' required to execute the application was not found in '%s'."),
+    TRACE_ERROR(_X("A fatal error was encountered. The library '%s' required to execute the application was not found in '%s'."),
         LIBHOSTPOLICY_NAME, expected.c_str());
     if (mode == host_mode_t::muxer && !is_framework_dependent)
     {
         if (!pal::file_exists(get_app(fx_definitions).get_runtime_config().get_path()))
         {
-            trace::error(_X("Failed to run as a self-contained app. If this should be a framework-dependent app, add the %s file specifying the appropriate framework."),
+            TRACE_ERROR(_X("Failed to run as a self-contained app. If this should be a framework-dependent app, add the %s file specifying the appropriate framework."),
                 get_app(fx_definitions).get_runtime_config().get_path().c_str());
         }
         else if (get_app(fx_definitions).get_name().empty())
         {
-            trace::error(_X("Failed to run as a self-contained app. If this should be a framework-dependent app, specify the appropriate framework in %s."),
+            TRACE_ERROR(_X("Failed to run as a self-contained app. If this should be a framework-dependent app, specify the appropriate framework in %s."),
                 get_app(fx_definitions).get_runtime_config().get_path().c_str());
         }
     }

@@ -15,25 +15,25 @@ typedef web::json::object json_object;
 
 pal::string_t resolve_cli_version(const pal::string_t& global_json)
 {
-    trace::verbose(_X("--- Resolving CLI version from global json [%s]"), global_json.c_str());
+    TRACE_VERBOSE(_X("--- Resolving CLI version from global json [%s]"), global_json.c_str());
 
     pal::string_t retval;
     if (!pal::file_exists(global_json))
     {
-        trace::verbose(_X("[%s] does not exist"), global_json.c_str());
+        TRACE_VERBOSE(_X("[%s] does not exist"), global_json.c_str());
         return retval;
     }
 
     pal::ifstream_t file(global_json);
     if (!file.good())
     {
-        trace::verbose(_X("[%s] could not be opened"), global_json.c_str());
+        TRACE_VERBOSE(_X("[%s] could not be opened"), global_json.c_str());
         return retval;
     }
 
     if (skip_utf8_bom(&file))
     {
-        trace::verbose(_X("UTF-8 BOM skipped while reading [%s]"), global_json.c_str());
+        TRACE_VERBOSE(_X("UTF-8 BOM skipped while reading [%s]"), global_json.c_str());
     }
 
     try
@@ -43,7 +43,7 @@ pal::string_t resolve_cli_version(const pal::string_t& global_json)
         const auto sdk_iter = json.find(_X("sdk"));
         if (sdk_iter == json.end() || sdk_iter->second.is_null())
         {
-            trace::verbose(_X("CLI '/sdk/version' field not present/null in [%s]"), global_json.c_str());
+            TRACE_VERBOSE(_X("CLI '/sdk/version' field not present/null in [%s]"), global_json.c_str());
             return retval;
         }
 
@@ -51,7 +51,7 @@ pal::string_t resolve_cli_version(const pal::string_t& global_json)
         const auto ver_iter = sdk_obj.find(_X("version"));
         if (ver_iter == sdk_obj.end() || ver_iter->second.is_null())
         {
-            trace::verbose(_X("CLI 'sdk/version' field not present/null in [%s]"), global_json.c_str());
+            TRACE_VERBOSE(_X("CLI 'sdk/version' field not present/null in [%s]"), global_json.c_str());
             return retval;
         }
         retval = ver_iter->second.as_string();
@@ -60,9 +60,9 @@ pal::string_t resolve_cli_version(const pal::string_t& global_json)
     {
         pal::string_t jes;
         (void)pal::utf8_palstring(je.what(), &jes);
-        trace::error(_X("A JSON parsing exception occurred in [%s]: %s"), global_json.c_str(), jes.c_str());
+        TRACE_ERROR(_X("A JSON parsing exception occurred in [%s]: %s"), global_json.c_str(), jes.c_str());
     }
-    trace::verbose(_X("CLI version is [%s] in global json file [%s]"), retval.c_str(), global_json.c_str());
+    TRACE_VERBOSE(_X("CLI version is [%s] in global json file [%s]"), retval.c_str(), global_json.c_str());
     return retval;
 }
 
@@ -75,7 +75,7 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path, bool disallow_prerelea
     {
         if (!fx_ver_t::parse(global_cli_version, &specified, false))
         {
-            trace::error(_X("The specified SDK version '%s' could not be parsed"), global_cli_version.c_str());
+            TRACE_ERROR(_X("The specified SDK version '%s' could not be parsed"), global_cli_version.c_str());
             return pal::string_t();
         }
 
@@ -86,7 +86,7 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path, bool disallow_prerelea
         }
     }
 
-    trace::verbose(_X("--- Resolving SDK version from SDK dir [%s]"), sdk_path.c_str());
+    TRACE_VERBOSE(_X("--- Resolving SDK version from SDK dir [%s]"), sdk_path.c_str());
 
     pal::string_t retval;
     std::vector<pal::string_t> versions;
@@ -95,7 +95,7 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path, bool disallow_prerelea
     fx_ver_t max_ver;
     for (const auto& version : versions)
     {
-        trace::verbose(_X("Considering version... [%s]"), version.c_str());
+        TRACE_VERBOSE(_X("Considering version... [%s]"), version.c_str());
 
         fx_ver_t ver;
         if (fx_ver_t::parse(version, &ver, disallow_prerelease))
@@ -117,10 +117,10 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path, bool disallow_prerelea
         pal::string_t max_ver_str = max_ver.as_str();
         append_path(&sdk_path, max_ver_str.c_str());
 
-        trace::verbose(_X("Checking if resolved SDK dir [%s] exists"), sdk_path.c_str());
+        TRACE_VERBOSE(_X("Checking if resolved SDK dir [%s] exists"), sdk_path.c_str());
         if (pal::directory_exists(sdk_path))
         {
-            trace::verbose(_X("Resolved SDK dir is [%s]"), sdk_path.c_str());
+            TRACE_VERBOSE(_X("Resolved SDK dir is [%s]"), sdk_path.c_str());
             retval = max_ver_str;
         }
     }
@@ -130,11 +130,11 @@ pal::string_t resolve_sdk_version(pal::string_t sdk_path, bool disallow_prerelea
 
 bool sdk_resolver_t::resolve_sdk_dotnet_path(const pal::string_t& dotnet_root, pal::string_t* cli_sdk)
 {
-    trace::verbose(_X("--- Resolving dotnet from working dir"));
+    TRACE_VERBOSE(_X("--- Resolving dotnet from working dir"));
     pal::string_t cwd;
     if (!pal::getcwd(&cwd))
     {
-        trace::verbose(_X("Failed to obtain current working dir"));
+        TRACE_VERBOSE(_X("Failed to obtain current working dir"));
         assert(cwd.empty());
     }
 
@@ -176,17 +176,17 @@ bool sdk_resolver_t::resolve_sdk_dotnet_path(
             pal::string_t file = cur_dir;
             append_path(&file, _X("global.json"));
 
-            trace::verbose(_X("Probing path [%s] for global.json"), file.c_str());
+            TRACE_VERBOSE(_X("Probing path [%s] for global.json"), file.c_str());
             if (pal::file_exists(file))
             {
                 global = file;
-                trace::verbose(_X("Found global.json [%s]"), global.c_str());
+                TRACE_VERBOSE(_X("Found global.json [%s]"), global.c_str());
                 break;
             }
             parent_dir = get_directory(cur_dir);
             if (parent_dir.empty() || parent_dir.size() == cur_dir.size())
             {
-                trace::verbose(_X("Terminating global.json search at [%s]"), parent_dir.c_str());
+                TRACE_VERBOSE(_X("Terminating global.json search at [%s]"), parent_dir.c_str());
                 break;
             }
         }
@@ -206,7 +206,7 @@ bool sdk_resolver_t::resolve_sdk_dotnet_path(
 
     for (pal::string_t dir : hive_dir)
     {
-        trace::verbose(_X("Searching SDK directory in [%s]"), dir.c_str());
+        TRACE_VERBOSE(_X("Searching SDK directory in [%s]"), dir.c_str());
         pal::string_t current_sdk_path = dir;
         append_path(&current_sdk_path, _X("sdk"));
 
@@ -230,7 +230,7 @@ bool sdk_resolver_t::resolve_sdk_dotnet_path(
 
             if (pal::directory_exists(probing_sdk_path))
             {
-                trace::verbose(_X("CLI directory [%s] from global.json exists"), probing_sdk_path.c_str());
+                TRACE_VERBOSE(_X("CLI directory [%s] from global.json exists"), probing_sdk_path.c_str());
                 cli_version = global_cli_version;
                 sdk_path = current_sdk_path;
                 //  Use the first matching version
@@ -251,20 +251,20 @@ bool sdk_resolver_t::resolve_sdk_dotnet_path(
     {
         append_path(&sdk_path, cli_version.c_str());
         cli_sdk->assign(sdk_path);
-        trace::verbose(_X("Found CLI SDK in: %s"), cli_sdk->c_str());
+        TRACE_VERBOSE(_X("Found CLI SDK in: %s"), cli_sdk->c_str());
         return true;
     }
 
     if (!global_cli_version.empty())
     {
-        trace::error(_X("A compatible installed dotnet SDK for global.json version: [%s] from [%s] was not found"), global_cli_version.c_str(), global.c_str());
-        trace::error(_X("Please install the [%s] SDK or update [%s] with an installed dotnet SDK:"), global_cli_version.c_str(), global.c_str());
+        TRACE_ERROR(_X("A compatible installed dotnet SDK for global.json version: [%s] from [%s] was not found"), global_cli_version.c_str(), global.c_str());
+        TRACE_ERROR(_X("Please install the [%s] SDK or update [%s] with an installed dotnet SDK:"), global_cli_version.c_str(), global.c_str());
     }
     if (global_cli_version.empty() || !sdk_info::print_all_sdks(dotnet_root, _X("  ")))
     {
-        trace::error(_X("  It was not possible to find any installed dotnet SDKs"));
-        trace::error(_X("  Did you mean to run dotnet SDK commands? Please install dotnet SDK from:"));
-        trace::error(_X("      %s"), DOTNET_CORE_DOWNLOAD_URL);
+        TRACE_ERROR(_X("  It was not possible to find any installed dotnet SDKs"));
+        TRACE_ERROR(_X("  Did you mean to run dotnet SDK commands? Please install dotnet SDK from:"));
+        TRACE_ERROR(_X("      %s"), DOTNET_CORE_DOWNLOAD_URL);
     }
     return false;
 }

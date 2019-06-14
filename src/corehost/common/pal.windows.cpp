@@ -69,7 +69,7 @@ bool pal::touch_file(const pal::string_t& path)
     HANDLE hnd = ::CreateFileW(path.c_str(), 0, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hnd == INVALID_HANDLE_VALUE)
     {
-        trace::verbose(_X("Failed to leave breadcrumb, HRESULT: 0x%X"), HRESULT_FROM_WIN32(GetLastError()));
+        TRACE_VERBOSE(_X("Failed to leave breadcrumb, HRESULT: 0x%X"), HRESULT_FROM_WIN32(GetLastError()));
         return false;
     }
     ::CloseHandle(hnd);
@@ -100,7 +100,7 @@ bool pal::getcwd(pal::string_t* recv)
         }
     }
     assert(result == 0);
-    trace::error(_X("Failed to obtain working directory, HRESULT: 0x%X"), HRESULT_FROM_WIN32(GetLastError()));
+    TRACE_ERROR(_X("Failed to obtain working directory, HRESULT: 0x%X"), HRESULT_FROM_WIN32(GetLastError()));
     return false;
 }
 
@@ -130,7 +130,7 @@ bool pal::load_library(const string_t* in_path, dll_t* dll)
     {
         if (!pal::realpath(&path))
         {
-            trace::error(_X("Failed to load the dll from [%s], HRESULT: 0x%X"), path.c_str(), HRESULT_FROM_WIN32(GetLastError()));
+            TRACE_ERROR(_X("Failed to load the dll from [%s], HRESULT: 0x%X"), path.c_str(), HRESULT_FROM_WIN32(GetLastError()));
             return false;
         }
     }
@@ -141,7 +141,7 @@ bool pal::load_library(const string_t* in_path, dll_t* dll)
     *dll = ::LoadLibraryExW(path.c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
     if (*dll == nullptr)
     {
-        trace::error(_X("Failed to load the dll from [%s], HRESULT: 0x%X"), path.c_str(), HRESULT_FROM_WIN32(GetLastError()));
+        TRACE_ERROR(_X("Failed to load the dll from [%s], HRESULT: 0x%X"), path.c_str(), HRESULT_FROM_WIN32(GetLastError()));
         return false;
     }
 
@@ -149,7 +149,7 @@ bool pal::load_library(const string_t* in_path, dll_t* dll)
     HMODULE dummy_module;
     if (!::GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_PIN, path.c_str(), &dummy_module))
     {
-        trace::error(_X("Failed to pin library [%s] in [%s]"), path.c_str(), _STRINGIFY(__FUNCTION__));
+        TRACE_ERROR(_X("Failed to pin library [%s] in [%s]"), path.c_str(), _STRINGIFY(__FUNCTION__));
         return false;
     }
 
@@ -157,7 +157,7 @@ bool pal::load_library(const string_t* in_path, dll_t* dll)
     {
         string_t buf;
         GetModuleFileNameWrapper(*dll, &buf);
-        trace::info(_X("Loaded library from %s"), buf.c_str());
+        TRACE_INFO(_X("Loaded library from %s"), buf.c_str());
     }
 
     return true;
@@ -168,7 +168,7 @@ pal::proc_t pal::get_symbol(dll_t library, const char* name)
     auto result = ::GetProcAddress(library, name);
     if (result == nullptr)
     {
-        trace::info(_X("Probed for and did not resolve library symbol %S"), name);
+        TRACE_INFO(_X("Probed for and did not resolve library symbol %S"), name);
     }
 
     return result;
@@ -199,7 +199,7 @@ bool pal::get_default_breadcrumb_store(string_t* recv)
     if (!get_file_path_from_env(_X("ProgramData"), &prog_dat))
     {
         // We should have the path in prog_dat.
-        trace::verbose(_X("Failed to read default breadcrumb store [%s]"), prog_dat.c_str());
+        TRACE_VERBOSE(_X("Failed to read default breadcrumb store [%s]"), prog_dat.c_str());
         return false;
     }
     recv->assign(prog_dat);
@@ -319,7 +319,7 @@ bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
     LSTATUS result = ::RegOpenKeyExW(hkeyHive, sub_key.c_str(), 0, KEY_READ | KEY_WOW64_32KEY, &hkey);
     if (result != ERROR_SUCCESS)
     {
-        trace::verbose(_X("Can't open the SDK installed location registry key, result: 0x%X"), result);
+        TRACE_VERBOSE(_X("Can't open the SDK installed location registry key, result: 0x%X"), result);
         return false;
     }
 
@@ -328,7 +328,7 @@ bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
     result = ::RegGetValueW(hkey, nullptr, value, RRF_RT_REG_SZ, nullptr, nullptr, &size);
     if (result != ERROR_SUCCESS || size == 0)
     {
-        trace::verbose(_X("Can't get the size of the SDK location registry value or it's empty, result: 0x%X"), result);
+        TRACE_VERBOSE(_X("Can't get the size of the SDK location registry value or it's empty, result: 0x%X"), result);
         ::RegCloseKey(hkey);
         return false;
     }
@@ -338,7 +338,7 @@ bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
     result = ::RegGetValueW(hkey, nullptr, value, RRF_RT_REG_SZ, nullptr, &buffer[0], &size);
     if (result != ERROR_SUCCESS)
     {
-        trace::verbose(_X("Can't get the value of the SDK location registry value, result: 0x%X"), result);
+        TRACE_VERBOSE(_X("Can't get the value of the SDK location registry value, result: 0x%X"), result);
         ::RegCloseKey(hkey);
         return false;
     }
@@ -455,14 +455,14 @@ bool pal::getenv(const char_t* name, string_t* recv)
         auto err = GetLastError();
         if (err != ERROR_ENVVAR_NOT_FOUND)
         {
-            trace::error(_X("Failed to read environment variable [%s], HRESULT: 0x%X"), name, HRESULT_FROM_WIN32(GetLastError()));
+            TRACE_ERROR(_X("Failed to read environment variable [%s], HRESULT: 0x%X"), name, HRESULT_FROM_WIN32(GetLastError()));
         }
         return false;
     }
     auto buf = new char_t[length];
     if (::GetEnvironmentVariableW(name, buf, length) == 0)
     {
-        trace::error(_X("Failed to read environment variable [%s], HRESULT: 0x%X"), name, HRESULT_FROM_WIN32(GetLastError()));
+        TRACE_ERROR(_X("Failed to read environment variable [%s], HRESULT: 0x%X"), name, HRESULT_FROM_WIN32(GetLastError()));
         return false;
     }
 
@@ -584,7 +584,7 @@ bool pal::realpath(string_t* path, bool skip_error_logging)
     {
         if (!skip_error_logging)
         {
-            trace::error(_X("Error resolving full path [%s]"), path->c_str());
+            TRACE_ERROR(_X("Error resolving full path [%s]"), path->c_str());
         }
         return false;
     }
@@ -605,7 +605,7 @@ bool pal::realpath(string_t* path, bool skip_error_logging)
         {
             if (!skip_error_logging)
             {
-                trace::error(_X("Error resolving full path [%s]"), path->c_str());
+                TRACE_ERROR(_X("Error resolving full path [%s]"), path->c_str());
             }
             return false;
         }

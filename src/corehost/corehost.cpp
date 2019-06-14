@@ -52,7 +52,7 @@ bool is_exe_enabled_for_execution(pal::string_t* app_dll)
     std::string binding(&embed[0]);
     if (!pal::utf8_palstring(binding, app_dll))
     {
-        trace::error(_X("The managed DLL bound to this executable could not be retrieved from the executable image."));
+        TRACE_ERROR(_X("The managed DLL bound to this executable could not be retrieved from the executable image."));
         return false;
     }
 
@@ -65,11 +65,11 @@ bool is_exe_enabled_for_execution(pal::string_t* app_dll)
         binding.compare(0, hi_len, &hi_part[0]) == 0 &&
         binding.compare(hi_len, lo_len, &lo_part[0]) == 0)
     {
-        trace::error(_X("This executable is not bound to a managed DLL to execute. The binding value is: '%s'"), app_dll->c_str());
+        TRACE_ERROR(_X("This executable is not bound to a managed DLL to execute. The binding value is: '%s'"), app_dll->c_str());
         return false;
     }
 
-    trace::info(_X("The managed DLL bound to this executable is: '%s'"), app_dll->c_str());
+    TRACE_INFO(_X("The managed DLL bound to this executable is: '%s'"), app_dll->c_str());
     return true;
 }
 #elif !defined(FEATURE_LIBHOST)
@@ -85,7 +85,7 @@ int exe_start(const int argc, const pal::char_t* argv[])
     pal::string_t host_path;
     if (!pal::get_own_executable_path(&host_path) || !pal::realpath(&host_path))
     {
-        trace::error(_X("Failed to resolve full path of the current executable [%s]"), host_path.c_str());
+        TRACE_ERROR(_X("Failed to resolve full path of the current executable [%s]"), host_path.c_str());
         return StatusCode::CoreHostCurHostFindFailure;
     }
 
@@ -97,7 +97,7 @@ int exe_start(const int argc, const pal::char_t* argv[])
     pal::string_t embedded_app_name;
     if (!is_exe_enabled_for_execution(&embedded_app_name))
     {
-        trace::error(_X("A fatal error was encountered. This executable was not bound to load a managed DLL."));
+        TRACE_ERROR(_X("A fatal error was encountered. This executable was not bound to load a managed DLL."));
         return StatusCode::AppHostExeNotBoundFailure;
     }
 
@@ -127,14 +127,14 @@ int exe_start(const int argc, const pal::char_t* argv[])
 
     case StatusCode::BundleExtractionFailure:
     default:
-        trace::error(_X("A fatal error was encountered. Could not extract contents of the bundle"));
+        TRACE_ERROR(_X("A fatal error was encountered. Could not extract contents of the bundle"));
         return StatusCode::AppHostExeNotBoundFailure;
     }
 
     append_path(&app_path, embedded_app_name.c_str());
     if (!pal::realpath(&app_path))
     {
-        trace::error(_X("The application to execute does not exist: '%s'."), app_path.c_str());
+        TRACE_ERROR(_X("The application to execute does not exist: '%s'."), app_path.c_str());
         return StatusCode::LibHostAppRootFindFailure;
     }
 
@@ -149,7 +149,7 @@ int exe_start(const int argc, const pal::char_t* argv[])
         // dotnet.exe is signed by Microsoft. It is technically possible to rename the file MyApp.exe and include it in the application.
         // Then one can create a shortcut for "MyApp.exe MyApp.dll" which works. The end result is that MyApp looks like it's signed by Microsoft.
         // To prevent this dotnet.exe must not be renamed, otherwise it won't run.
-        trace::error(_X("A fatal error was encountered. Cannot execute %s when renamed to %s."), CURHOST_TYPE, own_name.c_str());
+        TRACE_ERROR(_X("A fatal error was encountered. Cannot execute %s when renamed to %s."), CURHOST_TYPE, own_name.c_str());
         return StatusCode::CoreHostEntryPointFailure;
     }
 
@@ -187,9 +187,9 @@ int exe_start(const int argc, const pal::char_t* argv[])
     pal::dll_t fxr;
     if (!pal::load_library(&fxr_path, &fxr))
     {
-        trace::error(_X("The library %s was found, but loading it from %s failed"), LIBFXR_NAME, fxr_path.c_str());
-        trace::error(_X("  - Installing .NET Core prerequisites might help resolve this problem."));
-        trace::error(_X("     %s"), DOTNET_CORE_INSTALL_PREREQUISITES_URL);
+        TRACE_ERROR(_X("The library %s was found, but loading it from %s failed"), LIBFXR_NAME, fxr_path.c_str());
+        TRACE_ERROR(_X("  - Installing .NET Core prerequisites might help resolve this problem."));
+        TRACE_ERROR(_X("     %s"), DOTNET_CORE_INSTALL_PREREQUISITES_URL);
         return StatusCode::CoreHostLibLoadFailure;
     }
 
@@ -202,10 +202,10 @@ int exe_start(const int argc, const pal::char_t* argv[])
         const pal::char_t* dotnet_root_cstr = dotnet_root.empty() ? nullptr : dotnet_root.c_str();
         const pal::char_t* app_path_cstr = app_path.empty() ? nullptr : app_path.c_str();
 
-        trace::info(_X("Invoking fx resolver [%s] v2"), fxr_path.c_str());
-        trace::info(_X("Host path: [%s]"), host_path.c_str());
-        trace::info(_X("Dotnet path: [%s]"), dotnet_root.c_str());
-        trace::info(_X("App path: [%s]"), app_path.c_str());
+        TRACE_INFO(_X("Invoking fx resolver [%s] v2"), fxr_path.c_str());
+        TRACE_INFO(_X("Host path: [%s]"), host_path.c_str());
+        TRACE_INFO(_X("Dotnet path: [%s]"), dotnet_root.c_str());
+        TRACE_INFO(_X("App path: [%s]"), app_path.c_str());
 
         hostfxr_set_error_writer_fn set_error_writer_fn = reinterpret_cast<hostfxr_set_error_writer_fn>(pal::get_symbol(fxr, "hostfxr_set_error_writer"));
 
@@ -219,12 +219,12 @@ int exe_start(const int argc, const pal::char_t* argv[])
     {
         if (requires_v2_hostfxr_interface)
         {
-            trace::error(_X("The required library %s does not support relative app dll paths."), fxr_path.c_str());
+            TRACE_ERROR(_X("The required library %s does not support relative app dll paths."), fxr_path.c_str());
             rc = StatusCode::CoreHostEntryPointFailure;
         }
         else
         {
-            trace::info(_X("Invoking fx resolver [%s] v1"), fxr_path.c_str());
+            TRACE_INFO(_X("Invoking fx resolver [%s] v1"), fxr_path.c_str());
 
             // Previous corehost trace messages must be printed before calling trace::setup in hostfxr
             trace::flush();
@@ -238,7 +238,7 @@ int exe_start(const int argc, const pal::char_t* argv[])
             }
             else
             {
-                trace::error(_X("The required library %s does not contain the expected entry point."), fxr_path.c_str());
+                TRACE_ERROR(_X("The required library %s does not contain the expected entry point."), fxr_path.c_str());
                 rc = StatusCode::CoreHostEntryPointFailure;
             }
         }
@@ -282,12 +282,12 @@ int main(const int argc, const pal::char_t* argv[])
 
     if (trace::is_enabled())
     {
-        trace::info(_X("--- Invoked %s [version: %s, commit hash: %s] main = {"), CURHOST_TYPE, _STRINGIFY(CUREXE_PKG_VER), _STRINGIFY(REPO_COMMIT_HASH));
+        TRACE_INFO(_X("--- Invoked %s [version: %s, commit hash: %s] main = {"), CURHOST_TYPE, _STRINGIFY(CUREXE_PKG_VER), _STRINGIFY(REPO_COMMIT_HASH));
         for (int i = 0; i < argc; ++i)
         {
-            trace::info(_X("%s"), argv[i]);
+            TRACE_INFO(_X("%s"), argv[i]);
         }
-        trace::info(_X("}"));
+        TRACE_INFO(_X("}"));
     }
 
 #if defined(_WIN32) && defined(FEATURE_APPHOST)
@@ -303,14 +303,14 @@ int main(const int argc, const pal::char_t* argv[])
 
         if (!gui_errors_disabled)
         {
-            trace::verbose(_X("Redirecting errors to custom writer."));
+            TRACE_VERBOSE(_X("Redirecting errors to custom writer."));
             // If this is a GUI application, buffer errors to display them later. Without this any errors are effectively lost
             // unless the caller explicitly redirects stderr. This leads to bad experience of running the GUI app and nothing happening.
             trace::set_error_writer(buffering_trace_writer);
         }
         else
         {
-            trace::verbose(_X("Gui errors disabled, keeping errors in stderr."));
+            TRACE_VERBOSE(_X("Gui errors disabled, keeping errors in stderr."));
         }
     }
 #endif

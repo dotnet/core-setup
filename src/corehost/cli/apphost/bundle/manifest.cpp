@@ -25,8 +25,8 @@ manifest_header_t* manifest_header_t::read(FILE* stream)
     bundle_runner_t::read(&header->m_data, sizeof(header->m_data), stream);
     if (!header->is_valid())
     {
-        trace::error(_X("Failure processing application bundle."));
-        trace::error(_X("Manifest header version compatibility check failed"));
+        TRACE_ERROR(_X("Failure processing application bundle."));
+        TRACE_ERROR(_X("Manifest header version compatibility check failed"));
 
         throw StatusCode::BundleExtractionFailure;
     }

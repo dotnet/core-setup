@@ -85,7 +85,7 @@ pal::hresult_t coreclr_t::create(
 {
     if (!coreclr_bind(libcoreclr_path))
     {
-        trace::error(_X("Failed to bind to CoreCLR at '%s'"), libcoreclr_path.c_str());
+        TRACE_ERROR(_X("Failed to bind to CoreCLR at '%s'"), libcoreclr_path.c_str());
         return StatusCode::CoreClrBindFailure;
     }
 
@@ -246,7 +246,7 @@ bool coreclr_property_bag_t::add(const pal::char_t *key, const pal::char_t *valu
     }
     else
     {
-        trace::verbose(_X("Overwriting property %s. New value: '%s'. Old value: '%s'."), key, value, (*iter).second.c_str());
+        TRACE_VERBOSE(_X("Overwriting property %s. New value: '%s'. Old value: '%s'."), key, value, (*iter).second.c_str());
         _properties[key] = value;
         return false;
     }
@@ -280,14 +280,14 @@ void coreclr_property_bag_t::remove(const pal::char_t *key)
     if (iter == _properties.cend())
         return;
 
-    trace::verbose(_X("Removing property %s. Old value: '%s'."), key, (*iter).second.c_str());
+    TRACE_VERBOSE(_X("Removing property %s. Old value: '%s'."), key, (*iter).second.c_str());
     _properties.erase(iter);
 }
 
 void coreclr_property_bag_t::log_properties() const
 {
     for (auto &kv : _properties)
-        trace::verbose(_X("Property %s = %s"), kv.first.c_str(), kv.second.c_str());
+        TRACE_VERBOSE(_X("Property %s = %s"), kv.first.c_str(), kv.second.c_str());
 }
 
 int coreclr_property_bag_t::count() const

@@ -101,7 +101,7 @@ namespace
                 return false;
             }
 
-            trace::verbose(_X("Parsed known arg %s = %s"), arg.c_str(), argv[arg_i + 1]);
+            TRACE_VERBOSE(_X("Parsed known arg %s = %s"), arg.c_str(), argv[arg_i + 1]);
             (*opts)[*iter].push_back(argv[arg_i + 1]);
 
             // Increment for both the option and its value.
@@ -130,11 +130,11 @@ namespace
         int num_parsed = 0;
         if (!parse_known_args(argc - argoff, &argv[argoff], known_opts, &opts, &num_parsed))
         {
-            trace::error(_X("Failed to parse supported options or their values:"));
+            TRACE_ERROR(_X("Failed to parse supported options or their values:"));
             for (const auto& opt : known_opts)
             {
                 const host_option &arg = get_host_option(opt);
-                trace::error(_X("  %-37s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
+                TRACE_ERROR(_X("  %-37s  %s"), (arg.option + _X(" ") + arg.argument).c_str(), arg.description.c_str());
             }
             return StatusCode::InvalidArgFailure;
         }
@@ -148,7 +148,7 @@ namespace
         }
         else
         {
-            trace::verbose(_X("Using the provided arguments to determine the application to execute."));
+            TRACE_VERBOSE(_X("Using the provided arguments to determine the application to execute."));
             if (*new_argoff >= argc)
             {
                 command_line::print_muxer_usage(!is_sdk_dir_present(host_info.dotnet_root));
@@ -160,7 +160,7 @@ namespace
             bool is_app_managed = ends_with(app_candidate, _X(".dll"), false) || ends_with(app_candidate, _X(".exe"), false);
             if (!is_app_managed)
             {
-                trace::verbose(_X("Application '%s' is not a managed executable."), app_candidate.c_str());
+                TRACE_VERBOSE(_X("Application '%s' is not a managed executable."), app_candidate.c_str());
                 if (!exec_mode)
                 {
                     // Route to CLI.
@@ -171,7 +171,7 @@ namespace
             doesAppExist = pal::realpath(&app_candidate);
             if (!doesAppExist)
             {
-                trace::verbose(_X("Application '%s' does not exist."), app_candidate.c_str());
+                TRACE_VERBOSE(_X("Application '%s' does not exist."), app_candidate.c_str());
                 if (!exec_mode)
                 {
                     // Route to CLI.
@@ -182,7 +182,7 @@ namespace
             if (!is_app_managed && doesAppExist)
             {
                 assert(exec_mode == true);
-                trace::error(_X("dotnet exec needs a managed .dll or .exe extension. The application specified was '%s'"), app_candidate.c_str());
+                TRACE_ERROR(_X("dotnet exec needs a managed .dll or .exe extension. The application specified was '%s'"), app_candidate.c_str());
                 return StatusCode::InvalidArgFailure;
             }
         }
@@ -190,7 +190,7 @@ namespace
         // App is managed executable.
         if (!doesAppExist)
         {
-            trace::error(_X("The application to execute does not exist: '%s'"), app_candidate.c_str());
+            TRACE_ERROR(_X("The application to execute does not exist: '%s'"), app_candidate.c_str());
             return StatusCode::InvalidArgFailure;
         }
 
@@ -231,20 +231,20 @@ int command_line::parse_args_for_mode(
     if (mode == host_mode_t::split_fx)
     {
         // Invoked as corehost
-        trace::verbose(_X("--- Executing in split/FX mode..."));
+        TRACE_VERBOSE(_X("--- Executing in split/FX mode..."));
         result = parse_args(host_info, argoff, argc, argv, false, mode, new_argoff, app_candidate, opts);
     }
     else if (mode == host_mode_t::apphost)
     {
         // Invoked from the application base.
-        trace::verbose(_X("--- Executing in a native executable mode..."));
+        TRACE_VERBOSE(_X("--- Executing in a native executable mode..."));
         result = parse_args(host_info, argoff, argc, argv, false, mode, new_argoff, app_candidate, opts);
     }
     else
     {
         // Invoked as the dotnet.exe muxer.
         assert(mode == host_mode_t::muxer);
-        trace::verbose(_X("--- Executing in muxer mode..."));
+        TRACE_VERBOSE(_X("--- Executing in muxer mode..."));
 
         if (argc <= argoff)
         {

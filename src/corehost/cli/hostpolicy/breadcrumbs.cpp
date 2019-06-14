@@ -23,12 +23,12 @@ breadcrumb_writer_t::breadcrumb_writer_t(std::unordered_set<pal::string_t> &file
 // thread to write breadcrumbs.
 std::shared_ptr<breadcrumb_writer_t> breadcrumb_writer_t::begin_write(std::unordered_set<pal::string_t> &files)
 {
-    trace::verbose(_X("--- Begin breadcrumb write"));
+    TRACE_VERBOSE(_X("--- Begin breadcrumb write"));
 
     auto instance = std::make_shared<breadcrumb_writer_t>(files);
     if (instance->m_breadcrumb_store.empty())
     {
-        trace::verbose(_X("Breadcrumb store was not obtained... skipping write."));
+        TRACE_VERBOSE(_X("Breadcrumb store was not obtained... skipping write."));
         return nullptr;
     }
 
@@ -36,7 +36,7 @@ std::shared_ptr<breadcrumb_writer_t> breadcrumb_writer_t::begin_write(std::unord
     instance->m_threads_instance = instance;
 
     instance->m_thread = std::thread(write_worker_callback, instance.get());
-    trace::verbose(_X("Breadcrumbs will be written using a background thread"));
+    TRACE_VERBOSE(_X("Breadcrumbs will be written using a background thread"));
 
     return instance;
 }
@@ -59,7 +59,7 @@ void breadcrumb_writer_t::write_callback()
             }
         }
     }
-    trace::verbose(_X("--- End breadcrumb write %d"), successful);
+    TRACE_VERBOSE(_X("--- End breadcrumb write %d"), successful);
 
     // Clear reference to this object for the thread.
     m_threads_instance.reset();
@@ -73,12 +73,12 @@ void breadcrumb_writer_t::write_worker_callback(breadcrumb_writer_t* p_this)
     assert(p_this->m_threads_instance.get() == p_this);
     try
     {
-        trace::verbose(_X("Breadcrumb thread write callback..."));
+        TRACE_VERBOSE(_X("Breadcrumb thread write callback..."));
         p_this->write_callback();
     }
     catch (...)
     {
-        trace::warning(_X("An unexpected exception was thrown while leaving breadcrumbs"));
+        TRACE_WARNING(_X("An unexpected exception was thrown while leaving breadcrumbs"));
     }
 }
 
@@ -87,10 +87,10 @@ void breadcrumb_writer_t::end_write()
 {
     if (m_thread.joinable())
     {
-        trace::verbose(_X("Waiting for breadcrumb thread to exit..."));
+        TRACE_VERBOSE(_X("Waiting for breadcrumb thread to exit..."));
 
         // Block on the thread to exit.
         m_thread.join();
     }
-    trace::verbose(_X("Done waiting for breadcrumb thread to exit..."));
+    TRACE_VERBOSE(_X("Done waiting for breadcrumb thread to exit..."));
 }

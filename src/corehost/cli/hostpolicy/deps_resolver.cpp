@@ -53,7 +53,7 @@ void add_unique_path(
         return;
     }
 
-    trace::verbose(_X("Adding to %s path: %s"), deps_entry_t::s_known_asset_types[asset_type], real.c_str());
+    TRACE_VERBOSE(_X("Adding to %s path: %s"), deps_entry_t::s_known_asset_types[asset_type], real.c_str());
 
     if (starts_with(real, svc_dir, false))
     {
@@ -99,7 +99,7 @@ void deps_resolver_t::add_tpa_asset(
     name_to_resolved_asset_map_t::iterator existing = items->find(resolved_asset.asset.name);
     if (existing == items->end())
     {
-        trace::verbose(_X("Adding tpa entry: %s, AssemblyVersion: %s, FileVersion: %s"),
+        TRACE_VERBOSE(_X("Adding tpa entry: %s, AssemblyVersion: %s, FileVersion: %s"),
             resolved_asset.resolved_path.c_str(),
             resolved_asset.asset.assembly_version.as_str().c_str(),
             resolved_asset.asset.file_version.as_str().c_str());
@@ -118,7 +118,7 @@ void deps_resolver_t::get_dir_assemblies(
     name_to_resolved_asset_map_t* items)
 {
     version_t empty;
-    trace::verbose(_X("Adding files from %s dir %s"), dir_name.c_str(), dir.c_str());
+    TRACE_VERBOSE(_X("Adding files from %s dir %s"), dir_name.c_str(), dir.c_str());
 
     // Managed extensions in priority order, pick DLL over EXE and NI over IL.
     const pal::string_t managed_ext[] = { _X(".ni.dll"), _X(".dll"), _X(".ni.exe"), _X(".exe") };
@@ -149,7 +149,7 @@ void deps_resolver_t::get_dir_assemblies(
             // Already added entry for this asset, by priority order skip this ext
             if (items->count(file_name))
             {
-                trace::verbose(_X("Skipping %s because the %s already exists in %s assemblies"),
+                TRACE_VERBOSE(_X("Skipping %s because the %s already exists in %s assemblies"),
                     file.c_str(),
                     items->find(file_name)->second.asset.relative_path.c_str(),
                     dir_name.c_str());
@@ -165,7 +165,7 @@ void deps_resolver_t::get_dir_assemblies(
             }
             file_path.append(file);
 
-            trace::verbose(_X("Adding %s to %s assembly set from %s"),
+            TRACE_VERBOSE(_X("Adding %s to %s assembly set from %s"),
                 file_name.c_str(),
                 dir_name.c_str(),
                 file_path.c_str());
@@ -262,7 +262,7 @@ void deps_resolver_t::setup_probe_config(
 
     if (trace::is_enabled())
     {
-        trace::verbose(_X("-- Listing probe configurations..."));
+        TRACE_VERBOSE(_X("-- Listing probe configurations..."));
         for (const auto& pc : m_probes)
         {
             pc.print();
@@ -288,17 +288,17 @@ bool deps_resolver_t::probe_deps_entry(const deps_entry_t& entry, const pal::str
 
     for (const auto& config : m_probes)
     {
-        trace::verbose(_X("  Considering entry [%s/%s/%s], probe dir [%s], probe fx level:%d, entry fx level:%d"),
+        TRACE_VERBOSE(_X("  Considering entry [%s/%s/%s], probe dir [%s], probe fx level:%d, entry fx level:%d"),
             entry.library_name.c_str(), entry.library_version.c_str(), entry.asset.relative_path.c_str(), config.probe_dir.c_str(), config.fx_level, fx_level);
 
         if (config.only_serviceable_assets && !entry.is_serviceable)
         {
-            trace::verbose(_X("    Skipping... not serviceable asset"));
+            TRACE_VERBOSE(_X("    Skipping... not serviceable asset"));
             continue;
         }
         if (config.only_runtime_assets && entry.asset_type != deps_entry_t::asset_types::runtime)
         {
-            trace::verbose(_X("    Skipping... not runtime asset"));
+            TRACE_VERBOSE(_X("    Skipping... not runtime asset"));
             continue;
         }
         pal::string_t probe_dir = config.probe_dir;
@@ -318,12 +318,12 @@ bool deps_resolver_t::probe_deps_entry(const deps_entry_t& entry, const pal::str
                 // No need to check further for the exact asset relative sub path.
                 if (config.probe_deps_json->has_package(entry.library_name, entry.library_version) && entry.to_dir_path(probe_dir, candidate))
                 {
-                    trace::verbose(_X("    Probed deps json and matched '%s'"), candidate->c_str());
+                    TRACE_VERBOSE(_X("    Probed deps json and matched '%s'"), candidate->c_str());
                     return true;
                 }
             }
 
-            trace::verbose(_X("    Skipping... not found in deps json."));
+            TRACE_VERBOSE(_X("    Skipping... not found in deps json."));
         }
         else if (config.is_app())
         {
@@ -336,7 +336,7 @@ bool deps_resolver_t::probe_deps_entry(const deps_entry_t& entry, const pal::str
                 {
                     if (entry.to_rel_path(deps_dir, candidate))
                     {
-                        trace::verbose(_X("    Probed deps dir and matched '%s'"), candidate->c_str());
+                        TRACE_VERBOSE(_X("    Probed deps dir and matched '%s'"), candidate->c_str());
                         return true;
                     }
                 }
@@ -345,21 +345,21 @@ bool deps_resolver_t::probe_deps_entry(const deps_entry_t& entry, const pal::str
                     // Non-rid assets, lookup in the published dir.
                     if (entry.to_dir_path(deps_dir, candidate))
                     {
-                        trace::verbose(_X("    Probed deps dir and matched '%s'"), candidate->c_str());
+                        TRACE_VERBOSE(_X("    Probed deps dir and matched '%s'"), candidate->c_str());
                         return true;
                     }
                 }
             }
 
-            trace::verbose(_X("    Skipping... not found in deps dir '%s'"), deps_dir.c_str());
+            TRACE_VERBOSE(_X("    Skipping... not found in deps dir '%s'"), deps_dir.c_str());
         }
         else if (entry.to_full_path(probe_dir, candidate))
         {
-            trace::verbose(_X("    Probed package dir and matched '%s'"), candidate->c_str());
+            TRACE_VERBOSE(_X("    Probed package dir and matched '%s'"), candidate->c_str());
             return true;
         }
 
-        trace::verbose(_X("    Skipping... not found in probe dir '%s'"), probe_dir.c_str());
+        TRACE_VERBOSE(_X("    Skipping... not found in probe dir '%s'"), probe_dir.c_str());
         // continue to try next probe config
     }
     return false;
@@ -374,32 +374,32 @@ bool report_missing_assembly_in_manifest(const deps_entry_t& entry, bool continu
         // Treat missing resource assemblies as informational.
         continueResolving = true;
 
-        trace::info(MissingAssemblyMessage.c_str(), _X("Info"),
+        TRACE_INFO(MissingAssemblyMessage.c_str(), _X("Info"),
             entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.asset.relative_path.c_str());
 
         if (showManifestListMessage)
         {
-            trace::info(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
+            TRACE_INFO(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
         }
     }
     else if (continueResolving)
     {
-        trace::warning(MissingAssemblyMessage.c_str(), _X("Warning"),
+        TRACE_WARNING(MissingAssemblyMessage.c_str(), _X("Warning"),
             entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.asset.relative_path.c_str());
 
         if (showManifestListMessage)
         {
-            trace::warning(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
+            TRACE_WARNING(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
         }
     }
     else
     {
-        trace::error(MissingAssemblyMessage.c_str(), _X("Error"),
+        TRACE_ERROR(MissingAssemblyMessage.c_str(), _X("Error"),
             entry.deps_file.c_str(), entry.library_name.c_str(), entry.library_version.c_str(), entry.asset.relative_path.c_str());
 
         if (showManifestListMessage)
         {
-            trace::error(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
+            TRACE_ERROR(ManifestListMessage.c_str(), entry.runtime_store_manifest_list.c_str());
         }
     }
 
@@ -431,7 +431,7 @@ bool deps_resolver_t::resolve_tpa_list(
             return true;
         }
 
-        trace::info(_X("Processing TPA for deps entry [%s, %s, %s]"), entry.library_name.c_str(), entry.library_version.c_str(), entry.asset.relative_path.c_str());
+        TRACE_INFO(_X("Processing TPA for deps entry [%s, %s, %s]"), entry.library_name.c_str(), entry.library_version.c_str(), entry.asset.relative_path.c_str());
 
         pal::string_t resolved_path;
 
@@ -452,7 +452,7 @@ bool deps_resolver_t::resolve_tpa_list(
             // Verify the extension is the same as the previous verified entry
             if (get_deps_filename(entry.asset.relative_path) != get_filename(existing->second.resolved_path))
             {
-                trace::error(
+                TRACE_ERROR(
                     DuplicateAssemblyWithDifferentExtensionMessage.c_str(),
                     entry.deps_file.c_str(),
                     entry.library_name.c_str(),
@@ -474,7 +474,7 @@ bool deps_resolver_t::resolve_tpa_list(
                     // If the path is the same, then no need to replace
                     if (resolved_path != existing_entry->resolved_path)
                     {
-                        trace::verbose(_X("Replacing deps entry [%s, AssemblyVersion:%s, FileVersion:%s] with [%s, AssemblyVersion:%s, FileVersion:%s]"),
+                        TRACE_VERBOSE(_X("Replacing deps entry [%s, AssemblyVersion:%s, FileVersion:%s] with [%s, AssemblyVersion:%s, FileVersion:%s]"),
                             existing_entry->resolved_path.c_str(), existing_entry->asset.assembly_version.as_str().c_str(), existing_entry->asset.file_version.as_str().c_str(),
                             resolved_path.c_str(), entry.asset.assembly_version.as_str().c_str(), entry.asset.file_version.as_str().c_str());
 
@@ -635,14 +635,14 @@ void deps_resolver_t::resolve_additional_deps(const arguments_t& args, const dep
         {
             if (pal::file_exists(additional_deps_path))
             {
-                trace::verbose(_X("Using specified additional deps.json: '%s'"), 
+                TRACE_VERBOSE(_X("Using specified additional deps.json: '%s'"), 
                     additional_deps_path.c_str());
 
                 m_additional_deps_files.push_back(additional_deps_path);
             }
             else
             {
-                trace::warning(_X("Warning: Specified additional deps.json does not exist: '%s'"), 
+                TRACE_WARNING(_X("Warning: Specified additional deps.json does not exist: '%s'"), 
                     additional_deps_path.c_str());
             }
         }
@@ -658,7 +658,7 @@ void deps_resolver_t::resolve_additional_deps(const arguments_t& args, const dep
                 pal::string_t additional_deps_path_fx = additional_deps_path;
                 append_path(&additional_deps_path_fx, _X("shared"));
                 append_path(&additional_deps_path_fx, m_fx_definitions[i]->get_name().c_str());
-                trace::verbose(_X("Searching for most compatible deps directory in [%s]"), additional_deps_path_fx.c_str());
+                TRACE_VERBOSE(_X("Searching for most compatible deps directory in [%s]"), additional_deps_path_fx.c_str());
                 std::vector<pal::string_t> deps_dirs;
                 pal::readdir_onlydirectories(additional_deps_path_fx, &deps_dirs);
 
@@ -679,11 +679,11 @@ void deps_resolver_t::resolve_additional_deps(const arguments_t& args, const dep
 
                 if (most_compatible_deps_folder_version == fx_ver_t())
                 {
-                    trace::verbose(_X("No additional deps directory less than or equal to [%s] found with same major and minor version."), framework_found_version.as_str().c_str());
+                    TRACE_VERBOSE(_X("No additional deps directory less than or equal to [%s] found with same major and minor version."), framework_found_version.as_str().c_str());
                 }
                 else
                 {
-                    trace::verbose(_X("Found additional deps directory [%s]"), most_compatible_deps_folder_version.as_str().c_str());
+                    TRACE_VERBOSE(_X("Found additional deps directory [%s]"), most_compatible_deps_folder_version.as_str().c_str());
 
                     append_path(&additional_deps_path_fx, most_compatible_deps_folder_version.as_str().c_str());
 
@@ -696,7 +696,7 @@ void deps_resolver_t::resolve_additional_deps(const arguments_t& args, const dep
                         append_path(&json_full_path, json_file.c_str());
                         m_additional_deps_files.push_back(json_full_path);
 
-                        trace::verbose(_X("Using specified additional deps.json: '%s'"),
+                        TRACE_VERBOSE(_X("Using specified additional deps.json: '%s'"),
                             json_full_path.c_str());
                     }
                 }
@@ -786,7 +786,7 @@ bool deps_resolver_t::resolve_probe_dirs(
             return true;
         }
 
-        trace::verbose(_X("Processing native/culture for deps entry [%s, %s, %s]"), 
+        TRACE_VERBOSE(_X("Processing native/culture for deps entry [%s, %s, %s]"), 
             entry.library_name.c_str(), entry.library_version.c_str(), entry.asset.relative_path.c_str());
 
         if (probe_deps_entry(entry, deps_dir, fx_level, &candidate))

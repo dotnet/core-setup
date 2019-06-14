@@ -13,7 +13,7 @@ void fx_resolver_t::display_incompatible_framework_error(
     const pal::string_t& higher,
     const fx_reference_t& lower)
 {
-    trace::error(_X("The specified framework '%s', version '%s', apply_patches=%d, version_compatibility_range=%s cannot roll-forward to the previously referenced version '%s'."),
+    TRACE_ERROR(_X("The specified framework '%s', version '%s', apply_patches=%d, version_compatibility_range=%s cannot roll-forward to the previously referenced version '%s'."),
         lower.get_fx_name().c_str(),
         lower.get_fx_version().c_str(),
         lower.get_apply_patches(),
@@ -27,7 +27,7 @@ void fx_resolver_t::display_compatible_framework_trace(
 {
     if (trace::is_enabled())
     {
-        trace::verbose(_X("--- The specified framework '%s', version '%s', apply_patches=%d, version_compatibility_range=%s is compatible with the previously referenced version '%s'."),
+        TRACE_VERBOSE(_X("--- The specified framework '%s', version '%s', apply_patches=%d, version_compatibility_range=%s is compatible with the previously referenced version '%s'."),
             lower.get_fx_name().c_str(),
             lower.get_fx_version().c_str(),
             lower.get_apply_patches(),
@@ -42,7 +42,7 @@ void fx_resolver_t::display_retry_framework_trace(
 {
     if (trace::is_enabled())
     {
-        trace::verbose(_X("--- Restarting all framework resolution because the previously resolved framework '%s', version '%s' must be re-resolved with the new version '%s', apply_patches=%d, version_compatibility_range=%s, roll_to_highest_version=%d ."),
+        TRACE_VERBOSE(_X("--- Restarting all framework resolution because the previously resolved framework '%s', version '%s' must be re-resolved with the new version '%s', apply_patches=%d, version_compatibility_range=%s, roll_to_highest_version=%d ."),
             fx_existing.get_fx_name().c_str(),
             fx_existing.get_fx_version().c_str(),
             fx_new.get_fx_version().c_str(),
@@ -58,7 +58,7 @@ void fx_resolver_t::display_summary_of_frameworks(
 {
     if (trace::is_enabled())
     {
-        trace::verbose(_X("--- Summary of all frameworks:"));
+        TRACE_VERBOSE(_X("--- Summary of all frameworks:"));
 
         bool is_app = true;
         for (const auto& fx : fx_definitions)
@@ -72,7 +72,7 @@ void fx_resolver_t::display_summary_of_frameworks(
                 auto newest_ref = newest_references.find(fx->get_name());
                 assert(newest_ref != newest_references.end());
 
-                trace::verbose(_X("     framework:'%s', lowest requested version='%s', found version='%s', effective reference version='%s' apply_patches=%d, version_compatibility_range=%s, roll_to_highest_version=%d, folder=%s"),
+                TRACE_VERBOSE(_X("     framework:'%s', lowest requested version='%s', found version='%s', effective reference version='%s' apply_patches=%d, version_compatibility_range=%s, roll_to_highest_version=%d, folder=%s"),
                     fx->get_name().c_str(),
                     fx->get_requested_version().c_str(),
                     fx->get_found_version().c_str(),
@@ -113,38 +113,38 @@ void fx_resolver_t::display_missing_framework_error(
     // Display the error message about missing FX.
     if (fx_version.length())
     {
-        trace::error(_X("The specified framework '%s', version '%s' was not found."), fx_name.c_str(), fx_version.c_str());
+        TRACE_ERROR(_X("The specified framework '%s', version '%s' was not found."), fx_name.c_str(), fx_version.c_str());
     }
     else
     {
-        trace::error(_X("The specified framework '%s' was not found."), fx_name.c_str());
+        TRACE_ERROR(_X("The specified framework '%s' was not found."), fx_name.c_str());
     }
 
     if (framework_infos.size())
     {
-        trace::error(_X("  - The following frameworks were found:"));
+        TRACE_ERROR(_X("  - The following frameworks were found:"));
         for (const framework_info& info : framework_infos)
         {
-            trace::error(_X("      %s at [%s]"), info.version.as_str().c_str(), info.path.c_str());
+            TRACE_ERROR(_X("      %s at [%s]"), info.version.as_str().c_str(), info.path.c_str());
         }
     }
     else
     {
-        trace::error(_X("  - No frameworks were found."));
+        TRACE_ERROR(_X("  - No frameworks were found."));
     }
 
-    trace::error(_X(""));
-    trace::error(_X("You can resolve the problem by installing the specified framework and/or SDK."));
-    trace::error(_X(""));
-    trace::error(_X("The .NET Core frameworks can be found at:"));
-    trace::error(_X("  - %s"), DOTNET_CORE_DOWNLOAD_URL);
+    TRACE_ERROR(_X(""));
+    TRACE_ERROR(_X("You can resolve the problem by installing the specified framework and/or SDK."));
+    TRACE_ERROR(_X(""));
+    TRACE_ERROR(_X("The .NET Core frameworks can be found at:"));
+    TRACE_ERROR(_X("  - %s"), DOTNET_CORE_DOWNLOAD_URL);
 }
 
 void fx_resolver_t::display_incompatible_loaded_framework_error(
     const pal::string_t& loaded_version,
     const fx_reference_t& fx_ref)
 {
-    trace::error(_X("The specified framework '%s', version '%s', apply_patches=%d, version_compatibility_range=%s is incompatible with the previously loaded version '%s'."),
+    TRACE_ERROR(_X("The specified framework '%s', version '%s', apply_patches=%d, version_compatibility_range=%s is incompatible with the previously loaded version '%s'."),
         fx_ref.get_fx_name().c_str(),
         fx_ref.get_fx_version().c_str(),
         fx_ref.get_apply_patches(),
@@ -154,5 +154,5 @@ void fx_resolver_t::display_incompatible_loaded_framework_error(
 
 void fx_resolver_t::display_missing_loaded_framework_error(const pal::string_t& fx_name)
 {
-    trace::error(_X("The specified framework '%s' is not present in the previously loaded runtime."), fx_name.c_str());
+    TRACE_ERROR(_X("The specified framework '%s' is not present in the previously loaded runtime."), fx_name.c_str());
 }

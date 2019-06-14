@@ -9,16 +9,19 @@
 
 namespace trace
 {
+    enum class verbosity {
+        Disabled = 0,
+        Error = 1,
+        Warning = 2,
+        Info = 3,
+        Verbose = 4,
+    };
+    trace::verbosity current_verbosity() PURE_FUNCTION;
+
     void setup();
+
     bool enable();
-    bool is_enabled();
-    void verbose(const pal::char_t* format, ...);
-    void info(const pal::char_t* format, ...);
-    void warning(const pal::char_t* format, ...);
-    void error(const pal::char_t* format, ...);
-    void println(const pal::char_t* format, ...);
-    void println();
-    void flush();
+    inline bool is_enabled() { return current_verbosity() != verbosity::Disabled; }
 
     typedef void (*error_writer_fn)(const pal::char_t* message);
 
@@ -31,6 +34,35 @@ namespace trace
 
     // Returns the currently set callback for error writing
     error_writer_fn get_error_writer();
+
+    void trace(const pal::char_t* format, ...) COLD_FUNCTION;
+    void trace_error(const pal::char_t* format, ...) COLD_FUNCTION;
+
+    void println(const pal::char_t* format, ...);
+    void println();
+    void flush();
 };
+
+// Tracing is performed with a macro so that arguments to trace::trace() and
+// trace::trace_error() can be evaluated lazily depending on the current
+// verbosity level.
+#define TRACE_LAZY_DETAIL(Verbosity, ...)                  \
+    {                                                      \
+        if (Verbosity > trace::current_verbosity())        \
+        {                                                  \
+            trace::trace(__VA_ARGS__);                     \
+        }                                                  \
+    }
+#define TRACE_WARNING(Args...) TRACE_LAZY_DETAIL(trace::verbosity::Warning, Args)
+#define TRACE_INFO(Args...)    TRACE_LAZY_DETAIL(trace::verbosity::Info, Args)
+#define TRACE_VERBOSE(Args...) TRACE_LAZY_DETAIL(trace::verbosity::Verbose, Args)
+
+// Error conditions should be rare, so move the call to the tracing function
+// to a lambda that's never inlined and far away from the happy path.  This
+// reduces the pressure on the instruction cache, branch predictors, and
+// prefetchers.  (This optimization requires compiler support, but is just
+// a pass-through otherwise.)
+#define TRACE_ERROR(...)                                                 \
+    [&]() COLD_FUNCTION NO_INLINE { trace::trace_error(__VA_ARGS__); }()
 
 #endif // TRACE_H

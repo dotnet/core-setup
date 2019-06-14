@@ -24,8 +24,8 @@ file_entry_t* file_entry_t::read(FILE* stream)
     bundle_runner_t::read(&entry->m_data, sizeof(entry->m_data), stream);
     if (!entry->is_valid())
     {
-        trace::error(_X("Failure processing application bundle; possible file corruption."));
-        trace::error(_X("Invalid FileEntry detected."));
+        TRACE_ERROR(_X("Failure processing application bundle; possible file corruption."));
+        TRACE_ERROR(_X("Invalid FileEntry detected."));
         throw StatusCode::BundleExtractionFailure;
     }
 

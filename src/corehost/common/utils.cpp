@@ -25,7 +25,7 @@ bool coreclr_exists_in_dir(const pal::string_t& candidate)
 {
     pal::string_t test(candidate);
     append_path(&test, LIBCORECLR_NAME);
-    trace::verbose(_X("Checking if CoreCLR path exists=[%s]"), test.c_str());
+    TRACE_VERBOSE(_X("Checking if CoreCLR path exists=[%s]"), test.c_str());
     return pal::file_exists(test);
 }
 
@@ -330,7 +330,7 @@ bool get_file_path_from_env(const pal::char_t* env_key, pal::string_t* recv)
             recv->assign(file_path);
             return true;
         }
-        trace::verbose(_X("Did not find [%s] directory [%s]"), env_key, file_path.c_str());
+        TRACE_VERBOSE(_X("Did not find [%s] directory [%s]"), env_key, file_path.c_str());
     }
 
     return false;
@@ -396,7 +396,7 @@ void get_runtime_config_paths(const pal::string_t& path, const pal::string_t& na
     append_path(&dev_json_path, dev_json_name.c_str());
     dev_cfg->assign(dev_json_path);
 
-    trace::verbose(_X("Runtime config is cfg=%s dev=%s"), json_path.c_str(), dev_json_path.c_str());
+    TRACE_VERBOSE(_X("Runtime config is cfg=%s dev=%s"), json_path.c_str(), dev_json_path.c_str());
 }
 
 pal::string_t get_dotnet_root_from_fxr_path(const pal::string_t &fxr_path)

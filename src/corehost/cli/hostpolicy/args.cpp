@@ -118,7 +118,7 @@ bool init_arguments(
     args.managed_application = managed_application_path;
     if (!args.managed_application.empty() && !pal::realpath(&args.managed_application))
     {
-        trace::error(_X("Failed to locate managed application [%s]"), args.managed_application.c_str());
+        TRACE_ERROR(_X("Failed to locate managed application [%s]"), args.managed_application.c_str());
         return false;
     }
     args.app_root = get_directory(args.managed_application);

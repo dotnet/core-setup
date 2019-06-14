@@ -48,7 +48,7 @@ roll_forward_option roll_forward_option_from_string(const pal::string_t& value)
         }
     }
 
-    trace::error(_X("Unrecognized roll forward setting value '%s'."), value.c_str());
+    TRACE_ERROR(_X("Unrecognized roll forward setting value '%s'."), value.c_str());
     return roll_forward_option::__Last;
 }
 

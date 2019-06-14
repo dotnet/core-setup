@@ -13,8 +13,8 @@ void bundle_runner_t::seek(FILE* stream, long offset, int origin)
 {
     if (fseek(stream, offset, origin) != 0)
     {
-        trace::error(_X("Failure processing application bundle; possible file corruption."));
-        trace::error(_X("I/O seek failure within the bundle."));
+        TRACE_ERROR(_X("Failure processing application bundle; possible file corruption."));
+        TRACE_ERROR(_X("I/O seek failure within the bundle."));
         throw StatusCode::BundleExtractionIOError;
     }
 }
@@ -23,8 +23,8 @@ void bundle_runner_t::write(const void* buf, size_t size, FILE *stream)
 {
     if (fwrite(buf, 1, size, stream) != size)
     {
-        trace::error(_X("Failure extracting contents of the application bundle."));
-        trace::error(_X("I/O failure when writing extracted files."));
+        TRACE_ERROR(_X("Failure extracting contents of the application bundle."));
+        TRACE_ERROR(_X("I/O failure when writing extracted files."));
         throw StatusCode::BundleExtractionIOError;
     }
 }
@@ -33,8 +33,8 @@ void bundle_runner_t::read(void* buf, size_t size, FILE* stream)
 {
     if (fread(buf, 1, size, stream) != size)
     {
-        trace::error(_X("Failure processing application bundle; possible file corruption."));
-        trace::error(_X("I/O failure reading contents of the bundle."));
+        TRACE_ERROR(_X("Failure processing application bundle; possible file corruption."));
+        TRACE_ERROR(_X("I/O failure reading contents of the bundle."));
         throw StatusCode::BundleExtractionIOError;
     }
 }
@@ -58,8 +58,8 @@ size_t bundle_runner_t::get_path_length(int8_t first_byte, FILE* stream)
         if (second_byte & 0x80)
         {
             // There can be no more than two bytes in path_length
-            trace::error(_X("Failure processing application bundle; possible file corruption."));
-            trace::error(_X("Path length encoding read beyond two bytes"));
+            TRACE_ERROR(_X("Failure processing application bundle; possible file corruption."));
+            TRACE_ERROR(_X("Path length encoding read beyond two bytes"));
 
             throw StatusCode::BundleExtractionFailure;
         }
@@ -69,8 +69,8 @@ size_t bundle_runner_t::get_path_length(int8_t first_byte, FILE* stream)
 
     if (length <= 0 || length > PATH_MAX)
     {
-        trace::error(_X("Failure processing application bundle; possible file corruption."));
-        trace::error(_X("Path length is zero or too long"));
+        TRACE_ERROR(_X("Failure processing application bundle; possible file corruption."));
+        TRACE_ERROR(_X("Path length is zero or too long"));
         throw StatusCode::BundleExtractionFailure;
     }
 
@@ -117,8 +117,8 @@ static void create_directory_tree(const pal::string_t &path)
             return;
         }
 
-        trace::error(_X("Failure processing application bundle."));
-        trace::error(_X("Failed to create directory [%s] for extracting bundled files"), path.c_str());
+        TRACE_ERROR(_X("Failure processing application bundle."));
+        TRACE_ERROR(_X("Failed to create directory [%s] for extracting bundled files"), path.c_str());
         throw StatusCode::BundleExtractionIOError;
     }
 }
@@ -145,13 +145,13 @@ static void remove_directory_tree(const pal::string_t& path)
     {
         if (!pal::remove(file.c_str()))
         {
-            trace::warning(_X("Failed to remove temporary file [%s]."), file.c_str());
+            TRACE_WARNING(_X("Failed to remove temporary file [%s]."), file.c_str());
         }
     }
 
     if (!pal::rmdir(path.c_str()))
     {
-        trace::warning(_X("Failed to remove temporary directory [%s]."), path.c_str());
+        TRACE_WARNING(_X("Failed to remove temporary directory [%s]."), path.c_str());
     }
 }
 
@@ -160,8 +160,8 @@ void bundle_runner_t::reopen_host_for_reading()
     m_bundle_stream = pal::file_open(m_bundle_path, _X("rb"));
     if (m_bundle_stream == nullptr)
     {
-        trace::error(_X("Failure processing application bundle."));
-        trace::error(_X("Couldn't open host binary for reading contents"));
+        TRACE_ERROR(_X("Failure processing application bundle."));
+        TRACE_ERROR(_X("Couldn't open host binary for reading contents"));
         throw StatusCode::BundleExtractionIOError;
     }
 }
@@ -177,7 +177,7 @@ bool bundle_runner_t::process_manifest_footer(int64_t &header_offset)
 
     if (!footer->is_valid())
     {
-        trace::info(_X("This executable is not recognized as a .net core bundle."));
+        TRACE_INFO(_X("This executable is not recognized as a .net core bundle."));
         return false;
     }
 
@@ -206,8 +206,8 @@ void bundle_runner_t::determine_extraction_dir()
     {
         if (!pal::get_temp_directory(m_extraction_dir))
         {
-            trace::error(_X("Failure processing application bundle."));
-            trace::error(_X("Failed to determine location for extracting embedded files"));
+            TRACE_ERROR(_X("Failure processing application bundle."));
+            TRACE_ERROR(_X("Failed to determine location for extracting embedded files"));
             throw StatusCode::BundleExtractionFailure;
         }
 
@@ -218,7 +218,7 @@ void bundle_runner_t::determine_extraction_dir()
     append_path(&m_extraction_dir, host_name.c_str());
     append_path(&m_extraction_dir, m_bundle_id.c_str());
 
-    trace::info(_X("Files embedded within the bundled will be extracted to [%s] directory"), m_extraction_dir.c_str());
+    TRACE_INFO(_X("Files embedded within the bundled will be extracted to [%s] directory"), m_extraction_dir.c_str());
 }
 
 // Compute the worker extraction location for this process, before the 
@@ -234,7 +234,7 @@ void bundle_runner_t::create_working_extraction_dir()
 
     create_directory_tree(m_working_extraction_dir);
 
-    trace::info(_X("Temporary directory used to extract bundled files is [%s]"), m_working_extraction_dir.c_str());
+    TRACE_INFO(_X("Temporary directory used to extract bundled files is [%s]"), m_working_extraction_dir.c_str());
 }
 
 // Create a file to be extracted out on disk, including any intermediate sub-directories.
@@ -254,8 +254,8 @@ FILE* bundle_runner_t::create_extraction_file(const pal::string_t& relative_path
 
     if (file == nullptr)
     {
-        trace::error(_X("Failure processing application bundle."));
-        trace::error(_X("Failed to open file [%s] for writing"), file_path.c_str());
+        TRACE_ERROR(_X("Failure processing application bundle."));
+        TRACE_ERROR(_X("Failed to open file [%s] for writing"), file_path.c_str());
         throw StatusCode::BundleExtractionIOError;
     }
 
@@ -358,14 +358,14 @@ StatusCode bundle_runner_t::extract()
             {
                 // Another process successfully extracted the dependencies
 
-                trace::info(_X("Extraction completed by another process, aborting current extracion."));
+                TRACE_INFO(_X("Extraction completed by another process, aborting current extracion."));
 
                 remove_directory_tree(m_working_extraction_dir);
                 return StatusCode::Success;
             }
 
-            trace::error(_X("Failure processing application bundle."));
-            trace::error(_X("Failed to commit extracted to files to directory [%s]"), m_extraction_dir.c_str());
+            TRACE_ERROR(_X("Failure processing application bundle."));
+            TRACE_ERROR(_X("Failed to commit extracted to files to directory [%s]"), m_extraction_dir.c_str());
             throw StatusCode::BundleExtractionFailure;
         }
 

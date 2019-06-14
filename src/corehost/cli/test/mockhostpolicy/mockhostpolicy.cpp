@@ -34,7 +34,7 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_load(host_interface_t* init)
 {
     trace::setup();
 
-    trace::verbose(_X("--- Invoked hostpolicy mock - corehost_load"));
+    TRACE_VERBOSE(_X("--- Invoked hostpolicy mock - corehost_load"));
 
     std::cout << "--- Invoked hostpolicy mock - corehost_load" << std::endl;
     std::cout << "mock version: " << init->version_hi << " " << init->version_lo << std::endl;
@@ -89,19 +89,19 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_load(host_interface_t* init)
 
 SHARED_API int HOSTPOLICY_CALLTYPE corehost_main(const int argc, const pal::char_t* argv[])
 {
-    trace::verbose(_X("--- Invoked hostpolicy mock - corehost_main"));
+    TRACE_VERBOSE(_X("--- Invoked hostpolicy mock - corehost_main"));
     return StatusCode::Success;
 }
 
 SHARED_API int HOSTPOLICY_CALLTYPE corehost_unload()
 {
-    trace::verbose(_X("--- Invoked hostpolicy mock - corehost_unload"));
+    TRACE_VERBOSE(_X("--- Invoked hostpolicy mock - corehost_unload"));
     return StatusCode::Success;
 }
 
 SHARED_API corehost_error_writer_fn HOSTPOLICY_CALLTYPE corehost_set_error_writer(corehost_error_writer_fn error_writer)
 {
-    trace::verbose(_X("--- Invoked hostpolicy mock - corehost_set_error_writer"));
+    TRACE_VERBOSE(_X("--- Invoked hostpolicy mock - corehost_set_error_writer"));
     return nullptr;
 }
 

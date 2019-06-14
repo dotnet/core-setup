@@ -30,7 +30,7 @@ pal::hresult_t get_load_in_memory_assembly_delegate(pal::dll_t handle, load_in_m
             pal::string_t mod_path;
             if (!pal::get_module_path(handle, &mod_path))
             {
-                trace::error(_X("Failed to resolve full path of the current mixed-mode module [%s]"), host_path.c_str());
+                TRACE_ERROR(_X("Failed to resolve full path of the current mixed-mode module [%s]"), host_path.c_str());
                 return StatusCode::LibHostCurExeFindFailure;
             }
 

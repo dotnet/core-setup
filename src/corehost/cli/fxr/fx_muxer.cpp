@@ -79,7 +79,7 @@ int load_hostpolicy(
     int rc = hostpolicy_resolver::load(lib_dir, h_host, hostpolicy_contract);
     if (rc != StatusCode::Success)
     {
-        trace::error(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, lib_dir.c_str());
+        TRACE_ERROR(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, lib_dir.c_str());
         return rc;
     }
 
@@ -103,7 +103,7 @@ static int execute_app(
 
         if (g_active_host_context != nullptr)
         {
-            trace::error(_X("Hosting components are already initialized. Re-initialization to execute an app is not allowed."));
+            TRACE_ERROR(_X("Hosting components are already initialized. Re-initialization to execute an app is not allowed."));
             return StatusCode::HostInvalidState;
         }
 
@@ -197,7 +197,7 @@ void get_runtime_config_paths_from_arg(const pal::string_t& arg, pal::string_t* 
     append_path(&json_path, json_name.c_str());
     append_path(&dev_json_path, dev_json_name.c_str());
 
-    trace::verbose(_X("Runtime config is cfg=%s dev=%s"), json_path.c_str(), dev_json_path.c_str());
+    TRACE_VERBOSE(_X("Runtime config is cfg=%s dev=%s"), json_path.c_str(), dev_json_path.c_str());
 
     dev_cfg->assign(dev_json_path);
     cfg->assign(json_path);
@@ -245,12 +245,12 @@ void append_probe_realpath(const pal::string_t& path, std::vector<pal::string_t>
             }
             else
             {
-                trace::verbose(_X("Ignoring host interpreted additional probing path %s as it does not exist."), probe_path.c_str());
+                TRACE_VERBOSE(_X("Ignoring host interpreted additional probing path %s as it does not exist."), probe_path.c_str());
             }
         }
         else
         {
-            trace::verbose(_X("Ignoring additional probing path %s as it does not exist."), probe_path.c_str());
+            TRACE_VERBOSE(_X("Ignoring additional probing path %s as it does not exist."), probe_path.c_str());
         }
     }
 }
@@ -265,7 +265,7 @@ namespace
     {
         if (!runtime_config.empty() && !pal::realpath(&runtime_config))
         {
-            trace::error(_X("The specified runtimeconfig.json [%s] does not exist"), runtime_config.c_str());
+            TRACE_ERROR(_X("The specified runtimeconfig.json [%s] does not exist"), runtime_config.c_str());
             return StatusCode::InvalidConfigFile;
         }
 
@@ -273,19 +273,19 @@ namespace
 
         if (runtime_config.empty())
         {
-            trace::verbose(_X("App runtimeconfig.json from [%s]"), app_candidate.c_str());
+            TRACE_VERBOSE(_X("App runtimeconfig.json from [%s]"), app_candidate.c_str());
             get_runtime_config_paths_from_app(app_candidate, &config_file, &dev_config_file);
         }
         else
         {
-            trace::verbose(_X("Specified runtimeconfig.json from [%s]"), runtime_config.c_str());
+            TRACE_VERBOSE(_X("Specified runtimeconfig.json from [%s]"), runtime_config.c_str());
             get_runtime_config_paths_from_arg(runtime_config, &config_file, &dev_config_file);
         }
 
         app.parse_runtime_config(config_file, dev_config_file, override_settings);
         if (!app.get_runtime_config().is_valid())
         {
-            trace::error(_X("Invalid runtimeconfig.json [%s] [%s]"), app.get_runtime_config().get_path().c_str(), app.get_runtime_config().get_dev_path().c_str());
+            TRACE_ERROR(_X("Invalid runtimeconfig.json [%s] [%s]"), app.get_runtime_config().get_path().c_str(), app.get_runtime_config().get_dev_path().c_str());
             return StatusCode::InvalidConfigFile;
         }
 
@@ -303,7 +303,7 @@ namespace
             append_path(&deps_in_dotnet_root, deps_filename.c_str());
             bool deps_exists = pal::file_exists(deps_in_dotnet_root);
 
-            trace::info(_X("Detecting mode... CoreCLR present in dotnet root [%s] and checking if [%s] file present=[%d]"),
+            TRACE_INFO(_X("Detecting mode... CoreCLR present in dotnet root [%s] and checking if [%s] file present=[%d]"),
                 host_info.dotnet_root.c_str(), deps_filename.c_str(), deps_exists);
 
             // Name of runtimeconfig file; since no path is included here the check is in the current working directory
@@ -361,7 +361,7 @@ namespace
         pal::string_t deps_file = command_line::get_option_value(opts, known_options::deps_file, _X(""));
         if (!deps_file.empty() && !pal::realpath(&deps_file))
         {
-            trace::error(_X("The specified deps.json [%s] does not exist"), deps_file.c_str());
+            TRACE_ERROR(_X("The specified deps.json [%s] does not exist"), deps_file.c_str());
             return StatusCode::InvalidArgFailure;
         }
 
@@ -386,7 +386,7 @@ namespace
             auto val = roll_forward_option_from_string(roll_forward);
             if (val == roll_forward_option::__Last)
             {
-                trace::error(_X("Invalid value for command line argument '%s'"), command_line::get_option_name(known_options::roll_forward).c_str());
+                TRACE_ERROR(_X("Invalid value for command line argument '%s'"), command_line::get_option_name(known_options::roll_forward).c_str());
                 return StatusCode::InvalidArgFailure;
             }
 
@@ -398,7 +398,7 @@ namespace
         {
             if (override_settings.has_roll_forward)
             {
-                trace::error(_X("It's invalid to use both '%s' and '%s' command line options."),
+                TRACE_ERROR(_X("It's invalid to use both '%s' and '%s' command line options."),
                     command_line::get_option_name(known_options::roll_forward).c_str(),
                     command_line::get_option_name(known_options::roll_forward_on_no_candidate_fx).c_str());
                 return StatusCode::InvalidArgFailure;
@@ -459,7 +459,7 @@ namespace
         std::vector<pal::string_t> spec_probe_paths = opts.count(opts_probe_path) ? opts.find(opts_probe_path)->second : std::vector<pal::string_t>();
         std::vector<pal::string_t> probe_realpaths = get_probe_realpaths(fx_definitions, spec_probe_paths);
 
-        trace::verbose(_X("Executing as a %s app as per config file [%s]"),
+        TRACE_VERBOSE(_X("Executing as a %s app as per config file [%s]"),
             (is_framework_dependent ? _X("framework-dependent") : _X("self-contained")), app_config.get_path().c_str());
 
         if (!hostpolicy_resolver::try_get_dir(mode, host_info.dotnet_root, fx_definitions, app_candidate, deps_file, probe_realpaths, &hostpolicy_dir))
@@ -577,7 +577,7 @@ namespace
         const runtime_config_t app_config = app->get_runtime_config();
         if (!app_config.get_is_framework_dependent())
         {
-            trace::error(_X("Initialization for self-contained components is not supported"));
+            TRACE_ERROR(_X("Initialization for self-contained components is not supported"));
             return StatusCode::InvalidConfigFile;
         }
 
@@ -587,7 +587,7 @@ namespace
 
         const std::vector<pal::string_t> probe_realpaths = get_probe_realpaths(fx_definitions, std::vector<pal::string_t>() /* specified_probing_paths */);
 
-        trace::verbose(_X("Libhost loading occurring for a framework-dependent component per config file [%s]"), app_config.get_path().c_str());
+        TRACE_VERBOSE(_X("Libhost loading occurring for a framework-dependent component per config file [%s]"), app_config.get_path().c_str());
 
         const pal::string_t deps_file;
         if (!hostpolicy_resolver::try_get_dir(mode, host_info.dotnet_root, fx_definitions, host_info.app_path, deps_file, probe_realpaths, &hostpolicy_dir))
@@ -618,7 +618,7 @@ namespace
         const runtime_config_t app_config = app.get_runtime_config();
         if (!app_config.get_is_framework_dependent())
         {
-            trace::error(_X("Initialization for self-contained components is not supported"));
+            TRACE_ERROR(_X("Initialization for self-contained components is not supported"));
             return StatusCode::InvalidConfigFile;
         }
 
@@ -641,7 +641,7 @@ namespace
         int rc = hostpolicy_resolver::load(hostpolicy_dir, &hostpolicy_dll, hostpolicy_contract);
         if (rc != StatusCode::Success)
         {
-            trace::error(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, hostpolicy_dir.c_str());
+            TRACE_ERROR(_X("An error occurred while loading required library %s from [%s]"), LIBHOSTPOLICY_NAME, hostpolicy_dir.c_str());
         }
         else
         {
@@ -670,7 +670,7 @@ int fx_muxer_t::initialize_for_app(
 
         if (g_active_host_context != nullptr)
         {
-            trace::error(_X("Hosting components are already initialized. Re-initialization for an app is not allowed."));
+            TRACE_ERROR(_X("Hosting components are already initialized. Re-initialization for an app is not allowed."));
             return StatusCode::HostInvalidState;
         }
 
@@ -698,7 +698,7 @@ int fx_muxer_t::initialize_for_app(
     rc = initialize_context(hostpolicy_dir, *init, intialization_options_t::none, context);
     if (rc != StatusCode::Success)
     {
-        trace::error(_X("Failed to initialize context for app: %s. Error code: 0x%x"), host_info.app_path.c_str(), rc);
+        TRACE_ERROR(_X("Failed to initialize context for app: %s. Error code: 0x%x"), host_info.app_path.c_str(), rc);
         return rc;
     }
 
@@ -706,7 +706,7 @@ int fx_muxer_t::initialize_for_app(
     for (int i = 0; i < argc; ++i)
         context->argv.push_back(argv[i]);
 
-    trace::info(_X("Initialized context for app: %s"), host_info.app_path.c_str());
+    TRACE_INFO(_X("Initialized context for app: %s"), host_info.app_path.c_str());
     *host_context_handle = context.release();
     return rc;
 }
@@ -768,13 +768,13 @@ int fx_muxer_t::initialize_for_runtime_config(
 
     if (!STATUS_CODE_SUCCEEDED(rc))
     {
-        trace::error(_X("Failed to initialize context for config: %s. Error code: 0x%x"), runtime_config_path, rc);
+        TRACE_ERROR(_X("Failed to initialize context for config: %s. Error code: 0x%x"), runtime_config_path, rc);
         return rc;
     }
 
     context->is_app = false;
 
-    trace::info(_X("Initialized %s for config: %s"), already_initialized ? _X("secondary context") : _X("context"), runtime_config_path);
+    TRACE_INFO(_X("Initialized %s for config: %s"), already_initialized ? _X("secondary context") : _X("context"), runtime_config_path);
     *host_context_handle = context.release();
     return rc;
 }
@@ -864,7 +864,7 @@ const host_context_t* fx_muxer_t::get_active_host_context()
     const hostpolicy_contract_t &hostpolicy_contract = g_active_host_context->hostpolicy_contract;
     if (hostpolicy_contract.initialize == nullptr)
     {
-        trace::warning(_X("Getting the contract for the initialized hostpolicy is only supprted for .NET Core 3.0 or a higher version."));
+        TRACE_WARNING(_X("Getting the contract for the initialized hostpolicy is only supprted for .NET Core 3.0 or a higher version."));
         return nullptr;
     }
 
@@ -874,7 +874,7 @@ const host_context_t* fx_muxer_t::get_active_host_context()
         int rc = hostpolicy_contract.initialize(nullptr, intialization_options_t::get_contract, &hostpolicy_context_contract);
         if (rc != StatusCode::Success)
         {
-            trace::error(_X("Failed to get contract for existing initialized hostpolicy: 0x%x"), rc);
+            TRACE_ERROR(_X("Failed to get contract for existing initialized hostpolicy: 0x%x"), rc);
             return nullptr;
         }
     }
@@ -932,7 +932,7 @@ int fx_muxer_t::handle_exec_host_command(
         new_argc = vec_argv.size();
     }
 
-    trace::info(_X("Using dotnet root path [%s]"), host_info.dotnet_root.c_str());
+    TRACE_INFO(_X("Using dotnet root path [%s]"), host_info.dotnet_root.c_str());
 
     // Transform dotnet [exec] [--additionalprobingpath path] [--depsfile file] [dll] [args] -> dotnet [dll] [args]
     return read_config_and_execute(
@@ -994,7 +994,7 @@ int fx_muxer_t::handle_cli(
 
     if (!pal::file_exists(sdk_dotnet))
     {
-        trace::error(_X("Found dotnet SDK, but did not find dotnet.dll at [%s]"), sdk_dotnet.c_str());
+        TRACE_ERROR(_X("Found dotnet SDK, but did not find dotnet.dll at [%s]"), sdk_dotnet.c_str());
         return StatusCode::LibHostSdkFindFailure;
     }
 
@@ -1006,7 +1006,7 @@ int fx_muxer_t::handle_cli(
     new_argv.push_back(sdk_dotnet.c_str());
     new_argv.insert(new_argv.end(), argv + 1, argv + argc);
 
-    trace::verbose(_X("Using dotnet SDK dll=[%s]"), sdk_dotnet.c_str());
+    TRACE_VERBOSE(_X("Using dotnet SDK dll=[%s]"), sdk_dotnet.c_str());
 
     int new_argoff;
     pal::string_t app_candidate;

@@ -55,7 +55,7 @@ namespace
         }
         catch (const json::json_exception&)
         {
-            trace::error(_X("Embedded .clsidmap format is invalid"));
+            TRACE_ERROR(_X("Embedded .clsidmap format is invalid"));
             throw HResultException{ StatusCode::InvalidConfigFile };
         }
 
@@ -71,7 +71,7 @@ namespace
             if (FAILED(hr))
             {
                 assert(false && "Invalid CLSID");
-                trace::error(_X("Invalid CLSID format in .clsidmap"));
+                TRACE_ERROR(_X("Invalid CLSID format in .clsidmap"));
                 continue;
             }
 
@@ -182,7 +182,7 @@ namespace
 
         if (!is_binary_unsigned(this_module))
         {
-            trace::verbose(_X("Binary is signed, disabling loose .clsidmap file discovery"));
+            TRACE_VERBOSE(_X("Binary is signed, disabling loose .clsidmap file discovery"));
             return {};
         }
 
@@ -223,11 +223,11 @@ clsid_map comhost::get_clsid_map()
     clsid_map mapping = get_json_map_from_resource(found_resource);
     if (!found_resource && mapping.empty())
     {
-        trace::verbose(_X("JSON map resource stream not found"));
+        TRACE_VERBOSE(_X("JSON map resource stream not found"));
 
         mapping = get_json_map_from_file();
         if (mapping.empty())
-            trace::verbose(_X("JSON map .clsidmap file not found"));
+            TRACE_VERBOSE(_X("JSON map .clsidmap file not found"));
     }
 
     // Make a copy to retain

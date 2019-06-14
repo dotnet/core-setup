@@ -67,11 +67,11 @@ void deps_json_t::reconcile_libraries_with_targets(
     const auto& libraries = json.at(_X("libraries")).as_object();
     for (const auto& library : libraries)
     {
-        trace::info(_X("Reconciling library %s"), library.first.c_str());
+        TRACE_INFO(_X("Reconciling library %s"), library.first.c_str());
 
         if (!library_exists_fn(library.first))
         {
-            trace::info(_X("Library %s does not exist"), library.first.c_str());
+            TRACE_INFO(_X("Library %s does not exist"), library.first.c_str());
             continue;
         }
 
@@ -121,7 +121,7 @@ void deps_json_t::reconcile_libraries_with_targets(
                         [deps_entry_t::asset_types::runtime].size() - 1;
                 }
 
-                trace::info(_X("Parsed %s deps entry %d for asset name: %s from %s: %s, library version: %s, relpath: %s, assemblyVersion %s, fileVersion %s"),
+                TRACE_INFO(_X("Parsed %s deps entry %d for asset name: %s from %s: %s, library version: %s, relpath: %s, assemblyVersion %s, fileVersion %s"),
                     deps_entry_t::s_known_asset_types[i],
                     m_deps_entries[i].size() - 1,
                     entry.asset.name.c_str(),
@@ -150,7 +150,7 @@ pal::string_t deps_json_t::get_current_rid(const rid_fallback_graph_t& rid_fallb
         }
     }
     
-    trace::info(_X("HostRID is %s"), currentRid.empty()? _X("not available"): currentRid.c_str());
+    TRACE_INFO(_X("HostRID is %s"), currentRid.empty()? _X("not available"): currentRid.c_str());
 
     // If the current RID is not present in the RID fallback graph, then the platform
     // is unknown to us. At this point, we will fallback to using the base RIDs and attempt
@@ -161,7 +161,7 @@ pal::string_t deps_json_t::get_current_rid(const rid_fallback_graph_t& rid_fallb
     {
         currentRid = pal::get_current_os_fallback_rid() + pal::string_t(_X("-")) + get_arch();
 
-        trace::info(_X("Falling back to base HostRID: %s"), currentRid.c_str());
+        TRACE_INFO(_X("Falling back to base HostRID: %s"), currentRid.c_str());
     }
 
     return currentRid;
@@ -182,7 +182,7 @@ bool deps_json_t::perform_rid_fallback(rid_specific_assets_t* portable_assets, c
                 auto rid_fallback_iter = rid_fallback_graph.find(host_rid);
                 if (rid_fallback_iter == rid_fallback_graph.end())
                 {
-                    trace::warning(_X("The targeted framework does not support the runtime '%s'. Some native libraries from [%s] may fail to load on this platform."), host_rid.c_str(), package.first.c_str());
+                    TRACE_WARNING(_X("The targeted framework does not support the runtime '%s'. Some native libraries from [%s] may fail to load on this platform."), host_rid.c_str(), package.first.c_str());
                 }
                 else
                 {
@@ -206,7 +206,7 @@ bool deps_json_t::perform_rid_fallback(rid_specific_assets_t* portable_assets, c
             {
                 if (iter->first != matched_rid)
                 {
-                    trace::verbose(
+                    TRACE_VERBOSE(
                         _X("Chose %s, so removing rid (%s) specific assets for package %s and asset type %s"),
                         matched_rid.c_str(),
                         iter->first.c_str(),
@@ -265,7 +265,7 @@ bool deps_json_t::process_runtime_targets(const json_value& json, const pal::str
 
                     deps_asset_t asset(get_filename_without_ext(file.first), file.first, assembly_version, file_version);
 
-                    trace::info(_X("Adding runtimeTargets %s asset %s rid=%s assemblyVersion=%s fileVersion=%s from %s"),
+                    TRACE_INFO(_X("Adding runtimeTargets %s asset %s rid=%s assemblyVersion=%s fileVersion=%s from %s"),
                         deps_entry_t::s_known_asset_types[asset_type_index],
                         asset.relative_path.c_str(),
                         rid.c_str(),
@@ -317,7 +317,7 @@ bool deps_json_t::process_targets(const json_value& json, const pal::string_t& t
 
                     deps_asset_t asset(get_filename_without_ext(file.first), file.first, assembly_version, file_version);
 
-                    trace::info(_X("Adding %s asset %s assemblyVersion=%s fileVersion=%s from %s"),
+                    TRACE_INFO(_X("Adding %s asset %s assemblyVersion=%s fileVersion=%s from %s"),
                         deps_entry_t::s_known_asset_types[i],
                         asset.relative_path.c_str(),
                         asset.assembly_version.as_str().c_str(),
@@ -363,7 +363,7 @@ bool deps_json_t::load_framework_dependent(const pal::string_t& deps_path, const
                 return assets_for_type;
             }
 
-            trace::verbose(_X("There were no rid specific %s asset for %s"), deps_entry_t::s_known_asset_types[asset_type_index], package.c_str());
+            TRACE_VERBOSE(_X("There were no rid specific %s asset for %s"), deps_entry_t::s_known_asset_types[asset_type_index], package.c_str());
         }
 
         if (m_assets.libs.count(package))
@@ -413,17 +413,17 @@ bool deps_json_t::load_self_contained(const pal::string_t& deps_path, const json
 
     if (trace::is_enabled())
     {
-        trace::verbose(_X("The rid fallback graph is: {"));
+        TRACE_VERBOSE(_X("The rid fallback graph is: {"));
         for (const auto& rid : m_rid_fallback_graph)
         {
-            trace::verbose(_X("%s => ["), rid.first.c_str());
+            TRACE_VERBOSE(_X("%s => ["), rid.first.c_str());
             for (const auto& fallback : rid.second)
             {
-                trace::verbose(_X("%s, "), fallback.c_str());
+                TRACE_VERBOSE(_X("%s, "), fallback.c_str());
             }
-            trace::verbose(_X("]"));
+            TRACE_VERBOSE(_X("]"));
         }
-        trace::verbose(_X("}"));
+        TRACE_VERBOSE(_X("}"));
     }
     return true;
 }
@@ -461,7 +461,7 @@ bool deps_json_t::load(bool is_framework_dependent, const pal::string_t& deps_pa
     // If file doesn't exist, then assume parsed.
     if (!m_file_exists)
     {
-        trace::verbose(_X("Could not locate the dependencies manifest file [%s]. Some libraries may fail to resolve."), deps_path.c_str());
+        TRACE_VERBOSE(_X("Could not locate the dependencies manifest file [%s]. Some libraries may fail to resolve."), deps_path.c_str());
         return true;
     }
 
@@ -469,13 +469,13 @@ bool deps_json_t::load(bool is_framework_dependent, const pal::string_t& deps_pa
     pal::ifstream_t file(deps_path);
     if (!file.good())
     {
-        trace::error(_X("Could not open dependencies manifest file [%s]"), deps_path.c_str());
+        TRACE_ERROR(_X("Could not open dependencies manifest file [%s]"), deps_path.c_str());
         return false;
     }
 
     if (skip_utf8_bom(&file))
     {
-        trace::verbose(_X("UTF-8 BOM skipped while reading [%s]"), deps_path.c_str());
+        TRACE_VERBOSE(_X("UTF-8 BOM skipped while reading [%s]"), deps_path.c_str());
     }
 
     try
@@ -488,7 +488,7 @@ bool deps_json_t::load(bool is_framework_dependent, const pal::string_t& deps_pa
             runtime_target.as_string():
             runtime_target.at(_X("name")).as_string();
 
-        trace::verbose(_X("Loading deps file... %s as framework dependent=[%d]"), deps_path.c_str(), is_framework_dependent);
+        TRACE_VERBOSE(_X("Loading deps file... %s as framework dependent=[%d]"), deps_path.c_str(), is_framework_dependent);
 
         return (is_framework_dependent) ? load_framework_dependent(deps_path, json, name, rid_fallback_graph) : load_self_contained(deps_path, json, name);
     }
@@ -496,7 +496,7 @@ bool deps_json_t::load(bool is_framework_dependent, const pal::string_t& deps_pa
     {
         pal::string_t jes;
         (void) pal::utf8_palstring(je.what(), &jes);
-        trace::error(_X("A JSON parsing exception occurred in [%s]: %s"), deps_path.c_str(), jes.c_str());
+        TRACE_ERROR(_X("A JSON parsing exception occurred in [%s]: %s"), deps_path.c_str(), jes.c_str());
         return false;
     }
 }

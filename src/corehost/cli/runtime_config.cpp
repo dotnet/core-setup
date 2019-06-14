@@ -66,7 +66,7 @@ void runtime_config_t::parse(const pal::string_t& path, const pal::string_t& dev
     // Parse the file
     m_valid = ensure_parsed();
 
-    trace::verbose(_X("Runtime config [%s] is valid=[%d]"), path.c_str(), m_valid);
+    TRACE_VERBOSE(_X("Runtime config [%s] is valid=[%d]"), path.c_str(), m_valid);
 }
 
 bool runtime_config_t::parse_opts(const json_value& opts)
@@ -116,7 +116,7 @@ bool runtime_config_t::parse_opts(const json_value& opts)
         auto val = roll_forward_option_from_string(roll_forward->second.as_string());
         if (val == roll_forward_option::__Last)
         {
-            trace::error(_X("Invalid value for property 'rollForward'."));
+            TRACE_ERROR(_X("Invalid value for property 'rollForward'."));
             return false;
         }
         m_default_settings.set_roll_forward(val);
@@ -231,7 +231,7 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
         auto val = roll_forward_option_from_string(roll_forward->second.as_string());
         if (val == roll_forward_option::__Last)
         {
-            trace::error(_X("Invalid value for property 'rollForward'."));
+            TRACE_ERROR(_X("Invalid value for property 'rollForward'."));
             return false;
         }
         fx_out.set_roll_forward(val);
@@ -269,7 +269,7 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
         auto val = roll_forward_option_from_string(env_roll_forward);
         if (val == roll_forward_option::__Last)
         {
-            trace::error(_X("Invalid value for environment variable 'DOTNET_ROLL_FORWARD'."));
+            TRACE_ERROR(_X("Invalid value for environment variable 'DOTNET_ROLL_FORWARD'."));
             return false;
         }
 
@@ -284,7 +284,7 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
 
 bool runtime_config_t::ensure_dev_config_parsed()
 {
-    trace::verbose(_X("Attempting to read dev runtime config: %s"), m_dev_path.c_str());
+    TRACE_VERBOSE(_X("Attempting to read dev runtime config: %s"), m_dev_path.c_str());
 
     pal::string_t retval;
     if (!pal::file_exists(m_dev_path))
@@ -296,13 +296,13 @@ bool runtime_config_t::ensure_dev_config_parsed()
     pal::ifstream_t file(m_dev_path);
     if (!file.good())
     {
-        trace::verbose(_X("File stream not good %s"), m_dev_path.c_str());
+        TRACE_VERBOSE(_X("File stream not good %s"), m_dev_path.c_str());
         return false;
     }
 
     if (skip_utf8_bom(&file))
     {
-        trace::verbose(_X("UTF-8 BOM skipped while reading [%s]"), m_dev_path.c_str());
+        TRACE_VERBOSE(_X("UTF-8 BOM skipped while reading [%s]"), m_dev_path.c_str());
     }
     
     try
@@ -319,7 +319,7 @@ bool runtime_config_t::ensure_dev_config_parsed()
     {
         pal::string_t jes;
         (void) pal::utf8_palstring(je.what(), &jes);
-        trace::error(_X("A JSON parsing exception occurred in [%s]: %s"), m_dev_path.c_str(), jes.c_str());
+        TRACE_ERROR(_X("A JSON parsing exception occurred in [%s]: %s"), m_dev_path.c_str(), jes.c_str());
         return false;
     }
 
@@ -343,7 +343,7 @@ bool runtime_config_t::read_framework_array(web::json::array frameworks_json)
 
         if (fx_out.get_fx_name().length() == 0)
         {
-            trace::verbose(_X("No framework name specified."));
+            TRACE_VERBOSE(_X("No framework name specified."));
             rc = false;
             break;
         }
@@ -354,7 +354,7 @@ bool runtime_config_t::read_framework_array(web::json::array frameworks_json)
                 [&](const fx_reference_t& item) { return fx_out.get_fx_name() == item.get_fx_name(); })
             != m_frameworks.end())
         {
-            trace::verbose(_X("Framework %s already specified."), fx_out.get_fx_name().c_str());
+            TRACE_VERBOSE(_X("Framework %s already specified."), fx_out.get_fx_name().c_str());
             rc = false;
             break;
         }
@@ -367,10 +367,10 @@ bool runtime_config_t::read_framework_array(web::json::array frameworks_json)
 
 bool runtime_config_t::ensure_parsed()
 {
-    trace::verbose(_X("Attempting to read runtime config: %s"), m_path.c_str());
+    TRACE_VERBOSE(_X("Attempting to read runtime config: %s"), m_path.c_str());
     if (!ensure_dev_config_parsed())
     {
-        trace::verbose(_X("Did not successfully parse the runtimeconfig.dev.json"));
+        TRACE_VERBOSE(_X("Did not successfully parse the runtimeconfig.dev.json"));
     }
 
     pal::string_t retval;
@@ -383,13 +383,13 @@ bool runtime_config_t::ensure_parsed()
     pal::ifstream_t file(m_path);
     if (!file.good())
     {
-        trace::verbose(_X("File stream not good %s"), m_path.c_str());
+        TRACE_VERBOSE(_X("File stream not good %s"), m_path.c_str());
         return false;
     }
 
     if (skip_utf8_bom(&file))
     {
-        trace::verbose(_X("UTF-8 BOM skipped while reading [%s]"), m_path.c_str());
+        TRACE_VERBOSE(_X("UTF-8 BOM skipped while reading [%s]"), m_path.c_str());
     }
 
     bool rc = true;
@@ -407,7 +407,7 @@ bool runtime_config_t::ensure_parsed()
     {
         pal::string_t jes;
         (void) pal::utf8_palstring(je.what(), &jes);
-        trace::error(_X("A JSON parsing exception occurred in [%s]: %s"), m_path.c_str(), jes.c_str());
+        TRACE_ERROR(_X("A JSON parsing exception occurred in [%s]: %s"), m_path.c_str(), jes.c_str());
         return false;
     }
 
@@ -457,7 +457,7 @@ bool runtime_config_t::mark_specified_setting(specified_setting setting)
     // If there's any flag set but the one we're trying to set, it's invalid
     if (m_specified_settings & ~setting)
     {
-        trace::error(_X("It's invalid to use both `rollForward` and one of `rollForwardOnNoCandidateFx` or `applyPatches` in the same runtime config."));
+        TRACE_ERROR(_X("It's invalid to use both `rollForward` and one of `rollForwardOnNoCandidateFx` or `applyPatches` in the same runtime config."));
         return false;
     }
 

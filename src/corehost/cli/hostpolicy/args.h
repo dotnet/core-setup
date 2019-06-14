@@ -24,7 +24,7 @@ struct probe_config_t
 
     void print() const
     {
-        trace::verbose(_X("probe_config_t: probe=[%s] deps-dir-probe=[%d]"),
+        TRACE_VERBOSE(_X("probe_config_t: probe=[%s] deps-dir-probe=[%d]"),
             probe_dir.c_str(), probe_publish_dir);
     }
 
@@ -111,20 +111,20 @@ struct arguments_t
     {
         if (trace::is_enabled())
         {
-            trace::verbose(_X("-- arguments_t: host_path='%s' app_root='%s' deps='%s' core_svc='%s' mgd_app='%s'"),
+            TRACE_VERBOSE(_X("-- arguments_t: host_path='%s' app_root='%s' deps='%s' core_svc='%s' mgd_app='%s'"),
                 host_path.c_str(), app_root.c_str(), deps_path.c_str(), core_servicing.c_str(), managed_application.c_str());
             for (const auto& probe : probe_paths)
             {
-                trace::verbose(_X("-- arguments_t: probe dir: '%s'"), probe.c_str());
+                TRACE_VERBOSE(_X("-- arguments_t: probe dir: '%s'"), probe.c_str());
             }
             for (const auto& shared : env_shared_store)
             {
-                trace::verbose(_X("-- arguments_t: env shared store: '%s'"), shared.c_str());
+                TRACE_VERBOSE(_X("-- arguments_t: env shared store: '%s'"), shared.c_str());
             }
-            trace::verbose(_X("-- arguments_t: dotnet shared store: '%s'"), dotnet_shared_store.c_str());
+            TRACE_VERBOSE(_X("-- arguments_t: dotnet shared store: '%s'"), dotnet_shared_store.c_str());
             for (const auto& global_shared : global_shared_stores)
             {
-                trace::verbose(_X("-- arguments_t: global shared store: '%s'"), global_shared.c_str());
+                TRACE_VERBOSE(_X("-- arguments_t: global shared store: '%s'"), global_shared.c_str());
             }
         }
     }

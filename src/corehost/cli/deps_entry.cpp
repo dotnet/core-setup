@@ -40,12 +40,12 @@ bool deps_entry_t::to_path(const pal::string_t& base, bool look_in_base, pal::st
     const pal::char_t* query_type = look_in_base ? _X("Local") : _X("Relative");
     if (!exists)
     {
-        trace::verbose(_X("    %s path query did not exist %s"), query_type, candidate.c_str());
+        TRACE_VERBOSE(_X("    %s path query did not exist %s"), query_type, candidate.c_str());
         candidate.clear();
     }
     else
     {
-        trace::verbose(_X("    %s path query exists %s"), query_type, candidate.c_str());
+        TRACE_VERBOSE(_X("    %s path query exists %s"), query_type, candidate.c_str());
     }
     return exists;
 }
@@ -84,7 +84,7 @@ bool deps_entry_t::to_dir_path(const pal::string_t& base, pal::string_t* str) co
         
         pal::string_t base_ietf_dir = base;
         append_path(&base_ietf_dir, ietf.c_str());
-        trace::verbose(_X("Detected a resource asset, will query dir/ietf-tag/resource base: %s asset: %s"), base_ietf_dir.c_str(), asset.name.c_str());
+        TRACE_VERBOSE(_X("Detected a resource asset, will query dir/ietf-tag/resource base: %s asset: %s"), base_ietf_dir.c_str(), asset.name.c_str());
         return to_path(base_ietf_dir, true, str);
     }
     return to_path(base, true, str);

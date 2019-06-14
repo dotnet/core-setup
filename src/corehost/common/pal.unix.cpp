@@ -50,7 +50,7 @@ bool pal::touch_file(const pal::string_t& path)
     int fd = open(path.c_str(), (O_CREAT | O_EXCL), (S_IRUSR | S_IRGRP | S_IROTH));
     if (fd == -1)
     {
-        trace::warning(_X("open(%s) failed in %s"), path.c_str(), _STRINGIFY(__FUNCTION__));
+        TRACE_WARNING(_X("open(%s) failed in %s"), path.c_str(), _STRINGIFY(__FUNCTION__));
         return false;
     }
     (void) close(fd);
@@ -165,7 +165,7 @@ bool pal::load_library(const string_t* path, dll_t* dll)
     *dll = dlopen(path->c_str(), RTLD_LAZY);
     if (*dll == nullptr)
     {
-        trace::error(_X("Failed to load %s, error: %s"), path, dlerror());
+        TRACE_ERROR(_X("Failed to load %s, error: %s"), path, dlerror());
         return false;
     }
     return true;
@@ -176,7 +176,7 @@ pal::proc_t pal::get_symbol(dll_t library, const char* name)
     auto result = dlsym(library, name);
     if (result == nullptr)
     {
-        trace::info(_X("Probed for and did not find library symbol %s, error: %s"), name, dlerror());
+        TRACE_INFO(_X("Probed for and did not find library symbol %s, error: %s"), name, dlerror());
     }
 
     return result;
@@ -186,7 +186,7 @@ void pal::unload_library(dll_t library)
 {
     if (dlclose(library) != 0)
     {
-        trace::warning(_X("Failed to unload library, error: %s"), dlerror());
+        TRACE_WARNING(_X("Failed to unload library, error: %s"), dlerror());
     }
 }
 
@@ -207,25 +207,25 @@ bool pal::get_default_breadcrumb_store(string_t* recv)
     if (pal::getenv(_X("CORE_BREADCRUMBS"), &ext) && pal::realpath(&ext))
     {
         // We should have the path in ext.
-        trace::info(_X("Realpath CORE_BREADCRUMBS [%s]"), ext.c_str());
+        TRACE_INFO(_X("Realpath CORE_BREADCRUMBS [%s]"), ext.c_str());
     }
 
     if (!pal::directory_exists(ext))
     {
-        trace::info(_X("Directory core breadcrumbs [%s] was not specified or found"), ext.c_str());
+        TRACE_INFO(_X("Directory core breadcrumbs [%s] was not specified or found"), ext.c_str());
         ext.clear();
         append_path(&ext, _X("opt"));
         append_path(&ext, _X("corebreadcrumbs"));
         if (!pal::directory_exists(ext))
         {
-            trace::info(_X("Fallback directory core breadcrumbs at [%s] was not found"), ext.c_str());
+            TRACE_INFO(_X("Fallback directory core breadcrumbs at [%s] was not found"), ext.c_str());
             return false;
         }
     }
 
     if (access(ext.c_str(), (R_OK | W_OK)) != 0)
     {
-        trace::info(_X("Breadcrumb store [%s] is not ACL-ed with rw-"), ext.c_str());
+        TRACE_INFO(_X("Breadcrumb store [%s] is not ACL-ed with rw-"), ext.c_str());
     }
 
     recv->assign(ext);
@@ -239,29 +239,29 @@ bool pal::get_default_servicing_directory(string_t* recv)
     if (pal::getenv(_X("CORE_SERVICING"), &ext) && pal::realpath(&ext))
     {
         // We should have the path in ext.
-        trace::info(_X("Realpath CORE_SERVICING [%s]"), ext.c_str());
+        TRACE_INFO(_X("Realpath CORE_SERVICING [%s]"), ext.c_str());
     }
 
     if (!pal::directory_exists(ext))
     {
-        trace::info(_X("Directory core servicing at [%s] was not specified or found"), ext.c_str());
+        TRACE_INFO(_X("Directory core servicing at [%s] was not specified or found"), ext.c_str());
         ext.clear();
         append_path(&ext, _X("opt"));
         append_path(&ext, _X("coreservicing"));
         if (!pal::directory_exists(ext))
         {
-            trace::info(_X("Fallback directory core servicing at [%s] was not found"), ext.c_str());
+            TRACE_INFO(_X("Fallback directory core servicing at [%s] was not found"), ext.c_str());
             return false;
         }
     }
 
     if (access(ext.c_str(), R_OK) != 0)
     {
-        trace::info(_X("Directory core servicing at [%s] was not ACL-ed properly"), ext.c_str());
+        TRACE_INFO(_X("Directory core servicing at [%s] was not ACL-ed properly"), ext.c_str());
     }
 
     recv->assign(ext);
-    trace::info(_X("Using core servicing at [%s]"), ext.c_str());
+    TRACE_INFO(_X("Using core servicing at [%s]"), ext.c_str());
     return true;
 }
 
@@ -333,11 +333,11 @@ bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
     }
     //  ***************************
 
-    trace::verbose(_X("Looking for install_location file in '%s'."), install_location_file_path.c_str());
+    TRACE_VERBOSE(_X("Looking for install_location file in '%s'."), install_location_file_path.c_str());
     FILE* install_location_file = pal::file_open(install_location_file_path, "r");
     if (install_location_file == nullptr)
     {
-        trace::verbose(_X("The install_location file failed to open."));
+        TRACE_VERBOSE(_X("The install_location file failed to open."));
         return false;
     }
 
@@ -355,13 +355,13 @@ bool pal::get_dotnet_self_registered_dir(pal::string_t* recv)
             install_location[len - 1] = '\0';
         }
 
-        trace::verbose(_X("Using install location '%s'."), install_location);
+        TRACE_VERBOSE(_X("Using install location '%s'."), install_location);
         *recv = install_location;
         result = true;
     }
     else
     {
-        trace::verbose(_X("The install_location file first line could not be read."));
+        TRACE_VERBOSE(_X("The install_location file first line could not be read."));
     }
 
     fclose(install_location_file);

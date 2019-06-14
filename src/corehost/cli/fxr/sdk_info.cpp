@@ -53,7 +53,7 @@ void sdk_info::get_all_sdk_infos(
     for (pal::string_t dir : hive_dir)
     {
         auto base_dir = dir;
-        trace::verbose(_X("Gathering SDK locations in [%s]"), base_dir.c_str());
+        TRACE_VERBOSE(_X("Gathering SDK locations in [%s]"), base_dir.c_str());
 
         append_path(&base_dir, _X("sdk"));
 
@@ -67,7 +67,7 @@ void sdk_info::get_all_sdk_infos(
                 fx_ver_t parsed;
                 if (fx_ver_t::parse(ver, &parsed, false))
                 {
-                    trace::verbose(_X("Found SDK version [%s]"), ver.c_str());
+                    TRACE_VERBOSE(_X("Found SDK version [%s]"), ver.c_str());
 
                     auto full_dir = base_dir;
                     append_path(&full_dir, ver.c_str());

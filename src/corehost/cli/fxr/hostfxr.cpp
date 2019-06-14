@@ -20,7 +20,7 @@ namespace
     void trace_hostfxr_entry_point(const pal::char_t *entry_point)
     {
         trace::setup();
-        trace::info(_X("--- Invoked %s [commit hash: %s]"), entry_point, _STRINGIFY(REPO_COMMIT_HASH));
+        TRACE_INFO(_X("--- Invoked %s [commit hash: %s]"), entry_point, _STRINGIFY(REPO_COMMIT_HASH));
     }
 }
 
@@ -96,7 +96,7 @@ SHARED_API int32_t HOSTFXR_CALLTYPE hostfxr_resolve_sdk(
 
     if (buffer_size < 0 || (buffer_size > 0 && buffer == nullptr))
     {
-        trace::error(_X("hostfxr_resolve_sdk received an invalid argument."));
+        TRACE_ERROR(_X("hostfxr_resolve_sdk received an invalid argument."));
         return -1;
     }
 
@@ -127,7 +127,7 @@ SHARED_API int32_t HOSTFXR_CALLTYPE hostfxr_resolve_sdk(
     }
     else
     {
-        trace::info(_X("hostfxr_resolve_sdk received a buffer that is too small to hold the located SDK path."));
+        TRACE_INFO(_X("hostfxr_resolve_sdk received a buffer that is too small to hold the located SDK path."));
     }
 
     return cli_sdk.size() + 1;
@@ -354,7 +354,7 @@ SHARED_API int32_t HOSTFXR_CALLTYPE hostfxr_get_native_search_directories(const 
 
     if (buffer_size < 0 || (buffer_size > 0 && buffer == nullptr) || required_buffer_size == nullptr)
     {
-        trace::error(_X("hostfxr_get_native_search_directories received an invalid argument."));
+        TRACE_ERROR(_X("hostfxr_get_native_search_directories received an invalid argument."));
         return InvalidArgFailure;
     }
 
@@ -410,7 +410,7 @@ namespace
         {
             if (!pal::get_own_executable_path(&startup_info.host_path) || !pal::realpath(&startup_info.host_path))
             {
-                trace::error(_X("Failed to resolve full path of the current host [%s]"), startup_info.host_path.c_str());
+                TRACE_ERROR(_X("Failed to resolve full path of the current host [%s]"), startup_info.host_path.c_str());
                 return StatusCode::CoreHostCurHostFindFailure;
             }
         }
@@ -424,7 +424,7 @@ namespace
             startup_info.dotnet_root = get_dotnet_root_from_fxr_path(mod_path);
             if (!pal::realpath(&startup_info.dotnet_root))
             {
-                trace::error(_X("Failed to resolve full path of dotnet root [%s]"), startup_info.dotnet_root.c_str());
+                TRACE_ERROR(_X("Failed to resolve full path of dotnet root [%s]"), startup_info.dotnet_root.c_str());
                 return StatusCode::CoreHostCurHostFindFailure;
             }
         }
@@ -676,7 +676,7 @@ SHARED_API int32_t HOSTFXR_CALLTYPE hostfxr_get_runtime_property_value(
         const host_context_t *context_maybe = fx_muxer_t::get_active_host_context();
         if (context_maybe == nullptr)
         {
-            trace::error(_X("Hosting components context has not been initialized. Cannot get runtime properties."));
+            TRACE_ERROR(_X("Hosting components context has not been initialized. Cannot get runtime properties."));
             return StatusCode::HostInvalidState;
         }
 
@@ -741,7 +741,7 @@ SHARED_API int32_t HOSTFXR_CALLTYPE hostfxr_set_runtime_property_value(
 
     if (context->type != host_context_type::initialized)
     {
-        trace::error(_X("Setting properties is not allowed once runtime has been loaded."));
+        TRACE_ERROR(_X("Setting properties is not allowed once runtime has been loaded."));
         return StatusCode::InvalidArgFailure;
     }
 
@@ -793,7 +793,7 @@ SHARED_API int32_t HOSTFXR_CALLTYPE hostfxr_get_runtime_properties(
         const host_context_t *context_maybe = fx_muxer_t::get_active_host_context();
         if (context_maybe == nullptr)
         {
-            trace::error(_X("Hosting components context has not been initialized. Cannot get runtime properties."));
+            TRACE_ERROR(_X("Hosting components context has not been initialized. Cannot get runtime properties."));
             return StatusCode::HostInvalidState;
         }
 

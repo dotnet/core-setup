@@ -57,7 +57,7 @@ bool compare_by_name_and_version(const framework_info &a, const framework_info &
 
                 if (pal::directory_exists(fx_dir))
                 {
-                    trace::verbose(_X("Gathering FX locations in [%s]"), fx_dir.c_str());
+                    TRACE_VERBOSE(_X("Gathering FX locations in [%s]"), fx_dir.c_str());
 
                     std::vector<pal::string_t> versions;
                     pal::readdir_onlydirectories(fx_dir, &versions);
@@ -67,7 +67,7 @@ bool compare_by_name_and_version(const framework_info &a, const framework_info &
                         fx_ver_t parsed;
                         if (fx_ver_t::parse(ver, &parsed, false))
                         {
-                            trace::verbose(_X("Found FX version [%s]"), ver.c_str());
+                            TRACE_VERBOSE(_X("Found FX version [%s]"), ver.c_str());
 
                             framework_info info(fx_name, fx_dir, parsed);
                             framework_infos->push_back(info);

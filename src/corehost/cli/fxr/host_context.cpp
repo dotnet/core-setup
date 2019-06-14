@@ -20,7 +20,7 @@ namespace
     {
         if (hostpolicy_contract.initialize == nullptr)
         {
-            trace::error(_X("This component must target .NET Core 3.0 or a higher version."));
+            TRACE_ERROR(_X("This component must target .NET Core 3.0 or a higher version."));
             return StatusCode::HostApiUnsupportedVersion;
         }
 
@@ -108,15 +108,15 @@ host_context_t* host_context_t::from_handle(const hostfxr_handle handle, bool al
         if (allow_invalid_type || context->type != host_context_type::invalid)
             return context;
 
-        trace::error(_X("Host context is in an invalid state"));
+        TRACE_ERROR(_X("Host context is in an invalid state"));
     }
     else if (marker == closed_host_context_marker)
     {
-        trace::error(_X("Host context has already been closed"));
+        TRACE_ERROR(_X("Host context has already been closed"));
     }
     else
     {
-        trace::error(_X("Invalid host context handle marker: 0x%x"), marker);
+        TRACE_ERROR(_X("Invalid host context handle marker: 0x%x"), marker);
     }
 
     return nullptr;

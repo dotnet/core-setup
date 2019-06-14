@@ -12,8 +12,8 @@ namespace
 {
     void log_duplicate_property_error(const pal::char_t *property_key)
     {
-        trace::error(_X("Duplicate runtime property found: %s"), property_key);
-        trace::error(_X("It is invalid to specify values for properties populated by the hosting layer in the the application's .runtimeconfig.json"));
+        TRACE_ERROR(_X("Duplicate runtime property found: %s"), property_key);
+        TRACE_ERROR(_X("It is invalid to specify values for properties populated by the hosting layer in the the application's .runtimeconfig.json"));
     }
 }
 
@@ -35,7 +35,7 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
     pal::string_t resolver_errors;
     if (!resolver.valid(&resolver_errors))
     {
-        trace::error(_X("Error initializing the dependency resolver: %s"), resolver_errors.c_str());
+        TRACE_ERROR(_X("Error initializing the dependency resolver: %s"), resolver_errors.c_str());
         return StatusCode::ResolverInitFailure;
     }
 
@@ -67,7 +67,7 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
     clr_path = probe_paths.coreclr;
     if (clr_path.empty() || !pal::realpath(&clr_path))
     {
-        trace::error(_X("Could not resolve CoreCLR path. For more details, enable tracing by setting COREHOST_TRACE environment variable to 1"));
+        TRACE_ERROR(_X("Could not resolve CoreCLR path. For more details, enable tracing by setting COREHOST_TRACE environment variable to 1"));
         return StatusCode::CoreClrResolveFailure;
     }
 
@@ -89,16 +89,16 @@ int hostpolicy_context_t::initialize(hostpolicy_init_t &hostpolicy_init, const a
     pal::string_t clrjit_path = probe_paths.clrjit;
     if (clrjit_path.empty())
     {
-        trace::warning(_X("Could not resolve CLRJit path"));
+        TRACE_WARNING(_X("Could not resolve CLRJit path"));
     }
     else if (pal::realpath(&clrjit_path))
     {
-        trace::verbose(_X("The resolved JIT path is '%s'"), clrjit_path.c_str());
+        TRACE_VERBOSE(_X("The resolved JIT path is '%s'"), clrjit_path.c_str());
     }
     else
     {
         clrjit_path.clear();
-        trace::warning(_X("Could not resolve symlink to CLRJit path '%s'"), probe_paths.clrjit.c_str());
+        TRACE_WARNING(_X("Could not resolve symlink to CLRJit path '%s'"), probe_paths.clrjit.c_str());
     }
 
     const fx_definition_vector_t &fx_definitions = resolver.get_fx_definitions();
