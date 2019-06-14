@@ -77,7 +77,7 @@ namespace Microsoft.NET.HostModel.Tests
             fileSpecs.Add(new FileSpec(BundleHelper.GetAppPath(fixture), "app.repeat"));
 
             Bundler bundler = new Bundler(hostName, bundleDir.FullName);
-            Assert.Throws<BundleException>(() => bundler.GenerateBundle(fileSpecs));
+            Assert.Throws<ArgumentException>(() => bundler.GenerateBundle(fileSpecs));
         }
 
         [InlineData(true)]

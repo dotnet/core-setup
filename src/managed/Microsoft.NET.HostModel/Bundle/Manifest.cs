@@ -71,20 +71,11 @@ namespace Microsoft.NET.HostModel.Bundle
             BundleID = bundleID;
         }
 
-        public FileEntry AddEntry(FileEntry entry)
-        {
-            if(Files.Any(file => file.RelativePath.Equals(entry.RelativePath)))
-            {
-                throw new BundleException("Found multiple entries with the same bundle-relative-path");
-            }
-
-            Files.Add(entry);
-            return entry;
-        }
-
         public FileEntry AddEntry(FileType type, string relativePath, long offset, long size)
         {
-            return AddEntry(new FileEntry(type, relativePath, offset, size));
+            FileEntry entry = new FileEntry(type, relativePath, offset, size);
+            Files.Add(entry);
+            return entry;
         }
 
         public long Write(BinaryWriter writer)
@@ -120,7 +111,7 @@ namespace Microsoft.NET.HostModel.Bundle
             string signature = reader.ReadString();
             if (!signature.Equals(Signature))
             {
-                throw new BundleException("Invalid Bundle");
+                throw new BundleException("Extraction failed: Invalid Bundle");
             }
 
             // The manifest header offset resides just behind the signature.
@@ -144,6 +135,11 @@ namespace Microsoft.NET.HostModel.Bundle
             for (long i = 0; i < fileCount; i++)
             {
                 manifest.Files.Add(FileEntry.Read(reader));
+            }
+
+            if (manifest.Files.GroupBy(file => file.RelativePath).Where(g => g.Count() > 1).Any())
+            {
+                throw new BundleException("Extraction failed: Found multiple entries with the same bundle-relative-path");
             }
 
             return manifest;
