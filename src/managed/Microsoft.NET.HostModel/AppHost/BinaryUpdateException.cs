@@ -4,15 +4,14 @@
 
 using System;
 
-namespace Microsoft.NET.HostModel.Bundle
+namespace Microsoft.NET.HostModel.AppHost
 {
     /// <summary>
-    /// This exception is thrown when a bundle extraction
-    /// operation fails due to known user errors.
+    /// This exception is thrown when an AppHost binary update fails due to known user errors.
     /// </summary>
-    public class BundleException : Exception
+    public class BinaryUpdateException : Exception
     {
-        public BundleException(string message) :
+        public BinaryUpdateException(string message) :
                 base(message)
         {
         }
