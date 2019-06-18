@@ -11,7 +11,7 @@ namespace Microsoft.NET.HostModel.AppHost
 {
     public static class BinaryUtils
     {
-        internal static unsafe bool SearchAndReplace(
+        internal static unsafe void SearchAndReplace(
             MemoryMappedViewAccessor accessor,
             byte[] searchPattern,
             byte[] patternToReplace)
@@ -26,7 +26,7 @@ namespace Microsoft.NET.HostModel.AppHost
                 int position = KMPSearch(searchPattern, bytes, accessor.Capacity);
                 if (position < 0)
                 {
-                    return false;
+                    throw new AppUpdatePlaceHolderNotFoundException(searchPattern);
                 }
 
                 accessor.WriteArray(
@@ -44,8 +44,6 @@ namespace Microsoft.NET.HostModel.AppHost
                     accessor.SafeMemoryMappedViewHandle.ReleasePointer();
                 }
             }
-
-            return true;
         }
 
         private static unsafe void Pad0(byte[] searchPattern, byte[] patternToReplace, byte* bytes, int offset)
@@ -59,31 +57,14 @@ namespace Microsoft.NET.HostModel.AppHost
             }
         }
 
-        public static unsafe void SearchAndReplace(MemoryMappedFile mappedFile, byte[] searchPattern, byte[] patternToReplace)
-        {
-            using (var accessor = mappedFile.CreateViewAccessor())
-            {
-                if (!SearchAndReplace(accessor, searchPattern, patternToReplace))
-                {
-                    throw new BinaryUpdateException($"SearchPattern {searchPattern} not found.");
-                }
-            }
-        }
-
         public static unsafe void SearchAndReplace(string filePath, byte[] searchPattern, byte[] patternToReplace)
         {
             using (var mappedFile = MemoryMappedFile.CreateFromFile(filePath))
             {
-                SearchAndReplace(mappedFile, searchPattern, patternToReplace);
-            }
-        }
-
-        public static unsafe int SearchInFile(MemoryMappedFile mappedFile, byte[] searchPattern)
-        {
-            using (var accessor = mappedFile.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read))
-            {
-                var safeBuffer = accessor.SafeMemoryMappedViewHandle;
-                return KMPSearch(searchPattern, (byte*)safeBuffer.DangerousGetHandle(), (int)safeBuffer.ByteLength);
+                using (var accessor = mappedFile.CreateViewAccessor())
+                {
+                    SearchAndReplace(accessor, searchPattern, patternToReplace);
+                }
             }
         }
 
@@ -91,7 +72,11 @@ namespace Microsoft.NET.HostModel.AppHost
         {
             using (var mappedFile = MemoryMappedFile.CreateFromFile(filePath))
             {
-                return SearchInFile(mappedFile, searchPattern);
+                using (var accessor = mappedFile.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read))
+                {
+                    var safeBuffer = accessor.SafeMemoryMappedViewHandle;
+                    return KMPSearch(searchPattern, (byte*)safeBuffer.DangerousGetHandle(), (int)safeBuffer.ByteLength);
+                }
             }
         }
 
@@ -226,10 +211,7 @@ namespace Microsoft.NET.HostModel.AppHost
         /// This method will attempt to set the subsystem to GUI. The apphost file should be a windows PE file.
         /// </summary>
         /// <param name="accessor">The memory accessor which has the apphost file opened.</param>
-        /// <param name="appHostSourcePath">The path to the source apphost.</param>
-        internal static unsafe void SetWindowsGraphicalUserInterfaceBit(
-            MemoryMappedViewAccessor accessor,
-            string appHostSourcePath)
+        internal static unsafe void SetWindowsGraphicalUserInterfaceBit(MemoryMappedViewAccessor accessor)
         {
             byte* pointer = null;
 
@@ -243,7 +225,7 @@ namespace Microsoft.NET.HostModel.AppHost
 
                 if (accessor.Capacity < peHeaderOffset + SubsystemOffset + sizeof(UInt16))
                 {
-                    throw new BinaryUpdateException($" Unable to use '{appHostSourcePath}' as application host executable because it's not a Windows PE file");
+                    throw new AppHostNotPEFileException();
                 }
 
                 UInt16* subsystem = ((UInt16*)(bytes + peHeaderOffset + SubsystemOffset));
@@ -252,7 +234,7 @@ namespace Microsoft.NET.HostModel.AppHost
                 // The subsystem of the prebuilt apphost should be set to CUI
                 if (subsystem[0] != WindowsCUISubsystem)
                 {
-                    throw new BinaryUpdateException("Unable to use '{appHostSourcePath}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem");
+                    throw new AppHostNotCUIException();
                 }
 
                 // Set the subsystem to GUI
@@ -263,6 +245,62 @@ namespace Microsoft.NET.HostModel.AppHost
                 if (pointer != null)
                 {
                     accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+                }
+            }
+        }
+
+        public static unsafe void SetWindowsGraphicalUserInterfaceBit(string filePath)
+        {
+            using (var mappedFile = MemoryMappedFile.CreateFromFile(filePath))
+            {
+                using (var accessor = mappedFile.CreateViewAccessor())
+                {
+                    SetWindowsGraphicalUserInterfaceBit(accessor);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This method will return the subsystem CUI/GUI value. The apphost file should be a windows PE file.
+        /// </summary>
+        /// <param name="accessor">The memory accessor which has the apphost file opened.</param>
+        internal static unsafe UInt16 GetWindowsGraphicalUserInterfaceBit(MemoryMappedViewAccessor accessor)
+        {
+            byte* pointer = null;
+
+            try
+            {
+                accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref pointer);
+                byte* bytes = pointer + accessor.PointerOffset;
+
+                // https://en.wikipedia.org/wiki/Portable_Executable
+                UInt32 peHeaderOffset = ((UInt32*)(bytes + PEHeaderPointerOffset))[0];
+
+                if (accessor.Capacity < peHeaderOffset + SubsystemOffset + sizeof(UInt16))
+                {
+                    throw new AppHostNotPEFileException();
+                }
+
+                UInt16* subsystem = ((UInt16*)(bytes + peHeaderOffset + SubsystemOffset));
+
+                return subsystem[0];
+            }
+            finally
+            {
+                if (pointer != null)
+                {
+                    accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+                }
+            }
+        }
+
+        public static unsafe UInt16 GetWindowsGraphicalUserInterfaceBit(string filePath)
+        {
+            using (var mappedFile = MemoryMappedFile.CreateFromFile(filePath))
+            {
+                using (var accessor = mappedFile.CreateViewAccessor())
+                {
+                    return GetWindowsGraphicalUserInterfaceBit(accessor);
                 }
             }
         }
