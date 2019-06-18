@@ -121,7 +121,7 @@ void deps_json_t::reconcile_libraries_with_targets(
                         [deps_entry_t::asset_types::runtime].size() - 1;
                 }
 
-                TRACE_INFO(_X("Parsed %s deps entry %d for asset name: %s from %s: %s, library version: %s, relpath: %s, assemblyVersion %s, fileVersion %s"),
+                TRACE_INFO(_X("Parsed %s deps entry %zu for asset name: %s from %s: %s, library version: %s, relpath: %s, assemblyVersion %s, fileVersion %s"),
                     deps_entry_t::s_known_asset_types[i],
                     m_deps_entries[i].size() - 1,
                     entry.asset.name.c_str(),

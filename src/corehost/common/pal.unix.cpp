@@ -165,7 +165,7 @@ bool pal::load_library(const string_t* path, dll_t* dll)
     *dll = dlopen(path->c_str(), RTLD_LAZY);
     if (*dll == nullptr)
     {
-        TRACE_ERROR(_X("Failed to load %s, error: %s"), path, dlerror());
+        TRACE_ERROR(_X("Failed to load %s, error: %s"), path->c_str(), dlerror());
         return false;
     }
     return true;

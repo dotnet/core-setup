@@ -35,10 +35,10 @@ namespace trace
     // Returns the currently set callback for error writing
     error_writer_fn get_error_writer();
 
-    void trace(const pal::char_t* format, ...) COLD_FUNCTION;
-    void trace_error(const pal::char_t* format, ...) COLD_FUNCTION;
+    void trace(const pal::char_t* format, ...) COLD_FUNCTION PRINTF_FUNCTION(1, 2);
+    void trace_error(const pal::char_t* format, ...) COLD_FUNCTION PRINTF_FUNCTION(1, 2);
 
-    void println(const pal::char_t* format, ...);
+    void println(const pal::char_t* format, ...) COLD_FUNCTION PRINTF_FUNCTION(1, 2);
     void println();
     void flush();
 };

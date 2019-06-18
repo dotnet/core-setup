@@ -108,6 +108,7 @@ namespace pal
     #define COLD_FUNCTION
     #define NO_INLINE
     #define PURE_FUNCTION
+    #define PRINTF_FUNCTION(FormatArg, FirstToCheck)
 
     typedef wchar_t char_t;
     typedef std::wstring string_t;
@@ -188,6 +189,7 @@ namespace pal
     #define COLD_FUNCTION __attribute__((cold))
     #define NO_INLINE __attribute__((noinline))
     #define PURE_FUNCTION __attribute__((pure))
+    #define PRINTF_FUNCTION(FormatArg, FirstToCheck)  __attribute__((format(printf, FormatArg, FirstToCheck)))
 
     typedef char char_t;
     typedef std::string string_t;

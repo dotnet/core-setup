@@ -150,7 +150,7 @@ namespace
         }
 
         // Print detailed message about the file not found in the probe paths.
-        TRACE_ERROR(_X("Could not find required library %s in %d probing paths:"),
+        TRACE_ERROR(_X("Could not find required library %s in %zu probing paths:"),
             LIBHOSTPOLICY_NAME, probe_realpaths.size());
         for (const auto& path : probe_realpaths)
         {
