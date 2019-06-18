@@ -11,11 +11,12 @@ namespace Microsoft.NET.HostModel.AppHost
     /// </summary>
     public class AppNameTooLongException : AppHostUpdateException
     {
-        public string LongName;
+        public string LongName { get; }
         public AppNameTooLongException(string name)
         {
             LongName = name;
         }
+
     }
 }
 
