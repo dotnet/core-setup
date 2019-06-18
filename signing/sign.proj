@@ -37,6 +37,12 @@
       <FilesToSign Include="$(OutDir)corehost/**/dotnet.exe">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
+      <FilesToSign Include="$(OutDir)corehost/**/apphost.exe">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="$(OutDir)corehost/**/comhost.dll">
+        <Authenticode>$(CertificateId)</Authenticode>
+      </FilesToSign>
       <FilesToSign Include="$(OutDir)corehost/**/ijwhost.dll">
         <Authenticode>$(CertificateId)</Authenticode>
       </FilesToSign>
