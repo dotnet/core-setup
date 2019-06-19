@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include "manifest.h"
+#include "marker.h"
 #include "error_codes.h"
 
 namespace bundle
@@ -39,8 +40,7 @@ namespace bundle
         void reopen_host_for_reading();
         static void seek(FILE* stream, long offset, int origin);
 
-        bool process_manifest_footer(int64_t& header_offset);
-        void process_manifest_header(int64_t header_offset);
+        void process_manifest_header();
 
         void determine_extraction_dir();
         void create_working_extraction_dir();

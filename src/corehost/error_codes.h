@@ -43,14 +43,13 @@ enum StatusCode
     SdkResolverResolveFailure           = 0x8000809b,
     FrameworkCompatFailure              = 0x8000809c,
     FrameworkCompatRetry                = 0x8000809d,
-    AppHostExeNotBundle                 = 0x8000809e,
-    BundleExtractionFailure             = 0x8000809f,
-    BundleExtractionIOError             = 0x800080a0,
-    LibHostDuplicateProperty            = 0x800080a1,
-    HostApiUnsupportedVersion           = 0x800080a2,
-    HostInvalidState                    = 0x800080a3,
-    HostPropertyNotFound                = 0x800080a4,
-    CoreHostIncompatibleConfig          = 0x800080a5,
+    BundleExtractionFailure             = 0x8000809e,
+    BundleExtractionIOError             = 0x8000809f,
+    LibHostDuplicateProperty            = 0x800080a0,
+    HostApiUnsupportedVersion           = 0x800080a1,
+    HostInvalidState                    = 0x800080a2,
+    HostPropertyNotFound                = 0x800080a3,
+    CoreHostIncompatibleConfig          = 0x800080a4,
 };
 
 #define STATUS_CODE_SUCCEEDED(status_code) ((static_cast<int>(static_cast<StatusCode>(status_code))) >= 0)

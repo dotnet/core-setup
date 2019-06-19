@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #include "bundle_runner.h"
+#include "manifest_header.h"
 #include "pal.h"
 #include "trace.h"
 #include "utils.h"
@@ -166,28 +167,9 @@ void bundle_runner_t::reopen_host_for_reading()
     }
 }
 
-// Checks if this host binary has a valid bundle signature.
-// If so, it sets header_offset and returns true.
-// If not, returns false.
-bool bundle_runner_t::process_manifest_footer(int64_t &header_offset)
+void bundle_runner_t::process_manifest_header()
 {
-    seek(m_bundle_stream, -manifest_footer_t::num_bytes_read(), SEEK_END);
-
-    manifest_footer_t* footer = manifest_footer_t::read(m_bundle_stream);
-
-    if (!footer->is_valid())
-    {
-        trace::info(_X("This executable is not recognized as a .net core bundle."));
-        return false;
-    }
-
-    header_offset = footer->manifest_header_offset();
-    return true;
-}
-
-void bundle_runner_t::process_manifest_header(int64_t header_offset)
-{
-    seek(m_bundle_stream, header_offset, SEEK_SET);
+    seek(m_bundle_stream, marker_t::header_offset(), SEEK_SET);
 
     manifest_header_t* header = manifest_header_t::read(m_bundle_stream);
 
@@ -302,22 +284,9 @@ StatusCode bundle_runner_t::extract()
 {
     try
     {
-        // Determine if the current executable is a bundle
         reopen_host_for_reading();
 
-        //  If the current AppHost is a bundle, it's layout will be 
-        //    AppHost binary 
-        //    Embedded Files: including the app, its configuration files, 
-        //                    dependencies, and possibly the runtime.
-        //    Bundle Manifest
-
-        int64_t manifest_header_offset;
-
-        if (!process_manifest_footer(manifest_header_offset))
-        {
-            return StatusCode::AppHostExeNotBundle;
-        }
-        process_manifest_header(manifest_header_offset);
+        process_manifest_header();
 
         // Determine if embedded files are already extracted, and available for reuse
         determine_extraction_dir();

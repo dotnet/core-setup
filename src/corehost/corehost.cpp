@@ -12,6 +12,7 @@
 
 #if defined(FEATURE_APPHOST)
 #include "cli/apphost/bundle/bundle_runner.h"
+#include "cli/apphost/bundle/marker.h"
 
 #define CURHOST_TYPE    _X("apphost")
 #define CUREXE_PKG_VER  COMMON_HOST_PKG_VER
@@ -32,22 +33,22 @@
  *        o https://en.wikipedia.org/wiki/Comparison_of_file_systems
  *          has more details on maximum file name sizes.
  */
-#define EMBED_HASH_HI_PART_UTF8 "c3ab8ff13720e8ad9047dd39466b3c89" // SHA-256 of "foobar" in UTF-8
-#define EMBED_HASH_LO_PART_UTF8 "74e592c2fa383d4a3960714caef0c4f2"
-#define EMBED_HASH_FULL_UTF8    (EMBED_HASH_HI_PART_UTF8 EMBED_HASH_LO_PART_UTF8) // NUL terminated
+#define APP_DLL_EMBED_HASH_HI_PART_UTF8 "c3ab8ff13720e8ad9047dd39466b3c89" // SHA-256 of "foobar" in UTF-8
+#define APP_DLL_EMBED_HASH_LO_PART_UTF8 "74e592c2fa383d4a3960714caef0c4f2"
+#define APP_DLL_EMBED_HASH_FULL_UTF8    (APP_DLL_EMBED_HASH_HI_PART_UTF8 APP_DLL_EMBED_HASH_LO_PART_UTF8) // NUL terminated
 
 bool is_exe_enabled_for_execution(pal::string_t* app_dll)
 {
-    constexpr int EMBED_SZ = sizeof(EMBED_HASH_FULL_UTF8) / sizeof(EMBED_HASH_FULL_UTF8[0]);
+    constexpr int EMBED_SZ = sizeof(APP_DLL_EMBED_HASH_FULL_UTF8) / sizeof(APP_DLL_EMBED_HASH_FULL_UTF8[0]);
     constexpr int EMBED_MAX = (EMBED_SZ > 1025 ? EMBED_SZ : 1025); // 1024 DLL name length, 1 NUL
 
-    // Contains the embed hash value at compile time or the managed DLL name replaced by "dotnet build".
+    // Contains the APP_DLL_EMBED_HASH_FULL_UTF8 value at compile time or the managed DLL name replaced by "dotnet build".
     // Must not be 'const' because std::string(&embed[0]) below would bind to a const string ctor plus length
     // where length is determined at compile time (=64) instead of the actual length of the string at runtime.
-    static char embed[EMBED_MAX] = EMBED_HASH_FULL_UTF8;     // series of NULs followed by embed hash string
+    static char embed[EMBED_MAX] = APP_DLL_EMBED_HASH_FULL_UTF8;     // series of NULs followed by embed hash string
 
-    static const char hi_part[] = EMBED_HASH_HI_PART_UTF8;
-    static const char lo_part[] = EMBED_HASH_LO_PART_UTF8;
+    static const char hi_part[] = APP_DLL_EMBED_HASH_HI_PART_UTF8;
+    static const char lo_part[] = APP_DLL_EMBED_HASH_LO_PART_UTF8;
 
     std::string binding(&embed[0]);
     if (!pal::utf8_palstring(binding, app_dll))
@@ -72,6 +73,7 @@ bool is_exe_enabled_for_execution(pal::string_t* app_dll)
     trace::info(_X("The managed DLL bound to this executable is: '%s'"), app_dll->c_str());
     return true;
 }
+
 #elif !defined(FEATURE_LIBHOST)
 #define CURHOST_TYPE    _X("dotnet")
 #define CUREXE_PKG_VER  HOST_PKG_VER
@@ -112,23 +114,22 @@ int exe_start(const int argc, const pal::char_t* argv[])
         requires_v2_hostfxr_interface = true;
     }
 
-    bundle::bundle_runner_t extractor(host_path);
-    StatusCode bundle_status = extractor.extract();
-
-    switch (bundle_status)
+    if (bundle::marker_t::is_bundle())
     {
-    case StatusCode::Success:
+        bundle::bundle_runner_t extractor(host_path);
+        StatusCode bundle_status = extractor.extract();
+
+        if (bundle_status != StatusCode::Success)
+        {
+            trace::error(_X("A fatal error was encountered. Could not extract contents of the bundle"));
+            return bundle_status;
+        }
+
         app_path.assign(extractor.get_extraction_dir());
-        break;
-
-    case StatusCode::AppHostExeNotBundle:
+    }
+    else
+    {
         app_path.assign(get_directory(host_path));
-        break;
-
-    case StatusCode::BundleExtractionFailure:
-    default:
-        trace::error(_X("A fatal error was encountered. Could not extract contents of the bundle"));
-        return StatusCode::AppHostExeNotBoundFailure;
     }
 
     append_path(&app_path, embedded_app_name.c_str());
