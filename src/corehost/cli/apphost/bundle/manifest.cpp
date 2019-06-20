@@ -50,13 +50,9 @@ bool manifest_footer_t::is_valid()
         strcmp(m_signature, m_expected_signature) == 0;
 }
 
-manifest_footer_t* manifest_footer_t::read(FILE* stream)
+StatusCode manifest_footer_t::try_read(FILE* stream, manifest_footer_t *footer)
 {
-    manifest_footer_t* footer = new manifest_footer_t();
-
-    bundle_runner_t::read(footer, num_bytes_read(), stream);
-
-    return footer;
+    return bundle_runner_t::try_read(footer, num_bytes_read(), stream);
 }
 
 manifest_t* manifest_t::read(FILE* stream, int32_t num_files)

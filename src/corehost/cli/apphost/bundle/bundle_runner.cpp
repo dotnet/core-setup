@@ -9,33 +9,63 @@
 
 using namespace bundle;
 
-void bundle_runner_t::seek(FILE* stream, long offset, int origin)
+StatusCode bundle_runner_t::try_seek(FILE* stream, long offset, int origin)
 {
     if (fseek(stream, offset, origin) != 0)
     {
         trace::error(_X("Failure processing application bundle; possible file corruption."));
         trace::error(_X("I/O seek failure within the bundle."));
-        throw StatusCode::BundleExtractionIOError;
+        return StatusCode::BundleExtractionIOError;
     }
+    return StatusCode::Success;
 }
 
-void bundle_runner_t::write(const void* buf, size_t size, FILE *stream)
+StatusCode bundle_runner_t::try_write(const void* buf, size_t size, FILE *stream)
 {
     if (fwrite(buf, 1, size, stream) != size)
     {
         trace::error(_X("Failure extracting contents of the application bundle."));
         trace::error(_X("I/O failure when writing extracted files."));
-        throw StatusCode::BundleExtractionIOError;
+        return StatusCode::BundleExtractionIOError;
     }
+    return StatusCode::Success;
 }
 
-void bundle_runner_t::read(void* buf, size_t size, FILE* stream)
+StatusCode bundle_runner_t::try_read(void* buf, size_t size, FILE* stream)
 {
     if (fread(buf, 1, size, stream) != size)
     {
         trace::error(_X("Failure processing application bundle; possible file corruption."));
         trace::error(_X("I/O failure reading contents of the bundle."));
-        throw StatusCode::BundleExtractionIOError;
+        return StatusCode::BundleExtractionIOError;
+    }
+    return StatusCode::Success;
+}
+
+void bundle_runner_t::read(void* buf, size_t size, FILE* stream)
+{
+    auto sc = bundle_runner_t::try_read(buf, size, stream);
+    if (sc != StatusCode::Success)
+    {
+        throw sc;
+    }
+}
+
+void bundle_runner_t::write(const void* buf, size_t size, FILE* stream)
+{
+    auto sc = bundle_runner_t::try_write(buf, size, stream);
+    if (sc != StatusCode::Success)
+    {
+        throw sc;
+    }
+}
+
+void bundle_runner_t::seek(FILE* stream, long offset, int origin)
+{
+    auto sc = bundle_runner_t::try_seek(stream, offset, origin);
+    if (sc != StatusCode::Success)
+    {
+        throw sc;
     }
 }
 
@@ -171,18 +201,21 @@ void bundle_runner_t::reopen_host_for_reading()
 // If not, returns false.
 bool bundle_runner_t::process_manifest_footer(int64_t &header_offset)
 {
-    seek(m_bundle_stream, -manifest_footer_t::num_bytes_read(), SEEK_END);
+    manifest_footer_t footer;
 
-    manifest_footer_t* footer = manifest_footer_t::read(m_bundle_stream);
-
-    if (!footer->is_valid())
+    auto sc = try_seek(m_bundle_stream, -manifest_footer_t::num_bytes_read(), SEEK_END);
+    if (sc == StatusCode::Success)
     {
-        trace::info(_X("This executable is not recognized as a .net core bundle."));
-        return false;
+        sc = manifest_footer_t::try_read(m_bundle_stream, &footer);
+        if (sc == StatusCode::Success && footer.is_valid())
+        {
+            header_offset = footer.manifest_header_offset();
+            return true;
+        }
     }
 
-    header_offset = footer->manifest_header_offset();
-    return true;
+    trace::info(_X("This executable is not recognized as a .net core bundle."));
+    return false;
 }
 
 void bundle_runner_t::process_manifest_header(int64_t header_offset)

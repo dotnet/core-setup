@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <list>
 #include "file_entry.h"
+#include "error_codes.h"
 
 namespace bundle
 {
@@ -64,7 +65,7 @@ namespace bundle
         }
 
         bool is_valid();
-        static manifest_footer_t* read(FILE* stream);
+        static StatusCode try_read(FILE* stream, struct manifest_footer_t* footer);
         int64_t manifest_header_offset() { return m_header_offset; }
         static size_t num_bytes_read()
         {
