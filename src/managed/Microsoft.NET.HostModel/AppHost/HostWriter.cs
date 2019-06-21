@@ -137,12 +137,12 @@ namespace Microsoft.NET.HostModel.AppHost
                     int position = BinaryUtils.SearchInFile(accessor, bundleSignature);
                     if(position == -1)
                     {
-                        bundleHeaderOffset = 0;
-                        return false;
+                        throw new PlaceHolderNotInAppHostFoundException(bundleSignature);
                     }
 
                     bundleHeaderOffset = accessor.ReadInt64(position - sizeof(Int64));
-                    return true;
+
+                    return (bundleHeaderOffset != 0);
                 }
             }
         }

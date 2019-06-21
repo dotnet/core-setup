@@ -27,7 +27,7 @@ namespace Microsoft.NET.HostModel.AppHost
                 int position = KMPSearch(searchPattern, bytes, accessor.Capacity);
                 if (position < 0)
                 {
-                    throw new AppUpdatePlaceHolderNotFoundException(searchPattern);
+                    throw new PlaceHolderNotInAppHostFoundException(searchPattern);
                 }
 
                 accessor.WriteArray(
