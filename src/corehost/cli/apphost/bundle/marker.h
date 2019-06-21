@@ -13,11 +13,11 @@ namespace bundle
     union marker_t
     {
     public:
-        int8_t placeholder[40];
+        uint8_t placeholder[40];
         struct
         {
             int64_t bundle_header_offset;
-            int8_t signature[32];
+            uint8_t signature[32];
         } locator;
 
         static int64_t header_offset();
@@ -25,7 +25,6 @@ namespace bundle
         {
             return header_offset() != 0;
         }
-
     };
 #pragma pack(pop)
 
