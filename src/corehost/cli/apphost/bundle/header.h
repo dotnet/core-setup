@@ -2,15 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#ifndef __MANIFEST_HEADER_H__
-#define __MANIFEST_HEADER_H__
+#ifndef __HEADER_H__
+#define __HEADER_H__
 
 #include <cstdint>
+#include "pal.h"
 
 namespace bundle
 {
-    // Manifest Header contains:
-    // Fixed size thunk (represened by manifest_header_inner_t)
+    // The Bundle Header contains:
+    // Fixed size thunk (m_data)
     //   - Major Version     
     //   - Minor Version     
     //   - Number of embedded files
@@ -18,16 +19,16 @@ namespace bundle
     // Variable size portion:
     //   - Bundle ID ("Bundle ID length" bytes)
 
-    struct manifest_header_t
+    struct header_t
     {
     public:
-        manifest_header_t()
+        header_t()
             :m_data(), m_bundle_id()
         {
         }
 
         bool is_valid();
-        static manifest_header_t* read(FILE* stream);
+        static header_t* read(FILE* stream);
         const pal::string_t& bundle_id() { return m_bundle_id; }
         int32_t num_embedded_files() { return m_data.num_embedded_files;  }
 
@@ -47,4 +48,4 @@ namespace bundle
         static const uint32_t m_current_minor_version = 1;
     };
 }
-#endif // __MANIFEST_HEADER_H__
+#endif // __HEADER_H__

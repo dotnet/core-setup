@@ -28,7 +28,7 @@ namespace Microsoft.NET.HostModel.Bundle
     /// 
     /// 
     ///
-    /// ------------ Manifest Header -------------
+    /// ------------ Bundle Header -------------
     ///     MajorVersion
     ///     MinorVersion
     ///     NumEmbeddedFiles
@@ -78,7 +78,7 @@ namespace Microsoft.NET.HostModel.Bundle
         {
             long startOffset = writer.BaseStream.Position;
 
-            // Write the manifest header
+            // Write the bundle header
             writer.Write(MajorVersion);
             writer.Write(MinorVersion);
             writer.Write(Files.Count());
@@ -95,11 +95,12 @@ namespace Microsoft.NET.HostModel.Bundle
 
         public static Manifest Read(string filePath, BinaryReader reader, long headerOffset)
         {
+            // Read the bundle header
             reader.BaseStream.Position = headerOffset;
             uint majorVersion = reader.ReadUInt32();
             uint minorVersion = reader.ReadUInt32();
             int fileCount = reader.ReadInt32();
-            string bundleID = reader.ReadString(); // Bundle ID
+            string bundleID = reader.ReadString(); 
 
             if (majorVersion != MajorVersion || minorVersion != MinorVersion)
             {

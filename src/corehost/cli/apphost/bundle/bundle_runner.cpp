@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 #include "bundle_runner.h"
-#include "manifest_header.h"
 #include "pal.h"
 #include "trace.h"
 #include "utils.h"
@@ -167,16 +166,6 @@ void bundle_runner_t::reopen_host_for_reading()
     }
 }
 
-void bundle_runner_t::process_manifest_header()
-{
-    seek(m_bundle_stream, marker_t::header_offset(), SEEK_SET);
-
-    manifest_header_t* header = manifest_header_t::read(m_bundle_stream);
-
-    m_num_embedded_files = header->num_embedded_files();
-    m_bundle_id = header->bundle_id();
-}
-
 // Compute the final extraction location as:
 // m_extraction_dir = $DOTNET_BUNDLE_EXTRACT_BASE_DIR/<app>/<id>/...
 //
@@ -198,7 +187,7 @@ void bundle_runner_t::determine_extraction_dir()
 
     pal::string_t host_name = strip_executable_ext(get_filename(m_bundle_path));
     append_path(&m_extraction_dir, host_name.c_str());
-    append_path(&m_extraction_dir, m_bundle_id.c_str());
+    append_path(&m_extraction_dir, bundle_id().c_str());
 
     trace::info(_X("Files embedded within the bundled will be extracted to [%s] directory"), m_extraction_dir.c_str());
 }
@@ -286,7 +275,9 @@ StatusCode bundle_runner_t::extract()
     {
         reopen_host_for_reading();
 
-        process_manifest_header();
+        // Read the bundle header
+        seek(m_bundle_stream, marker_t::header_offset(), SEEK_SET);
+        m_header = header_t::read(m_bundle_stream);
 
         // Determine if embedded files are already extracted, and available for reuse
         determine_extraction_dir();
@@ -314,7 +305,7 @@ StatusCode bundle_runner_t::extract()
         
         create_working_extraction_dir();
 
-        m_manifest = manifest_t::read(m_bundle_stream, m_num_embedded_files);
+        m_manifest = manifest_t::read(m_bundle_stream, num_embedded_files());
 
         for (file_entry_t* entry : m_manifest->files) {
             extract_file(entry);
