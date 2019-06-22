@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             Directory.CreateDirectory(_exeSdkBaseDir);
             
             // Trace messages used to identify from which folder the SDK was picked
-            _exeSelectedMessage = $"Using dotnet SDK dll=[{_exeSdkBaseDir}";
+            _exeSelectedMessage = $"Using .NET Core SDK dll=[{_exeSdkBaseDir}";
         }
 
         public void Dispose()
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         public void SdkLookup_Global_Json_Single_Digit_Patch_Rollup()
         {
             // Set specified SDK version = 9999.3.4-global-dummy
-            SetGlobalJsonVersion("SingleDigit-global.json");
+            CopyGlobalJson("SingleDigit-global.json");
 
             // Specified SDK version: 9999.3.4-global-dummy
             // Exe: empty
@@ -93,8 +93,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining("A compatible installed dotnet SDK for global.json version")
-                .And.HaveStdErrContaining("It was not possible to find any installed dotnet SDKs")
+                .And.HaveStdErrContaining("A compatible installed .NET Core SDK for global.json version")
+                .And.HaveStdErrContaining("It was not possible to find any installed .NET Core SDKs")
                 .And.HaveStdErrContaining("aka.ms/dotnet-download")
                 .And.NotHaveStdErrContaining("Checking if resolved SDK dir");
 
@@ -113,8 +113,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining("A compatible installed dotnet SDK for global.json version")
-                .And.NotHaveStdErrContaining("It was not possible to find any installed dotnet SDKs");
+                .And.HaveStdErrContaining("A compatible installed .NET Core SDK for global.json version")
+                .And.NotHaveStdErrContaining("It was not possible to find any installed .NET Core SDKs");
 
             // Add SDK versions
             AddAvailableSdkVersions(_exeSdkBaseDir, "9999.3.3");
@@ -131,8 +131,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining("A compatible installed dotnet SDK for global.json version")
-                .And.NotHaveStdErrContaining("It was not possible to find any installed dotnet SDKs");
+                .And.HaveStdErrContaining("A compatible installed .NET Core SDK for global.json version")
+                .And.NotHaveStdErrContaining("It was not possible to find any installed .NET Core SDKs");
 
             // Add SDK versions
             AddAvailableSdkVersions(_exeSdkBaseDir, "9999.3.4");
@@ -224,7 +224,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         public void SdkLookup_Global_Json_Two_Part_Patch_Rollup()
         {
             // Set specified SDK version = 9999.3.304-global-dummy
-            SetGlobalJsonVersion("TwoPart-global.json");
+            CopyGlobalJson("TwoPart-global.json");
 
             // Specified SDK version: 9999.3.304-global-dummy
             // Exe: empty
@@ -238,8 +238,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining("A compatible installed dotnet SDK for global.json version")
-                .And.HaveStdErrContaining("It was not possible to find any installed dotnet SDKs");
+                .And.HaveStdErrContaining("A compatible installed .NET Core SDK for global.json version")
+                .And.HaveStdErrContaining("It was not possible to find any installed .NET Core SDKs");
 
             // Add SDK versions
             AddAvailableSdkVersions(_exeSdkBaseDir, "9999.3.57", "9999.3.4-dummy");
@@ -256,8 +256,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining("A compatible installed dotnet SDK for global.json version")
-                .And.NotHaveStdErrContaining("It was not possible to find any installed dotnet SDKs");
+                .And.HaveStdErrContaining("A compatible installed .NET Core SDK for global.json version")
+                .And.NotHaveStdErrContaining("It was not possible to find any installed .NET Core SDKs");
 
             // Add SDK versions
             AddAvailableSdkVersions(_exeSdkBaseDir, "9999.3.300", "9999.7.304-global-dummy");
@@ -274,8 +274,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining("A compatible installed dotnet SDK for global.json version")
-                .And.NotHaveStdErrContaining("It was not possible to find any installed dotnet SDKs");
+                .And.HaveStdErrContaining("A compatible installed .NET Core SDK for global.json version")
+                .And.NotHaveStdErrContaining("It was not possible to find any installed .NET Core SDKs");
 
             // Add SDK versions
             AddAvailableSdkVersions(_exeSdkBaseDir, "9999.3.304");
@@ -385,8 +385,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .CaptureStdErr()
                 .Execute(fExpectedToFail: true)
                 .Should().Fail()
-                .And.HaveStdErrContaining("It was not possible to find any installed dotnet SDKs")
-                .And.HaveStdErrContaining("Did you mean to run dotnet SDK commands? Please install dotnet SDK from");
+                .And.HaveStdErrContaining("It was not possible to find any installed .NET Core SDKs")
+                .And.HaveStdErrContaining("Did you mean to run .NET Core SDK commands? Install a .NET Core SDK from");
 
             // Add SDK versions
             AddAvailableSdkVersions(_exeSdkBaseDir, "9999.0.4");
@@ -555,6 +555,706 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdOutContaining("9999.0.52000000");
         }
 
+        [Fact]
+        public void It_falls_back_to_latest_sdk_for_invalid_global_json()
+        {
+            AddAvailableSdkVersions(_exeSdkBaseDir, "9999.0.100", "9999.0.300-dummy.9", "9999.1.402");
+
+            // Write an invalid global.json file
+            WriteGlobalJson("{ sdk: { \"version\": \"9999.0.100\" } }");
+
+            DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining("A JSON parsing exception occurred")
+                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+
+            // Write a global.json that doesn't contain an object
+            WriteGlobalJson("true");
+
+             DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining("Expected a JSON object")
+                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+
+            // Write a global.json that has a non-string version
+            WriteGlobalJson("{ \"sdk\": { \"version\": 1 } }");
+
+            DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining("Expected a string for the 'sdk/version' value")
+                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+
+            // Write a global.json with an invalid version value
+            CreateGlobalJson(version: "invalid");
+
+            DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining("Version 'invalid' is not valid for the 'sdk/version' value")
+                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+
+            // Write a global.json that has a non-string policy
+            WriteGlobalJson("{ \"sdk\": { \"rollForward\": true } }");
+
+            DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining("Expected a string for the 'sdk/rollForward' value")
+                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+
+            // Write a global.json that has a policy but no version
+            CreateGlobalJson(policy: "latestPatch");
+
+            DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining("The roll-forward policy 'latestPatch' requires a 'sdk/version' value")
+                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+
+            // Write a global.json that has an invalid policy value
+            CreateGlobalJson(policy: "invalid");
+
+            DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining("The roll-forward policy 'invalid' is not supported for the 'sdk/rollForward' value")
+                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+
+            // Write a global.json that has a non-boolean allow prerelease
+            WriteGlobalJson("{ \"sdk\": { \"allowPrerelease\": \"true\" } }");
+
+            DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining("Expected a boolean for the 'sdk/allowPrerelease' value")
+                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+
+            // Write a global.json that has a prerelease version and allowPrerelease = false
+            CreateGlobalJson(version: "9999.1.402-preview1", allowPrerelease: false);
+
+            DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining("Ignoring the 'sdk/allowPrerelease' value")
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+        }
+
+        [Theory]
+        [MemberData(nameof(SdkRollForwardData))]
+        public void It_rolls_forward_as_expected(string policy, string requested, bool allowPrerelease, string expected, string[] installed)
+        {
+            AddAvailableSdkVersions(_exeSdkBaseDir, installed);
+
+            CreateGlobalJson(policy: policy, version: requested, allowPrerelease: allowPrerelease);
+
+            var result = DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute();
+
+            var globalJson = Path.Combine(_currentWorkingDir, "global.json");
+
+            if (expected == null)
+            {
+                result
+                    .Should()
+                    .Fail()
+                    .And.HaveStdErrContaining($"A compatible installed .NET Core SDK for global.json version [{requested}] from [{globalJson}] was not found")
+                    .And.HaveStdErrContaining($"Install the [{requested}] .NET Core SDK or update [{globalJson}] with an installed .NET Core SDK:");
+            }
+            else
+            {
+                result
+                    .Should()
+                    .Pass()
+                    .And.HaveStdErrContaining($"SDK path resolved to [{Path.Combine(_exeSdkBaseDir, expected)}]");
+            }
+        }
+
+        [Fact]
+        public void It_uses_latest_stable_sdk_if_allow_prerelease_is_false()
+        {
+            var installed = new string[] {
+                    "9999.1.702",
+                    "9999.2.101",
+                    "9999.2.203",
+                    "9999.2.204-preview1",
+                    "10000.0.100-preview3",
+                    "10000.0.100-preview7",
+                    "10000.0.100",
+                    "10000.1.102",
+                    "10000.1.106",
+                    "10000.0.200-preview5",
+                    "10000.1.100-preview3",
+                    "10001.0.100-preview3",
+                };
+
+            const string ExpectedVersion = "10000.1.106";
+
+            AddAvailableSdkVersions(_exeSdkBaseDir, installed);
+
+            CreateGlobalJson(allowPrerelease: false);
+
+            var result = DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining($"SDK path resolved to [{Path.Combine(_exeSdkBaseDir, ExpectedVersion)}]");
+        }
+
+        public static IEnumerable<object[]> SdkRollForwardData
+        {
+            get
+            {
+                const string Requested = "9999.1.501";
+
+                var installed = new string[] {
+                    "9999.1.500",
+                };
+
+                // Array of (policy, expected) tuples
+                var policies = new[] {
+                    ((string)null,    (string)null),
+                    ("patch",         (string)null),
+                    ("feature",       (string)null),
+                    ("minor",         (string)null),
+                    ("major",         (string)null),
+                    ("latestPatch",   (string)null),
+                    ("latestFeature", (string)null),
+                    ("latestMinor",   (string)null),
+                    ("latestMajor",   (string)null),
+                    ("disable",       (string)null),
+                    ("invalid",       "9999.1.500"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        true,         // allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9999.1.500",
+                    "9999.2.100-preview1",
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    ((string)null,    (string)null),
+                    ("patch",         (string)null),
+                    ("feature",       (string)null),
+                    ("minor",         (string)null),
+                    ("major",         (string)null),
+                    ("latestPatch",   (string)null),
+                    ("latestFeature", (string)null),
+                    ("latestMinor",   (string)null),
+                    ("latestMajor",   (string)null),
+                    ("disable",       (string)null),
+                    ("invalid",       "9999.2.100-preview1"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        false,        // do not allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "9999.1.501",
+                    "9999.1.503-preview5",
+                    "9999.1.503",
+                    "9999.1.504-preview1",
+                    "9999.1.504-preview2",
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    ((string)null,    "9999.1.501"),
+                    ("patch",         "9999.1.501"),
+                    ("feature",       "9999.1.504-preview2"),
+                    ("minor",         "9999.1.504-preview2"),
+                    ("major",         "9999.1.504-preview2"),
+                    ("latestPatch",   "9999.1.504-preview2"),
+                    ("latestFeature", "9999.1.504-preview2"),
+                    ("latestMinor",   "9999.1.504-preview2"),
+                    ("latestMajor",   "9999.1.504-preview2"),
+                    ("disable",       "9999.1.501"),
+                    ("invalid",       "9999.1.504-preview2"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        true,         // allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "9999.1.501",
+                    "9999.1.503-preview5",
+                    "9999.1.503",
+                    "9999.1.504-preview1",
+                    "9999.1.504-preview2",
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    ((string)null,    "9999.1.501"),
+                    ("patch",         "9999.1.501"),
+                    ("feature",       "9999.1.503"),
+                    ("minor",         "9999.1.503"),
+                    ("major",         "9999.1.503"),
+                    ("latestPatch",   "9999.1.503"),
+                    ("latestFeature", "9999.1.503"),
+                    ("latestMinor",   "9999.1.503"),
+                    ("latestMajor",   "9999.1.503"),
+                    ("disable",       "9999.1.501"),
+                    ("invalid",       "9999.1.504-preview2"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        false,        // don't allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "9999.1.503",
+                    "9999.1.505-preview2",
+                    "9999.1.505",
+                    "9999.1.506-preview1",
+                    "9999.1.601",
+                    "9999.1.608-preview3",
+                    "9999.1.609",
+                    "9999.2.101",
+                    "9999.2.203-preview1",
+                    "9999.2.203",
+                    "10000.0.100",
+                    "10000.1.100-preview1"
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    (null,            "9999.1.506-preview1"),
+                    ("patch",         "9999.1.506-preview1"),
+                    ("feature",       "9999.1.506-preview1"),
+                    ("minor",         "9999.1.506-preview1"),
+                    ("major",         "9999.1.506-preview1"),
+                    ("latestPatch",   "9999.1.506-preview1"),
+                    ("latestFeature", "9999.1.609"),
+                    ("latestMinor",   "9999.2.203"),
+                    ("latestMajor",   "10000.1.100-preview1"),
+                    ("disable",       (string)null),
+                    ("invalid",       "10000.1.100-preview1"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        true,         // allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "9999.1.503",
+                    "9999.1.505-preview2",
+                    "9999.1.505",
+                    "9999.1.506-preview1",
+                    "9999.1.601",
+                    "9999.1.608-preview3",
+                    "9999.1.609",
+                    "9999.2.101",
+                    "9999.2.203-preview1",
+                    "9999.2.203",
+                    "10000.0.100",
+                    "10000.1.100-preview1"
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    (null,            "9999.1.505"),
+                    ("patch",         "9999.1.505"),
+                    ("feature",       "9999.1.505"),
+                    ("minor",         "9999.1.505"),
+                    ("major",         "9999.1.505"),
+                    ("latestPatch",   "9999.1.505"),
+                    ("latestFeature", "9999.1.609"),
+                    ("latestMinor",   "9999.2.203"),
+                    ("latestMajor",   "10000.0.100"),
+                    ("disable",       (string)null),
+                    ("invalid",       "10000.1.100-preview1"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        false,        // don't allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "9999.1.601",
+                    "9999.1.604-preview3",
+                    "9999.1.604",
+                    "9999.1.605-preview4",
+                    "9999.1.701",
+                    "9999.1.702-preview1",
+                    "9999.1.702",
+                    "9999.2.101",
+                    "9999.2.203",
+                    "9999.2.204-preview1",
+                    "10000.0.100-preview7",
+                    "10000.0.100",
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    ((string)null,    (string)null),
+                    ("patch",         (string)null),
+                    ("feature",       "9999.1.605-preview4"),
+                    ("minor",         "9999.1.605-preview4"),
+                    ("major",         "9999.1.605-preview4"),
+                    ("latestPatch",   (string)null),
+                    ("latestFeature", "9999.1.702"),
+                    ("latestMinor",   "9999.2.204-preview1"),
+                    ("latestMajor",   "10000.0.100"),
+                    ("disable",       (string)null),
+                    ("invalid",       "10000.0.100"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        true,         // allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "9999.1.601",
+                    "9999.1.604-preview3",
+                    "9999.1.604",
+                    "9999.1.605-preview4",
+                    "9999.1.701",
+                    "9999.1.702-preview1",
+                    "9999.1.702",
+                    "9999.2.101",
+                    "9999.2.203",
+                    "9999.2.204-preview1",
+                    "10000.0.100-preview7",
+                    "10000.0.100",
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    ((string)null,    (string)null),
+                    ("patch",         (string)null),
+                    ("feature",       "9999.1.604"),
+                    ("minor",         "9999.1.604"),
+                    ("major",         "9999.1.604"),
+                    ("latestPatch",   (string)null),
+                    ("latestFeature", "9999.1.702"),
+                    ("latestMinor",   "9999.2.203"),
+                    ("latestMajor",   "10000.0.100"),
+                    ("disable",       (string)null),
+                    ("invalid",       "10000.0.100"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        false,        // don't allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "9999.2.101-preview4",
+                    "9999.2.101",
+                    "9999.2.102-preview1",
+                    "9999.2.203",
+                    "9999.3.501",
+                    "9999.4.205-preview3",
+                    "10000.0.100",
+                    "10000.1.100-preview1"
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    ((string)null,    (string)null),
+                    ("patch",         (string)null),
+                    ("feature",       (string)null),
+                    ("minor",         "9999.2.102-preview1"),
+                    ("major",         "9999.2.102-preview1"),
+                    ("latestPatch",   (string)null),
+                    ("latestFeature", (string)null),
+                    ("latestMinor",   "9999.4.205-preview3"),
+                    ("latestMajor",   "10000.1.100-preview1"),
+                    ("disable",       (string)null),
+                    ("invalid",       "10000.1.100-preview1"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        true,         // allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "9999.2.101-preview4",
+                    "9999.2.101",
+                    "9999.2.102-preview1",
+                    "9999.2.203",
+                    "9999.3.501",
+                    "9999.4.205-preview3",
+                    "10000.0.100",
+                    "10000.1.100-preview1"
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    ((string)null,    (string)null),
+                    ("patch",         (string)null),
+                    ("feature",       (string)null),
+                    ("minor",         "9999.2.101"),
+                    ("major",         "9999.2.101"),
+                    ("latestPatch",   (string)null),
+                    ("latestFeature", (string)null),
+                    ("latestMinor",   "9999.3.501"),
+                    ("latestMajor",   "10000.0.100"),
+                    ("disable",       (string)null),
+                    ("invalid",       "10000.1.100-preview1"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        false,        // don't allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "10000.0.100",
+                    "10000.0.105-preview1",
+                    "10000.0.105",
+                    "10000.0.106-preview1",
+                    "10000.1.102",
+                    "10000.1.107",
+                    "10000.3.100",
+                    "10000.3.102-preview3",
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    ((string)null,    (string)null),
+                    ("patch",         (string)null),
+                    ("feature",       (string)null),
+                    ("minor",         (string)null),
+                    ("major",         "10000.0.106-preview1"),
+                    ("latestPatch",   (string)null),
+                    ("latestFeature", (string)null),
+                    ("latestMinor",   (string)null),
+                    ("latestMajor",   "10000.3.102-preview3"),
+                    ("disable",       (string)null),
+                    ("invalid",       "10000.3.102-preview3"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        true,         // allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+
+                installed = new string[] {
+                    "9998.0.300",
+                    "9999.1.500",
+                    "10000.0.100",
+                    "10000.0.105-preview1",
+                    "10000.0.105",
+                    "10000.0.106-preview1",
+                    "10000.1.102",
+                    "10000.1.107",
+                    "10000.3.100",
+                    "10000.3.102-preview3",
+                };
+
+                // Array of (policy, expected) tuples
+                policies = new[] {
+                    ((string)null,    (string)null),
+                    ("patch",         (string)null),
+                    ("feature",       (string)null),
+                    ("minor",         (string)null),
+                    ("major",         "10000.0.105"),
+                    ("latestPatch",   (string)null),
+                    ("latestFeature", (string)null),
+                    ("latestMinor",   (string)null),
+                    ("latestMajor",   "10000.3.100"),
+                    ("disable",       (string)null),
+                    ("invalid",       "10000.3.102-preview3"),
+                };
+
+                foreach (var policy in policies)
+                {
+                    yield return new object[] {
+                        policy.Item1, // policy
+                        Requested,    // requested
+                        false,        // don't allow prerelease
+                        policy.Item2, // expected
+                        installed     // installed
+                    };
+                }
+            }
+        }
+
         // This method adds a list of new sdk version folders in the specified directory.
         // The actual contents are 'fake' and the mininum required for SDK discovery.
         // The dotnet.runtimeconfig.json created uses a dummy framework version (9999.0.0)
@@ -578,13 +1278,27 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         }
 
         // Put a global.json file in the cwd in order to specify a CLI
-        private void SetGlobalJsonVersion(string globalJsonFileName)
+        private void CopyGlobalJson(string globalJsonFileName)
         {
             string destFile = Path.Combine(_currentWorkingDir, "global.json");
             string srcFile = Path.Combine(RepoDirectories.RepoRoot, "src", "test", "Assets", "TestUtils",
                 "SDKLookup", globalJsonFileName);
 
             File.Copy(srcFile, destFile, true);
+        }
+
+        private void CreateGlobalJson(string version = null, string policy = null, bool? allowPrerelease = null)
+        {
+            version = version == null ? "null" : string.Format("\"{0}\"", version);
+            policy = policy == null ? "null" : string.Format("\"{0}\"", policy);
+            string allow = allowPrerelease.HasValue ? (allowPrerelease.Value ? "true" : "false") : "null";
+
+            WriteGlobalJson($@"{{ ""sdk"": {{ ""version"": {version}, ""rollForward"": {policy}, ""allowPrerelease"": {allow} }} }}");
+        }
+
+        private void WriteGlobalJson(string contents)
+        {
+            File.WriteAllText(Path.Combine(_currentWorkingDir, "global.json"), contents);
         }
     }
 }
