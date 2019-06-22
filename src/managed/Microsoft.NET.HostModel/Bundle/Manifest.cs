@@ -93,7 +93,7 @@ namespace Microsoft.NET.HostModel.Bundle
             return startOffset;
         }
 
-        public static Manifest Read(string filePath, BinaryReader reader, long headerOffset)
+        public static Manifest Read(BinaryReader reader, long headerOffset)
         {
             // Read the bundle header
             reader.BaseStream.Position = headerOffset;

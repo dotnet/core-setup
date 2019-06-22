@@ -10,10 +10,10 @@ namespace Microsoft.NET.HostModel.AppHost
     /// Unable to use input file as a valid application host executable, as it does not contain 
     /// the expected placeholder byte sequence.
     /// </summary>
-    public class PlaceHolderNotInAppHostFoundException : AppHostUpdateException
+    public class PlaceHolderNotFoundInAppHostException : AppHostUpdateException
     {
         public byte[] MissingPattern { get; }
-        public PlaceHolderNotInAppHostFoundException(byte[] pattern)
+        public PlaceHolderNotFoundInAppHostException(byte[] pattern)
         {
             MissingPattern = pattern;
         }

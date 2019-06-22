@@ -199,8 +199,9 @@ namespace Microsoft.NET.HostModel.Bundle
 
                 // Write the bundle manifest
                 headerOffset = BundleManifest.Write(writer);
-                trace.Log($"Manifest: Offset={headerOffset}, Size={writer.BaseStream.Position - headerOffset}");
-                trace.Log($"Bundle: Path={bundlePath} Size={bundle.Length}");
+                trace.Log($"Header Offset={headerOffset}");
+                trace.Log($"Meta-data Size={writer.BaseStream.Position - headerOffset}");
+                trace.Log($"Bundle: Path={bundlePath}, Size={bundle.Length}");
             }
 
             HostWriter.SetAsBundle(bundlePath, headerOffset);

@@ -44,8 +44,8 @@ namespace bundle
 #pragma pack(pop)
         pal::string_t m_bundle_id;
 
-        static const uint32_t m_current_major_version = 0;
-        static const uint32_t m_current_minor_version = 1;
+        const uint32_t m_current_major_version = 0;
+        const uint32_t m_current_minor_version = 1;
     };
 }
 #endif // __HEADER_H__

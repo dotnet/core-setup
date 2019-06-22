@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 #include "bundle_runner.h"
-#include "header.h"
-#include "pal.h"
 #include "error_codes.h"
 #include "trace.h"
 #include "utils.h"

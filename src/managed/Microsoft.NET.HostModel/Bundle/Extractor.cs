@@ -50,7 +50,7 @@ namespace Microsoft.NET.HostModel.Bundle
 
                 using (BinaryReader reader = new BinaryReader(File.OpenRead(BundlePath)))
                 {
-                    Manifest manifest = Manifest.Read(BundlePath, reader, headerOffset);
+                    Manifest manifest = Manifest.Read(reader, headerOffset);
 
                     foreach (FileEntry entry in manifest.Files)
                     {
