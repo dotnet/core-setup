@@ -9,14 +9,12 @@ param(
     [Parameter(Mandatory=$true)][string]$Architecture,
     [Parameter(Mandatory=$true)][string]$ComponentName,
     [Parameter(Mandatory=$true)][string]$ComponentFriendlyName,
-    [Parameter(Mandatory=$true)][string]$ProjectUrl
+    [Parameter(Mandatory=$true)][string]$ProjectUrl,
+	[Parameter(Mandatory=$true)][string]$BinDir
 )
 
-$RepoRoot = Convert-Path "$PSScriptRoot\..\..\..\..\..\.."
-$NuGetDir = Join-Path $RepoRoot "artifacts\Tools\nuget"
-$NuGetExe = Join-Path $NuGetDir "nuget.exe"
+$NuGetExe = Join-Path $BinDir "nuget.exe"
 $OutputDirectory = [System.IO.Path]::GetDirectoryName($NupkgFile)
-$SdkBundlePath = [System.IO.Path]::GetFullPath($MsiPath)
 
 if (-not (Test-Path $NuGetDir)) {
     New-Item -ItemType Directory -Force -Path $NuGetDir | Out-Null

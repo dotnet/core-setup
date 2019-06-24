@@ -231,7 +231,8 @@
                       '$(TargetArchitecture)' ^
                       '@(SdkMsiComponent->'%(ComponentId)')' ^
                       '@(SdkMsiComponent->'%(ComponentFriendlyName)')' ^
-                      '$(ProjectUrl)'" />
+                      '$(ProjectUrl)' ^
+                      '$(BinDir)'" />
   </Target>
   
   <Target Name="SetupVSNugetPackages">
