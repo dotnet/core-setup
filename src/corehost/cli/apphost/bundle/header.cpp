@@ -11,8 +11,8 @@ using namespace bundle;
 
 bool header_t::is_valid()
 {
-    return m_data.major_version == m_current_major_version &&
-           m_data.minor_version == m_current_minor_version &&
+    return m_data.major_version == current_major_version &&
+           m_data.minor_version == current_minor_version &&
            m_data.num_embedded_files > 0;
 }
 
