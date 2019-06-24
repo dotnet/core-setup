@@ -92,6 +92,7 @@
     <TargetingPackBrandName>$(ProductBrandPrefix) Targeting Pack - $(ProductBrandSuffix)</TargetingPackBrandName>
     <AppHostPackBrandName>$(ProductBrandPrefix) AppHost Pack - $(ProductBrandSuffix)</AppHostPackBrandName>
     <SharedFrameworkBrandName>$(ProductBrandPrefix) Runtime - $(ProductBrandSuffix)</SharedFrameworkBrandName>
+    <NetStandardProductBandVersion>2.1</NetStandardProductBandVersion>
   </PropertyGroup>
 
   <ItemGroup>
