@@ -13,10 +13,9 @@
     </PackageTargets>
   </PropertyGroup>
 
-  <Target Name="Build" DependsOnTargets="BuildInstallers;BuildCombinedInstallers;BuildVSNugetPackages" Condition="'$(DOTNET_BUILD_SKIP_PACKAGING)' != 'true'" />
+  <Target Name="Build" DependsOnTargets="BuildInstallers;BuildCombinedInstallers" Condition="'$(DOTNET_BUILD_SKIP_PACKAGING)' != 'true'" />
   <Target Name="BuildInstallers" DependsOnTargets="$(PackageTargets)" Condition="'$(DOTNET_BUILD_SKIP_PACKAGING)' != 'true'" />
-  <Target Name="BuildCombinedInstallers" DependsOnTargets="GenerateCombinedInstallers" Condition="'$(DOTNET_BUILD_SKIP_PACKAGING)' != 'true'" />
-  <Target Name="BuildVSNugetPackages" DependsOnTargets="GenerateVSNugetPackages" Condition="'$(DOTNET_BUILD_SKIP_PACKAGING)' != 'true'" />
+  <Target Name="BuildCombinedInstallers" DependsOnTargets="GenerateCombinedInstallers;GenerateVSNugetPackages" Condition="'$(DOTNET_BUILD_SKIP_PACKAGING)' != 'true'" />
 
   <Target Name="InitPackage">
     <ItemGroup>
