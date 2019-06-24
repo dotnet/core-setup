@@ -17,7 +17,7 @@
   <Target Name="BuildInstallers" DependsOnTargets="$(PackageTargets)" Condition="'$(DOTNET_BUILD_SKIP_PACKAGING)' != 'true'" />
   <Target Name="BuildCombinedInstallers" DependsOnTargets="GenerateCombinedInstallers" Condition="'$(DOTNET_BUILD_SKIP_PACKAGING)' != 'true'" />
   <Target Name="BuildVSNugetPackages" DependsOnTargets="GenerateVSNugetPackages" Condition="'$(DOTNET_BUILD_SKIP_PACKAGING)' != 'true'" />
-  
+
   <Target Name="InitPackage">
     <ItemGroup>
       <OutDirs Include="$(SharedHostPublishRoot)" />
