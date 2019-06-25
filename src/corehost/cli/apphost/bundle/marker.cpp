@@ -15,7 +15,7 @@ int64_t marker_t::header_offset()
     // If this is a single-file bundle, the last 8 bytes are replaced 
     // bundle-header replaced by "dotnet publish" with the offset 
     // where the bundle_header is located.
-    static uint8_t placeholder[] = 
+    static volatile uint8_t placeholder[] = 
     {
         // 8 bytes represent the bundle header-offset 
         // Zero for non-bundle apphosts (default).
@@ -27,7 +27,7 @@ int64_t marker_t::header_offset()
         0xee, 0x3b, 0x2d, 0xce, 0x24, 0xb3, 0x6a, 0xae
     };
 
-    marker_t* marker = (marker_t*)placeholder;
+    volatile marker_t* marker = (volatile marker_t*)placeholder;
 
     return marker->locator.bundle_header_offset;
 }
