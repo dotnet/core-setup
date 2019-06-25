@@ -10,7 +10,7 @@ param(
     [Parameter(Mandatory=$true)][string]$ComponentName,
     [Parameter(Mandatory=$true)][string]$ComponentFriendlyName,
     [Parameter(Mandatory=$true)][string]$ProjectUrl,
-	[Parameter(Mandatory=$true)][string]$BinDir
+    [Parameter(Mandatory=$true)][string]$BinDir
 )
 
 $NuGetDir = Join-Path $BinDir  "nuget"
