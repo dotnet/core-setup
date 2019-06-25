@@ -255,18 +255,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             UseBuiltAppHost(appExe);
             MarkAppHostAsGUI(appExe);
 
-            Command command = Command.Create(appExe)
+            Command.Create(appExe)
                 .CaptureStdErr()
                 .CaptureStdOut()
-                .Start();
-
-            CommandResult result = command.WaitForExit(true);
-
-            // There should be no output written by the process.
-            Assert.Equal(string.Empty, result.StdOut);
-            Assert.Equal(string.Empty, result.StdErr);
-
-            result.Should().Fail();
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErrContaining("This executable is not bound to a managed DLL to execute.");
         }
 
         [Fact]
@@ -288,15 +282,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             MarkAppHostAsGUI(appExe);
 
             string traceFilePath;
-            Command command = Command.Create(appExe)
+            Command.Create(appExe)
                 .EnableHostTracingToFile(out traceFilePath)
-                .Start();
-
-            CommandResult result = command.WaitForExit(true);
-
-            result.Should().Fail()
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute()
+                .Should().Fail()
                 .And.FileExists(traceFilePath)
-                .And.FileContains(traceFilePath, "This executable is not bound to a managed DLL to execute.");
+                .And.FileContains(traceFilePath, "This executable is not bound to a managed DLL to execute.")
+                .And.HaveStdErrContaining("This executable is not bound to a managed DLL to execute.");
 
             FileUtils.DeleteFileIfPossible(traceFilePath);
         }

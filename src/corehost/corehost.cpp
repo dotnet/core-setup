@@ -253,21 +253,10 @@ pal::string_t g_buffered_errors;
 
 void buffering_trace_writer(const pal::char_t* message)
 {
+    // Add to buffer for later use.
     g_buffered_errors.append(message).append(_X("\n"));
-}
-
-// Determines if the current module (should be the apphost.exe) is marked as Windows GUI application
-// in case it's not a GUI application (so should be CUI) or in case of any error the function returns false.
-bool get_windows_graphical_user_interface_bit()
-{
-    HMODULE module = ::GetModuleHandleW(NULL);
-    BYTE *bytes = (BYTE *)module;
-
-    // https://en.wikipedia.org/wiki/Portable_Executable
-    UINT32 pe_header_offset = ((IMAGE_DOS_HEADER *)bytes)->e_lfanew;
-    UINT16 subsystem = ((IMAGE_NT_HEADERS *)(bytes + pe_header_offset))->OptionalHeader.Subsystem;
-
-    return subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI;
+    // Also write to stderr immediately
+    pal::err_fputs(message);
 }
 
 #endif
@@ -291,12 +280,9 @@ int main(const int argc, const pal::char_t* argv[])
     }
 
 #if defined(_WIN32) && defined(FEATURE_APPHOST)
-    if (get_windows_graphical_user_interface_bit())
-    {
-        trace::verbose(_X("Redirecting errors to custom writer."));
-        // If this is a GUI application, buffer errors to use them later.
-        trace::set_error_writer(buffering_trace_writer);
-    }
+    trace::verbose(_X("Redirecting errors to custom writer."));
+    // Buffer errors to use them later.
+    trace::set_error_writer(buffering_trace_writer);
 #endif
 
     int exit_code = exe_start(argc, argv);
@@ -306,18 +292,25 @@ int main(const int argc, const pal::char_t* argv[])
 
 #if defined(_WIN32) && defined(FEATURE_APPHOST)
     // No need to unregister the error writer since we're exiting anyway.
-    if (!g_buffered_errors.empty())
+    if (exit_code != 0)
     {
         // If there are errors buffered, write them to the Windows Event Log.
+        pal::string_t executable_path;
         pal::string_t executable_name;
-        if (pal::get_own_executable_path(&executable_name))
+        if (pal::get_own_executable_path(&executable_path))
         {
-            executable_name = get_filename(executable_name);
+            executable_name = get_filename(executable_path);
         }
 
-        auto eventSource = ::RegisterEventSourceW(nullptr, executable_name.c_str());
-        const DWORD traceErrorID = 1024; // Somewhat arbitrary
-        LPCWSTR messages[] = {g_buffered_errors.c_str()};
+        auto eventSource = ::RegisterEventSourceW(nullptr, _X(".NET Runtime"));
+        const DWORD traceErrorID = 1023; // Matches CoreCLR ERT_UnmanagedFailFast
+        pal::string_t message;
+        message.append(_X("Description: A .NET Application failed.\n"));
+        message.append(_X("Application: ")).append(executable_name).append(_X("\n"));
+        message.append(_X("Path: ")).append(executable_path).append(_X("\n"));
+        message.append(_X("Message: ")).append(g_buffered_errors).append(_X("\n"));
+
+        LPCWSTR messages[] = {message.c_str()};
         ::ReportEventW(eventSource, EVENTLOG_ERROR_TYPE, 0, traceErrorID, nullptr, 1, 0, messages, nullptr);
         ::DeregisterEventSource(eventSource);
     }
