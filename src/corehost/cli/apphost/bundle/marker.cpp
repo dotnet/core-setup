@@ -16,7 +16,7 @@ int64_t marker_t::header_offset()
     // bundle-header replaced by "dotnet publish" with the offset 
     // where the bundle_header is located.
     static uint8_t placeholder[] = 
-	{
+    {
         // 8 bytes represent the bundle header-offset 
         // Zero for non-bundle apphosts (default).
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
