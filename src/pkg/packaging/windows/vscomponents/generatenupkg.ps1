@@ -13,7 +13,8 @@ param(
 	[Parameter(Mandatory=$true)][string]$BinDir
 )
 
-$NuGetExe = Join-Path $BinDir "nuget.exe"
+$NuGetDir = Join-Path $BinDir  "nuget"
+$NuGetExe = Join-Path $NuGetDir "nuget.exe"
 $OutputDirectory = [System.IO.Path]::GetDirectoryName($NupkgFile)
 
 if (-not (Test-Path $NuGetDir)) {
