@@ -25,6 +25,12 @@ namespace bundle
         {
         }
 
+        ~bundle_runner_t()
+        {
+            delete m_header;
+            delete m_manifest;
+        }
+
         pal::string_t get_extraction_dir()
         {
             return m_extraction_dir;
