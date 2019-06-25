@@ -93,25 +93,25 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>468355e66daf9eaeb1978703fa6365cd1e37e644</Sha>
     </Dependency>
-    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19324.1">
+    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19325.2">
       <Uri>https://github.com/dotnet/standard</Uri>
-      <Sha>a16de9736f56679dba14dd47be90910bfe81391d</Sha>
+      <Sha>0242a5d57d43d5cb8b7f1b8b58598e83f6e1eb17</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview7.19323.2">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview7.19325.1">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>8974a699899bdc2cc5687504e1ada606ac803e9b</Sha>
+      <Sha>3eac718c85cde9121fb5f03da58bb949914b51e1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.0-preview7.19320.7" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.0-preview7.19323.8" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
-      <Sha>ec302430e0e792ea446ec20e3406a03dc0143310</Sha>
+      <Sha>4c20bc21ee3538341b1dc863eec6c33e3e528eaf</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.0-preview7.19322.1" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.0-preview7.19324.12" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>530d4aecbcd678b5de8eb8acb2963310e8b44ac5</Sha>
+      <Sha>f207fe697fe2a72cc27a2cb745393fd5b24ed9c7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.0-preview7.19322.4">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.0-preview7.19324.38">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>be5355c04aa68d33f26644b25863524d57352e7d</Sha>
+      <Sha>9de66e3291978073feab305c4732eceec0325e5a</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
