@@ -293,25 +293,9 @@ int main(const int argc, const pal::char_t* argv[])
 #if defined(_WIN32) && defined(FEATURE_APPHOST)
     if (get_windows_graphical_user_interface_bit())
     {
-        pal::string_t env_value;
-        bool gui_errors_disabled = false;
-
-        if (pal::getenv(_X("DOTNET_DISABLE_GUI_ERRORS"), &env_value))
-        {
-            gui_errors_disabled = pal::xtoi(env_value.c_str()) == 1;
-        }
-
-        if (!gui_errors_disabled)
-        {
-            trace::verbose(_X("Redirecting errors to custom writer."));
-            // If this is a GUI application, buffer errors to display them later. Without this any errors are effectively lost
-            // unless the caller explicitly redirects stderr. This leads to bad experience of running the GUI app and nothing happening.
-            trace::set_error_writer(buffering_trace_writer);
-        }
-        else
-        {
-            trace::verbose(_X("Gui errors disabled, keeping errors in stderr."));
-        }
+        trace::verbose(_X("Redirecting errors to custom writer."));
+        // If this is a GUI application, buffer errors to use them later.
+        trace::set_error_writer(buffering_trace_writer);
     }
 #endif
 
@@ -324,19 +308,18 @@ int main(const int argc, const pal::char_t* argv[])
     // No need to unregister the error writer since we're exiting anyway.
     if (!g_buffered_errors.empty())
     {
-        // If there are errors buffered, display them as a dialog. We only buffer if there's no console attached.
+        // If there are errors buffered, write them to the Windows Event Log.
         pal::string_t executable_name;
         if (pal::get_own_executable_path(&executable_name))
         {
             executable_name = get_filename(executable_name);
         }
 
-        trace::verbose(_X("Creating a GUI message box with title: '%s' and message: '%s;."), executable_name.c_str(), g_buffered_errors.c_str());
-
-        // Flush here so that when the dialog is up, the traces are up to date (specifically when they are redirected to a file).
-        trace::flush();
-
-        ::MessageBoxW(NULL, g_buffered_errors.c_str(), executable_name.c_str(), MB_OK);
+        auto eventSource = ::RegisterEventSourceW(nullptr, executable_name.c_str());
+        const DWORD traceErrorID = 1024; // Somewhat arbitrary
+        LPCWSTR messages[] = {g_buffered_errors.c_str()};
+        ::ReportEventW(eventSource, EVENTLOG_ERROR_TYPE, 0, traceErrorID, nullptr, 1, 0, messages, nullptr);
+        ::DeregisterEventSource(eventSource);
     }
 #endif
 
