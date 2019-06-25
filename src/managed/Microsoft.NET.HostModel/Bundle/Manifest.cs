@@ -44,8 +44,8 @@ namespace Microsoft.NET.HostModel.Bundle
     /// </summary>
     public class Manifest
     {
-        public const uint MajorVersion = 0;
-        public const uint MinorVersion = 1;
+        public const uint MajorVersion = 1;
+        public const uint MinorVersion = 0;
 
         // Bundle ID is a string that is used to uniquely 
         // identify this bundle. It is choosen to be compatible
@@ -100,9 +100,13 @@ namespace Microsoft.NET.HostModel.Bundle
             uint majorVersion = reader.ReadUInt32();
             uint minorVersion = reader.ReadUInt32();
             int fileCount = reader.ReadInt32();
-            string bundleID = reader.ReadString(); 
+            string bundleID = reader.ReadString();
 
-            if (majorVersion != MajorVersion || minorVersion != MinorVersion)
+            bool isCompatible = 
+                (majorVersion < MajorVersion) ||
+                (majorVersion == MajorVersion && minorVersion <= MinorVersion);
+
+            if (!isCompatible)
             {
                 throw new BundleException("Extraction failed: Invalid Version");
             }

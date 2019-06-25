@@ -11,9 +11,9 @@ using namespace bundle;
 
 bool header_t::is_valid()
 {
-    return m_data.major_version == current_major_version &&
-           m_data.minor_version == current_minor_version &&
-           m_data.num_embedded_files > 0;
+    return m_data.num_embedded_files > 0 &&
+           ((m_data.major_version < current_major_version) ||
+            (m_data.major_version == current_major_version && m_data.minor_version <= current_minor_version));
 }
 
 header_t* header_t::read(FILE* stream)
