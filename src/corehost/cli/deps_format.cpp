@@ -287,6 +287,80 @@ bool deps_json_t::process_runtime_targets(const json_value& json, const pal::str
     return true;
 }
 
+static bool matches_current_locale(const pal::string_t& locale)
+{
+    // This is a TERRIBLE HACK! Just to test the idea.
+    //
+    // getenv("LANG") should really go to the PAL under something like
+    // pal::get_current_locale(), and it should do the platform-specific
+    // massaging there.
+    //
+    // Also, this might trigger loading certain assets that might not really
+    // relate to the current locale.  For instance, Chinese assets for the
+    // traditional script might be loaded even though the current locale
+    // uses the simplified script.  Without an actual locale fallback graph,
+    // it's not possible to avoid this.  However, since this is just an
+    // optimization -- everything was being loaded before!  -- this is fine
+    // as it is.
+    static pal::string_t lang, lang_no_dash;
+
+    if (lang.empty())
+    {
+        // Language and culture are two different things, but I don't know
+        // which of the ${LC_*} environment variables actually map to whatever
+        // .NET uses in its "locale" tag.
+        const auto v = getenv("LANG");
+        if (v == nullptr)
+        {
+            // No ${LANG} environment variable set, so it always matches.
+            return true;
+        }
+
+        lang.assign(v);
+
+        // lang => en_US.UTF-8 -> en_US
+        auto dot = lang.find_first_of('.');
+        if (dot != pal::string_t::npos)
+        {
+            lang = lang.substr(0, dot);
+        }
+
+        // lang => en_US -> en-US
+        // lang_no_dash => en-US -> en
+        auto underscore = lang.find_first_of('_');
+        if (underscore != pal::string_t::npos)
+        {
+            lang[underscore] = '-';
+            lang_no_dash = lang.substr(0, underscore);
+        }
+        else
+        {
+            lang_no_dash = lang;
+        }
+
+        if (lang == "C")
+        {
+            lang = lang_no_dash = "en";
+        }
+
+        trace::info(_X("Current locale information: lang=%s, lang-no-dash=%s"),
+                    lang.c_str(), lang_no_dash.c_str());
+    }
+
+    if (locale == lang || locale == lang_no_dash)
+    {
+        return true;
+    }
+
+    auto locale_dash = locale.find_first_of('-');
+    if (locale_dash == pal::string_t::npos)
+    {
+        return false;
+    }
+
+    return locale.substr(0, locale_dash) == lang_no_dash;
+}
+
 bool deps_json_t::process_targets(const json_value& json, const pal::string_t& target_name, deps_assets_t* p_assets)
 {
     deps_assets_t& assets = *p_assets;
@@ -296,36 +370,49 @@ bool deps_json_t::process_targets(const json_value& json, const pal::string_t& t
         for (size_t i = 0; i < deps_entry_t::s_known_asset_types.size(); ++i)
         {
             auto iter = asset_types.find(deps_entry_t::s_known_asset_types[i]);
-            if (iter != asset_types.end())
+            if (iter == asset_types.end())
             {
-                for (const auto& file : iter->second.as_object())
+                continue;
+            }
+
+            for (const auto& file : iter->second.as_object())
+            {
+                const auto& properties = file.second.as_object();
+                version_t assembly_version, file_version;
+
+                pal::string_t assembly_version_str = get_optional_property(properties, _X("assemblyVersion"));
+                if (assembly_version_str.length() > 0)
                 {
-                    const auto& properties = file.second.as_object();
-                    version_t assembly_version, file_version;
-
-                    pal::string_t assembly_version_str = get_optional_property(properties, _X("assemblyVersion"));
-                    if (assembly_version_str.length() > 0)
-                    {
-                        version_t::parse(assembly_version_str, &assembly_version);
-                    }
-
-                    pal::string_t file_version_str = get_optional_property(properties, _X("fileVersion"));
-                    if (file_version_str.length() > 0)
-                    {
-                        version_t::parse(file_version_str, &file_version);
-                    }
-
-                    deps_asset_t asset(get_filename_without_ext(file.first), file.first, assembly_version, file_version);
-
-                    trace::info(_X("Adding %s asset %s assemblyVersion=%s fileVersion=%s from %s"),
-                        deps_entry_t::s_known_asset_types[i],
-                        asset.relative_path.c_str(),
-                        asset.assembly_version.as_str().c_str(),
-                        asset.file_version.as_str().c_str(),
-                        package.first.c_str());
-
-                    assets.libs[package.first][i].push_back(asset);
+                    version_t::parse(assembly_version_str, &assembly_version);
                 }
+
+                pal::string_t file_version_str = get_optional_property(properties, _X("fileVersion"));
+                if (file_version_str.length() > 0)
+                {
+                    version_t::parse(file_version_str, &file_version);
+                }
+
+                pal::string_t locale_str = get_optional_property(properties, _X("locale"));
+                if (locale_str.length() > 0)
+                {
+                    if (!matches_current_locale(locale_str))
+                    {
+                        trace::info(_X("Resource does not match current locale, not loading: %s"),
+                                       file.first.c_str());
+                        continue;
+                    }
+                }
+
+                deps_asset_t asset(get_filename_without_ext(file.first), file.first, assembly_version, file_version);
+
+                trace::info(_X("Adding %s asset %s assemblyVersion=%s fileVersion=%s from %s"),
+                    deps_entry_t::s_known_asset_types[i],
+                    asset.relative_path.c_str(),
+                    asset.assembly_version.as_str().c_str(),
+                    asset.file_version.as_str().c_str(),
+                    package.first.c_str());
+
+                assets.libs[package.first][i].push_back(asset);
             }
         }
     }
