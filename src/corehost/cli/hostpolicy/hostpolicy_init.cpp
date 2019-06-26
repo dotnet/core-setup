@@ -35,6 +35,7 @@ bool hostpolicy_init_t::init(host_interface_t* input, hostpolicy_init_t* init)
         make_palstr_arr(input->config_keys.len, input->config_keys.arr, &init->cfg_keys);
         make_palstr_arr(input->config_values.len, input->config_values.arr, &init->cfg_values);
 
+        init->runtime_config_file = input->runtime_config_file;
         init->deps_file = input->deps_file;
         init->is_framework_dependent = input->is_framework_dependent;
 

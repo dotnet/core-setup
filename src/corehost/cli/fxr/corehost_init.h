@@ -17,6 +17,7 @@ private:
     std::vector<const pal::char_t*> m_clr_keys_cstr;
     std::vector<const pal::char_t*> m_clr_values_cstr;
     const pal::string_t m_tfm;
+    const pal::string_t m_runtime_config_file;
     const pal::string_t m_deps_file;
     const pal::string_t m_additional_deps_serialized;
     bool m_is_framework_dependent;
@@ -40,6 +41,7 @@ public:
     corehost_init_t(
         const pal::string_t& host_command,
         const host_startup_info_t& host_info,
+        const pal::string_t &runtime_config_file,
         const pal::string_t& deps_file,
         const pal::string_t& additional_deps_serialized,
         const std::vector<pal::string_t>& probe_paths,

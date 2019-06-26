@@ -13,6 +13,7 @@ struct hostpolicy_init_t
 {
     std::vector<pal::string_t> cfg_keys;
     std::vector<pal::string_t> cfg_values;
+    pal::string_t runtime_config_file;
     pal::string_t deps_file;
     pal::string_t additional_deps_serialized;
     std::vector<pal::string_t> probe_paths;

@@ -29,7 +29,7 @@ public:
         hostfxr_handle *host_context_handle);
     static int initialize_for_runtime_config(
         const host_startup_info_t& host_info,
-        const pal::char_t * runtime_config_path,
+        const pal::char_t * runtime_config_file,
         hostfxr_handle *host_context_handle);
     static int run_app(host_context_t *context);
     static int get_runtime_delegate(

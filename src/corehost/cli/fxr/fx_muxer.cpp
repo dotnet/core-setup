@@ -260,26 +260,26 @@ namespace
     int read_config(
         fx_definition_t& app,
         const pal::string_t& app_candidate,
-        pal::string_t& runtime_config,
+        pal::string_t& runtime_config_file,
         const runtime_config_t::settings_t& override_settings)
     {
-        if (!runtime_config.empty() && !pal::realpath(&runtime_config))
+        if (!runtime_config_file.empty() && !pal::realpath(&runtime_config_file))
         {
-            trace::error(_X("The specified runtimeconfig.json [%s] does not exist"), runtime_config.c_str());
+            trace::error(_X("The specified runtimeconfig.json [%s] does not exist"), runtime_config_file.c_str());
             return StatusCode::InvalidConfigFile;
         }
 
         pal::string_t config_file, dev_config_file;
 
-        if (runtime_config.empty())
+        if (runtime_config_file.empty())
         {
             trace::verbose(_X("App runtimeconfig.json from [%s]"), app_candidate.c_str());
             get_runtime_config_paths_from_app(app_candidate, &config_file, &dev_config_file);
         }
         else
         {
-            trace::verbose(_X("Specified runtimeconfig.json from [%s]"), runtime_config.c_str());
-            get_runtime_config_paths_from_arg(runtime_config, &config_file, &dev_config_file);
+            trace::verbose(_X("Specified runtimeconfig.json from [%s]"), runtime_config_file.c_str());
+            get_runtime_config_paths_from_arg(runtime_config_file, &config_file, &dev_config_file);
         }
 
         app.parse_runtime_config(config_file, dev_config_file, override_settings);
@@ -467,7 +467,7 @@ namespace
             return CoreHostLibMissingFailure;
         }
 
-        init.reset(new corehost_init_t(host_command, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions));
+        init.reset(new corehost_init_t(host_command, host_info, app_config.get_path(), deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions));
 
         return StatusCode::Success;
     }
@@ -560,7 +560,7 @@ namespace
     int get_init_info_for_component(
         const host_startup_info_t &host_info,
         host_mode_t mode,
-        pal::string_t &runtime_config_path,
+        pal::string_t &runtime_config_file,
         /*out*/ pal::string_t &hostpolicy_dir,
         /*out*/ std::unique_ptr<corehost_init_t> &init)
     {
@@ -570,7 +570,7 @@ namespace
         fx_definitions.push_back(std::unique_ptr<fx_definition_t>(app));
 
         const runtime_config_t::settings_t override_settings;
-        int rc = read_config(*app, host_info.app_path, runtime_config_path, override_settings);
+        int rc = read_config(*app, host_info.app_path, runtime_config_file, override_settings);
         if (rc != StatusCode::Success)
             return rc;
 
@@ -596,7 +596,7 @@ namespace
         }
 
         const pal::string_t additional_deps_serialized;
-        init.reset(new corehost_init_t(pal::string_t{}, host_info, deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions));
+        init.reset(new corehost_init_t(pal::string_t{}, host_info, app_config.get_path(), deps_file, additional_deps_serialized, probe_realpaths, mode, fx_definitions));
 
         return StatusCode::Success;
     }
@@ -604,14 +604,14 @@ namespace
     int get_init_info_for_secondary_component(
         const host_startup_info_t &host_info,
         host_mode_t mode,
-        pal::string_t &runtime_config_path,
+        pal::string_t &runtime_config_file,
         const host_context_t *existing_context,
         /*out*/ std::unordered_map<pal::string_t, pal::string_t> &config_properties)
     {
         // Read config
         fx_definition_t app;
         const runtime_config_t::settings_t override_settings;
-        int rc = read_config(app, host_info.app_path, runtime_config_path, override_settings);
+        int rc = read_config(app, host_info.app_path, runtime_config_file, override_settings);
         if (rc != StatusCode::Success)
             return rc;
 
@@ -713,7 +713,7 @@ int fx_muxer_t::initialize_for_app(
 
 int fx_muxer_t::initialize_for_runtime_config(
     const host_startup_info_t &host_info,
-    const pal::char_t *runtime_config_path,
+    const pal::char_t *runtime_config_file,
     hostfxr_handle *host_context_handle)
 {
     int32_t initialization_options = intialization_options_t::none;
@@ -741,12 +741,12 @@ int fx_muxer_t::initialize_for_runtime_config(
 
     int rc;
     host_mode_t mode = host_mode_t::libhost;
-    pal::string_t runtime_config = runtime_config_path;
+    pal::string_t runtime_config_file_non_const = runtime_config_file;
     std::unique_ptr<host_context_t> context;
     if (already_initialized)
     {
         std::unordered_map<pal::string_t, pal::string_t> config_properties;
-        rc = get_init_info_for_secondary_component(host_info, mode, runtime_config, existing_context, config_properties);
+        rc = get_init_info_for_secondary_component(host_info, mode, runtime_config_file_non_const, existing_context, config_properties);
         if (rc != StatusCode::Success)
             return rc;
 
@@ -756,7 +756,7 @@ int fx_muxer_t::initialize_for_runtime_config(
     {
         pal::string_t hostpolicy_dir;
         std::unique_ptr<corehost_init_t> init;
-        rc = get_init_info_for_component(host_info, mode, runtime_config, hostpolicy_dir, init);
+        rc = get_init_info_for_component(host_info, mode, runtime_config_file_non_const, hostpolicy_dir, init);
         if (rc != StatusCode::Success)
         {
             handle_initialize_failure_or_abort();
@@ -768,13 +768,13 @@ int fx_muxer_t::initialize_for_runtime_config(
 
     if (!STATUS_CODE_SUCCEEDED(rc))
     {
-        trace::error(_X("Failed to initialize context for config: %s. Error code: 0x%x"), runtime_config_path, rc);
+        trace::error(_X("Failed to initialize context for config: %s. Error code: 0x%x"), runtime_config_file, rc);
         return rc;
     }
 
     context->is_app = false;
 
-    trace::info(_X("Initialized %s for config: %s"), already_initialized ? _X("secondary context") : _X("context"), runtime_config_path);
+    trace::info(_X("Initialized %s for config: %s"), already_initialized ? _X("secondary context") : _X("context"), runtime_config_file);
     *host_context_handle = context.release();
     return rc;
 }

@@ -16,12 +16,14 @@ void make_cstr_arr(const std::vector<pal::string_t>& arr, std::vector<const pal:
 corehost_init_t::corehost_init_t(
     const pal::string_t& host_command,
     const host_startup_info_t& host_info,
+    const pal::string_t &runtime_config_file,
     const pal::string_t& deps_file,
     const pal::string_t& additional_deps_serialized,
     const std::vector<pal::string_t>& probe_paths,
     const host_mode_t mode,
     const fx_definition_vector_t& fx_definitions)
     : m_tfm(get_app(fx_definitions).get_runtime_config().get_tfm())
+    , m_runtime_config_file(runtime_config_file)
     , m_deps_file(deps_file)
     , m_additional_deps_serialized(additional_deps_serialized)
     , m_is_framework_dependent(get_app(fx_definitions).get_runtime_config().get_is_framework_dependent())
@@ -93,6 +95,7 @@ const host_interface_t& corehost_init_t::get_host_init_data()
         hi.fx_ver = _X("");
     }
 
+    hi.runtime_config_file = m_runtime_config_file.c_str();
     hi.deps_file = m_deps_file.c_str();
     hi.additional_deps_serialized = m_additional_deps_serialized.c_str();
     hi.is_framework_dependent = m_is_framework_dependent;
