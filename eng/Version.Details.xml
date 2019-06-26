@@ -90,7 +90,7 @@
       <Sha>b958f70b06826095c5b0e15bb566f300b96094ce</Sha>
     </Dependency>
     <Dependency Name="System.Threading.AccessControl" Version="4.6.0-preview7.19326.5">
-    <Uri>https://github.com/dotnet/corefx</Uri>
+      <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>b958f70b06826095c5b0e15bb566f300b96094ce</Sha>
     </Dependency>
     <Dependency Name="System.Windows.Extensions" Version="4.6.0-preview7.19326.5">
