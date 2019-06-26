@@ -30,7 +30,9 @@
     <RuntimePackageFile
       Include="
         $(PackageOutputPath)**/runtime.*.nupkg;
-        $(PackageOutputPath)**/*.App.Host.*.nupkg"
+        $(PackageOutputPath)**/*.Runtime.*.nupkg;
+        $(PackageOutputPath)**/*.App.Host.*.nupkg;
+        $(PackageOutputPath)**/VS.Redist.Common.*.nupkg"
       RelativeBlobPath="$(BinariesRelativePath)"/>
 
     <RidAgnosticPackageFile Include="$(PackageOutputPath)**/*.nupkg" Exclude="@(RuntimePackageFile)" >

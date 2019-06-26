@@ -5,6 +5,7 @@
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.CoreSetup.Test;
+using Microsoft.NET.HostModel.AppHost;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -163,7 +164,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             string appDll = fixture.TestProject.AppDll;
             string appDllName = Path.GetFileName(appDll);
             string relativeDllPath = Path.Combine(relativeNewPath, appDllName);
-            FileUtils.SearchAndReplace(appExe, Encoding.UTF8.GetBytes(appDllName), Encoding.UTF8.GetBytes(relativeDllPath), true);
+            BinaryUtils.SearchAndReplace(appExe, Encoding.UTF8.GetBytes(appDllName), Encoding.UTF8.GetBytes(relativeDllPath));
 
             Command.Create(appExe)
                 .CaptureStdErr()
@@ -237,7 +238,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         }
 
         [Fact]
-        public void Running_AppHost_with_GUI_Reports_Errors_In_Window()
+        public void Running_AppHost_with_GUI_No_Console()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -254,29 +255,16 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             UseBuiltAppHost(appExe);
             MarkAppHostAsGUI(appExe);
 
-            Command command = Command.Create(appExe)
+            Command.Create(appExe)
                 .CaptureStdErr()
                 .CaptureStdOut()
-                .Start();
-
-            IntPtr windowHandle = WaitForPopupFromProcess(command.Process);
-            Assert.NotEqual(IntPtr.Zero, windowHandle);
-
-            // In theory we should close the window - but it's just easier to kill the process.
-            // The popup should be the last thing the process does anyway.
-            command.Process.Kill();
-
-            CommandResult result = command.WaitForExit(true);
-
-            // There should be no output written by the process.
-            Assert.Equal(string.Empty, result.StdOut);
-            Assert.Equal(string.Empty, result.StdErr);
-
-            result.Should().Fail();
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErrContaining("This executable is not bound to a managed DLL to execute.");
         }
 
         [Fact]
-        public void Running_AppHost_with_GUI_Reports_Errors_In_Window_and_Traces()
+        public void Running_AppHost_with_GUI_Traces()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -293,123 +281,19 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             UseBuiltAppHost(appExe);
             MarkAppHostAsGUI(appExe);
 
-            string traceFilePath = Path.Combine(Path.GetDirectoryName(appExe), "trace.log");
-
-            Command command = Command.Create(appExe)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("COREHOST_TRACEFILE", traceFilePath)
-                .Start();
-
-            IntPtr windowHandle = WaitForPopupFromProcess(command.Process);
-            Assert.NotEqual(IntPtr.Zero, windowHandle);
-
-            // In theory we should close the window - but it's just easier to kill the process.
-            // The popup should be the last thing the process does anyway.
-            command.Process.Kill();
-
-            CommandResult result = command.WaitForExit(true);
-
-            result.Should().Fail()
+            string traceFilePath;
+            Command.Create(appExe)
+                .EnableHostTracingToFile(out traceFilePath)
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute()
+                .Should().Fail()
                 .And.FileExists(traceFilePath)
-                .And.FileContains(traceFilePath, "This executable is not bound to a managed DLL to execute.");
+                .And.FileContains(traceFilePath, "This executable is not bound to a managed DLL to execute.")
+                .And.HaveStdErrContaining("This executable is not bound to a managed DLL to execute.");
+
+            FileUtils.DeleteFileIfPossible(traceFilePath);
         }
-
-        [Fact]
-        public void Running_AppHost_with_GUI_Doesnt_Report_Errors_In_Window_When_Disabled()
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // GUI app host is only supported on Windows.
-                return;
-            }
-
-            var fixture = sharedTestState.StandaloneAppFixture_Published
-                .Copy();
-
-            string appExe = fixture.TestProject.AppExe;
-
-            // Mark the apphost as GUI, but don't bind it to anything - this will cause it to fail
-            UseBuiltAppHost(appExe);
-            MarkAppHostAsGUI(appExe);
-
-            Command command = Command.Create(appExe)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .EnvironmentVariable(Constants.DisableGuiErrors.EnvironmentVariable, "1")
-                .Start();
-
-            CommandResult commandResult = command.WaitForExit(fExpectedToFail: false, timeoutMilliseconds: 30000);
-            if (commandResult.ExitCode == -1)
-            {
-                try
-                {
-                    // Try to kill the process - it may be up with a dialog, or have some other issue.
-                    command.Process.Kill();
-                }
-                catch
-                {
-                    // Ignore exceptions, we don't know what's going on with the process.
-                }
-
-                Assert.True(false, "The process failed to exit in the alloted time, it's possible it has a dialog up which should not be there.");
-            }
-        }
-
-#if WINDOWS
-        private delegate bool EnumThreadWindowsDelegate(IntPtr hWnd, IntPtr lParam);
-
-        [DllImport("user32.dll")]
-        private static extern bool EnumThreadWindows(int dwThreadId, EnumThreadWindowsDelegate plfn, IntPtr lParam);
-
-        private IntPtr WaitForPopupFromProcess(Process process, int timeout = 30000)
-        {
-            IntPtr windowHandle = IntPtr.Zero;
-            StringBuilder diagMessages = new StringBuilder();
-
-            int longTimeout = timeout * 3;
-            int timeRemaining = longTimeout;
-            while (timeRemaining > 0)
-            {
-                foreach (ProcessThread thread in process.Threads)
-                {
-                    // Note we take the last window we find - there really should only be one at most anyway.
-                    EnumThreadWindows(thread.Id,
-                        (hWnd, lParam) => {
-                            diagMessages.AppendLine($"Callback for a window {hWnd} on thread {thread.Id}.");
-                            windowHandle = hWnd;
-                            return true;
-                        },
-                        IntPtr.Zero);
-                }
-
-                if (windowHandle != IntPtr.Zero)
-                {
-                    break;
-                }
-
-                Thread.Sleep(100);
-                timeRemaining -= 100;
-            }
-
-            Assert.True(
-                windowHandle != IntPtr.Zero,
-                $"Waited {longTimeout} milliseconds for the popup window on process {process.Id}, but none was found." +
-                $"{Environment.NewLine}{diagMessages.ToString()}");
-
-            Assert.True(
-                timeRemaining > (longTimeout - timeout),
-                $"Waited {longTimeout - timeRemaining} milliseconds for the popup window on process {process.Id}. " +
-                $"It did show and was detected as HWND {windowHandle}, but it took too long. Consider extending the timeout period for this test.");
-
-            return windowHandle;
-        }
-#else
-        private IntPtr WaitForPopupFromProcess(Process process, int timeout = 5000)
-        {
-            throw new PlatformNotSupportedException();
-        }
-#endif
 
         private void UseBuiltAppHost(string appExe)
         {
@@ -433,7 +317,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 // Replace the hash with the managed DLL name.
                 var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes("foobar"));
                 var hashStr = BitConverter.ToString(hash).Replace("-", "").ToLower();
-                FileUtils.SearchAndReplace(appDirHostExe, Encoding.UTF8.GetBytes(hashStr), Encoding.UTF8.GetBytes(appDll), true);
+                BinaryUtils.SearchAndReplace(appDirHostExe, Encoding.UTF8.GetBytes(hashStr), Encoding.UTF8.GetBytes(appDll));
             }
             File.Copy(appDirHostExe, appExe, true);
         }

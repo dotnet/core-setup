@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.NET.HostModel.AppHost;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -156,7 +157,12 @@ namespace Microsoft.NET.HostModel.Bundle
             }
             catch (InvalidOperationException)
             {
-                throw new ArgumentException("Input must uniquely specify the host binary");
+                throw new ArgumentException("Invalid input specification: Must specify the host binary");
+            }
+
+            if(fileSpecs.GroupBy(file => file.BundleRelativePath).Where(g => g.Count() > 1).Any())
+            {
+                throw new ArgumentException("Invalid input specification: Found multiple entries with the same BundleRelativePath");
             }
 
             string bundlePath = Path.Combine(OutputDir, HostName);
@@ -165,10 +171,9 @@ namespace Microsoft.NET.HostModel.Bundle
                 trace.Log($"Ovewriting existing File {bundlePath}");
             }
 
-            // Start with a copy of the host executable.
-            // Copy the file to preserve its permissions.
-            File.Copy(hostSource, bundlePath, overwrite: true);
+            BinaryUtils.CopyFile(hostSource, bundlePath);
 
+            long headerOffset = 0;
             using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(bundlePath)))
             {
                 Stream bundle = writer.BaseStream;
@@ -187,17 +192,19 @@ namespace Microsoft.NET.HostModel.Bundle
                     {
                         FileType type = InferType(fileSpec.BundleRelativePath, file);
                         long startOffset = AddToBundle(bundle, file, type);
-                        FileEntry entry = new FileEntry(type, fileSpec.BundleRelativePath, startOffset, file.Length);
-                        BundleManifest.Files.Add(entry);
+                        FileEntry entry = BundleManifest.AddEntry(type, fileSpec.BundleRelativePath, startOffset, file.Length);
                         trace.Log($"Embed: {entry}");
                     }
                 }
 
                 // Write the bundle manifest
-                long manifestOffset = BundleManifest.Write(writer);
-                trace.Log($"Manifest: Offset={manifestOffset}, Size={writer.BaseStream.Position - manifestOffset}");
-                trace.Log($"Bundle: Path={bundlePath} Size={bundle.Length}");
+                headerOffset = BundleManifest.Write(writer);
+                trace.Log($"Header Offset={headerOffset}");
+                trace.Log($"Meta-data Size={writer.BaseStream.Position - headerOffset}");
+                trace.Log($"Bundle: Path={bundlePath}, Size={bundle.Length}");
             }
+
+            HostWriter.SetAsBundle(bundlePath, headerOffset);
 
             return bundlePath;
         }
