@@ -143,7 +143,7 @@ namespace Microsoft.NET.HostModel.Tests
             bundleDir.Should().OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
+        //[Fact]
         public void TestWithAdditionalContentAfterBundleMetadata()
         {
             var fixture = sharedTestState.TestFixture.Copy();
