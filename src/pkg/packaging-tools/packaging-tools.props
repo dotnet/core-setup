@@ -8,16 +8,27 @@
   <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Ref'))">
     <FrameworkPackType>targeting</FrameworkPackType>
 
-    <!-- Include the platform manifest in the data dir. -->
+    <!-- Include manifests in the data dir. -->
     <PlatformManifestTargetPath>data/PlatformManifest.txt</PlatformManifestTargetPath>
+    <FrameworkListTargetPath>data/</FrameworkListTargetPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Runtime'))">
+    <FrameworkPackType>runtime</FrameworkPackType>
+    <BuildRidSpecificPacks>true</BuildRidSpecificPacks>
+
+    <!-- Include a list of runtime files in the data dir. -->
+    <FrameworkListFilename>RuntimeList.xml</FrameworkListFilename>
     <FrameworkListTargetPath>data/</FrameworkListTargetPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Host'))">
     <FrameworkPackType>apphost</FrameworkPackType>
-
-    <!-- AppHost packs are only per-RID, e.g. 'Microsoft.NETCore.App.Host.win-x64'. -->
     <BuildRidSpecificPacks>true</BuildRidSpecificPacks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BuildRidSpecificPacks)' == 'true'">
+    <!-- RID-specific packs don't have a lineup package. -->
     <BuildLineupPackage>false</BuildLineupPackage>
 
     <!--

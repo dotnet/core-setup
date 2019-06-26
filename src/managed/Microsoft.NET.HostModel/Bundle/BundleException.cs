@@ -7,8 +7,8 @@ using System;
 namespace Microsoft.NET.HostModel.Bundle
 {
     /// <summary>
-    /// This exception is thrown when a bundle/extraction
-    /// operation fails due known user errors.
+    /// This exception is thrown when a bundle extraction
+    /// operation fails due to known user errors.
     /// </summary>
     public class BundleException : Exception
     {
