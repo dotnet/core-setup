@@ -39,6 +39,44 @@ pal::hresult_t get_load_in_memory_assembly_delegate(pal::dll_t handle, load_in_m
 
             *config_path_out = std::move(config_path_local);
 
+            // if file does not exist, try to get the one used for an existing context (if there is any)
+            if (!pal::realpath(&config_path_local))
+            {
+                trace::info(_X("Failed to resolve .runtimeconfig.json path of the current mixed-mode module [%s]"), mod_path.c_str());
+                trace::info(_X("Trying to get .runtimeconfig.json from existing context"));
+
+                pal::dll_t out_fxr;
+                pal::string_t out_fxr_path;
+
+                if (pal::get_loaded_library(LIBFXR_NAME, "hostfxr_get_runtime_property_value", &out_fxr, &out_fxr_path))
+                {
+                    hostfxr_get_runtime_property_value_fn get_runtime_property_value = reinterpret_cast<hostfxr_get_runtime_property_value_fn>(pal::get_symbol(out_fxr, "hostfxr_get_runtime_property_value"));
+
+                    const pal::char_t *value;
+                    int rc = get_runtime_property_value(nullptr, _X("APP_CONTEXT_RUNTIME_CONFIG_FILE"), &value);
+
+                    if (rc == StatusCode::Success)
+                    {
+                        pal::string_t config_path_from_context = value;
+                        *config_path_out = std::move(config_path_from_context);
+
+                        trace::info(_X("Got .runtimeconfig.json [%s] from existing context"), config_path_out->c_str());
+                        return StatusCode::Success;
+                    }
+                    else
+                    {
+                        trace::error(_X("Getting APP_CONTEXT_RUNTIME_CONFIG_FILE from existing context failed with [%i]"), rc);
+                    }
+                }
+                else
+                {
+                    trace::error(_X("Could not get .runtimeconfig.json from existing context as [%s] was not loaded"), LIBFXR_NAME);
+                }
+
+                trace::error(_X("Failed to resolve .runtimeconfig.json path of the current mixed-mode module [%s] and also failed to get it from an existing context"), mod_path.c_str());
+                return StatusCode::InvalidConfigFile;
+            }
+
             return StatusCode::Success;
         },
         delegate
