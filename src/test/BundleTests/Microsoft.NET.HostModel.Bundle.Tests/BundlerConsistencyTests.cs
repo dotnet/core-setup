@@ -143,34 +143,6 @@ namespace Microsoft.NET.HostModel.Tests
             bundleDir.Should().OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact(Skip = "Disabled in master temporarily to avoid infra issues")]
-        public void TestWithAdditionalContentAfterBundleMetadata()
-        {
-            var fixture = sharedTestState.TestFixture.Copy();
-
-            var hostName = BundleHelper.GetHostName(fixture);
-            var bundleDir = BundleHelper.GetBundleDir(fixture);
-
-            var bundler = new Bundler(hostName, bundleDir.FullName);
-            string singleFile = bundler.GenerateBundle(BundleHelper.GetPublishPath(fixture));
-
-            using (var file = File.OpenWrite(singleFile))
-            {
-                file.Position = file.Length;
-                var blob = Encoding.UTF8.GetBytes("Mock signature at the end of the bundle");
-                file.Write(blob, 0, blob.Length);
-            }
-
-            Command.Create(singleFile)
-                   .CaptureStdErr()
-                   .CaptureStdOut()
-                   .Execute()
-                   .Should()
-                   .Pass()
-                   .And
-                   .HaveStdOutContaining("Hello World!");
-        }
-
         public class SharedTestState : IDisposable
         {
             public TestProjectFixture TestFixture { get; set; }
