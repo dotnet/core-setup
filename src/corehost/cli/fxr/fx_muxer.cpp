@@ -13,6 +13,7 @@
 
 #include <cpprest/json.h>
 #include <corehost_context_contract.h>
+#include <hostpolicy.h>
 #include "corehost_init.h"
 #include "deps_format.h"
 #include "framework_info.h"
@@ -27,9 +28,6 @@
 #include "sdk_info.h"
 #include "sdk_resolver.h"
 #include "roll_fwd_on_no_candidate_fx_option.h"
-
-using corehost_main_fn = int(*) (const int argc, const pal::char_t* argv[]);
-using corehost_main_with_output_buffer_fn = int(*) (const int argc, const pal::char_t* argv[], pal::char_t buffer[], int32_t buffer_size, int32_t* required_buffer_size);
 
 namespace
 {
@@ -708,7 +706,7 @@ int fx_muxer_t::initialize_for_app(
     for (int i = 0; i < argc; ++i)
         context->argv.push_back(argv[i]);
 
-    trace::verbose(_X("Initialized context for app: %s"), host_info.app_path.c_str());
+    trace::info(_X("Initialized context for app: %s"), host_info.app_path.c_str());
     *host_context_handle = context.release();
     return rc;
 }
@@ -776,7 +774,7 @@ int fx_muxer_t::initialize_for_runtime_config(
 
     context->is_app = false;
 
-    trace::verbose(_X("Initialized %s for config: %s"), already_initialized ? _X("secondary context") : _X("context"), runtime_config_path);
+    trace::info(_X("Initialized %s for config: %s"), already_initialized ? _X("secondary context") : _X("context"), runtime_config_path);
     *host_context_handle = context.release();
     return rc;
 }
