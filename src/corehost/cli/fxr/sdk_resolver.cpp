@@ -37,42 +37,27 @@ sdk_resolver::sdk_resolver(bool allow_prerelease) :
 {
 }
 
-sdk_resolver::sdk_resolver(fx_ver_t requested, sdk_roll_forward_policy policy, bool allow_prerelease) :
-    _requested(move(requested)),
-    _policy(policy),
-    _allow_prerelease(allow_prerelease)
+sdk_resolver::sdk_resolver(fx_ver_t version, sdk_roll_forward_policy roll_forward, bool allow_prerelease) :
+    version(move(version)),
+    roll_forward(roll_forward),
+    allow_prerelease(allow_prerelease)
 {
 }
 
 pal::string_t const& sdk_resolver::global_file_path() const
 {
-    return _global_file_path;
-}
-
-fx_ver_t const& sdk_resolver::requested_version() const
-{
-    return _requested;
-}
-
-sdk_roll_forward_policy sdk_resolver::policy() const
-{
-    return _policy;
-}
-
-bool sdk_resolver::allow_prerelease() const
-{
-    return _allow_prerelease;
+    return global_file;
 }
 
 pal::string_t sdk_resolver::resolve(const pal::string_t& dotnet_root) const
 {
-    auto requested = _requested.is_empty() ? pal::string_t{} : _requested.as_str();
+    auto requested = version.is_empty() ? pal::string_t{} : version.as_str();
 
     trace::verbose(
-        _X("Resolving SDKs with version = '%s', roll-forward = '%s', allow-prerelease = %s"),
+        _X("Resolving SDKs with version = '%s', rollForward = '%s', allowPrerelease = %s"),
         requested.empty() ? _X("latest") : requested.c_str(),
-        to_policy_name(_policy),
-        _allow_prerelease ? _X("true") : _X("false"));
+        to_policy_name(roll_forward),
+        allow_prerelease ? _X("true") : _X("false"));
 
     pal::string_t resolved_sdk_path;
     fx_ver_t resolved_version;
@@ -98,10 +83,10 @@ pal::string_t sdk_resolver::resolve(const pal::string_t& dotnet_root) const
 
     if (!requested.empty())
     {
-        if (!_global_file_path.empty())
+        if (!global_file.empty())
         {
-            trace::error(_X("A compatible installed .NET Core SDK for global.json version [%s] from [%s] was not found"), requested.c_str(), _global_file_path.c_str());
-            trace::error(_X("Install the [%s] .NET Core SDK or update [%s] with an installed .NET Core SDK:"), requested.c_str(), _global_file_path.c_str());
+            trace::error(_X("A compatible installed .NET Core SDK for global.json version [%s] from [%s] was not found"), requested.c_str(), global_file.c_str());
+            trace::error(_X("Install the [%s] .NET Core SDK or update [%s] with an installed .NET Core SDK:"), requested.c_str(), global_file.c_str());
         }
         else
         {
@@ -143,15 +128,15 @@ sdk_resolver sdk_resolver::from_nearest_global_file(const pal::string_t& cwd, bo
         // Fall back to a default SDK resolver
         resolver = sdk_resolver{ allow_prerelease };
 
-        trace::error(
+        trace::warning(
             _X("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (%s prereleases) will be used"),
-            resolver.allow_prerelease() ? _X("including") : _X("excluding"));
+            resolver.allow_prerelease ? _X("including") : _X("excluding"));
     }
 
     // If the requested version is a prerelease, always allow prerelease versions
-    if (resolver._requested.is_prerelease())
+    if (resolver.version.is_prerelease())
     {
-        resolver._allow_prerelease = true;
+        resolver.allow_prerelease = true;
     }
 
     return resolver;
@@ -225,14 +210,11 @@ bool sdk_resolver::parse_global_file(pal::string_t global_file_path)
     pal::ifstream_t file{ global_file_path };
     if (!file.good())
     {
-        trace::error(_X("[%s] could not be opened"), global_file_path.c_str());
+        trace::warning(_X("[%s] could not be opened"), global_file_path.c_str());
         return false;
     }
 
-    if (skip_utf8_bom(&file))
-    {
-        trace::verbose(_X("UTF-8 BOM skipped while reading [%s]"), global_file_path.c_str());
-    }
+    skip_utf8_bom(&file);
 
     json_value doc;
     try
@@ -243,13 +225,13 @@ bool sdk_resolver::parse_global_file(pal::string_t global_file_path)
     {
         pal::string_t msg;
         (void)pal::utf8_palstring(ex.what(), &msg);
-        trace::error(_X("A JSON parsing exception occurred in [%s]: %s"), global_file_path.c_str(), msg.c_str());
+        trace::warning(_X("A JSON parsing exception occurred in [%s]: %s"), global_file_path.c_str(), msg.c_str());
         return false;
     }
 
     if (!doc.is_object())
     {
-        trace::error(_X("Expected a JSON object in [%s]"), global_file_path.c_str());
+        trace::warning(_X("Expected a JSON object in [%s]"), global_file_path.c_str());
         return false;
     }
 
@@ -265,172 +247,156 @@ bool sdk_resolver::parse_global_file(pal::string_t global_file_path)
 
     if (!sdk->second.is_object())
     {
-        trace::error(_X("Expected a JSON object for the 'sdk' value in [%s]"), global_file_path.c_str());
+        trace::warning(_X("Expected a JSON object for the 'sdk' value in [%s]"), global_file_path.c_str());
         return false;
     }
 
     const auto& sdk_obj = sdk->second.as_object();
 
-    const auto version = sdk_obj.find(_X("version"));
-    if (version == sdk_obj.end() || version->second.is_null())
+    const auto version_value = sdk_obj.find(_X("version"));
+    if (version_value == sdk_obj.end() || version_value->second.is_null())
     {
         trace::verbose(_X("Value 'sdk/version' is missing or null in [%s]"), global_file_path.c_str());
     }
     else
     {
-        if (!version->second.is_string())
+        if (!version_value->second.is_string())
         {
-            trace::error(_X("Expected a string for the 'sdk/version' value in [%s]"), global_file_path.c_str());
+            trace::warning(_X("Expected a string for the 'sdk/version' value in [%s]"), global_file_path.c_str());
             return false;
         }
 
-        if (!fx_ver_t::parse(version->second.as_string(), &_requested, false))
+        if (!fx_ver_t::parse(version_value->second.as_string(), &version, false))
         {
-            trace::error(
+            trace::warning(
                 _X("Version '%s' is not valid for the 'sdk/version' value in [%s]"),
-                version->second.as_string().c_str(),
+                version_value->second.as_string().c_str(),
                 global_file_path.c_str()
             );
             return false;
         }
 
         // The default policy when a version is specified is 'patch'
-        _policy = sdk_roll_forward_policy::patch;
+        roll_forward = sdk_roll_forward_policy::patch;
     }
 
-    const auto roll_forward = sdk_obj.find(_X("rollForward"));
-    if (roll_forward == sdk_obj.end() || roll_forward->second.is_null())
+    const auto roll_forward_value = sdk_obj.find(_X("rollForward"));
+    if (roll_forward_value == sdk_obj.end() || roll_forward_value->second.is_null())
     {
         trace::verbose(_X("Value 'sdk/rollForward' is missing or null in [%s]"), global_file_path.c_str());
     }
     else
     {
-        if (!roll_forward->second.is_string())
+        if (!roll_forward_value->second.is_string())
         {
-            trace::error(_X("Expected a string for the 'sdk/rollForward' value in [%s]"), global_file_path.c_str());
+            trace::warning(_X("Expected a string for the 'sdk/rollForward' value in [%s]"), global_file_path.c_str());
             return false;
         }
 
-        _policy = to_policy(roll_forward->second.as_string());
-        if (_policy == sdk_roll_forward_policy::unsupported)
+        roll_forward = to_policy(roll_forward_value->second.as_string());
+        if (roll_forward == sdk_roll_forward_policy::unsupported)
         {
-            trace::error(
+            trace::warning(
                 _X("The roll-forward policy '%s' is not supported for the 'sdk/rollForward' value in [%s]"),
-                roll_forward->second.as_string().c_str(),
+                roll_forward_value->second.as_string().c_str(),
                 global_file_path.c_str()
             );
             return false;
         }
 
         // All policies other than 'latestMajor' require a version to operate
-        if (_policy != sdk_roll_forward_policy::latest_major && _requested.is_empty())
+        if (roll_forward != sdk_roll_forward_policy::latest_major && version.is_empty())
         {
-            trace::error(
+            trace::warning(
                 _X("The roll-forward policy '%s' requires a 'sdk/version' value in [%s]"),
-                roll_forward->second.as_string().c_str(),
+                roll_forward_value->second.as_string().c_str(),
                 global_file_path.c_str()
             );
             return false;
         }
     }
 
-    const auto prerelease = sdk_obj.find(_X("allowPrerelease"));
-    if (prerelease == sdk_obj.end() || prerelease->second.is_null())
+    const auto allow_prerelease_value = sdk_obj.find(_X("allowPrerelease"));
+    if (allow_prerelease_value == sdk_obj.end() || allow_prerelease_value->second.is_null())
     {
         trace::verbose(_X("Value 'sdk/allowPrerelease' is missing or null in [%s]"), global_file_path.c_str());
     }
     else
     {
-        if (!prerelease->second.is_boolean())
+        if (!allow_prerelease_value->second.is_boolean())
         {
-            trace::error(_X("Expected a boolean for the 'sdk/allowPrerelease' value in [%s]"), global_file_path.c_str());
+            trace::warning(_X("Expected a boolean for the 'sdk/allowPrerelease' value in [%s]"), global_file_path.c_str());
             return false;
         }
 
-        _allow_prerelease = prerelease->second.as_bool();
+        allow_prerelease = allow_prerelease_value->second.as_bool();
 
-        if (!_allow_prerelease && _requested.is_prerelease())
+        if (!allow_prerelease && version.is_prerelease())
         {
             trace::warning(_X("Ignoring the 'sdk/allowPrerelease' value in [%s] because a prerelease version was specified"), global_file_path.c_str());
-            _allow_prerelease = true;
+            allow_prerelease = true;
         }
     }
 
-    _global_file_path = move(global_file_path);
+    global_file = move(global_file_path);
     return true;
 }
 
-bool sdk_resolver::matches_policy(const fx_ver_t& version) const
+bool sdk_resolver::matches_policy(const fx_ver_t& current) const
 {
-    // Check for unallowed prerelease versions
-    if (version.is_empty() || (!_allow_prerelease && version.is_prerelease()))
+    // Check for unallowed prerelease versions or a disabled/unsupported roll-forward policy
+    if (current.is_empty() ||
+        (!allow_prerelease && current.is_prerelease()) ||
+        roll_forward == sdk_roll_forward_policy::unsupported ||
+        roll_forward == sdk_roll_forward_policy::disable)
     {
         return false;
     }
 
     // If no version was requested, then all versions match
-    if (_requested.is_empty())
+    if (version.is_empty())
     {
         return true;
     }
 
-    int requested_patch = _requested.get_patch() % 100;
-    int version_patch = version.get_patch() % 100;
+    int requested_feature = version.get_patch() / 100;
+    int current_feature = current.get_patch() / 100;
 
-    int requested_feature = _requested.get_patch() / 100;
-    int version_feature = version.get_patch() / 100;
+    int requested_minor = version.get_minor();
+    int current_minor = current.get_minor();
 
-    int requested_minor = _requested.get_minor();
-    int version_minor = version.get_minor();
+    int requested_major = version.get_major();
+    int current_major = current.get_major();
 
-    int requested_major = _requested.get_major();
-    int version_major = version.get_major();
-
-    // First exclude any versions that don't match the policy requirements
-    switch (_policy)
+    // Rolling forward on patch requires the same major/minor/feature
+    if ((roll_forward == sdk_roll_forward_policy::patch ||
+         roll_forward == sdk_roll_forward_policy::latest_patch) &&
+        (current_major != requested_major ||
+         current_minor != requested_minor ||
+         current_feature != requested_feature))
     {
-        case sdk_roll_forward_policy::unsupported:
-        case sdk_roll_forward_policy::disable:
-            return false;
+        return false;
+    }
 
-        case sdk_roll_forward_policy::patch:
-        case sdk_roll_forward_policy::latest_patch:
-            if (version_major != requested_major ||
-                version_minor != requested_minor ||
-                version_feature != requested_feature ||
-                version_patch < requested_patch)
-            {
-                return false;
-            }
-            break;
+    // Rolling forward on feature requires the same major and minor
+    if ((roll_forward == sdk_roll_forward_policy::feature ||
+         roll_forward == sdk_roll_forward_policy::latest_feature) &&
+        (current_major != requested_major ||
+         current_minor != requested_minor))
+    {
+        return false;
+    }
 
-        case sdk_roll_forward_policy::feature:
-        case sdk_roll_forward_policy::latest_feature:
-            if (version_major != requested_major ||
-                version_minor != requested_minor ||
-                version_feature < requested_feature ||
-                (version_feature == requested_feature &&
-                 version_patch < requested_patch))
-            {
-                return false;
-            }
-            break;
-
-        case sdk_roll_forward_policy::minor:
-        case sdk_roll_forward_policy::latest_minor:
-            if (version_major != requested_major)
-            {
-                return false;
-            }
-            break;
-
-        case sdk_roll_forward_policy::major:
-        case sdk_roll_forward_policy::latest_major:
-            break;
+    // Rolling forward on minor requires the same major
+    if ((roll_forward == sdk_roll_forward_policy::minor ||
+         roll_forward == sdk_roll_forward_policy::latest_minor) &&
+        (current_major != requested_major))
+    {
+        return false;
     }
 
     // The version must be at least what was requested
-    return version >= _requested;
+    return current >= version;
 }
 
 bool sdk_resolver::is_better_match(const fx_ver_t& current, const fx_ver_t& previous) const
@@ -443,88 +409,58 @@ bool sdk_resolver::is_better_match(const fx_ver_t& current, const fx_ver_t& prev
         return true;
     }
 
-    // If there wasn't a requested version, then latest is best
-    if (_requested.is_empty())
+    // Use the later of the two if there is no requested version, the policy requires it,
+    // or if everything is equal up to the feature level (latest patch always wins)
+    if (version.is_empty() ||
+        is_policy_use_latest() ||
+        (current.get_major() == previous.get_major() &&
+         current.get_minor() == previous.get_minor() &&
+         (current.get_patch() / 100) == (previous.get_patch() / 100)))
     {
+        // Accept the later of the versions
+        // This will also handle stable and prerelease comparisons
         return current > previous;
     }
 
-    int current_patch = current.get_patch() % 100;
-    int previous_patch = previous.get_patch() % 100;
-
-    int current_feature = current.get_patch() / 100;
-    int previous_feature = previous.get_patch() / 100;
-
-    int current_minor = current.get_minor();
-    int previous_minor = previous.get_minor();
-
-    int current_major = current.get_major();
-    int previous_major = previous.get_major();
-
-    bool use_latest = is_policy_use_latest();
-
-    if (current_major == previous_major)
-    {
-        if (current_minor == previous_minor)
-        {
-            if (current_feature == previous_feature)
-            {
-                if (current_patch == previous_patch)
-                {
-                    // Accept the later of the versions
-                    // This will handle stable and prerelease comparisons
-                    return current > previous;
-                }
-
-                // Latest always wins for patch level
-                return current_patch > previous_patch;
-            }
-
-            return use_latest ? (current_feature > previous_feature) : (current_feature < previous_feature);
-        }
-
-        return use_latest ? (current_minor > previous_minor) : (current_minor < previous_minor);
-    }
-
-    return use_latest ? (current_major > previous_major) : (current_major < previous_major);
+    return current < previous;
 }
 
-bool sdk_resolver::exact_match_allowed() const
+bool sdk_resolver::exact_match_preferred() const
 {
-    return _policy == sdk_roll_forward_policy::disable ||
-           _policy == sdk_roll_forward_policy::patch;
+    return roll_forward == sdk_roll_forward_policy::disable ||
+           roll_forward == sdk_roll_forward_policy::patch;
 }
 
 bool sdk_resolver::is_policy_use_latest() const
 {
-    return _policy == sdk_roll_forward_policy::latest_patch ||
-           _policy == sdk_roll_forward_policy::latest_feature ||
-           _policy == sdk_roll_forward_policy::latest_minor ||
-           _policy == sdk_roll_forward_policy::latest_major;
+    return roll_forward == sdk_roll_forward_policy::latest_patch ||
+           roll_forward == sdk_roll_forward_policy::latest_feature ||
+           roll_forward == sdk_roll_forward_policy::latest_minor ||
+           roll_forward == sdk_roll_forward_policy::latest_major;
 }
 
 bool sdk_resolver::resolve_sdk_path_and_version(const pal::string_t& dir, pal::string_t& sdk_path, fx_ver_t& resolved_version) const
 {
     trace::verbose(_X("Searching for SDK versions in [%s]"), dir.c_str());
 
-    // If an exact match is allowed, check for the existence of the version
-    if (exact_match_allowed() && !_requested.is_empty())
+    // If an exact match is preferred, check for the existence of the version
+    if (exact_match_preferred() && !version.is_empty())
     {
         auto probe_path = dir;
-        append_path(&probe_path, _requested.as_str().c_str());
+        append_path(&probe_path, version.as_str().c_str());
 
         if (pal::directory_exists(probe_path))
         {
             trace::verbose(_X("Found requested SDK directory [%s]"), probe_path.c_str());
             sdk_path = move(probe_path);
-            resolved_version = _requested;
+            resolved_version = version;
 
             // The SDK path has been resolved
             return true;
         }
     }
 
-    if (_policy == sdk_roll_forward_policy::disable)
+    if (roll_forward == sdk_roll_forward_policy::disable)
     {
         // Not yet fully resolved
         return false;

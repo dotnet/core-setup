@@ -611,7 +611,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             // Write a global.json that doesn't contain an object
             WriteGlobalJson("true");
 
-             DotNet.Exec("help")
+            DotNet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
