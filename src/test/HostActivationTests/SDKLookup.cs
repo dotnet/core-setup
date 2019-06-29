@@ -555,6 +555,37 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdOutContaining("9999.0.52000000");
         }
 
+        [Theory]
+        [InlineData("diSABle")]
+        [InlineData("PaTCh")]
+        [InlineData("FeaturE")]
+        [InlineData("MINOR")]
+        [InlineData("maJor")]
+        [InlineData("LatestPatch")]
+        [InlineData("Latestfeature")]
+        [InlineData("latestMINOR")]
+        [InlineData("latESTMajor")]
+        public void It_allows_case_insensitive_roll_forward_policy_names(string rollForward)
+        {
+            const string Requested = "9999.0.100";
+
+            AddAvailableSdkVersions(_exeSdkBaseDir, Requested);
+
+            CreateGlobalJson(policy: rollForward, version: Requested);
+
+            DotNet.Exec("help")
+                .WorkingDirectory(_currentWorkingDir)
+                .WithUserProfile(_userDir)
+                .Environment(s_DefaultEnvironment)
+                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, Requested, _dotnetSdkDllMessageTerminator));
+        }
+
         [Fact]
         public void It_falls_back_to_latest_sdk_for_invalid_global_json()
         {

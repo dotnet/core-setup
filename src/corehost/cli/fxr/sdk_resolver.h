@@ -5,6 +5,7 @@
 #include "pal.h"
 #include "fx_ver.h"
 
+// Note: this must be kept in-sync with `RollForwardPolicyNames`.
 enum class sdk_roll_forward_policy
 {
     // The specified policy is not supported.
@@ -50,7 +51,7 @@ public:
 
 private:
     static sdk_roll_forward_policy to_policy(const pal::string_t& name);
-    static const char* to_policy_name(sdk_roll_forward_policy policy);
+    static const pal::char_t* to_policy_name(sdk_roll_forward_policy policy);
     static pal::string_t find_nearest_global_file(const pal::string_t& cwd);
     bool parse_global_file(pal::string_t global_file_path);
     bool matches_policy(const fx_ver_t& version) const;

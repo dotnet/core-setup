@@ -14,6 +14,24 @@ typedef web::json::object json_object;
 
 using namespace std;
 
+namespace
+{
+    // Note: this array must be in the same order as the `sdk_roll_forward_policy` enumeration
+    const pal::char_t* const RollForwardPolicyNames[] =
+    {
+        _X("unsupported"),
+        _X("disable"),
+        _X("patch"),
+        _X("feature"),
+        _X("minor"),
+        _X("major"),
+        _X("latestPatch"),
+        _X("latestFeature"),
+        _X("latestMinor"),
+        _X("latestMajor"),
+    };
+}
+
 sdk_resolver::sdk_resolver(bool allow_prerelease) :
     sdk_resolver({}, sdk_roll_forward_policy::latest_major, allow_prerelease)
 {
@@ -141,88 +159,30 @@ sdk_resolver sdk_resolver::from_nearest_global_file(const pal::string_t& cwd, bo
 
 sdk_roll_forward_policy sdk_resolver::to_policy(const pal::string_t& name)
 {
-    if (name == _X("disable"))
+    int index = 0;
+    for (auto policy : RollForwardPolicyNames)
     {
-        return sdk_roll_forward_policy::disable;
-    }
+        if (pal::strcasecmp(name.c_str(), policy) == 0)
+        {
+            return static_cast<sdk_roll_forward_policy>(index);
+        }
 
-    if (name == _X("patch"))
-    {
-        return sdk_roll_forward_policy::patch;
-    }
-
-    if (name == _X("feature"))
-    {
-        return sdk_roll_forward_policy::feature;
-    }
-
-    if (name == _X("minor"))
-    {
-        return sdk_roll_forward_policy::minor;
-    }
-
-    if (name == _X("major"))
-    {
-        return sdk_roll_forward_policy::major;
-    }
-
-    if (name == _X("latestPatch"))
-    {
-        return sdk_roll_forward_policy::latest_patch;
-    }
-
-    if (name == _X("latestFeature"))
-    {
-        return sdk_roll_forward_policy::latest_feature;
-    }
-
-    if (name == _X("latestMinor"))
-    {
-        return sdk_roll_forward_policy::latest_minor;
-    }
-
-    if (name == _X("latestMajor"))
-    {
-        return sdk_roll_forward_policy::latest_major;
+        ++index;
     }
 
     return sdk_roll_forward_policy::unsupported;
 }
 
-const char* sdk_resolver::to_policy_name(sdk_roll_forward_policy policy)
+const pal::char_t* sdk_resolver::to_policy_name(sdk_roll_forward_policy policy)
 {
-    switch (policy)
+    auto index = static_cast<int>(policy);
+
+    if (index < 0 || index > (end(RollForwardPolicyNames) - begin(RollForwardPolicyNames)))
     {
-        case sdk_roll_forward_policy::unsupported:
-            return "unsupported";
-
-        case sdk_roll_forward_policy::disable:
-            return "disable";
-
-        case sdk_roll_forward_policy::patch:
-            return "patch";
-
-        case sdk_roll_forward_policy::feature:
-            return "feature";
-
-        case sdk_roll_forward_policy::minor:
-            return "minor";
-
-        case sdk_roll_forward_policy::major:
-            return "major";
-
-        case sdk_roll_forward_policy::latest_patch:
-            return "latestPatch";
-
-        case sdk_roll_forward_policy::latest_feature:
-            return "latestFeature";
-
-        case sdk_roll_forward_policy::latest_minor:
-            return "latestMinor";
-
-        case sdk_roll_forward_policy::latest_major:
-            return "latestMajor";
+        return RollForwardPolicyNames[static_cast<int>(sdk_roll_forward_policy::unsupported)];
     }
+
+    return RollForwardPolicyNames[index];
 }
 
 pal::string_t sdk_resolver::find_nearest_global_file(const pal::string_t& cwd)
