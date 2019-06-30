@@ -571,7 +571,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             AddAvailableSdkVersions(_exeSdkBaseDir, Requested);
 
-            CreateGlobalJson(policy: rollForward, version: Requested);
+            WriteGlobalJson(FormatGlobalJson(policy: rollForward, version: Requested));
 
             DotNet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
@@ -586,15 +586,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, Requested, _dotnetSdkDllMessageTerminator));
         }
 
-        [Fact]
-        public void It_falls_back_to_latest_sdk_for_invalid_global_json()
+        [Theory]
+        [MemberData(nameof(InvalidGlobalJsonData))]
+        public void It_falls_back_to_latest_sdk_for_invalid_global_json(string globalJsonContents, string[] messages)
         {
             AddAvailableSdkVersions(_exeSdkBaseDir, "9999.0.100", "9999.0.300-dummy.9", "9999.1.402");
 
-            // Write an invalid global.json file
-            WriteGlobalJson("{ sdk: { \"version\": \"9999.0.100\" } }");
+            WriteGlobalJson(globalJsonContents);
 
-            DotNet.Exec("help")
+            var expectation = DotNet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
                 .WithUserProfile(_userDir)
                 .Environment(s_DefaultEnvironment)
@@ -604,144 +604,12 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .Execute()
                 .Should()
                 .Pass()
-                .And.HaveStdErrContaining("A JSON parsing exception occurred")
-                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
                 .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
 
-            // Write a global.json that doesn't contain an object
-            WriteGlobalJson("true");
-
-            DotNet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And.HaveStdErrContaining("Expected a JSON object")
-                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
-                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
-
-            // Write a global.json that has a non-string version
-            WriteGlobalJson("{ \"sdk\": { \"version\": 1 } }");
-
-            DotNet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And.HaveStdErrContaining("Expected a string for the 'sdk/version' value")
-                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
-                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
-
-            // Write a global.json with an invalid version value
-            CreateGlobalJson(version: "invalid");
-
-            DotNet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And.HaveStdErrContaining("Version 'invalid' is not valid for the 'sdk/version' value")
-                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
-                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
-
-            // Write a global.json that has a non-string policy
-            WriteGlobalJson("{ \"sdk\": { \"rollForward\": true } }");
-
-            DotNet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And.HaveStdErrContaining("Expected a string for the 'sdk/rollForward' value")
-                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
-                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
-
-            // Write a global.json that has a policy but no version
-            CreateGlobalJson(policy: "latestPatch");
-
-            DotNet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And.HaveStdErrContaining("The roll-forward policy 'latestPatch' requires a 'sdk/version' value")
-                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
-                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
-
-            // Write a global.json that has an invalid policy value
-            CreateGlobalJson(policy: "invalid");
-
-            DotNet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And.HaveStdErrContaining("The roll-forward policy 'invalid' is not supported for the 'sdk/rollForward' value")
-                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
-                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
-
-            // Write a global.json that has a non-boolean allow prerelease
-            WriteGlobalJson("{ \"sdk\": { \"allowPrerelease\": \"true\" } }");
-
-            DotNet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And.HaveStdErrContaining("Expected a boolean for the 'sdk/allowPrerelease' value")
-                .And.HaveStdErrContaining("Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used")
-                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
-
-            // Write a global.json that has a prerelease version and allowPrerelease = false
-            CreateGlobalJson(version: "9999.1.402-preview1", allowPrerelease: false);
-
-            DotNet.Exec("help")
-                .WorkingDirectory(_currentWorkingDir)
-                .WithUserProfile(_userDir)
-                .Environment(s_DefaultEnvironment)
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
-                .CaptureStdOut()
-                .CaptureStdErr()
-                .Execute()
-                .Should()
-                .Pass()
-                .And.HaveStdErrContaining("Ignoring the 'sdk/allowPrerelease' value")
-                .And.HaveStdErrContaining(Path.Combine(_exeSelectedMessage, "9999.1.402", _dotnetSdkDllMessageTerminator));
+            foreach (var message in messages)
+            {
+                expectation = expectation.And.HaveStdErrContaining(message);
+            }
         }
 
         [Theory]
@@ -750,7 +618,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         {
             AddAvailableSdkVersions(_exeSdkBaseDir, installed);
 
-            CreateGlobalJson(policy: policy, version: requested, allowPrerelease: allowPrerelease);
+            WriteGlobalJson(FormatGlobalJson(policy: policy, version: requested, allowPrerelease: allowPrerelease));
 
             var result = DotNet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
@@ -802,7 +670,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             AddAvailableSdkVersions(_exeSdkBaseDir, installed);
 
-            CreateGlobalJson(allowPrerelease: false);
+            WriteGlobalJson(FormatGlobalJson(allowPrerelease: false));
 
             var result = DotNet.Exec("help")
                 .WorkingDirectory(_currentWorkingDir)
@@ -815,6 +683,92 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 .Should()
                 .Pass()
                 .And.HaveStdErrContaining($"SDK path resolved to [{Path.Combine(_exeSdkBaseDir, ExpectedVersion)}]");
+        }
+
+        public static IEnumerable<object[]> InvalidGlobalJsonData
+        {
+            get
+            {
+                const string IgnoringSDKSettings = "Ignoring SDK settings in global.json: the latest installed .NET Core SDK (including prereleases) will be used";
+
+                // Use invalid JSON
+                yield return new object[] {
+                    "{ sdk: { \"version\": \"9999.0.100\" } }",
+                    new[] {
+                        "A JSON parsing exception occurred",
+                        IgnoringSDKSettings
+                    }
+                };
+
+                // Use something other than a JSON object
+                yield return new object[] {
+                    "true",
+                    new[] {
+                        "Expected a JSON object",
+                        IgnoringSDKSettings
+                    }
+                };
+
+                // Use a non-string version
+                yield return new object[] {
+                    "{ \"sdk\": { \"version\": 1 } }",
+                    new[] {
+                        "Expected a string for the 'sdk/version' value",
+                        IgnoringSDKSettings
+                    }
+                };
+
+                // Use an invalid version value
+                yield return new object[] {
+                    FormatGlobalJson(version: "invalid"),
+                    new[] {
+                        "Version 'invalid' is not valid for the 'sdk/version' value",
+                        IgnoringSDKSettings
+                    }
+                };
+
+                // Use a non-string policy
+                yield return new object[] {
+                    "{ \"sdk\": { \"rollForward\": true } }",
+                    new[] {
+                        "Expected a string for the 'sdk/rollForward' value",
+                        IgnoringSDKSettings
+                    }
+                };
+
+                // Use a policy but no version
+                yield return new object[] {
+                    FormatGlobalJson(policy: "latestPatch"),
+                    new[] {
+                        "The roll-forward policy 'latestPatch' requires a 'sdk/version' value",
+                        IgnoringSDKSettings
+                    }
+                };
+
+                // Use an invalid policy value
+                yield return new object[] {
+                    FormatGlobalJson(policy: "invalid"),
+                    new[] {
+                        "The roll-forward policy 'invalid' is not supported for the 'sdk/rollForward' value",
+                        IgnoringSDKSettings
+                    }
+                };
+
+                // Use a non-boolean allow prerelease
+                yield return new object[] {
+                    "{ \"sdk\": { \"allowPrerelease\": \"true\" } }",
+                    new[] {
+                        "Expected a boolean for the 'sdk/allowPrerelease' value",
+                        IgnoringSDKSettings
+                    }
+                };
+
+                // Use a prerelease version and allowPrerelease = false
+                yield return new object[] {
+                    FormatGlobalJson(version: "9999.1.402-preview1", allowPrerelease: false),
+                    new[] { "Ignoring the 'sdk/allowPrerelease' value" }
+                };
+            }
         }
 
         public static IEnumerable<object[]> SdkRollForwardData
@@ -1318,13 +1272,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             File.Copy(srcFile, destFile, true);
         }
 
-        private void CreateGlobalJson(string version = null, string policy = null, bool? allowPrerelease = null)
+        private static string FormatGlobalJson(string version = null, string policy = null, bool? allowPrerelease = null)
         {
             version = version == null ? "null" : string.Format("\"{0}\"", version);
             policy = policy == null ? "null" : string.Format("\"{0}\"", policy);
             string allow = allowPrerelease.HasValue ? (allowPrerelease.Value ? "true" : "false") : "null";
 
-            WriteGlobalJson($@"{{ ""sdk"": {{ ""version"": {version}, ""rollForward"": {policy}, ""allowPrerelease"": {allow} }} }}");
+            return $@"{{ ""sdk"": {{ ""version"": {version}, ""rollForward"": {policy}, ""allowPrerelease"": {allow} }} }}";
         }
 
         private void WriteGlobalJson(string contents)
