@@ -35,6 +35,23 @@
 extern "C" {
 #endif
 
+// Parameters for get_hostfxr_path
+//
+// Fields:
+//   assembly_path
+//     Path to the compenent's assembly.
+//     If specified, hostfxr is located as if the assembly_path is the apphost
+//
+//   dotnet_root
+//     Path to directory containing the dotnet executable.
+//     If specified, hostfxr is located under this path and assembly_path is ignored.
+//
+struct get_hostfxr_parameters {
+    size_t version;
+    const char_t *assembly_path;
+    const char_t *dotnet_root;
+};
+
 //
 // Get the path to the hostfxr library
 //
@@ -48,11 +65,9 @@ extern "C" {
 //           or buffer is nullptr, this is populated with the minimum required size
 //           in char_t units for a buffer to hold the hostfxr path
 //
-//   assembly_path
-//     Optional. Path to the compenent's assembly. Whether or not this is specified
-//     determines the behaviour for locating the hostfxr library.
+//   get_hostfxr_parameters
+//     Optional. Parameters that modify the behaviour for locating the hostfxr library.
 //     If nullptr, hostfxr is located using the enviroment variable or global registration
-//     If specified, hostfxr is located as if the assembly_path is the apphost
 //
 // Return value:
 //   0 on success, otherwise failure
@@ -65,7 +80,7 @@ extern "C" {
 NETHOST_API int NETHOST_CALLTYPE get_hostfxr_path(
     char_t * buffer,
     size_t * buffer_size,
-    const char_t * assembly_path);
+    const struct get_hostfxr_parameters *parameters);
 
 #ifdef __cplusplus
 } // extern "C"

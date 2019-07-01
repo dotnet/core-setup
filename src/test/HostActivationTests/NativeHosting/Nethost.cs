@@ -59,6 +59,40 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         }
 
         [Theory]
+        [InlineData(true, false, true)]
+        [InlineData(true, false, false)]
+        [InlineData(true, true, true)]
+        [InlineData(true, true, false)]
+        [InlineData(false, false, true)]
+        [InlineData(false, false, false)]
+        [InlineData(false, true, true)]
+        [InlineData(false, true, false)]
+        public void GetHostFxrPath_DotNetRootParameter(bool explicitLoad, bool useAssemblyPath, bool isValid)
+        {
+            string dotNetRoot = isValid ? Path.Combine(sharedState.ValidInstallRoot, "dotnet") : sharedState.InvalidInstallRoot;
+            CommandResult result = Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} {explicitLoad} {(useAssemblyPath ? sharedState.TestAssemblyPath : "nullptr")} {dotNetRoot}")
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .Execute();
+
+            result.Should().HaveStdErrContaining("Using dotnet root parameter");
+
+            if (isValid)
+            {
+                result.Should().Pass()
+                    .And.HaveStdOutContaining($"hostfxr_path: {sharedState.HostFxrPath}".ToLower());
+            }
+            else
+            {
+                result.Should().Fail()
+                    .And.ExitWith(1)
+                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}")
+                    .And.HaveStdErrContaining($"The folder [{Path.Combine(dotNetRoot, "host", "fxr")}] does not exist");
+            }
+        }
+
+        [Theory]
         [InlineData(true, false, true, false)]
         [InlineData(true, false, true, true)]
         [InlineData(true, false, false, false)]
@@ -118,9 +152,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GetHostFxrPath_WithAssemblyPath_AppLocalFxr(bool explicitLoad)
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void GetHostFxrPath_WithAssemblyPath_AppLocalFxr(bool explicitLoad, bool useDotNetRoot)
         {
             string appLocalFxrDir = Path.Combine(sharedState.BaseDirectory, "appLocalFxr");
             Directory.CreateDirectory(appLocalFxrDir);
@@ -129,19 +165,20 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             File.WriteAllText(assemblyPath, string.Empty);
             File.WriteAllText(hostFxrPath, string.Empty);
 
-            Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} {explicitLoad} {assemblyPath}")
+            string dotNetRoot = useDotNetRoot ? Path.Combine(sharedState.ValidInstallRoot, "dotnet") : string.Empty;
+            Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} {explicitLoad} {assemblyPath} {dotNetRoot}")
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .EnvironmentVariable("COREHOST_TRACE", "1")
                 .Execute()
                 .Should().Pass()
-                .And.HaveStdOutContaining($"hostfxr_path: {hostFxrPath}".ToLower());
+                .And.HaveStdOutContaining($"hostfxr_path: {(useDotNetRoot ? sharedState.HostFxrPath : hostFxrPath)}".ToLower());
         }
 
         [Fact]
         public void GetHostFxrPath_HostFxrAlreadyLoaded()
         {
-            Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} false {sharedState.TestAssemblyPath} {sharedState.ProductHostFxrPath}")
+            Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} false {sharedState.TestAssemblyPath} nullptr {sharedState.ProductHostFxrPath}")
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .EnvironmentVariable("COREHOST_TRACE", "1")

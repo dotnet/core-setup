@@ -70,19 +70,27 @@ The binary itself should be signed by Microsoft as there will be no support for 
 
 ### Locate `hostfxr`
 ``` C++
+struct get_hostfxr_parameters {
+    size_t version;
+    const char_t * assembly_path;
+    const char_t * dotnet_root;
+};
+
 int get_hostfxr_path(
     char_t * result_buffer,
     size_t * buffer_size,
-    const char_t * assembly_path);
+    const get_hostfxr_parameters * parameters);
 ```
 
-This API locates the `hostfxr` and returns its path by calling the `result` function.
+This API locates the `hostfxr` library and returns its path by populating `result_buffer`.
 
 * `result_buffer` - Buffer that will be populated with the hostfxr path, including a null terminator.
 * `buffer_size` - On input this points to the size of the `result_buffer` in `char_t` units. On output this points to the number of `char_t` units used from the `result_buffer` (including the null terminator). If `result_buffer` is `nullptr` the input value is ignored and only the minimum required size in `char_t` units is set on output.
-* `assembly_path` - Optional. Path to the component's assembly. Whether or not this is specified determines the behavior for locating the hostfxr library.
-  * If `nullptr`, `hostfxr` is located using the environment variable or global registration
+* `parameters` - Optional. Additional parameters that modify the behaviour for locating the `hostfxr` library. If `nullptr`, `hostfxr` is located using the environment variable or global registration
+  * `assembly_path` - Optional. Path to the component's assembly.
   * If specified, `hostfxr` is located as if the `assembly_path` is an application with `apphost`
+  * `dotnet_root` - Optional. Path to the root of a .NET Core installation (i.e. folder containing the dotnet executable).
+    * If specified, `hostfxr` is located under this path and `assembly_path` is ignored.
 
 `nethost` library uses the `__stdcall` calling convention.
 
