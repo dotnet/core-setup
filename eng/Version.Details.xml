@@ -93,9 +93,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>9e3278936912fc413891926f3789689cb05fd3c3</Sha>
     </Dependency>
-    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19326.4">
+    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19352.6">
       <Uri>https://github.com/dotnet/standard</Uri>
-      <Sha>ae567d1c3807dedbbe6ced99547e16ee1c0eb6b6</Sha>
+      <Sha>3e7f6392230513ad238d28eaf6a6602f544db56b</Sha>
     </Dependency>
     <Dependency Name="System.Windows.Extensions" Version="4.6.0-preview7.19329.3">
       <Uri>https://github.com/dotnet/corefx</Uri>
