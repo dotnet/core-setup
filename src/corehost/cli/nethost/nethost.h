@@ -47,7 +47,9 @@ extern "C" {
 //
 //   dotnet_root
 //     Path to directory containing the dotnet executable.
-//     If specified, hostfxr is located under this path and assembly_path is ignored.
+//     If specified, hostfxr is located as if an application is started using
+//     'dotnet app.dll', which means it will be searched for under the dotnet_root
+//     path and the assembly_path is ignored.
 //
 struct get_hostfxr_parameters {
     size_t size;

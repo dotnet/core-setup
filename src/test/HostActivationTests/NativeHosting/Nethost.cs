@@ -12,8 +12,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
     public class Nethost : IClassFixture<Nethost.SharedTestState>
     {
         private const string GetHostFxrPath = "get_hostfxr_path";
-        private const int CoreHostLibMissingFailure = unchecked((int)0x80008083);
-        private const int InvalidArgFailure = unchecked((int)0x80008081);
 
         private static readonly string HostFxrName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostfxr");
         private readonly SharedTestState sharedState;
@@ -36,9 +34,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         {
             string dotNetRoot = isValid ? Path.Combine(sharedState.ValidInstallRoot, "dotnet") : sharedState.InvalidInstallRoot;
             CommandResult result = Command.Create(sharedState.NativeHostPath, $"{GetHostFxrPath} {explicitLoad} {(useAssemblyPath ? sharedState.TestAssemblyPath : string.Empty)}")
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .EnableTracingAndCaptureOutputs()
                 .EnvironmentVariable("DOTNET_ROOT", dotNetRoot)
                 .EnvironmentVariable("DOTNET_ROOT(x86)", dotNetRoot)
                 .Execute();
@@ -54,7 +50,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             {
                 result.Should().Fail()
                     .And.ExitWith(1)
-                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}")
+                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{Constants.ErrorCode.CoreHostLibMissingFailure.ToString("x")}")
                     .And.HaveStdErrContaining($"The required library {HostFxrName} could not be found");
             }
         }
@@ -86,7 +82,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             {
                 result.Should().Fail()
                     .And.ExitWith(1)
-                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}")
+                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{Constants.ErrorCode.CoreHostLibMissingFailure.ToString("x")}")
                     .And.HaveStdErrContaining($"The folder [{Path.Combine(dotNetRoot, "host", "fxr")}] does not exist");
             }
         }
@@ -143,7 +139,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             {
                 result.Should().Fail()
                     .And.ExitWith(1)
-                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}")
+                    .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{Constants.ErrorCode.CoreHostLibMissingFailure.ToString("x")}")
                     .And.HaveStdErrContaining($"The required library {HostFxrName} could not be found");
             }
         }
@@ -224,7 +220,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 {
                     result.Should().Fail()
                         .And.ExitWith(1)
-                        .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{CoreHostLibMissingFailure.ToString("x")}")
+                        .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{Constants.ErrorCode.CoreHostLibMissingFailure.ToString("x")}")
                         .And.HaveStdErrContaining($"The required library {HostFxrName} could not be found");
                 }
             }
@@ -237,7 +233,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 .EnableTracingAndCaptureOutputs()
                 .Execute()
                 .Should().Fail()
-                .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{InvalidArgFailure.ToString("x")}")
+                .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{Constants.ErrorCode.InvalidArgFailure.ToString("x")}")
                 .And.HaveStdErrContaining("Invalid size for get_hostfxr_parameters");
         }
 
