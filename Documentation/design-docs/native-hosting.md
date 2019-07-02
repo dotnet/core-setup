@@ -87,7 +87,7 @@ This API locates the `hostfxr` library and returns its path by populating `resul
 * `result_buffer` - Buffer that will be populated with the hostfxr path, including a null terminator.
 * `buffer_size` - On input this points to the size of the `result_buffer` in `char_t` units. On output this points to the number of `char_t` units used from the `result_buffer` (including the null terminator). If `result_buffer` is `nullptr` the input value is ignored and only the minimum required size in `char_t` units is set on output.
 * `parameters` - Optional. Additional parameters that modify the behaviour for locating the `hostfxr` library. If `nullptr`, `hostfxr` is located using the environment variable or global registration
-  * `assembly_path` - Optional. Path to the component's assembly.
+  * `assembly_path` - Optional. Path to the application or to the component's assembly.
   * If specified, `hostfxr` is located as if the `assembly_path` is an application with `apphost`
   * `dotnet_root` - Optional. Path to the root of a .NET Core installation (i.e. folder containing the dotnet executable).
     * If specified, `hostfxr` is located under this path and `assembly_path` is ignored.
