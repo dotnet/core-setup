@@ -97,6 +97,7 @@ jobs:
     portableBuild: true
     skipTests: true
     targetArchitecture: arm
+    timeoutInMinutes: 120
 
 - template: /eng/jobs/bash-build.yml
   parameters:
@@ -107,6 +108,7 @@ jobs:
     portableBuild: true
     skipTests: true
     targetArchitecture: arm64
+    timeoutInMinutes: 120
 
 # # Tizen build only for PR build
 # - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
@@ -132,6 +134,7 @@ jobs:
     portableBuild: false
     skipTests: true
     targetArchitecture: arm64
+    timeoutInMinutes: 120
 
 - template: /eng/jobs/bash-build.yml
   parameters:
@@ -140,6 +143,7 @@ jobs:
     dockerImage: mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.6-3148f11-20171119021156
     portableBuild: false
     targetArchitecture: x64
+    timeoutInMinutes: 120
 
 - template: /eng/jobs/bash-build.yml
   parameters:
@@ -159,6 +163,7 @@ jobs:
       - sles.12
     portableBuild: true
     targetArchitecture: x64
+    timeoutInMinutes: 120
 
 - template: /eng/jobs/bash-build.yml
   parameters:
@@ -167,11 +172,14 @@ jobs:
     dockerImage: mcr.microsoft.com/dotnet-buildtools/prereqs:centos-6-376e1a3-20174311014331
     portableBuild: false
     targetArchitecture: x64
+    timeoutInMinutes: 120
 
   ################################################################################
   # Build Build_OSX leg
   ################################################################################
 - template: /eng/jobs/osx-build.yml
+  parameters:
+    timeoutInMinutes: 120
 
   ################################################################################
   # Build Windows legs
@@ -183,6 +191,7 @@ jobs:
     displayName: Build_Windows_Arm
     skipTests: true
     targetArchitecture: arm
+    timeoutInMinutes: 120
 
 # Windows Arm64
 - template: /eng/jobs/windows-build.yml
@@ -190,6 +199,7 @@ jobs:
     displayName: Build_Windows_Arm64
     skipTests: true
     targetArchitecture: arm64
+    timeoutInMinutes: 120
 
 # Windows x64
 - template: /eng/jobs/windows-build.yml
@@ -198,6 +208,7 @@ jobs:
     displayName: Build_Windows_x64
     publishRidAgnosticPackages: true
     targetArchitecture: x64
+    timeoutInMinutes: 120
 
 # Windows x86
 - template: /eng/jobs/windows-build.yml
@@ -205,6 +216,7 @@ jobs:
     buildFullPlatformManifest: true
     displayName: Build_Windows_x86
     targetArchitecture: x86
+    timeoutInMinutes: 120
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   ################################################################################
