@@ -238,7 +238,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 .Execute()
                 .Should().Fail()
                 .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{InvalidArgFailure.ToString("x")}")
-                .And.HaveStdErrContaining("Invalid version for get_hostfxr_parameters");
+                .And.HaveStdErrContaining("Invalid size for get_hostfxr_parameters");
         }
 
         [Fact]

@@ -38,8 +38,8 @@ extern "C" {
 // Parameters for get_hostfxr_path
 //
 // Fields:
-//   version
-//     Version of the struct. This should be set to the size of the struct.
+//   size
+//     Size of the struct. This is used for versioning.
 //
 //   assembly_path
 //     Path to the compenent's assembly.
@@ -50,7 +50,7 @@ extern "C" {
 //     If specified, hostfxr is located under this path and assembly_path is ignored.
 //
 struct get_hostfxr_parameters {
-    size_t version;
+    size_t size;
     const char_t *assembly_path;
     const char_t *dotnet_root;
 };

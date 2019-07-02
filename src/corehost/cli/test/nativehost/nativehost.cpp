@@ -100,7 +100,7 @@ int main(const int argc, const pal::char_t *argv[])
 
         // Make version invalid for error case
         if (assembly_path != nullptr && pal::strcmp(assembly_path, _X("[error]")) == 0)
-            parameters.version = parameters.version - 1;
+            parameters.size = parameters.size - 1;
 
         const get_hostfxr_parameters *parameters_ptr = assembly_path != nullptr || dotnet_root != nullptr ? &parameters : nullptr;
 
