@@ -1,6 +1,5 @@
 jobs:
 - job: Build_OSX
-  timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: Hosted macOS
