@@ -120,10 +120,7 @@ bool fxr_resolver::try_get_path(const pal::string_t& root_path, pal::string_t* o
         return false;
     }
 
-    if (!get_latest_fxr(std::move(fxr_dir), out_fxr_path))
-        return false;
-
-    return true;
+    return get_latest_fxr(std::move(fxr_dir), out_fxr_path);
 #else // !FEATURE_APPHOST && !FEATURE_LIBHOST
     // For non-apphost and non-libhost (i.e. muxer), root_path is expected to be the full path to the host
     pal::string_t host_dir;
@@ -146,10 +143,7 @@ bool fxr_resolver::try_get_path_from_dotnet_root(const pal::string_t &dotnet_roo
         return false;
     }
 
-    if (!get_latest_fxr(std::move(fxr_dir), out_fxr_path))
-        return false;
-
-    return true;
+    return get_latest_fxr(std::move(fxr_dir), out_fxr_path);
 }
 
 bool fxr_resolver::try_get_existing_fxr(pal::dll_t *out_fxr, pal::string_t *out_fxr_path)

@@ -29,6 +29,13 @@ NETHOST_API int NETHOST_CALLTYPE get_hostfxr_path(
     trace::setup();
     error_writer_scope_t writer_scope(swallow_trace);
 
+    size_t min_parameters_version = offsetof(get_hostfxr_parameters, dotnet_root) + sizeof(const char_t*);
+    if (parameters != nullptr && parameters->version < min_parameters_version)
+    {
+        trace::error(_X("Invalid version for get_hostfxr_parameters. Expected at least %d"), min_parameters_version);
+        return StatusCode::InvalidArgFailure;
+    }
+
     pal::dll_t fxr;
     pal::string_t fxr_path;
     if (!fxr_resolver::try_get_existing_fxr(&fxr, &fxr_path))

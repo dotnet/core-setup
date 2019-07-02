@@ -38,6 +38,9 @@ extern "C" {
 // Parameters for get_hostfxr_path
 //
 // Fields:
+//   version
+//     Version of the struct. This should be set to the size of the struct.
+//
 //   assembly_path
 //     Path to the compenent's assembly.
 //     If specified, hostfxr is located as if the assembly_path is the apphost
