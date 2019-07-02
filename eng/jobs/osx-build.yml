@@ -1,5 +1,3 @@
-parameters:
-  timeoutInMinutes: 120
 jobs:
 - job: Build_OSX
   timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
