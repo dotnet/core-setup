@@ -225,7 +225,7 @@ bool sdk_resolver::parse_global_file(pal::string_t global_file_path)
     {
         pal::string_t msg;
         (void)pal::utf8_palstring(ex.what(), &msg);
-        trace::warning(_X("A JSON parsing exception occurred in [%s]: %s"), global_file_path.c_str(), msg.c_str());
+        trace::error(_X("A JSON parsing exception occurred in [%s]: %s"), global_file_path.c_str(), msg.c_str());
         return false;
     }
 
