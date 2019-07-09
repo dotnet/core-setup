@@ -214,6 +214,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
     }
 
     // Run the tests on a portable component hosted by a self-contained app
+    // This is testing the currently shipping scenario where SDK does not generate RID fallback graph for self-contained apps
     public class PortableComponentOnSelfContainedAppRidAssetResolution :
         RidAssetResolutionBase,
         IClassFixture<PortableComponentOnSelfContainedAppRidAssetResolution.ComponentSharedTestState>
@@ -268,6 +269,58 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             public ComponentSharedTestState()
             {
                 HostApp = CreateSelfContainedAppWithMockCoreClr("ComponentHostSelfContainedApp", "1.0.0");
+            }
+        }
+    }
+
+    // Run the tests on a portable component hosted by a self-contained app which does have a RID fallback graph
+    // This is testing the scenario after SDK starts generating RID fallback graph even for self-contained apps 
+    //   - https://github.com/dotnet/sdk/issues/3361
+    public class PortableComponentOnSelfContainedAppRidAssetResolutionWithRidFallbackGraph :
+        RidAssetResolutionBase,
+        IClassFixture<PortableComponentOnSelfContainedAppRidAssetResolutionWithRidFallbackGraph.ComponentSharedTestState>
+    {
+        private ComponentSharedTestState ComponentSharedState { get; }
+
+        public PortableComponentOnSelfContainedAppRidAssetResolutionWithRidFallbackGraph(ComponentSharedTestState sharedState)
+            : base(sharedState)
+        {
+            ComponentSharedState = sharedState;
+        }
+
+        protected override void RunTest(
+            Action<NetCoreAppBuilder.RuntimeLibraryBuilder> assetsCustomizer,
+            string rid,
+            string includedAssemblyPaths,
+            string excludedAssemblyPaths,
+            string includedNativeLibraryPaths,
+            string excludedNativeLibraryPaths,
+            Action<NetCoreAppBuilder> appCustomizer)
+        {
+            var component = SharedState.CreateComponentWithNoDependencies(b => b
+                .WithPackage("NativeDependency", "1.0.0", p => assetsCustomizer?.Invoke(p))
+                .WithCustomizer(appCustomizer));
+
+            SharedState.RunComponentResolutionTest(component.AppDll, ComponentSharedState.HostApp, ComponentSharedState.HostApp.Location, command => command
+                .RuntimeId(rid))
+                .Should().Pass()
+                .And.HaveSuccessfullyResolvedComponentDependencies()
+                .And.HaveResolvedComponentDependencyAssembly(includedAssemblyPaths, component)
+                .And.NotHaveResolvedComponentDependencyAssembly(excludedAssemblyPaths, component)
+                .And.HaveResolvedComponentDependencyNativeLibraryPath(includedNativeLibraryPaths, component)
+                .And.NotHaveResolvedComponentDependencyNativeLibraryPath(excludedNativeLibraryPaths, component);
+        }
+
+        public class ComponentSharedTestState : SharedTestState
+        {
+            public TestApp HostApp { get; }
+
+            public ComponentSharedTestState()
+            {
+                HostApp = CreateSelfContainedAppWithMockCoreClr(
+                    "ComponentHostSelfContainedApp", 
+                    "1.0.0",
+                    b => b.WithStandardRuntimeFallbacks());
             }
         }
     }
