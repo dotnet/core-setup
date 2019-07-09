@@ -312,21 +312,41 @@ StatusCode bundle_runner_t::extract()
         }
 
         // Commit files to the final extraction directory
-        if (pal::rename(m_working_extraction_dir.c_str(), m_extraction_dir.c_str()) != 0)
+        // Retry the move operation with some wait in between the attempts. This is to workaround possible file locking
+        // caused by AV software. Basically the extraction process above just write a bunch of executable files to disk
+        // and some AV software may decide to scan it on write. If this happens the files will be locked and we won't
+        // be allowed to move them around.
+        int retry_count = 500;
+        while (true)
         {
-            if (can_reuse_extraction())
+            if (pal::rename(m_working_extraction_dir.c_str(), m_extraction_dir.c_str()) != 0)
             {
-                // Another process successfully extracted the dependencies
+                bool should_retry = errno == EACCES;
+                if (can_reuse_extraction())
+                {
+                    // Another process successfully extracted the dependencies
 
-                trace::info(_X("Extraction completed by another process, aborting current extracion."));
+                    trace::info(_X("Extraction completed by another process, aborting current extracion."));
 
-                remove_directory_tree(m_working_extraction_dir);
-                return StatusCode::Success;
+                    remove_directory_tree(m_working_extraction_dir);
+                    return StatusCode::Success;
+                }
+
+                if (should_retry && (retry_count--) > 0)
+                {
+                    trace::info(_X("Retrying extraction due to EACCES trying to rename the extraction folder to [%s]."), m_extraction_dir.c_str());
+                    pal::sleep(100);
+                    continue;
+                }
+                else
+                {
+                    trace::error(_X("Failure processing application bundle."));
+                    trace::error(_X("Failed to commit extracted to files to directory [%s]"), m_extraction_dir.c_str());
+                    throw StatusCode::BundleExtractionFailure;
+                }
             }
 
-            trace::error(_X("Failure processing application bundle."));
-            trace::error(_X("Failed to commit extracted to files to directory [%s]"), m_extraction_dir.c_str());
-            throw StatusCode::BundleExtractionFailure;
+            break;
         }
 
         fclose(m_bundle_stream);
