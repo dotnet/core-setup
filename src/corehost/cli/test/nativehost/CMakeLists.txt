@@ -18,6 +18,7 @@ endif()
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../../nethost)
 
 set(SOURCES
+    ./error_writer_redirector.cpp
     ./hostfxr_exports.cpp
     ./hostpolicy_exports.cpp
     ./host_context_test.cpp

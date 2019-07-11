@@ -11,17 +11,15 @@
 
 namespace
 {
-    template<int n>
     class resolve_component_dependencies_result
     {
     public:
-        static pal::string_t assembly_paths;
-        static pal::string_t native_search_paths;
-        static pal::string_t resource_search_paths;
+        thread_local static pal::string_t assembly_paths;
+        thread_local static pal::string_t native_search_paths;
+        thread_local static pal::string_t resource_search_paths;
 
         resolve_component_dependencies_result()
         {
-            _n = n;
         }
 
         static void HOSTPOLICY_CALLTYPE fn(
@@ -33,14 +31,11 @@ namespace
             native_search_paths = local_native_search_paths;
             resource_search_paths = local_resource_search_paths;
         }
-
-    private:
-        int _n;
     };
 
-    template<int n> pal::string_t resolve_component_dependencies_result<n>::assembly_paths;
-    template<int n> pal::string_t resolve_component_dependencies_result<n>::native_search_paths;
-    template<int n> pal::string_t resolve_component_dependencies_result<n>::resource_search_paths;
+    thread_local pal::string_t resolve_component_dependencies_result::assembly_paths;
+    thread_local pal::string_t resolve_component_dependencies_result::native_search_paths;
+    thread_local pal::string_t resolve_component_dependencies_result::resource_search_paths;
 
     template<typename Act>
     bool run_app_and_hostpolicy_action(
@@ -85,16 +80,15 @@ namespace
         return rc == StatusCode::Success && rcClose == StatusCode::Success;
     }
 
-    template<int n>
     int resolve_component_helper(
         hostpolicy_exports& hostpolicy,
         const pal::string_t& component_path,
         const pal::char_t* prefix,
         pal::stringstream_t& test_output)
     {
-        error_writer_redirector<n> errors{ hostpolicy.set_error_writer, prefix };
+        error_writer_redirector errors{ hostpolicy.set_error_writer, prefix };
 
-        resolve_component_dependencies_result<n> result;
+        resolve_component_dependencies_result result;
         int rc = hostpolicy.resolve_component_dependencies(component_path.c_str(), result.fn);
 
         if (rc == StatusCode::Success)
@@ -150,7 +144,7 @@ bool resolve_component_dependencies_test::run_app_and_resolve(
         test_output,
         [&](hostpolicy_exports& hostpolicy)
         {
-            return resolve_component_helper<0>(
+            return resolve_component_helper(
                 hostpolicy,
                 component_path,
                 _X(""),
@@ -172,14 +166,17 @@ bool resolve_component_dependencies_test::run_app_and_resolve_multithreaded(
         test_output,
         [&](hostpolicy_exports& hostpolicy)
         {
+            pal::stringstream_t test_output_a;
+            pal::stringstream_t test_output_b;
+
             int rc = StatusCode::Success;
             std::thread resolve_component_a([&]
                 {
-                    int rc_inner = resolve_component_helper<0>(
+                    int rc_inner = resolve_component_helper(
                         hostpolicy,
                         component_path_a,
                         _X("ComponentA: "),
-                        test_output);
+                        test_output_a);
                     if (rc_inner != StatusCode::Success)
                     {
                         rc = rc_inner;
@@ -188,11 +185,11 @@ bool resolve_component_dependencies_test::run_app_and_resolve_multithreaded(
 
             std::thread resolve_component_b([&]
                 {
-                    int rc_inner = resolve_component_helper<1>(
+                    int rc_inner = resolve_component_helper(
                         hostpolicy,
                         component_path_b,
                         _X("ComponentB: "),
-                        test_output);
+                        test_output_b);
                     if (rc_inner != StatusCode::Success)
                     {
                         rc = rc_inner;
@@ -201,6 +198,9 @@ bool resolve_component_dependencies_test::run_app_and_resolve_multithreaded(
 
             resolve_component_a.join();
             resolve_component_b.join();
+
+            test_output << test_output_a.str();
+            test_output << test_output_b.str();
 
             return rc;
         }

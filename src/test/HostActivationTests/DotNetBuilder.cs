@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         /// Add a mock of the Microsoft.NETCore.App framework with the specified version
         /// </summary>
         /// <param name="version">Version to add</param>
-        /// <param name="customizer">Customizer to customize the framework before its built</param>
+        /// <param name="customizer">Customizer to customize the framework before it is built</param>
         /// <remarks>
         /// Product runtime binaries are not added. All the added mock framework will contain is hostpolicy,
         /// a mock version of coreclr, and a minimal Microsoft.NETCore.App.deps.json.
