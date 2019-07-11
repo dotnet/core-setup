@@ -16,9 +16,9 @@ bool header_t::is_valid()
             (m_data.major_version == current_major_version && m_data.minor_version <= current_minor_version));
 }
 
-header_t* header_t::read(FILE* stream)
+std::unique_ptr<header_t> header_t::read(FILE* stream)
 {
-    header_t* header = new header_t();
+    std::unique_ptr<header_t> header{ new header_t() };
 
     // First read the fixed size portion of the header
     bundle_runner_t::read(&header->m_data, sizeof(header->m_data), stream);

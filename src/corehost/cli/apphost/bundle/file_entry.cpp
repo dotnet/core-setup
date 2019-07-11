@@ -16,9 +16,9 @@ bool file_entry_t::is_valid()
         static_cast<file_type_t>(m_data.type) < file_type_t::__last;
 }
 
-file_entry_t* file_entry_t::read(FILE* stream)
+std::unique_ptr<file_entry_t> file_entry_t::read(FILE* stream)
 {
-    file_entry_t* entry = new file_entry_t();
+    std::unique_ptr<file_entry_t> entry{ new file_entry_t() };
 
     // First read the fixed-sized portion of file-entry
     bundle_runner_t::read(&entry->m_data, sizeof(entry->m_data), stream);
@@ -49,5 +49,3 @@ file_entry_t* file_entry_t::read(FILE* stream)
 
     return entry;
 }
-
-

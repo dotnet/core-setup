@@ -48,7 +48,7 @@ namespace bundle
         bool can_reuse_extraction();
 
         FILE* create_extraction_file(const pal::string_t& relative_path);
-        void extract_file(file_entry_t* entry);
+        void extract_file(const file_entry_t& entry);
 
         FILE* m_bundle_stream;
         std::unique_ptr<header_t> m_header;

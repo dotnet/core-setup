@@ -28,7 +28,7 @@ namespace bundle
         }
 
         bool is_valid();
-        static header_t* read(FILE* stream);
+        static std::unique_ptr<header_t> read(FILE* stream);
         const pal::string_t& bundle_id() { return m_bundle_id; }
         int32_t num_embedded_files() { return m_data.num_embedded_files;  }
 
