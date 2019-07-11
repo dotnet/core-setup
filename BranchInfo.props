@@ -1,8 +1,8 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MajorVersion>2</MajorVersion>
-    <MinorVersion>1</MinorVersion>
-    <PatchVersion>13</PatchVersion>
+    <MinorVersion>2</MinorVersion>
+    <PatchVersion>7</PatchVersion>
 
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
 
@@ -12,7 +12,7 @@
     <IncludeBuildNumberInPackageVersion Condition="'$(StabilizePackageVersion)' != 'true'">true</IncludeBuildNumberInPackageVersion>
 
     <ReleaseSuffix>$(PreReleaseLabel)</ReleaseSuffix>
-    <ReleaseBrandSuffix Condition="'$(IncludePreReleaseLabelInPackageVersion)' == 'true'">Release Candidate 1</ReleaseBrandSuffix>
+    <ReleaseBrandSuffix Condition="'$(IncludePreReleaseLabelInPackageVersion)' == 'true'">Preview 3</ReleaseBrandSuffix>
     <Channel>master</Channel>
     <BranchName>master</BranchName>
     <ContainerName>dotnet</ContainerName>
