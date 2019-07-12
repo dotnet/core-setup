@@ -277,7 +277,7 @@ StatusCode bundle_runner_t::extract()
 
         // Read the bundle header
         seek(m_bundle_stream, marker_t::header_offset(), SEEK_SET);
-        m_header = std::move(header_t::read(m_bundle_stream));
+        m_header = header_t::read(m_bundle_stream);
 
         // Determine if embedded files are already extracted, and available for reuse
         determine_extraction_dir();
@@ -305,10 +305,10 @@ StatusCode bundle_runner_t::extract()
         
         create_working_extraction_dir();
 
-        m_manifest = std::move(manifest_t::read(m_bundle_stream, num_embedded_files()));
+        m_manifest = manifest_t::read(m_bundle_stream, num_embedded_files());
 
-        for (std::unique_ptr<file_entry_t> & entry : m_manifest->files) {
-            extract_file(*entry.get());
+        for (const file_entry_t & entry : m_manifest.files) {
+            extract_file(entry);
         }
 
         // Commit files to the final extraction directory
