@@ -73,9 +73,12 @@
 
   <!-- Versioning -->
   <PropertyGroup>
+    <BuildNumberMinorTrimmedLeadingZero>$(BuildNumberMinor.TrimStart('0'))</BuildNumberMinorTrimmedLeadingZero>
+    <BuildNumberMinorTrimmedLeadingZero Condition="'$(BuildNumberMinorTrimmedLeadingZero)' == ''">0</BuildNumberMinorTrimmedLeadingZero>
+
     <VersionSuffix></VersionSuffix>
     <VersionSuffix Condition="'$(IncludePreReleaseLabelInPackageVersion)' == 'true'">$(PreReleaseLabel)</VersionSuffix>
-    <VersionSuffix Condition="'$(IncludeBuildNumberInPackageVersion)' == 'true'">$(VersionSuffix)-$(BuildNumberMajor)-$(BuildNumberMinor)</VersionSuffix>
+    <VersionSuffix Condition="'$(IncludeBuildNumberInPackageVersion)' == 'true'">$(VersionSuffix).$(BuildNumberMajor).$(BuildNumberMinorTrimmedLeadingZero)</VersionSuffix>
 
     <ProductVersionSuffix Condition="'$(IncludePreReleaseLabelInPackageVersion)' == 'true'">-$(VersionSuffix)</ProductVersionSuffix>
     <ProductBandVersion Condition="'$(ProductBandVersion)' == ''">$(MajorVersion).$(MinorVersion)</ProductBandVersion>
