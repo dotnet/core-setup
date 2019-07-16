@@ -93,6 +93,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             {
                 base.Dispose();
 
+                FrameworkReferenceApp.Dispose();
                 _nativeHostingState.Dispose();
             }
         }

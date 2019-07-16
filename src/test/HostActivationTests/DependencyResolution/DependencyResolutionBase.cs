@@ -67,7 +67,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
             public TestApp CreateComponentWithNoDependencies(Action<NetCoreAppBuilder> customizer = null, string location = null)
             {
                 TestApp componentWithNoDependencies = CreateTestApp(location, "ComponentWithNoDependencies");
-                FileUtils.EnsureDirectoryExists(componentWithNoDependencies.Location);
                 NetCoreAppBuilder builder = NetCoreAppBuilder.PortableForNETCoreApp(componentWithNoDependencies)
                     .WithProject(p => p.WithAssemblyGroup(null, g => g.WithMainAssembly()));
                 customizer?.Invoke(builder);
