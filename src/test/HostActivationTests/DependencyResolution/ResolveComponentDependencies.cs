@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                 sharedTestState.FrameworkReferenceApp,
                 sharedTestState.DotNetWithNetCoreApp.GreatestVersionHostFxrPath)
                 .Should().Fail()
-                .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Fail[0x80008092]")
+                .And.HaveStdOutContaining($"corehost_resolve_component_dependencies:Fail[0x{Constants.ErrorCode.LibHostInvalidArgs.ToString("x")}]")
                 .And.HaveStdOutContaining("corehost reported errors:")
                 .And.HaveStdOutContaining("Failed to locate managed application");
         }
@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
 
             sharedTestState.RunComponentResolutionTest(component)
                 .Should().Fail()
-                .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Fail[0x8000808c]")
+                .And.HaveStdOutContaining($"corehost_resolve_component_dependencies:Fail[0x{Constants.ErrorCode.ResolverResolveFailure.ToString("x")}]")
                 .And.HaveStdOutContaining("corehost reported errors:")
                 .And.HaveStdOutContaining("An assembly specified in the application dependencies manifest (ComponentWithDependencies.deps.json) has already been found but with a different file extension")
                 .And.HaveStdOutContaining("package: 'ComponentDependency_Dupe', version: '1.0.0'")
@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
 
             sharedTestState.RunComponentResolutionTest(component)
                 .Should().Fail()
-                .And.HaveStdOutContaining("corehost_resolve_component_dependencies:Fail[0x8000808b]")
+                .And.HaveStdOutContaining($"corehost_resolve_component_dependencies:Fail[0x{Constants.ErrorCode.ResolverInitFailure.ToString("x")}]")
                 .And.HaveStdOutContaining("corehost reported errors:")
                 .And.HaveStdOutContaining($"A JSON parsing exception occurred in [{component.DepsJson}]: * Line 1, Column 2 Syntax error: Malformed token")
                 .And.HaveStdOutContaining($"Error initializing the dependency resolver: An error occurred while parsing: {component.DepsJson}");
@@ -256,11 +256,11 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.DependencyResolution
                 sharedTestState.FrameworkReferenceApp,
                 sharedTestState.DotNetWithNetCoreApp.GreatestVersionHostFxrPath)
                 .Should().Fail()
-                .And.HaveStdOutContaining($"ComponentA: corehost_resolve_component_dependencies:Fail[0x8000808b]")
+                .And.HaveStdOutContaining($"ComponentA: corehost_resolve_component_dependencies:Fail[0x{Constants.ErrorCode.ResolverInitFailure.ToString("x")}]")
                 .And.HaveStdOutContaining($"ComponentA: corehost reported errors:")
                 .And.HaveStdOutContaining($"ComponentA: A JSON parsing exception occurred in [{componentWithNoDependencies.DepsJson}]: * Line 1, Column 2 Syntax error: Malformed token")
                 .And.HaveStdOutContaining($"ComponentA: Error initializing the dependency resolver: An error occurred while parsing: {componentWithNoDependencies.DepsJson}")
-                .And.HaveStdOutContaining($"ComponentB: corehost_resolve_component_dependencies:Fail[0x80008092]")
+                .And.HaveStdOutContaining($"ComponentB: corehost_resolve_component_dependencies:Fail[0x{Constants.ErrorCode.LibHostInvalidArgs.ToString("x")}]")
                 .And.HaveStdOutContaining($"ComponentB: corehost reported errors:")
                 .And.HaveStdOutContaining($"ComponentB: Failed to locate managed application");
         }
