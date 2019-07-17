@@ -68,7 +68,9 @@
 
   <!-- Creates the *.versions.txt file describing where data in this package came from. -->
   <Target Name="GenerateHashVersionsFile"
-          DependsOnTargets="GetDependencyVersionFiles"
+          DependsOnTargets="
+            GetDependencyVersionFiles;
+            GetLatestCommit"
           Condition="'$(FrameworkPackageName)' != ''">
     <Error
       Condition="'@(DependencyVersionFile)' != '' AND !Exists('%(DependencyVersionFile.Identity)')"

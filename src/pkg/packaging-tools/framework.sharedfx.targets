@@ -73,7 +73,9 @@
   </Target>
 
   <Target Name="GenerateVersionFile"
-          DependsOnTargets="GetPackageReference"
+          DependsOnTargets="
+            GetPackageReference;
+            GetLatestCommitFromPkgproj"
           BeforeTargets="Publish">
     <!-- Generate .version file -->
     <ItemGroup>
@@ -85,6 +87,20 @@
       File="$(PublishDir).version"
       Lines="@(VersionLines)"
       Overwrite="true" />
+  </Target>
+
+  <!--
+    This project doesn't have access to SourceLink because Restore happened in the same MSBuild
+    context and the generated NuGet props haven't applied. Call into a pkgproj to get this info.
+  -->
+  <Target Name="GetLatestCommitFromPkgproj">
+    <PropertyGroup>
+      <OnePkgProjectReference>%(PkgProjectReference.Identity)</OnePkgProjectReference>
+    </PropertyGroup>
+
+    <MSBuild Projects="$(OnePkgProjectReference)" Targets="ReturnLatestCommit">
+      <Output TaskParameter="TargetOutputs" PropertyName="LatestCommit" />
+    </MSBuild>
   </Target>
 
   <!--
