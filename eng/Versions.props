@@ -8,40 +8,40 @@
   <!--Package versions-->
   <PropertyGroup>
     <!-- corefx -->
-    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview7.19362.9</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreTargetsPackageVersion>3.0.0-preview7.19362.9</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-preview7.19362.9</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftWin32RegistryVersion>4.6.0-preview7.19362.9</MicrosoftWin32RegistryVersion>
-    <MicrosoftWin32SystemEventsVersion>4.6.0-preview7.19362.9</MicrosoftWin32SystemEventsVersion>
-    <MicrosoftWindowsCompatibilityPackageVersion>3.0.0-preview7.19362.9</MicrosoftWindowsCompatibilityPackageVersion>
-    <SystemCodeDomVersion>4.6.0-preview7.19362.9</SystemCodeDomVersion>
-    <SystemConfigurationConfigurationManagerVersion>4.6.0-preview7.19362.9</SystemConfigurationConfigurationManagerVersion>
-    <SystemDiagnosticsEventLogVersion>4.6.0-preview7.19362.9</SystemDiagnosticsEventLogVersion>
-    <SystemDirectoryServicesVersion>4.6.0-preview7.19362.9</SystemDirectoryServicesVersion>
-    <SystemDrawingCommonVersion>4.6.0-preview7.19362.9</SystemDrawingCommonVersion>
-    <SystemIOFileSystemAccessControlVersion>4.6.0-preview7.19362.9</SystemIOFileSystemAccessControlVersion>
-    <SystemIOPackagingVersion>4.6.0-preview7.19362.9</SystemIOPackagingVersion>
-    <SystemResourcesExtensionsPackageVersion>4.6.0-preview7.19362.9</SystemResourcesExtensionsPackageVersion>
-    <SystemSecurityAccessControlVersion>4.6.0-preview7.19362.9</SystemSecurityAccessControlVersion>
-    <SystemSecurityCryptographyCngVersion>4.6.0-preview7.19362.9</SystemSecurityCryptographyCngVersion>
-    <SystemSecurityCryptographyPkcsVersion>4.6.0-preview7.19362.9</SystemSecurityCryptographyPkcsVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>4.6.0-preview7.19362.9</SystemSecurityCryptographyProtectedDataVersion>
-    <SystemSecurityCryptographyXmlVersion>4.6.0-preview7.19362.9</SystemSecurityCryptographyXmlVersion>
-    <SystemSecurityPermissionsVersion>4.6.0-preview7.19362.9</SystemSecurityPermissionsVersion>
-    <SystemSecurityPrincipalWindowsVersion>4.6.0-preview7.19362.9</SystemSecurityPrincipalWindowsVersion>
-    <SystemTextJsonVersion>4.6.0-preview7.19362.9</SystemTextJsonVersion>
-    <SystemThreadingAccessControlVersion>4.6.0-preview7.19362.9</SystemThreadingAccessControlVersion>
-    <SystemWindowsExtensionsPackageVersion>4.6.0-preview7.19362.9</SystemWindowsExtensionsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview8.19366.5</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreTargetsPackageVersion>3.0.0-preview8.19366.5</MicrosoftNETCoreTargetsPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-preview8.19366.5</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftWin32RegistryVersion>4.6.0-preview8.19366.5</MicrosoftWin32RegistryVersion>
+    <MicrosoftWin32SystemEventsVersion>4.6.0-preview8.19366.5</MicrosoftWin32SystemEventsVersion>
+    <MicrosoftWindowsCompatibilityPackageVersion>3.0.0-preview8.19366.5</MicrosoftWindowsCompatibilityPackageVersion>
+    <SystemCodeDomVersion>4.6.0-preview8.19366.5</SystemCodeDomVersion>
+    <SystemConfigurationConfigurationManagerVersion>4.6.0-preview8.19366.5</SystemConfigurationConfigurationManagerVersion>
+    <SystemDiagnosticsEventLogVersion>4.6.0-preview8.19366.5</SystemDiagnosticsEventLogVersion>
+    <SystemDirectoryServicesVersion>4.6.0-preview8.19366.5</SystemDirectoryServicesVersion>
+    <SystemDrawingCommonVersion>4.6.0-preview8.19366.5</SystemDrawingCommonVersion>
+    <SystemIOFileSystemAccessControlVersion>4.6.0-preview8.19366.5</SystemIOFileSystemAccessControlVersion>
+    <SystemIOPackagingVersion>4.6.0-preview8.19366.5</SystemIOPackagingVersion>
+    <SystemResourcesExtensionsPackageVersion>4.6.0-preview8.19366.5</SystemResourcesExtensionsPackageVersion>
+    <SystemSecurityAccessControlVersion>4.6.0-preview8.19366.5</SystemSecurityAccessControlVersion>
+    <SystemSecurityCryptographyCngVersion>4.6.0-preview8.19366.5</SystemSecurityCryptographyCngVersion>
+    <SystemSecurityCryptographyPkcsVersion>4.6.0-preview8.19366.5</SystemSecurityCryptographyPkcsVersion>
+    <SystemSecurityCryptographyProtectedDataVersion>4.6.0-preview8.19366.5</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemSecurityCryptographyXmlVersion>4.6.0-preview8.19366.5</SystemSecurityCryptographyXmlVersion>
+    <SystemSecurityPermissionsVersion>4.6.0-preview8.19366.5</SystemSecurityPermissionsVersion>
+    <SystemSecurityPrincipalWindowsVersion>4.6.0-preview8.19366.5</SystemSecurityPrincipalWindowsVersion>
+    <SystemTextJsonVersion>4.6.0-preview8.19366.5</SystemTextJsonVersion>
+    <SystemThreadingAccessControlVersion>4.6.0-preview8.19366.5</SystemThreadingAccessControlVersion>
+    <SystemWindowsExtensionsPackageVersion>4.6.0-preview8.19366.5</SystemWindowsExtensionsPackageVersion>
     <!-- standard -->
-    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19352.8</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19366.1</NETStandardLibraryPackageVersion>
     <!-- coreclr -->
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview7.19327.2</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview8.19366.1</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- winforms -->
-    <MicrosoftPrivateWinformsPackageVersion>4.8.0-preview7.19352.2</MicrosoftPrivateWinformsPackageVersion>
+    <MicrosoftPrivateWinformsPackageVersion>4.8.0-preview8.19359.1</MicrosoftPrivateWinformsPackageVersion>
     <!-- wpf -->
-    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.0-preview7.19352.4</MicrosoftDotNetWpfGitHubPackageVersion>
+    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.0-preview8.19359.5</MicrosoftDotNetWpfGitHubPackageVersion>
     <!-- wpf-int -->
-    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-preview7.19352.7</MicrosoftDotNetWpfDncEngPackageVersion>
+    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-preview8.19364.2</MicrosoftDotNetWpfDncEngPackageVersion>
   </PropertyGroup>
   <!--Package names-->
   <PropertyGroup>
