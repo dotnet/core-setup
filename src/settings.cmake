@@ -156,6 +156,7 @@ if(WIN32)
     add_compile_options(/GF) # enable read-only string pooling
     add_compile_options(/FC) # use full pathnames in diagnostics
     add_compile_options(/DEBUG)
+    add_compile_options(/Zi) # enable debugging information
     add_compile_options(/GS)
     add_compile_options(/W1)
     add_compile_options(/we5038) # make reorder warnings into errors
