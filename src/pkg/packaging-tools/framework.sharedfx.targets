@@ -67,7 +67,7 @@
     </PropertyGroup>
 
     <WriteLinesToFile
-      File="$(PublishDir)$(MSBuildProjectName).runtimeconfig.json"
+      File="$(PublishDir)$(SfxIdentity).runtimeconfig.json"
       Lines="$(_runtimeConfigContent)"
       Overwrite="true" />
   </Target>
@@ -176,11 +176,23 @@
     <Copy SourceFiles="@(SharedFrameworkSymbols)" DestinationFolder="$(SharedFrameworkPublishSymbolsDir)" />
   </Target>
 
-  <Target Name="GenerateRuntimeGraph"
-          Condition="'$(GenerateRuntimeGraph)' == 'true'"
+  <Target Name="FixDepsJsonFileName"
           AfterTargets="Publish">
     <PropertyGroup>
-      <SharedFrameworkDepsFile>$(PublishDir)$(ProjectDepsFileName)</SharedFrameworkDepsFile>
+      <SharedFrameworkDepsOriginFile>$(PublishDir)$(ProjectDepsFileName)</SharedFrameworkDepsOriginFile>
+      <SharedFrameworkDepsDestinationFile>$(PublishDir)$(SfxIdentity).deps.json</SharedFrameworkDepsDestinationFile>
+    </PropertyGroup>
+
+    <Move
+      SourceFiles="$(SharedFrameworkDepsOriginFile)"
+      DestinationFiles="$(SharedFrameworkDepsDestinationFile)" />
+  </Target>
+
+  <Target Name="GenerateRuntimeGraph"
+          Condition="'$(GenerateRuntimeGraph)' == 'true'"
+          DependsOnTargets="FixDepsJsonFileName"
+          AfterTargets="Publish">
+    <PropertyGroup>
       <RuntimeGraphGeneratorRuntime Condition="'$(OSGroup)'=='Windows_NT'">win</RuntimeGraphGeneratorRuntime>
       <RuntimeGraphGeneratorRuntime Condition="'$(OSGroup)'=='OSX'">osx</RuntimeGraphGeneratorRuntime>
       <RuntimeGraphGeneratorRuntime Condition="'$(OSGroup)'=='FreeBSD'">freebsd</RuntimeGraphGeneratorRuntime>
@@ -201,7 +213,7 @@
     </ItemGroup>
 
     <ProcessSharedFrameworkDeps AssetsFilePath="$(ProjectAssetsFile)"
-                                DepsFilePath="$(SharedFrameworkDepsFile)"
+                                DepsFilePath="$(SharedFrameworkDepsDestinationFile)"
                                 PackagesToRemove="@(TrimPkgsFromDeps)"
                                 Runtime="$(RuntimeGraphGeneratorRuntime)"
                                 BuildTasksAssemblyPath="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
