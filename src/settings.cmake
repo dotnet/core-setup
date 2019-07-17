@@ -190,6 +190,7 @@ if(WIN32)
     set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
     set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
 else()
+    add_compile_options(-g) # enable debugging information
     add_compile_options(-Wall)
     add_compile_options(-Wextra)
     if(CMAKE_C_COMPILER_ID STREQUAL Clang)
