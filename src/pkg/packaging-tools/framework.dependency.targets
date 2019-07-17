@@ -91,8 +91,8 @@
   <Target Name="SetupGenerateFileVersionProps"
           Condition="'$(FrameworkPackageName)' != ''">
     <PropertyGroup>
-      <PropsFile>$(IntermediateOutputPath)$(MSBuildProjectName).props</PropsFile>
-      <PlatformManifestFile>$(IntermediateOutputPath)$(MSBuildProjectName).PlatformManifest.txt</PlatformManifestFile>
+      <PropsFile>$(IntermediateOutputPath)$(FrameworkPackageName).props</PropsFile>
+      <PlatformManifestFile>$(IntermediateOutputPath)$(FrameworkPackageName).PlatformManifest.txt</PlatformManifestFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -143,11 +143,11 @@
     </PropertyGroup>
 
     <GenerateFileVersionProps Files="@(SharedFrameworkRuntimeFiles)"
-                              PackageId="$(FrameworkPackageName)"
+                              PackageId="__PackageId__"
                               PackageVersion="$(Version)"
                               PlatformManifestFile="$(PlatformManifestFile)"
                               PropsFile="$(PropsFile)"
-                              PreferredPackages="$(Id);@(RuntimeDependency)"
+                              PreferredPackages="__PreferredPackages__"
                               PermitDllAndExeFilesLackingFileVersion="$(PermitDllAndExeFilesLackingFileVersion)" />
   </Target>
 
