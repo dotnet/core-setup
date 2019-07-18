@@ -274,3 +274,10 @@ config.ps1
 # VS generated files
 launchSettings.json
 
+# Snapcraft files
+.snapcraft
+*.snap
+parts/
+prime/
+stage/
+
