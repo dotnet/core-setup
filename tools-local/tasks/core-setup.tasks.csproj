@@ -12,6 +12,7 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="BuildTools.Publish\**\*.cs" />
+    <Compile Include="Arcade\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

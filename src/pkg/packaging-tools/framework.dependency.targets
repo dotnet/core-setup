@@ -3,6 +3,9 @@
     Shared targets specific to dependency projects (depproj).
   -->
 
+  <UsingTask TaskName="LoadItems" AssemblyFile="$(LocalBuildToolsTaskFile)" />
+  <UsingTask TaskName="SaveItems" AssemblyFile="$(ArcadeSdkBuildTasksAssembly)" />
+
   <!-- Fetches all the file items from the packages that we want to redist -->
   <Target Name="GetFilesFromPackages">
     <ItemGroup>
@@ -48,8 +51,28 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="GetFilesToPackage"
+  <PropertyGroup>
+    <FilesToPackageCache>$(IntermediateOutputPath)FilesToPackage.RIDless.cache.props</FilesToPackageCache>
+    <FilesToPackageCache Condition="'$(PackageTargetRuntime)' != ''">$(IntermediateOutputPath)FilesToPackage.$(PackageTargetRuntime).cache.props</FilesToPackageCache>
+  </PropertyGroup>
+
+  <Target Name="GetFilesToPackageAndPopulateCache"
           DependsOnTargets="ResolveReferences;GetFilesFromPackages"
+          Returns="@(FilesToPackage)">
+    <SaveItems
+      ItemName="FilesToPackage"
+      Items="@(FilesToPackage)"
+      File="$(FilesToPackageCache)" />
+  </Target>
+
+  <Target Name="ReadFilesToPackageCache">
+    <LoadItems File="$(FilesToPackageCache)">
+      <Output TaskParameter="Items" ItemName="FilesToPackage" />
+    </LoadItems>
+  </Target>
+
+  <Target Name="GetFilesToPackage"
+          DependsOnTargets="ReadFilesToPackageCache"
           Returns="@(FilesToPackage)" />
 
   <Target Name="GetDependenciesToPackage"
@@ -130,7 +153,7 @@
     </ItemGroup>
 
     <MSBuild Projects="@(RidSpecificGetPackageFilesProject)"
-             Targets="GetFilesToPackage">
+             Targets="GetFilesToPackageAndPopulateCache">
       <Output TaskParameter="TargetOutputs" ItemName="SharedFrameworkRuntimeFiles" />
     </MSBuild>
 
@@ -425,7 +448,7 @@
   </Target>
 
   <Target Name="GetRuntimeFilesToPackage"
-          BeforeTargets="GetFilesToPackage"
+          BeforeTargets="GetFilesToPackageAndPopulateCache"
           DependsOnTargets="PrepareForCrossGen;GetCrossGenSymbolsFiles" />
 
   <Target Name="GetReferenceFilenames"
@@ -441,7 +464,7 @@
 
   <Target Name="BuildDepprojArtifacts"
           DependsOnTargets="
-            GetFilesToPackage;
+            GetFilesToPackageAndPopulateCache;
             CrossGen;
             GenerateHashVersionsFile;
             GenerateFileVersionProps"
