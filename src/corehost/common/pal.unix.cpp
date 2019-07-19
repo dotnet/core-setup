@@ -748,8 +748,8 @@ bool pal::file_exists(const pal::string_t& path)
     {
         return false;
     }
-    struct stat buffer;
-    return (::stat(path.c_str(), &buffer) == 0);
+
+    return (::access(path.c_str(), F_OK) == 0);
 }
 
 static void readdir(const pal::string_t& path, const pal::string_t& pattern, bool onlydirectories, std::vector<pal::string_t>* list)
