@@ -1,0 +1,11 @@
+<Project>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory).., Directory.Build.props))\Directory.Build.props" />
+
+  <PropertyGroup>
+    <TestDir>$(ProjectDir)src\test\</TestDir>
+    <TestAssetsDir>$(TestDir)Assets\</TestAssetsDir>
+    <TestRestorePackagesPath>$(ObjDir)TestPackageCache\</TestRestorePackagesPath>
+    <TestArchitectures>$(TargetArchitecture)</TestArchitectures>
+  </PropertyGroup>
+
+</Project>
