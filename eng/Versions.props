@@ -64,6 +64,7 @@
     <SystemSecurityPermissionsVersion>4.6.0-preview8.19369.2</SystemSecurityPermissionsVersion>
     <SystemSecurityPrincipalWindowsVersion>4.6.0-preview8.19369.2</SystemSecurityPrincipalWindowsVersion>
     <SystemTextJsonVersion>4.6.0-preview8.19369.2</SystemTextJsonVersion>
+    <SystemTextEncodingsWebVersion>4.6.0-preview8.19369.2</SystemTextEncodingsWebVersion>
     <SystemThreadingAccessControlVersion>4.6.0-preview8.19369.2</SystemThreadingAccessControlVersion>
     <SystemWindowsExtensionsPackageVersion>4.6.0-preview8.19369.2</SystemWindowsExtensionsPackageVersion>
     <!-- standard -->
