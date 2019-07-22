@@ -37,6 +37,10 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>ae28da289ecb09197cfc16b619db0fc1df86bc42</Sha>
     </Dependency>
+    <Dependency Name="System.Diagnostics.PerformanceCounter" Version="4.6.0-preview8.19375.15">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha>ae28da289ecb09197cfc16b619db0fc1df86bc42</Sha>
+    </Dependency>
     <Dependency Name="System.DirectoryServices" Version="4.6.0-preview8.19375.15">
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>ae28da289ecb09197cfc16b619db0fc1df86bc42</Sha>
@@ -56,6 +60,10 @@
     <Dependency Name="System.IO.Packaging" Version="4.6.0-preview8.19375.15">
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>ae28da289ecb09197cfc16b619db0fc1df86bc42</Sha>
+    </Dependency>
+    <Dependency Name="System.IO.Pipes.AccessControl" Version="4.5.1">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha>7ee84596d92e178bce54c986df31ccc52479e772 </Sha>
     </Dependency>
     <Dependency Name="System.Security.AccessControl" Version="4.6.0-preview8.19375.15">
       <Uri>https://github.com/dotnet/corefx</Uri>

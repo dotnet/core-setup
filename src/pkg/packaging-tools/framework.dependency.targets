@@ -94,7 +94,7 @@
           Condition="'$(FrameworkPackageName)' != ''">
     <PropertyGroup>
       <PropsFile>$(IntermediateOutputPath)$(FrameworkPackageName).props</PropsFile>
-      <PlatformManifestFile>$(IntermediateOutputPath)$(FrameworkPackageName).PlatformManifest.txt</PlatformManifestFile>
+      <PlatformManifestFile>$(BaseIntermediateOutputPath)$(FrameworkPackageName).PlatformManifest.txt</PlatformManifestFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -464,6 +464,14 @@
           DependsOnTargets="ResolveReferences"
           Returns="@(Reference -> '%(Filename)')" />
 
+  <Target Name="GetReferenceCopyLocalPathsFilenames"
+          DependsOnTargets="ResolveReferences"
+          Returns="@(ReferenceCopyLocalPaths -> '%(Filename)')" />
+
+  <Target Name="BuildDependencyProjectReferences">
+    <MSBuild Projects="@(OrderProjectReference)" Targets="Build" />
+  </Target>
+
   <!-- Target overrides (can't be shared with pkgproj) -->
 
   <Target Name="Build"
@@ -473,6 +481,7 @@
 
   <Target Name="BuildDepprojArtifacts"
           DependsOnTargets="
+            BuildDependencyProjectReferences;
             GetFilesToPackage;
             CrossGen;
             GenerateHashVersionsFile;

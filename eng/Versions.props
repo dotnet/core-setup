@@ -49,16 +49,19 @@
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview8.19375.15</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>3.0.0-preview8.19375.15</MicrosoftNETCoreTargetsPackageVersion>
     <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-preview8.19375.15</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftWin32RegistryAccessControlVersion>4.6.0-preview8.19375.15</MicrosoftWin32RegistryAccessControlVersion>
     <MicrosoftWin32RegistryVersion>4.6.0-preview8.19375.15</MicrosoftWin32RegistryVersion>
     <MicrosoftWin32SystemEventsVersion>4.6.0-preview8.19375.15</MicrosoftWin32SystemEventsVersion>
     <MicrosoftWindowsCompatibilityPackageVersion>3.0.0-preview8.19375.15</MicrosoftWindowsCompatibilityPackageVersion>
     <SystemCodeDomVersion>4.6.0-preview8.19375.15</SystemCodeDomVersion>
     <SystemConfigurationConfigurationManagerVersion>4.6.0-preview8.19375.15</SystemConfigurationConfigurationManagerVersion>
     <SystemDiagnosticsEventLogVersion>4.6.0-preview8.19375.15</SystemDiagnosticsEventLogVersion>
+    <SystemDiagnosticsPerformanceCounter>4.6.0-preview8.19375.15</SystemDiagnosticsPerformanceCounter>
     <SystemDirectoryServicesVersion>4.6.0-preview8.19375.15</SystemDirectoryServicesVersion>
     <SystemDrawingCommonVersion>4.6.0-preview8.19375.15</SystemDrawingCommonVersion>
     <SystemIOFileSystemAccessControlVersion>4.6.0-preview8.19375.15</SystemIOFileSystemAccessControlVersion>
     <SystemIOPackagingVersion>4.6.0-preview8.19375.15</SystemIOPackagingVersion>
+    <SystemIOPipesAccessControl>4.5.1</SystemIOPipesAccessControl>
     <SystemResourcesExtensionsPackageVersion>4.6.0-preview8.19375.15</SystemResourcesExtensionsPackageVersion>
     <SystemSecurityAccessControlVersion>4.6.0-preview8.19375.15</SystemSecurityAccessControlVersion>
     <SystemSecurityCryptographyCngVersion>4.6.0-preview8.19375.15</SystemSecurityCryptographyCngVersion>
@@ -67,8 +70,8 @@
     <SystemSecurityCryptographyXmlVersion>4.6.0-preview8.19375.15</SystemSecurityCryptographyXmlVersion>
     <SystemSecurityPermissionsVersion>4.6.0-preview8.19375.15</SystemSecurityPermissionsVersion>
     <SystemSecurityPrincipalWindowsVersion>4.6.0-preview8.19375.15</SystemSecurityPrincipalWindowsVersion>
-    <SystemTextJsonVersion>4.6.0-preview8.19375.15</SystemTextJsonVersion>
     <SystemTextEncodingsWebVersion>4.6.0-preview8.19375.15</SystemTextEncodingsWebVersion>
+    <SystemTextJsonVersion>4.6.0-preview8.19375.15</SystemTextJsonVersion>
     <SystemThreadingAccessControlVersion>4.6.0-preview8.19375.15</SystemThreadingAccessControlVersion>
     <SystemWindowsExtensionsPackageVersion>4.6.0-preview8.19375.15</SystemWindowsExtensionsPackageVersion>
     <!-- standard -->

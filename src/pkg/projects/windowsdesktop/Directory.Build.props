@@ -7,6 +7,10 @@
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory).., Directory.Build.props))\Directory.Build.props" />
 
+  <ItemGroup>
+    <PlatformManifestProjectReference Include="$(MSBuildThisFileDirectory)..\netcoreapp\src\netcoreapp.depproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <ShortFrameworkName>windowsdesktop</ShortFrameworkName>
 

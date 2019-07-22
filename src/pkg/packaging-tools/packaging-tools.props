@@ -81,4 +81,9 @@
     <OutputName>$(InstallerFileNameWithoutExtension)</OutputName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Ensure depproj has had a chance to build the platform manifest. -->
+    <OrderProjectReference Include="@(PlatformManifestProjectReference)" />
+  </ItemGroup>
+
 </Project>
