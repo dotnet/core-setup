@@ -121,6 +121,19 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
       <Sha>d6cdc6daf9ddfeee3731ca75c8205589195d7adb</Sha>
     </Dependency>
+    <!-- TODO: Sort these into the above. These are out of the way at the moment to make it easier to resolve conflicts. -->
+    <Dependency Name="System.IO.FileSystem.AccessControl" Version="5.0.0-alpha1.19372.3">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha>3c3b9ceee6e1416db6f1ddbc1ab0d0ffb67c16fa</Sha>
+    </Dependency>
+    <Dependency Name="System.Diagnostics.PerformanceCounter" Version="5.0.0-alpha1.19372.3">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha>3c3b9ceee6e1416db6f1ddbc1ab0d0ffb67c16fa</Sha>
+    </Dependency>
+    <Dependency Name="System.IO.Pipes.AccessControl" Version="4.5.1">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha>7ee84596d92e178bce54c986df31ccc52479e772 </Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19364.1">
