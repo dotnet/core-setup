@@ -4,6 +4,12 @@
     <MajorVersion>3</MajorVersion>
     <MinorVersion>0</MinorVersion>
     <PatchVersion>0</PatchVersion>
+    <!--
+      TODO: When changing this to preview9, remove /p:_BuildNumberYY=28 workaround in the official
+      build yml files. These were added because we migrated to the Arcade SDK during preview8, and
+      needed to raise the version number to preserve continuity. In preview9 we should remove these
+      to conform to Arcade defaults. https://github.com/dotnet/core-setup/issues/7348
+    -->
     <PreReleaseVersionLabel>preview8</PreReleaseVersionLabel>
     <!-- Enable to remove prerelease label. -->
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
