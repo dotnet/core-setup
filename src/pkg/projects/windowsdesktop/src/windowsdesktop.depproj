@@ -22,6 +22,7 @@
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="$(SystemSecurityCryptographyPkcsVersion)" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataVersion)" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="$(SystemSecurityCryptographyXmlVersion)" />
+    <PackageReference Include="System.Security.Permissions" Version="$(SystemSecurityPermissionsVersion)" />
     <PackageReference Include="System.Security.Principal.Windows" Version="$(SystemSecurityPrincipalWindowsVersion)" />
     <PackageReference Include="System.Threading.AccessControl" Version="$(SystemThreadingAccessControlVersion)" />
     <PackageReference Include="System.Windows.Extensions" Version="$(SystemWindowsExtensionsPackageVersion)" />
@@ -31,10 +32,6 @@
     <RefOnlyPackageReference Include="System.IO.Pipes.AccessControl" Version="$(SystemIOPipesAccessControl)" />
 
     <PackageReference Include="@(RefOnlyPackageReference)" ExcludeAssets="Runtime" />
-
-    <RuntimeOnlyPackageReference Include="System.Security.Permissions" Version="$(SystemSecurityPermissionsVersion)" />
-
-    <PackageReference Include="@(RuntimeOnlyPackageReference)" ExcludeAssets="Compile" />
   </ItemGroup>
 
   <!--

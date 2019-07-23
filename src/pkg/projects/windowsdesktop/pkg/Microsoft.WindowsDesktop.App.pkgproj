@@ -51,9 +51,6 @@
 
     <!-- We don't have a ref assembly for DirectWriteForwarder -->
     <IgnoredReference Condition="'$(PackageTargetRuntime)' == ''" Include="DirectWriteForwarder" />
-
-    <!-- We want to intentionally exclude the ref assembly for System.Security.Permissions. -->
-    <IgnoredReference Condition="'$(PackageTargetRuntime)' == ''" Include="System.Security.Permissions" />
   </ItemGroup>
 
   <Target Name="GetNETCoreAppIgnoredReference" BeforeTargets="VerifyClosure">

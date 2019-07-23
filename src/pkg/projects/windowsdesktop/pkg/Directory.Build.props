@@ -51,6 +51,7 @@
     <FrameworkListFileClass Include="System.Security.Cryptography.Pkcs.dll" Profile="WindowsForms;WPF" />
     <FrameworkListFileClass Include="System.Security.Cryptography.ProtectedData.dll" Profile="WindowsForms;WPF" />
     <FrameworkListFileClass Include="System.Security.Cryptography.Xml.dll" Profile="WindowsForms;WPF" />
+    <FrameworkListFileClass Include="System.Security.Permissions.dll" Profile="WindowsForms;WPF" />
     <FrameworkListFileClass Include="System.Security.Principal.Windows.dll" Profile="WindowsForms;WPF" />
     <FrameworkListFileClass Include="System.Threading.AccessControl.dll" Profile="WindowsForms;WPF" />
     <FrameworkListFileClass Include="System.Windows.Controls.Ribbon.dll" Profile="WPF" />
