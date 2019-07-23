@@ -136,6 +136,28 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="ResolvePlatformManifestProjectReferences"
+          Condition="'@(PlatformManifestProjectReference)' != ''"
+          BeforeTargets="ResolveProjectReferences">
+    <!-- Ensure depproj has had a chance to build the platform manifest. -->
+    <MSBuild
+      Projects="@(PlatformManifestProjectReference)"
+      Targets="Build" />
+
+    <MSBuild
+      Projects="@(PlatformManifestProjectReference)"
+      Targets="GetDataFiles"
+      SkipNonexistentTargets="true">
+      <Output TaskParameter="TargetOutputs" ItemName="ProjectReferenceDataFile" />
+    </MSBuild>
+
+    <ItemGroup>
+      <PackageConflictPlatformManifests
+        Include="@(ProjectReferenceDataFile)"
+        Condition="'%(ProjectReferenceDataFile.PlatformManifestFile)' == 'true'" />
+    </ItemGroup>
+  </Target>
+
   <!--
     By default, shared frameworks are generated based on the package. This can be overridden by the
     project, and in the future, the runtime pack is likely to be used to assemble the sfx.

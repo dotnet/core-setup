@@ -453,6 +453,10 @@
           DependsOnTargets="ResolveReferences"
           Returns="@(Reference -> '%(Filename)')" />
 
+  <Target Name="GetReferenceCopyLocalPathsFilenames"
+          DependsOnTargets="ResolveReferences"
+          Returns="@(ReferenceCopyLocalPaths -> '%(Filename)')" />
+
   <!-- Target overrides (can't be shared with pkgproj) -->
 
   <Target Name="Build"

@@ -53,11 +53,21 @@
     <IgnoredReference Condition="'$(PackageTargetRuntime)' == ''" Include="DirectWriteForwarder" />
   </ItemGroup>
 
-  <Target Name="GetNETCoreAppIgnoredReference" BeforeTargets="VerifyClosure">
+  <Target Name="GetNETCoreAppIgnoredReference"
+          BeforeTargets="VerifyClosure">
     <MSBuild
+      Condition="'$(PackageTargetRuntime)' == ''"
       Projects="../../netcoreapp/src/netcoreapp.depproj"
       Properties="Configuration=netcoreapp"
       Targets="GetReferenceFilenames">
+      <Output TaskParameter="TargetOutputs" ItemName="IgnoredReference" />
+    </MSBuild>
+
+    <MSBuild
+      Condition="'$(PackageTargetRuntime)' != ''"
+      Projects="../../netcoreapp/src/netcoreapp.depproj"
+      Properties="Configuration=netcoreapp"
+      Targets="GetReferenceCopyLocalPathsFilenames">
       <Output TaskParameter="TargetOutputs" ItemName="IgnoredReference" />
     </MSBuild>
   </Target>
