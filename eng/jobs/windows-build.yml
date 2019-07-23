@@ -35,6 +35,7 @@ jobs:
         /p:PortableBuild=true
         /p:SkipTests=${{ parameters.skipTests }}
         /p:BuildFullPlatformManifest=${{ parameters.buildFullPlatformManifest }}
+        /p:_BuildNumberYY=28
       MsbuildSigningArguments: >-
         /p:CertificateId=400
         /p:DotNetSignType=$(SignType)
