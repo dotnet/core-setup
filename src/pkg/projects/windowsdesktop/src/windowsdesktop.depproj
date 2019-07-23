@@ -16,7 +16,6 @@
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="$(SystemIOFileSystemAccessControlVersion)" />
     <PackageReference Include="System.IO.Packaging" Version="$(SystemIOPackagingVersion)" />
-    <PackageReference Include="System.IO.Pipes.AccessControl" Version="$(SystemIOPipesAccessControl)" />
     <PackageReference Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
     <PackageReference Include="System.Security.AccessControl" Version="$(SystemSecurityAccessControlVersion)" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="$(SystemSecurityCryptographyCngVersion)" />
@@ -29,6 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <RefOnlyPackageReference Include="System.IO.Pipes.AccessControl" Version="$(SystemIOPipesAccessControl)" />
+
+    <PackageReference Include="@(RefOnlyPackageReference)" ExcludeAssets="Runtime" />
+
     <RuntimeOnlyPackageReference Include="System.Security.Permissions" Version="$(SystemSecurityPermissionsVersion)" />
 
     <PackageReference Include="@(RuntimeOnlyPackageReference)" ExcludeAssets="Compile" />
