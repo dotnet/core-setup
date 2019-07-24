@@ -49,9 +49,6 @@
   <ItemGroup Condition="'$(SignFinalPackages)' == 'true'">
     <DownloadedSymbolPackages Include="$(DownloadDirectory)**\*.symbols.nupkg" />
     <ItemsToSign Include="$(DownloadDirectory)**\*.nupkg" Exclude="@(DownloadedSymbolPackages)" />
-
-    <ItemsToSign Include="$(DownloadDirectory)**\*.deb" />
-    <ItemsToSign Include="$(DownloadDirectory)**\*.rpm" />
   </ItemGroup>
 
   <ItemGroup>
