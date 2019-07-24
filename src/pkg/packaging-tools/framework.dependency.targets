@@ -110,7 +110,18 @@
   <Target Name="GenerateFileVersionProps"
           Condition="'$(FrameworkPackageName)' != ''"
           DependsOnTargets="SetupGenerateFileVersionProps">
+    <!--
+      Building the full platform manifest gathers information from the packages of all known RIDs,
+      which we can't do while building from source because the entire product needs to build on a
+      single machine (single RID) without access to prebuilts.
+    -->
+    <PropertyGroup Condition="'$(DotNetBuildFromSource)' == 'true'">
+      <BuildFullPlatformManifest Condition="'$(BuildFullPlatformManifest)' == ''">false</BuildFullPlatformManifest>
+    </PropertyGroup>
+
     <PropertyGroup>
+      <BuildFullPlatformManifest Condition="'$(BuildFullPlatformManifest)' == ''">true</BuildFullPlatformManifest>
+
       <!-- During an official build when we can guarantee that all RID-specific dependencies have been built,
           restore all of those dependencies and gather the prospective content of the RID-specific Core.App
           packages.  This is needed so that we have a complete platform manifest in the shipping version of
@@ -168,8 +179,13 @@
     <ItemGroup>
       <CrossgenToolPackageReference Include="Microsoft.Private.CoreFx.NETCoreApp" Version="$(MicrosoftPrivateCoreFxNETCoreAppPackageVersion)" />
       <CrossgenToolPackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR" Version="$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)" />
-      <CrossgenToolPackageReference Include="Microsoft.DiaSymReader.Native" Version="$(MicrosoftDiaSymReaderNativePackageVersion)" />
       <CrossgenToolPackageReference Include="$(MicrosoftTargetingPackPrivateWinRTPackage)" Version="$(MicrosoftTargetingPackPrivateWinRTPackageVersion)" />
+
+      <!-- This tool is a prebuilt not buildable from source. -->
+      <CrossgenToolPackageReference
+        Condition="'$(DotNetBuildFromSource)' != 'true'"
+        Include="Microsoft.DiaSymReader.Native"
+        Version="$(MicrosoftDiaSymReaderNativePackageVersion)" />
 
       <!--
         If any tool packages are missing, add them with ExcludeAssets=All. Be careful not to modify
@@ -249,6 +265,14 @@
 
     <PropertyGroup Condition="'@(_diaSymReaderAssembly)' != ''">
       <_diaSymReaderToolDir>%(_diaSymReaderAssembly.RootDir)%(_diaSymReaderAssembly.Directory)</_diaSymReaderToolDir>
+    </PropertyGroup>
+
+    <!--
+      DiaSymReader can't be built from source, so use an unrelated default directory in that case.
+      This is used as the working directory for crossgen calls.
+    -->
+    <PropertyGroup Condition="'$(DotNetBuildFromSource)' == 'true'">
+      <_diaSymReaderToolDir>$(IntermediateOutputPath)</_diaSymReaderToolDir>
     </PropertyGroup>
 
     <ItemGroup>
