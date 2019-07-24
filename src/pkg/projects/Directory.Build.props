@@ -41,13 +41,11 @@
     <RestoreAllBuildRids>true</RestoreAllBuildRids>
   </PropertyGroup>
 
-  <!-- Most packages need the host to be built first. -->
-  <ItemGroup Condition="'$(DisableOrderDependencies)' != 'true'">
+  <ItemGroup Condition="'$(DisableOrderDependencies)' != 'true' and '$(MSBuildProjectExtension)' == '.pkgproj'">
+    <!-- Most packages need the host to be built first. -->
     <OrderProjectReference Include="@(CorehostProjectToBuild)" />
     <!-- Pkgproj requires its depproj crossgen outputs to be signed.-->
-    <OrderProjectReference
-      Condition="'$(MSBuildProjectExtension)' == '.pkgproj'"
-      Include="$(RepoRoot)signing\SignBinaries.proj" />
+    <OrderProjectReference Include="$(RepoRoot)signing\SignBinaries.proj" />
   </ItemGroup>
 
   <!-- In *.builds projects, the current phase's name is the same as the project name. -->

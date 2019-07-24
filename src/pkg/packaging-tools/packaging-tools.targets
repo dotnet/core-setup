@@ -147,16 +147,20 @@
     </MSBuild>
 
     <ItemGroup>
-      <!--
-        Add the platform manifest, if it exists. It may not exist if this is, for example, an x64
-        GetFilesToPackage build running under TargetArchitecture=x86.
-      -->
-      <PackageConflictPlatformManifests
+      <ProjectReferencePlatformManifestFile
         Include="@(ProjectReferenceDataFile)"
-        Condition="
-          '%(ProjectReferenceDataFile.PlatformManifestFile)' == 'true' and
-          Exists('%(ProjectReferenceDataFile.Identity)')" />
+        Condition="'%(ProjectReferenceDataFile.PlatformManifestFile)' == 'true'" />
+
+      <PackageConflictPlatformManifests Include="@(ProjectReferencePlatformManifestFile)" />
     </ItemGroup>
+
+    <Error
+      Condition="'@(ProjectReferencePlatformManifestFile)' == ''"
+      Text="No ProjectReferencePlatformManifestFile found in @(PlatformManifestProjectReference)" />
+
+    <Error
+      Condition="!Exists('%(ProjectReferencePlatformManifestFile.Identity)')"
+      Text="ProjectReferencePlatformManifestFile does not exist: '@(ProjectReferencePlatformManifestFile)' in @(PlatformManifestProjectReference)" />
   </Target>
 
   <!--

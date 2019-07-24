@@ -83,7 +83,7 @@
 
   <ItemGroup>
     <!-- Ensure depproj has had a chance to build the platform manifest. -->
-    <OrderProjectDependency Include="@(PlatformManifestProjectReference)" />
+    <OrderProjectReference Include="@(PlatformManifestProjectReference)" />
   </ItemGroup>
 
 </Project>

@@ -34,6 +34,9 @@
     PackageConflictPlatformManifests item. This causes NuGet to remove files from publish output
     because they're "already" defined in the shared framework. But we're creating a shared framework
     here, so we need to remove the PackageConflictPlatformManifests items before they're used.
+
+    If we have a PlatformManifestProjectReference (WindowsDesktop), keep that platform manifest. It
+    ensures we don't carry items that the base framework (NETCoreApp) already has.
   -->
   <Target Name="RemovePlatformManifests"
           BeforeTargets="
@@ -41,6 +44,7 @@
             _HandlePackageFileConflicts">
     <ItemGroup>
       <PackageConflictPlatformManifests Remove="@(PackageConflictPlatformManifests)" />
+      <PackageConflictPlatformManifests Include="@(ProjectReferencePlatformManifestFile)" />
     </ItemGroup>
   </Target>
 
@@ -259,7 +263,6 @@
   <Target Name="BuildSfxprojArtifacts"
           DependsOnTargets="
             BuildPkgProjectReferences;
-            ResolvePlatformManifestProjectReferences;
             SetPublishDir;
             CleanPackages;
             Restore;
