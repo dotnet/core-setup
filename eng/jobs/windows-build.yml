@@ -65,7 +65,7 @@ jobs:
         displayName: Push Visual Studio NuPkgs
         inputs:
           command: push
-          packagesToPush: '$(Build.SourcesDirectory)/artifacts/packages/$(TargetArchitecture)/NonShipping/VS.Redist.Common.*.nupkg'
+          packagesToPush: '$(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)/*/VS.Redist.Common.*.nupkg'
           nuGetFeedType: external
           publishFeedCredentials: 'DevDiv - VS package feed'
         condition: and(succeeded(), or(eq(variables['TargetArchitecture'], 'x64'), eq(variables['TargetArchitecture'], 'x86')))
