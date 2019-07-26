@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Build.Tasks
             XDocument content = XDocument.Load(SourceFile);
 
             XNamespace rootNamespace = content.Root.GetDefaultNamespace();
-            XName N(string name) => rootNamespace.GetName(name);
+            XName GetQualifiedName(string name) => rootNamespace.GetName(name);
 
             foreach (var file in FileElementToStabilize)
             {
@@ -66,11 +66,11 @@ namespace Microsoft.DotNet.Build.Tasks
                     continue;
                 }
 
-                XElement[] matchingFileElements = content.Element(N("Wix"))
-                    .Elements(N("Fragment"))
-                    .SelectMany(f => f.Elements(N("ComponentGroup")))
-                    .SelectMany(cg => cg.Elements(N("Component")))
-                    .SelectMany(c => c.Elements(N("File")))
+                XElement[] matchingFileElements = content.Element(GetQualifiedName("Wix"))
+                    .Elements(GetQualifiedName("Fragment"))
+                    .SelectMany(f => f.Elements(GetQualifiedName("ComponentGroup")))
+                    .SelectMany(cg => cg.Elements(GetQualifiedName("Component")))
+                    .SelectMany(c => c.Elements(GetQualifiedName("File")))
                     .Where(f => f.Attribute("Source")?.Value
                         ?.EndsWith(file.ItemSpec, StringComparison.OrdinalIgnoreCase) == true)
                     .ToArray();
