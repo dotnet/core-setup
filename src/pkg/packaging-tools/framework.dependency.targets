@@ -468,7 +468,8 @@
           DependsOnTargets="ResolveReferences"
           Returns="@(ReferenceCopyLocalPaths -> '%(Filename)')" />
 
-  <Target Name="BuildDependencyProjectReferences">
+  <Target Name="BuildDependencyProjectReferences"
+          DependsOnTargets="GetDefaultOrderProjectReferences">
     <MSBuild Projects="@(OrderProjectReference)" Targets="Build" />
   </Target>
 

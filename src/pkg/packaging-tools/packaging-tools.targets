@@ -136,6 +136,13 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="GetDefaultOrderProjectReferences">
+    <ItemGroup>
+      <!-- Ensure depproj has had a chance to build the platform manifest. -->
+      <OrderProjectReference Include="@(PlatformManifestProjectReference)" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="ResolvePlatformManifestProjectReferences"
           Condition="'@(PlatformManifestProjectReference)' != ''"
           BeforeTargets="ResolveProjectReferences">
