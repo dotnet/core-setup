@@ -234,7 +234,8 @@
     we're using its nupkg directly. In the future, this will be handled in shared tooling to
     generate shared frameworks in the Arcade SDK.
   -->
-  <Target Name="BuildPkgProjectReferences">
+  <Target Name="BuildPkgProjectReferences"
+          DependsOnTargets="GetDefaultOrderProjectReferences">
     <MSBuild
       Projects="
         $(RepoRoot)signing\SignBinaries.proj;

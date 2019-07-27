@@ -192,7 +192,8 @@
             (
               '$(BuildRidSpecificPacks)' == 'true' or
               ('$(FrameworkPackType)' == '' and '$(BuildRuntimePackages)' == 'true')
-            )">
+            )"
+          DependsOnTargets="GetDefaultOrderProjectReferences">
     <!--
       Ensure all project references are built to make sure dependencies (e.g. native build and
       depproj's crossgen) runs first. The global properties mean we can't let the inner build handle
