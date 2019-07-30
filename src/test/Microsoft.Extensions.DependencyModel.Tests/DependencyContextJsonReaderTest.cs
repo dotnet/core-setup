@@ -698,6 +698,20 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         }
 
         [Fact]
+        public void FailsToReadInvalidDefines()
+        {
+            Assert.Throws<FormatException>(() => Read(
+@"{
+    ""compilationOptions"": {
+        ""defines"": ""MY"",
+    },
+    ""targets"": {
+        "".NETCoreApp,Version=v1.0/osx.10.10-x64"": {}
+    }
+}"));
+        }
+
+        [Fact]
         public void IgnoresUnknownPropertiesInCompilationOptions()
         {
             var context = Read(
