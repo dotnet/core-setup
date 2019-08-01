@@ -31,12 +31,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 return;
             }
 
-            string scenario = synchronous ? "synchronous" : "concurrent";
-            string args = $"comhost {scenario} {count} {sharedState.ComHostPath} {sharedState.ClsidString}";
-            CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                .EnableTracingAndCaptureOutputs()
-                .DotNetRoot(sharedState.ComLibraryFixture.BuiltDotnet.BinPath)
-                .MultilevelLookup(false)
+            string [] args = {
+                "comhost",
+                synchronous ? "synchronous" : "concurrent",
+                $"{count}",
+                sharedState.ComHostPath,
+                sharedState.ClsidString
+            };
+            CommandResult result = sharedState.CreateNativeHostCommand(args, sharedState.ComLibraryFixture.BuiltDotnet.BinPath)
                 .Execute();
 
             result.Should().Pass()
@@ -64,11 +66,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                     fixture.TestProject.BuiltApp.Location,
                     $"{ fixture.TestProject.AssemblyName }.comhost.dll");
 
-                string args = $"comhost synchronous 1 {comHostWithAppLocalFxr} {sharedState.ClsidString}";
-                CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                    .EnableTracingAndCaptureOutputs()
-                    .DotNetRoot(fixture.BuiltDotnet.BinPath)
-                    .MultilevelLookup(false)
+                string[] args = {
+                    "comhost",
+                    "synchronous",
+                    "1",
+                    comHostWithAppLocalFxr,
+                    sharedState.ClsidString
+                    };
+                CommandResult result = sharedState.CreateNativeHostCommand(args, fixture.BuiltDotnet.BinPath)
                     .Execute();
 
                 result.Should().Pass()
@@ -98,11 +103,14 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                     fixture.TestProject.BuiltApp.Location,
                     $"{ fixture.TestProject.AssemblyName }.comhost.dll");
 
-                string args = $"comhost errorinfo 1 {comHost} {sharedState.ClsidString}";
-                CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                    .EnableTracingAndCaptureOutputs()
-                    .DotNetRoot(fixture.BuiltDotnet.BinPath)
-                    .MultilevelLookup(false)
+                string[] args = {
+                    "comhost",
+                    "errorinfo",
+                    "1",
+                    comHost,
+                    sharedState.ClsidString
+                };
+                CommandResult result = sharedState.CreateNativeHostCommand(args, fixture.BuiltDotnet.BinPath)
                     .Execute();
 
                 result.Should().Pass()
