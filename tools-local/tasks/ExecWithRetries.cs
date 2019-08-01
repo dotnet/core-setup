@@ -20,6 +20,8 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required]
         public string Command { get; set; }
 
+        public string WorkingDirectory { get; set; }
+
         public bool IgnoreStandardErrorWarningFormat { get; set; }
 
         public int MaxAttempts { get; set; } = 5;
@@ -35,6 +37,10 @@ namespace Microsoft.DotNet.Build.Tasks
         /// The default is -1 to make the first retry instant, because ((base^0)-1) == 0.
         /// </summary>
         public double RetryDelayConstant { get; set; } = -1;
+
+        public string StandardOutputImportance { get; set; }
+
+        public string StandardErrorImportance { get; set; }
 
         private CancellationTokenSource _cancelTokenSource = new CancellationTokenSource();
 
@@ -56,7 +62,10 @@ namespace Microsoft.DotNet.Build.Tasks
                 {
                     BuildEngine = BuildEngine,
                     Command = Command,
+                    WorkingDirectory = WorkingDirectory,
                     IgnoreStandardErrorWarningFormat = IgnoreStandardErrorWarningFormat,
+                    StandardOutputImportance = StandardOutputImportance,
+                    StandardErrorImportance = StandardErrorImportance,
                     LogStandardErrorAsError = false,
                     IgnoreExitCode = true
                 };
@@ -81,12 +90,10 @@ namespace Microsoft.DotNet.Build.Tasks
                     break;
                 }
 
-                Log.LogMessage(MessageImportance.High, message);
-
                 TimeSpan delay = TimeSpan.FromSeconds(
                     Math.Pow(RetryDelayBase, i) + RetryDelayConstant);
 
-                Log.LogMessage(MessageImportance.High, $"Retrying after {delay}...");
+                Log.LogMessage(MessageImportance.High, $"{message} -- Retrying after {delay}...");
 
                 try
                 {
