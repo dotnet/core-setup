@@ -39,11 +39,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 validMethod ? sharedState.ComponentEntryPoint1 : "BadMethod",
             };
             CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
+                .EnableTracingAndCaptureOutputs()
+                .DotNetRoot(sharedState.DotNetRoot)
+                .MultilevelLookup(false)
                 .Execute();
 
             result.Should()
@@ -91,11 +89,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             }
 
             CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
+                .EnableTracingAndCaptureOutputs()
+                .DotNetRoot(sharedState.DotNetRoot)
+                .MultilevelLookup(false)
                 .Execute();
 
             result.Should().Pass()
@@ -140,11 +136,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             }
 
             CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
+                .EnableTracingAndCaptureOutputs()
+                .DotNetRoot(sharedState.DotNetRoot)
+                .MultilevelLookup(false)
                 .Execute();
 
             result.Should().Pass()

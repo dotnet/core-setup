@@ -139,11 +139,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 newPropertyName
             };
             CommandResult result = Command.Create(sharedState.NativeHostPath, args.Concat(commandArgs).Concat(appArgs))
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
+                .EnableTracingAndCaptureOutputs()
+                .DotNetRoot(sharedState.DotNetRoot)
+                .MultilevelLookup(false)
                 .Execute();
 
             result.Should().Pass()
@@ -177,11 +175,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 newPropertyName
             };
             CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
+                .EnableTracingAndCaptureOutputs()
+                .DotNetRoot(sharedState.DotNetRoot)
+                .MultilevelLookup(false)
                 .Execute();
 
             result.Should().Pass()
@@ -204,11 +200,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 sharedState.SelfContainedConfigPath
             };
             CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
+                .EnableTracingAndCaptureOutputs()
+                .DotNetRoot(sharedState.DotNetRoot)
+                .MultilevelLookup(false)
                 .Execute();
 
             result.Should().Fail()
@@ -237,11 +231,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 SharedTestState.SecondaryConfigPropertyName
             };
             CommandResult result = Command.Create(sharedState.NativeHostPath, args)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
+                .EnableTracingAndCaptureOutputs()
+                .DotNetRoot(sharedState.DotNetRoot)
+                .MultilevelLookup(false)
                 .Execute();
 
             result.Should().Pass()
@@ -290,12 +282,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 SharedTestState.ConfigPropertyName
             };
             CommandResult result = Command.Create(sharedState.NativeHostPath, args.Concat(appArgs))
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .EnvironmentVariable("COREHOST_TRACE", "1")
+                .EnableTracingAndCaptureOutputs()
+                .DotNetRoot(sharedState.DotNetRoot)
+                .MultilevelLookup(false)
                 .EnvironmentVariable("COREHOST_TRACE_VERBOSITY", "3")
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
                 .EnvironmentVariable("TEST_BLOCK_MOCK_EXECUTE_ASSEMBLY", $"{sharedState.AppPath}.block")
                 .EnvironmentVariable("TEST_SIGNAL_MOCK_EXECUTE_ASSEMBLY", $"{sharedState.AppPath}.signal")
                 .Execute();
@@ -381,12 +371,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             try
             {
                 result = Command.Create(sharedState.NativeHostPath, args)
-                    .CaptureStdErr()
-                    .CaptureStdOut()
-                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnableTracingAndCaptureOutputs()
+                    .DotNetRoot(sharedState.DotNetRoot)
+                    .MultilevelLookup(false)
                     .EnvironmentVariable("COREHOST_TRACE_VERBOSITY", "3")
-                    .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                    .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
                     .EnvironmentVariable("TEST_BLOCK_MOCK_EXECUTE_ASSEMBLY", $"{sharedState.AppPath}.block")
                     .EnvironmentVariable("TEST_SIGNAL_MOCK_EXECUTE_ASSEMBLY", $"{sharedState.AppPath}.signal")
                     .Execute();
@@ -477,12 +465,10 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             try
             {
                 result = Command.Create(sharedState.NativeHostPath, args)
-                    .CaptureStdErr()
-                    .CaptureStdOut()
-                    .EnvironmentVariable("COREHOST_TRACE", "1")
+                    .EnableTracingAndCaptureOutputs()
+                    .DotNetRoot(sharedState.DotNetRoot)
+                    .MultilevelLookup(false)
                     .EnvironmentVariable("COREHOST_TRACE_VERBOSITY", "3")
-                    .EnvironmentVariable("DOTNET_ROOT", sharedState.DotNetRoot)
-                    .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.DotNetRoot)
                     .EnvironmentVariable("TEST_BLOCK_MOCK_EXECUTE_ASSEMBLY", $"{sharedState.AppPath}.block")
                     .EnvironmentVariable("TEST_SIGNAL_MOCK_EXECUTE_ASSEMBLY", $"{sharedState.AppPath}.signal")
                     .Execute();

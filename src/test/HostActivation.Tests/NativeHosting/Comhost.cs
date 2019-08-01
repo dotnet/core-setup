@@ -35,8 +35,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             string args = $"comhost {scenario} {count} {sharedState.ComHostPath} {sharedState.ClsidString}";
             CommandResult result = Command.Create(sharedState.NativeHostPath, args)
                 .EnableTracingAndCaptureOutputs()
-                .EnvironmentVariable("DOTNET_ROOT", sharedState.ComLibraryFixture.BuiltDotnet.BinPath)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", sharedState.ComLibraryFixture.BuiltDotnet.BinPath)
+                .DotNetRoot(sharedState.ComLibraryFixture.BuiltDotnet.BinPath)
+                .MultilevelLookup(false)
                 .Execute();
 
             result.Should().Pass()
@@ -67,8 +67,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 string args = $"comhost synchronous 1 {comHostWithAppLocalFxr} {sharedState.ClsidString}";
                 CommandResult result = Command.Create(sharedState.NativeHostPath, args)
                     .EnableTracingAndCaptureOutputs()
-                    .EnvironmentVariable("DOTNET_ROOT", fixture.BuiltDotnet.BinPath)
-                    .EnvironmentVariable("DOTNET_ROOT(x86)", fixture.BuiltDotnet.BinPath)
+                    .DotNetRoot(fixture.BuiltDotnet.BinPath)
+                    .MultilevelLookup(false)
                     .Execute();
 
                 result.Should().Pass()
@@ -101,8 +101,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
                 string args = $"comhost errorinfo 1 {comHost} {sharedState.ClsidString}";
                 CommandResult result = Command.Create(sharedState.NativeHostPath, args)
                     .EnableTracingAndCaptureOutputs()
-                    .EnvironmentVariable("DOTNET_ROOT", fixture.BuiltDotnet.BinPath)
-                    .EnvironmentVariable("DOTNET_ROOT(x86)", fixture.BuiltDotnet.BinPath)
+                    .DotNetRoot(fixture.BuiltDotnet.BinPath)
+                    .MultilevelLookup(false)
                     .Execute();
 
                 result.Should().Pass()
