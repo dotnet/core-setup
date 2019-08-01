@@ -11,11 +11,16 @@
     Manufacturer="$(var.Manufacturer)"
     UpgradeCode="$(var.UpgradeCode)">
 
-    <?include "..\product.common.wxi" ?>
+    <?include "product.common.wxi" ?>
 
     <Feature Id="MainFeature" Title="Main Feature" Level="1">
-      <ComponentGroupRef Id="InstallFiles" />
-      <ComponentGroupRef Id="AuthoredRegistryKeys"/>
+      <?ifdef InstallFiles ?>
+        <ComponentGroupRef Id="InstallFiles" />
+      <?endif?>
+
+      <?ifdef AuthoredRegistryKeys ?>
+        <ComponentGroupRef Id="AuthoredRegistryKeys"/>
+      <?endif?>
 
       <?ifdef WerRelatedKeys ?>
         <ComponentGroupRef Id="WerRelatedKeys"/>
@@ -24,15 +29,26 @@
       <?ifdef BreadcrumbStoreFolder ?>
         <ComponentRef Id="BreadcrumbStoreFolder"/>
       <?endif?>
+
+      <?ifdef ExtraComponentGroupRefIds ?>
+        <?foreach extraComponentGroupRefId in $(var.ExtraComponentGroupRefIds)?>
+          <ComponentGroupRef Id="$(var.extraComponentGroupRefId)"/>
+        <?endforeach?>
+      <?endif?>
     </Feature>
+
+    <?ifdef ExtraPropertyRefIds ?>
+      <?foreach extraPropertyRefId in $(var.ExtraPropertyRefIds)?>
+        <PropertyRef Id="$(var.extraPropertyRefId)" />
+      <?endforeach?>
+    <?endif?>
+
   </Product>
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.Program_Files)">
-        <Directory Id="DOTNETHOME" Name="dotnet" >
-          <Directory Id="SHARED" Name="shared" />
-        </Directory>
+        <Directory Id="DOTNETHOME" Name="dotnet" />
       </Directory>
     </Directory>
   </Fragment>
