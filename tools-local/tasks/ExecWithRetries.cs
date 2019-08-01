@@ -38,8 +38,16 @@ namespace Microsoft.DotNet.Build.Tasks
         /// </summary>
         public double RetryDelayConstant { get; set; } = -1;
 
+        /// <summary>
+        /// MSBuild message importance to use when logging stdout messages from the command. Default
+        /// is "High".
+        /// </summary>
         public string StandardOutputImportance { get; set; }
 
+        /// <summary>
+        /// MSBuild message importance to use when logging stderr messages from the command. Default
+        /// is "High".
+        /// </summary>
         public string StandardErrorImportance { get; set; }
 
         private CancellationTokenSource _cancelTokenSource = new CancellationTokenSource();
@@ -56,8 +64,6 @@ namespace Microsoft.DotNet.Build.Tasks
         {
             for (int i = 0; i < MaxAttempts; i++)
             {
-                string attemptMessage = $"(attempt {i + 1}/{MaxAttempts})";
-
                 _runningExec = new Exec
                 {
                     BuildEngine = BuildEngine,
@@ -82,7 +88,7 @@ namespace Microsoft.DotNet.Build.Tasks
                     return true;
                 }
 
-                string message = $"Exec FAILED: exit code {exitCode} {attemptMessage}";
+                string message = $"Exec FAILED: exit code {exitCode} (attempt {i + 1}/{MaxAttempts})";
 
                 if (i + 1 == MaxAttempts || _cancelTokenSource.IsCancellationRequested)
                 {
