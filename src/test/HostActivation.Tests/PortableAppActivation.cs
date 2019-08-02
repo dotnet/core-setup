@@ -149,10 +149,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                     "exec",
                     "--additionalprobingpath", additionalProbingPath,
                     appDll)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .EnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0")
-                .CaptureStdErr()
-                .CaptureStdOut()
+                .EnableTracingAndCaptureOutputs()
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello World")
@@ -260,8 +257,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             Command.Create(appExe)
                 .CaptureStdErr()
                 .CaptureStdOut()
-                .EnvironmentVariable("DOTNET_ROOT", builtDotnet)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", builtDotnet)
+                .DotNetRoot(builtDotnet)
+                .MultilevelLookup(false)
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello World")
@@ -271,8 +268,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             // Verify running from within the working directory
             Command.Create(appExe)
                 .WorkingDirectory(fixture.TestProject.OutputDirectory)
-                .EnvironmentVariable("DOTNET_ROOT", builtDotnet)
-                .EnvironmentVariable("DOTNET_ROOT(x86)", builtDotnet)
+                .DotNetRoot(builtDotnet)
+                .MultilevelLookup(false)
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute()
@@ -310,6 +307,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 Command.Create(appExe)
                     .CaptureStdErr()
                     .CaptureStdOut()
+                    .MultilevelLookup(false)
                     .ApplyRegisteredInstallLocationOverride(registeredInstallLocationOverride)
                     .EnvironmentVariable(Constants.TestOnlyEnvironmentVariables.DefaultInstallPath, useRegisteredLocation ? null : builtDotnet)
                     .Execute()
@@ -321,6 +319,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 Command.Create(appExe)
                     .CaptureStdErr()
                     .CaptureStdOut()
+                    .MultilevelLookup(false)
                     .WorkingDirectory(fixture.TestProject.OutputDirectory)
                     .ApplyRegisteredInstallLocationOverride(registeredInstallLocationOverride)
                     .EnvironmentVariable(Constants.TestOnlyEnvironmentVariables.DefaultInstallPath, useRegisteredLocation ? null : builtDotnet)
@@ -341,9 +340,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             var appDll = fixture.TestProject.AppDll;
 
             dotnet.Exec(appDll)
-                .EnvironmentVariable("COREHOST_TRACE", "1")
-                .CaptureStdErr()
-                .CaptureStdOut()
+                .EnableTracingAndCaptureOutputs()
                 .Execute()
                 .Should().Pass()
                 .And.HaveStdErrMatching($"Property TRUSTED_PLATFORM_ASSEMBLIES = .*[^{Path.PathSeparator}]$", System.Text.RegularExpressions.RegexOptions.Multiline);
