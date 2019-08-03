@@ -152,7 +152,7 @@ COM_API HRESULT STDMETHODCALLTYPE DllCanUnloadNow(void)
 
 namespace
 {
-    const WCHAR CLSIDKeyFmt[] = _X("SOFTWARE\\Classes\\CLSID\\%s");
+    const WCHAR ClsidKeyFmt[] = _X("SOFTWARE\\Classes\\CLSID\\%s");
     const WCHAR ProgIDKeyFmt[] = _X("SOFTWARE\\Classes\\%s");
 
     struct OleStr : public std::unique_ptr<std::remove_pointer<LPOLESTR>::type, decltype(&::CoTaskMemFree)>
@@ -228,7 +228,7 @@ namespace
         OleStr clsidAsStr{ clsidAsStrRaw };
 
         WCHAR regKeyPath[1024];
-        ::swprintf_s(regKeyPath, CLSIDKeyFmt, clsidAsStr.get());
+        ::swprintf_s(regKeyPath, ClsidKeyFmt, clsidAsStr.get());
 
         // Remove CLSID key
         RETURN_IF_FAILED(RemoveRegistryKey(regKeyPath));
@@ -318,7 +318,7 @@ namespace
         OleStr clsidAsStr{ clsidAsStrRaw };
 
         WCHAR regKeyClsidPath[1024];
-        ::swprintf_s(regKeyClsidPath, CLSIDKeyFmt, clsidAsStr.get());
+        ::swprintf_s(regKeyClsidPath, ClsidKeyFmt, clsidAsStr.get());
 
         HKEY regKeyRaw;
         DWORD disp;
