@@ -262,6 +262,8 @@ namespace
         RegKey regKey{ regKeyRaw };
 
         // Set the default value for the ProgID to be the type name
+        // This valid is used purely for user consumption and has no
+        // functional impact.
         res = ::RegSetValueExW(
             regKey.get(),
             nullptr,
@@ -411,7 +413,7 @@ namespace
         {
             // Register the ProgID in the CLSID key
             WCHAR regKeyProgIdPath[ARRAYSIZE(regKeyClsidPath) * 2];
-            ::swprintf_s(regKeyProgIdPath, L"%s\\ProgId", regKeyClsidPath);
+            ::swprintf_s(regKeyProgIdPath, L"%s\\ProgID", regKeyClsidPath);
 
             HKEY regProgIdKeyRaw;
             res = ::RegCreateKeyExW(
