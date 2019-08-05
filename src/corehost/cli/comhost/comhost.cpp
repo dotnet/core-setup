@@ -262,7 +262,7 @@ namespace
         RegKey regKey{ regKeyRaw };
 
         // Set the default value for the ProgID to be the type name
-        // This valid is used purely for user consumption and has no
+        // This value is only used for user consumption and has no
         // functional impact.
         res = ::RegSetValueExW(
             regKey.get(),
