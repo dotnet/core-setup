@@ -82,10 +82,11 @@ namespace Microsoft.NET.HostModel.Tests
             {
                 RepoDirectories = new RepoDirectoriesProvider();
 
-                TestFixture = new TestProjectFixture("StandaloneApp", RepoDirectories);
+                TestFixture = new TestProjectFixture("PortableApp", RepoDirectories);
                 TestFixture
                     .EnsureRestoredForRid(TestFixture.CurrentRid, RepoDirectories.CorehostPackages)
                     .PublishProject(runtime: TestFixture.CurrentRid,
+                                    selfContained: "false",
                                     outputDirectory: BundleHelper.GetPublishPath(TestFixture));
             }
 
