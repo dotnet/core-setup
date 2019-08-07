@@ -135,7 +135,6 @@ jobs:
       $(_CommonPublishArgs)
       $(_SymbolServerArgs)
       $(_DotNetVersionsArgs)
-      /p:_BuildNumberYY=28
       /bl:$(Build.SourcesDirectory)\finalizepublish.binlog
     displayName: Publish
 

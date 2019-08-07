@@ -20,7 +20,6 @@ jobs:
     CommonMSBuildArgs: >-
       /p:Configuration=$(_BuildConfig)
       /p:PortableBuild=true
-      /p:_BuildNumberYY=28
   steps:
   - script: >-
       $(Build.SourcesDirectory)/build.sh --ci --test
