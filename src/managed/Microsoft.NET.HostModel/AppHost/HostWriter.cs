@@ -31,16 +31,16 @@ namespace Microsoft.NET.HostModel.AppHost
         /// <param name="func">The action to retry on IO-Error</param>
         private static void RetryOnIOError(Action func)
         {
-            uint numberOfRetries = 32;
+            uint numberOfRetries = 256;
 
-            for(uint i = 1; i <= numberOfRetries; i++)
+            for (uint i = 1; i <= numberOfRetries; i++)
             {
                 try
                 {
                     func();
                     break;
                 }
-                catch(IOException) when (i < numberOfRetries)
+                catch (IOException) when (i < numberOfRetries)
                 {
                     Thread.Sleep(200);
                 }
