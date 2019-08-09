@@ -4,16 +4,16 @@
     <ShortFrameworkName>netstandard</ShortFrameworkName>
     <ProductBrandPrefix>Microsoft .NET Standard</ProductBrandPrefix>
 
-    <ProductBandVersion>2.1</ProductBandVersion>
+    <ProductBandVersion>2.2</ProductBandVersion>
     <ProductionVersion>$(ProductBandVersion).0</ProductionVersion>
   </PropertyGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory).., Directory.Build.props))\Directory.Build.props" />
 
   <PropertyGroup>
-    <FrameworkListName>.NET Standard 2.1</FrameworkListName>
+    <FrameworkListName>.NET Standard 2.2</FrameworkListName>
     <FrameworkListTargetFrameworkIdentifier>.NETStandard</FrameworkListTargetFrameworkIdentifier>
-    <FrameworkListTargetFrameworkVersion>2.1</FrameworkListTargetFrameworkVersion>
+    <FrameworkListTargetFrameworkVersion>2.2</FrameworkListTargetFrameworkVersion>
     <FrameworkListFrameworkName>NETStandard.Library</FrameworkListFrameworkName>
 
     <VSInsertionProductName>NetStandard</VSInsertionProductName>
