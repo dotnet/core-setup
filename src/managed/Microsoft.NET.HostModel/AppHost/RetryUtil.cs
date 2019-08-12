@@ -10,7 +10,7 @@ using System.Threading;
 namespace Microsoft.NET.HostModel
 {
     /// <summary>
-    /// HowtModel library implements several services for updating the AppHost DLL.
+    /// HostModel library implements several services for updating the AppHost DLL.
     /// These updates involve multiple file open/close operations.
     /// An Antivirus scanner may intercept in-between and lock the file, 
     /// causing the operations to fail with IO-Error.
