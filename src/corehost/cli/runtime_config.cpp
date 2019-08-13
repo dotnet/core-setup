@@ -97,14 +97,14 @@ bool runtime_config_t::parse_opts(const json_value& opts)
     {
         if (probe_paths->second.is_string())
         {
-            m_probe_paths.insert(m_probe_paths.begin(), probe_paths->second.as_string());
+            m_probe_paths.insert(m_probe_paths.begin(), get_directory(m_path).c_str() + probe_paths->second.as_string());
         }
         else
         {
             const auto& arr = probe_paths->second.as_array();
             for (auto iter = arr.rbegin(); iter != arr.rend(); iter++)
             {
-                m_probe_paths.push_front(iter->as_string());
+                m_probe_paths.push_front(get_directory(m_path).c_str() + iter->as_string());
             }
         }
     }
