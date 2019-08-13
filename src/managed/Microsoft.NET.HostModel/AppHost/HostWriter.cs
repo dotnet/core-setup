@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Text;
+using System.Threading;
 
 namespace Microsoft.NET.HostModel.AppHost
 {
@@ -43,11 +43,11 @@ namespace Microsoft.NET.HostModel.AppHost
             }
 
             BinaryUtils.CopyFile(appHostSourceFilePath, appHostDestinationFilePath);
+            bool appHostIsPEImage = false;
 
-            try
+            void RewriteAppHost()
             {
                 // Re-write the destination apphost with the proper contents.
-                bool appHostIsPEImage = false;
                 using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostDestinationFilePath))
                 {
                     using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor())
@@ -67,7 +67,10 @@ namespace Microsoft.NET.HostModel.AppHost
                         }
                     }
                 }
+            }
 
+            void UpdateResources()
+            { 
                 if (assemblyToCopyResorcesFrom != null && appHostIsPEImage)
                 {
                     if (ResourceUpdater.IsSupportedOS())
@@ -82,9 +85,16 @@ namespace Microsoft.NET.HostModel.AppHost
                         throw new AppHostCustomizationUnsupportedOSException();
                     }
                 }
+            }
+
+            try
+            {
+                RetryUtil.RetryOnIOError(RewriteAppHost);
+
+                RetryUtil.RetryOnWin32Error(UpdateResources);
 
                 // Memory-mapped write does not updating last write time
-                File.SetLastWriteTimeUtc(appHostDestinationFilePath, DateTime.UtcNow);
+                RetryUtil.RetryOnIOError(() => File.SetLastWriteTimeUtc(appHostDestinationFilePath, DateTime.UtcNow));
             }
             catch (Exception ex)
             {
@@ -123,13 +133,15 @@ namespace Microsoft.NET.HostModel.AppHost
             };
 
             // Re-write the destination apphost with the proper contents.
-            BinaryUtils.SearchAndReplace(appHostPath,
-                                         bundleHeaderPlaceholder,
-                                         BitConverter.GetBytes(bundleHeaderOffset), 
-                                         pad0s:false);
+            RetryUtil.RetryOnIOError(() => 
+                BinaryUtils.SearchAndReplace(appHostPath,
+                                             bundleHeaderPlaceholder,
+                                             BitConverter.GetBytes(bundleHeaderOffset), 
+                                             pad0s:false));
 
             // Memory-mapped write does not updating last write time
-            File.SetLastWriteTimeUtc(appHostPath, DateTime.UtcNow);
+            RetryUtil.RetryOnIOError(() => 
+                File.SetLastWriteTimeUtc(appHostPath, DateTime.UtcNow));
         }
 
         /// <summary>
@@ -148,21 +160,28 @@ namespace Microsoft.NET.HostModel.AppHost
                 0xee, 0x3b, 0x2d, 0xce, 0x24, 0xb3, 0x6a, 0xae
             };
 
-            using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostFilePath))
+            long headerOffset = 0;
+            void FindBundleHeader()
             {
-                using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor())
+                using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostFilePath))
                 {
-                    int position = BinaryUtils.SearchInFile(accessor, bundleSignature);
-                    if(position == -1)
+                    using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor())
                     {
-                        throw new PlaceHolderNotFoundInAppHostException(bundleSignature);
+                        int position = BinaryUtils.SearchInFile(accessor, bundleSignature);
+                        if (position == -1)
+                        {
+                            throw new PlaceHolderNotFoundInAppHostException(bundleSignature);
+                        }
+
+                        headerOffset = accessor.ReadInt64(position - sizeof(Int64));
                     }
-
-                    bundleHeaderOffset = accessor.ReadInt64(position - sizeof(Int64));
-
-                    return (bundleHeaderOffset != 0);
                 }
             }
+
+            RetryUtil.RetryOnIOError(FindBundleHeader);
+            bundleHeaderOffset = headerOffset;
+
+            return headerOffset != 0;
         }
     }
 }
