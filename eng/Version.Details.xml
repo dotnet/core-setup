@@ -113,31 +113,31 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>b82d2bc44424c8a99a1f0fc13202bdfd43e6f9f5</Sha>
     </Dependency>
-    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19413.3">
+    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19414.3">
       <Uri>https://github.com/dotnet/standard</Uri>
-      <Sha>f27dd1491378aa0da5b15aac881fc4de2ea357a8</Sha>
+      <Sha>7d56086e753abe6d9a99f67a9b6c021bf7c809ce</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview9.19409.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>eeec95164a0b39ad3f98dfe04012675f30807cb1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.0-preview9.19412.3" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.0-preview9.19414.4" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
-      <Sha>1c72026e76f18126aabcadadecea81db2db9a03a</Sha>
+      <Sha>062c2caf0b63057ad39056d28ed92998b86f988e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.0-preview9.19412.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.0-preview9.19414.6" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>208cc4fe64a0a38c6afe336d1719186aa4d2cf2c</Sha>
+      <Sha>8dc7fe5830259e8790b34778960194c742454adc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.0-preview9.19413.5">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.0-preview9.19414.17">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>0e70052c1a97f417dd9c719cf83cdd1052c64fdd</Sha>
+      <Sha>92fc803e9cb1110401cf9785d4175f2facab9936</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19412.1">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19412.7">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>ec2dd5b3e7d11b88b2ca0688bb1685836cfad20a</Sha>
+      <Sha>82c822ee7db08f5347e6ac44e3ed465248394a9e</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
