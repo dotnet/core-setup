@@ -156,6 +156,7 @@ stages:
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - stage: PrepareForPublish
+    displayName: Prepare for Publish
     dependsOn: Build
     jobs:
     # Prep artifacts: sign them and upload pipeline artifacts expected by stages-based publishing.

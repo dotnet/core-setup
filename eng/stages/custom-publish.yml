@@ -108,7 +108,7 @@ stages:
           $(_CommonPublishArgs)
           $(_DotNetVersionsArgs)
           /bl:$(Build.SourcesDirectory)\custom-publish.binlog
-        displayName: Run
+        displayName: Publish to custom locations
 
       - task: CopyFiles@2
         displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
