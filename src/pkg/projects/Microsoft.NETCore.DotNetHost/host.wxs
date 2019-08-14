@@ -22,7 +22,11 @@
 
       <Component Id="cmpCoreHost" Directory="DOTNETHOME" Guid="{45399BBB-DDA5-4386-A2E9-618FB3C54A18}" >
         <File Id="fileCoreHostExe" KeyPath="yes" Source="$(var.HostSrc)\dotnet.exe">
-          <CopyFile Id="copyFileCoreHostExe" DestinationDirectory="[$(var.Program_Files)]dotnet" />
+          <?if $(var.Platform)=x86?>
+            <CopyFile Id="copyFileCoreHostExe" DestinationDirectory="[ProgramFilesFolder]dotnet" />
+          <?elseif $(var.Platform)=x64?>
+            <CopyFile Id="copyFileCoreHostExe" DestinationDirectory="[ProgramFiles64Folder]dotnet" />
+          <?endif?>
         </File>
         <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\Setup\InstalledVersions\$(var.Platform)\sharedhost">
           <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.NugetVersion)"/>
@@ -32,10 +36,18 @@
 
       <Component Id="cmpLicenseFiles" Directory="DOTNETHOME" Guid="{A61CBE5B-1282-4F29-90AD-63597AA2372E}">
         <File Id="fileLicenseTxt" KeyPath="yes" Source="$(var.HostSrc)\LICENSE.txt">
-          <CopyFile Id="copyFileLicenseTxt" DestinationDirectory="[$(var.Program_Files)]dotnet" />
+          <?if $(var.Platform)=x86?>
+            <CopyFile Id="copyFileLicenseTxt" DestinationDirectory="[ProgramFilesFolder]dotnet" />
+          <?elseif $(var.Platform)=x64?>
+            <CopyFile Id="copyFileLicenseTxt" DestinationDirectory="[ProgramFiles64Folder]dotnet" />
+          <?endif?>
         </File>
         <File Id="fileThirdPartyNoticesTxt" Source="$(var.HostSrc)\ThirdPartyNotices.txt">
-          <CopyFile Id="copyFileThirdPartyNoticesTxt" DestinationDirectory="[$(var.Program_Files)]dotnet" />
+          <?if $(var.Platform)=x86?>
+            <CopyFile Id="copyFileThirdPartyNoticesTxt" DestinationDirectory="[ProgramFilesFolder]dotnet" />
+          <?elseif $(var.Platform)=x64?>
+            <CopyFile Id="copyFileThirdPartyNoticesTxt" DestinationDirectory="[ProgramFiles64Folder]dotnet" />
+          <?endif?>
         </File>
       </Component>
 
