@@ -2,27 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#include "util.h"
+#include "dir_utils.h"
 #include "error_codes.h"
+#include "utils.h"
 
 using namespace bundle;
 
-void util_t::write(const void* buf, size_t size, FILE* stream)
-{
-    if (fwrite(buf, 1, size, stream) != size)
-    {
-        trace::error(_X("Failure extracting contents of the application bundle."));
-        trace::error(_X("I/O failure when writing extracted files."));
-        throw StatusCode::BundleExtractionIOError;
-    }
-}
-
-bool util_t::has_dirs_in_path(const pal::string_t& path)
+bool dir_utils_t::has_dirs_in_path(const pal::string_t& path)
 {
     return path.find_last_of(DIR_SEPARATOR) != pal::string_t::npos;
 }
 
-void util_t::create_directory_tree(const pal::string_t &path)
+void dir_utils_t::create_directory_tree(const pal::string_t &path)
 {
     if (path.empty())
     {
@@ -53,7 +44,7 @@ void util_t::create_directory_tree(const pal::string_t &path)
     }
 }
 
-void util_t::remove_directory_tree(const pal::string_t& path)
+void dir_utils_t::remove_directory_tree(const pal::string_t& path)
 {
     if (path.empty())
     {
@@ -86,7 +77,7 @@ void util_t::remove_directory_tree(const pal::string_t& path)
 }
 
 // Fixup a path to have current platform's directory separator.
-void util_t::fixup_path_separator(const pal::string_t& path)
+void dir_utils_t::fixup_path_separator(pal::string_t& path)
 {
     const pal::char_t bundle_dir_separator = '/';
 

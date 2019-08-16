@@ -125,7 +125,7 @@ int exe_start(const int argc, const pal::char_t* argv[])
             return bundle_status;
         }
 
-        app_path.assign(extractor.extraction_path());
+        app_path.assign(bundle_runner.extraction_path());
     }
     else
     {

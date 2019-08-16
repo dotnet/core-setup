@@ -5,17 +5,16 @@
 #ifndef __EXTRACTOR_H__
 #define __EXTRACTOR_H__
 
-#include "util.h"
 #include "reader.h"
-#include "error_codes.h"
+#include "file_entry.h"
 
 namespace bundle
 {
     class extractor_t
     {
     public:
-        extractor_t(pal::string_t &bundle_id, pal::string_t& bundle_path)
-            :m_extraction_dir(), m_working_extraction_dir()
+        extractor_t(const pal::string_t &bundle_id, const pal::string_t& bundle_path)
+            :m_extraction_path(), m_working_extraction_path()
         {
             m_bundle_id = bundle_id;
             m_bundle_path = bundle_path;
@@ -35,8 +34,8 @@ namespace bundle
 
         pal::string_t m_bundle_id;
         pal::string_t m_bundle_path;
-        pal::string_t m_extraction_dir;
-        pal::string_t m_working_extraction_dir;
+        pal::string_t m_extraction_path;
+        pal::string_t m_working_extraction_path;
     };
 }
 

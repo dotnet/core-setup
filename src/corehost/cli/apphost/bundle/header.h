@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include "pal.h"
+#include "reader.h"
 
 namespace bundle
 {
@@ -19,17 +20,25 @@ namespace bundle
     //   - Bundle ID (7-bit extension encoded length prefixed string)
 
 #pragma pack(push, 1)
-    struct
+    struct header_fixed_t
     {
         uint32_t major_version;
         uint32_t minor_version;
         int32_t num_embedded_files;
-    } header_fixed_t;
+    };
 #pragma pack(pop)
 
     struct header_t
     {
     public:
+        header_t()
+            : m_major_version(-1)
+            , m_minor_version(-1)
+            , m_num_embedded_files(0)
+            , m_bundle_id()
+        {
+        }
+
         header_t(const header_fixed_t* fixed_data)
             : m_bundle_id()
         {

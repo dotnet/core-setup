@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#include "bundle_runner.h"
+#include "header.h"
+#include "reader.h"
 #include "error_codes.h"
 #include "trace.h"
-#include "utils.h"
 
 using namespace bundle;
 

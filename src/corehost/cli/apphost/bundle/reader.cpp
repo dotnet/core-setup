@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#include "util.h"
+#include "reader.h"
 #include "error_codes.h"
+#include "trace.h"
 
 using namespace bundle;
 

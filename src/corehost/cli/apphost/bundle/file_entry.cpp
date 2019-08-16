@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#include "runner.h"
-#include "util.h"
-#include "pal.h"
-#include "error_codes.h"
+#include "file_entry.h"
 #include "trace.h"
-#include "utils.h"
+#include "dir_utils.h"
+#include "error_codes.h"
 
 using namespace bundle;
 
@@ -17,7 +15,7 @@ bool file_entry_t::is_valid() const
         static_cast<file_type_t>(m_type) < file_type_t::__last;
 }
 
-file_entry_t* file_entry_t::read(reader_t &reader)
+file_entry_t file_entry_t::read(reader_t &reader)
 {
     // First read the fixed-sized portion of file-entry
     const file_entry_fixed_t* fixed_data = reinterpret_cast<const file_entry_fixed_t*>(reader.read_direct(sizeof(file_entry_fixed_t)));
@@ -31,7 +29,7 @@ file_entry_t* file_entry_t::read(reader_t &reader)
     }
 
     reader.read_path_string(entry.m_relative_path);
-    util_t::fixup_path_separator(entry.m_relative_path);
+    dir_utils_t::fixup_path_separator(entry.m_relative_path);
 
     return entry;
 }

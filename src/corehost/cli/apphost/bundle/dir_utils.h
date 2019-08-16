@@ -2,22 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#ifndef __UTIL_H__
-#define __UTIL_H__
+#ifndef __DIR_UTIL_H__
+#define __DIR_UTIL_H__
 
 #include <cstdint>
+#include "pal.h"
 
 namespace bundle
 {
-    class util_t
+    class dir_utils_t
     {
     public:
         static bool has_dirs_in_path(const pal::string_t &path);
         static void remove_directory_tree(const pal::string_t &path);
         static void create_directory_tree(const pal::string_t &path);
-        static void fixup_path_separator(const pal::string_t& path);
-        static void write(const void* buf, size_t size, FILE* stream);
+        static void fixup_path_separator(pal::string_t& path);
     };
 }
 
-#endif // __UTIL_H__
+#endif // __DIR_UTIL_H__

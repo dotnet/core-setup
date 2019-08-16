@@ -40,6 +40,7 @@
 #include <mutex>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/mman.h>
 
 #define xerr std::cerr
 #define xout std::cout
@@ -162,7 +163,7 @@ namespace pal
     inline bool rmdir (const char_t* path) { return RemoveDirectoryW(path) != 0; }
     inline int rename(const char_t* old_name, const char_t* new_name) { return ::_wrename(old_name, new_name); }
     inline int remove(const char_t* path) { return ::_wremove(path); }
-    inline void unmap_file(void* addr, size_t length) { UnmapViewOfFile(addr) != 0; }
+    inline bool unmap_file(void* addr, size_t length) { return UnmapViewOfFile(addr) != 0; }
     inline int get_pid() { return GetCurrentProcessId(); }
     inline void sleep(uint32_t milliseconds) { Sleep(milliseconds); }
 #else

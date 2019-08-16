@@ -27,7 +27,7 @@ set(SOURCES
     ./bundle/reader.cpp
     ./bundle/extractor.cpp
     ./bundle/runner.cpp
-    ./bundle/util.cpp    
+    ./bundle/dir_utils.cpp
 )
 
 set(HEADERS
@@ -40,7 +40,7 @@ set(HEADERS
     ./bundle/reader.h
     ./bundle/extractor.h
     ./bundle/runner.h
-    ./bundle/util.h
+    ./bundle/dir_utils.h
 )
 
 include(../exe.cmake)
