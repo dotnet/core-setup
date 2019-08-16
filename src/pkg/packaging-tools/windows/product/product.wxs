@@ -49,9 +49,6 @@
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.Program_Files)">
         <Directory Id="DOTNETHOME" Name="dotnet" />
-        <?ifdef DefineDefaultInstallationDir ?>
-          <Directory Id="PROGRAMFILES_DOTNET" Name="dotnet" />
-        <?endif?>
       </Directory>
     </Directory>
   </Fragment>

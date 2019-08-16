@@ -44,7 +44,6 @@
 
       <CandleVariables Include="ExtraPropertyRefIds" Value="ProductCPU;RTM_ProductVersion" />
       <CandleVariables Include="HostSrc" Value="$(PublishRootDir)" />
-      <CandleVariables Include="DefineDefaultInstallationDir" Value="true" />
     </ItemGroup>
   </Target>
 
