@@ -22,44 +22,35 @@ namespace bundle
 #pragma pack(push, 1)
     struct header_fixed_t
     {
+    public:
         uint32_t major_version;
         uint32_t minor_version;
         int32_t num_embedded_files;
+
+        bool is_valid() const;
     };
 #pragma pack(pop)
 
     struct header_t
     {
     public:
-        header_t()
-            : m_major_version(-1)
-            , m_minor_version(-1)
-            , m_num_embedded_files(0)
+        header_t(int32_t num_embedded_files = 0)
+            : m_num_embedded_files(num_embedded_files)
             , m_bundle_id()
         {
         }
 
-        header_t(const header_fixed_t* fixed_data)
-            : m_bundle_id()
-        {
-            m_major_version = fixed_data->major_version;
-            m_minor_version = fixed_data->minor_version;
-            m_num_embedded_files = fixed_data->num_embedded_files;
-        }
-
-        bool is_valid();
         static header_t read(reader_t& reader);
         const pal::string_t& bundle_id() { return m_bundle_id; }
         int32_t num_embedded_files() { return m_num_embedded_files;  }
 
+        static const uint32_t major_version = 1;
+        static const uint32_t minor_version = 0;
+
     private:
-        uint32_t m_major_version;
-        uint32_t m_minor_version;
         int32_t m_num_embedded_files;
         pal::string_t m_bundle_id;
 
-        static const uint32_t current_major_version = 1;
-        static const uint32_t current_minor_version = 0;
     };
 }
 #endif // __HEADER_H__

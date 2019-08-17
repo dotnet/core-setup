@@ -9,25 +9,26 @@
 
 using namespace bundle;
 
-bool header_t::is_valid()
+bool header_fixed_t::is_valid() const
 {
-    return m_num_embedded_files > 0 &&
-           ((m_major_version < current_major_version) ||
-            (m_major_version == current_major_version && m_minor_version <= current_minor_version));
+    return num_embedded_files > 0 &&
+           ((major_version < header_t::major_version) ||
+            (major_version == header_t::major_version && minor_version <= header_t::minor_version));
 }
 
 header_t header_t::read(reader_t& reader)
 {
-    const header_fixed_t* fixed_data = reinterpret_cast<const header_fixed_t*>(reader.read_direct(sizeof(header_fixed_t)));
-    header_t header(fixed_data);
+    const header_fixed_t* fixed_header = reinterpret_cast<const header_fixed_t*>(reader.read_direct(sizeof(header_fixed_t)));
 
-    if (!header.is_valid())
+    if (!fixed_header->is_valid())
     {
         trace::error(_X("Failure processing application bundle."));
-        trace::error(_X("Bundle header version compatibility check failed"));
+        trace::error(_X("Bundle header version compatibility check failed."));
 
         throw StatusCode::BundleExtractionFailure;
     }
+
+    header_t header(fixed_header->num_embedded_files);
 
     // bundle_id is a component of the extraction path
     reader.read_path_string(header.m_bundle_id);

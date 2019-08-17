@@ -39,7 +39,7 @@ void dir_utils_t::create_directory_tree(const pal::string_t &path)
         }
 
         trace::error(_X("Failure processing application bundle."));
-        trace::error(_X("Failed to create directory [%s] for extracting bundled files"), path.c_str());
+        trace::error(_X("Failed to create directory [%s] for extracting bundled files."), path.c_str());
         throw StatusCode::BundleExtractionIOError;
     }
 }

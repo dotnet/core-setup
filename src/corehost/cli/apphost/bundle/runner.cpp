@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 #include <memory>
-#include "runner.h"
 #include "extractor.h"
+#include "runner.h"
 #include "trace.h"
+#include "header.h"
 #include "marker.h"
+#include "manifest.h"
 
 using namespace bundle;
 
@@ -17,7 +19,7 @@ void runner_t::map_host()
     if (m_bundle_map == nullptr)
     {
         trace::error(_X("Failure processing application bundle."));
-        trace::error(_X("Couldn't memory map the bundle file for reading"));
+        trace::error(_X("Couldn't memory map the bundle file for reading."));
         throw StatusCode::BundleExtractionIOError;
     }
 }
@@ -42,10 +44,10 @@ StatusCode runner_t::extract()
 
         // Read the bundle header
         reader.set_offset(marker_t::header_offset());
-        m_header = header_t::read(reader);
+        header_t header = header_t::read(reader);
 
-        extractor_t extractor(bundle_id(), m_bundle_path);
-        m_extraction_path = extractor.extraction_dir();
+        extractor_t extractor(header.bundle_id(), m_bundle_path);
+        m_extraction_dir = extractor.extraction_dir();
 
         // Determine if embedded files are already extracted, and available for reuse
         if (extractor.can_reuse_extraction())
@@ -53,13 +55,9 @@ StatusCode runner_t::extract()
             return StatusCode::Success;
         }
 
-        m_manifest = manifest_t::read(reader, num_embedded_files());
+        manifest_t manifest = manifest_t::read(reader, header.num_embedded_files());
 
-        extractor.begin();
-        for (const file_entry_t &entry : m_manifest.files) {
-            extractor.extract(entry, reader);
-        }
-        extractor.commit();
+        extractor.extract(manifest, reader);
 
         unmap_host();
 
@@ -70,3 +68,4 @@ StatusCode runner_t::extract()
         return e;
     }
 }
+

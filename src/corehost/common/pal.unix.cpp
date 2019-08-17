@@ -75,7 +75,7 @@ void* pal::map_file_readonly(const pal::string_t& path, size_t& length)
     }
 
     length = buf.st_size;
-	void* address = mmap(nullptr, length, PROT_READ, MAP_SHARED, fd, 0);
+    void* address = mmap(nullptr, length, PROT_READ, MAP_SHARED, fd, 0);
 
     if(address == nullptr)
     {

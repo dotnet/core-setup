@@ -29,7 +29,7 @@ size_t reader_t::read_path_length()
         {
             // There can be no more than two bytes in path_length
             trace::error(_X("Failure processing application bundle; possible file corruption."));
-            trace::error(_X("Path length encoding read beyond two bytes"));
+            trace::error(_X("Path length encoding read beyond two bytes."));
 
             throw StatusCode::BundleExtractionFailure;
         }
@@ -40,7 +40,7 @@ size_t reader_t::read_path_length()
     if (length <= 0 || length > PATH_MAX)
     {
         trace::error(_X("Failure processing application bundle; possible file corruption."));
-        trace::error(_X("Path length is zero or too long"));
+        trace::error(_X("Path length is zero or too long."));
         throw StatusCode::BundleExtractionFailure;
     }
 
