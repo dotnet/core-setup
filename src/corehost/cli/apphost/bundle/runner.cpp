@@ -40,7 +40,7 @@ StatusCode runner_t::extract()
     try
     {
         map_host();
-        reader_t reader(m_bundle_map);
+        reader_t reader(m_bundle_map, m_bundle_length);
 
         // Read the bundle header
         reader.set_offset(marker_t::header_offset());

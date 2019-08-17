@@ -8,6 +8,47 @@
 
 using namespace bundle;
 
+const int8_t* reader_t::add_without_overflow(const int8_t* ptr, int64_t len)
+{
+    const int8_t* new_ptr = ptr + len;
+
+    // The following check will fail in case len < 0 (which is also an error while reading) 
+    // even if the actual arthmetic didn't overflow.
+    if (new_ptr < ptr)
+    {
+        trace::error(_X("Failure processing application bundle; possible file corruption."));
+        trace::error(_X("Arithmetic overflow computing bundle-bounds."));
+        throw StatusCode::BundleExtractionFailure;
+    }
+
+    return new_ptr;
+}
+
+void reader_t::set_offset(int64_t offset)
+{
+    if (offset < 0 || offset >= m_bound)
+    {
+        trace::error(_X("Failure processing application bundle; possible file corruption."));
+        trace::error(_X("Arithmetic overflow while reading bundle."));
+        throw StatusCode::BundleExtractionFailure;
+    }
+
+    m_ptr = m_base_ptr + offset;
+}
+
+void reader_t::bounds_check(int64_t len)
+{
+    const int8_t* post_read_ptr = add_without_overflow(m_ptr, len);
+    
+    // It is legal for post_read_ptr == m_bound_ptr after reading the last byte.
+    if (m_ptr < m_base_ptr || post_read_ptr > m_bound_ptr)
+    {
+        trace::error(_X("Failure processing application bundle; possible file corruption."));
+        trace::error(_X("Bounds check failed while reading the bundle."));
+        throw StatusCode::BundleExtractionFailure;
+    }
+}
+
 // Handle the relatively uncommon scenario where the bundle ID or 
 // the relative-path of a file within the bundle is longer than 127 bytes
 size_t reader_t::read_path_length()
