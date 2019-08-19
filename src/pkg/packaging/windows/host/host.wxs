@@ -35,16 +35,18 @@
         </Directory>
     </Fragment>
 
-      <!-- When installing the SharedHost; copy all files to the traditional default install location: 'ProgramFiles'\dotnet even when installing into a custom location.
-      User Scenerio:
-      When a user has installed a 2.1 SDK or similar SDK first so that the PATH environmental variable has 'ProgramFiles'\dotnet in a first position.
-      Then the user installs a 3.0 SDK thru VS to a different volume with VS so that 'VSSharedVolume'\dotnet is in a second position.
-      We want the 3.0 SharedHost to be on the PATH in the first position. Therefore, installing the SharedHost to both 'VSSharedVolume'\dotnet and
-      'ProgramFiles'\dotnet will achieve this.
-      On a 'clean' machine when installing into a custom location; the installation behavior is the same.
-      Rationale:
-        1. the legacy SDK can be subsequently installed
-        2. the user runs 'dotnet' commands directly against 'ProgramFiles'\dotnet\dotnet.exe -->
+    <!-- When installing the SharedHost; copy all files to the traditional default install location: 'ProgramFiles'\dotnet even when installing into a custom location.
+    
+         User Scenerio:
+         When a user has installed a 2.1 SDK or similar SDK first so that the PATH environmental variable has 'ProgramFiles'\dotnet in a first position.
+         Then the user installs a 3.0 SDK thru VS to a different volume with VS so that 'VSSharedVolume'\dotnet is in a second position.
+         We want the 3.0 SharedHost to be on the PATH in the first position. Therefore, installing the SharedHost to both 'VSSharedVolume'\dotnet and
+         'ProgramFiles'\dotnet will achieve this.
+         On a 'clean' machine when installing into a custom location; the installation behavior is the same.
+      
+         Rationale:
+           1. the legacy SDK can be subsequently installed
+           2. the user runs 'dotnet' commands directly against 'ProgramFiles'\dotnet\dotnet.exe -->
 
     <Fragment>
         <ComponentGroup Id="InstallSharedHostandDetectionKeys">
