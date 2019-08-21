@@ -199,6 +199,11 @@ stages:
           name: .NET Core 3 Dev
           bar: PublicDevRelease_30_Channel_Id
           storage: release/3.0
+      - dependsOn: PublishValidation
+        channel:
+          name: .NET Core 3 Release
+          bar: PublicRelease_30_Channel_Id
+          storage: release/3.0-preview9
       - dependsOn: NetCore_Dev5_PublishValidation
         channel:
           name: .NET Core 5 Dev
