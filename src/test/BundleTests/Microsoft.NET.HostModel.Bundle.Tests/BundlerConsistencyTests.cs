@@ -156,11 +156,9 @@ namespace Microsoft.NET.HostModel.Tests
             var bundler = new Bundler(hostName, bundleDir.FullName);
             bundler.GenerateBundle(BundleHelper.GetPublishPath(fixture));
 
-            foreach(var fileEntry in bundler.BundleManifest.Files)
-            {
-                Assert.True(!Bundler.NeedsAlignment(fileEntry.Type) || 
-                            fileEntry.Offset % Bundler.AssemblyAlignment == 0);
-            }
+            bundler.BundleManifest.Files.ForEach(file => 
+                Assert.True((file.Type != FileType.IL && file.Type != FileType.Ready2Run) ||
+                            (file.Offset % Bundler.AssemblyAlignment == 0)));
         }
 
         [Fact]

@@ -129,21 +129,6 @@ namespace Microsoft.NET.HostModel.Bundle
         }
 
         /// <summary>
-        /// Determine whether files of this type will be aligned
-        /// in the bundle.
-        /// <paramref name="type">
-        /// The FileType to examine
-        /// </paramref>
-        /// <returns>
-        /// Whether a file of this type will be aligned
-        /// </returns>
-        /// </summary>
-        public static bool NeedsAlignment(FileType type)
-        {
-            return type == FileType.IL || type == FileType.Ready2Run;
-        }
-
-        /// <summary>
         /// Generate a bundle, given the specification of embedded files
         /// </summary>
         /// <param name="fileSpecs">
@@ -175,7 +160,7 @@ namespace Microsoft.NET.HostModel.Bundle
                 throw new ArgumentException("Invalid input specification: Must specify the host binary");
             }
 
-            if(fileSpecs.GroupBy(file => file.BundleRelativePath).Where(g => g.Count() > 1).Any())
+            if (fileSpecs.GroupBy(file => file.BundleRelativePath).Where(g => g.Count() > 1).Any())
             {
                 throw new ArgumentException("Invalid input specification: Found multiple entries with the same BundleRelativePath");
             }
@@ -204,6 +189,7 @@ namespace Microsoft.NET.HostModel.Bundle
                 // TODO: Order file writes to minimize file size.
 
                 List<Tuple<FileSpec, FileType>> ailgnedFiles = new List<Tuple<FileSpec, FileType>>();
+                bool NeedsAlignment(FileType type) => type == FileType.IL || type == FileType.Ready2Run;
 
                 foreach (var fileSpec in fileSpecs)
                 {
@@ -217,7 +203,7 @@ namespace Microsoft.NET.HostModel.Bundle
                     {
                         FileType type = InferType(fileSpec.BundleRelativePath, file);
 
-                        if(NeedsAlignment(type))
+                        if (NeedsAlignment(type))
                         {
                             ailgnedFiles.Add(Tuple.Create(fileSpec, type));
                             continue;
@@ -282,7 +268,7 @@ namespace Microsoft.NET.HostModel.Bundle
             Array.Sort(sources, StringComparer.Ordinal);
 
             List<FileSpec> fileSpecs = new List<FileSpec>(sources.Length);
-            foreach(var file in sources)
+            foreach (var file in sources)
             {
                 fileSpecs.Add(new FileSpec(file, RelativePath(sourceDir, file)));
             }
