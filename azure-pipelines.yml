@@ -199,7 +199,7 @@ stages:
           name: .NET Core 3 Dev
           bar: PublicDevRelease_30_Channel_Id
           storage: release/3.0
-      - dependsOn: PublishValidation
+      - dependsOn: PubRel_PublishValidation
         channel:
           name: .NET Core 3 Release
           bar: PublicRelease_30_Channel_Id
