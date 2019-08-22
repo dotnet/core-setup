@@ -94,6 +94,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         private bool? _applyPatches;
         private readonly string _path;
         private readonly List<Framework> _frameworks = new List<Framework>();
+        private readonly List<Framework> _includedFrameworks = new List<Framework>();
         private readonly List<Tuple<string, string>> _properties = new List<Tuple<string, string>>();
 
         /// <summary>
@@ -183,6 +184,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
             return this;
         }
 
+        public RuntimeConfig WithIncludedFramework(Framework framework)
+        {
+            _includedFrameworks.Add(framework);
+            return this;
+        }
+
+        public RuntimeConfig WithIncludedFramework(string name, string version)
+        {
+            return WithIncludedFramework(new Framework(name, version));
+        }
+
         public RuntimeConfig WithRollForward(string value)
         {
             _rollForward = value;
@@ -215,6 +227,13 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 runtimeOptions.Add(
                     "frameworks",
                     new JArray(_frameworks.Select(f => f.ToJson()).ToArray()));
+            }
+
+            if (_includedFrameworks.Any())
+            {
+                runtimeOptions.Add(
+                    "includedFrameworks",
+                    new JArray(_includedFrameworks.Select(f => f.ToJson()).ToArray()));
             }
 
             if (_rollForward != null)
