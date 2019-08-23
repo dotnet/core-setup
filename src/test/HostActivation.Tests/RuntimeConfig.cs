@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 {
@@ -48,11 +49,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
 
             internal JObject ToJson()
             {
-                JObject frameworkReference =
-                    new JObject(
-                        new JProperty("name", Name),
-                        new JProperty("version", Version)
-                        );
+                JObject frameworkReference = new JObject();
+
+                if (Name != null)
+                {
+                    frameworkReference.Add("name", Name);
+                }
+
+                if (Version != null)
+                {
+                    frameworkReference.Add("version", Version);
+                }
 
                 if (RollForward != null)
                 {

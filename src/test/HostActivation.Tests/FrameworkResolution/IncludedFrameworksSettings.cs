@@ -19,7 +19,6 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
             SharedState = sharedState;
         }
 
-        // Verifies that the default is true
         [Fact]
         public void FrameworkAndIncludedFrameworksIsInvalid()
         {
@@ -39,7 +38,33 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 new TestSettings()
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithIncludedFramework(MicrosoftNETCoreApp, "5.1.2")))
-                .Should().Pass();
+                .Should().Pass()
+                .And.HaveStdOutContaining("mock is_framework_dependent: 0");
+        }
+
+        [Fact]
+        public void IncludedFrameworkMustSpecifyName()
+        {
+            RunSelfContainedTest(
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithIncludedFramework(null, "5.1.2")))
+                .Should().Fail()
+                .And.HaveStdErrContaining("No framework name specified.");
+        }
+
+        [Fact]
+        public void OtherPropertiesAreIgnoredOnIncludedFramework()
+        {
+            RunSelfContainedTest(
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithIncludedFramework(new RuntimeConfig.Framework(MicrosoftNETCoreApp, "5.1.2")
+                            .WithApplyPatches(false)    // Properties which are otherwise valid on frameworks are ignored
+                            .WithRollForward("invalid") // in case of included frameworks.
+                            .WithRollForwardOnNoCandidateFx(42))))
+                .Should().Pass()
+                .And.HaveStdOutContaining("mock is_framework_dependent: 0");
         }
 
         private CommandResult RunFrameworkDependentTest(TestSettings testSettings) =>
