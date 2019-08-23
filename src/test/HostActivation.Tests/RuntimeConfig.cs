@@ -141,6 +141,15 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                         }
                     }
 
+                    var includedFrameworks = runtimeOptions["includedFrameworks"];
+                    if (includedFrameworks != null)
+                    {
+                        foreach (JObject includedFramework in includedFrameworks)
+                        {
+                            runtimeConfig.WithFramework(Framework.FromJson(includedFramework));
+                        }
+                    }
+
                     var configProperties = runtimeOptions["configProperties"] as JObject;
                     if (configProperties != null)
                     {

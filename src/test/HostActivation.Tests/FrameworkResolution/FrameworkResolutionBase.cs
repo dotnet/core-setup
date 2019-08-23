@@ -128,10 +128,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 string hostPolicyFileName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("hostpolicy");
                 string mockHostPolicyFileName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("mockhostpolicy");
                 string appHostFileName = RuntimeInformationExtensions.GetExeFileNameForCurrentPlatform("apphost");
-                string coreclrFileName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("coreclr");
-                string mockCoreclrFileName = RuntimeInformationExtensions.GetSharedLibraryFileNameForCurrentPlatform("mockcoreclr");
 
-                string currentRid = _repoDirectories.TargetRID;
                 DotNetCli builtDotNetCli = new DotNetCli(_builtDotnet);
 
                 // ./hostfxr - the product version
