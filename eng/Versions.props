@@ -9,7 +9,7 @@
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
     <!-- Disable SemVer v2 until after 3.0.0. -->
-    <SemanticVersioningV1 Condition="&#xA;      $(MajorVersion) &lt; 3 or&#xA;      '$(MajorVersion).$(MinorVersion).$(PatchVersion)' == '3.1.0'">true</SemanticVersioningV1>
+    <SemanticVersioningV1 Condition="&#xA;      $(MajorVersion) &lt; 3 or&#xA;      '$(MajorVersion).$(MinorVersion).$(PatchVersion)' == '3.0.0'">true</SemanticVersioningV1>
     <!-- "Latest" channel to publish to. -->
     <Channel>release/3.1</Channel>
     <ContainerName>dotnet</ContainerName>
@@ -90,6 +90,7 @@
     <MicrosoftDiaSymReaderNativePackageVersion>1.7.0</MicrosoftDiaSymReaderNativePackageVersion>
     <!-- Infrastructure and test-only. -->
     <MicrosoftSourceLinkVersion>1.0.0-beta2-18618-05</MicrosoftSourceLinkVersion>
+    <MNAVersion>3.0.0-preview6-27623-10</MNAVersion>
   </PropertyGroup>
   <!--Package names-->
   <PropertyGroup>
