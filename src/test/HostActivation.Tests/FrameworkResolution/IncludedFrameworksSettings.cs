@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
         [Fact]
         public void FrameworkAndIncludedFrameworksIsInvalid()
         {
-            RunTest(
+            RunFrameworkDependentTest(
                 new TestSettings()
                     .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
                         .WithFramework(MicrosoftNETCoreApp, "5.1.2")
@@ -32,12 +32,27 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                 .And.HaveStdErrContaining("It's invalid to specify both `framework`/`frameworks` and `includedFrameworks` properties.");
         }
 
-        private CommandResult RunTest(TestSettings testSettings) =>
+        [Fact]
+        public void SelfContainedCanHaveIncludedFrameworks()
+        {
+            RunSelfContainedTest(
+                new TestSettings()
+                    .WithRuntimeConfigCustomizer(runtimeConfig => runtimeConfig
+                        .WithIncludedFramework(MicrosoftNETCoreApp, "5.1.2")))
+                .Should().Pass();
+        }
+
+        private CommandResult RunFrameworkDependentTest(TestSettings testSettings) =>
             RunTest(SharedState.DotNetWithFrameworks, SharedState.FrameworkReferenceApp, testSettings);
+
+        private CommandResult RunSelfContainedTest(TestSettings testSettings) =>
+            RunSelfContainedTest(SharedState.SelfContainedApp, testSettings);
 
         public class SharedTestState : SharedTestStateBase
         {
             public TestApp FrameworkReferenceApp { get; }
+
+            public TestApp SelfContainedApp { get; }
 
             public DotNetCli DotNetWithFrameworks { get; }
 
@@ -48,6 +63,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.FrameworkResolution
                     .Build();
 
                 FrameworkReferenceApp = CreateFrameworkReferenceApp();
+                SelfContainedApp = CreateSelfContainedAppWithMockHostPolicy();
             }
         }
     }
