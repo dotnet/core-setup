@@ -1,5 +1,13 @@
 <Project>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), TestProjects.targets))\TestProjects.targets" />
+  
+  <PropertyGroup>
+    <!--
+      Define this here (not just in Versions.props) because the SDK resets it
+      unconditionally in Microsoft.NETCoreSdk.BundledVersions.props.
+    -->
+    <NETCoreAppMaximumVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppMaximumVersion>
+  </PropertyGroup>
 
   <!--
     Some known framework references are downstream of Core-Setup and don't exist with the build's
