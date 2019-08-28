@@ -90,7 +90,6 @@
     <MicrosoftDiaSymReaderNativePackageVersion>1.7.0</MicrosoftDiaSymReaderNativePackageVersion>
     <!-- Infrastructure and test-only. -->
     <MicrosoftSourceLinkVersion>1.0.0-beta2-18618-05</MicrosoftSourceLinkVersion>
-    <MNAVersion>3.0.0-preview8-28379-02</MNAVersion>
   </PropertyGroup>
   <!--Package names-->
   <PropertyGroup>
