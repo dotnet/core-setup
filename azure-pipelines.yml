@@ -8,6 +8,7 @@ trigger:
 pr:
 - master
 - release/3.*
+- dev/arcade-migration
 
 name: $(Date:yyyyMMdd)$(Rev:.rr)
 

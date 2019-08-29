@@ -113,9 +113,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>8f95b1e7953e3fbff7f101d0ca6830fd9e37fd99</Sha>
     </Dependency>
-    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19414.3">
+    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19421.6">
       <Uri>https://github.com/dotnet/standard</Uri>
-      <Sha>7d56086e753abe6d9a99f67a9b6c021bf7c809ce</Sha>
+      <Sha>1bb236a5181e03d3c1533e1129a4515d38dff97d</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview9.19421.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
@@ -138,6 +138,9 @@
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19421.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>7aa107d818fe87e627154c0331d6de5d47f39a45</Sha>
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19420.8">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>fa168dd690798a683ef0d1e65d60ce5d6918d987</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
