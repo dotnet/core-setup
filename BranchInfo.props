@@ -18,5 +18,6 @@
     <ContainerName>dotnet</ContainerName>
     <ChecksumContainerName>$(ContainerName)</ChecksumContainerName>
     <NETCoreAppMaximumVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppMaximumVersion>
+    <NETCoreAppFrameworkVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppFrameworkVersion>
   </PropertyGroup>
 </Project>
