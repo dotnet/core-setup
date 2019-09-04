@@ -2,7 +2,7 @@
 <WixLocalization Culture="en-us" Language="1033" xmlns="http://schemas.microsoft.com/wix/2006/localization">
   <String Id="Caption">[WixBundleName] 安装程序</String>
   <String Id="Title">[BUNDLEMONIKER]</String>
-  <String Id="Motto">你只需要一个 shell、一个文本编辑器，还需花 10 分钟即可。.
+  <String Id="Motto">你只需要一个 shell、一个文本编辑器，还需花 10 分钟即可。
 
 准备好了吗? 要设置? 让我们开始吧!</String>
   <String Id="ConfirmCancelMessage">是否确实要取消?</String>
@@ -59,7 +59,7 @@
   <String Id="FilesInUseOkButton">确定(&amp;O)</String>
   <String Id="FilesInUseCancelButton">取消(&amp;C)</String>
   <String Id="WelcomeHeaderMessage">.NET Core Runtime</String>
-  <String Id="WelcomeDescription">.NET Core 是一种开发平台，可用于生成命令行应用程序、微服务和新式网站。它是开源、跨平台的，且受 Microsoft 支持。希望你喜欢!</String>
+  <String Id="WelcomeDescription">.NET Core 是一种开发平台，可用于生成命令行应用程序、微服务和新式网站。它是开放源代码、跨平台的，且受 Microsoft 支持。希望你喜欢!</String>
   <String Id="LearnMoreTitle">了解有关 .NET Core 的详细信息</String>
   <String Id="SuccessInstallLocation">以下项已安装到 [DOTNETHOME]</String>
   <String Id="SuccessInstallProductName"> - [BUNDLEMONIKER] </String>
