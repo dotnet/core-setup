@@ -28,7 +28,10 @@
     <CompressedFile Include="$(AssetOutputPath)**/*$(CompressedFileExtension)">
       <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
     </CompressedFile>
-    <RuntimePackageFile Include="$(PackageOutputPath)**/runtime.*.nupkg" >
+    <RuntimePackageFile
+      Include="
+        $(PackageOutputPath)**/runtime.*.nupkg;
+        $(PackageOutputPath)**/VS.Redist.Common.*.nupkg" >
       <RelativeBlobPath>$(BinariesRelativePath)</RelativeBlobPath>
     </RuntimePackageFile>
     <RidAgnosticPackageFile Include="$(PackageOutputPath)**/*.nupkg" Exclude="@(RuntimePackageFile)" >
