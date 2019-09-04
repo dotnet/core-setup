@@ -559,13 +559,9 @@ namespace
         return StatusCode::Success;
     }
 
-    bool matches_existing_properties(const corehost_initialize_request_t *init_request)
+    bool matches_existing_properties(const coreclr_property_bag_t &properties, const corehost_initialize_request_t *init_request)
     {
-        const std::shared_ptr<hostpolicy_context_t> context = get_hostpolicy_context(/*require_runtime*/ true);
-        assert(context != nullptr);
-
         bool hasDifferentProperties = false;
-        const coreclr_property_bag_t &properties = context->coreclr_properties;
         size_t len = init_request->config_keys.len;
         for (size_t i = 0; i < len; ++i)
         {
@@ -731,8 +727,12 @@ SHARED_API int HOSTPOLICY_CALLTYPE corehost_initialize(const corehost_initialize
             && init_request->version >= offsetof(corehost_initialize_request_t, config_values) + sizeof(init_request->config_values)
             && init_request->config_keys.len == init_request->config_values.len);
 
+        const std::shared_ptr<hostpolicy_context_t> context = get_hostpolicy_context(/*require_runtime*/ true);
+        if (context == nullptr)
+            return StatusCode::HostInvalidState;
+
         // Compare the current context with this request (properties)
-        if (!matches_existing_properties(init_request))
+        if (!matches_existing_properties(context->coreclr_properties, init_request))
             rc = StatusCode::Success_DifferentRuntimeProperties;
     }
 
