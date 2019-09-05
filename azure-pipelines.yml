@@ -11,7 +11,7 @@ pr:
 - dev/arcade-migration
 
 
-name: $(Date:yyyyMMdd)$(Rev:.rr)
+name: $(Date:yyyyMMdd)$(Rev:.r)
 
 variables:
   - name: TeamName
