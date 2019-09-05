@@ -18,9 +18,15 @@
     </PropertyGroup>
   </Target>
 
+  <!--
+    Set up the PackageReference based on the pkgproj output at the right point in the build process.
+    The BeforeTargets makes it try to run even when the project is excluded from a build from
+    source, so this has to be handled directly.
+  -->
   <Target Name="GetPackageReference"
           DependsOnTargets="GetProductVersions"
-          BeforeTargets="CollectPackageReferences">
+          BeforeTargets="CollectPackageReferences"
+          Condition="'$(DotNetBuildFromSource)' != 'true' or '$(ExcludeFromSourceBuild)' != 'true'">
     <PropertyGroup>
       <SfxVersion Condition="'$(SfxVersion)' == ''">$(ProductVersion)</SfxVersion>
       <SfxPackageIdentity Condition="'$(SfxPackageIdentity)' == ''">$(SfxIdentity)</SfxPackageIdentity>
@@ -162,17 +168,13 @@
     <Delete Files="@(ToDelete)" />
   </Target>
 
-  <!-- Preserve symbol files for compressed symbol archive. -->
+  <!-- Preserve symbol files for compressed symbol archive. Specific to NETCoreApp. -->
   <Target Name="CopySymbolsToPublishFolder"
           Condition="'$(SfxIdentity)' == 'Microsoft.NETCore.App'"
           AfterTargets="Publish">
     <PropertyGroup>
-      <!--
-        Microsoft.NETCore.App is the name of the shared framework, but the internal package is
-        the one doing the crossgen.
-      -->
-      <CrossgennedPackageId>Microsoft.NETCore.App.Internal</CrossgennedPackageId>
-      <CrossgennedPackageSymbolDir>$(PackageSymbolsBinDir)$(CrossgennedPackageId)/</CrossgennedPackageSymbolDir>
+      <!-- Get crossgen-generated and redist symbols from the depproj. -->
+      <CrossgennedPackageSymbolDir>$(PackageSymbolsBinDir)netcoreapp/</CrossgennedPackageSymbolDir>
     </PropertyGroup>
 
     <ItemGroup>
