@@ -76,9 +76,9 @@
     <!-- winforms -->
     <MicrosoftPrivateWinformsPackageVersion>4.8.0-rc1.19455.21</MicrosoftPrivateWinformsPackageVersion>
     <!-- wpf -->
-    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.0-rc1.19456.11</MicrosoftDotNetWpfGitHubPackageVersion>
+    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.0-rc1.19457.3</MicrosoftDotNetWpfGitHubPackageVersion>
     <!-- wpf-int -->
-    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-rc1.19456.20</MicrosoftDotNetWpfDncEngPackageVersion>
+    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-rc1.19457.5</MicrosoftDotNetWpfDncEngPackageVersion>
     <!-- Not auto-updated. -->
     <MicrosoftBuildPackageVersion>15.7.179</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
