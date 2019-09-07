@@ -41,34 +41,34 @@
     <!-- sourcelink -->
     <MicrosoftSourceLinkVersion>1.0.0-beta2-19367-01</MicrosoftSourceLinkVersion>
     <!-- corefx -->
-    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-rc2.19456.12</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreTargetsPackageVersion>3.0.0-rc2.19456.12</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-rc2.19456.12</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftWin32RegistryAccessControlVersion>4.6.0-rc2.19456.12</MicrosoftWin32RegistryAccessControlVersion>
-    <MicrosoftWin32RegistryVersion>4.6.0-rc2.19456.12</MicrosoftWin32RegistryVersion>
-    <MicrosoftWin32SystemEventsVersion>4.6.0-rc2.19456.12</MicrosoftWin32SystemEventsVersion>
-    <MicrosoftWindowsCompatibilityPackageVersion>3.0.0-rc2.19456.12</MicrosoftWindowsCompatibilityPackageVersion>
-    <SystemCodeDomVersion>4.6.0-rc2.19456.12</SystemCodeDomVersion>
-    <SystemConfigurationConfigurationManagerVersion>4.6.0-rc2.19456.12</SystemConfigurationConfigurationManagerVersion>
-    <SystemDiagnosticsEventLogVersion>4.6.0-rc2.19456.12</SystemDiagnosticsEventLogVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-rc2.19456.18</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreTargetsPackageVersion>3.0.0-rc2.19456.18</MicrosoftNETCoreTargetsPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-rc2.19456.18</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftWin32RegistryAccessControlVersion>4.6.0-rc2.19456.18</MicrosoftWin32RegistryAccessControlVersion>
+    <MicrosoftWin32RegistryVersion>4.6.0-rc2.19456.18</MicrosoftWin32RegistryVersion>
+    <MicrosoftWin32SystemEventsVersion>4.6.0-rc2.19456.18</MicrosoftWin32SystemEventsVersion>
+    <MicrosoftWindowsCompatibilityPackageVersion>3.0.0-rc2.19456.18</MicrosoftWindowsCompatibilityPackageVersion>
+    <SystemCodeDomVersion>4.6.0-rc2.19456.18</SystemCodeDomVersion>
+    <SystemConfigurationConfigurationManagerVersion>4.6.0-rc2.19456.18</SystemConfigurationConfigurationManagerVersion>
+    <SystemDiagnosticsEventLogVersion>4.6.0-rc2.19456.18</SystemDiagnosticsEventLogVersion>
     <SystemDiagnosticsPerformanceCounter>4.6.0-preview8.19375.15</SystemDiagnosticsPerformanceCounter>
-    <SystemDirectoryServicesVersion>4.6.0-rc2.19456.12</SystemDirectoryServicesVersion>
-    <SystemDrawingCommonVersion>4.6.0-rc2.19456.12</SystemDrawingCommonVersion>
-    <SystemIOFileSystemAccessControlVersion>4.6.0-rc2.19456.12</SystemIOFileSystemAccessControlVersion>
-    <SystemIOPackagingVersion>4.6.0-rc2.19456.12</SystemIOPackagingVersion>
+    <SystemDirectoryServicesVersion>4.6.0-rc2.19456.18</SystemDirectoryServicesVersion>
+    <SystemDrawingCommonVersion>4.6.0-rc2.19456.18</SystemDrawingCommonVersion>
+    <SystemIOFileSystemAccessControlVersion>4.6.0-rc2.19456.18</SystemIOFileSystemAccessControlVersion>
+    <SystemIOPackagingVersion>4.6.0-rc2.19456.18</SystemIOPackagingVersion>
     <SystemIOPipesAccessControl>4.5.1</SystemIOPipesAccessControl>
-    <SystemResourcesExtensionsPackageVersion>4.6.0-rc2.19456.12</SystemResourcesExtensionsPackageVersion>
-    <SystemSecurityAccessControlVersion>4.6.0-rc2.19456.12</SystemSecurityAccessControlVersion>
-    <SystemSecurityCryptographyCngVersion>4.6.0-rc2.19456.12</SystemSecurityCryptographyCngVersion>
-    <SystemSecurityCryptographyPkcsVersion>4.6.0-rc2.19456.12</SystemSecurityCryptographyPkcsVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>4.6.0-rc2.19456.12</SystemSecurityCryptographyProtectedDataVersion>
-    <SystemSecurityCryptographyXmlVersion>4.6.0-rc2.19456.12</SystemSecurityCryptographyXmlVersion>
-    <SystemSecurityPermissionsVersion>4.6.0-rc2.19456.12</SystemSecurityPermissionsVersion>
-    <SystemSecurityPrincipalWindowsVersion>4.6.0-rc2.19456.12</SystemSecurityPrincipalWindowsVersion>
-    <SystemTextEncodingsWebVersion>4.6.0-rc2.19456.12</SystemTextEncodingsWebVersion>
-    <SystemTextJsonVersion>4.6.0-rc2.19456.12</SystemTextJsonVersion>
-    <SystemThreadingAccessControlVersion>4.6.0-rc2.19456.12</SystemThreadingAccessControlVersion>
-    <SystemWindowsExtensionsPackageVersion>4.6.0-rc2.19456.12</SystemWindowsExtensionsPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>4.6.0-rc2.19456.18</SystemResourcesExtensionsPackageVersion>
+    <SystemSecurityAccessControlVersion>4.6.0-rc2.19456.18</SystemSecurityAccessControlVersion>
+    <SystemSecurityCryptographyCngVersion>4.6.0-rc2.19456.18</SystemSecurityCryptographyCngVersion>
+    <SystemSecurityCryptographyPkcsVersion>4.6.0-rc2.19456.18</SystemSecurityCryptographyPkcsVersion>
+    <SystemSecurityCryptographyProtectedDataVersion>4.6.0-rc2.19456.18</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemSecurityCryptographyXmlVersion>4.6.0-rc2.19456.18</SystemSecurityCryptographyXmlVersion>
+    <SystemSecurityPermissionsVersion>4.6.0-rc2.19456.18</SystemSecurityPermissionsVersion>
+    <SystemSecurityPrincipalWindowsVersion>4.6.0-rc2.19456.18</SystemSecurityPrincipalWindowsVersion>
+    <SystemTextEncodingsWebVersion>4.6.0-rc2.19456.18</SystemTextEncodingsWebVersion>
+    <SystemTextJsonVersion>4.6.0-rc2.19456.18</SystemTextJsonVersion>
+    <SystemThreadingAccessControlVersion>4.6.0-rc2.19456.18</SystemThreadingAccessControlVersion>
+    <SystemWindowsExtensionsPackageVersion>4.6.0-rc2.19456.18</SystemWindowsExtensionsPackageVersion>
     <!-- standard -->
     <NETStandardLibraryPackageVersion>2.1.0-prerelease.19455.4</NETStandardLibraryPackageVersion>
     <!-- coreclr -->
