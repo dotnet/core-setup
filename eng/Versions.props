@@ -71,7 +71,7 @@
     <SystemThreadingAccessControlVersion>4.7.0-preview1.19459.13</SystemThreadingAccessControlVersion>
     <SystemWindowsExtensionsPackageVersion>4.7.0-preview1.19459.13</SystemWindowsExtensionsPackageVersion>
     <!-- standard -->
-    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19460.4</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19460.5</NETStandardLibraryPackageVersion>
     <!-- coreclr -->
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.1.0-preview1.19459.7</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- winforms -->
