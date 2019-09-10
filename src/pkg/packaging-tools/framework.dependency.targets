@@ -208,6 +208,7 @@
           BeforeTargets="CollectPackageReferences">
     <ItemGroup>
       <CrossgenToolPackageReference Include="Microsoft.Private.CoreFx.NETCoreApp" Version="$(MicrosoftPrivateCoreFxNETCoreAppPackageVersion)" />
+      <CrossgenToolPackageReference Include="Microsoft.NETCore.Platforms" Version="$(MicrosoftNETCorePlatformsPackageVersion)" />
       <CrossgenToolPackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR" Version="$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)" />
       <CrossgenToolPackageReference Include="$(MicrosoftTargetingPackPrivateWinRTPackage)" Version="$(MicrosoftTargetingPackPrivateWinRTPackageVersion)" />
 

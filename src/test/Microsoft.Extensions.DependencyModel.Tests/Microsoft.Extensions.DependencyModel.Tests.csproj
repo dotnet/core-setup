@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Microsoft.DotNet.Tools.Tests.Utilities Class Library</Description>
-    <TargetFramework>$(NETCoreAppFramework)</TargetFramework>
+    <TargetFramework>$(TestInfraTargetFramework)</TargetFramework>
     <AssemblyName>Microsoft.Extensions.DependencyModel.Tests</AssemblyName>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
