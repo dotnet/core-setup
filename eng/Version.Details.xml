@@ -113,17 +113,17 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>2d38da41c8c153e498ea5fbda88c7532389b2f3f</Sha>
     </Dependency>
-    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19459.4">
+    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19460.4">
       <Uri>https://github.com/dotnet/standard</Uri>
-      <Sha>d11814a7310c574c171f17d9b5d26b4b0406878b</Sha>
+      <Sha>ad49bfe43c7d8e2931d0bde6fb8e894f6332c364</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.0-preview1.19459.7">
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>d13d1b61de8a28e0d5509273a6ec3de35b1dd258</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.0-rc1.19455.21" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.0-rc1.19453.3" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
-      <Sha>a5d85d901ead0ac0f8052ae6f4b2aeadfe73166e</Sha>
+      <Sha>dc6297c0fb269c3a78ce36333012753c6555aeb9</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.0-rc2.19459.2" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/wpf</Uri>
