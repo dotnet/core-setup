@@ -126,6 +126,7 @@ namespace Microsoft.DotNet.Build.Tasks
                 }
             }
         }
+
         private static XName CreateQualifiedName(XDocument doc, string name)
         {
             return doc.Root.GetDefaultNamespace().GetName(name);
