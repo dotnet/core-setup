@@ -93,7 +93,7 @@
 
   <!--
     Fetch the package version of 'Microsoft.NETCore.App.Runtime.<rid>'. The runtime nupkg project
-    always ships, and may have a stable version.
+    always ships, so it may or may not have a stable version depending on product lifecycle.
 
     Some test projects end in ".Tests", which Arcade detects and applies IsShipping=false. This
     makes ProductVersion non-stable, so we can't rely on the test project's ProductVersion to be the
@@ -109,7 +109,7 @@
 
   <!--
     Fetch the package version of Microsoft.NETCore.App.Internal. The legacy App nupkg project
-    doesn't ship, so it may or may not have a stable version.
+    doesn't ship, so it never has a stable version.
   -->
   <Target Name="GetNETCoreAppInternalPackageVersion">
     <MSBuild
