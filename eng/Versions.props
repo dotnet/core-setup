@@ -72,7 +72,7 @@
     <!-- standard -->
     <NETStandardLibraryPackageVersion>2.1.0-prerelease.19462.4</NETStandardLibraryPackageVersion>
     <!-- coreclr -->
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-rc2.19461.5</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-rc2.19462.2</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- winforms -->
     <MicrosoftPrivateWinformsPackageVersion>4.8.0-rc2.19462.7</MicrosoftPrivateWinformsPackageVersion>
     <!-- wpf -->
