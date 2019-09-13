@@ -1,9 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <UsingTask TaskName="CopyNupkgAndChangeVersion" AssemblyFile="$(LocalBuildToolsTaskFile)" />
+
   <Target Name="PrepareTestAssets"
           DependsOnTargets="
-            GetProductVersions;
-            DetermineTestOutputDirectory">
+            GetNETCoreAppInternalPackageVersion;
+            GetNETCoreAppRuntimePackVersion;
+            CleanTestAssets;
+            GenerateTestRestoreSourcesNuGetConfig;
+            PrepareStabilizedLegacyPackages;
+            RestoreTestAssetProjects" />
+
+  <Target Name="CleanTestAssets"
+          DependsOnTargets="DetermineTestOutputDirectory">
     <!--
       Ensure installers (and therefore shared framework projects) are built first. Include used
       transitive dependenices here in case Subset is defined.
@@ -23,16 +32,65 @@
     <ItemGroup>
       <DirsToClean Include="$(TestDir)\**\bin" />
       <DirsToClean Include="$(TestDir)\**\obj" />
+      <DirsToClean Include="$(TestStabilizedLegacyPackagesDir)" />
       <DirsToClean Include="$(TestRestorePackagesPath)" />
       <DirsToClean Include="$(TempFolderRoot)$(TargetArchitecture)" />
+    </ItemGroup>
 
+    <RemoveDir Directories="@(DirsToClean)" />
+
+    <!-- Directory must exist even if there are no nupkgs inside to use, or NuGet fails. -->
+    <MakeDir Directories="$(TestStabilizedLegacyPackagesDir)" />
+  </Target>
+
+  <Target Name="GenerateTestRestoreSourcesNuGetConfig">
+    <ItemGroup>
+      <RestoreTestSource Include="$(ArtifactsShippingPackagesDir)" Key="artifacts-shipping-packages" />
+      <RestoreTestSource Include="$(ArtifactsNonShippingPackagesDir)" Key="artifacts-nonshipping-packages" />
+      <RestoreTestSource Include="$(TestStabilizedLegacyPackagesDir)" Key="stabilized-legacy-packages" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <TemplateNuGetConfigFile>$(ProjectDir)NuGet.config</TemplateNuGetConfigFile>
+
+      <RestoreTestSourceConfigLines>@(RestoreTestSource -> '&lt;add key="%(Key)" value="%(Identity)" /&gt;', '%0A    ')</RestoreTestSourceConfigLines>
+
+      <TestRestoreNuGetConfigContent>$([System.IO.File]::ReadAllText('$(TemplateNuGetConfigFile)').Replace(
+        '&lt;!-- TEST_RESTORE_SOURCES_INSERTION_LINE --&gt;',
+        '$(RestoreTestSourceConfigLines)'))</TestRestoreNuGetConfigContent>
+    </PropertyGroup>
+
+    <WriteLinesToFile
+      File="$(TestRestoreNuGetConfigFile)"
+      Lines="$(TestRestoreNuGetConfigContent)"
+      Overwrite="true" />
+  </Target>
+
+  <Target Name="PrepareStabilizedLegacyPackages"
+          Condition="'$(NETCoreAppInternalPackageVersion)' != '$(NETCoreAppRuntimePackVersion)'">
+    <ItemGroup>
+      <NonShippingPackageToStabilizeFile Include="
+        $(ArtifactsNonShippingPackagesDir)Microsoft.*.nupkg;
+        $(ArtifactsNonShippingPackagesDir)runtime.*.nupkg;" />
+    </ItemGroup>
+
+    <!-- Workaround for NonShipping packages being unable to have stable versions, see https://github.com/dotnet/core-setup/issues/8112 -->
+    <Message Importance="High" Text="Generating stabilized legacy NETCoreApp packages..." />
+
+    <CopyNupkgAndChangeVersion
+      SourceFile="%(NonShippingPackageToStabilizeFile.Identity)"
+      TargetFile="$(TestStabilizedLegacyPackagesDir)@(NonShippingPackageToStabilizeFile -> '%(Filename)%(Extension)')"
+      OriginalVersion="$(NETCoreAppInternalPackageVersion)"
+      TargetVersion="$(NETCoreAppRuntimePackVersion)" />
+  </Target>
+
+  <Target Name="RestoreTestAssetProjects">
+    <ItemGroup>
       <TestAssetProjectToRestore Include="$(TestAssetsDir)**\*.csproj" />
 
       <AllTestRestoreSources Include="@(RestoreTestSource)"/>
       <AllTestRestoreSources Include="@(RestoreTestFallbackSource)"/>
     </ItemGroup>
-
-    <RemoveDir Directories="@(DirsToClean)" />
 
     <Message Importance="High" Text="Running NuGet Restore for test asset projects..." />
 
@@ -40,11 +98,10 @@
       Projects="@(TestAssetProjectToRestore)"
       Targets="Restore"
       Properties="
-        ArtifactsShippingPackagesDir=$(ArtifactsShippingPackagesDir);
-        ArtifactsNonShippingPackagesDir=$(ArtifactsNonShippingPackagesDir);
+        RestoreConfigFile=$(TestRestoreNuGetConfigFile);
         TestRestorePackagesPath=$(TestRestorePackagesPath);
         TestTargetRid=$(TestTargetRid);
-        MNAVersion=$(ProductVersion)" />
+        MNAVersion=$(NETCoreAppRuntimePackVersion)" />
   </Target>
 
 </Project>
