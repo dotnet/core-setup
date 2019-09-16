@@ -239,7 +239,7 @@ namespace
     }
 }
 
-bool runtime_config_t::parse_framework(const json_parser_t::value_t& fx_obj, fx_reference_t& fx_out)
+bool runtime_config_t::parse_framework(const json_parser_t::value_t& fx_obj, fx_reference_t& fx_out, bool name_and_version_only)
 {
     if (!name_and_version_only)
     {
@@ -353,7 +353,7 @@ bool runtime_config_t::ensure_dev_config_parsed()
     return true;
 }
 
-bool runtime_config_t::read_framework_array(const json_parser_t::value_t& frameworks_json, fx_reference_vector_t& frameworks, bool name_and_version_only)
+bool runtime_config_t::read_framework_array(const json_parser_t::value_t& frameworks_json, fx_reference_vector_t& frameworks_out, bool name_and_version_only)
 {
     bool rc = true;
 
@@ -374,17 +374,17 @@ bool runtime_config_t::read_framework_array(const json_parser_t::value_t& framew
         }
 
         if (std::find_if(
-                frameworks.begin(),
-                frameworks.end(),
+                frameworks_out.begin(),
+                frameworks_out.end(),
                 [&](const fx_reference_t& item) { return fx_out.get_fx_name() == item.get_fx_name(); })
-            != frameworks.end())
+            != frameworks_out.end())
         {
             trace::verbose(_X("Framework %s already specified."), fx_out.get_fx_name().c_str());
             rc = false;
             break;
         }
 
-        frameworks.push_back(fx_out);
+        frameworks_out.push_back(fx_out);
     }
 
     return rc;
