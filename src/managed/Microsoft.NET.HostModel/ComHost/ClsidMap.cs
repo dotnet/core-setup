@@ -11,20 +11,21 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.NET.HostModel.ComHost
 {
-    internal static class ClsidMap
+    public static class ClsidMap
     {
         private struct ClsidEntry
         {
-            [JsonProperty(PropertyName = "type")]
-            public string Type;
-            [JsonProperty(PropertyName = "assembly")]
-            public string Assembly;
-            [JsonProperty(PropertyName = "progid", NullValueHandling = NullValueHandling.Ignore)]
-            public string ProgId;
+            [JsonPropertyName("type")]
+            public string Type { get; set; }
+            [JsonPropertyName("assembly")]
+            public string Assembly { get; set; }
+            [JsonPropertyName("progid")]
+            public string ProgId { get; set; }
         }
 
         public static void Create(MetadataReader metadataReader, string clsidMapPath)
@@ -64,7 +65,7 @@ namespace Microsoft.NET.HostModel.ComHost
 
             using (StreamWriter writer = File.CreateText(clsidMapPath))
             {
-                writer.Write(JsonConvert.SerializeObject(clsidMap));
+                writer.Write(JsonSerializer.Serialize(clsidMap, new JsonSerializerOptions { IgnoreNullValues = true }));
             }
         }
 

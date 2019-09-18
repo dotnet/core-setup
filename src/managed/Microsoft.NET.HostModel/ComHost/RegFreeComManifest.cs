@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -29,26 +31,20 @@ namespace Microsoft.NET.HostModel.ComHost
 
             XElement fileElement = new XElement(ns + "file", new XAttribute("name", comHostName));
 
-            JObject clsidMap;
-            string clsidMapText = File.ReadAllText(clsidMapPath);
-            using (StreamReader clsidMapReader = File.OpenText(clsidMapPath))
-            using (JsonTextReader jsonReader = new JsonTextReader(clsidMapReader))
+            JsonElement clsidMap;
+            using (FileStream clsidMapStream = File.OpenRead(clsidMapPath))
             {
-                clsidMap = JObject.Load(jsonReader);
+                clsidMap = JsonDocument.Parse(clsidMapStream).RootElement;
             }
 
-            foreach (JProperty property in clsidMap.Properties())
+            foreach (JsonProperty property in clsidMap.EnumerateObject())
             {
                 string guidMaybe = property.Name;
                 Guid guid = Guid.Parse(guidMaybe);
                 XElement comClassElement = new XElement(ns + "comClass", new XAttribute("clsid", guid.ToString("B")), new XAttribute("threadingModel", "Both"));
-                if (property.Value is JObject clsidEntry)
+                if (property.Value.TryGetProperty("progid", out JsonElement progIdValue))
                 {
-                    JProperty progIdProperty = clsidEntry.Properties().FirstOrDefault(prop => prop.Name == "progid");
-                    if (!(progIdProperty is null))
-                    {
-                        comClassElement.Add(new XAttribute("progid", progIdProperty.Value.ToString()));
-                    }
+                    comClassElement.Add(new XAttribute("progid", progIdValue.GetString()));
                 }
 
                 fileElement.Add(comClassElement);

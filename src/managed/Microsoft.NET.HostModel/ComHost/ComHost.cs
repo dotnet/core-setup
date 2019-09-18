@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -36,9 +35,11 @@ namespace Microsoft.NET.HostModel.ComHost
                 string clsidMap = File.ReadAllText(clsidmapFilePath);
                 byte[] clsidMapBytes = Encoding.UTF8.GetBytes(clsidMap);
 
-                ResourceUpdater updater = new ResourceUpdater(comHostDestinationFilePath);
-                updater.AddResource(clsidMapBytes, (IntPtr)ClsidmapResourceType, (IntPtr)ClsidmapResourceId);
-                updater.Update();
+                using (ResourceUpdater updater = new ResourceUpdater(comHostDestinationFilePath))
+                {
+                    updater.AddResource(clsidMapBytes, (IntPtr)ClsidmapResourceType, (IntPtr)ClsidmapResourceId);
+                    updater.Update();
+                }
             }
             else
             {
