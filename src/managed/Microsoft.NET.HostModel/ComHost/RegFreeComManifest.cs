@@ -9,7 +9,7 @@ using System.Xml.Linq;
 
 namespace Microsoft.NET.HostModel.ComHost
 {
-    class RegFreeComManifest
+    public class RegFreeComManifest
     {
         /// <summary>
         /// Generates a side-by-side application manifest to enable reg-free COM.

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Xunit;
 
@@ -173,34 +172,6 @@ namespace Microsoft.NET.HostModel.ComHost.Tests
                 ComLibraryFixture.Dispose();
                 ComLibraryMissingGuidFixture.Dispose();
                 ComLibraryConflictingGuidFixture.Dispose();
-            }
-        }
-
-
-        private class TestDirectory : IDisposable
-        {
-            public string Path { get; private set; }
-
-            private TestDirectory(string path)
-            {
-                Path = path;
-                Directory.CreateDirectory(path);
-            }
-
-            public static TestDirectory Create([CallerMemberName] string callingMethod = "")
-            {
-                string path = System.IO.Path.Combine(
-                    System.IO.Path.GetTempPath(),
-                    "dotNetSdkUnitTest_" + callingMethod + (Guid.NewGuid().ToString().Substring(0, 8)));
-                return new TestDirectory(path);
-            }
-
-            public void Dispose()
-            {
-                if (Directory.Exists(Path))
-                {
-                    Directory.Delete(Path, true);
-                }
             }
         }
     }
