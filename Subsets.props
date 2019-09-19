@@ -122,6 +122,7 @@
     <TestProjectToBuild Include="$(RepoRoot)src\test\Microsoft.NET.HostModel.Tests\AppHost.Bundle.Tests\AppHost.Bundle.Tests.csproj" />
     <TestProjectToBuild Include="$(RepoRoot)src\test\Microsoft.NET.HostModel.Tests\Microsoft.NET.HostModel.AppHost.Tests\Microsoft.NET.HostModel.AppHost.Tests.csproj" />
     <TestProjectToBuild Include="$(RepoRoot)src\test\Microsoft.NET.HostModel.Tests\Microsoft.NET.HostModel.Bundle.Tests\Microsoft.NET.HostModel.Bundle.Tests.csproj" />
+    <TestProjectToBuild Include="$(RepoRoot)src\test\Microsoft.NET.HostModel.Tests\Microsoft.NET.HostModel.ComHost.Tests\Microsoft.NET.HostModel.ComHost.Tests.csproj" />
     <TestProjectToBuild Include="$(RepoRoot)src\test\HostActivation.Tests\HostActivation.Tests.csproj" />
     <TestProjectToBuild Include="$(RepoRoot)src\test\Microsoft.DotNet.CoreSetup.Packaging.Tests\Microsoft.DotNet.CoreSetup.Packaging.Tests.csproj" />
     <TestProjectToBuild Include="$(RepoRoot)src\test\Microsoft.Extensions.DependencyModel.Tests\Microsoft.Extensions.DependencyModel.Tests.csproj" />

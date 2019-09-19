@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Microsoft.NET.HostModel.ComHost
 {
-    class MissingGuidException : Exception
+    public class MissingGuidException : Exception
     {
         public MissingGuidException(string typeName)
         {
