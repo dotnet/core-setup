@@ -30,20 +30,18 @@ namespace Microsoft.NET.HostModel.ComHost
             // Copy apphost to destination path so it inherits the same attributes/permissions.
             File.Copy(comHostSourceFilePath, comHostDestinationFilePath, overwrite: true);
 
-            if (ResourceUpdater.IsSupportedOS())
-            {
-                string clsidMap = File.ReadAllText(clsidmapFilePath);
-                byte[] clsidMapBytes = Encoding.UTF8.GetBytes(clsidMap);
-
-                using (ResourceUpdater updater = new ResourceUpdater(comHostDestinationFilePath))
-                {
-                    updater.AddResource(clsidMapBytes, (IntPtr)ClsidmapResourceType, (IntPtr)ClsidmapResourceId);
-                    updater.Update();
-                }
-            }
-            else
+            if (!ResourceUpdater.IsSupportedOS())
             {
                 throw new ComHostCustomizationUnsupportedOSException();
+            }
+
+            string clsidMap = File.ReadAllText(clsidmapFilePath);
+            byte[] clsidMapBytes = Encoding.UTF8.GetBytes(clsidMap);
+
+            using (ResourceUpdater updater = new ResourceUpdater(comHostDestinationFilePath))
+            {
+                updater.AddResource(clsidMapBytes, (IntPtr)ClsidmapResourceType, (IntPtr)ClsidmapResourceId);
+                updater.Update();
             }
         }
     }

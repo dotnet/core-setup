@@ -107,22 +107,23 @@ namespace Microsoft.NET.HostModel.ComHost.Tests
         {
             using var testDirectory = TestDirectory.Create();
             string clsidMapPath = Path.Combine(testDirectory.Path, "test.clsidmap");
+
             using (var assemblyStream = new FileStream(project.TestProject.AppDll, FileMode.Open, FileAccess.Read, FileShare.Delete | FileShare.Read))
+            using (PEReader peReader = new PEReader(assemblyStream))
             {
-                using (PEReader peReader = new PEReader(assemblyStream))
+                if (peReader.HasMetadata)
                 {
-                    if (peReader.HasMetadata)
-                    {
-                        MetadataReader reader = peReader.GetMetadataReader();
-                        ClsidMap.Create(reader, clsidMapPath);
-                    }
+                    MetadataReader reader = peReader.GetMetadataReader();
+                    ClsidMap.Create(reader, clsidMapPath);
                 }
             }
 
-            using var clsidMapFile = File.OpenText(clsidMapPath);
-            using var clsidMapReader = new JsonTextReader(clsidMapFile);
+            using (var clsidMapFile = File.OpenText(clsidMapPath))
+            using (var clsidMapReader = new JsonTextReader(clsidMapFile))
+            {
+                return JObject.Load(clsidMapReader);
+            }
 
-            return JObject.Load(clsidMapReader);
         }
 
         public class SharedTestState : IDisposable

@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace ComLibrary
 {
+    // These two types must have the same GUID for testing.
+
     [ComVisible(true)]
     [Guid("cc6e9910-18d5-484a-a2d2-fa8910fd0261")]
     public class Server
