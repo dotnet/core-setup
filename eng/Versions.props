@@ -32,7 +32,7 @@
     <!-- corefx -->
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>3.0.0</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-rc2.19462.14</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-rc2.19476.5</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftWin32RegistryAccessControlVersion>4.6.0</MicrosoftWin32RegistryAccessControlVersion>
     <MicrosoftWin32RegistryVersion>4.6.0</MicrosoftWin32RegistryVersion>
     <MicrosoftWin32SystemEventsVersion>4.6.0</MicrosoftWin32SystemEventsVersion>
