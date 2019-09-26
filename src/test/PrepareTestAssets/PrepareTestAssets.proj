@@ -73,7 +73,7 @@
       -->
       <TestRestoreNuGetConfigContent>$([System.Text.RegularExpressions.Regex]::Replace(
         '$(TestRestoreNuGetConfigContent)',
-        '&lt;add key=".+" value="https://pkgs.dev.azure.com/dnceng/.+" /&gt;',
+        '&lt;add key=".+" value="https://pkgs.dev.azure.com/dnceng/_packaging.+" /&gt;',
         ''))</TestRestoreNuGetConfigContent>
     </PropertyGroup>
 
