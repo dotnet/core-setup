@@ -131,7 +131,7 @@ The `CLSID` mapping manifest is a JSON format (`.clsidmap` extension when on dis
 1) A new .NET Core class library project is created using [`dotnet.exe`][dotnet_link].
 1) A class is defined that has the [`GuidAttribute("<GUID>")`][guid_link] and the [`ComVisibleAttribute(true)`](https://docs.microsoft.com/dotnet/api/system.runtime.interopservices.comvisibleattribute).
     - In .NET Core, unlike .NET Framework, there is no generated class interface generation (i.e. `IClassX`). This means it is advantageous for users to have the class implement a marshalable interface.
-    - A ProgID for the class can be defined using the [`ProgIdAttribute`](https://docs.microsoft.com/dotnet/api/system.runtime.interopservices.progidattribute) or the namespace and class name will be used. This follows the same semantics as .NET Framework COM servers.
+    - A ProgID for the class can be defined using the [`ProgIdAttribute`](https://docs.microsoft.com/dotnet/api/system.runtime.interopservices.progidattribute). If a ProgID is not explicitly specified, the namespace and class name will be used as the ProgID. This follows the same semantics as .NET Framework COM servers.
 1) The `EnableComHosting` property is added to the project file.
     - i.e. `<EnableComHosting>true</EnableComHosting>`
 1) During class project build, the following actions occur if the `EnableComHosting` property is `true`:
