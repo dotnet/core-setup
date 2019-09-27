@@ -143,7 +143,7 @@ The `CLSID` mapping manifest is a JSON format (`.clsidmap` extension when on dis
 
 ### .NET Core COM server registration
 
-Two options exist for registration and are a function of the intent of the class's author. The .NET Core platform will impose the deployment of a shim instance with a `.clsidmap` manifest. In order to address potential security concerns, the .NET Core tool chain by default will embedded the `.clsidmap` in the customized shim. When the `.clsidmap` is embedded the customized shim allows for the implicit signing of the `.clsidmap` manifest. Once the shim is signed, the option for loading a non-embedded `.clsidmap` is disabled.
+Two options exist for registration and are a function of the intent of the class's author. The .NET Core platform will impose the deployment of a shim instance with a `.clsidmap` manifest. In order to address potential security concerns, the .NET Core tool chain by default will embed the `.clsidmap` in the customized shim. When the `.clsidmap` is embedded the customized shim allows for the implicit signing of the `.clsidmap` manifest. Once the shim is signed, the option for loading a non-embedded `.clsidmap` is disabled.
 
 #### Registry
 
