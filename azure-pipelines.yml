@@ -8,8 +8,10 @@ trigger:
 pr:
 - master
 - release/3.*
+- dev/arcade-migration
 
-name: $(Date:yyyyMMdd)$(Rev:.rr)
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
 
 variables:
   - name: TeamName
@@ -221,6 +223,6 @@ stages:
       - dependsOn: PVR_Publish
         channel:
           name: .NET Tools - Validation
-          bar: PublicValidationRelease_30_Channel_Id
+          bar: NetCore_Tools_Validation_Channel_Id
           storage: dev/validation
           public: true
