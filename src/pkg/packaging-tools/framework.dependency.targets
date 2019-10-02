@@ -53,6 +53,31 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="OverrideRuntimeFilesFromPackageResolve" Condition="'$(CoreCLROverridePath)' != ''" BeforeTargets="GetFilesFromPackageResolve">
+    <Error Condition="!Exists('$(CoreCLROverridePath)')" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not exist." />
+    <PropertyGroup>
+      <CoreCLRPDBOverridePath Condition="'$(CoreCLRPDBOverridePath)' == '' and Exists('$(CoreCLROverridePath)/PDB')">$(CoreCLROverridePath)/PDB</CoreCLRPDBOverridePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <CoreCLRFiles Include="$(CoreCLROverridePath)/*.*" />
+      <CoreCLRFiles Condition="'$(CoreCLRPDBOverridePath)' != ''" Include="$(CoreCLRPDBOverridePath)/*.pdb;$(CoreCLRPDBOverridePath)/*.dbg" />
+
+      <OverriddenFiles Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'">
+        <CoreCLRFile>@(CoreCLRFiles)</CoreCLRFile>
+      </OverriddenFiles>
+
+      <OverriddenFiles>
+        <IsNative Condition="$([System.String]::new('%(Identity)').ToLowerInvariant().Replace('\', '/').Contains('/native/'))">true</IsNative>
+      </OverriddenFiles>
+
+      <ReferenceCopyLocalPaths Remove="@(OverriddenFiles)" />
+      <ReferenceCopyLocalPaths Include="@(OverriddenFiles->Metadata('CoreCLRFile'))" />
+      
+    </ItemGroup>
+
+    <Error Condition="'@(CoreCLRFiles)' == ''" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not contain any files." />
+  </Target>
+
   <Target Name="SetupFindSiblingSymbolFilesByName"
           DependsOnTargets="GetFilesFromPackageResolve">
     <ItemGroup>
@@ -251,10 +276,17 @@
       <_diaSymReaderPackageDir>$(PackagesDir)microsoft.diasymreader.native/$(MicrosoftDiaSymReaderNativePackageVersion)/</_diaSymReaderPackageDir>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(TargetArchitecture)' == 'arm' AND '$(OS)' == 'Windows_NT'">
+      <_crossHostArch>x86</_crossHostArch>
+    </PropertyGroup> 
+    <PropertyGroup Condition="'$(TargetArchitecture)' == 'arm' AND '$(OS)' != 'Windows_NT'">
+      <_crossHostArch>x64</_crossHostArch>
+    </PropertyGroup> 
+    <PropertyGroup Condition="'$(TargetArchitecture)' == 'arm64'">
+      <_crossHostArch>x64</_crossHostArch>
+    </PropertyGroup> 
     <PropertyGroup>
-      <_crossDir Condition="'$(TargetArchitecture)' == 'arm' AND '$(OS)' == 'Windows_NT'">/x86_arm</_crossDir>
-      <_crossDir Condition="'$(TargetArchitecture)' == 'arm' AND '$(OS)' != 'Windows_NT'">/x64_arm</_crossDir>
-      <_crossDir Condition="'$(TargetArchitecture)' == 'arm64'">/x64_arm64</_crossDir>
+      <_crossDir Condition="'$(_crossHostArch)' != ''">/$(_crossHostArch)_$(TargetArchitecture)</_crossDir>
     </PropertyGroup>
 
     <ItemGroup>
@@ -303,6 +335,13 @@
     <PropertyGroup Condition="'@(_diaSymReaderAssembly)' != ''">
       <_diaSymReaderToolDir>%(_diaSymReaderAssembly.RootDir)%(_diaSymReaderAssembly.Directory)</_diaSymReaderToolDir>
     </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(CoreCLROverridePath)' != ''">
+      <_runtimeDirectory>$(CoreCLROverridePath)</_runtimeDirectory>
+      <_crossgenPath>$(CoreCLROverridePath)/crossgen$(ApplicationFileExtension)</_crossgenPath>
+      <_coreLibDirectory>$(CoreCLROverridePath)</_coreLibDirectory>
+      <_jitPath>$(CoreClrOverridePath)/$(_crossHostArch)/$(LibraryFilePrefix)clrjit$(LibraryFileExtension)</_jitPath>
+    </PropertyGroup>
 
     <!--
       DiaSymReader can't be built from source, so use an unrelated default directory in that case.
@@ -313,7 +352,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <_requiredProperty Include="_coreLibDirectory;_crossGenPath;_jitPath;_fxLibDirectory;_windowsWinMDDirectory;_diaSymReaderToolDir" />
+      <_requiredProperty Include="_runtimeDirectory;_coreLibDirectory;_crossGenPath;_jitPath;_fxLibDirectory;_windowsWinMDDirectory;_diaSymReaderToolDir" />
     </ItemGroup>
 
     <Message Text="%(_requiredProperty.Identity): $(%(_requiredProperty.Identity))" />
@@ -404,7 +443,7 @@
           DependsOnTargets="
             GetCrossgenToolPaths;
             EnsureCrossGenIsExecutable"
-          Inputs="@(_filesToCrossGen)"
+          Inputs="@(_filesToCrossGen);$(_crossGenPath)"
           Outputs="%(_filesToCrossGen.CrossGenedPath)">
     <PropertyGroup>
       <_crossGenResponseFile>$(_crossGenIntermediatePath)%(_filesToCrossGen.FileName).rsp</_crossGenResponseFile>
