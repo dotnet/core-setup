@@ -40,8 +40,10 @@
       <!-- include all doc files -->
       <_docFilesToPackage Include="%(FilesToPackage.RootDir)%(FilesToPackage.Directory)**\%(FilesToPackage.FileName).xml" />
 
+      <_docFilesToPackage Condition="'$(CoreFXOverridePath)' != ''" Include="@(FilesToPackage->'$(CoreFXOverridePath)/../../bin/docs/%(FileName).xml')" />
+
       <FilesToPackage Include="@(_docFilesToPackage)">
-        <TargetPath>ref/$(PackageTargetFramework)/%(RecursiveDir)</TargetPath>
+        <TargetPath Condition="'%(_docFilesToPackage.TargetPath)' != ''">ref/$(PackageTargetFramework)/%(RecursiveDir)</TargetPath>
       </FilesToPackage>
     </ItemGroup>
 
@@ -62,20 +64,74 @@
       <CoreCLRFiles Include="$(CoreCLROverridePath)/*.*" />
       <CoreCLRFiles Condition="'$(CoreCLRPDBOverridePath)' != ''" Include="$(CoreCLRPDBOverridePath)/*.pdb;$(CoreCLRPDBOverridePath)/*.dbg" />
 
-      <OverriddenFiles Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'">
+      <OverriddenRuntimeFiles Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'">
         <CoreCLRFile>@(CoreCLRFiles)</CoreCLRFile>
-      </OverriddenFiles>
+      </OverriddenRuntimeFiles>
 
-      <OverriddenFiles>
+      <OverriddenRuntimeFiles>
         <IsNative Condition="$([System.String]::new('%(Identity)').ToLowerInvariant().Replace('\', '/').Contains('/native/'))">true</IsNative>
-      </OverriddenFiles>
+      </OverriddenRuntimeFiles>
 
-      <ReferenceCopyLocalPaths Remove="@(OverriddenFiles)" />
-      <ReferenceCopyLocalPaths Include="@(OverriddenFiles->Metadata('CoreCLRFile'))" />
+      <ReferenceCopyLocalPaths Remove="@(OverriddenRuntimeFiles)" />
+      <ReferenceCopyLocalPaths Include="@(OverriddenRuntimeFiles->Metadata('CoreCLRFile'))" />
       
     </ItemGroup>
 
     <Error Condition="'@(CoreCLRFiles)' == ''" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not contain any files." />
+  </Target>
+
+  <Target Name="OverrideFrameworkFilesFromPackageResolve" Condition="'$(CoreFXOverridePath)' != ''" BeforeTargets="GetFilesFromPackageResolve">
+    <Error Condition="!Exists('$(CoreFXOverridePath)')" Text="The path provided to CoreFXOverridePath ($(CoreFXOverridePath)) does not exist." />
+
+    <PropertyGroup>
+      <CoreFXSharedFrameworkPackageSpec>$(CoreFXOverridePath)/specs/Microsoft.Private.CoreFx.NETCoreApp.nuspec</CoreFXSharedFrameworkPackageSpec>
+      <CoreFXSharedFrameworkImplementationPackageSpec Condition="'$(PackageRID)' != ''">$(CoreFXOverridePath)/specs/runtime.$(PackageRID).Microsoft.Private.CoreFx.NETCoreApp.nuspec</CoreFXSharedFrameworkImplementationPackageSpec>
+    </PropertyGroup>
+
+    
+    <Error Condition="!Exists('$(CoreFXSharedFrameworkPackageSpec)')" Text="The nuspec for the reference Microsoft.Private.CoreFx.NETCoreApp package does not exist." />
+    <Message Condition="'$(CoreFXSharedFrameworkImplementationPackageSpec)' != '' And !Exists('$(CoreFXSharedFrameworkImplementationPackageSpec)')"
+      Text="The nuspec for the implementation runtime.$(PackageRID).Microsoft.Private.CoreFx.NETCoreApp package does not exist. Falling back to packaged CoreFX." />
+
+    <XmlPeek
+      Namespaces="&lt;Namespace Prefix='nuget' Uri='http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd' /&gt;"
+      Query="nuget:package/nuget:files/nuget:file/@src"
+      XmlInputPath="$(CoreFXSharedFrameworkPackageSpec)">
+      <Output TaskParameter="Result" ItemName="CoreFXReferenceItems" />
+    </XmlPeek>
+
+    <XmlPeek
+      Condition="'$(CoreFXSharedFrameworkImplementationPackageSpec)' != '' And Exists($(CoreFXSharedFrameworkImplementationPackageSpec))"
+      Namespaces="&lt;Namespace Prefix='nuget' Uri='http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd' /&gt;"
+      Query="nuget:package/nuget:files/nuget:file/@src"
+      XmlInputPath="$(CoreFXSharedFrameworkImplementationPackageSpec)">
+      <Output TaskParameter="Result" ItemName="CoreFXReferenceCopyLocalItems" />
+    </XmlPeek>
+    
+    <ItemGroup>
+      <CoreFXReferenceItems NuGetPackageId="Microsoft.Private.CoreFx.NETCoreApp" />
+      <CoreFXReferenceCopyLocalItems NuGetPackageId="runtime.$(PackageRID).Microsoft.Private.CoreFx.NETCoreApp" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <OverriddenFrameworkReferenceFiles Include="@(Reference)" Condition="'@(CoreFXReferenceItems->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)' And '@(CoreFXReferenceItems->'%(NuGetPackageId)')' == '%(NuGetPackageId)'">
+        <CoreFXFile>@(CoreFXReferenceItems)</CoreFXFile>
+      </OverriddenFrameworkReferenceFiles>
+
+      <Reference Remove="@(OverriddenFrameworkReferenceFiles)" />
+      <Reference Include="@(OverriddenFrameworkReferenceFiles->Metadata('CoreFXFile'))" />
+
+      <OverriddenFrameworkImplementationFiles Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreFXReferenceCopyLocalItems->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)' And '@(CoreFXReferenceCopyLocalItems->'%(NuGetPackageId)')' == '%(NuGetPackageId)'">
+        <CoreFXFile>@(CoreFXReferenceCopyLocalItems)</CoreFXFile>
+      </OverriddenFrameworkImplementationFiles>
+
+      <OverriddenFrameworkImplementationFiles>
+        <IsNative Condition="$([System.String]::new('%(Identity)').ToLowerInvariant().Replace('\', '/').Contains('/native/'))">true</IsNative>
+      </OverriddenFrameworkImplementationFiles>
+
+      <ReferenceCopyLocalPaths Remove="@(OverriddenFrameworkImplementationFiles)" />
+      <ReferenceCopyLocalPaths Include="@(OverriddenFrameworkImplementationFiles->Metadata('CoreFXFile'))" />
+    </ItemGroup>
   </Target>
 
   <Target Name="SetupFindSiblingSymbolFilesByName"
