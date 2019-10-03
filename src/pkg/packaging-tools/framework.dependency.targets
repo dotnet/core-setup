@@ -40,7 +40,8 @@
       <!-- include all doc files -->
       <_docFilesToPackage Include="%(FilesToPackage.RootDir)%(FilesToPackage.Directory)**\%(FilesToPackage.FileName).xml" />
 
-      <_docFilesToPackage Condition="'$(CoreFXOverridePath)' != ''" Include="@(FilesToPackage->'$(CoreFXOverridePath)/../../bin/docs/%(FileName).xml')" />
+      <_coreFXOverrideDocFiles Condition="'$(CoreFXOverridePath)' != ''" Include="@(FilesToPackage->'$(CoreFXOverridePath)/../../bin/docs/%(FileName).xml')" />
+      <_docFilesToPackage Include="@(_coreFXOverrideDocFiles)" Condition="Exists('%(Identity)')" />
 
       <FilesToPackage Include="@(_docFilesToPackage)">
         <TargetPath Condition="'%(_docFilesToPackage.TargetPath)' != ''">ref/$(PackageTargetFramework)/%(RecursiveDir)</TargetPath>
