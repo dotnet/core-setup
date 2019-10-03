@@ -69,6 +69,16 @@
         <CoreCLRFile>@(CoreCLRFiles)</CoreCLRFile>
       </OverriddenRuntimeFiles>
 
+      <LongNameDacFile Include="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(FileName)').StartsWith('mscordaccore_'))">
+        <TargetPath>%(PathInPackage)</TargetPath>
+      </LongNameDacFile>
+
+      <ShortNameDacFileOverride Include="@(CoreCLRFiles)" Condition="'%(FileName)%(Extension)' == 'mscordaccore.dll'" />
+
+      <OverriddenRuntimeFiles Include="@(LongNameDacFile)">
+        <CoreCLRFile>@(ShortNameDacFileOverride)</CoreCLRFile>
+      </OverriddenRuntimeFiles>
+
       <OverriddenRuntimeFiles>
         <IsNative Condition="$([System.String]::new('%(Identity)').ToLowerInvariant().Replace('\', '/').Contains('/native/'))">true</IsNative>
       </OverriddenRuntimeFiles>
