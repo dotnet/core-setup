@@ -10,7 +10,7 @@
       <CoreCLRFiles Include="$(CoreCLROverridePath)/*.*" />
       <CoreCLRFiles Include="$(CoreCLROverridePath)/Redist/**/*.dll" />
       <CoreCLRFiles Condition="'$(CoreCLRPDBOverridePath)' != ''"
-        Include="$(CoreCLRPDBOverridePath)/*.pdb;$(CoreCLRPDBOverridePath)/*.dbg;$(CoreCLRPDBOverridePath)/*.dylib;$(CoreCLRPDBOverridePath)/*.dylib.dwarf" />
+        Include="$(CoreCLRPDBOverridePath)/*.pdb;$(CoreCLRPDBOverridePath)/*.dbg;$(CoreCLRPDBOverridePath)/*.dwarf" />
 
       <OverriddenRuntimeFiles Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'">
         <CoreCLRFile>@(CoreCLRFiles)</CoreCLRFile>
