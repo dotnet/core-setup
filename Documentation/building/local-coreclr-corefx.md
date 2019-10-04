@@ -13,7 +13,7 @@ build.cmd /p:CoreCLROverridePath=d:\git\coreclr\bin\Product\Windows_NT.x64.Relea
 
 By convention the project will look for PDBs in a directory under `$(CoreCLROverridePath)/PDB` and if found will also copy them. If not found no PDBs will be copied. If you want to explicitly set the PDB path then you can pass `CoreCLRPDBOverridePath` property to that PDB directory.
 Once you have updated your CoreCLR you can run tests however you usually do and it should be using your copy of CoreCLR.
-If you prefer, you can use a Debug build of System.Private.CoreLib, but if you do you must also use a Debug build of the native portions of the runtime, e.g. coreclr.dll. Tests with a Debug runtime will execute much more slowly than with Release runtime bits.
+If you prefer, you can use a Debug build of System.Private.CoreLib, but if you do you must also use a Debug build of the native portions of the runtime, e.g. coreclr.dll. Tests with a Debug runtime will execute much more slowly than with Release runtime bits. This override is only enabled for building the NETCoreApp shared framework.
 
 ## Testing with private CoreFX bits
 
@@ -26,4 +26,4 @@ Similarly to how Core-Setup consumes CoreCLR, Core-Setup also consumes CoreFX fr
 build.cmd /p:CoreFXOverridePath=d:\git\corefx\artifacts\packages\Debug
 ```
 
-The Core-Setup build will resolve the correct libraries to use to build the shared framework based on the restored packages and will locate the files in the output directory based on the nuspec file of the shared-framework package in the local CoreFX build.
+The Core-Setup build will resolve the correct libraries to use to build the NETCoreApp shared framework based on the restored packages and will locate the files in the output directory based on the nuspec file of the shared-framework package in the local CoreFX build. This override does not enable using a local CoreFX build when creating the WindowsDesktop shared framework.
