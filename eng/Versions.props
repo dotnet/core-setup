@@ -69,15 +69,19 @@
     <!-- wpf-int -->
     <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-servicing.19502.10</MicrosoftDotNetWpfDncEngPackageVersion>
     <!-- Not auto-updated. -->
-    <MicrosoftBuildPackageVersion>15.7.179</MicrosoftBuildPackageVersion>
-    <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
-    <MicrosoftBuildTasksCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildTasksCorePackageVersion>
-    <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>1.1.1</MicrosoftDotNetPlatformAbstractionsPackageVersion>
-    <NugetProjectModelPackageVersion>4.9.4</NugetProjectModelPackageVersion>
-    <NugetPackagingPackageVersion>4.9.4</NugetPackagingPackageVersion>
     <MicrosoftTargetingPackPrivateWinRTPackageVersion>1.0.5</MicrosoftTargetingPackPrivateWinRTPackageVersion>
     <MicrosoftDiaSymReaderNativePackageVersion>1.7.0</MicrosoftDiaSymReaderNativePackageVersion>
+    <!--
+      These are used as reference assemblies only, so they must not take a ProdCon/source-build
+      version. Insert "RefOnly" to avoid assignment via PVP.
+    -->
+    <RefOnlyMicrosoftBuildPackageVersion>15.7.179</RefOnlyMicrosoftBuildPackageVersion>
+    <RefOnlyMicrosoftBuildFrameworkPackageVersion>$(RefOnlyMicrosoftBuildPackageVersion)</RefOnlyMicrosoftBuildFrameworkPackageVersion>
+    <RefOnlyMicrosoftBuildTasksCorePackageVersion>$(RefOnlyMicrosoftBuildPackageVersion)</RefOnlyMicrosoftBuildTasksCorePackageVersion>
+    <RefOnlyMicrosoftBuildUtilitiesCorePackageVersion>$(RefOnlyMicrosoftBuildPackageVersion)</RefOnlyMicrosoftBuildUtilitiesCorePackageVersion>
+    <RefOnlyNugetProjectModelPackageVersion>4.9.4</RefOnlyNugetProjectModelPackageVersion>
+    <RefOnlyNugetPackagingPackageVersion>4.9.4</RefOnlyNugetPackagingPackageVersion>
   </PropertyGroup>
   <!--Package names-->
   <PropertyGroup>
