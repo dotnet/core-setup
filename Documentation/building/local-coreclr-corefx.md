@@ -8,7 +8,7 @@ Generally the Core-Setup build system gets the CoreCLR from a NuGet package whic
 2. Build Core-Setup either passing in the `CoreCLROverridePath` property or setting it as an environment variable:
 
 ```batch
-build.cmd /p:CoreCLROverridePath=d:\git\coreclr\bin\Product\Windows_NT.x64.Release\
+build.cmd /p:CoreCLROverridePath=d:\git\coreclr\bin\Product\Windows_NT.x64.Release
 ```
 
 By convention the project will look for PDBs in a directory under `$(CoreCLROverridePath)/PDB` and if found will also copy them. If not found no PDBs will be copied. If you want to explicitly set the PDB path then you can pass `CoreCLRPDBOverridePath` property to that PDB directory.
