@@ -121,17 +121,17 @@
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>28f54a4013e85774e2a2793c5c7ca2b36948f996</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-preview1.19501.1" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-preview1.19504.1" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
-      <Sha>be3d33927476deb6e299c69cc68f0c54ed1b828c</Sha>
+      <Sha>1934207dfd7aa570337791a67e4eeec4f6b82265</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-preview1.19501.6" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-preview1.19505.1" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>9a67316ef068c3f4a78a11916777b505b0bbacca</Sha>
+      <Sha>17d637dbe1d67cadaf4b0a151bd2f6daa5ed97d1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-preview1.19501.19">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-preview1.19505.4">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>a39d0313a23f0e74822f6aa1f714c187f5f33a49</Sha>
+      <Sha>056a8fd43e139de7654e9824977c1aa767a3b241</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
