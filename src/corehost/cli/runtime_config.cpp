@@ -187,40 +187,41 @@ bool runtime_config_t::parse_opts(const json_parser_t::value_t& opts)
         m_is_framework_dependent = true;
 
         fx_reference_t fx_out;
-        rc = parse_framework(framework->value, fx_out);
-        if (rc)
+        if (!parse_framework(framework->value, fx_out))
         {
-            m_frameworks.push_back(fx_out);
+            return false;
         }
+
+        m_frameworks.push_back(fx_out);
     }
 
-    if (rc)
+    const auto& iter = opts_obj.FindMember(_X("frameworks"));
+    if (iter != opts_obj.MemberEnd())
     {
-        const auto& iter = opts_obj.FindMember(_X("frameworks"));
-        if (iter != opts_obj.MemberEnd())
-        {
-            m_is_framework_dependent = true;
+        m_is_framework_dependent = true;
 
-            rc = read_framework_array(iter->value, m_frameworks);
+        if (!read_framework_array(iter->value, m_frameworks))
+        {
+            return false;
         }
     }
 
-    if (rc)
+    const auto& includedFrameworks = opts_obj.FindMember(_X("includedFrameworks"));
+    if (includedFrameworks != opts_obj.MemberEnd())
     {
-        const auto& includedFrameworks = opts_obj.FindMember(_X("includedFrameworks"));
-        if (includedFrameworks != opts_obj.MemberEnd())
+        if (m_is_framework_dependent)
         {
-            if (m_is_framework_dependent)
-            {
-                trace::error(_X("It's invalid to specify both `framework`/`frameworks` and `includedFrameworks` properties."));
-                return false;
-            }
+            trace::error(_X("It's invalid to specify both `framework`/`frameworks` and `includedFrameworks` properties."));
+            return false;
+        }
 
-            rc = read_framework_array(includedFrameworks->value, m_included_frameworks, /*name_and_version_only*/ true);
+        if (!read_framework_array(includedFrameworks->value, m_included_frameworks, /*name_and_version_only*/ true))
+        {
+            return false;
         }
     }
 
-    return rc;
+    return true;
 }
 
 namespace
