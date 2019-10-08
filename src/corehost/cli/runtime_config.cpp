@@ -180,7 +180,6 @@ bool runtime_config_t::parse_opts(const json_parser_t::value_t& opts)
     }
 
     // Step #3: read the "framework" and "frameworks" section
-    bool rc = true;
     const auto& framework = opts_obj.FindMember(_X("framework"));
     if (framework != opts_obj.MemberEnd())
     {
