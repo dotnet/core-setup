@@ -31,34 +31,34 @@
     <!-- sourcelink -->
     <MicrosoftSourceLinkVersion>1.0.0-beta2-19367-01</MicrosoftSourceLinkVersion>
     <!-- corefx -->
-    <MicrosoftNETCorePlatformsPackageVersion>3.1.0-preview2.19510.10</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreTargetsPackageVersion>3.1.0-preview2.19510.10</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.7.0-preview2.19510.10</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftWin32RegistryAccessControlVersion>4.7.0-preview2.19510.10</MicrosoftWin32RegistryAccessControlVersion>
-    <MicrosoftWin32RegistryVersion>4.7.0-preview2.19510.10</MicrosoftWin32RegistryVersion>
-    <MicrosoftWin32SystemEventsVersion>4.7.0-preview2.19510.10</MicrosoftWin32SystemEventsVersion>
-    <MicrosoftWindowsCompatibilityPackageVersion>3.1.0-preview2.19510.10</MicrosoftWindowsCompatibilityPackageVersion>
-    <SystemCodeDomVersion>4.7.0-preview2.19510.10</SystemCodeDomVersion>
-    <SystemConfigurationConfigurationManagerVersion>4.7.0-preview2.19510.10</SystemConfigurationConfigurationManagerVersion>
-    <SystemDiagnosticsEventLogVersion>4.7.0-preview2.19510.10</SystemDiagnosticsEventLogVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.1.0-preview2.19510.14</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreTargetsPackageVersion>3.1.0-preview2.19510.14</MicrosoftNETCoreTargetsPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.7.0-preview2.19510.14</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftWin32RegistryAccessControlVersion>4.7.0-preview2.19510.14</MicrosoftWin32RegistryAccessControlVersion>
+    <MicrosoftWin32RegistryVersion>4.7.0-preview2.19510.14</MicrosoftWin32RegistryVersion>
+    <MicrosoftWin32SystemEventsVersion>4.7.0-preview2.19510.14</MicrosoftWin32SystemEventsVersion>
+    <MicrosoftWindowsCompatibilityPackageVersion>3.1.0-preview2.19510.14</MicrosoftWindowsCompatibilityPackageVersion>
+    <SystemCodeDomVersion>4.7.0-preview2.19510.14</SystemCodeDomVersion>
+    <SystemConfigurationConfigurationManagerVersion>4.7.0-preview2.19510.14</SystemConfigurationConfigurationManagerVersion>
+    <SystemDiagnosticsEventLogVersion>4.7.0-preview2.19510.14</SystemDiagnosticsEventLogVersion>
     <SystemDiagnosticsPerformanceCounter>4.6.0-preview8.19375.15</SystemDiagnosticsPerformanceCounter>
-    <SystemDirectoryServicesVersion>4.7.0-preview2.19510.10</SystemDirectoryServicesVersion>
-    <SystemDrawingCommonVersion>4.7.0-preview2.19510.10</SystemDrawingCommonVersion>
-    <SystemIOFileSystemAccessControlVersion>4.7.0-preview2.19510.10</SystemIOFileSystemAccessControlVersion>
-    <SystemIOPackagingVersion>4.7.0-preview2.19510.10</SystemIOPackagingVersion>
+    <SystemDirectoryServicesVersion>4.7.0-preview2.19510.14</SystemDirectoryServicesVersion>
+    <SystemDrawingCommonVersion>4.7.0-preview2.19510.14</SystemDrawingCommonVersion>
+    <SystemIOFileSystemAccessControlVersion>4.7.0-preview2.19510.14</SystemIOFileSystemAccessControlVersion>
+    <SystemIOPackagingVersion>4.7.0-preview2.19510.14</SystemIOPackagingVersion>
     <SystemIOPipesAccessControl>4.5.1</SystemIOPipesAccessControl>
-    <SystemResourcesExtensionsPackageVersion>4.7.0-preview2.19510.10</SystemResourcesExtensionsPackageVersion>
-    <SystemSecurityAccessControlVersion>4.7.0-preview2.19510.10</SystemSecurityAccessControlVersion>
-    <SystemSecurityCryptographyCngVersion>4.7.0-preview2.19510.10</SystemSecurityCryptographyCngVersion>
-    <SystemSecurityCryptographyPkcsVersion>4.7.0-preview2.19510.10</SystemSecurityCryptographyPkcsVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>4.7.0-preview2.19510.10</SystemSecurityCryptographyProtectedDataVersion>
-    <SystemSecurityCryptographyXmlVersion>4.7.0-preview2.19510.10</SystemSecurityCryptographyXmlVersion>
-    <SystemSecurityPermissionsVersion>4.7.0-preview2.19510.10</SystemSecurityPermissionsVersion>
-    <SystemSecurityPrincipalWindowsVersion>4.7.0-preview2.19510.10</SystemSecurityPrincipalWindowsVersion>
-    <SystemTextEncodingsWebVersion>4.7.0-preview2.19510.10</SystemTextEncodingsWebVersion>
-    <SystemTextJsonVersion>4.7.0-preview2.19510.10</SystemTextJsonVersion>
-    <SystemThreadingAccessControlVersion>4.7.0-preview2.19510.10</SystemThreadingAccessControlVersion>
-    <SystemWindowsExtensionsPackageVersion>4.7.0-preview2.19510.10</SystemWindowsExtensionsPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>4.7.0-preview2.19510.14</SystemResourcesExtensionsPackageVersion>
+    <SystemSecurityAccessControlVersion>4.7.0-preview2.19510.14</SystemSecurityAccessControlVersion>
+    <SystemSecurityCryptographyCngVersion>4.7.0-preview2.19510.14</SystemSecurityCryptographyCngVersion>
+    <SystemSecurityCryptographyPkcsVersion>4.7.0-preview2.19510.14</SystemSecurityCryptographyPkcsVersion>
+    <SystemSecurityCryptographyProtectedDataVersion>4.7.0-preview2.19510.14</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemSecurityCryptographyXmlVersion>4.7.0-preview2.19510.14</SystemSecurityCryptographyXmlVersion>
+    <SystemSecurityPermissionsVersion>4.7.0-preview2.19510.14</SystemSecurityPermissionsVersion>
+    <SystemSecurityPrincipalWindowsVersion>4.7.0-preview2.19510.14</SystemSecurityPrincipalWindowsVersion>
+    <SystemTextEncodingsWebVersion>4.7.0-preview2.19510.14</SystemTextEncodingsWebVersion>
+    <SystemTextJsonVersion>4.7.0-preview2.19510.14</SystemTextJsonVersion>
+    <SystemThreadingAccessControlVersion>4.7.0-preview2.19510.14</SystemThreadingAccessControlVersion>
+    <SystemWindowsExtensionsPackageVersion>4.7.0-preview2.19510.14</SystemWindowsExtensionsPackageVersion>
     <!-- standard -->
     <NETStandardLibraryPackageVersion>2.1.0</NETStandardLibraryPackageVersion>
     <!-- coreclr -->
