@@ -8,8 +8,6 @@
 #include "trace.h"
 #include "utils.h"
 
-#include <regex>
-
 namespace
 {
     pal::string_t g_buffered_errors;
@@ -79,13 +77,22 @@ namespace
             pal::string_t line;
             pal::stringstream_t ss(g_buffered_errors);
             while (std::getline(ss, line, _X('\n'))){
-                std::wsmatch match;
-                if (std::regex_match(line, match, std::wregex(_X("^The specified framework '(.*?)'(?:, version '(.*)')? was not found.$"))))
+                const pal::string_t prefix = _X("The specified framework '");
+                const pal::string_t suffix = _X("' was not found.");
+                if (starts_with(line, prefix, true) && ends_with(line, suffix, true))
                 {
-                    assert(match.size() == 3);
-                    name = match[1].str();
-                    if (match[2].matched)
-                        version = match[2].str();
+                    pal::string_t framework_info = line.substr(prefix.length(), line.length() - suffix.length() - prefix.length());
+                    const pal::string_t version_prefix = _X("', version '");
+                    size_t pos = framework_info.find(version_prefix);
+                    if (pos != pal::string_t::npos)
+                    {
+                        name = framework_info.substr(0, pos);
+                        version = framework_info.substr(pos + version_prefix.length(), framework_info.length() - pos - version_prefix.length());
+                    }
+                    else
+                    {
+                        name = framework_info;
+                    }
 
                     dialogMsg.append(_X("The framework '"));
                     dialogMsg.append(name);
