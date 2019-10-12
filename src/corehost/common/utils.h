@@ -35,6 +35,7 @@ void remove_trailing_dir_seperator(pal::string_t* dir);
 void replace_char(pal::string_t* path, pal::char_t match, pal::char_t repl);
 pal::string_t get_replaced_char(const pal::string_t& path, pal::char_t match, pal::char_t repl);
 const pal::char_t* get_arch();
+pal::string_t get_current_runtime_id(bool use_fallback);
 bool get_env_shared_store_dirs(std::vector<pal::string_t>* dirs, const pal::string_t& arch, const pal::string_t& tfm);
 bool get_global_shared_store_dirs(std::vector<pal::string_t>* dirs, const pal::string_t& arch, const pal::string_t& tfm);
 bool multilevel_lookup_enabled();

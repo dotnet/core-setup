@@ -200,6 +200,25 @@ const pal::char_t* get_arch()
 #endif
 }
 
+pal::string_t get_current_runtime_id(bool use_fallback)
+{
+    pal::string_t rid;
+    if (pal::getenv(_X("DOTNET_RUNTIME_ID"), &rid))
+        return rid;
+
+    rid = pal::get_current_os_rid_platform();
+    if (rid.empty() && use_fallback)
+        rid = pal::get_current_os_fallback_rid();
+
+    if (!rid.empty())
+    {
+        rid.append(_X("-"));
+        rid.append(get_arch());
+    }
+
+    return rid;
+}
+
 bool get_env_shared_store_dirs(std::vector<pal::string_t>* dirs, const pal::string_t& arch, const pal::string_t& tfm)
 {
     pal::string_t path;

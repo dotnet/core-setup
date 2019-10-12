@@ -65,7 +65,7 @@ namespace
         pal::string_t url = DOTNET_CORE_DOWNLOAD_URL;
         if (error_code == StatusCode::CoreHostLibMissingFailure)
         {
-            url.append(_X("?runtime=latest"));
+            url.append(_X("?missing_runtime=true"));
         }
         else if (error_code == StatusCode::FrameworkMissingFailure)
         {
@@ -118,8 +118,13 @@ namespace
         }
 
         dialogMsg.append(_X("Would you like to download it now?"));
+        url.append(_X("&arch="));
+        url.append(get_arch());
+        pal::string_t rid = get_current_runtime_id(true /*use_fallback*/);
+        url.append(_X("&rid="));
+        url.append(rid);
 
-        trace::verbose(_X("Showing error dialog for application: '%s' - error code: 0x%x - url: '%s'"), executable_name, error_code, url);
+        trace::verbose(_X("Showing error dialog for application: '%s' - error code: 0x%x - url: '%s'"), executable_name, error_code, url.c_str());
         if (::MessageBoxW(nullptr, dialogMsg.c_str(), executable_name, MB_ICONERROR | MB_YESNO) == IDYES)
         {
             // Open the URL in default browser
