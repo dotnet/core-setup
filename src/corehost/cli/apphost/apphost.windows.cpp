@@ -62,7 +62,7 @@ namespace
             return;
 
         pal::string_t dialogMsg = _X("To run this application, you must install .NET Core.\n\n");
-        pal::string_t url = DOTNET_CORE_DOWNLOAD_URL;
+        pal::string_t url = DOTNET_CORE_APPLAUNCH_URL;
         if (error_code == StatusCode::CoreHostLibMissingFailure)
         {
             url.append(_X("?missing_runtime=true"));
