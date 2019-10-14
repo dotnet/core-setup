@@ -80,7 +80,7 @@ private:
     bool m_roll_forward_to_prerelease;
 
     bool parse_framework(const json_object& fx_obj, fx_reference_t& fx_out, bool name_and_version_only = false);
-    bool read_framework_array(web::json::array& frameworks, fx_reference_vector_t& frameworks_out, bool name_and_version_only = false);
+    bool read_framework_array(web::json::array frameworks, fx_reference_vector_t& frameworks_out, bool name_and_version_only = false);
 
     bool mark_specified_setting(specified_setting setting);
 };

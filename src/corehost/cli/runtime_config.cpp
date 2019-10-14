@@ -167,10 +167,8 @@ bool runtime_config_t::parse_opts(const json_value& opts)
         rc = parse_framework(framework_obj, fx_out);
         if (rc)
         {
-            return false;
+            m_frameworks.push_back(fx_out);
         }
-
-        m_frameworks.push_back(fx_out);
     }
 
     if (rc)
@@ -200,7 +198,7 @@ bool runtime_config_t::parse_opts(const json_value& opts)
         }
     }
 
-    return true;
+    return rc;
 }
 
 namespace
@@ -351,7 +349,7 @@ bool runtime_config_t::ensure_dev_config_parsed()
     return true;
 }
 
-bool runtime_config_t::read_framework_array(const web::json::array frameworks_json, fx_reference_vector_t& frameworks_out, bool name_and_version_only)
+bool runtime_config_t::read_framework_array(web::json::array frameworks_json, fx_reference_vector_t& frameworks_out, bool name_and_version_only)
 {
     bool rc = true;
 
@@ -360,7 +358,7 @@ bool runtime_config_t::read_framework_array(const web::json::array frameworks_js
         const auto& fx_obj = fx_json.as_object();
 
         fx_reference_t fx_out;
-        rc = parse_framework(fx_json, fx_out, name_and_version_only);
+        rc = parse_framework(fx_obj, fx_out, name_and_version_only);
         if (!rc)
         {
             break;
