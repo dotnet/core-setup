@@ -167,8 +167,10 @@ bool runtime_config_t::parse_opts(const json_value& opts)
         rc = parse_framework(framework_obj, fx_out);
         if (rc)
         {
-            m_frameworks.push_back(fx_out);
+            return false;
         }
+
+        m_frameworks.push_back(fx_out);
     }
 
     if (rc)
@@ -179,11 +181,26 @@ bool runtime_config_t::parse_opts(const json_value& opts)
             m_is_framework_dependent = true;
 
             const auto& frameworks_obj = iter->second.as_array();
-            rc = read_framework_array(frameworks_obj);
+            rc = read_framework_array(frameworks_obj, m_frameworks);
         }
     }
 
-    return rc;
+    if (rc)
+    {
+        const auto& includedFrameworks = opts_obj.find(_X("includedFrameworks"));
+        if (includedFrameworks != opts_obj.end())
+        {
+            if (m_is_framework_dependent)
+            {
+                trace::error(_X("It's invalid to specify both `framework`/`frameworks` and `includedFrameworks` properties."));
+                return false;
+            }
+
+            rc = read_framework_array(includedFrameworks->second.as_array(), m_included_frameworks, /*name_and_version_only*/ true);
+        }
+    }
+
+    return true;
 }
 
 namespace
@@ -202,9 +219,12 @@ namespace
     }
 }
 
-bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t& fx_out)
+bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t& fx_out, bool name_and_version_only)
 {
-    apply_settings_to_fx_reference(m_default_settings, fx_out);
+    if (!name_and_version_only)
+    {
+        apply_settings_to_fx_reference(m_default_settings, fx_out);
+    }
 
     auto fx_name= fx_obj.find(_X("name"));
     if (fx_name != fx_obj.end())
@@ -219,10 +239,15 @@ bool runtime_config_t::parse_framework(const json_object& fx_obj, fx_reference_t
 
         // Release version should prefer release versions, unless the rollForwardToPrerelease is set
         // in which case no preference should be applied.
-        if (!fx_out.get_fx_version_number().is_prerelease() && !m_roll_forward_to_prerelease)
+        if (!name_and_version_only && !fx_out.get_fx_version_number().is_prerelease() && !m_roll_forward_to_prerelease)
         {
             fx_out.set_prefer_release(true);
         }
+    }
+
+    if (name_and_version_only)
+    {
+        return true;
     }
 
     auto roll_forward = fx_obj.find(_X("rollForward"));
@@ -326,7 +351,7 @@ bool runtime_config_t::ensure_dev_config_parsed()
     return true;
 }
 
-bool runtime_config_t::read_framework_array(web::json::array frameworks_json)
+bool runtime_config_t::read_framework_array(const web::json::array frameworks_json, fx_reference_vector_t& frameworks_out, bool name_and_version_only)
 {
     bool rc = true;
 
@@ -335,7 +360,7 @@ bool runtime_config_t::read_framework_array(web::json::array frameworks_json)
         const auto& fx_obj = fx_json.as_object();
 
         fx_reference_t fx_out;
-        rc = parse_framework(fx_obj, fx_out);
+        rc = parse_framework(fx_json, fx_out, name_and_version_only);
         if (!rc)
         {
             break;
@@ -349,17 +374,17 @@ bool runtime_config_t::read_framework_array(web::json::array frameworks_json)
         }
 
         if (std::find_if(
-                m_frameworks.begin(),
-                m_frameworks.end(),
+                frameworks_out.begin(),
+                frameworks_out.end(),
                 [&](const fx_reference_t& item) { return fx_out.get_fx_name() == item.get_fx_name(); })
-            != m_frameworks.end())
+            != frameworks_out.end())
         {
             trace::verbose(_X("Framework %s already specified."), fx_out.get_fx_name().c_str());
             rc = false;
             break;
         }
 
-        m_frameworks.push_back(fx_out);
+        frameworks_out.push_back(fx_out);
     }
 
     return rc;
