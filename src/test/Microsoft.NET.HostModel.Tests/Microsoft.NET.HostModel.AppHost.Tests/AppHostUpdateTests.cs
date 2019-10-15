@@ -180,9 +180,9 @@ namespace Microsoft.NET.HostModel.Tests
                     .Should()
                     .NotBe(-1);
 
-                GetFilePermissionOctal(sourceAppHostMock)
+                GetFilePermissionValue(sourceAppHostMock)
                     .Should()
-                    .Be(444);
+                    .Be(Convert.ToInt32("444", 8));
 
                 HostWriter.CreateAppHost(
                     sourceAppHostMock,
@@ -190,9 +190,9 @@ namespace Microsoft.NET.HostModel.Tests
                     appBinaryFilePath,
                     windowsGraphicalUserInterface: true);
 
-                GetFilePermissionOctal(destinationFilePath)
+                GetFilePermissionValue(destinationFilePath)
                     .Should()
-                    .Be(755);
+                    .Be(Convert.ToInt32("755", 8));
             }
         }
 
@@ -245,7 +245,7 @@ namespace Microsoft.NET.HostModel.Tests
         [DllImport("libc", SetLastError = true)]
         private static extern int chmod(string pathname, int mode);
 
-        private static int GetFilePermissionOctal(string path)
+        private static int GetFilePermissionValue(string path)
         {
             var modeValue = CoreFxFileStatusProvider.GetFileMode(path);
 
@@ -258,12 +258,7 @@ namespace Microsoft.NET.HostModel.Tests
                 .Should()
                 .BeInRange(0, 511);
 
-            // convert to octal number
-            int octal = (modeValue / 64) * 100;
-            modeValue %= 64;
-            octal += (modeValue / 8) * 10;
-            octal += modeValue % 8;
-            return octal;
+            return modeValue;
         }
 
         private static class CoreFxFileStatusProvider
