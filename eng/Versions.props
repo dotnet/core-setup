@@ -25,10 +25,10 @@
   <!--Package versions-->
   <PropertyGroup>
     <!-- arcade -->
-    <MicrosoftDotNetBuildTasksFeedPackageVersion>5.0.0-beta.19511.1</MicrosoftDotNetBuildTasksFeedPackageVersion>
-    <MicrosoftDotNetBuildTasksPackagingPackageVersion>5.0.0-beta.19511.1</MicrosoftDotNetBuildTasksPackagingPackageVersion>
-    <MicrosoftDotNetVersionToolsTasksPackageVersion>5.0.0-beta.19511.1</MicrosoftDotNetVersionToolsTasksPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsPackageVersion>5.0.0-beta.19511.1</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <MicrosoftDotNetBuildTasksFeedPackageVersion>5.0.0-beta.19515.1</MicrosoftDotNetBuildTasksFeedPackageVersion>
+    <MicrosoftDotNetBuildTasksPackagingPackageVersion>5.0.0-beta.19515.1</MicrosoftDotNetBuildTasksPackagingPackageVersion>
+    <MicrosoftDotNetVersionToolsTasksPackageVersion>5.0.0-beta.19515.1</MicrosoftDotNetVersionToolsTasksPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>5.0.0-beta.19515.1</MicrosoftDotNetXUnitExtensionsPackageVersion>
     <!-- Testing -->
     <XUnitPackageVersion>2.4.1</XUnitPackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.0.0-preview6-27804-01</MicrosoftDotNetPlatformAbstractionsPackageVersion>
@@ -61,9 +61,9 @@
     <SystemThreadingAccessControlVersion>5.0.0-alpha1.19504.7</SystemThreadingAccessControlVersion>
     <SystemWindowsExtensionsPackageVersion>5.0.0-alpha1.19504.7</SystemWindowsExtensionsPackageVersion>
     <!-- standard -->
-    <NETStandardLibraryPackageVersion>2.2.0-prerelease.19513.1</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageVersion>2.2.0-prerelease.19515.1</NETStandardLibraryPackageVersion>
     <!-- coreclr -->
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>5.0.0-alpha1.19512.2</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>5.0.0-alpha1.19513.3</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- winforms -->
     <MicrosoftPrivateWinformsPackageVersion>5.0.0-alpha1.19480.6</MicrosoftPrivateWinformsPackageVersion>
     <!-- wpf -->
