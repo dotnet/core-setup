@@ -9,9 +9,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-servicing.19515.13">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-servicing.19516.9">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>b7c9adac194142041f361332082c743e5467be68</Sha>
+      <Sha>c1778515a3bee34cc09c757b5563d0af0c8b1e99</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -27,7 +27,7 @@
     </Dependency>
     <Dependency Name="Microsoft.Windows.Compatibility" Version="3.0.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>b7c9adac194142041f361332082c743e5467be68</Sha>
+      <Sha>c1778515a3bee34cc09c757b5563d0af0c8b1e99</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -51,7 +51,7 @@
     </Dependency>
     <Dependency Name="System.Drawing.Common" Version="4.6.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>b7c9adac194142041f361332082c743e5467be68</Sha>
+      <Sha>c1778515a3bee34cc09c757b5563d0af0c8b1e99</Sha>
     </Dependency>
     <Dependency Name="System.IO.FileSystem.AccessControl" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -75,7 +75,7 @@
     </Dependency>
     <Dependency Name="System.Security.Cryptography.Cng" Version="4.6.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>b7c9adac194142041f361332082c743e5467be68</Sha>
+      <Sha>c1778515a3bee34cc09c757b5563d0af0c8b1e99</Sha>
     </Dependency>
     <Dependency Name="System.Security.Cryptography.Pkcs" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
