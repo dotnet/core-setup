@@ -9,9 +9,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-servicing.19510.8">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-servicing.19516.9">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>ff2f51bf436060f0a6ecad7181746494253dd870</Sha>
+      <Sha>c1778515a3bee34cc09c757b5563d0af0c8b1e99</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -25,9 +25,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Windows.Compatibility" Version="3.0.0">
+    <Dependency Name="Microsoft.Windows.Compatibility" Version="3.0.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
+      <Sha>c1778515a3bee34cc09c757b5563d0af0c8b1e99</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -49,9 +49,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
     </Dependency>
-    <Dependency Name="System.Drawing.Common" Version="4.6.0">
+    <Dependency Name="System.Drawing.Common" Version="4.6.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
+      <Sha>c1778515a3bee34cc09c757b5563d0af0c8b1e99</Sha>
     </Dependency>
     <Dependency Name="System.IO.FileSystem.AccessControl" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -73,9 +73,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
     </Dependency>
-    <Dependency Name="System.Security.Cryptography.Cng" Version="4.6.0">
+    <Dependency Name="System.Security.Cryptography.Cng" Version="4.6.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
+      <Sha>c1778515a3bee34cc09c757b5563d0af0c8b1e99</Sha>
     </Dependency>
     <Dependency Name="System.Security.Cryptography.Pkcs" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>

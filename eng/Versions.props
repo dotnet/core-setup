@@ -32,23 +32,23 @@
     <!-- corefx -->
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>3.0.0</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-servicing.19510.8</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-servicing.19516.9</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftWin32RegistryAccessControlVersion>4.6.0</MicrosoftWin32RegistryAccessControlVersion>
     <MicrosoftWin32RegistryVersion>4.6.0</MicrosoftWin32RegistryVersion>
     <MicrosoftWin32SystemEventsVersion>4.6.0</MicrosoftWin32SystemEventsVersion>
-    <MicrosoftWindowsCompatibilityPackageVersion>3.0.0</MicrosoftWindowsCompatibilityPackageVersion>
+    <MicrosoftWindowsCompatibilityPackageVersion>3.0.1</MicrosoftWindowsCompatibilityPackageVersion>
     <SystemCodeDomVersion>4.6.0</SystemCodeDomVersion>
     <SystemConfigurationConfigurationManagerVersion>4.6.0</SystemConfigurationConfigurationManagerVersion>
     <SystemDiagnosticsEventLogVersion>4.6.0</SystemDiagnosticsEventLogVersion>
     <SystemDiagnosticsPerformanceCounter>4.6.0-preview8.19375.15</SystemDiagnosticsPerformanceCounter>
     <SystemDirectoryServicesVersion>4.6.0</SystemDirectoryServicesVersion>
-    <SystemDrawingCommonVersion>4.6.0</SystemDrawingCommonVersion>
+    <SystemDrawingCommonVersion>4.6.1</SystemDrawingCommonVersion>
     <SystemIOFileSystemAccessControlVersion>4.6.0</SystemIOFileSystemAccessControlVersion>
     <SystemIOPackagingVersion>4.6.0</SystemIOPackagingVersion>
     <SystemIOPipesAccessControl>4.5.1</SystemIOPipesAccessControl>
     <SystemResourcesExtensionsPackageVersion>4.6.0</SystemResourcesExtensionsPackageVersion>
     <SystemSecurityAccessControlVersion>4.6.0</SystemSecurityAccessControlVersion>
-    <SystemSecurityCryptographyCngVersion>4.6.0</SystemSecurityCryptographyCngVersion>
+    <SystemSecurityCryptographyCngVersion>4.6.1</SystemSecurityCryptographyCngVersion>
     <SystemSecurityCryptographyPkcsVersion>4.6.0</SystemSecurityCryptographyPkcsVersion>
     <SystemSecurityCryptographyProtectedDataVersion>4.6.0</SystemSecurityCryptographyProtectedDataVersion>
     <SystemSecurityCryptographyXmlVersion>4.6.0</SystemSecurityCryptographyXmlVersion>
