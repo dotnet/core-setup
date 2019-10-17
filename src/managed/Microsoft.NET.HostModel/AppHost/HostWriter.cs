@@ -98,10 +98,11 @@ namespace Microsoft.NET.HostModel.AppHost
                     const int EINTR = 4;
                     int chmodReturnCode = 0;
 
-                    for (int retries = 500; chmodReturnCode == -1 && Marshal.GetLastWin32Error() == EINTR && retries > 0; --retries)
+                    do
                     {
                         chmodReturnCode = chmod(appHostDestinationFilePath, filePermissionOctal);
                     }
+                    while (chmodReturnCode == -1 && Marshal.GetLastWin32Error() == EINTR);
 
                     if (chmodReturnCode == -1)
                     {
