@@ -1,7 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
-  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.Wpf.DncEng" Version="$(MicrosoftDotNetWpfDncEngPackageVersion)" />
