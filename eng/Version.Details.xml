@@ -117,9 +117,9 @@
       <Uri>https://github.com/dotnet/standard</Uri>
       <Sha>a5b5f2e1e369972c8ff1e2183979fab6099f52ef</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.0-preview2.19516.2">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.0-preview2.19517.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>617091aa904c74fe8a42cebf7fcb56677c60c079</Sha>
+      <Sha>b9c739940772f2745e4fdf6c2951fd7c7d3c7be0</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-preview1.19515.8" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
