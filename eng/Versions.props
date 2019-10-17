@@ -40,7 +40,7 @@
     <SystemCodeDomVersion>4.6.0</SystemCodeDomVersion>
     <SystemConfigurationConfigurationManagerVersion>4.6.0</SystemConfigurationConfigurationManagerVersion>
     <SystemDiagnosticsEventLogVersion>4.6.0</SystemDiagnosticsEventLogVersion>
-    <SystemDiagnosticsPerformanceCounterVersion>4.6.0-preview8.19375.15</SystemDiagnosticsPerformanceCounterVersion>
+    <SystemDiagnosticsPerformanceCounterVersion>4.6.0</SystemDiagnosticsPerformanceCounterVersion>
     <SystemDirectoryServicesVersion>4.6.0</SystemDirectoryServicesVersion>
     <SystemDrawingCommonVersion>4.6.1</SystemDrawingCommonVersion>
     <SystemIOFileSystemAccessControlVersion>4.6.0</SystemIOFileSystemAccessControlVersion>
