@@ -180,7 +180,7 @@ namespace Microsoft.NET.HostModel.Tests
                     .Should()
                     .NotBe(-1);
 
-                Marshal.GetLastWin32Error()
+                GetLastError()
                     .Should()
                     .NotBe(4); // EINTR
 
@@ -198,6 +198,8 @@ namespace Microsoft.NET.HostModel.Tests
                     .Should()
                     .Be(Convert.ToInt32("755", 8));
             }
+
+            int GetLastError() => Marshal.GetLastWin32Error();
         }
 
         private string PrepareAppHostMockFile(TestDirectory testDirectory, Action<byte[]> customize = null)
