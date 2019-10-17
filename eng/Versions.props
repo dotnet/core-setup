@@ -41,12 +41,12 @@
     <SystemCodeDomVersion>4.7.0-preview2.19521.18</SystemCodeDomVersion>
     <SystemConfigurationConfigurationManagerVersion>4.7.0-preview2.19521.18</SystemConfigurationConfigurationManagerVersion>
     <SystemDiagnosticsEventLogVersion>4.7.0-preview2.19521.18</SystemDiagnosticsEventLogVersion>
-    <SystemDiagnosticsPerformanceCounter>4.6.0-preview8.19375.15</SystemDiagnosticsPerformanceCounter>
+    <SystemDiagnosticsPerformanceCounterVersion>4.6.0-preview8.19375.15</SystemDiagnosticsPerformanceCounterVersion>
     <SystemDirectoryServicesVersion>4.7.0-preview2.19521.18</SystemDirectoryServicesVersion>
     <SystemDrawingCommonVersion>4.7.0-preview2.19521.18</SystemDrawingCommonVersion>
     <SystemIOFileSystemAccessControlVersion>4.7.0-preview2.19521.18</SystemIOFileSystemAccessControlVersion>
     <SystemIOPackagingVersion>4.7.0-preview2.19521.18</SystemIOPackagingVersion>
-    <SystemIOPipesAccessControl>4.5.1</SystemIOPipesAccessControl>
+    <SystemIOPipesAccessControlVersion>4.5.1</SystemIOPipesAccessControlVersion>
     <SystemResourcesExtensionsPackageVersion>4.7.0-preview2.19521.18</SystemResourcesExtensionsPackageVersion>
     <SystemSecurityAccessControlVersion>4.7.0-preview2.19521.18</SystemSecurityAccessControlVersion>
     <SystemSecurityCryptographyCngVersion>4.7.0-preview2.19521.18</SystemSecurityCryptographyCngVersion>
