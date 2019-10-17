@@ -377,7 +377,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 if (missingHostfxr)
                 {
                     expectedErrorCode = Constants.ErrorCode.CoreHostLibMissingFailure.ToString("x");
-                    expectedUrlQuery = "?missing_runtime=true";
+                    expectedUrlQuery = "missing_runtime=true";
                 }
                 else
                 {
@@ -385,7 +385,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                         .Build()
                         .BinPath;
                     expectedErrorCode = Constants.ErrorCode.FrameworkMissingFailure.ToString("x");
-                    expectedUrlQuery = $"?framework={Constants.MicrosoftNETCoreApp}&version={sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}";
+                    expectedUrlQuery = $"framework={Constants.MicrosoftNETCoreApp}&framework_version={sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}";
                 }
 
                 Command command = Command.Create(appExe)
@@ -400,7 +400,8 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
                 command.WaitForExit(true)
                     .Should().Fail()
                     .And.HaveStdErrContaining($"Showing error dialog for application: '{Path.GetFileName(appExe)}' - error code: 0x{expectedErrorCode}")
-                    .And.HaveStdErrContaining(expectedUrlQuery);
+                    .And.HaveStdErrContaining($"url: 'https://aka.ms/dotnet-core-applaunch?{expectedUrlQuery}")
+                    .And.HaveStdErrContaining($"apphost_version={sharedTestState.RepoDirectories.MicrosoftNETCoreAppVersion}");
             }
         }
 

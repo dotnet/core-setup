@@ -62,67 +62,40 @@ namespace
             return;
 
         pal::string_t dialogMsg = _X("To run this application, you must install .NET Core.\n\n");
-        pal::string_t url = DOTNET_CORE_APPLAUNCH_URL;
+        pal::string_t url;
         if (error_code == StatusCode::CoreHostLibMissingFailure)
         {
-            url.append(_X("?missing_runtime=true"));
+            url = get_download_url();
         }
         else if (error_code == StatusCode::FrameworkMissingFailure)
         {
-            pal::string_t name;
-            pal::string_t version;
-
             // We don't have a great way of passing out different kinds of detailed error info across components, so
             // just match the expected error string. See fx_resolver.messages.cpp.
             pal::string_t line;
             pal::stringstream_t ss(g_buffered_errors);
             while (std::getline(ss, line, _X('\n'))){
-                const pal::string_t prefix = _X("The specified framework '");
+                const pal::string_t prefix = _X("The framework '");
                 const pal::string_t suffix = _X("' was not found.");
+                const pal::string_t url_prefix = _X("  - ") DOTNET_CORE_APPLAUNCH_URL _X("?");
                 if (starts_with(line, prefix, true) && ends_with(line, suffix, true))
                 {
-                    pal::string_t framework_info = line.substr(prefix.length(), line.length() - suffix.length() - prefix.length());
-                    const pal::string_t version_prefix = _X("', version '");
-                    size_t pos = framework_info.find(version_prefix);
-                    if (pos != pal::string_t::npos)
-                    {
-                        name = framework_info.substr(0, pos);
-                        version = framework_info.substr(pos + version_prefix.length(), framework_info.length() - pos - version_prefix.length());
-                    }
-                    else
-                    {
-                        name = framework_info;
-                    }
-
-                    dialogMsg.append(_X("The framework '"));
-                    dialogMsg.append(name);
-                    if (!version.empty())
-                    {
-                        dialogMsg.append(_X("', version '"));
-                        dialogMsg.append(version);
-                    }
-                    dialogMsg.append(_X("' was not found.\n\n"));
-
+                    dialogMsg.append(line);
+                    dialogMsg.append(_X("\n\n"));
+                }
+                else if (starts_with(line, url_prefix, true))
+                {
+                    size_t offset = url_prefix.length() - pal::strlen(DOTNET_CORE_APPLAUNCH_URL) - 1;
+                    url = line.substr(offset, line.length() - offset);
                     break;
                 }
-            }
-
-            assert(!name.empty());
-            url.append(_X("?framework="));
-            url.append(name);
-            if (!version.empty())
-            {
-                url.append(_X("&version="));
-                url.append(version);
             }
         }
 
         dialogMsg.append(_X("Would you like to download it now?"));
-        url.append(_X("&arch="));
-        url.append(get_arch());
-        pal::string_t rid = get_current_runtime_id(true /*use_fallback*/);
-        url.append(_X("&rid="));
-        url.append(rid);
+
+        assert(url.length() > 0);
+        url.append(_X("&apphost_version="));
+        url.append(_STRINGIFY(COMMON_HOST_PKG_VER));
 
         trace::verbose(_X("Showing error dialog for application: '%s' - error code: 0x%x - url: '%s'"), executable_name, error_code, url.c_str());
         if (::MessageBoxW(nullptr, dialogMsg.c_str(), executable_name, MB_ICONERROR | MB_YESNO) == IDYES)

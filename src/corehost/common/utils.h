@@ -48,6 +48,10 @@ pal::string_t get_deps_from_app_binary(const pal::string_t& app_base, const pal:
 void get_runtime_config_paths(const pal::string_t& path, const pal::string_t& name, pal::string_t* cfg, pal::string_t* dev_cfg);
 pal::string_t get_dotnet_root_from_fxr_path(const pal::string_t &fxr_path);
 
+// Get a download URL for a specific framework and version
+// If no framework is specified, a download URL for the runtime is returned
+pal::string_t get_download_url(const pal::char_t *framework_name = nullptr, const pal::char_t *framework_version = nullptr);
+
 // Retrieves environment variable which is only used for testing.
 // This will return the value of the variable only if the product binary is stamped
 // with test-only marker.

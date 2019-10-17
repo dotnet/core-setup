@@ -402,6 +402,33 @@ pal::string_t get_dotnet_root_from_fxr_path(const pal::string_t &fxr_path)
     return get_directory(get_directory(fxr_root));
 }
 
+pal::string_t get_download_url(const pal::char_t *framework_name, const pal::char_t *framework_version)
+{
+    pal::string_t url = DOTNET_CORE_APPLAUNCH_URL _X("?");
+    if (framework_name != nullptr && pal::strlen(framework_name) > 0)
+    {
+        url.append(_X("framework="));
+        url.append(framework_name);
+        if (framework_version != nullptr && pal::strlen(framework_version) > 0)
+        {
+            url.append(_X("&framework_version="));
+            url.append(framework_version);
+        }
+    }
+    else
+    {
+        url.append(_X("missing_runtime=true"));
+    }
+
+    url.append(_X("&arch="));
+    url.append(get_arch());
+    pal::string_t rid = get_current_runtime_id(true /*use_fallback*/);
+    url.append(_X("&rid="));
+    url.append(rid);
+
+    return url;
+}
+
 #define TEST_ONLY_MARKER "d38cc827-e34f-4453-9df4-1e796e9f1d07"
 
 // Retrieves environment variable which is only used for testing.
