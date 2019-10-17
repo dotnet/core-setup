@@ -180,6 +180,10 @@ namespace Microsoft.NET.HostModel.Tests
                     .Should()
                     .NotBe(-1);
 
+                Marshal.GetLastWin32Error()
+                    .Should()
+                    .NotBe(4); // EINTR
+
                 GetFilePermissionValue(sourceAppHostMock)
                     .Should()
                     .Be(Convert.ToInt32("444", 8));

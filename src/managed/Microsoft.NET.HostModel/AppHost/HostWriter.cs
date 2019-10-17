@@ -46,15 +46,6 @@ namespace Microsoft.NET.HostModel.AppHost
 
             BinaryUtils.CopyFile(appHostSourceFilePath, appHostDestinationFilePath);
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var filePermissionOctal = Convert.ToInt32("755", 8); // -rwxr-xr-x
-                if (chmod(appHostDestinationFilePath, filePermissionOctal) == -1)
-                {
-                    throw new Win32Exception(Marshal.GetLastWin32Error(), $"Could not set file permission {filePermissionOctal} for {appHostDestinationFilePath}.");
-                }
-            }
-
             bool appHostIsPEImage = false;
 
             void RewriteAppHost()
@@ -101,6 +92,23 @@ namespace Microsoft.NET.HostModel.AppHost
 
             try
             {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    var filePermissionOctal = Convert.ToInt32("755", 8); // -rwxr-xr-x
+                    const int EINTR = 4;
+                    int chmodReturnCode = 0;
+
+                    for (int retries = 500; chmodReturnCode == -1 && Marshal.GetLastWin32Error() == EINTR && retries > 0; --retries)
+                    {
+                        chmodReturnCode = chmod(appHostDestinationFilePath, filePermissionOctal);
+                    }
+
+                    if (chmodReturnCode == -1)
+                    {
+                        throw new Win32Exception(Marshal.GetLastWin32Error(), $"Could not set file permission {filePermissionOctal} for {appHostDestinationFilePath}.");
+                    }
+                }
+
                 RetryUtil.RetryOnIOError(RewriteAppHost);
 
                 RetryUtil.RetryOnWin32Error(UpdateResources);
