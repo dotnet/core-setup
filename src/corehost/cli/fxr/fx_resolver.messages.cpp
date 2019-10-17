@@ -139,9 +139,6 @@ void fx_resolver_t::display_missing_framework_error(
     trace::error(_X(""));
     trace::error(_X("The specified framework can be found at:"));
     trace::error(_X("  - %s"), url.c_str());
-    trace::error(_X(""));
-    trace::error(_X("The .NET Core frameworks can be found at:"));
-    trace::error(_X("  - %s"), DOTNET_CORE_DOWNLOAD_URL);
 }
 
 void fx_resolver_t::display_incompatible_loaded_framework_error(
