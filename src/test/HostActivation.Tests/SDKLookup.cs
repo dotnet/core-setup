@@ -371,6 +371,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         public void SdkLookup_Negative_Version()
         {
             WriteEmptyGlobalJson();
+
             // Add a negative SDK version
             AddAvailableSdkVersions(_exeSdkBaseDir, "-1.-1.-1");
 
@@ -422,6 +423,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         public void SdkLookup_Must_Pick_The_Highest_Semantic_Version()
         {
             WriteEmptyGlobalJson();
+            
             // Add SDK versions
             AddAvailableSdkVersions(_exeSdkBaseDir, "9999.0.0", "9999.0.3-dummy.9", "9999.0.3-dummy.10");
 
@@ -569,8 +571,9 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         [InlineData("latESTMajor")]
         public void It_allows_case_insensitive_roll_forward_policy_names(string rollForward)
         {
-            WriteEmptyGlobalJson();
             const string Requested = "9999.0.100";
+
+            WriteEmptyGlobalJson();
 
             AddAvailableSdkVersions(_exeSdkBaseDir, Requested);
 
@@ -1288,7 +1291,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation
         {
             File.WriteAllText(Path.Combine(_currentWorkingDir, "global.json"), contents);
         }
-
+        
         private void WriteEmptyGlobalJson() => WriteGlobalJson("{}");
     }
 }
