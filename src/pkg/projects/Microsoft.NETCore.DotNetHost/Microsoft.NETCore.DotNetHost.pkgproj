@@ -29,7 +29,7 @@
     <Copy SourceFiles="$(RepoRoot)THIRD-PARTY-NOTICES.TXT"
           DestinationFiles="$(PublishRootDir)ThirdPartyNotices.txt" />
 
-    <Copy SourceFiles="$(RepoRoot)LICENSE.TXT"
+    <Copy SourceFiles="$(RepoRoot)LICENSE"
           DestinationFiles="$(PublishRootDir)LICENSE.txt"
           Condition="'$(TargetsUnix)' == 'true'"/>
 
