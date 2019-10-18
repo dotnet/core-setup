@@ -84,6 +84,14 @@ namespace Microsoft.NET.HostModel.AppHost
             public uint cmdsize;
             public uint dataoff;
             public uint datasize;
+
+            public void ZeroInit()
+            {
+                cmd = 0;
+                cmdsize = 0;
+                dataoff = 0;
+                datasize = 0;
+            }
         }
 
         struct SymtabCommand
@@ -271,7 +279,8 @@ namespace Microsoft.NET.HostModel.AppHost
                                 // Remove the signature command
                                 header->ncmds--;
                                 header->sizeofcmds -= signature->cmdsize;
-                                Unsafe.InitBlock(signature, 0, signature->cmdsize);
+                                
+                                signature->ZeroInit();
 
                                 // Remove the signature blob (note for truncation)
                                 signatureSize = (uint)(fileEnd - symtabEnd);
