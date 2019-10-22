@@ -11,12 +11,12 @@
     <PackageReference Include="System.CodeDom" Version="$(SystemCodeDomVersion)" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="$(SystemDiagnosticsEventLogVersion)" />
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="$(SystemDiagnosticsPerformanceCounter)" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="$(SystemDiagnosticsPerformanceCounterVersion)" />
     <PackageReference Include="System.DirectoryServices" Version="$(SystemDirectoryServicesVersion)" />
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="$(SystemIOFileSystemAccessControlVersion)" />
     <PackageReference Include="System.IO.Packaging" Version="$(SystemIOPackagingVersion)" />
-    <PackageReference Include="System.IO.Pipes.AccessControl" Version="$(SystemIOPipesAccessControl)" />
+    <PackageReference Include="System.IO.Pipes.AccessControl" Version="$(SystemIOPipesAccessControlVersion)" />
     <PackageReference Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
     <PackageReference Include="System.Security.AccessControl" Version="$(SystemSecurityAccessControlVersion)" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="$(SystemSecurityCryptographyCngVersion)" />
