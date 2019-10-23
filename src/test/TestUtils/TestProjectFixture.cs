@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.CoreSetup.Test
 
             _assemblyName = assemblyName;
 
-            var sourceTestProjectPath = Path.Combine(repoDirectoriesProvider.RepoRoot, "src", "test", "Assets", "TestProjects", testProjectName);
+            var sourceTestProjectPath = Path.Combine(repoDirectoriesProvider.TestAssetsFolder, "TestProjects", testProjectName);
             _sourceTestProject = new TestProject(
                 sourceTestProjectPath,
                 assemblyName: _assemblyName);
