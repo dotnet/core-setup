@@ -381,7 +381,8 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                 bool success = exitCode == 0;
                 string msgExpectedToFail = "";
 
-                if (fExpectedToFail) {
+                if (fExpectedToFail)
+                {
                     success = !success;
                     msgExpectedToFail = "failed as expected and ";
                 }
