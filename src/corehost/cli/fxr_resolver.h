@@ -13,6 +13,7 @@
 
 namespace fxr_resolver
 {
+    bool is_runtime_embedded();
     bool try_get_path(const pal::string_t& root_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path);
     bool try_get_path_from_dotnet_root(const pal::string_t& dotnet_root, pal::string_t* out_fxr_path);
     bool try_get_existing_fxr(pal::dll_t *out_fxr, pal::string_t *out_fxr_path);
@@ -36,6 +37,11 @@ int load_fxr_and_get_delegate(hostfxr_delegate_type type, THostPathToConfigCallb
     {
         dotnet_root = get_dotnet_root_from_fxr_path(fxr_path);
         trace::verbose(_X("The library %s was already loaded. Reusing the previously loaded library [%s]."), LIBFXR_NAME, fxr_path.c_str());
+    }
+    else if (fxr_resolver::is_runtime_embedded())
+    {
+        trace::error(_X("The .NET Core runtime is embedded in the current executable. Dynamic loading of components is not supported."));
+        return StatusCode::EmbeddedRuntimeNotSupported;
     }
     else
     {

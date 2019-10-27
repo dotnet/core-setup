@@ -28,6 +28,8 @@ This error code is also returned from `corehost_resolve_component_dependencies` 
 * `CoreHostCurHostFindFailure` (`0x80008085`) - If the hosting component is trying to use the path to the current module (the hosting component itself) and from it deduce the location of the installation. Either the location of the current module could not be determined (some weird OS call failure) or the location is not in the right place relative to other expected components.  
 For example the `hostfxr` may look at its location and try to deduce the location of the `shared` folder with the framework from it. It assumes the typical install layout on disk. If this doesn't work, this error will be returned.
 
+* `EmbeddedRuntimeNotSupported` (`0x80008086`) - The hosting component is running in an environment with an embedded runtime, which is not supported for the attempted operation.
+
 * `CoreClrResolveFailure` (`0x80008087`) - If the `coreclr` library could not be found. The hosting layer (`hostpolicy`) looks for `coreclr` library either next to the app itself (for self-contained) or in the root framework (for framework-dependent). This search can be done purely by looking at disk or more commonly by looking into the respective `.deps.json`. If the `coreclr` library is missing in `.deps.json` or it's there but doesn't exist on disk, this error is returned.
 
 * `CoreClrBindFailure` (`0x80008088`) - The loaded `coreclr` library doesn't have one of the required entry points.

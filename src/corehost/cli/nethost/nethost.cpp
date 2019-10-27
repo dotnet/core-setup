@@ -40,6 +40,12 @@ NETHOST_API int NETHOST_CALLTYPE get_hostfxr_path(
     pal::string_t fxr_path;
     if (!fxr_resolver::try_get_existing_fxr(&fxr, &fxr_path))
     {
+        if (fxr_resolver::is_runtime_embedded())
+        {
+            trace::error(_X("The .NET Core runtime is embedded in the current executable. Using hostfxr is not supported."));
+            return StatusCode::EmbeddedRuntimeNotSupported;
+        }
+
         if (parameters != nullptr && parameters->dotnet_root != nullptr)
         {
             pal::string_t dotnet_root = parameters->dotnet_root;

@@ -522,6 +522,16 @@ bool pal::get_own_executable_path(string_t* recv)
     return GetModuleFileNameWrapper(NULL, recv);
 }
 
+bool pal::get_current_executable(dll_t *exe)
+{
+    dll_t exe_maybe = ::GetModuleHandleW(nullptr);
+    if (exe_maybe == nullptr)
+        return false;
+
+    *exe = exe_maybe;
+    return true;
+}
+
 bool pal::get_current_module(dll_t *mod)
 {
     HMODULE hmod = nullptr;

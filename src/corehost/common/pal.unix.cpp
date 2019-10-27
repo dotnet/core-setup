@@ -737,6 +737,16 @@ bool pal::get_module_path(dll_t module, string_t* recv)
     return false;
 }
 
+bool pal::get_current_executable(dll_t *exe)
+{
+    dll_t exe_maybe = dlopen(nullptr, RTLD_LAZY);
+    if (exe_maybe == nullptr)
+        return false;
+
+    *exe = exe_maybe;
+    return true;
+}
+
 bool pal::get_current_module(dll_t *mod)
 {
     return false;
