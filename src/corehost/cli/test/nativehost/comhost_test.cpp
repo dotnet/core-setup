@@ -72,7 +72,7 @@ namespace
     {
         ss << "Activation of " << clsid << (FAILED(hr) ? " failed. " : " succeeded. ") << activationNumber << " of " << total;
         if (FAILED(hr))
-            ss << "(" << std::hex << std::showbase << hr << ")";
+            ss << " (" << std::hex << std::showbase << hr << ")";
 
         ss << std::endl;
     }

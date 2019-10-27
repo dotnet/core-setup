@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         public string NativeHostPath { get; }
         public string NethostPath { get; }
         public RepoDirectoriesProvider RepoDirectories { get; }
+        public string SingleFileHostPath { get; }
 
         public SharedTestStateBase()
         {
@@ -37,11 +38,24 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             File.Copy(
                 Path.Combine(RepoDirectories.CorehostPackages, nethostName),
                 NethostPath);
+
+            // Copy over mock single-file native host
+            string singleFileHostName = RuntimeInformationExtensions.GetExeFileNameForCurrentPlatform("nativehost_singlefile");
+            SingleFileHostPath = Path.Combine(BaseDirectory, singleFileHostName);
+            File.Copy(Path.Combine(RepoDirectories.Artifacts, "corehost_test", singleFileHostName), SingleFileHostPath);
         }
 
         public Command CreateNativeHostCommand(IEnumerable<string> args, string dotNetRoot)
         {
             return Command.Create(NativeHostPath, args)
+                .EnableTracingAndCaptureOutputs()
+                .DotNetRoot(dotNetRoot)
+                .MultilevelLookup(false);
+        }
+
+        public Command CreateSingleFileHostCommand(IEnumerable<string> args, string dotNetRoot)
+        {
+            return Command.Create(SingleFileHostPath, args)
                 .EnableTracingAndCaptureOutputs()
                 .DotNetRoot(dotNetRoot)
                 .MultilevelLookup(false);

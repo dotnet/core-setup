@@ -118,6 +118,30 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
             }
         }
 
+        [Fact]
+        public void ActivateClass_EmbeddedRuntime()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // COM activation is only supported on Windows
+                return;
+            }
+
+            string [] args = {
+                "comhost",
+                "synchronous",
+                "1",
+                sharedState.ComHostPath,
+                sharedState.ClsidString
+            };
+            CommandResult result = sharedState.CreateSingleFileHostCommand(args, sharedState.ComLibraryFixture.BuiltDotnet.BinPath)
+                .Execute();
+
+            result.Should().Fail()
+                .And.HaveStdErrContaining("The .NET Core runtime is embedded in the current executable. Dynamic loading of components is not supported.")
+                .And.HaveStdOutContaining($"Activation of {sharedState.ClsidString} failed. 1 of 1 (0x{Constants.ErrorCode.EmbeddedRuntimeNotSupported.ToString("x")})");
+        }
+
         public class SharedTestState : SharedTestStateBase
         {
             public string ComHostPath { get; }

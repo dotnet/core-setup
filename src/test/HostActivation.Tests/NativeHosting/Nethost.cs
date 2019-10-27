@@ -241,6 +241,17 @@ namespace Microsoft.DotNet.CoreSetup.Test.HostActivation.NativeHosting
         }
 
         [Fact]
+        public void GetHostFxrPath_EmbeddedRuntime()
+        {
+            sharedState.CreateSingleFileHostCommand(new string[]{ GetHostFxrPath }, null)
+                .Execute()
+                .Should().Fail()
+                .And.ExitWith(1)
+                .And.HaveStdOutContaining($"{GetHostFxrPath} failed: 0x{Constants.ErrorCode.EmbeddedRuntimeNotSupported.ToString("x")}")
+                .And.HaveStdErrContaining("The .NET Core runtime is embedded in the current executable. Using hostfxr is not supported.");
+        }
+
+        [Fact]
         public void TestOnlyDisabledByDefault()
         {
             // Intentionally not enabling test-only behavior. This test validates that even if the test-only env. variable is set
