@@ -53,24 +53,6 @@ namespace
     }
 }
 
-bool fxr_resolver::is_runtime_embedded()
-{
-    // Check for an export of DotNetRuntime pointing to a string of 'DotNetRuntime'
-    pal::dll_t exe;
-    if (!pal::get_current_executable(&exe))
-        return false;
-
-    const char *runtime_marker = u8"DotNetRuntime";
-    const char **marker_maybe = reinterpret_cast<const char**>(pal::get_symbol(exe, runtime_marker));
-    if (marker_maybe == nullptr)
-        return false;
-
-    if (::strcmp(*marker_maybe, runtime_marker) == 0)
-        return true;
-
-    return false;
-}
-
 bool fxr_resolver::try_get_path(const pal::string_t& root_path, pal::string_t* out_dotnet_root, pal::string_t* out_fxr_path)
 {
 #if defined(FEATURE_APPHOST) || defined(FEATURE_LIBHOST)

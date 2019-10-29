@@ -1,4 +1,5 @@
 #include <pal.h>
 
-SHARED_API const char *DotNetRuntime;
-const char *DotNetRuntime = u8"DotNetRuntime";
+// Export a symbol indicating this is a single-file host with the runtime embedded.
+SHARED_API bool DotNetRuntimeEmbeddedSingleFileHost;
+bool DotNetRuntimeEmbeddedSingleFileHost = true;

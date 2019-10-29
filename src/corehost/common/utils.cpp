@@ -429,6 +429,18 @@ pal::string_t get_download_url(const pal::char_t *framework_name, const pal::cha
     return url;
 }
 
+bool is_single_file_host()
+{
+    pal::dll_t exe;
+    if (!pal::get_current_executable(&exe))
+        return false;
+
+    // Check for an export of DotNetRuntimeEmbeddedSingleFileHost. Its presence indicates
+    // that the executable was build as a single-file host with the runtime embedded.
+    pal::proc_t marker_maybe = pal::get_symbol(exe, "DotNetRuntimeEmbeddedSingleFileHost");
+    return marker_maybe != nullptr;
+}
+
 #define TEST_ONLY_MARKER "d38cc827-e34f-4453-9df4-1e796e9f1d07"
 
 // Retrieves environment variable which is only used for testing.
