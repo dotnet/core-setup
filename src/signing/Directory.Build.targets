@@ -21,7 +21,7 @@
         ArtifactsPackagesDir=$(ArtifactsPackagesDir)" />
   </Target>
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory).., Directory.Build.targets))\Directory.Build.targets" />
+  <Import Project="..\Directory.Build.targets" />
 
   <!-- If signing is enabled, wait until all projects in this stage are done and sign them. -->
   <Target Name="Build"
