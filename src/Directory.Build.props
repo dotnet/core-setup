@@ -1,6 +1,6 @@
 <Project>
 
-  <!-- TODO: Remove condition and Arcade SDK import below when consolidated. -->
+  <!-- TODO: (Consolidation) Remove when consolidated. -->
   <PropertyGroup>
     <IsRuntimeRepository Condition="Exists('..\..\.dotnet-runtime-placeholder')">true</IsRuntimeRepository>
   </PropertyGroup>
@@ -48,7 +48,7 @@
     <LicenseFile>$(RepoRoot)LICENSE.TXT</LicenseFile>
   </PropertyGroup>
 
-  <!-- TODO: Remove when consolidated. -->
+  <!-- TODO: (Consolidation) Remove when consolidated. -->
   <PropertyGroup Condition="'$(IsRuntimeRepository)' != 'true'">
     <InstallerTasksOutputPath>$(ArtifactsBinDir)installer.tasks\$(Configuration)\</InstallerTasksOutputPath>
     <InstallerTasksAssemblyPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$(InstallerTasksOutputPath)netstandard2.0\installer.tasks.dll</InstallerTasksAssemblyPath>

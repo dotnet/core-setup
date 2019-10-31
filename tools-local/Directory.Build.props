@@ -1,6 +1,6 @@
 <Project>
   
-  <!-- Remove when consolidated. -->
+  <!-- TODO: (Consolidation) Remove when consolidated. -->
   <PropertyGroup>
     <IsRuntimeRepository Condition="Exists('..\..\..\.dotnet-runtime-placeholder')">true</IsRuntimeRepository>
   </PropertyGroup>

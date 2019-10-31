@@ -77,6 +77,7 @@
     <ItemGroup>
       <RepoTaskProjects Include="$(RepoTasksDir)**\*.csproj" />
     </ItemGroup>
+
     <MSBuild
       Projects="@(RepoTaskProjects)"
       Properties="RepoRoot=$(RepoRoot)"
