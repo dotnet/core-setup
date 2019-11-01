@@ -22,10 +22,10 @@
   <!--Package versions-->
   <PropertyGroup>
     <!-- arcade -->
-    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19531.14</MicrosoftDotNetBuildTasksFeedPackageVersion>
-    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19531.14</MicrosoftDotNetBuildTasksPackagingPackageVersion>
-    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19531.14</MicrosoftDotNetVersionToolsTasksPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19531.14</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19531.14</MicrosoftDotNetBuildTasksFeedVersion>
+    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19531.14</MicrosoftDotNetBuildTasksPackagingVersion>
+    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19531.14</MicrosoftDotNetVersionToolsTasksVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19531.14</MicrosoftDotNetXUnitExtensionsVersion>
     <!-- Testing -->
     <XUnitVersion>2.4.1</XUnitVersion>
     <!-- core-setup -->
