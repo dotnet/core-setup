@@ -25,9 +25,9 @@
       <Uri>https://github.com/dotnet/standard</Uri>
       <Sha>1063b6811691a2e009d7733cbf68f897511f00b2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="5.0.0-alpha1.19551.1">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="5.0.0-alpha1.19551.3">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>25520b174be2a8584e9d016a1eaa06b6120c8d6a</Sha>
+      <Sha>e4863f47ec226fb1dd0b20cf953944237c87883c</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
