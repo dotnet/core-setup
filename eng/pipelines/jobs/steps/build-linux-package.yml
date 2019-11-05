@@ -5,12 +5,10 @@ parameters:
   outputRidArg: ''
   packageStepDescription: null
   packagingArgs: ''
-
-variables:
-  - ${{ if contains(variables['Build.DefinitionName'], 'runtime') }}:
+  ${{ if contains(variables['Build.DefinitionName'], 'runtime') }}:
     - name: subsetArg
       value: --subset Installers
-  - ${{ if not(contains(variables['Build.DefinitionName'], 'runtime')) }}:
+  ${{ if not(contains(variables['Build.DefinitionName'], 'runtime')) }}:
     - name: subsetArg
       value: /p:Subset=Installer
 
