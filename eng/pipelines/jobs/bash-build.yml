@@ -147,7 +147,7 @@ jobs:
             distroRid: ${{ packageBuild.imageRid }}
             image: ${{ packageBuild.image }}
             packageStepDescription: Runtime Deps, Runtime, Framework Packs installers
-            subsetArg: ${{ installersSubsetArg }}
+            subsetArg: $(installersSubsetArg)
 
         - ${{ each rid in packageBuild.rids }}:
           # Build distro-dependent packages.
@@ -158,7 +158,7 @@ jobs:
               outputRidArg: /p:OutputRid=${{ rid }}-${{ parameters.targetArchitecture }}
               packageStepDescription: Runtime Deps installers
               packagingArgs: /p:BuildDistroIndependentInstallers=false
-              subsetArg: ${{ installersSubsetArg }}
+              subsetArg: $(installersSubsetArg)
 
     # Files may be owned by root because builds don't set user ID. The next AzDO step runs 'find' in
     # the source tree, which fails due to permissions in the 'NetCore*-Int-Pool' queues. This step
