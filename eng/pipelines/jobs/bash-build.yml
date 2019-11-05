@@ -97,6 +97,13 @@ jobs:
         -w=/root/runtime
         $(PreserveNuGetAuthDockerArgs)
 
+      ${{ if contains(variables['Build.DefinitionName'], 'runtime') }}:
+        - name: installersSubsetArg
+          value: --subset Installers
+      ${{ if not(contains(variables['Build.DefinitionName'], 'runtime')) }}:
+        - name: installersSubsetArg
+          value: /p:Subset=Installer
+
     steps:
 
     - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
@@ -142,6 +149,7 @@ jobs:
             distroRid: ${{ packageBuild.imageRid }}
             image: ${{ packageBuild.image }}
             packageStepDescription: Runtime Deps, Runtime, Framework Packs installers
+            subsetArg: $(installersSubsetArg)
 
         - ${{ each rid in packageBuild.rids }}:
           # Build distro-dependent packages.
@@ -152,6 +160,7 @@ jobs:
               outputRidArg: /p:OutputRid=${{ rid }}-${{ parameters.targetArchitecture }}
               packageStepDescription: Runtime Deps installers
               packagingArgs: /p:BuildDistroIndependentInstallers=false
+              subsetArg: $(installersSubsetArg)
 
     # Files may be owned by root because builds don't set user ID. The next AzDO step runs 'find' in
     # the source tree, which fails due to permissions in the 'NetCore*-Int-Pool' queues. This step

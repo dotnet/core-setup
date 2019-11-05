@@ -5,12 +5,7 @@ parameters:
   outputRidArg: ''
   packageStepDescription: null
   packagingArgs: ''
-  ${{ if contains(variables['Build.DefinitionName'], 'runtime') }}:
-    - name: subsetArg
-      value: --subset Installers
-  ${{ if not(contains(variables['Build.DefinitionName'], 'runtime')) }}:
-    - name: subsetArg
-      value: /p:Subset=Installer
+  subsetArg: ''
 
 steps:
 - ${{ if eq(parameters.buildTraversalBuildDependencies, true) }}:
