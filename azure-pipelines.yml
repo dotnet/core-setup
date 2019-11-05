@@ -85,7 +85,7 @@ stages:
 - stage: Build
   jobs:
   # -------- Build Bash legs (Linux and FreeBSD) --------
-  - template: $(pipelinesPath)/jobs/bash-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/bash-build.yml
     parameters:
       crossBuild: true
       name: Linux_Arm
@@ -95,7 +95,7 @@ stages:
       skipTests: true
       targetArchitecture: arm
 
-  - template: $(pipelinesPath)/jobs/bash-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/bash-build.yml
     parameters:
       crossBuild: true
       name: Linux_Arm64
@@ -107,7 +107,7 @@ stages:
 
   # # Tizen build only for PR build
   # - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
-  #   - template: $(pipelinesPath)/jobs/bash-build.yml
+  #   - template: ${{ variables['pipelinesPath'] }}/jobs/bash-build.yml
   #     parameters:
   #       additionalMSBuildArgs: /p:OverridePackageSource=https:%2F%2Ftizen.myget.org/F/dotnet-core/api/v3/index.json /p:OutputRid=tizen.5.0.0-armel
   #       additionalRunArgs: -e ROOTFS_DIR=/crossrootfs/armel.tizen.build
@@ -119,7 +119,7 @@ stages:
   #       skipTests: true
   #       targetArchitecture: armel
 
-  - template: $(pipelinesPath)/jobs/bash-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/bash-build.yml
     parameters:
       additionalMSBuildArgs: /p:OutputRid=linux-musl-arm64
       crossBuild: true
@@ -130,7 +130,7 @@ stages:
       skipTests: true
       targetArchitecture: arm64
 
-  - template: $(pipelinesPath)/jobs/bash-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/bash-build.yml
     parameters:
       additionalMSBuildArgs: /p:OutputRid=linux-musl-x64
       name: Linux_x64_Alpine39
@@ -138,7 +138,7 @@ stages:
       portableBuild: false
       targetArchitecture: x64
 
-  - template: $(pipelinesPath)/jobs/bash-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/bash-build.yml
     parameters:
       name: Linux_x64_glibc
       dockerImage: mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-50f0d02-20190918214028
@@ -157,7 +157,7 @@ stages:
       portableBuild: true
       targetArchitecture: x64
 
-  - template: $(pipelinesPath)/jobs/bash-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/bash-build.yml
     parameters:
       additionalMSBuildArgs: /p:OutputRid=rhel.6-x64
       name: Linux_x64_Rhel6
@@ -166,34 +166,34 @@ stages:
       targetArchitecture: x64
 
   # -------- Build OSX (macOS) leg --------
-  - template: $(pipelinesPath)/jobs/osx-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/osx-build.yml
     parameters:
       name: OSX
 
   # -------- Build Windows legs --------
   # Windows Arm
-  - template: $(pipelinesPath)/jobs/windows-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/windows-build.yml
     parameters:
       name: Windows_Arm
       skipTests: true
       targetArchitecture: arm
 
   # Windows Arm64
-  - template: $(pipelinesPath)/jobs/windows-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/windows-build.yml
     parameters:
       name: Windows_Arm64
       skipTests: true
       targetArchitecture: arm64
 
   # Windows x64
-  - template: $(pipelinesPath)/jobs/windows-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/windows-build.yml
     parameters:
       name: Windows_x64
       publishRidAgnosticPackages: true
       targetArchitecture: x64
 
   # Windows x86
-  - template: $(pipelinesPath)/jobs/windows-build.yml
+  - template: ${{ variables['pipelinesPath'] }}/jobs/windows-build.yml
     parameters:
       name: Windows_x86
       targetArchitecture: x86
@@ -204,7 +204,7 @@ stages:
     dependsOn: Build
     jobs:
     # Prep artifacts: sign them and upload pipeline artifacts expected by stages-based publishing.
-    - template: $(pipelinesPath)/jobs/prepare-signed-artifacts.yml
+    - template: ${{ variables['pipelinesPath'] }}/jobs/prepare-signed-artifacts.yml
       parameters:
         PublishRidAgnosticPackagesFromJobName: Windows_x64
     # Publish to Build Asset Registry in order to generate the ReleaseConfigs artifact.
@@ -216,7 +216,7 @@ stages:
           name: NetCoreInternal-Pool
           queue: buildpool.windows.10.amd64.vs2017
 
-  - template: $(pipelinesPath)/stages/publish.yml
+  - template: ${{ variables['pipelinesPath'] }}/stages/publish.yml
     parameters:
       # Publish channel configuration. The publish template wraps Arcade publishing and adds some
       # extras that aren't implemented in Arcade yet.
