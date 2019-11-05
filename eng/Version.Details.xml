@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="5.0.0-alpha.1.19554.7">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="5.0.0-alpha.1.19554.9">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>bc7a5b1899f081dad41b418d6538a429caf5e7bf</Sha>
+      <Sha>279292804fa4f6cb856577e59246ac934a2ef9e5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Targets" Version="5.0.0-alpha.1.19554.7">
+    <Dependency Name="Microsoft.NETCore.Targets" Version="5.0.0-alpha.1.19554.9">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>bc7a5b1899f081dad41b418d6538a429caf5e7bf</Sha>
+      <Sha>279292804fa4f6cb856577e59246ac934a2ef9e5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="5.0.0-alpha.1.19554.7">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="5.0.0-alpha.1.19554.9">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>bc7a5b1899f081dad41b418d6538a429caf5e7bf</Sha>
+      <Sha>279292804fa4f6cb856577e59246ac934a2ef9e5</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Encodings.Web" Version="5.0.0-alpha.1.19554.7">
+    <Dependency Name="System.Text.Encodings.Web" Version="5.0.0-alpha.1.19554.9">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>bc7a5b1899f081dad41b418d6538a429caf5e7bf</Sha>
+      <Sha>279292804fa4f6cb856577e59246ac934a2ef9e5</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Json" Version="5.0.0-alpha.1.19554.7">
+    <Dependency Name="System.Text.Json" Version="5.0.0-alpha.1.19554.9">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>bc7a5b1899f081dad41b418d6538a429caf5e7bf</Sha>
+      <Sha>279292804fa4f6cb856577e59246ac934a2ef9e5</Sha>
     </Dependency>
     <Dependency Name="NETStandard.Library" Version="2.2.0-prerelease.19554.1">
       <Uri>https://github.com/dotnet/standard</Uri>
