@@ -98,11 +98,9 @@ jobs:
         $(PreserveNuGetAuthDockerArgs)
 
       ${{ if contains(variables['Build.DefinitionName'], 'runtime') }}:
-        - name: installersSubsetArg
-          value: --subset Installers
+        installersSubsetArg: --subset Installers
       ${{ if not(contains(variables['Build.DefinitionName'], 'runtime')) }}:
-        - name: installersSubsetArg
-          value: /p:Subset=Installer
+        installersSubsetArg: /p:Subset=Installer
 
     steps:
 
