@@ -50,11 +50,14 @@ jobs:
         RunArguments: export DotNetBootstrapCliTarPath=/dotnet-sdk-freebsd-x64.tar &&
 
       ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-        BuildScript: ./eng/install-nuget-credprovider-then-build.sh
+        ${{ if not(contains(variables['Build.DefinitionName'], 'runtime')) }}:
+          BuildScript: ./eng/install-nuget-credprovider-then-build.sh
+        ${{ if contains(variables['Build.DefinitionName'], 'runtime') }}:
+          BuildScript: ./eng/install-nuget-credprovider-then-build.sh --subsetCategory installer
         MSBuildScript: /root/coresetup/eng/install-nuget-credprovider-then-msbuild.sh
 
       ${{ if not(and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'))) }}:
-        BuildScript: ./build.sh
+        BuildScript: ./$(buildScriptFileName).sh
         MSBuildScript: /root/coresetup/eng/common/msbuild.sh
 
       CommonMSBuildArgs: >-

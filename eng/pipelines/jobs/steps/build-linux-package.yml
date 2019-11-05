@@ -6,6 +6,14 @@ parameters:
   packageStepDescription: null
   packagingArgs: ''
 
+variables:
+  - ${{ if contains(variables['Build.DefinitionName'], 'runtime') }}:
+    - name: subsetArg
+      value: --subset Installers
+  - ${{ if not(contains(variables['Build.DefinitionName'], 'runtime')) }}:
+    - name: subsetArg
+      value: /p:Subset=Installer
+
 steps:
 - ${{ if eq(parameters.buildTraversalBuildDependencies, true) }}:
   - script: |
@@ -24,12 +32,12 @@ steps:
     df -h
     $(DockerRunMSBuild) ${{ parameters.image }} $(BuildScript) \
       --ci \
-      /p:Subset=Installer \
+      $(subsetArg) \
       /p:UsePrebuiltPortableBinariesForInstallers=true \
       $(PackagePortableBitsArgs) \
       /p:GenerateProjectInstallers=true \
       ${{ parameters.packagingArgs }} \
       $(CommonMSBuildArgs) \
       ${{ parameters.outputRidArg }} \
-      /bl:msbuild.${{ parameters.distroRid }}.installers.binlog
+      /bl:artifacts/log/$(_BuildConfig)/msbuild.${{ parameters.distroRid }}.installers.binlog
   displayName: Package ${{ parameters.packageStepDescription }} - ${{ parameters.distroRid }}
