@@ -71,5 +71,5 @@
       Text="No symbol packages found." />
   </Target>
 
-  <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.targets" />
+  <Import Project="..\Directory.Build.targets" />
 </Project>

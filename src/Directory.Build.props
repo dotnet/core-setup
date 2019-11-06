@@ -4,7 +4,7 @@
   <PropertyGroup>
     <IsRuntimeRepository Condition="Exists('$(MSBuildThisFileDirectory)..\..\.dotnet-runtime-placeholder')">true</IsRuntimeRepository>
   </PropertyGroup>
-  <Import Project="$(MSBuildThisFileDirectory)..\..\Directory.Build.props" Condition="'$(IsRuntimeRepository)' == 'true'" />
+  <Import Project="..\..\Directory.Build.props" Condition="'$(IsRuntimeRepository)' == 'true'" />
 
   <!--
     Import the arcade sdk with these requirements.
