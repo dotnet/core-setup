@@ -22,10 +22,10 @@
   <!--Package versions-->
   <PropertyGroup>
     <!-- arcade -->
-    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19555.7</MicrosoftDotNetBuildTasksFeedVersion>
-    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19555.7</MicrosoftDotNetBuildTasksPackagingVersion>
-    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19555.7</MicrosoftDotNetVersionToolsTasksVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19555.7</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19556.10</MicrosoftDotNetBuildTasksFeedVersion>
+    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19556.10</MicrosoftDotNetBuildTasksPackagingVersion>
+    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19556.10</MicrosoftDotNetVersionToolsTasksVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19556.10</MicrosoftDotNetXUnitExtensionsVersion>
     <!-- Testing -->
     <XUnitVersion>2.4.1</XUnitVersion>
     <!-- core-setup -->
@@ -40,7 +40,7 @@
     <!-- standard -->
     <NETStandardLibraryVersion>2.2.0-prerelease.19555.1</NETStandardLibraryVersion>
     <!-- coreclr -->
-    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19556.1</MicrosoftNETCoreRuntimeCoreCLRVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19556.2</MicrosoftNETCoreRuntimeCoreCLRVersion>
     <!-- Not auto-updated. -->
     <MicrosoftTargetingPackPrivateWinRTVersion>1.0.5</MicrosoftTargetingPackPrivateWinRTVersion>
     <MicrosoftDiaSymReaderNativeVersion>1.7.0</MicrosoftDiaSymReaderNativeVersion>
