@@ -5,38 +5,33 @@
     <Error Condition="!Exists('$(CoreCLROverridePath)')" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not exist." />
     <PropertyGroup>
       <CoreCLRPDBOverridePath Condition="'$(CoreCLRPDBOverridePath)' == '' and Exists('$(CoreCLROverridePath)/PDB')">$(CoreCLROverridePath)/PDB</CoreCLRPDBOverridePath>
+      <CoreCLRCrossTargetComponentFolder Condition="'$(TargetArchitecture)' == 'arm64'">x64</CoreCLRCrossTargetComponentFolder>
+      <CoreCLRCrossTargetComponentFolder Condition="'$(TargetArchitecture)' == 'arm' and '$(TargetsWindows)' == 'true'">x86</CoreCLRCrossTargetComponentFolder>
+      <CoreCLRCrossTargetComponentFolder Condition="'$(TargetArchitecture)' == 'arm' and '$(TargetsLinux)' == 'true'">x64</CoreCLRCrossTargetComponentFolder>
     </PropertyGroup>
     <ItemGroup>
-      <CoreCLRFiles Include="$(CoreCLROverridePath)/*.*" />
+      <CoreCLRFiles Include="$(CoreCLROverridePath)/sharedFramework/*.*" />
+      <CoreCLRFiles Condition="'$(CoreCLRCrossTargetComponentFolder)' != ''" Include="$(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/*.*" />
       <CoreCLRFiles Include="$(CoreCLROverridePath)/Redist/**/*.dll" />
+      <CoreCLRFiles>
+        <IsNative>true</IsNative>
+      </CoreCLRFiles>
+      <CoreCLRFiles Include="$(CoreCLROverridePath)/System.Private.CoreLib.dll" />
       <CoreCLRFiles Condition="'$(CoreCLRPDBOverridePath)' != ''"
         Include="$(CoreCLRPDBOverridePath)/*.pdb;$(CoreCLRPDBOverridePath)/*.dbg;$(CoreCLRPDBOverridePath)/*.dwarf" />
 
-      <OverriddenRuntimeFiles Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'">
-        <CoreCLRFile>@(CoreCLRFiles)</CoreCLRFile>
-      </OverriddenRuntimeFiles>
+      <CoreCLRFiles>
+        <TargetPath>runtime/$(RuntimeIdentifier)/native</TargetPath>
+      </CoreCLRFiles>
 
-      <LongNameDacFile Include="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(FileName)').StartsWith('mscordaccore_'))">
-        <TargetPath>%(PathInPackage)</TargetPath>
-      </LongNameDacFile>
-
-      <ShortNameDacFileOverride Include="@(CoreCLRFiles)" Condition="'%(FileName)%(Extension)' == 'mscordaccore.dll'" />
-
-      <OverriddenRuntimeFiles Include="@(LongNameDacFile)">
-        <CoreCLRFile>@(ShortNameDacFileOverride)</CoreCLRFile>
-      </OverriddenRuntimeFiles>
-
-      <OverriddenRuntimeFiles>
-        <IsNative Condition="$([System.String]::new('%(Identity)').ToLowerInvariant().Replace('\', '/').Contains('/native/'))">true</IsNative>
-      </OverriddenRuntimeFiles>
-
-      <ReferenceCopyLocalPaths Remove="@(OverriddenRuntimeFiles)" />
-      <ReferenceCopyLocalPaths Include="@(OverriddenRuntimeFiles->Metadata('CoreCLRFile'))" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'"/>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(FileName)').StartsWith('mscordaccore_'))" />
+      <ReferenceCopyLocalPaths Include="@(CoreCLRFiles)" />
     </ItemGroup>
 
     <Error Condition="'@(CoreCLRFiles)' == ''" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not contain any files." />
   </Target>
-
+ 
   <Target Name="OverrideFrameworkFilesFromPackageResolve" Condition="'$(CoreFXOverridePath)' != ''" BeforeTargets="GetFilesFromPackageResolve">
     <Error Condition="!Exists('$(CoreFXOverridePath)')" Text="The path provided to CoreFXOverridePath ($(CoreFXOverridePath)) does not exist." />
 
