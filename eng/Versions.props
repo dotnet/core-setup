@@ -40,7 +40,7 @@
     <!-- standard -->
     <NETStandardLibraryVersion>2.2.0-prerelease.19560.1</NETStandardLibraryVersion>
     <!-- coreclr -->
-    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19560.1</MicrosoftNETCoreRuntimeCoreCLRVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19560.2</MicrosoftNETCoreRuntimeCoreCLRVersion>
     <!-- Not auto-updated. -->
     <MicrosoftTargetingPackPrivateWinRTVersion>1.0.5</MicrosoftTargetingPackPrivateWinRTVersion>
     <MicrosoftDiaSymReaderNativeVersion>1.7.0</MicrosoftDiaSymReaderNativeVersion>
