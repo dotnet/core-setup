@@ -37,7 +37,7 @@
       </CoreCLRFiles>
 
       <CoreCLRCrossTargetFiles>
-        <TargetPath>runtime/$(CoreCLRCrossTargetComponentFolder)_$(TargetArchitecture)/native</TargetPath>
+        <TargetPath>runtime/$(CoreCLRCrossTargetComponentFolderName)_$(TargetArchitecture)/native</TargetPath>
       </CoreCLRCrossTargetFiles>
 
       <CoreCLRFiles Include="@(CoreCLRCrossTargetFiles)" />
