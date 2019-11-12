@@ -4,40 +4,43 @@
   <Target Name="OverrideRuntimeFilesFromPackageResolve" Condition="'$(CoreCLROverridePath)' != ''" BeforeTargets="GetFilesFromPackageResolve">
     <Error Condition="!Exists('$(CoreCLROverridePath)')" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not exist." />
     <PropertyGroup>
-      <CoreCLRCrossTargetComponentFolderName Condition="'$(TargetArchitecture)' == 'arm64' and '$(BuildArchitecture)' != 'arm64'">x64</CoreCLRCrossTargetComponentFolderName>
-      <CoreCLRCrossTargetComponentFolderName Condition="'$(TargetArchitecture)' == 'arm' and '$(BuildArchitecture)' != 'arm' and '$(TargetsWindows)' == 'true'">x86</CoreCLRCrossTargetComponentFolderName>
-      <CoreCLRCrossTargetComponentFolderName Condition="'$(TargetArchitecture)' == 'arm' and '$(BuildArchitecture)' != 'arm' and '$(TargetsLinux)' == 'true'">x64</CoreCLRCrossTargetComponentFolderName>
-      <CoreCLRSharedFrameworkFolder>$([MSBuild]::NormalizePath($(CoreCLROverridePath),'sharedFramework'))</CoreCLRSharedFrameworkFolder>
-      <CoreCLRCrossTargetComponentFolder
-        Condition="'$(CoreCLRCrossTargetComponentFolderName)' != ''">$([MSBuild]::NormalizePath($(CoreCLROverridePath),$(CoreCLRCrossTargetComponentFolder),'sharedFramework'))</CoreCLRCrossTargetComponentFolder>
+      <CoreCLROverridePath>$([MSBuild]::NormalizeDirectory('$(CoreCLROverridePath)'))</CoreCLROverridePath>
+    </PropertyGroup>
+    <PropertyGroup>
+      <CoreCLRCrossTargetComponentDirName Condition="'$(TargetArchitecture)' == 'arm64' and '$(BuildArchitecture)' != 'arm64'">x64</CoreCLRCrossTargetComponentDirName>
+      <CoreCLRCrossTargetComponentDirName Condition="'$(TargetArchitecture)' == 'arm' and '$(BuildArchitecture)' != 'arm' and '$(TargetsWindows)' == 'true'">x86</CoreCLRCrossTargetComponentDirName>
+      <CoreCLRCrossTargetComponentDirName Condition="'$(TargetArchitecture)' == 'arm' and '$(BuildArchitecture)' != 'arm' and '$(TargetsLinux)' == 'true'">x64</CoreCLRCrossTargetComponentDirName>
+      <CoreCLRSharedFrameworkDir>$([MSBuild]::NormalizeDirectory('$(CoreCLROverridePath)','sharedFramework'))</CoreCLRSharedFrameworkDir>
+      <CoreCLRCrossTargetComponentDir
+        Condition="'$(CoreCLRCrossTargetComponentDirName)' != ''">$([MSBuild]::NormalizeDirectory('$(CoreCLROverridePath)','$(CoreCLRCrossTargetComponentDir)','sharedFramework'))</CoreCLRCrossTargetComponentDir>
     </PropertyGroup>
     <ItemGroup>
-      <CoreCLRFiles Include="$(CoreCLRSharedFrameworkFolder)/*.*" />
-      <CoreCLRCrossTargetFiles Condition="'$(CoreCLRCrossTargetComponentFolder)' != ''" Include="$(CoreCLRCrossTargetComponentFolder)/*.*" />
-      <CoreCLRFiles Include="$(CoreCLROverridePath)/Redist/**/*.dll" />
+      <CoreCLRFiles Include="$(CoreCLRSharedFrameworkDir)*.*" />
+      <CoreCLRCrossTargetFiles Condition="'$(CoreCLRCrossTargetComponentDir)' != ''" Include="$(CoreCLRCrossTargetComponentDir)*.*" />
+      <CoreCLRFiles Include="$(CoreCLROverridePath)Redist/**/*.dll" />
       <CoreCLRFiles>
         <IsNative>true</IsNative>
       </CoreCLRFiles>
-      <CoreCLRFiles Include="$(CoreCLROverridePath)/System.Private.CoreLib.dll" />
+      <CoreCLRFiles Include="$(CoreCLROverridePath)System.Private.CoreLib.dll" />
       <CoreCLRFiles
         Include="
-          $(CoreCLRSharedFrameworkFolder)/PDB/*.pdb;
-          $(CoreCLRSharedFrameworkFolder)/PDB/*.dbg;
-          $(CoreCLRSharedFrameworkFolder)/PDB/*.dwarf" />
+          $(CoreCLRSharedFrameworkDir)PDB/*.pdb;
+          $(CoreCLRSharedFrameworkDir)PDB/*.dbg;
+          $(CoreCLRSharedFrameworkDir)PDB/*.dwarf" />
       <CoreCLRFiles
-        Include="$(CoreCLROverridePath)/PDB/System.Private.CoreLib.pdb;$(CoreCLROverridePath)/PDB/System.Private.CoreLib.ni.pdb" />
-      <CoreCLRCrossTargetFiles Condition="'$(CoreCLRCrossTargetComponentFolder)' != ''"
+        Include="$(CoreCLROverridePath)PDB/System.Private.CoreLib.pdb;$(CoreCLROverridePath)PDB/System.Private.CoreLib.ni.pdb" />
+      <CoreCLRCrossTargetFiles Condition="'$(CoreCLRCrossTargetComponentDir)' != ''"
         Include="
-          $(CoreCLRCrossTargetComponentFolder)/PDB/*.pdb;
-          $(CoreCLRCrossTargetComponentFolder)/PDB/*.dbg;
-          $(CoreCLRCrossTargetComponentFolder)/PDB/*.dwarf" />
+          $(CoreCLRCrossTargetComponentDir)PDB/*.pdb;
+          $(CoreCLRCrossTargetComponentDir)PDB/*.dbg;
+          $(CoreCLRCrossTargetComponentDir)PDB/*.dwarf" />
 
       <CoreCLRFiles>
         <TargetPath>runtime/$(RuntimeIdentifier)/native</TargetPath>
       </CoreCLRFiles>
 
       <CoreCLRCrossTargetFiles>
-        <TargetPath>runtime/$(CoreCLRCrossTargetComponentFolderName)_$(TargetArchitecture)/native</TargetPath>
+        <TargetPath>runtime/$(CoreCLRCrossTargetComponentDirName)_$(TargetArchitecture)/native</TargetPath>
       </CoreCLRCrossTargetFiles>
 
       <CoreCLRFiles Include="@(CoreCLRCrossTargetFiles)" />
