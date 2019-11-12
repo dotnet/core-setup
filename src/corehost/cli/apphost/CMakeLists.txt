@@ -37,6 +37,14 @@ set(HEADERS
     ./bundle/marker.h
 )
 
+if(WIN32)
+    list(APPEND SOURCES
+        apphost.windows.cpp)
+
+    list(APPEND HEADERS
+        apphost.windows.h)
+endif()
+
 include(../exe.cmake)
 
 add_definitions(-DFEATURE_APPHOST=1)
@@ -50,5 +58,5 @@ endif()
 
 # Specify non-default Windows libs to be used for Arm/Arm64 builds
 if (WIN32 AND (CLI_CMAKE_PLATFORM_ARCH_ARM OR CLI_CMAKE_PLATFORM_ARCH_ARM64))
-    target_link_libraries(apphost Advapi32.lib)
+    target_link_libraries(apphost Advapi32.lib shell32.lib)
 endif()

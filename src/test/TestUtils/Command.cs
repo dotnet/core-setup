@@ -266,10 +266,12 @@ namespace Microsoft.DotNet.Cli.Build.Framework
 
         public Command EnvironmentVariable(string name, string value)
         {
-            if (value != null)
+            if (value == null)
             {
-                Process.StartInfo.Environment[name] = value;
+                value = "";
             }
+
+            Process.StartInfo.Environment[name] = value;
 
             return this;
         }
@@ -381,7 +383,8 @@ namespace Microsoft.DotNet.Cli.Build.Framework
                 bool success = exitCode == 0;
                 string msgExpectedToFail = "";
 
-                if (fExpectedToFail) {
+                if (fExpectedToFail)
+                {
                     success = !success;
                     msgExpectedToFail = "failed as expected and ";
                 }

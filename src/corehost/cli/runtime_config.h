@@ -42,6 +42,7 @@ public:
     bool parse_opts(const json_value& opts);
     void combine_properties(std::unordered_map<pal::string_t, pal::string_t>& combined_properties) const;
     const fx_reference_vector_t& get_frameworks() const { return m_frameworks; }
+    const fx_reference_vector_t& get_included_frameworks() const { return m_included_frameworks; }
     void set_fx_version(pal::string_t version);
 
 private:
@@ -50,6 +51,7 @@ private:
 
     std::unordered_map<pal::string_t, pal::string_t> m_properties;
     fx_reference_vector_t m_frameworks;
+    fx_reference_vector_t m_included_frameworks;
     settings_t m_default_settings;   // the default settings (Steps #0 and #1)
     settings_t m_override_settings;  // the settings that can't be changed (Step #5)
     std::vector<std::string> m_prop_keys;
@@ -77,9 +79,9 @@ private:
     // If set to true, all versions (including pre-release) are considered even if starting from a release framework reference.
     bool m_roll_forward_to_prerelease;
 
-    bool parse_framework(const json_object& fx_obj, fx_reference_t& fx_out);
-    bool read_framework_array(web::json::array frameworks);
-    
+    bool parse_framework(const json_object& fx_obj, fx_reference_t& fx_out, bool name_and_version_only = false);
+    bool read_framework_array(web::json::array frameworks, fx_reference_vector_t& frameworks_out, bool name_and_version_only = false);
+
     bool mark_specified_setting(specified_setting setting);
 };
 #endif // __RUNTIME_CONFIG_H__

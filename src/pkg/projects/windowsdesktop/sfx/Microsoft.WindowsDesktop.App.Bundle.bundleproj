@@ -10,6 +10,11 @@
 
   <ItemGroup>
     <BundleComponentReference Include="Microsoft.WindowsDesktop.App.SharedFx.sfxproj" />
+
+    <!-- Include .NET Core Runtime MSIs. -->
+    <BundleComponentReference Include="..\..\netcoreapp\sfx\Microsoft.NETCore.App.SharedFx.sfxproj" />
+    <BundleComponentReference Include="..\..\Microsoft.NETCore.DotNetHostResolver\Microsoft.NETCore.DotNetHostResolver.pkgproj" />
+    <BundleComponentReference Include="..\..\Microsoft.NETCore.DotNetHost\Microsoft.NETCore.DotNetHost.pkgproj" />
   </ItemGroup>
 
   <ItemGroup>

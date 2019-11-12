@@ -179,6 +179,8 @@ void bundle_runner_t::determine_extraction_dir()
         {
             trace::error(_X("Failure processing application bundle."));
             trace::error(_X("Failed to determine location for extracting embedded files"));
+            trace::error(_X("DOTNET_BUNDLE_EXTRACT_BASE_DIR is not set, and temp-directory doesn't exist or is not readable/writable."));
+
             throw StatusCode::BundleExtractionFailure;
         }
 
