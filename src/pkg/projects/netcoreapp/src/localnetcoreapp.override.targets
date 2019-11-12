@@ -4,26 +4,33 @@
   <Target Name="OverrideRuntimeFilesFromPackageResolve" Condition="'$(CoreCLROverridePath)' != ''" BeforeTargets="GetFilesFromPackageResolve">
     <Error Condition="!Exists('$(CoreCLROverridePath)')" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not exist." />
     <PropertyGroup>
-      <CoreCLRCrossTargetComponentFolder Condition="'$(TargetArchitecture)' == 'arm64'">x64</CoreCLRCrossTargetComponentFolder>
-      <CoreCLRCrossTargetComponentFolder Condition="'$(TargetArchitecture)' == 'arm' and '$(TargetsWindows)' == 'true'">x86</CoreCLRCrossTargetComponentFolder>
-      <CoreCLRCrossTargetComponentFolder Condition="'$(TargetArchitecture)' == 'arm' and '$(TargetsLinux)' == 'true'">x64</CoreCLRCrossTargetComponentFolder>
+      <CoreCLRCrossTargetComponentFolderName Condition="'$(TargetArchitecture)' == 'arm64' and '$(BuildArchitecture)' != 'arm64'">x64</CoreCLRCrossTargetComponentFolderName>
+      <CoreCLRCrossTargetComponentFolderName Condition="'$(TargetArchitecture)' == 'arm' and '$(BuildArchitecture)' != 'arm' and '$(TargetsWindows)' == 'true'">x86</CoreCLRCrossTargetComponentFolderName>
+      <CoreCLRCrossTargetComponentFolderName Condition="'$(TargetArchitecture)' == 'arm' and '$(BuildArchitecture)' != 'arm' and '$(TargetsLinux)' == 'true'">x64</CoreCLRCrossTargetComponentFolderName>
+      <CoreCLRSharedFrameworkFolder>$([MSBuild]::NormalizePath($(CoreCLROverridePath),'sharedFramework'))</CoreCLRSharedFrameworkFolder>
+      <CoreCLRCrossTargetComponentFolder
+        Condition="'$(CoreCLRCrossTargetComponentFolderName)' != ''">$([MSBuild]::NormalizePath($(CoreCLROverridePath),$(CoreCLRCrossTargetComponentFolder),'sharedFramework'))</CoreCLRCrossTargetComponentFolder>
     </PropertyGroup>
     <ItemGroup>
-      <CoreCLRFiles Include="$(CoreCLROverridePath)/sharedFramework/*.*" />
-      <CoreCLRCrossTargetFiles Condition="'$(CoreCLRCrossTargetComponentFolder)' != ''" Include="$(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/*.*" />
+      <CoreCLRFiles Include="$(CoreCLRSharedFrameworkFolder)/*.*" />
+      <CoreCLRCrossTargetFiles Condition="'$(CoreCLRCrossTargetComponentFolder)' != ''" Include="$(CoreCLRCrossTargetComponentFolder)/*.*" />
       <CoreCLRFiles Include="$(CoreCLROverridePath)/Redist/**/*.dll" />
       <CoreCLRFiles>
         <IsNative>true</IsNative>
       </CoreCLRFiles>
       <CoreCLRFiles Include="$(CoreCLROverridePath)/System.Private.CoreLib.dll" />
       <CoreCLRFiles
-        Include="$(CoreCLROverridePath)/sharedFramework/PDB/*.pdb;$(CoreCLROverridePath)/sharedFramework/PDB/*.dbg;$(CoreCLROverridePath)/sharedFramework/PDB/*.dwarf" />
+        Include="
+          $(CoreCLRSharedFrameworkFolder)/PDB/*.pdb;
+          $(CoreCLRSharedFrameworkFolder)/PDB/*.dbg;
+          $(CoreCLRSharedFrameworkFolder)/PDB/*.dwarf" />
       <CoreCLRFiles
         Include="$(CoreCLROverridePath)/PDB/System.Private.CoreLib.pdb;$(CoreCLROverridePath)/PDB/System.Private.CoreLib.ni.pdb" />
       <CoreCLRCrossTargetFiles Condition="'$(CoreCLRCrossTargetComponentFolder)' != ''"
-        Include="$(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/PDB/*.pdb;
-        $(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/PDB/*.dbg;
-        $(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/PDB/*.dwarf" />
+        Include="
+          $(CoreCLRCrossTargetComponentFolder)/PDB/*.pdb;
+          $(CoreCLRCrossTargetComponentFolder)/PDB/*.dbg;
+          $(CoreCLRCrossTargetComponentFolder)/PDB/*.dwarf" />
 
       <CoreCLRFiles>
         <TargetPath>runtime/$(RuntimeIdentifier)/native</TargetPath>
@@ -42,7 +49,7 @@
 
     <Error Condition="'@(CoreCLRFiles)' == ''" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not contain any files." />
   </Target>
- 
+
   <Target Name="OverrideFrameworkFilesFromPackageResolve" Condition="'$(CoreFXOverridePath)' != ''" BeforeTargets="GetFilesFromPackageResolve">
     <Error Condition="!Exists('$(CoreFXOverridePath)')" Text="The path provided to CoreFXOverridePath ($(CoreFXOverridePath)) does not exist." />
 
