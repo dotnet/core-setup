@@ -34,7 +34,7 @@
       <Sha>4703e4aefb6650500d00a2a529c7ad474ca89859</Sha>
     </Dependency>
     <Dependency Name="System.Configuration.ConfigurationManager" Version="4.7.0">
-      <Uri>https://github.com/dotnet/corefx</Uri
+      <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>4703e4aefb6650500d00a2a529c7ad474ca89859</Sha>
     </Dependency>
     <Dependency Name="System.Diagnostics.EventLog" Version="4.7.0">
