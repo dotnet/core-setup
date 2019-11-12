@@ -4,25 +4,36 @@
   <Target Name="OverrideRuntimeFilesFromPackageResolve" Condition="'$(CoreCLROverridePath)' != ''" BeforeTargets="GetFilesFromPackageResolve">
     <Error Condition="!Exists('$(CoreCLROverridePath)')" Text="The path provided to CoreCLROverridePath ($(CoreCLROverridePath)) does not exist." />
     <PropertyGroup>
-      <CoreCLRPDBOverridePath Condition="'$(CoreCLRPDBOverridePath)' == '' and Exists('$(CoreCLROverridePath)/PDB')">$(CoreCLROverridePath)/PDB</CoreCLRPDBOverridePath>
       <CoreCLRCrossTargetComponentFolder Condition="'$(TargetArchitecture)' == 'arm64'">x64</CoreCLRCrossTargetComponentFolder>
       <CoreCLRCrossTargetComponentFolder Condition="'$(TargetArchitecture)' == 'arm' and '$(TargetsWindows)' == 'true'">x86</CoreCLRCrossTargetComponentFolder>
       <CoreCLRCrossTargetComponentFolder Condition="'$(TargetArchitecture)' == 'arm' and '$(TargetsLinux)' == 'true'">x64</CoreCLRCrossTargetComponentFolder>
     </PropertyGroup>
     <ItemGroup>
       <CoreCLRFiles Include="$(CoreCLROverridePath)/sharedFramework/*.*" />
-      <CoreCLRFiles Condition="'$(CoreCLRCrossTargetComponentFolder)' != ''" Include="$(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/*.*" />
+      <CoreCLRCrossTargetFiles Condition="'$(CoreCLRCrossTargetComponentFolder)' != ''" Include="$(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/*.*" />
       <CoreCLRFiles Include="$(CoreCLROverridePath)/Redist/**/*.dll" />
       <CoreCLRFiles>
         <IsNative>true</IsNative>
       </CoreCLRFiles>
       <CoreCLRFiles Include="$(CoreCLROverridePath)/System.Private.CoreLib.dll" />
-      <CoreCLRFiles Condition="'$(CoreCLRPDBOverridePath)' != ''"
-        Include="$(CoreCLRPDBOverridePath)/*.pdb;$(CoreCLRPDBOverridePath)/*.dbg;$(CoreCLRPDBOverridePath)/*.dwarf" />
+      <CoreCLRFiles
+        Include="$(CoreCLROverridePath)/sharedFramework/PDB/*.pdb;$(CoreCLROverridePath)/sharedFramework/PDB/*.dbg;$(CoreCLROverridePath)/sharedFramework/PDB/*.dwarf" />
+      <CoreCLRFiles
+        Include="$(CoreCLROverridePath)/PDB/System.Private.CoreLib.pdb;$(CoreCLROverridePath)/PDB/System.Private.CoreLib.ni.pdb" />
+      <CoreCLRCrossTargetFiles Condition="'$(CoreCLRCrossTargetComponentFolder)' != ''"
+        Include="$(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/PDB/*.pdb;
+        $(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/PDB/*.dbg;
+        $(CoreCLROverridePath)/$(CoreCLRCrossTargetComponentFolder)/sharedFramework/PDB/*.dwarf" />
 
       <CoreCLRFiles>
         <TargetPath>runtime/$(RuntimeIdentifier)/native</TargetPath>
       </CoreCLRFiles>
+
+      <CoreCLRCrossTargetFiles>
+        <TargetPath>runtime/$(CoreCLRCrossTargetComponentFolder)_$(TargetArchitecture)/native</TargetPath>
+      </CoreCLRCrossTargetFiles>
+
+      <CoreCLRFiles Include="@(CoreCLRCrossTargetFiles)" />
 
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'"/>
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(FileName)').StartsWith('mscordaccore_'))" />
