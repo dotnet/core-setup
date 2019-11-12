@@ -1,6 +1,24 @@
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
+  <UsingTask TaskName="GenerateChecksums" AssemblyFile="$(LocalBuildToolsTaskFile)" />
+  
+  <PropertyGroup>
+    <SuppressFinalPackageVersion>true</SuppressFinalPackageVersion>
+  </PropertyGroup>
+
+  <Target Name="CreateChecksums">
+    <ItemGroup>
+      <ArtifactsForGeneratingChecksums
+        Include="@(UploadToBlobStorageFile)"
+        DestinationPath="%(FullPath)$(ChecksumExtension)" />
+      
+      <GeneratedChecksumFile Include="@(ArtifactsForGeneratingChecksums -> '%(DestinationPath)')" />
+    </ItemGroup>
+
+    <GenerateChecksums Items="@(ArtifactsForGeneratingChecksums)" />
+  </Target>
+  
   <Target Name="SignPackages"
           Condition="'$(SkipSigning)' != 'true' and '$(SignType)' != 'public'">
     <Message Importance="High" Text="Signing final packages" />
@@ -10,26 +28,10 @@
       Properties="DownloadDirectory=$(DownloadDirectory)" />
   </Target>
 
-  <Target Name="UploadPreparedArtifactsToPipeline"
-          DependsOnTargets="
-            FindDownloadedArtifacts;
-            SignPackages">
-    <PropertyGroup>
-      <PreparedFileUploadDir>$(ArtifactsObjDir)PreparedFileUpload\</PreparedFileUploadDir>
-    </PropertyGroup>
-
-    <Copy SourceFiles="@(UploadToBlobStorageFile)" DestinationFolder="$(PreparedFileUploadDir)">
-      <Output TaskParameter="CopiedFiles" ItemName="CopiedUploadToBlobStorageFile" />
-    </Copy>
-
-    <Message Importance="High" Text="Uploading PreparedArtifacts to pipeline" />
-    <Message
-      Text="##vso[artifact.upload containerfolder=PreparedArtifacts;artifactname=PreparedArtifacts]%(CopiedUploadToBlobStorageFile.Identity)"
-      Importance="High" />
-  </Target>
-
   <Target Name="PreparePublishToAzureBlobFeed">
     <Error Condition="'$(PackagesUrl)'==''" Text="Missing property PackagesUrl" />
+    <Error Condition="'@(NupkgToPublishFile)' == ''" Text="No nupkgs found." />
+    <Error Condition="'@(SymbolNupkgToPublishFile)' == ''" Text="No symbol packages found." />
 
     <PropertyGroup>
       <ExpectedFeedUrl>$(PackagesUrl)</ExpectedFeedUrl>
@@ -90,16 +92,50 @@
       <!-- Create temp dir to store generated asset manifest, per Arcade guidance. -->
       <TempWorkingDir>$(ArtifactsObjDir)TempWorkingDir\$([System.Guid]::NewGuid())\</TempWorkingDir>
     </PropertyGroup>
+    
+    <!-- If this is a stabilized build, then we'll be pushing these stable blobs into
+           a non-stable directory name, as intended. But this presents a problem. Some downstream repos will
+           attempt to install this runtime using the dotnet-install script. As it is currently written, the dotnet
+           install script excepts that a runtime with version X will appear in a directory named X, which wouldn't be the
+           case. To avoid this issue, create another copy of the file with suffixed branding
+
+           Example: If 3.0.1 is the actual runtime version, and 3.0.1-servicing-19502-23 is the
+           suffixed version, blobs will look like:
+           - Runtime/3.0.1-servicing-19502-23/dotnet-host-3.0.1-x64.rpm
+           - Runtime/3.0.1-servicing-19502-23/dotnet-host-3.0.1-servicing-19502-23-x64.rpm
+
+           These files are the same file, just with different names.
+
+           Lastly, mark the suffixed versions as non-shipping so that we don't end with double the files in the file
+           shipping drop.
+      -->
+    <ItemGroup Condition="'$(DotNetFinalVersionKind)' == 'release'">
+        <ItemsToCopyWithSuffix Include="@(UploadToBlobStorageFile);@(GeneratedChecksumFile)" Exclude="@(NupkgToPublishFile);@(SymbolNupkgToPublishFile)"
+            Condition="'$([System.String]::Copy(`%(Filename)`).Contains(`$(ProductionVersion)`))' == 'true' AND '$([System.String]::Copy(`%(Filename)`).Contains(`$(ProductVersion)`))' != 'true'">
+          <SuffixedPath>%(Directory)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('$(ProductionVersion)' ,'$(ProductVersion)'))</SuffixedPath>
+        </ItemsToCopyWithSuffix>
+    </ItemGroup>
+    
+    <Copy
+      SourceFiles="@(ItemsToCopyWithSuffix -> '%(Identity)')"
+      DestinationFiles="@(ItemsToCopyWithSuffix -> '%(SuffixedPath)')">
+      <Output TaskParameter="CopiedFiles" ItemName="ItemsToPushWithSuffix" />
+    </Copy>
 
     <ItemGroup>
       <ItemsToPush Remove="@(ItemsToPush)" />
 
       <ItemsToPush
-        Include="@(UploadToBlobStorageFile)"
-        Exclude="@(NupkgToPublishFile);@(SymbolNupkgToPublishFile)" />
-      <ItemsToPush>
-        <RelativeBlobPath>assets/core-setup/$(InstallersRelativePath)%(Filename)%(Extension)</RelativeBlobPath>
+        Include="@(UploadToBlobStorageFile);@(GeneratedChecksumFile)"
+        Exclude="@(NupkgToPublishFile);@(SymbolNupkgToPublishFile)">
+        <RelativeBlobPath>$(InstallersRelativePath)%(Filename)%(Extension)</RelativeBlobPath>
       </ItemsToPush>
+      
+      <ItemsToPush Include="@(ItemsToPushWithSuffix)">
+        <RelativeBlobPath>$(InstallersRelativePath)%(Filename)%(Extension)</RelativeBlobPath>
+        <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
+      </ItemsToPush>
+
     </ItemGroup>
 
     <!-- Push items to AzDO as build artifacts, generating the asset manifest as a side effect. -->
@@ -132,7 +168,9 @@
   -->
   <Target Name="Build"
           DependsOnTargets="
-            UploadPreparedArtifactsToPipeline;
+            FindDownloadedArtifacts;
+            SignPackages;
+            CreateChecksums;
             PreparePublishToAzureBlobFeed;
             PreparePublishFilesToAzureBlobFeed">
     <Message Importance="High" Text="Complete!" />

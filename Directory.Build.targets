@@ -36,10 +36,6 @@
       <IncludePreReleaseLabelInPackageVersion Condition="'$(SuppressFinalPackageVersion)' == 'true'">true</IncludePreReleaseLabelInPackageVersion>
       <IncludePreReleaseLabelInPackageVersion Condition="'$(IsShipping)' != 'true'">true</IncludePreReleaseLabelInPackageVersion>
 
-      <IncludeBuildNumberInPackageVersion Condition="'$(StabilizePackageVersion)' != 'true'">true</IncludeBuildNumberInPackageVersion>
-      <IncludeBuildNumberInPackageVersion Condition="'$(SuppressFinalPackageVersion)' == 'true'">true</IncludeBuildNumberInPackageVersion>
-      <IncludeBuildNumberInPackageVersion Condition="'$(IsShipping)' != 'true'">true</IncludeBuildNumberInPackageVersion>
-
       <ProductVersionSuffix Condition="'$(IncludePreReleaseLabelInPackageVersion)' == 'true'">-$(VersionSuffix)</ProductVersionSuffix>
       <ProductBandVersion Condition="'$(ProductBandVersion)' == ''">$(MajorVersion).$(MinorVersion)</ProductBandVersion>
       <ProductionVersion Condition="'$(ProductionVersion)' == ''">$(ProductBandVersion).$(PatchVersion)</ProductionVersion>
@@ -90,7 +86,6 @@
       <HostPolicyVersion Condition="'$(UseShippedHostPolicyPackage)' != 'true'">$(ProductVersion)</HostPolicyVersion>
       <HostPolicyVersion Condition="'$(UseShippedHostPolicyPackage)' == 'true'">2.0.0</HostPolicyVersion>
 
-      <BinariesRelativePath>Runtime/$(SharedFrameworkNugetVersion)/</BinariesRelativePath>
       <InstallersRelativePath>Runtime/$(SharedFrameworkNugetVersion)/</InstallersRelativePath>
     </PropertyGroup>
 

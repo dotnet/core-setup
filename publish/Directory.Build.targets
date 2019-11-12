@@ -65,10 +65,6 @@
 
       <UploadToBlobStorageFile Include="@(SymbolNupkgToPublishFile)" />
     </ItemGroup>
-
-    <Error
-      Condition="'@(SymbolNupkgToPublishFile)' == ''"
-      Text="No symbol packages found." />
   </Target>
 
   <Import Project="..\Directory.Build.targets" />
