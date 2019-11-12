@@ -38,7 +38,7 @@
     <SystemTextJsonVersion>5.0.0-alpha.1.19556.7</SystemTextJsonVersion>
     <SystemTextEncodingsWebVersion>5.0.0-alpha.1.19556.7</SystemTextEncodingsWebVersion>
     <!-- standard -->
-    <NETStandardLibraryVersion>2.2.0-prerelease.19560.1</NETStandardLibraryVersion>
+    <NETStandardLibraryVersion>2.2.0-prerelease.19562.1</NETStandardLibraryVersion>
     <!-- coreclr -->
     <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19561.7</MicrosoftNETCoreRuntimeCoreCLRVersion>
     <!-- Not auto-updated. -->
