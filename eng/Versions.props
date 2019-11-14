@@ -32,15 +32,15 @@
     <MicrosoftExtensionsDependencyModelVersion>2.1.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftDotNetPlatformAbstractionsVersion>3.0.0</MicrosoftDotNetPlatformAbstractionsVersion>
     <!-- corefx -->
-    <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19556.7</MicrosoftNETCorePlatformsVersion>
-    <MicrosoftNETCoreTargetsVersion>5.0.0-alpha.1.19556.7</MicrosoftNETCoreTargetsVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppVersion>5.0.0-alpha.1.19556.7</MicrosoftPrivateCoreFxNETCoreAppVersion>
-    <SystemTextJsonVersion>5.0.0-alpha.1.19556.7</SystemTextJsonVersion>
-    <SystemTextEncodingsWebVersion>5.0.0-alpha.1.19556.7</SystemTextEncodingsWebVersion>
+    <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19563.3</MicrosoftNETCorePlatformsVersion>
+    <MicrosoftNETCoreTargetsVersion>5.0.0-alpha.1.19563.3</MicrosoftNETCoreTargetsVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppVersion>5.0.0-alpha.1.19563.3</MicrosoftPrivateCoreFxNETCoreAppVersion>
+    <SystemTextJsonVersion>5.0.0-alpha.1.19563.3</SystemTextJsonVersion>
+    <SystemTextEncodingsWebVersion>5.0.0-alpha.1.19563.3</SystemTextEncodingsWebVersion>
     <!-- standard -->
     <NETStandardLibraryVersion>2.2.0-prerelease.19563.1</NETStandardLibraryVersion>
     <!-- coreclr -->
-    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19562.1</MicrosoftNETCoreRuntimeCoreCLRVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19563.3</MicrosoftNETCoreRuntimeCoreCLRVersion>
     <!-- Not auto-updated. -->
     <MicrosoftTargetingPackPrivateWinRTVersion>1.0.5</MicrosoftTargetingPackPrivateWinRTVersion>
     <MicrosoftDiaSymReaderNativeVersion>1.7.0</MicrosoftDiaSymReaderNativeVersion>
