@@ -4,7 +4,7 @@
     <MajorVersion>3</MajorVersion>
     <MinorVersion>1</MinorVersion>
     <PatchVersion>0</PatchVersion>
-    <PreReleaseVersionLabel>preview3</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <!-- Enable to remove prerelease label. -->
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
