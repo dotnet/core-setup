@@ -87,14 +87,26 @@ namespace Microsoft.NET.HostModel.AppHost
                 }
             }
 
+            void RemoveSignatureIfMachO()
+            {
+                MachOUtils.RemoveSignature(appHostDestinationFilePath);
+            }
+
+            void SetLastWriteTime()
+            {
+                // Memory-mapped write does not updating last write time
+                File.SetLastWriteTimeUtc(appHostDestinationFilePath, DateTime.UtcNow);
+            }
+
             try
             {
                 RetryUtil.RetryOnIOError(RewriteAppHost);
 
                 RetryUtil.RetryOnWin32Error(UpdateResources);
 
-                // Memory-mapped write does not updating last write time
-                RetryUtil.RetryOnIOError(() => File.SetLastWriteTimeUtc(appHostDestinationFilePath, DateTime.UtcNow));
+                RetryUtil.RetryOnIOError(RemoveSignatureIfMachO);
+
+                RetryUtil.RetryOnIOError(SetLastWriteTime);
             }
             catch (Exception ex)
             {
