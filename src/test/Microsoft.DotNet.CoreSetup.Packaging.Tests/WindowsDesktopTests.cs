@@ -25,7 +25,11 @@ namespace Microsoft.DotNet.CoreSetup.Packaging.Tests
             {
                 if (CurrentRidShouldCreateNupkg)
                 {
-                    Assert.NotNull(tester);
+                    // Allow no targeting pack for servicing builds.
+                    if (tester == null)
+                    {
+                        return;
+                    }
 
                     tester.IsTargetingPackForPlatform();
                     tester.HasOnlyTheseDataFiles(

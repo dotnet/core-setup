@@ -14,10 +14,16 @@ namespace Microsoft.DotNet.CoreSetup.Packaging.Tests
         [Fact]
         public void NETStandardTargetingPackIsValid()
         {
-            using (var tester = NuGetArtifactTester.Open(
+            using (var tester = NuGetArtifactTester.OpenOrNull(
                 dirs,
                 "NETStandard.Library.Ref"))
             {
+                // Allow no targeting pack for servicing builds.
+                if (tester == null)
+                {
+                    return;
+                }
+
                 tester.HasOnlyTheseDataFiles(
                     "data/FrameworkList.xml",
                     "data/PackageOverrides.txt");
