@@ -41,7 +41,6 @@
     <ProjectServicingConfiguration Include="Microsoft.WindowsDesktop.App.Ref" PatchVersion="0" />
     <ProjectServicingConfiguration Include="NETStandard.Library.Ref" PatchVersion="0" />
   </ItemGroup>
-
   <PropertyGroup>
     <MicrosoftDotNetMaestroTasksVersion>1.0.0-beta.18619.4</MicrosoftDotNetMaestroTasksVersion>
   </PropertyGroup>
@@ -89,9 +88,9 @@
     <!-- winforms -->
     <MicrosoftPrivateWinformsPackageVersion>4.8.0-servicing.19480.1</MicrosoftPrivateWinformsPackageVersion>
     <!-- wpf -->
-    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.0-servicing.19571.2</MicrosoftDotNetWpfGitHubPackageVersion>
+    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.0-servicing.19571.3</MicrosoftDotNetWpfGitHubPackageVersion>
     <!-- wpf-int -->
-    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-servicing.19571.4</MicrosoftDotNetWpfDncEngPackageVersion>
+    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-servicing.19571.6</MicrosoftDotNetWpfDncEngPackageVersion>
     <!-- Not auto-updated. -->
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>1.1.1</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftTargetingPackPrivateWinRTPackageVersion>1.0.5</MicrosoftTargetingPackPrivateWinRTPackageVersion>
