@@ -90,7 +90,7 @@
     <!-- wpf -->
     <MicrosoftDotNetWpfGitHubPackageVersion>4.8.0-servicing.19571.3</MicrosoftDotNetWpfGitHubPackageVersion>
     <!-- wpf-int -->
-    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-servicing.19571.6</MicrosoftDotNetWpfDncEngPackageVersion>
+    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.0-servicing.19572.4</MicrosoftDotNetWpfDncEngPackageVersion>
     <!-- Not auto-updated. -->
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>1.1.1</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftTargetingPackPrivateWinRTPackageVersion>1.0.5</MicrosoftTargetingPackPrivateWinRTPackageVersion>
