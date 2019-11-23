@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.1-servicing.19572.1">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.1-servicing.19572.6">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>1c64bf53a2c835d8157ddede4cb8b6902fa5c3dd</Sha>
+      <Sha>a2b312cfb6b50fa9c224c1954a6ba2fe3095796b</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Targets" Version="3.0.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-servicing.19572.1">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-servicing.19572.6">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>1c64bf53a2c835d8157ddede4cb8b6902fa5c3dd</Sha>
+      <Sha>a2b312cfb6b50fa9c224c1954a6ba2fe3095796b</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -49,9 +49,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
     </Dependency>
-    <Dependency Name="System.Drawing.Common" Version="4.6.2-servicing.19572.1">
+    <Dependency Name="System.Drawing.Common" Version="4.6.2-servicing.19572.6">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>1c64bf53a2c835d8157ddede4cb8b6902fa5c3dd</Sha>
+      <Sha>a2b312cfb6b50fa9c224c1954a6ba2fe3095796b</Sha>
     </Dependency>
     <Dependency Name="System.IO.FileSystem.AccessControl" Version="4.6.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
