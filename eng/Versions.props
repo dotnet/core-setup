@@ -18,7 +18,30 @@
     <NETCoreAppMaximumVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppMaximumVersion>
     <NETCoreAppFrameworkVersion>$(MajorVersion).$(MinorVersion)</NETCoreAppFrameworkVersion>
     <NETCoreAppFramework>netcoreapp$(NETCoreAppFrameworkVersion)</NETCoreAppFramework>
+    <!--
+      The NETStandard.Library targeting pack does not version along with the runtime. Advance this
+      version if a new NETStandard targeting pack was released in the previous servicing release.
+    -->
+    <NETStandardPatchVersion>1</NETStandardPatchVersion>
   </PropertyGroup>
+  <!--
+    Servicing build settings.
+
+    * To enable a package build for the current patch release, set PatchVersion to match the current
+      patch version of that package. (major.minor.patch)
+
+    * Do not delete these lines to disable the package build. When PatchVersion is incremented at
+      the beginning of the next servicing release, the package automatically stops building because
+      the version no longer matches.
+
+    * These items also keep track of the last time each package was patched, enabling source-build
+      to produce the correct old version number using current sources.
+  -->
+  <ItemGroup Condition="'$(StabilizePackageVersion)' == 'true'">
+    <ProjectServicingConfiguration Include="Microsoft.NETCore.App.Ref" PatchVersion="0" />
+    <ProjectServicingConfiguration Include="Microsoft.WindowsDesktop.App.Ref" PatchVersion="0" />
+    <ProjectServicingConfiguration Include="NETStandard.Library.Ref" PatchVersion="0" />
+  </ItemGroup>
   <PropertyGroup>
     <MicrosoftDotNetMaestroTasksVersion>1.0.0-beta.18619.4</MicrosoftDotNetMaestroTasksVersion>
   </PropertyGroup>
