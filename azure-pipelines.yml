@@ -171,3 +171,5 @@ stages:
         pool:
           name: NetCoreInternal-Pool
           queue: buildpool.windows.10.amd64.vs2017
+
+  - template: /eng/stages/publish.yml
