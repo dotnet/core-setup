@@ -1,5 +1,5 @@
 name: dotnet-sdk
-version: 2.2.207
+version: 3.0.101
 summary: Cross-Platform .NET Core SDK
 description: |
   .NET Core SDK. https://dot.net/core.
@@ -16,8 +16,8 @@ base: core18
 parts:
   dotnet-sdk:
       plugin: dump
-      source: https://download.visualstudio.microsoft.com/download/pr/022d9abf-35f0-4fd5-8d1c-86056df76e89/477f1ebb70f314054129a9f51e9ec8ec/dotnet-sdk-2.2.207-linux-x64.tar.gz
-      source-checksum: sha512/9d70b4a8a63b66da90544087199a0f681d135bf90d43ca53b12ea97cc600a768b0a3d2f824cfe27bd3228e058b060c63319cd86033be8b8d27925283f99de958
+      source: https://download.visualstudio.microsoft.com/download/pr/4f51cfd8-311d-43fe-a887-c80b40358cfd/440d10dc2091b8d0f1a12b7124034e49/dotnet-sdk-3.0.101-linux-x64.tar.gz
+      source-checksum: sha512/8cd6070c9df1272ac3f2a0e9bd8c1fc2cfef38907fa2e3c81384f005168f45036b5904b4f731cbe37d2b3fe558f560008c481939093b0d08ef0f1778ca97f186
       stage-packages:
         - libicu60
         - libssl1.0.0
