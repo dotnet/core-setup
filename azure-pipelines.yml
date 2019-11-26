@@ -186,41 +186,28 @@ stages:
 
       - dependsOn: NetCore_Release30_Publish
         channel:
-          name: .NET Core 3 Release
+          name: .NET Core 3.0 Release
           bar: PublicRelease_30_Channel_Id
-          storage: release/3.0-preview9
-          public: true
-      - dependsOn: NetCore_30_Internal_Servicing_Publishing
-        channel:
-          name: .NET Core 3 Internal Servicing
-          bar: InternalServicing_30_Channel_Id
-          storage: internal/release/3.0
-          public: false
-
-      - dependsOn: NetCore_Dev31_Publish
-        channel:
-          name: .NET Core 3.1 Dev
-          bar: PublicDevRelease_31_Channel_Id
-          storage: release/3.1
+          storage: release/3.0
           public: true
 
       - dependsOn: NetCore_Release31_Publish
         channel:
           name: .NET Core 3.1 Release
           bar: PublicRelease_31_Channel_Id
-          storage: release/3.1-preview1
+          storage: release/3.1
           public: true
 
-      - dependsOn: NetCore_Dev5_Publish
+      - dependsOn: NetCore_30_Internal_Servicing_Publishing
         channel:
-          name: .NET Core 5 Dev
-          bar: NetCore_5_Dev_Channel_Id
-          storage: master
-          public: true
+          name: .NET Core 3 Internal Servicing
+          bar: InternalServicing_30_Channel_Id 
+          storage: internal/release/3.0
+          public: false
 
-      - dependsOn: PVR_Publish
+      - dependsOn: NetCore_31_Internal_Servicing_Publishing
         channel:
-          name: .NET Tools - Validation
-          bar: NetCore_Tools_Validation_Channel_Id
-          storage: dev/validation
-          public: true
+          name: .NET Core 3 Internal Servicing
+          bar: 550 # No variable in common-variables for this right now
+          storage: internal/release/3.0
+          public: false
