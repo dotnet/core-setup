@@ -53,9 +53,9 @@
     <!-- sourcelink -->
     <MicrosoftSourceLinkVersion>1.0.0-beta2-19367-01</MicrosoftSourceLinkVersion>
     <!-- corefx -->
-    <MicrosoftNETCorePlatformsPackageVersion>3.0.1-servicing.19576.7</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.0.1</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>3.0.0</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-servicing.19576.7</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0-servicing.19577.1</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftWin32RegistryAccessControlVersion>4.6.0</MicrosoftWin32RegistryAccessControlVersion>
     <MicrosoftWin32RegistryVersion>4.6.0</MicrosoftWin32RegistryVersion>
     <MicrosoftWin32SystemEventsVersion>4.6.0</MicrosoftWin32SystemEventsVersion>
@@ -65,7 +65,7 @@
     <SystemDiagnosticsEventLogVersion>4.6.0</SystemDiagnosticsEventLogVersion>
     <SystemDiagnosticsPerformanceCounterVersion>4.6.0</SystemDiagnosticsPerformanceCounterVersion>
     <SystemDirectoryServicesVersion>4.6.0</SystemDirectoryServicesVersion>
-    <SystemDrawingCommonVersion>4.6.2-servicing.19576.7</SystemDrawingCommonVersion>
+    <SystemDrawingCommonVersion>4.6.2</SystemDrawingCommonVersion>
     <SystemIOFileSystemAccessControlVersion>4.6.0</SystemIOFileSystemAccessControlVersion>
     <SystemIOPackagingVersion>4.6.0</SystemIOPackagingVersion>
     <SystemIOPipesAccessControlVersion>4.5.1</SystemIOPipesAccessControlVersion>
