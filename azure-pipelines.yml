@@ -4,10 +4,12 @@ trigger:
     include:
     - master
     - release/3.*
+    - internal/release/3.*
 
 pr:
 - master
 - release/3.*
+- internal/release/3.*
 
 name: $(Date:yyyyMMdd)$(Rev:.rr)
 
