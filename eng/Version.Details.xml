@@ -121,35 +121,35 @@
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>5558d18aafc84ecac3630ca6a31f52699cde0b66</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.19577.4" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.19605.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
-      <Sha>ec7144e9e1b54a651fda52339298873607d4baca</Sha>
+      <Sha>9483a88b7764a74d71cbd449de6c56c1d5e0af21</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-rtm.19577.4" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
-      <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>774b5e2d2b827743fa425612acc4988f9f350c6e</Sha>
+    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-rtm.19605.7" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
+      <Sha>a8e48616c8d8e56469a456eb1ee263268316b827</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-rtm.19577.8">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-rtm.19605.13">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>03552f96f667c1d6527668e27c2ee2fa59131bdc</Sha>
+      <Sha>4b7f4af7bab39e23a713eb73f063f2bf026e452b</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19577.5">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19603.16">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>99c6b59a8afff97fe891341b39abe985f1d3c565</Sha>
+      <Sha>8e47254f93b276c974968aff83222f89ec3931ed</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Build.Tasks.Feed" Version="2.2.0-beta.19577.5">
+    <Dependency Name="Microsoft.DotNet.Build.Tasks.Feed" Version="2.2.0-beta.19603.16">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>99c6b59a8afff97fe891341b39abe985f1d3c565</Sha>
+      <Sha>8e47254f93b276c974968aff83222f89ec3931ed</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Build.Tasks.Packaging" Version="1.0.0-beta.19577.5">
+    <Dependency Name="Microsoft.DotNet.Build.Tasks.Packaging" Version="1.0.0-beta.19603.16">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>99c6b59a8afff97fe891341b39abe985f1d3c565</Sha>
+      <Sha>8e47254f93b276c974968aff83222f89ec3931ed</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.VersionTools.Tasks" Version="1.0.0-beta.19577.5">
+    <Dependency Name="Microsoft.DotNet.VersionTools.Tasks" Version="1.0.0-beta.19603.16">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>99c6b59a8afff97fe891341b39abe985f1d3c565</Sha>
+      <Sha>8e47254f93b276c974968aff83222f89ec3931ed</Sha>
     </Dependency>
     <Dependency Name="Microsoft.SourceLink" Version="1.0.0-beta2-19367-01">
       <Uri>https://github.com/dotnet/sourcelink</Uri>

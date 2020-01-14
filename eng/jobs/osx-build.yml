@@ -25,6 +25,16 @@ jobs:
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - task: NuGetAuthenticate@0
 
+  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    - task: Bash@3
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+      condition: ne(variables['Agent.OS'], 'Windows_NT')
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
+
   - script: >-
       $(Build.SourcesDirectory)/build.sh --ci --test
       /p:OfficialBuildId=$(OfficialBuildId)
