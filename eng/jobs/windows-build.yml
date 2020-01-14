@@ -57,14 +57,15 @@ jobs:
     - powershell: Remove-Item -Recurse -ErrorAction Ignore "$env:LocalAppData\NuGet\v3-cache"
       displayName: Clear NuGet http cache (if exists)
 
-    - task: PowerShell@2
-      displayName: Setup Private Feeds Credentials
-      condition: eq(variables['Agent.OS'], 'Windows_NT')
-      inputs:
-        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
-        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
-      env:
-        Token: $(dn-bot-dnceng-artifact-feeds-rw)
+    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      - task: PowerShell@2
+        displayName: Setup Private Feeds Credentials
+        condition: eq(variables['Agent.OS'], 'Windows_NT')
+        inputs:
+          filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+          arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+        env:
+          Token: $(dn-bot-dnceng-artifact-feeds-rw)
 
     - script: >-
         build.cmd -ci -test
