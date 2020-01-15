@@ -9,9 +9,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.19608.1">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.20065.3">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>17300169760c61a90cab8d913636c1058a30a8c1</Sha>
+      <Sha>8fc9be2e7cf63e8225101b7052b39e8aaccd6786</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -101,9 +101,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Json" Version="4.7.0">
+    <Dependency Name="System.Text.Json" Version="4.7.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
+      <Sha>8fc9be2e7cf63e8225101b7052b39e8aaccd6786</Sha>
     </Dependency>
     <Dependency Name="System.Threading.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
