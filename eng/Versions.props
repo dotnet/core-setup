@@ -89,9 +89,9 @@
     <!-- winforms -->
     <MicrosoftPrivateWinformsPackageVersion>4.8.1-servicing.19605.5</MicrosoftPrivateWinformsPackageVersion>
     <!-- wpf -->
-    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.1-rtm.19605.7</MicrosoftDotNetWpfGitHubPackageVersion>
+    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.1-rtm.20064.7</MicrosoftDotNetWpfGitHubPackageVersion>
     <!-- wpf-int -->
-    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.1-rtm.19605.13</MicrosoftDotNetWpfDncEngPackageVersion>
+    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.1-rtm.20064.12</MicrosoftDotNetWpfDncEngPackageVersion>
     <!-- Not auto-updated. -->
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>1.1.1</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftTargetingPackPrivateWinRTPackageVersion>1.0.5</MicrosoftTargetingPackPrivateWinRTPackageVersion>
