@@ -11,7 +11,8 @@ pr:
 - release/3.*
 - internal/release/3.*
 
-name: $(Date:yyyyMMdd)$(Rev:.rr)
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
 
 variables:
   - name: TeamName
