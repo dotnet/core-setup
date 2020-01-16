@@ -12,7 +12,7 @@ using namespace bundle;
 
 bool file_entry_t::is_valid()
 {
-    return m_data.offset > 0 && m_data.size > 0 &&
+    return m_data.offset > 0 && m_data.size >= 0 &&
         static_cast<file_type_t>(m_data.type) < file_type_t::__last;
 }
 
