@@ -138,14 +138,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ManifestBuildData Include="InitialAssetsLocation=$(SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$(SYSTEM_TEAMPROJECT)/_apis/build/builds/$(BUILD_BUILDID)/artifacts" />
-        <ManifestBuildData Include="Location=$(AzureFeedUrl)" />
+      <ManifestBuildData Include="InitialAssetsLocation=$(SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$(SYSTEM_TEAMPROJECT)/_apis/build/builds/$(BUILD_BUILDID)/artifacts" />
+      <ManifestBuildData Include="Location=$(AzureFeedUrl)" />
     </ItemGroup>
 
     <!-- Push items to AzDO as build artifacts, generating the asset manifest as a side effect. -->
     <PushToAzureDevOpsArtifacts
       ItemsToPush="@(ItemsToPush)"
-      ManifestBuildData="@(ManifestBuildData)" />
+      ManifestBuildData="@(ManifestBuildData)"
       ManifestRepoUri="$(BUILD_REPOSITORY_URI)"
       ManifestBranch="$(BUILD_SOURCEBRANCH)"
       ManifestBuildId="$(BUILD_BUILDNUMBER)"
