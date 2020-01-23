@@ -210,25 +210,31 @@
         <NuSpecFile>$(MSBuildThisFileDirectory)windows/vscomponents/VS.Redist.Common.Component.nuspec</NuSpecFile>
         <GenerateNupkgPowershellScript>$(MSBuildThisFileDirectory)windows/vscomponents/generatenupkg.ps1</GenerateNupkgPowershellScript>
         <ProjectUrl>https://github.com/dotnet/core-setup</ProjectUrl>
+        <!--
+          Always build VS insertion packages with non-stable version. Ensures uniqueness for each
+          build, even if building stable multiple times in a row. Necessary because these are
+          published to an immutable feed before release day.
+        -->
+        <VSInsertionVersionSuffix>$(ProductionVersion)-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</VSInsertionVersionSuffix>
       </PropertyGroup>
 
       <ItemGroup>
         <SdkMsiComponent Include="HostFxrMsiNupkg">
           <MsiInstallerFile>$(HostFxrInstallerFile)</MsiInstallerFile>
           <ComponentId>VS.Redist.Common.NetCore.HostFXR.$(TargetArchitecture).$(NETCoreAppFrameworkVersion)</ComponentId>
-          <ComponentVersion>$(SharedFrameworkNugetVersion)</ComponentVersion>
+          <ComponentVersion>$(VSInsertionVersionSuffix)</ComponentVersion>
           <ComponentFriendlyName>$(NETCoreAppFrameworkVersion) .NET Core HostFX Resolver</ComponentFriendlyName>
         </SdkMsiComponent>
         <SdkMsiComponent Include="SharedFrameworkMsiNupkg">
           <MsiInstallerFile>$(SharedFrameworkInstallerFile)</MsiInstallerFile>
           <ComponentId>VS.Redist.Common.NetCore.SharedFramework.$(TargetArchitecture).$(NETCoreAppFrameworkVersion)</ComponentId>
-          <ComponentVersion>$(SharedFrameworkNugetVersion)</ComponentVersion>
+          <ComponentVersion>$(VSInsertionVersionSuffix)</ComponentVersion>
           <ComponentFriendlyName>$(NETCoreAppFrameworkVersion) .NET Core SharedFramework</ComponentFriendlyName>
         </SdkMsiComponent>
         <SdkMsiComponent Include="SharedHostMsiNupkg">
           <MsiInstallerFile>$(SharedHostInstallerFile)</MsiInstallerFile>
           <ComponentId>VS.Redist.Common.NetCore.SharedHost.$(TargetArchitecture).$(NETCoreAppFrameworkVersion)</ComponentId>
-          <ComponentVersion>$(SharedFrameworkNugetVersion)</ComponentVersion>
+          <ComponentVersion>$(VSInsertionVersionSuffix)</ComponentVersion>
           <ComponentFriendlyName>$(NETCoreAppFrameworkVersion) .NET Core SharedHost</ComponentFriendlyName>
         </SdkMsiComponent>
       </ItemGroup>
