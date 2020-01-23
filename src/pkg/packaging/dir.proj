@@ -215,26 +215,26 @@
           build, even if building stable multiple times in a row. Necessary because these are
           published to an immutable feed before release day.
         -->
-        <VSInsertionVersionSuffix>$(ProductionVersion)-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</VSInsertionVersionSuffix>
+        <VSInsertionVersion>$(ProductionVersion)-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</VSInsertionVersion>
       </PropertyGroup>
 
       <ItemGroup>
         <SdkMsiComponent Include="HostFxrMsiNupkg">
           <MsiInstallerFile>$(HostFxrInstallerFile)</MsiInstallerFile>
           <ComponentId>VS.Redist.Common.NetCore.HostFXR.$(TargetArchitecture).$(NETCoreAppFrameworkVersion)</ComponentId>
-          <ComponentVersion>$(VSInsertionVersionSuffix)</ComponentVersion>
+          <ComponentVersion>$(VSInsertionVersion)</ComponentVersion>
           <ComponentFriendlyName>$(NETCoreAppFrameworkVersion) .NET Core HostFX Resolver</ComponentFriendlyName>
         </SdkMsiComponent>
         <SdkMsiComponent Include="SharedFrameworkMsiNupkg">
           <MsiInstallerFile>$(SharedFrameworkInstallerFile)</MsiInstallerFile>
           <ComponentId>VS.Redist.Common.NetCore.SharedFramework.$(TargetArchitecture).$(NETCoreAppFrameworkVersion)</ComponentId>
-          <ComponentVersion>$(VSInsertionVersionSuffix)</ComponentVersion>
+          <ComponentVersion>$(VSInsertionVersion)</ComponentVersion>
           <ComponentFriendlyName>$(NETCoreAppFrameworkVersion) .NET Core SharedFramework</ComponentFriendlyName>
         </SdkMsiComponent>
         <SdkMsiComponent Include="SharedHostMsiNupkg">
           <MsiInstallerFile>$(SharedHostInstallerFile)</MsiInstallerFile>
           <ComponentId>VS.Redist.Common.NetCore.SharedHost.$(TargetArchitecture).$(NETCoreAppFrameworkVersion)</ComponentId>
-          <ComponentVersion>$(VSInsertionVersionSuffix)</ComponentVersion>
+          <ComponentVersion>$(VSInsertionVersion)</ComponentVersion>
           <ComponentFriendlyName>$(NETCoreAppFrameworkVersion) .NET Core SharedHost</ComponentFriendlyName>
         </SdkMsiComponent>
       </ItemGroup>
