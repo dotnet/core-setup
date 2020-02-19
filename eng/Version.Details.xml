@@ -14,9 +14,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.20118.2">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.20118.3">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>5f672de54209f59420d906a84491e47ce0ccfb14</Sha>
+      <Sha>7aaf058d8e001f728cc83aaf398001f69905f157</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
