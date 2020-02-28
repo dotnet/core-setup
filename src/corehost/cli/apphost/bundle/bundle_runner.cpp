@@ -285,6 +285,7 @@ StatusCode bundle_runner_t::extract()
         determine_extraction_dir();
         if (can_reuse_extraction())
         {
+            fclose(m_bundle_stream);
             return StatusCode::Success;
         }
 
