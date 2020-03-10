@@ -348,7 +348,7 @@
         <ReplacementString>libssl1.0.0 | libssl1.0.2 | libssl1.1</ReplacementString>
       </SharedFrameworkTokenValue>
 
-      <KnownLibIcuVersion Include="63;60;57;55;52" />
+      <KnownLibIcuVersion Include="65;63;60;57;55;52" />
       <SharedFrameworkTokenValue Include="%LIBICU_DEPENDENCY_LIST%">
         <ReplacementString>libicu | @(KnownLibIcuVersion -> 'libicu%(Identity)', ' | ')</ReplacementString>
       </SharedFrameworkTokenValue>
