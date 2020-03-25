@@ -283,6 +283,10 @@ namespace pal
 
     bool get_temp_directory(pal::string_t& tmp_dir);
 
+    // Returns a platform-specific, user-private directory within get_temp_directory()
+    // that can be used for extracting out components of a single-file app.
+    bool get_default_bundle_extraction_base_dir(string_t& extraction_dir);
+
     int xtoi(const char_t* input);
 
     bool get_loaded_library(const char_t *library_name, const char *symbol_name, /*out*/ dll_t *dll, /*out*/ pal::string_t *path);
