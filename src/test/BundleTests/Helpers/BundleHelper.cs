@@ -21,6 +21,11 @@ namespace BundleTests.Helpers
             return Path.Combine(GetPublishPath(fixture), GetAppName(fixture));
         }
 
+        public static string GetPublishedSingleFilePath(TestProjectFixture fixture)
+        {
+            return GetHostPath(fixture);
+        }
+
         public static string GetHostName(TestProjectFixture fixture)
         {
             return Path.GetFileName(fixture.TestProject.AppExe);
