@@ -45,7 +45,9 @@ namespace bundle
 
         void determine_extraction_dir();
         void create_working_extraction_dir();
-        bool can_reuse_extraction();
+        void verify_recover_extraction();
+        void commit_file(const pal::string_t& relative_path);
+        void commit_dir();
 
         FILE* create_extraction_file(const pal::string_t& relative_path);
         void extract_file(file_entry_t* entry);

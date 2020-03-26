@@ -135,7 +135,10 @@ static void remove_directory_tree(const pal::string_t& path)
 
     for (const pal::string_t &dir : dirs)
     {
-        remove_directory_tree(dir);
+        pal::string_t dir_path = path;
+        append_path(&dir_path, dir.c_str());
+
+        remove_directory_tree(dir_path);
     }
 
     std::vector<pal::string_t> files;
@@ -143,9 +146,12 @@ static void remove_directory_tree(const pal::string_t& path)
 
     for (const pal::string_t &file : files)
     {
-        if (!pal::remove(file.c_str()))
+        pal::string_t file_path = path;
+        append_path(&file_path, file.c_str());
+
+        if (!pal::remove(file_path.c_str()))
         {
-            trace::warning(_X("Failed to remove temporary file [%s]."), file.c_str());
+            trace::warning(_X("Failed to remove temporary file [%s]."), file_path.c_str());
         }
     }
 
@@ -153,6 +159,49 @@ static void remove_directory_tree(const pal::string_t& path)
     {
         trace::warning(_X("Failed to remove temporary directory [%s]."), path.c_str());
     }
+}
+
+// Retry the rename operation with some wait in between the attempts.
+// This is an attempt to workaround for possible file locking caused by AV software.
+
+bool rename_with_retries(pal::string_t& old_name, pal::string_t& new_name, bool& file_exists)
+{
+    for (int retry_count = 0; retry_count < 500; retry_count++)
+    {
+        if (pal::rename(old_name.c_str(), new_name.c_str()) == 0)
+        {
+            return true;
+        }
+        bool should_retry = errno == EACCES;
+
+        if (pal::file_exists(new_name))
+        {
+            // Check file_exists() on each run, because a concurrent process may have
+            // created the new_name file/directory.
+            //
+            // The rename() operation above fails with errono == EACCESS if 
+            // * Directory new_name already exists, or
+            // * Paths are invalid paths, or
+            // * Due to locking/permission problems.
+            // Therefore, we need to perform the directory_exists() check again.
+
+            file_exists = true;
+            return false;
+        }
+
+        if (should_retry)
+        {
+            trace::info(_X("Retrying Rename [%s] to [%s] due to EACCES error"), old_name.c_str(), new_name.c_str());
+            pal::sleep(100);
+            continue;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return false;
 }
 
 void bundle_runner_t::reopen_host_for_reading()
@@ -252,18 +301,98 @@ void bundle_runner_t::extract_file(file_entry_t *entry)
     fclose(file);
 }
 
-bool bundle_runner_t::can_reuse_extraction()
+void bundle_runner_t::commit_file(const pal::string_t& relative_path)
 {
-    // In this version, the extracted files are assumed to be 
-    // correct by construction.
-    // 
-    // Files embedded in the bundle are first extracted to m_working_extraction_dir
-    // Once all files are successfully extracted, the extraction location is 
-    // committed (renamed) to m_extraction_dir. Therefore, the presence of 
-    // m_extraction_dir means that the files are pre-extracted. 
+    // Commit individual files to the final extraction directory.
 
+    pal::string_t working_file_path = m_working_extraction_dir;
+    append_path(&working_file_path, relative_path.c_str());
 
-    return pal::directory_exists(m_extraction_dir);
+    pal::string_t final_file_path = m_extraction_dir;
+    append_path(&final_file_path, relative_path.c_str());
+
+    if (has_dirs_in_path(relative_path))
+    {
+        create_directory_tree(get_directory(final_file_path));
+    }
+
+    bool extracted_by_concurrent_process = false;
+    bool extracted_by_current_process =
+        rename_with_retries(working_file_path, final_file_path, extracted_by_concurrent_process);
+
+    if (extracted_by_concurrent_process)
+    {
+        // Another process successfully extracted the dependencies
+        trace::info(_X("Extraction completed by another process, aborting current extraction."));
+    }
+
+    if (!extracted_by_current_process && !extracted_by_concurrent_process)
+    {
+        trace::error(_X("Failure processing application bundle."));
+        trace::error(_X("Failed to commit extracted files to directory [%s]."), m_extraction_dir.c_str());
+        throw StatusCode::BundleExtractionFailure;
+    }
+
+    trace::info(_X("Extraction recovered [%s]"), relative_path.c_str());
+}
+
+void bundle_runner_t::commit_dir()
+{
+    // Commit an entire new extraction to the final extraction directory
+    // Retry the move operation with some wait in between the attempts. This is to workaround for possible file locking
+    // caused by AV software. Basically the extraction process above writes a bunch of executable files to disk
+    // and some AV software may decide to scan them on write. If this happens the files will be locked which blocks
+    // our ablity to move them.
+
+    bool extracted_by_concurrent_process = false;
+    bool extracted_by_current_process =
+        rename_with_retries(m_working_extraction_dir, m_extraction_dir, extracted_by_concurrent_process);
+
+    if (extracted_by_concurrent_process)
+    {
+        // Another process successfully extracted the dependencies
+        trace::info(_X("Extraction completed by another process, aborting current extraction."));
+        remove_directory_tree(m_working_extraction_dir);
+    }
+
+    if (!extracted_by_current_process && !extracted_by_concurrent_process)
+    {
+        trace::error(_X("Failure processing application bundle."));
+        trace::error(_X("Failed to commit extracted files to directory [%s]."), m_extraction_dir.c_str());
+        throw StatusCode::BundleExtractionFailure;
+    }
+
+    trace::info(_X("Completed new extraction."));
+}
+
+// Verify that an existing extraction contains all files listed in the bundle manifest.
+// If some files are missing, extract them individually.
+void bundle_runner_t::verify_recover_extraction()
+{
+    bool recovered = false;
+
+    for (file_entry_t* entry : m_manifest->files)
+    {
+        pal::string_t file_path = m_extraction_dir;
+        append_path(&file_path, entry->relative_path().c_str());
+
+        if (!pal::file_exists(file_path))
+        {
+            if (!recovered)
+            {
+                recovered = true;
+                create_working_extraction_dir();
+            }
+
+            extract_file(entry);
+            commit_file(entry->relative_path());
+        }
+    }
+
+    if (recovered)
+    {
+        remove_directory_tree(m_working_extraction_dir);
+    }
 }
 
 // Current support for executing single-file bundles involves 
@@ -279,13 +408,21 @@ StatusCode bundle_runner_t::extract()
         seek(m_bundle_stream, marker_t::header_offset(), SEEK_SET);
         m_header.reset(header_t::read(m_bundle_stream));
 
+        m_manifest.reset(manifest_t::read(m_bundle_stream, num_embedded_files()));
+
         // Determine if embedded files are already extracted, and available for reuse
         determine_extraction_dir();
-        if (can_reuse_extraction())
+        if (pal::directory_exists(m_extraction_dir))
         {
+            // If so, verify the contents, recover files if necessary, 
+            // and use the existing extraction.
+
+            verify_recover_extraction();
             fclose(m_bundle_stream);
             return StatusCode::Success;
         }
+
+        // If not, create a new extraction
 
         // Extract files to temporary working directory
         //
@@ -306,46 +443,11 @@ StatusCode bundle_runner_t::extract()
         
         create_working_extraction_dir();
 
-        m_manifest.reset(manifest_t::read(m_bundle_stream, num_embedded_files()));
-
         for (file_entry_t* entry : m_manifest->files) {
             extract_file(entry);
         }
 
-        // Commit files to the final extraction directory
-        // Retry the move operation with some wait in between the attempts. This is to workaround for possible file locking
-        // caused by AV software. Basically the extraction process above writes a bunch of executable files to disk
-        // and some AV software may decide to scan them on write. If this happens the files will be locked which blocks
-        // our ablity to move them.
-        int retry_count = 500;
-        while (true)
-        {
-            if (pal::rename(m_working_extraction_dir.c_str(), m_extraction_dir.c_str()) == 0)
-                break;
-
-            bool should_retry = errno == EACCES;
-            if (can_reuse_extraction())
-            {
-                // Another process successfully extracted the dependencies
-                trace::info(_X("Extraction completed by another process, aborting current extraction."));
-
-                remove_directory_tree(m_working_extraction_dir);
-                break;
-            }
-
-            if (should_retry && (retry_count--) > 0)
-            {
-                trace::info(_X("Retrying extraction due to EACCES trying to rename the extraction folder to [%s]."), m_extraction_dir.c_str());
-                pal::sleep(100);
-                continue;
-            }
-            else
-            {
-                trace::error(_X("Failure processing application bundle."));
-                trace::error(_X("Failed to commit extracted files to directory [%s]"), m_extraction_dir.c_str());
-                throw StatusCode::BundleExtractionFailure;
-            }
-        }
+        commit_dir();
 
         fclose(m_bundle_stream);
         return StatusCode::Success;
