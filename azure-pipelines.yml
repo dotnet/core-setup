@@ -95,7 +95,7 @@ stages:
     parameters:
       additionalMSBuildArgs: /p:OutputRid=linux-musl-x64
       name: Linux_x64_Alpine36
-      dockerImage: mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.6-3148f11-20171119021156
+      dockerImage: mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.6-3e800f1-20190508143246
       portableBuild: false
       targetArchitecture: x64
 
