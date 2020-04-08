@@ -74,6 +74,8 @@ jobs:
       displayName: Build
 
     - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), ne(variables['DisableVSPublish'], 'true')) }}:
+      - task: NuGetToolInstaller@1
+        displayName: 'Install NuGet.exe'
       - task: NuGetCommand@2
         displayName: Push Visual Studio NuPkgs
         inputs:
