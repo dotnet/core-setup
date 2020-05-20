@@ -14,9 +14,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.20221.1">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>059a4a19e602494bfbed473dbbb18f2dbfbd0878</Sha>
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.20265.1">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha>f3582b23a45b65de1d1090b282a80533e42ea128</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -118,9 +118,9 @@
       <Uri>https://github.com/dotnet/standard</Uri>
       <Sha>a5b5f2e1e369972c8ff1e2183979fab6099f52ef</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.4-servicing.20202.1">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.4-servicing.20263.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>05e3582c126663120b82a2eec8fd12dcb6929064</Sha>
+      <Sha>b1745659051f73cf089fbfb2ebbe4648c2fb6c12</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.20213.2" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
@@ -130,9 +130,9 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
       <Sha>847da8feefa286affd3f458fc3fdcedcd0d93869</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.20213.4">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.20269.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>2ef997f717b59246a01d0badece6ca8155d722c9</Sha>
+      <Sha>40954263e768b2540de2927297422f25683c5e86</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
