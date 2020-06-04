@@ -641,10 +641,10 @@
       "value": "PassedViaPipeBuild"
     },
     "NUGET_FEED_URL": {
-      "value": "https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v2/package"
+      "value": "https:%2F%2Fdotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json"
     },
     "NUGET_SYMBOLS_FEED_URL": {
-      "value": "https:%2F%2Fdotnet.myget.org/F/dotnet-core/symbols/api/v2/package"
+      "value": "https:%2F%2Fdotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json"
     },
     "OfficialBuildId": {
       "value": "$(Build.BuildNumber)"
