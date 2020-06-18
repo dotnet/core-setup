@@ -225,7 +225,7 @@
       "value": "--branch $(PB_Branch) https://$(PB_VsoAccountName):$(PB_VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Setup-Trusted"
     },
     "PB_Branch": {
-      "value": "master",
+      "value": "release/2.1",
       "allowOverride": true
     },
     "PB_VsoAccountName": {

@@ -197,7 +197,7 @@
       "value": "$(Build.SourcesDirectory)/core-setup"
     },
     "PB_Branch": {
-      "value": "master"
+      "value": "release/2.1"
     },
     "PB_AzureAccountName": {
       "value": "sourcebuild"

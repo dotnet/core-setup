@@ -660,7 +660,7 @@
       "value": "dotnet"
     },
     "PB_Branch": {
-      "value": "master",
+      "value": "release/2.1",
       "allowOverride": true
     },
     "PB_BuildFullPlatformManifest": {
@@ -783,7 +783,7 @@
     "type": "TfsGit",
     "name": "DotNet-Core-Setup-Trusted",
     "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Core-Setup-Trusted",
-    "defaultBranch": "refs/heads/master",
+    "defaultBranch": "refs/heads/release/2.1",
     "clean": "false",
     "checkoutSubmodules": false
   },
