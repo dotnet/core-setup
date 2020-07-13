@@ -794,7 +794,7 @@
     "id": 36,
     "name": "DotNet-Build",
     "pool": {
-      "id": 39,
+      "id": 24,
       "name": "DotNet-Build"
     }
   },
