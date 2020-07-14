@@ -122,6 +122,8 @@ exit /b 1
 
 :GenVSSolution
 :: Regenerate the VS solution
+copy "%~dp0\Windows\Directory.Build.props" "%__objDir%"
+copy "%~dp0\Windows\Directory.Build.targets" "%__objDir%"
 
 echo Calling "%__nativeWindowsDir%\gen-buildsys-win.bat %~dp0 "%__VSVersion%" %__BuildArch% %__CommitSha% %__HostVersion% %__AppHostVersion% %__HostFxrVersion% %__HostPolicyVersion% %__PortableBuild%"
 pushd "%__IntermediatesDir%"
@@ -134,6 +136,10 @@ if exist "%__IntermediatesDir%\INSTALL.vcxproj" goto BuildNativeProj
 goto :Failure
 
 :BuildNativeProj
+
+copy "%~dp0\Windows\Directory.Build.props" "%__objDir%"
+copy "%~dp0\Windows\Directory.Build.targets" "%__objDir%"
+
 :: Build the project created by Cmake
 set __msbuildArgs=/p:Platform=%__BuildArch% /p:PlatformToolset="%__PlatformToolset%"
 
