@@ -791,11 +791,11 @@
   "quality": "definition",
   "drafts": [],
   "queue": {
-    "id": 36,
-    "name": "DotNet-Build",
+    "id": 23,
+    "name": "MicroBuildV2Pool",
     "pool": {
       "id": 24,
-      "name": "DotNet-Build"
+      "name": "MicroBuildV2Pool"
     }
   },
   "id": 6102,
