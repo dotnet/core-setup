@@ -8,4 +8,32 @@
   <Import Project="packaging.stubs.targets" Condition="'$(MSBuildProjectExtension)' != '.pkgproj'" />
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory).., Directory.Build.targets))\Directory.Build.targets" />
+
+  <!--
+    Package build can be skipped by invoking PackIfServiced instead of Pack targets.
+
+    ProjectServicingConfiguration is used to determine if packaging should be skipped. See more in eng/Versions.props.
+  -->
+  <Target Name="PackIfServiced"
+          DependsOnTargets="
+            SkipPackIfShouldNotBuild;
+            Pack" />
+
+  <Target Name="GetCurrentProjectServicingConfiguration">
+    <ItemGroup>
+      <CurrentProjectServicingConfiguration
+        Include="@(ProjectServicingConfiguration)"
+        Condition="'%(Identity)' == '$(MSBuildProjectName)'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SkipPackIfShouldNotBuild"
+          Condition="'$(AlwaysPackEvenIfNotServicing)' != 'true'"
+          DependsOnTargets="GetCurrentProjectServicingConfiguration">
+    <PropertyGroup>
+      <MostRecentProducedServicingPatchVersion>%(CurrentProjectServicingConfiguration.PatchVersion)</MostRecentProducedServicingPatchVersion>
+      <IsPackable Condition="'$(MostRecentProducedServicingPatchVersion)' != '$(PatchVersion)'">false</IsPackable>
+    </PropertyGroup>
+  </Target>
+
 </Project>

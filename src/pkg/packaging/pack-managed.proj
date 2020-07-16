@@ -11,7 +11,7 @@
       <ManagedProject Include="$(RepoRoot)src\managed\**\*.csproj" />
     </ItemGroup>
 
-    <MSBuild Projects="@(ManagedProject)" Targets="Pack" />
+    <MSBuild Projects="@(ManagedProject)" Targets="PackIfServiced" />
   </Target>
 
   <Target Name="Test" />
