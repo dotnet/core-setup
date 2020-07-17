@@ -180,7 +180,7 @@ jobs:
 - job: release_osx_x64
   displayName: OSX x64 Release Build
   pool:
-    vmImage: macOS-10.13
+    name: Hosted macOS
   steps:
   - checkout: self
     clean: true
