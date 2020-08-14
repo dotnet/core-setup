@@ -66,6 +66,14 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
       <Sha>059a4a19e602494bfbed473dbbb18f2dbfbd0878</Sha>
     </Dependency>
+    <Dependency Name="System.Diagnostics.DiagnosticSource" Version="4.7.1">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
+      <Sha>059a4a19e602494bfbed473dbbb18f2dbfbd0878</Sha>
+    </Dependency>
+    <Dependency Name="System.Reflection.Metadata" Version="1.8.1">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
+      <Sha>059a4a19e602494bfbed473dbbb18f2dbfbd0878</Sha>
+    </Dependency>
     <Dependency Name="System.IO.Packaging" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
