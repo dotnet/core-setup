@@ -102,6 +102,14 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
       <Sha>059a4a19e602494bfbed473dbbb18f2dbfbd0878</Sha>
     </Dependency>
+    <Dependency Name="System.Reflection.MetadataLoadContext" Version="4.7.2">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha>c4164928b270ee2369808ab347d33423ef765216</Sha>
+    </Dependency>
+    <Dependency Name="System.Reflection.Emit" Version="4.7.0">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
+    </Dependency>
     <Dependency Name="System.IO.Packaging" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
@@ -175,6 +183,14 @@
       <Sha>a5b5f2e1e369972c8ff1e2183979fab6099f52ef</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.8-servicing.20411.5">
+      <Uri>https://github.com/dotnet/coreclr</Uri>
+      <Sha>f897710bc4efe6a046068fde0acf641667a8fff5</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NETCore.ILDAsm" Version="3.1.8-servicing.20411.5">
+      <Uri>https://github.com/dotnet/coreclr</Uri>
+      <Sha>f897710bc4efe6a046068fde0acf641667a8fff5</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.8-servicing.20411.5">
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>f897710bc4efe6a046068fde0acf641667a8fff5</Sha>
     </Dependency>
