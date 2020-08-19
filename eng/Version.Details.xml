@@ -102,6 +102,10 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
       <Sha>059a4a19e602494bfbed473dbbb18f2dbfbd0878</Sha>
     </Dependency>
+    <Dependency Name="System.Net.Http.Json" Version="3.2.1">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
+      <Sha>620cea9ccf0359993e803c900059932966399584</Sha>
+    </Dependency>
     <Dependency Name="System.Reflection.Metadata" Version="1.8.1">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
       <Sha>059a4a19e602494bfbed473dbbb18f2dbfbd0878</Sha>
