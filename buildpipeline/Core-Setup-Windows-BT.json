@@ -96,7 +96,7 @@
       "refName": "Task4",
       "task": {
         "id": "30666190-6959-11e5-9f96-f56098202fef",
-        "versionSpec": "1.*",
+        "versionSpec": "2.*",
         "definitionType": "task"
       },
       "inputs": {
