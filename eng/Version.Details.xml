@@ -230,6 +230,10 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>529227b18ce9d368e639986142d873f17c73840a</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.8-servicing.20412.3">
+      <Uri>https://github.com/dotnet/wpf</Uri>
+      <Sha>529227b18ce9d368e639986142d873f17c73840a</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.8-servicing.20412.3" CoherentParentDependency="Microsoft.WindowsDesktop.App.Runtime.win-x64">
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>529227b18ce9d368e639986142d873f17c73840a</Sha>
