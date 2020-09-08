@@ -11,6 +11,8 @@ if (!(Test-Path "$OutputDir"))
     mkdir "$OutputDir" | Out-Null
 }
 
+[Net.ServicePointManager]::SecurityProtocol += [Net.SecurityProtocolType]::Tls12
+
 if(!(Test-Path "$outFile"))
 {
     Write-Output "Downloading WixTools to $outFile.."
