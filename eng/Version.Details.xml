@@ -26,9 +26,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.20472.1">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.20472.2">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>2470c2a493ddb0e6c3ea6e0000c2af81d13d4dcb</Sha>
+      <Sha>fc4497486c18355c6b95d559290a68b796a17fcd</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -132,7 +132,7 @@
     </Dependency>
     <Dependency Name="System.IO.Pipelines" Version="4.7.3">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>2470c2a493ddb0e6c3ea6e0000c2af81d13d4dcb</Sha>
+      <Sha>fc4497486c18355c6b95d559290a68b796a17fcd</Sha>
     </Dependency>
     <Dependency Name="System.IO.Pipes.AccessControl" Version="4.5.1">
       <Uri>https://github.com/dotnet/corefx</Uri>
