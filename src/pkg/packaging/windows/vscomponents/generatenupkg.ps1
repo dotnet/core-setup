@@ -13,6 +13,9 @@ param(
     [Parameter(Mandatory=$true)][string]$BinDir
 )
 
+#Add tls 1.2
+[Net.ServicePointManager]::SecurityProtocol += [Net.SecurityProtocolType]::Tls12
+
 $NuGetDir = Join-Path $BinDir  "nuget"
 $NuGetExe = Join-Path $NuGetDir "nuget.exe"
 $OutputDirectory = [System.IO.Path]::GetDirectoryName($NupkgFile)
