@@ -383,7 +383,7 @@
       "allowOverride": true
     },
     "NUGET_FEED_URL": {
-      "value": "https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v2/package"
+      "value": "https:%2F%2Fdotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json"
     },
     "NUGET_API_KEY": {
       "value": null,
@@ -394,7 +394,7 @@
       "isSecret": true
     },
     "NUGET_SYMBOLS_FEED_URL": {
-      "value": "https:%2F%2Fdotnet.myget.org/F/dotnet-core/symbols/api/v2/package"
+      "value": "https:%2F%2Fdotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json"
     },
     "PB_SourcesDirectory": {
       "value": "$(Build.SourcesDirectory)\\core-setup"
