@@ -22,6 +22,118 @@
      </bal:Condition>
     <?endif?>
 
+    <?if $(var.Platform)=x86?>
+      <!--'Microsoft .NET Core Runtime - 2.1.23 (x86)'-->
+      <RelatedBundle Id="{1F054D2D-5682-501B-8D6C-BF35B41DF1A6}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.22 (x86)'-->
+      <RelatedBundle Id="{2DA64596-55BA-7B95-9ECB-E88913E325E5}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.21 (x86)'-->
+      <RelatedBundle Id="{9F8C818C-5C8A-78A8-A49F-F82A0C6804C4}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.20 (x86)'-->
+      <RelatedBundle Id="{E1FC6676-5B92-75CC-C713-31B272DB4555}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.19 (x86)'-->
+      <RelatedBundle Id="{17C39F60-57D7-616E-C491-0BB7042C9916}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.18 (x86)'-->
+      <RelatedBundle Id="{97247A23-5F4D-7934-0E0C-87D43AB24309}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.17 (x86)'-->
+      <RelatedBundle Id="{945F3297-5703-7C7E-392B-85CC99F46CAF}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.16 (x86)'-->
+      <RelatedBundle Id="{17B01FF2-540D-4094-07B9-1D63A929174E}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.15 (x86)'-->
+      <RelatedBundle Id="{C72BA4B9-5B24-4E9E-D3C0-031CD95CBFE0}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.14 (x86)'-->
+      <RelatedBundle Id="{402302BE-5075-5A10-DFEC-A4E7ABBE8ECA}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.13 (x86)'-->
+      <RelatedBundle Id="{AEE12588-53AA-7F22-0AD2-301F60B1BA60}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.12 (x86)'-->
+      <RelatedBundle Id="{A97CC17F-5ADF-4822-D454-43A3A53CAF5D}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.11 (x86)'-->
+      <RelatedBundle Id="{E9FDA257-5738-49BA-8A39-810FA18CCFEB}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.10 (x86)'-->
+      <RelatedBundle Id="{02AADC25-5EB4-7894-8C95-3B5EAA838208}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.9 (x86)'-->
+      <RelatedBundle Id="{AB23E8C1-59D2-52E8-5E74-E11C62D5A5F1}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.8 (x86)'-->
+      <RelatedBundle Id="{9A306160-5C96-43B8-B351-529CB7A863BF}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.7 (x86)'-->
+      <RelatedBundle Id="{4A14329A-50DC-629E-0849-69C54C064A44}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.6 (x86)'-->
+      <RelatedBundle Id="{1115EC26-5D62-6DE5-813B-E8143C44D3DA}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.5 (x86)'-->
+      <RelatedBundle Id="{E5876723-5A5F-6758-D05B-C82AC7F91CD6}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.4 (x86)'-->
+      <RelatedBundle Id="{F38DE68E-57F7-4FDC-19D5-3215D255633D}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.3 (x86)'-->
+      <RelatedBundle Id="{0F213F9D-5676-49D7-B6D9-9BD0B1E701D7}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.2 (x86)'-->
+      <RelatedBundle Id="{084D67B0-59F2-741E-54FE-6B09C2208AA6}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.1 (x86)'-->
+      <RelatedBundle Id="{F934DDE1-532B-76B8-9BA5-6BEF835003B5}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.0 (x86)'-->
+      <RelatedBundle Id="{3DD9C462-5001-6E11-6FAD-DA8C9E408B3F}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.0 Release Candidate 1 (x86)'-->
+      <RelatedBundle Id="{CBFE9836-5772-49FE-EDCB-5CB9EEA2EC2C}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.0 Preview 2 (x86)'-->
+      <RelatedBundle Id="{CA3715C5-5B14-5361-D5C6-3ECEFE346E5F}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.0 Preview 1 (x86)'-->
+      <RelatedBundle Id="{27809FF0-5BA5-4E76-8953-0A91B51B2261}" Action="Upgrade" />
+    <?endif?>
+
+    <?if $(var.Platform)=x64?>
+      <!--'Microsoft .NET Core Runtime - 2.1.23 (x64)'-->
+      <RelatedBundle Id="{7AA1275D-5DAF-45D9-307F-C3BC1066A283}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.22 (x64)'-->
+      <RelatedBundle Id="{D217640D-5F13-426F-58CD-63225FF62268}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.21 (x64)'-->
+      <RelatedBundle Id="{88B5A49E-5A19-4E4B-8E32-A4E740E7AFC7}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.20 (x64)'-->
+      <RelatedBundle Id="{1A5FD787-5853-51A4-82A9-7E847BE5B222}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.19 (x64)'-->
+      <RelatedBundle Id="{AAEDFEEE-5DDB-4E8B-A035-4D41270255E5}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.18 (x64)'-->
+      <RelatedBundle Id="{D1604763-529A-5232-5779-21B931027DCD}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.17 (x64)'-->
+      <RelatedBundle Id="{C9FE4D95-5820-642B-460E-3D4CB86EF2C8}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.16 (x64)'-->
+      <RelatedBundle Id="{5F736C49-582A-56D9-3A20-7EDB602F5110}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.15 (x64)'-->
+      <RelatedBundle Id="{3FD58586-5F3F-7CD0-B953-C02728B37322}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.14 (x64)'-->
+      <RelatedBundle Id="{9F441374-5A2C-78FE-B41A-4D5C40A42F59}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.13 (x64)'-->
+      <RelatedBundle Id="{A5ED3A7E-5F67-6D83-7003-B0D1680DC922}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.12 (x64)'-->
+      <RelatedBundle Id="{71115AC8-588E-5158-7ECC-B6E33F018027}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.11 (x64)'-->
+      <RelatedBundle Id="{9E9C3AFE-5CD3-5B99-BCD7-D0855986FFD9}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.10 (x64)'-->
+      <RelatedBundle Id="{3A4B9CDD-5D1E-4A31-0A1D-CD8D0ACE096A}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.9 (x64)'-->
+      <RelatedBundle Id="{F2690EBA-58FA-77E0-0BDF-4940FD03DBAF}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.8 (x64)'-->
+      <RelatedBundle Id="{4CA34765-55F0-42E9-C2A4-A90AFFADCEF9}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.7 (x64)'-->
+      <RelatedBundle Id="{37B3D26F-52DC-50BD-FB76-3D3F95DBB0E1}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.6 (x64)'-->
+      <RelatedBundle Id="{D88DA45A-5A45-4DFA-4B2C-A6BDA819E4AD}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.5 (x64)'-->
+      <RelatedBundle Id="{7789C96F-5750-416D-27A0-69444DCC004F}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.4 (x64)'-->
+      <RelatedBundle Id="{02E3C514-5E34-4E77-4509-A7C6CCE73F76}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.3 (x64)'-->
+      <RelatedBundle Id="{24783B95-537D-72D9-CD15-37689734D5E2}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.2 (x64)'-->
+      <RelatedBundle Id="{91283A22-5C39-4432-7A30-790A356A8DAE}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.1 (x64)'-->
+      <RelatedBundle Id="{87F773E5-5B25-694C-59E3-1E703A40D581}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.0 (x64)'-->
+      <RelatedBundle Id="{4F543CE1-5C33-4467-1D09-5D2D45224D6D}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.0 Preview 2 (x64)'-->
+      <RelatedBundle Id="{C29E85B4-5B8A-4A0F-BD48-BDB96F29D184}" Action="Upgrade" />
+      <!--'Microsoft .NET Core Runtime - 2.1.0 Preview 1 (x64)'-->
+      <RelatedBundle Id="{D756C595-5701-74CF-2F38-38DBABA2396D}" Action="Upgrade" />
+    <?endif?>
+
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.Foundation">
       <bal:WixStandardBootstrapperApplication
         LicenseFile="..\..\windows\sharedframework\dummyEula.rtf"
