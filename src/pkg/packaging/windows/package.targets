@@ -99,9 +99,17 @@
         <ArchParams>"$(MsiArch)" "$(TargetArchitecture)"</ArchParams>
      </PropertyGroup>
 
-     <GenerateGuidFromName Name="$(SharedBundle)">
-       <Output TaskParameter="GeneratedGui" PropertyName="SharedBundleCode" />
-     </GenerateGuidFromName>
+    <Error
+      Condition="'$(BundleInstallerUpgradeCodeSeed)' == ''"
+      Text="BundleInstallerUpgradeCodeSeed not defined. Required to produce a stable bundle upgrade code." />
+
+    <PropertyGroup>
+      <BundleInstallerOutputGuidString>$(BundleInstallerUpgradeCodeSeed) $(ProductBandVersion) $(PackageTargetRid)</BundleInstallerOutputGuidString>
+    </PropertyGroup>
+
+    <GenerateGuidFromName Name="$(BundleInstallerOutputGuidString)">
+      <Output TaskParameter="GeneratedGui" PropertyName="SharedBundleCode" />
+    </GenerateGuidFromName>
 
      <PropertyGroup>
         <BundleParameters>$(ShareFXMsi) $(HostMsi) $(HostFxrMsi) $(SharedBundle) $(WixToolsDir) '$(SharedBrandName)' $(MsiVersionString) $(BundleDisplayVersion) $(SharedFrameworkName) $(SharedFrameworkNugetVersion) $(SharedBundleCode) $(ArchParams)</BundleParameters>
