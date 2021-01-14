@@ -57,9 +57,9 @@
     <!-- sourcelink -->
     <MicrosoftSourceLinkVSTSVersion>1.0.0-beta2-19519-01</MicrosoftSourceLinkVSTSVersion>
     <!-- corefx -->
-    <MicrosoftNETCorePlatformsPackageVersion>3.1.3</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.1.4</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>3.1.0</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.7.0-servicing.20566.4</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.7.0-servicing.21064.8</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftWin32RegistryAccessControlVersion>4.7.0</MicrosoftWin32RegistryAccessControlVersion>
     <MicrosoftWin32RegistryVersion>4.7.0</MicrosoftWin32RegistryVersion>
     <MicrosoftWin32SystemEventsVersion>4.7.0</MicrosoftWin32SystemEventsVersion>
