@@ -55,7 +55,7 @@
     -->
     <BuildDistroIndependentInstallers Condition="'$(BuildDistroIndependentInstallers)' == ''">true</BuildDistroIndependentInstallers>
 
-    <WixVersion>3.10.4</WixVersion>
+    <WixVersion>3.14.0.4118</WixVersion>
     <WixToolsDir>$(IntermediateOutputRootPath)WixTools.$(WixVersion)/</WixToolsDir>
     <!-- Used in WiX targets to locate files. -->
     <WixInstallPath>$(WixToolsDir)</WixInstallPath>
