@@ -51,9 +51,9 @@
   <!--Package versions-->
   <PropertyGroup>
     <!-- arcade -->
-    <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.21072.7</MicrosoftDotNetBuildTasksFeedPackageVersion>
-    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.21072.7</MicrosoftDotNetBuildTasksPackagingPackageVersion>
-    <MicrosoftDotNetVersionToolsTasksPackageVersion>1.0.0-beta.21072.7</MicrosoftDotNetVersionToolsTasksPackageVersion>
+    <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.21110.10</MicrosoftDotNetBuildTasksFeedPackageVersion>
+    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.21110.10</MicrosoftDotNetBuildTasksPackagingPackageVersion>
+    <MicrosoftDotNetVersionToolsTasksPackageVersion>1.0.0-beta.21110.10</MicrosoftDotNetVersionToolsTasksPackageVersion>
     <!-- sourcelink -->
     <MicrosoftSourceLinkVSTSVersion>1.0.0-beta2-19519-01</MicrosoftSourceLinkVSTSVersion>
     <!-- corefx -->
