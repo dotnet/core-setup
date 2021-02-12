@@ -226,21 +226,21 @@
       <Uri>https://github.com/dotnet/winforms</Uri>
       <Sha>77b8f5e591e4e29951113504738ee1298d180367</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.21069.2" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>cf81780295b0a9a473c05c33a7251e9bc9f9770f</Sha>
+    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.21110.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+      <Uri>https://github.com/dotnet/wpf</Uri>
+      <Sha>296c1b7863d1a16b1dd916f80a635927354e113b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.11-servicing.21069.2" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>cf81780295b0a9a473c05c33a7251e9bc9f9770f</Sha>
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.13-servicing.21110.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+      <Uri>https://github.com/dotnet/wpf</Uri>
+      <Sha>296c1b7863d1a16b1dd916f80a635927354e113b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.11-servicing.21069.2" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>cf81780295b0a9a473c05c33a7251e9bc9f9770f</Sha>
+    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.13-servicing.21110.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+      <Uri>https://github.com/dotnet/wpf</Uri>
+      <Sha>296c1b7863d1a16b1dd916f80a635927354e113b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.21069.9">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.21111.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>6d83fa988168cff2044f521050a1ebaadf463874</Sha>
+      <Sha>2851b0279ecc75e135a848ae79dc95196f6c18b4</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
