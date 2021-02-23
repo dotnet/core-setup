@@ -4,11 +4,6 @@
 
 set (CMAKE_CXX_STANDARD 11)
 
-include(CheckPIESupported)
-
-# All code we build should be compiled as Position Independent Code.
-check_pie_supported(OUTPUT_VARIABLE PIE_SUPPORT_OUTPUT LANGUAGES CXX)
-
 if(NOT MSVC AND NOT CMAKE_CXX_LINK_PIE_SUPPORTED)
     message(WARNING "PIE is not supported at link time: ${PIE_SUPPORT_OUTPUT}.\n"
                     "PIE link options will not be passed to the linker.")
