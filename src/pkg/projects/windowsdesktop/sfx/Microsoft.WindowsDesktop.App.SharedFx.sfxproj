@@ -4,6 +4,7 @@
     <SfxIdentity>Microsoft.WindowsDesktop.App</SfxIdentity>
 
     <GenerateNetCoreAppRuntimeConfig>true</GenerateNetCoreAppRuntimeConfig>
+    <SkipArm64InstallerBuild>true</SkipArm64InstallerBuild>
   </PropertyGroup>
 
   <ItemGroup>

@@ -6,6 +6,7 @@
       product band to upgrade in place.
     -->
     <BundleInstallerUpgradeCodeSeed>Windows Desktop Shared Framework Bundle Installer</BundleInstallerUpgradeCodeSeed>
+    <SkipArm64InstallerBuild>true</SkipArm64InstallerBuild>
   </PropertyGroup>
 
   <ItemGroup>
