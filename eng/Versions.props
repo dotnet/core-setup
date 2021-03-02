@@ -22,20 +22,15 @@
       The NETStandard.Library targeting pack does not version along with the runtime. Advance this
       version if a new NETStandard targeting pack was released in the previous servicing release.
 
-      Merge the following 2 lines into one to stop building for arm64 and set the proerty to 1
-      for all architectures.
+      Build arm64 NETStandard package with 2.1.0 version in 3.1.14 build only.
     -->
-    <NETStandardPatchVersion Condition="'$(TargetArchitecture)' != 'arm64'">1</NETStandardPatchVersion>
-    <NETStandardPatchVersion Condition="'$(TargetArchitecture)' == 'arm64'">0</NETStandardPatchVersion>
+    <NETStandardPatchVersion>1</NETStandardPatchVersion>
+    <NETStandardPatchVersion Condition="'$(TargetArchitecture)' == 'arm64' and '$(PatchVersion)' == '14'">0</NETStandardPatchVersion>
     <!--
-      Enabling build of arm64 NETCore.App.Ref packages during servicing, using RTM (3.1.0) version.
-
-      Update NETCoreAppRefPatchVersion value to a value different than ProjectServicingConfiguration
-      for Microsoft.NETCore.App.Ref package, to stop building it. Ideally, merge the following two
-      lines into one that sets NETCoreAppRefPatchVersion to $(PatchVersion) for all architectures.
+      Build arm64 NETCore.App.Ref package with 3.1.0 version in 3.1.14 build only.
     -->
-    <NETCoreAppRefPatchVersion Condition="'$(TargetArchitecture)' != 'arm64'">$(PatchVersion)</NETCoreAppRefPatchVersion>
-    <NETCoreAppRefPatchVersion Condition="'$(TargetArchitecture)' == 'arm64'">0</NETCoreAppRefPatchVersion>
+    <NETCoreAppRefPatchVersion>$(PatchVersion)</NETCoreAppRefPatchVersion>
+    <NETCoreAppRefPatchVersion Condition="'$(TargetArchitecture)' == 'arm64' and '$(PatchVersion)' == '14'">0</NETCoreAppRefPatchVersion>
   </PropertyGroup>
   <!--
     Servicing build settings.
