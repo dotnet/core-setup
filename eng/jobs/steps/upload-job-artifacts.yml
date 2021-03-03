@@ -45,7 +45,7 @@ steps:
     TargetFolder: '$(Build.StagingDirectory)/BuildLogs'
     CleanTargetFolder: true
   continueOnError: true
-  condition: succeededOrFailed()
+  condition: always()
 
 - task: PublishBuildArtifacts@1
   displayName: Publish BuildLogs
@@ -53,4 +53,4 @@ steps:
     PathtoPublish: '$(Build.StagingDirectory)/BuildLogs'
     ArtifactName: Logs-${{ parameters.name }}-$(_BuildConfig)
   continueOnError: true
-  condition: succeededOrFailed()
+  condition: always()
