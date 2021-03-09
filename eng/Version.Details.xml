@@ -18,17 +18,17 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.1.4">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.1.5">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>50a99d5d3c6e68aecf70627897c0d862a92fc283</Sha>
+      <Sha>9299d909ff6c03c664a3f9a3ef995a9fa2eeec3e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Targets" Version="3.1.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.21069.5">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.21116.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>50a99d5d3c6e68aecf70627897c0d862a92fc283</Sha>
+      <Sha>9299d909ff6c03c664a3f9a3ef995a9fa2eeec3e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -182,9 +182,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Encodings.Web" Version="4.7.1">
+    <Dependency Name="System.Text.Encodings.Web" Version="4.7.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>059a4a19e602494bfbed473dbbb18f2dbfbd0878</Sha>
+      <Sha>9299d909ff6c03c664a3f9a3ef995a9fa2eeec3e</Sha>
     </Dependency>
     <Dependency Name="System.Text.Encodings.CodePages" Version="4.7.1">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
@@ -206,41 +206,41 @@
       <Uri>https://github.com/dotnet/standard</Uri>
       <Sha>a5b5f2e1e369972c8ff1e2183979fab6099f52ef</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.12-servicing.21065.4">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.13-servicing.21111.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>fa682a7bd0a7a1eb5f80904c10b88301eb33150c</Sha>
+      <Sha>c531bbb17fd887eaf7073f7159db43477d557ae3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILDAsm" Version="3.1.12-servicing.21065.4">
+    <Dependency Name="Microsoft.NETCore.ILDAsm" Version="3.1.13-servicing.21111.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>fa682a7bd0a7a1eb5f80904c10b88301eb33150c</Sha>
+      <Sha>c531bbb17fd887eaf7073f7159db43477d557ae3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.12-servicing.21065.4">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.13-servicing.21111.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>fa682a7bd0a7a1eb5f80904c10b88301eb33150c</Sha>
+      <Sha>c531bbb17fd887eaf7073f7159db43477d557ae3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.21064.4" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
-      <Uri>https://github.com/dotnet/winforms</Uri>
-      <Sha>77b8f5e591e4e29951113504738ee1298d180367</Sha>
+    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.21111.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-winforms</Uri>
+      <Sha>14b57cf8257c5b70f904d7cd39038eb024656ae6</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="4.8.1-servicing.21064.4" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
-      <Uri>https://github.com/dotnet/winforms</Uri>
-      <Sha>77b8f5e591e4e29951113504738ee1298d180367</Sha>
+    <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="4.8.1-servicing.21111.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-winforms</Uri>
+      <Sha>14b57cf8257c5b70f904d7cd39038eb024656ae6</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.21069.2" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.21112.1" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>cf81780295b0a9a473c05c33a7251e9bc9f9770f</Sha>
+      <Sha>1510d690fc242e852a10e3774ce606bc80a8e984</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.11-servicing.21069.2" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.13-servicing.21112.1" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>cf81780295b0a9a473c05c33a7251e9bc9f9770f</Sha>
+      <Sha>1510d690fc242e852a10e3774ce606bc80a8e984</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.11-servicing.21069.2" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.13-servicing.21112.1" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>cf81780295b0a9a473c05c33a7251e9bc9f9770f</Sha>
+      <Sha>1510d690fc242e852a10e3774ce606bc80a8e984</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.21069.9">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.21112.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>6d83fa988168cff2044f521050a1ebaadf463874</Sha>
+      <Sha>351cba840cb6c9478ba05f6646818218cf7c6ff0</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
