@@ -259,8 +259,16 @@ jobs:
       Release:
         _BuildConfig: Release
   pool:
-    name: NetCorePublic-Pool
-    queue: buildpool.ubuntu.1604.amd64.open
+    # Public Linux Build Pool
+    ${{ eq(variables['System.TeamProject'], 'public') }}:
+      name:  NetCorePublic-Pool
+      queue: BuildPool.Ubuntu.1604.Amd64.Open
+
+    # Official Build Linux Pool
+    ${{ ne(variables['System.TeamProject'], 'public') }}:
+      name: NetCoreInternal-Pool
+      queue: BuildPool.Ubuntu.1604.Amd64
+
   steps:
   - checkout: self
     clean: true
