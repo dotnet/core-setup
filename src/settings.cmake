@@ -4,7 +4,7 @@
 
 set (CMAKE_CXX_STANDARD 11)
 
-if(NOT MSVC AND NOT CMAKE_CXX_LINK_PIE_SUPPORTED)
+if(NOT MSVC)
     message(WARNING "PIE is not supported at link time: ${PIE_SUPPORT_OUTPUT}.\n"
                     "PIE link options will not be passed to the linker.")
 endif()
@@ -223,12 +223,12 @@ endif()
 # containing the reference instead of using definitions from other modules.
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Xlinker -Bsymbolic -Bsymbolic-functions")
-    add_link_options(-Wl,--build-id=sha1 -Wl,-z,relro,-z,now)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id=sha1 -Wl,-z,relro,-z,now")
     add_compile_options(-fstack-protector-strong)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_compile_options(-fstack-protector)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
-    add_link_options(-fuse-ld=lld -Wl,--build-id=sha1 -Wl,-z,relro,-z,now)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld -Wl,--build-id=sha1 -Wl,-z,relro,-z,now")
     add_compile_options(-fstack-protector)
 endif()
 
