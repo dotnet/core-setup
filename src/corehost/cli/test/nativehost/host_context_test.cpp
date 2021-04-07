@@ -11,6 +11,7 @@
 #include <corehost_context_contract.h>
 #include "host_context_test.h"
 #include <utils.h>
+#include <thread>
 
 namespace
 {
