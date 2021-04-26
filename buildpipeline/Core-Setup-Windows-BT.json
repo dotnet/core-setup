@@ -791,11 +791,11 @@
   "quality": "definition",
   "drafts": [],
   "queue": {
-    "id": 23,
-    "name": "MicroBuildV2Pool",
+    "id": 2737,
+    "name": "VSEngSS-MicroBuild2017",
     "pool": {
-      "id": 24,
-      "name": "MicroBuildV2Pool"
+      "id": 338,
+      "name": "VSEngSS-MicroBuild2017"
     }
   },
   "id": 6102,
