@@ -51,7 +51,7 @@
     <ProjectServicingConfiguration Include="NETStandard.Library.Ref" PatchVersion="0" />
     <ProjectServicingConfiguration Include="Microsoft.DotNet.PlatformAbstractions" PatchVersion="6" />
     <ProjectServicingConfiguration Include="Microsoft.Extensions.DependencyModel" PatchVersion="6" />
-    <ProjectServicingConfiguration Include="Microsoft.NET.HostModel" PatchVersion="6" />
+    <ProjectServicingConfiguration Include="Microsoft.NET.HostModel" PatchVersion="16" />
   </ItemGroup>
   <PropertyGroup>
     <MicrosoftDotNetMaestroTasksVersion>1.0.0-beta.18619.4</MicrosoftDotNetMaestroTasksVersion>
