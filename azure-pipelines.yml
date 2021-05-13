@@ -112,6 +112,7 @@ stages:
         rids:
         - centos.7
         - fedora.27
+        - fedora.34
         - opensuse.42
         - oraclelinux.7
         - sles.12
