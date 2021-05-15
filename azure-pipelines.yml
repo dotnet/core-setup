@@ -111,7 +111,7 @@ stages:
         imageRid: rhel.7
         rids:
         - centos.7
-        - cm1
+        - cm.1
         - fedora.27
         - opensuse.42
         - oraclelinux.7
