@@ -4,6 +4,8 @@
 
 set (CMAKE_CXX_STANDARD 11)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
     set(CLR_CMAKE_PLATFORM_UNIX 1)
     message("System name Linux")
@@ -174,7 +176,7 @@ if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /GUARD:CF")
 
     # Debug build specific flags
-    set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "/NOVCFEATURE")
+    set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /NOVCFEATURE")
 
     # Release build specific flags
     set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
@@ -216,14 +218,14 @@ endif()
 # containing the reference instead of using definitions from other modules.
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Xlinker -Bsymbolic -Bsymbolic-functions")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id=sha1")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id=sha1")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id=sha1 -Wl,-z,relro,-z,now")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie -Wl,--build-id=sha1 -Wl,-z,relro,-z,now")
     add_compile_options(-fstack-protector-strong)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_compile_options(-fstack-protector)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld -Xlinker --build-id=sha1")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -fuse-ld=lld -Xlinker --build-id=sha1")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld -Wl,--build-id=sha1 -Wl,-z,relro,-z,now")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld -pie -Wl,--build-id=sha1 -Wl,-z,relro,-z,now")
     add_compile_options(-fstack-protector)
 endif()
 
