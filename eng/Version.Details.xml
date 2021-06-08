@@ -18,17 +18,17 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.1.6">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.1.7">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>6e37696a5420057596d61119614574db9037c652</Sha>
+      <Sha>658544bf73653f734bca9675602fa57440f8b718</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Targets" Version="3.1.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.21214.2">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.21262.5">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>585ae475d8aebdecf310d7509585003721509c5a</Sha>
+      <Sha>658544bf73653f734bca9675602fa57440f8b718</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -206,41 +206,41 @@
       <Uri>https://github.com/dotnet/standard</Uri>
       <Sha>a5b5f2e1e369972c8ff1e2183979fab6099f52ef</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.15-servicing.21212.2">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.16-servicing.21262.5">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>803ce08ee96925f9d08021c9c6b96af8f27d16c4</Sha>
+      <Sha>b820e148c5ded6a37cb3ddb38b88b54210189562</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILDAsm" Version="3.1.15-servicing.21212.2">
+    <Dependency Name="Microsoft.NETCore.ILDAsm" Version="3.1.16-servicing.21262.5">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>803ce08ee96925f9d08021c9c6b96af8f27d16c4</Sha>
+      <Sha>b820e148c5ded6a37cb3ddb38b88b54210189562</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.15-servicing.21212.2">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.16-servicing.21262.5">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>803ce08ee96925f9d08021c9c6b96af8f27d16c4</Sha>
+      <Sha>b820e148c5ded6a37cb3ddb38b88b54210189562</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.21213.7" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-winforms</Uri>
-      <Sha>4159e19925152f3e6ef6b123d6c0b78f20044a72</Sha>
+    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.21261.7" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+      <Uri>https://github.com/dotnet/winforms</Uri>
+      <Sha>d3e02ddb767e59202d32597401f985a4880a45ac</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="4.8.1-servicing.21213.7" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-winforms</Uri>
-      <Sha>4159e19925152f3e6ef6b123d6c0b78f20044a72</Sha>
+    <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="4.8.1-servicing.21261.7" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+      <Uri>https://github.com/dotnet/winforms</Uri>
+      <Sha>d3e02ddb767e59202d32597401f985a4880a45ac</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.21213.14" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.21261.6" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>6e87e91ecfec2db2490cf78cc5f45517d0abb942</Sha>
+      <Sha>d2dae225ff87a65cc5ee4a949734c688d4637f55</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.15-servicing.21213.14" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.16-servicing.21261.6" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>6e87e91ecfec2db2490cf78cc5f45517d0abb942</Sha>
+      <Sha>d2dae225ff87a65cc5ee4a949734c688d4637f55</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.15-servicing.21213.14" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.16-servicing.21261.6" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>6e87e91ecfec2db2490cf78cc5f45517d0abb942</Sha>
+      <Sha>d2dae225ff87a65cc5ee4a949734c688d4637f55</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.21213.11">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.21261.7">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>825e41cc2e77c66b5af7a945948be0bcb915342b</Sha>
+      <Sha>48856158702ffa99a7f24c6d611d5a1003e26f57</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
