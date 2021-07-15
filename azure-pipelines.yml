@@ -9,7 +9,7 @@ pr:
 resources:
   containers:
   - container: MuslContainer
-    image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-WithNode-f4d3fe3-20181213005010
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.6-WithNode-f4d3fe3-20181213005010
 
 jobs:
 - job: debug_windows_nt_arm
@@ -86,7 +86,7 @@ jobs:
   steps:
   - checkout: self
     clean: true
-  - script: docker run -e ROOTFS_DIR=/crossrootfs/arm --name ubuntu-14.04-cross-e435274-20180323032140 --rm -v $(Build.SourcesDirectory):/src/core-setup -w=/src/core-setup microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-e435274-20180323032140 ./build.sh -ConfigurationGroup=Release -TargetArchitecture=arm -strip-symbols -SkipTests=true -CrossBuild=true
+  - script: docker run -e ROOTFS_DIR=/crossrootfs/arm --name ubuntu-14.04-cross-e435274-20180323032140 --rm -v $(Build.SourcesDirectory):/src/core-setup -w=/src/core-setup mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-14.04-cross-e435274-20180323032140 ./build.sh -ConfigurationGroup=Release -TargetArchitecture=arm -strip-symbols -SkipTests=true -CrossBuild=true
   - task: CopyFiles@2
     inputs:
       contents: |
@@ -117,7 +117,7 @@ jobs:
   steps:
   - checkout: self
     clean: true
-  - script: docker run -e ROOTFS_DIR=/crossrootfs/arm64 --name ubuntu-16.04-cross-arm64-a3ae44b-20180316023254 --rm -v $(Build.SourcesDirectory):/src/core-setup -w=/src/core-setup microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180316023254 ./build.sh -ConfigurationGroup=Release -TargetArchitecture=arm64 -strip-symbols -SkipTests=true -CrossBuild=true
+  - script: docker run -e ROOTFS_DIR=/crossrootfs/arm64 --name ubuntu-16.04-cross-arm64-a3ae44b-20180316023254 --rm -v $(Build.SourcesDirectory):/src/core-setup -w=/src/core-setup mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180316023254 ./build.sh -ConfigurationGroup=Release -TargetArchitecture=arm64 -strip-symbols -SkipTests=true -CrossBuild=true
   - task: CopyFiles@2
     inputs:
       contents: |
