@@ -769,7 +769,7 @@
       "value": "$(PB_DockerRepository):$(PB_DockerTag)"
     },
     "PB_DockerRepository": {
-      "value": "microsoft/dotnet-buildtools-prereqs"
+      "value": "mcr.microsoft.com/dotnet-buildtools/prereqs"
     },
     "PB_DockerContainerName": {
       "value": "coresetup-$(Build.BuildId)"

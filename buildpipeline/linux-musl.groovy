@@ -5,7 +5,7 @@
 // with the engineering system parameter names.
 // CGroup - Build configuration.
 
-simpleDockerNode('microsoft/dotnet-buildtools-prereqs:alpine-3.6-3148f11-20171119021156') {
+simpleDockerNode('mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.6-3148f11-20171119021156') {
     stage ('Checkout source') {
         checkoutRepo()
     }

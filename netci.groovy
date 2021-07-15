@@ -25,7 +25,7 @@ platformList.each { platform ->
     def buildCommand = '';
     def osForGHTrigger = os
     def version = "latest-or-auto"
-    def dockerRepository = "microsoft/dotnet-buildtools-prereqs"
+    def dockerRepository = "mcr.microsoft.com/dotnet-buildtools/prereqs"
     def dockerContainer = ''
     def dockerWorkingDirectory = "/src/core-setup"
     def dockerCommand = ''
