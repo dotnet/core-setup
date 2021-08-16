@@ -26,9 +26,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.21411.2">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.21416.1">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>981f9425fe2f63ad128ee91e1b7e80d6a5eec148</Sha>
+      <Sha>53e6ea8669e82e962d3d3c8b71b9b8ca12fd061e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -42,9 +42,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Windows.Compatibility" Version="3.1.1">
+    <Dependency Name="Microsoft.Windows.Compatibility" Version="3.1.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>36b8b8e26a8e2e06e000f59e19910d117bf0025b</Sha>
+      <Sha>53e6ea8669e82e962d3d3c8b71b9b8ca12fd061e</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -66,9 +66,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="System.Data.SqlClient" Version="4.8.2">
+    <Dependency Name="System.Data.SqlClient" Version="4.8.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>36b8b8e26a8e2e06e000f59e19910d117bf0025b</Sha>
+      <Sha>53e6ea8669e82e962d3d3c8b71b9b8ca12fd061e</Sha>
     </Dependency>
     <Dependency Name="System.Data.Odbc" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>

@@ -67,11 +67,11 @@
     <!-- corefx -->
     <MicrosoftNETCorePlatformsPackageVersion>3.1.7</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>3.1.0</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.7.0-servicing.21411.2</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.7.0-servicing.21416.1</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftWin32RegistryAccessControlVersion>4.7.0</MicrosoftWin32RegistryAccessControlVersion>
     <MicrosoftWin32RegistryVersion>4.7.0</MicrosoftWin32RegistryVersion>
     <MicrosoftWin32SystemEventsVersion>4.7.0</MicrosoftWin32SystemEventsVersion>
-    <MicrosoftWindowsCompatibilityPackageVersion>3.1.1</MicrosoftWindowsCompatibilityPackageVersion>
+    <MicrosoftWindowsCompatibilityPackageVersion>3.1.2</MicrosoftWindowsCompatibilityPackageVersion>
     <SystemCodeDomVersion>4.7.0</SystemCodeDomVersion>
     <SystemConfigurationConfigurationManagerVersion>4.7.0</SystemConfigurationConfigurationManagerVersion>
     <SystemDiagnosticsEventLogVersion>4.7.0</SystemDiagnosticsEventLogVersion>
