@@ -24,11 +24,11 @@ jobs:
         name: dnceng-freebsd-internal
       ${{ if ne(parameters.name, 'FreeBSD_x64') }}:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          name: NetCorePublic-Pool
-          queue: buildpool.ubuntu.1604.amd64.open
+          name: NetCore1ESPool-Svc-Public
+          demands: ImageOverride -equals build.ubuntu.1604.amd64.open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          name: NetCoreInternal-Pool
-          queue: buildpool.ubuntu.1604.amd64
+          name: NetCore1ESPool-Svc-Internal
+          demands: ImageOverride -equals build.ubuntu.1604.amd64
     strategy: ${{ parameters.strategy }}
     variables:
       # Preserve the NuGet authentication env vars into the Docker container.
