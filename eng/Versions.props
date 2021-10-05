@@ -3,7 +3,7 @@
   <PropertyGroup>
     <MajorVersion>3</MajorVersion>
     <MinorVersion>1</MinorVersion>
-    <PatchVersion>20</PatchVersion>
+    <PatchVersion>21</PatchVersion>
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <!-- Enable to remove prerelease label. -->
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
