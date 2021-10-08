@@ -48,6 +48,7 @@
       <WixExtensions Include="WixUtilExtension.dll" />
 
       <WixSrcFile Include="$(MSBuildThisFileDirectory)product/product.wxs" />
+      <WixSrcFile Include="$(MSBuildThisFileDirectory)product/dotnethome_x64.wxs" />
       <WixSrcFile Include="$(MSBuildThisFileDirectory)product/provider.wxs" />
     </ItemGroup>
   </Target>

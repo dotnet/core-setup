@@ -26,7 +26,8 @@
 
     <Unzip
       SourceFiles="$(WixDestinationPath)"
-      DestinationFolder="$(WixToolsDir)" />
+      DestinationFolder="$(WixToolsDir)"
+      OverwriteReadOnlyFiles="true" />
   </Target>
 
 </Project>
