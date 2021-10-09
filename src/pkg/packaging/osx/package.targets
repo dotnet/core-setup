@@ -19,7 +19,6 @@
             <Root>$(SharedFrameworkPublishRoot)</Root>
             <OutFile>$(PackagesIntermediateDir)$(SharedFxComponentId).pkg</OutFile>
             <InstallerFile>$(SharedFrameworkInstallerFile)</InstallerFile>
-            <AdditionalArgs></AdditionalArgs>
         </OSXPackages>
         <OSXPackages Include="sharedhost">
             <Id>$(SharedHostComponentId)</Id>
@@ -33,7 +32,6 @@
             <Root>$(HostFxrPublishRoot)</Root>
             <OutFile>$(PackagesIntermediateDir)$(HostFxrComponentId).pkg</OutFile>
             <InstallerFile>$(HostFxrInstallerFile)</InstallerFile>
-            <AdditionalArgs></AdditionalArgs>
         </OSXPackages>
     </ItemGroup>
 
