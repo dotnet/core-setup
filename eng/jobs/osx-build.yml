@@ -7,7 +7,7 @@ jobs:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: Hosted macOS
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: Hosted Mac internal
+      vmImage: macOS-latest
   strategy:
     matrix: 
       debug:
