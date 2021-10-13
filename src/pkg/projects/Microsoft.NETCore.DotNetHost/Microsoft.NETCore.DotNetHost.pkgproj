@@ -14,6 +14,7 @@
       <WixProductMoniker>$(SharedHostBrandName)</WixProductMoniker>
       <RegKeyProductName>sharedhost</RegKeyProductName>
       <WixDependencyKeyName>Dotnet_CLI_SharedHost</WixDependencyKeyName>
+      <MajorUpgradeSchedule>afterInstallExecute</MajorUpgradeSchedule>
       <VSInsertionShortComponentName>SharedHost</VSInsertionShortComponentName>
 
       <PublishRootDir>$(IntermediateOutputPath)publishRoot/</PublishRootDir>
