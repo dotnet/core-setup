@@ -26,9 +26,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.21507.1">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.21512.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>bb4d105ec1120df72447f5ce0a0cfaabf40abdcb</Sha>
+      <Sha>8fa24e0f1ebfdc8a6aa16a75dade545cd8ee7c79</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -94,9 +94,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="System.Drawing.Common" Version="4.7.2">
+    <Dependency Name="System.Drawing.Common" Version="4.7.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>50a99d5d3c6e68aecf70627897c0d862a92fc283</Sha>
+      <Sha>8fa24e0f1ebfdc8a6aa16a75dade545cd8ee7c79</Sha>
     </Dependency>
     <Dependency Name="System.IO.FileSystem.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
