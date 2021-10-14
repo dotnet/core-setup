@@ -120,14 +120,6 @@ stages:
       portableBuild: true
       targetArchitecture: x64
 
-  - template: /eng/jobs/bash-build.yml
-    parameters:
-      additionalMSBuildArgs: /p:OutputRid=rhel.6-x64
-      name: Linux_x64_Rhel6
-      dockerImage: mcr.microsoft.com/dotnet-buildtools/prereqs:centos-6-376e1a3-20174311014331
-      portableBuild: false
-      targetArchitecture: x64
-
   # -------- Build OSX (macOS) leg --------
   - template: /eng/jobs/osx-build.yml
     parameters:
