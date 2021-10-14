@@ -617,27 +617,6 @@ Daily Builds
 [centos-7-sharedfx-checksum-2.1.X]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-runtime-latest-x64.rpm.sha512
 
 
-[rhel-6-badge-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/sharedfx_rhel.6-x64_Release_version_badge.svg
-[rhel-6-version-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/latest.version
-[rhel-6-targz-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-runtime-latest-rhel.6-x64.tar.gz
-
-[rhel-6-badge-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/sharedfx_rhel.6-x64_Release_version_badge.svg
-[rhel-6-version-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/latest.version
-[rhel-6-targz-3.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/3.0/dotnet-runtime-latest-rhel.6-x64.tar.gz
-
-[rhel-6-badge-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/sharedfx_rhel.6-x64_Release_version_badge.svg
-[rhel-6-version-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/latest.version
-[rhel-6-targz-2.2.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.2/dotnet-runtime-latest-rhel.6-x64.tar.gz
-
-[rhel-6-badge-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/sharedfx_rhel.6-x64_Release_version_badge.svg
-[rhel-6-version-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/latest.version
-[rhel-6-targz-2.1.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.1/dotnet-runtime-latest-rhel.6-x64.tar.gz
-
-[rhel-6-badge-2.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.0.0/sharedfx_rhel.6-x64_Release_version_badge.svg
-[rhel-6-version-2.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.0.0/latest.version
-[rhel-6-targz-2.0.X]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.0.0/dotnet-runtime-latest-rhel.6-x64.tar.gz
-
-
 [rhel7-badge-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/sharedfx_rhel.7-x64_Release_version_badge.svg
 [rhel7-version-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/latest.version
 [rhel7-host-master]: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/master/dotnet-host-latest-rhel.7-x64.rpm
