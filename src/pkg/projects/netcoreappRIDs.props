@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build"
+  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
     <PackageRID Condition="'$(PackageRID)' == ''">$(OutputRid)</PackageRID>
@@ -8,7 +9,6 @@
   <ItemGroup>
     <OfficialBuildRID Include="linux-x64" />
     <OfficialBuildRID Include="linux-musl-x64" />
-    <OfficialBuildRID Include="rhel.6-x64" />
     <OfficialBuildRID Include="osx-x64" />
     <!-- Not currently built by CoreFX. -->
     <!-- <OfficialBuildRID Include="freebsd-x64" /> -->
