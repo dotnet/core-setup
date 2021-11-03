@@ -226,21 +226,21 @@
       <Uri>https://github.com/dotnet/winforms</Uri>
       <Sha>ea5125164473bee620552d81bb22a4562d8a2759</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.21521.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.21552.9" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>a998ea18c1ba4bf92884ddabeb766978026bc103</Sha>
+      <Sha>14bfb1b2d9a88bdb8c2868a23b0bcdea0242e23c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.21-servicing.21521.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.22-servicing.21552.9" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>a998ea18c1ba4bf92884ddabeb766978026bc103</Sha>
+      <Sha>14bfb1b2d9a88bdb8c2868a23b0bcdea0242e23c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.21-servicing.21521.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.22-servicing.21552.9" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>a998ea18c1ba4bf92884ddabeb766978026bc103</Sha>
+      <Sha>14bfb1b2d9a88bdb8c2868a23b0bcdea0242e23c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.21521.2">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.21552.5">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>071ed4d29ec52f8864c9f39915e23c3631eb59b4</Sha>
+      <Sha>f82a5a699c4e8f764c58243e0c728805c66ee049</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
