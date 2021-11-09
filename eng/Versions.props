@@ -67,7 +67,7 @@
     <!-- corefx -->
     <MicrosoftNETCorePlatformsPackageVersion>3.1.9</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreTargetsPackageVersion>3.1.0</MicrosoftNETCoreTargetsPackageVersion>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.7.0-servicing.21471.1</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.7.0-servicing.21515.8</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
     <MicrosoftWin32RegistryAccessControlVersion>4.7.0</MicrosoftWin32RegistryAccessControlVersion>
     <MicrosoftWin32RegistryVersion>4.7.0</MicrosoftWin32RegistryVersion>
     <MicrosoftWin32SystemEventsVersion>4.7.0</MicrosoftWin32SystemEventsVersion>
@@ -77,7 +77,7 @@
     <SystemDiagnosticsEventLogVersion>4.7.0</SystemDiagnosticsEventLogVersion>
     <SystemDiagnosticsPerformanceCounterVersion>4.7.0</SystemDiagnosticsPerformanceCounterVersion>
     <SystemDirectoryServicesVersion>4.7.0</SystemDirectoryServicesVersion>
-    <SystemDrawingCommonVersion>4.7.2</SystemDrawingCommonVersion>
+    <SystemDrawingCommonVersion>4.7.3</SystemDrawingCommonVersion>
     <SystemIOFileSystemAccessControlVersion>4.7.0</SystemIOFileSystemAccessControlVersion>
     <SystemIOPackagingVersion>4.7.0</SystemIOPackagingVersion>
     <SystemIOPipesAccessControlVersion>4.5.1</SystemIOPipesAccessControlVersion>
@@ -96,13 +96,13 @@
     <!-- standard -->
     <NETStandardLibraryPackageVersion>2.1.0</NETStandardLibraryPackageVersion>
     <!-- coreclr -->
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.1.20-servicing.21470.3</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.1.21-servicing.21514.4</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- winforms -->
-    <MicrosoftPrivateWinformsPackageVersion>4.8.1-servicing.21467.4</MicrosoftPrivateWinformsPackageVersion>
+    <MicrosoftPrivateWinformsPackageVersion>4.8.1-servicing.21521.5</MicrosoftPrivateWinformsPackageVersion>
     <!-- wpf -->
-    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.1-servicing.21467.11</MicrosoftDotNetWpfGitHubPackageVersion>
+    <MicrosoftDotNetWpfGitHubPackageVersion>4.8.1-servicing.21521.5</MicrosoftDotNetWpfGitHubPackageVersion>
     <!-- wpf-int -->
-    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.1-servicing.21467.4</MicrosoftDotNetWpfDncEngPackageVersion>
+    <MicrosoftDotNetWpfDncEngPackageVersion>4.8.1-servicing.21521.2</MicrosoftDotNetWpfDncEngPackageVersion>
     <!-- Not auto-updated. -->
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>1.1.1</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftTargetingPackPrivateWinRTPackageVersion>1.0.5</MicrosoftTargetingPackPrivateWinRTPackageVersion>
