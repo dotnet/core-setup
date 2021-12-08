@@ -96,7 +96,7 @@
     <!-- standard -->
     <NETStandardLibraryPackageVersion>2.1.0</NETStandardLibraryPackageVersion>
     <!-- coreclr -->
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.1.22-servicing.21568.3</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.1.23-servicing.21608.2</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- winforms -->
     <MicrosoftPrivateWinformsPackageVersion>4.8.1-servicing.21554.6</MicrosoftPrivateWinformsPackageVersion>
     <!-- wpf -->
