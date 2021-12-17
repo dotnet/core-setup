@@ -206,17 +206,17 @@
       <Uri>https://github.com/dotnet/standard</Uri>
       <Sha>a5b5f2e1e369972c8ff1e2183979fab6099f52ef</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.23-servicing.21608.2">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.23-servicing.21617.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-coreclr</Uri>
-      <Sha>d4a578c9c3ce5ac2b8b1a84f1795f2611ad6f548</Sha>
+      <Sha>f7961dc857a5fc3a2916b10d2dd26dcab4eea8a2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILDAsm" Version="3.1.23-servicing.21608.2">
+    <Dependency Name="Microsoft.NETCore.ILDAsm" Version="3.1.23-servicing.21617.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-coreclr</Uri>
-      <Sha>d4a578c9c3ce5ac2b8b1a84f1795f2611ad6f548</Sha>
+      <Sha>f7961dc857a5fc3a2916b10d2dd26dcab4eea8a2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.23-servicing.21608.2">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.23-servicing.21617.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-coreclr</Uri>
-      <Sha>d4a578c9c3ce5ac2b8b1a84f1795f2611ad6f548</Sha>
+      <Sha>f7961dc857a5fc3a2916b10d2dd26dcab4eea8a2</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.21554.6" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
