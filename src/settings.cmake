@@ -37,6 +37,14 @@ if(CMAKE_SYSTEM_NAME STREQUAL SunOS)
     message("System name SunOS")
 endif(CMAKE_SYSTEM_NAME STREQUAL SunOS)
 
+# Specify the minimum supported version of macOS
+if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(MACOS_VERSION_MIN_FLAGS "-mmacosx-version-min=10.13")
+    add_compile_options("${MACOS_VERSION_MIN_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MACOS_VERSION_MIN_FLAGS}")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${MACOS_VERSION_MIN_FLAGS}")
+endif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+
 if (NOT WIN32)
     # Try to locate the paxctl tool. Failure to find it is not fatal,
     # but the generated executables won't work on a system where PAX is set
