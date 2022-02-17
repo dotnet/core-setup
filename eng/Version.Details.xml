@@ -218,29 +218,29 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-coreclr</Uri>
       <Sha>07fd176f692f0c349ca462288a81eb36acd63ec5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.21554.6" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.Private.Winforms" Version="4.8.1-servicing.22103.4" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
-      <Sha>3d56c58183b52366071371edda3482cc521a8205</Sha>
+      <Sha>7e743b5d780dfaeab131d960bd26ea847454ec45</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="4.8.1-servicing.21554.6" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="4.8.1-servicing.22103.4" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://github.com/dotnet/winforms</Uri>
-      <Sha>3d56c58183b52366071371edda3482cc521a8205</Sha>
+      <Sha>7e743b5d780dfaeab131d960bd26ea847454ec45</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.21566.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.GitHub" Version="4.8.1-servicing.22111.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>72c95cddd8ec573c43e486a4b18548fda7444135</Sha>
+      <Sha>63a9573552b54a6bc4e650d966abdee7ab944dd3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.22-servicing.21566.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.22-servicing.22111.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>72c95cddd8ec573c43e486a4b18548fda7444135</Sha>
+      <Sha>63a9573552b54a6bc4e650d966abdee7ab944dd3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.22-servicing.21566.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
+    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="3.1.22-servicing.22111.5" CoherentParentDependency="Microsoft.DotNet.Wpf.DncEng">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>72c95cddd8ec573c43e486a4b18548fda7444135</Sha>
+      <Sha>63a9573552b54a6bc4e650d966abdee7ab944dd3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.22116.3">
+    <Dependency Name="Microsoft.DotNet.Wpf.DncEng" Version="4.8.1-servicing.22116.5">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf-int</Uri>
-      <Sha>eac68e97761b80c276bca97e53ae1b04a5d98399</Sha>
+      <Sha>614e86e3396d8698195a21ff1cc4280bafc43a78</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
