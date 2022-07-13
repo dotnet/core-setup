@@ -1317,6 +1317,7 @@ public:
     static void CastThrow( bool b, T& t ) SAFEINT_CPP_THROW
     {
         b = !!t;
+        (void)b;
     }
 };
 
