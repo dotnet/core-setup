@@ -26,9 +26,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.22417.2">
+    <Dependency Name="Microsoft.Private.CoreFx.NETCoreApp" Version="4.7.0-servicing.22463.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>0ea07d1b2b7964d8b0a32d96e022218e35c54a6a</Sha>
+      <Sha>b0c071b77272f99676321717f1daff9cb90a99d8</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry.AccessControl" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
@@ -168,7 +168,7 @@
     </Dependency>
     <Dependency Name="System.Security.Cryptography.Xml" Version="4.7.1">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>0ea07d1b2b7964d8b0a32d96e022218e35c54a6a</Sha>
+      <Sha>ff03553a820130bb4aa4701c45e8bf57f629a1cc</Sha>
     </Dependency>
     <Dependency Name="System.Security.Permissions" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
