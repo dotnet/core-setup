@@ -168,7 +168,7 @@
     </Dependency>
     <Dependency Name="System.Security.Cryptography.Xml" Version="4.7.1">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-corefx</Uri>
-      <Sha>ff03553a820130bb4aa4701c45e8bf57f629a1cc</Sha>
+      <Sha>0ea07d1b2b7964d8b0a32d96e022218e35c54a6a</Sha>
     </Dependency>
     <Dependency Name="System.Security.Permissions" Version="4.7.0">
       <Uri>https://github.com/dotnet/corefx</Uri>
