@@ -169,6 +169,6 @@ stages:
         dependsOn: PrepareSignedArtifacts
         pool:
           name: NetCore1ESPool-Svc-Internal
-          demands: ImageOverride -equals build.windows.10.amd64.vs2017
+          demands: ImageOverride -equals Windows.10.vs2019.amd64
 
   - template: /eng/stages/publish.yml
