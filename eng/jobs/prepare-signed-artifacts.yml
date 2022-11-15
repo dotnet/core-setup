@@ -8,7 +8,7 @@ jobs:
   dependsOn: ${{ parameters.dependsOn }}
   pool:
     name: NetCore1ESPool-Svc-Internal
-    demands: ImageOverride -equals build.windows.10.amd64.vs2017
+    demands: ImageOverride -equals Windows.10.vs2019.amd64
   # Double the default timeout.
   timeoutInMinutes: 120
   workspace:
