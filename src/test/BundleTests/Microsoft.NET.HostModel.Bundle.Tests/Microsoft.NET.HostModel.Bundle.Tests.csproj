@@ -17,4 +17,7 @@
     <ProjectReference Include="..\Helpers\BundleHelper.csproj" />
   </ItemGroup>
 
+  <ItemGroup Label="Dependency Resolutions">
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+  </ItemGroup>
 </Project>
