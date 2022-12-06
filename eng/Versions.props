@@ -115,7 +115,7 @@
     <RefOnlyMicrosoftBuildFrameworkPackageVersion>$(RefOnlyMicrosoftBuildPackageVersion)</RefOnlyMicrosoftBuildFrameworkPackageVersion>
     <RefOnlyMicrosoftBuildTasksCorePackageVersion>$(RefOnlyMicrosoftBuildPackageVersion)</RefOnlyMicrosoftBuildTasksCorePackageVersion>
     <RefOnlyMicrosoftBuildUtilitiesCorePackageVersion>$(RefOnlyMicrosoftBuildPackageVersion)</RefOnlyMicrosoftBuildUtilitiesCorePackageVersion>
-    <RefOnlyNugetProjectModelPackageVersion>4.9.4</RefOnlyNugetProjectModelPackageVersion>
+    <RefOnlyNugetProjectModelPackageVersion>4.9.6</RefOnlyNugetProjectModelPackageVersion>
     <RefOnlyNugetPackagingPackageVersion>4.9.4</RefOnlyNugetPackagingPackageVersion>
   </PropertyGroup>
   <!--Package names-->
