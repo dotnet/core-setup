@@ -19,6 +19,10 @@
     <OrderProjectReference Include="@(PkgprojProjectToBuild)" />
   </ItemGroup>
 
+  <ItemGroup Label="Dependency Resolutions">
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+  </ItemGroup>
+  
   <!--
     Ensure the packaging projects build first. Don't do this in VS: the build takes too long and
     isn't incremental.
